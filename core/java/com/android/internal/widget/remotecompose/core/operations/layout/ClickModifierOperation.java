@@ -16,7 +16,6 @@
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -80,7 +79,7 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         for (Operation op : mList) {
             if (op instanceof TextData) {
                 op.apply(context);
@@ -90,7 +89,7 @@ public class ClickModifierOperation extends PaintOperation
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
@@ -137,7 +136,7 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(@NonNull RemoteContext context, float width, float height) {
         mWidth = width;
         mHeight = height;
     }
@@ -154,8 +153,8 @@ public class ClickModifierOperation extends PaintOperation
 
     @Override
     public void onClick(
-            RemoteContext context,
-            CoreDocument document,
+            @NonNull RemoteContext context,
+            @NonNull CoreDocument document,
             @NonNull Component component,
             float x,
             float y) {
@@ -171,6 +170,7 @@ public class ClickModifierOperation extends PaintOperation
                 ((ActionOperation) o).runAction(context, document, component, x, y);
             }
         }
+        context.hapticEffect(3);
     }
 
     @NonNull
@@ -182,7 +182,7 @@ public class ClickModifierOperation extends PaintOperation
         buffer.start(OP_CODE);
     }
 
-    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ClickModifierOperation());
     }
 

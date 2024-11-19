@@ -69,7 +69,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
         mWindowDecorViewModel = windowDecorViewModel;
         mTaskChangeListener = taskChangeListener;
         mFocusTransitionObserver = focusTransitionObserver;
-        if (FreeformComponents.isFreeformEnabled(context)) {
+        if (FreeformComponents.requiresFreeformComponents(context)) {
             shellInit.addInitCallback(this::onInit, this);
         }
     }

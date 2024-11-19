@@ -19,12 +19,14 @@ package com.android.server.security.authenticationpolicy;
 import static android.adaptiveauth.Flags.FLAG_ENABLE_ADAPTIVE_AUTH;
 import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.security.Flags.FLAG_REPORT_PRIMARY_AUTH_ATTEMPTS;
+import static android.security.authenticationpolicy.AuthenticationPolicyManager.ERROR_UNSUPPORTED;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 import static com.android.server.security.authenticationpolicy.AuthenticationPolicyService.MAX_ALLOWED_FAILED_AUTH_ATTEMPTS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -95,6 +97,8 @@ public class AuthenticationPolicyServiceTest {
     private WindowManagerInternal mWindowManager;
     @Mock
     private UserManagerInternal mUserManager;
+    @Mock
+    private SecureLockDeviceServiceInternal mSecureLockDeviceService;
 
     @Captor
     ArgumentCaptor<LockSettingsStateListener> mLockSettingsStateListenerCaptor;
@@ -123,6 +127,11 @@ public class AuthenticationPolicyServiceTest {
         LocalServices.addService(WindowManagerInternal.class, mWindowManager);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mUserManager);
+        if (android.security.Flags.secureLockdown()) {
+            LocalServices.removeServiceForTest(SecureLockDeviceServiceInternal.class);
+            LocalServices.addService(SecureLockDeviceServiceInternal.class,
+                    mSecureLockDeviceService);
+        }
 
         mAuthenticationPolicyService = new AuthenticationPolicyService(
                 mContext, mLockPatternUtils);
@@ -136,6 +145,12 @@ public class AuthenticationPolicyServiceTest {
         // Set PRIMARY_USER_ID as the parent of MANAGED_PROFILE_USER_ID
         when(mUserManager.getProfileParentId(eq(MANAGED_PROFILE_USER_ID)))
                 .thenReturn(PRIMARY_USER_ID);
+        if (android.security.Flags.secureLockdown()) {
+            when(mSecureLockDeviceService.enableSecureLockDevice(any()))
+                    .thenReturn(ERROR_UNSUPPORTED);
+            when(mSecureLockDeviceService.disableSecureLockDevice(any()))
+                    .thenReturn(ERROR_UNSUPPORTED);
+        }
     }
 
     @After
@@ -143,6 +158,9 @@ public class AuthenticationPolicyServiceTest {
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
+        if (android.security.Flags.secureLockdown()) {
+            LocalServices.removeServiceForTest(SecureLockDeviceServiceInternal.class);
+        }
     }
 
     @Test

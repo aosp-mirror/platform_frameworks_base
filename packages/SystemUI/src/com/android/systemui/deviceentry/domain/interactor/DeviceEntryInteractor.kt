@@ -16,6 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Hosts application business logic related to device entry.
@@ -174,6 +174,14 @@ constructor(
     }
 
     /**
+     * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
+     * dismissed once the authentication challenge is completed. For example, completing a biometric
+     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
+     * lockscreen.
+     */
+    val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
+
+    /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
      * unlock the device it will transition to bouncer.
      *
@@ -238,11 +246,8 @@ constructor(
         isLockscreenEnabled()
     }
 
-    /**
-     * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
-     * dismissed once the authentication challenge is completed. For example, completing a biometric
-     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lockscreen.
-     */
-    val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
+    /** Locks the device instantly. */
+    fun lockNow() {
+        deviceUnlockedInteractor.lockNow()
+    }
 }

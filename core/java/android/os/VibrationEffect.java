@@ -1713,10 +1713,13 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Add a haptic primitive to the end of the current composition.
          *
+         * <p>Similar to {@link #addPrimitive(int, float, int, int)}, but default
+         * delay type applied is {@link #DELAY_TYPE_PAUSE}.
+         *
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
-         * @param delay The amount of time in milliseconds to wait before playing this primitive,
-         *              starting at the time the previous element in this composition is finished.
+         * @param delay The amount of time in milliseconds to wait between the end of the last
+         *              primitive and the beginning of this one (i.e. a pause in the composition).
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
          */
         @NonNull

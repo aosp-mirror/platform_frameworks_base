@@ -43,7 +43,7 @@ public class MeasurePass {
         return mList.containsKey(id);
     }
 
-    public ComponentMeasure get(@NonNull Component c) {
+    public @NonNull ComponentMeasure get(@NonNull Component c) {
         if (!mList.containsKey(c.getComponentId())) {
             ComponentMeasure measure =
                     new ComponentMeasure(
@@ -54,7 +54,7 @@ public class MeasurePass {
         return mList.get(c.getComponentId());
     }
 
-    public ComponentMeasure get(int id) {
+    public @NonNull ComponentMeasure get(int id) {
         if (!mList.containsKey(id)) {
             ComponentMeasure measure =
                     new ComponentMeasure(id, 0f, 0f, 0f, 0f, Component.Visibility.GONE);

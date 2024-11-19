@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.data.repository.keyguardSmartspaceRepositor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -95,5 +96,27 @@ class KeyguardSmartspaceViewModelTest : SysuiTestCase() {
             }
 
             assertThat(isWeatherVisible).isEqualTo(false)
+        }
+
+    @Test
+    fun isShadeLayoutWide_withConfigTrue_true() =
+        with(kosmos) {
+            testScope.runTest {
+                val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
+                shadeRepository.setShadeLayoutWide(true)
+
+                assertThat(isShadeLayoutWide).isTrue()
+            }
+        }
+
+    @Test
+    fun isShadeLayoutWide_withConfigFalse_false() =
+        with(kosmos) {
+            testScope.runTest {
+                val isShadeLayoutWide by collectLastValue(underTest.isShadeLayoutWide)
+                shadeRepository.setShadeLayoutWide(false)
+
+                assertThat(isShadeLayoutWide).isFalse()
+            }
         }
 }

@@ -54,7 +54,7 @@ public class WidthModifierOperation extends DimensionModifierOperation {
         operations.add(op);
     }
 
-    public WidthModifierOperation(Type type, float value) {
+    public WidthModifierOperation(@NonNull Type type, float value) {
         super(type, value);
     }
 
@@ -63,7 +63,7 @@ public class WidthModifierOperation extends DimensionModifierOperation {
         apply(buffer, mType.ordinal(), mValue);
     }
 
-    public WidthModifierOperation(Type type) {
+    public WidthModifierOperation(@NonNull Type type) {
         super(type);
     }
 

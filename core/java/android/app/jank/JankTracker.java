@@ -89,7 +89,12 @@ public class JankTracker {
      * stats
      */
     public void mergeAppJankStats(AppJankStats appJankStats) {
-        mJankDataProcessor.mergeJankStats(appJankStats, mActivityName);
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                mJankDataProcessor.mergeJankStats(appJankStats, mActivityName);
+            }
+        });
     }
 
     public void setActivityName(@NonNull String activityName) {

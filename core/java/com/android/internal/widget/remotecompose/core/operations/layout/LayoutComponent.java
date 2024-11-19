@@ -24,7 +24,9 @@ import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
+import com.android.internal.widget.remotecompose.core.operations.PaintData;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
+import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.DimensionModifierOperation;
@@ -57,12 +59,14 @@ public class LayoutComponent extends Component {
     protected float mPaddingBottom = 0f;
 
     @NonNull protected ComponentModifiers mComponentModifiers = new ComponentModifiers();
-    @NonNull protected ArrayList<Component> mChildrenComponents = new ArrayList<>();
+
+    @NonNull
+    protected ArrayList<Component> mChildrenComponents = new ArrayList<>(); // members are not null
 
     protected boolean mChildrenHaveZIndex = false;
 
     public LayoutComponent(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -129,6 +133,9 @@ public class LayoutComponent extends Component {
 
     public void inflate() {
         ArrayList<TextData> data = new ArrayList<>();
+        ArrayList<TouchExpression> touchExpressions = new ArrayList<>();
+        ArrayList<PaintData> paintData = new ArrayList<>();
+
         for (Operation op : mList) {
             if (op instanceof LayoutComponentContent) {
                 mContent = (LayoutComponentContent) op;
@@ -172,6 +179,10 @@ public class LayoutComponent extends Component {
                 mComponentModifiers.add((ModifierOperation) op);
             } else if (op instanceof TextData) {
                 data.add((TextData) op);
+            } else if (op instanceof TouchExpression) {
+                touchExpressions.add((TouchExpression) op);
+            } else if (op instanceof PaintData) {
+                paintData.add((PaintData) op);
             } else {
                 // nothing
             }
@@ -179,6 +190,8 @@ public class LayoutComponent extends Component {
 
         mList.clear();
         mList.addAll(data);
+        mList.addAll(touchExpressions);
+        mList.addAll(paintData);
         mList.add(mComponentModifiers);
         for (Component c : mChildrenComponents) {
             c.mParent = this;
@@ -255,11 +268,24 @@ public class LayoutComponent extends Component {
     }
 
     @Override
+    public float getScrollX() {
+        return mComponentModifiers.getScrollX();
+    }
+
+    @Override
+    public float getScrollY() {
+        return mComponentModifiers.getScrollY();
+    }
+
+    @Override
     public void paintingComponent(@NonNull PaintContext context) {
-        Component prev = context.getContext().lastComponent;
-        context.getContext().lastComponent = this;
+        Component prev = context.getContext().mLastComponent;
+        context.getContext().mLastComponent = this;
         context.save();
         context.translate(mX, mY);
+        if (context.isVisualDebug()) {
+            debugBox(this, context);
+        }
         if (mGraphicsLayerModifier != null) {
             context.startGraphicsLayer((int) getWidth(), (int) getHeight());
             float scaleX = mGraphicsLayerModifier.getScaleX();
@@ -285,8 +311,8 @@ public class LayoutComponent extends Component {
                     renderEffectId);
         }
         mComponentModifiers.paint(context);
-        float tx = mPaddingLeft;
-        float ty = mPaddingTop;
+        float tx = mPaddingLeft + getScrollX();
+        float ty = mPaddingTop + getScrollY();
         context.translate(tx, ty);
         if (mChildrenHaveZIndex) {
             // TODO -- should only sort when something has changed
@@ -305,7 +331,7 @@ public class LayoutComponent extends Component {
         }
         context.translate(-tx, -ty);
         context.restore();
-        context.getContext().lastComponent = prev;
+        context.getContext().mLastComponent = prev;
     }
 
     /** Traverse the modifiers to compute indicated dimension */
@@ -337,7 +363,7 @@ public class LayoutComponent extends Component {
      * @param padding output start and end padding values
      * @return padding width
      */
-    public float computeModifierDefinedPaddingWidth(float[] padding) {
+    public float computeModifierDefinedPaddingWidth(@NonNull float[] padding) {
         float s = 0f;
         float e = 0f;
         for (Operation c : mComponentModifiers.getList()) {
@@ -381,7 +407,7 @@ public class LayoutComponent extends Component {
      * @param padding output top and bottom padding values
      * @return padding height
      */
-    public float computeModifierDefinedPaddingHeight(float[] padding) {
+    public float computeModifierDefinedPaddingHeight(@NonNull float[] padding) {
         float t = 0f;
         float b = 0f;
         for (Operation c : mComponentModifiers.getList()) {

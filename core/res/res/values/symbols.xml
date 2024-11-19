@@ -2390,6 +2390,7 @@
   <java-symbol type="layout" name="notification_material_action_list" />
   <java-symbol type="layout" name="notification_material_action_tombstone" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_base" />
+  <java-symbol type="layout" name="notification_2025_template_heads_up_base" />
   <java-symbol type="layout" name="notification_2025_template_header" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
@@ -5634,6 +5635,9 @@
        screen. -->
   <java-symbol type="bool" name="config_dragToMaximizeInDesktopMode" />
 
+  <!-- Whether showing the app handle is supported on this device -->
+  <java-symbol type="bool" name="config_enableAppHandle" />
+
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
@@ -5702,8 +5706,8 @@
   <java-symbol type="string" name="identity_check_settings_action" />
   <java-symbol type="string" name="identity_check_settings_package_name" />
 
-  <!-- Forensic event transport -->
-  <java-symbol type="string" name="config_forensicEventTransport" />
+  <!-- Intrusion detection event transport -->
+  <java-symbol type="string" name="config_intrusionDetectionEventTransport" />
 
   <!-- Fingerprint screen off unlock config -->
   <java-symbol type="bool" name="config_screen_off_udfps_enabled" />

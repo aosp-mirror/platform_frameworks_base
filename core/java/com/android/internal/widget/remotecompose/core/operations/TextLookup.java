@@ -126,7 +126,7 @@ public class TextLookup implements Operation, VariableSupport {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

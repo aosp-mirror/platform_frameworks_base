@@ -27,11 +27,11 @@ public class DebugLog {
 
     public static class Node {
         @Nullable public Node parent;
-        public String name;
-        public String endString;
+        @NonNull public String name;
+        @NonNull public String endString;
         @NonNull public ArrayList<Node> list = new ArrayList<>();
 
-        public Node(@Nullable Node parent, String name) {
+        public Node(@Nullable Node parent, @NonNull String name) {
             this.parent = parent;
             this.name = name;
             this.endString = name + " DONE";
@@ -40,13 +40,13 @@ public class DebugLog {
             }
         }
 
-        public void add(Node node) {
+        public void add(@NonNull Node node) {
             list.add(node);
         }
     }
 
     public static class LogNode extends Node {
-        public LogNode(Node parent, String name) {
+        public LogNode(@Nullable Node parent, @NonNull String name) {
             super(parent, name);
         }
     }

@@ -59,9 +59,9 @@ public class IntegerExpressionEvaluator {
     public static final int I_VAR1 = OFFSET + 24;
     public static final int I_VAR2 = OFFSET + 25;
 
-    int[] mStack;
+    @NonNull int[] mStack = new int[0];
     @NonNull int[] mLocalStack = new int[128];
-    int[] mVar;
+    @NonNull int[] mVar = new int[0];
 
     interface Op {
         int eval(int sp);
@@ -75,7 +75,7 @@ public class IntegerExpressionEvaluator {
      * @param var variables if the expression is a function
      * @return return the results of evaluating the expression
      */
-    public int eval(int mask, int[] exp, int... var) {
+    public int eval(int mask, @NonNull int[] exp, @NonNull int... var) {
         mStack = exp;
         mVar = var;
         int sp = -1;
@@ -99,7 +99,7 @@ public class IntegerExpressionEvaluator {
      * @param var variables if the expression is a function
      * @return return the results of evaluating the expression
      */
-    public int eval(int mask, @NonNull int[] exp, int len, int... var) {
+    public int eval(int mask, @NonNull int[] exp, int len, @NonNull int... var) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
         mStack = mLocalStack;
         mVar = var;
@@ -123,17 +123,15 @@ public class IntegerExpressionEvaluator {
      * @param var variables if the expression is a function
      * @return return the results of evaluating the expression
      */
-    public int evalDB(int opMask, @NonNull int[] exp, int... var) {
+    public int evalDB(int opMask, @NonNull int[] exp, @NonNull int... var) {
         mStack = exp;
         mVar = var;
         int sp = -1;
         for (int i = 0; i < exp.length; i++) {
             int v = mStack[i];
             if (((1 << i) & opMask) != 0) {
-                System.out.print(" " + sNames.get((v - OFFSET)));
                 sp = mOps[v - OFFSET].eval(sp);
             } else {
-                System.out.print(" " + v);
                 mStack[++sp] = v;
             }
         }
@@ -199,7 +197,7 @@ public class IntegerExpressionEvaluator {
                     return sp - 1;
                 };
         Op mCOPY_SIGN =
-                (sp) -> { // COPY_SIGN
+                (sp) -> { // COPY_SIGN copy the sign via bit manipulation
                     mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31)) - (mStack[sp] >> 31);
                     return sp - 1;
                 };
@@ -239,12 +237,12 @@ public class IntegerExpressionEvaluator {
                     return sp;
                 };
         Op mSIGN =
-                (sp) -> { // SIGN
+                (sp) -> { // SIGN x<0 = -1,x==0 =  0 , x>0 = 1
                     mStack[sp] = (mStack[sp] >> 31) | (-mStack[sp] >>> 31);
                     return sp;
                 };
         Op mCLAMP =
-                (sp) -> { // CLAMP
+                (sp) -> { // CLAMP(min,max, val)
                     mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
                     return sp - 2;
                 };
@@ -360,7 +358,7 @@ public class IntegerExpressionEvaluator {
      * @return
      */
     @NonNull
-    public static String toString(int opMask, @NonNull int[] exp, String[] labels) {
+    public static String toString(int opMask, @NonNull int[] exp, @NonNull String[] labels) {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < exp.length; i++) {
             int v = exp[i];

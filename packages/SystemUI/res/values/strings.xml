@@ -3214,6 +3214,9 @@
     <!-- Text to display when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_copy_toast">Build number copied to clipboard.</string>
 
+    <!-- Text for accessibility action for copying content to clipboard [CHAR LIMIT=NONE]-->
+    <string name="copy_to_clipboard_a11y_action">copy to clipboard.</string>
+
      <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
     <string name="basic_status">Open conversation</string>
     <!--Title text for Conversation widget set up screen [CHAR LIMIT=180] -->

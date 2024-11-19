@@ -34,7 +34,7 @@ public class ParticleAnimation {
             @NonNull PaintContext context,
             @NonNull Component component,
             @NonNull ComponentMeasure start,
-            ComponentMeasure end,
+            @NonNull ComponentMeasure end,
             float progress) {
         ArrayList<Particle> particles = mAllParticles.get(component.getComponentId());
         if (particles == null) {

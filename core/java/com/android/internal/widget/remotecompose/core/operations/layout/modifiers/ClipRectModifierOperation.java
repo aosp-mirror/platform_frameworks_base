@@ -40,7 +40,7 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(@NonNull RemoteContext context, float width, float height) {
         this.mWidth = width;
         this.mHeight = height;
     }
@@ -68,7 +68,7 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
         buffer.start(OP_CODE);
     }
 
-    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ClipRectModifierOperation());
     }
 

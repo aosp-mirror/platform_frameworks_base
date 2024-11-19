@@ -17923,6 +17923,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void notifyInactiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyInactiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
         public ArraySet<String> getClientPackages(String servicePackageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.getClientPackagesLocked(servicePackageName);
@@ -19070,8 +19079,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean enableFgsNotificationRateLimit(boolean enable) {
-        enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
-                "enableFgsNotificationRateLimit");
+        if (android.security.Flags.protectDeviceConfigFlags()) {
+            enforceCallingHasAtLeastOnePermission("enableFgsNotificationRateLimit",
+                    permission.WRITE_DEVICE_CONFIG, permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
+        } else {
+            enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
+                    "enableFgsNotificationRateLimit");
+        }
         synchronized (this) {
             return mServices.enableFgsNotificationRateLimitLocked(enable);
         }

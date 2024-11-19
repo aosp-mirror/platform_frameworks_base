@@ -44,6 +44,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.testing.TestableDeviceConfig;
+import com.android.server.backup.BackupAgentConnectionManager;
 import com.android.server.backup.Flags;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.BackupHandler;
@@ -95,6 +96,8 @@ public class PerformUnifiedRestoreTaskTest {
     private TransportConnection mTransportConnection;
     @Mock
     private BackupTransportClient mBackupTransportClient;
+    @Mock
+    private BackupAgentConnectionManager mBackupAgentConnectionManager;
 
     private Set<String> mExcludedkeys = new HashSet<>();
     private Map<String, String> mBackupData = new HashMap<>();
@@ -121,6 +124,9 @@ public class PerformUnifiedRestoreTaskTest {
         populateTestData();
 
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+
+        when(mBackupManagerService.getBackupAgentConnectionManager()).thenReturn(
+                mBackupAgentConnectionManager);
 
         mBackupDataSource = new ArrayDeque<>(mBackupData.keySet());
         when(mBackupDataInput.readNextHeader())
@@ -166,7 +172,7 @@ public class PerformUnifiedRestoreTaskTest {
         mRestoreTask.setNoRestrictedModePackages(mBackupTransportClient,
                 new PackageInfo[]{packageInfo1, packageInfo2});
 
-        verify(mBackupManagerService).setNoRestrictedModePackages(
+        verify(mBackupAgentConnectionManager).setNoRestrictedModePackages(
                 eq(Set.of("package1")),
                 eq(BackupAnnotations.OperationType.RESTORE));
     }

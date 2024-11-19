@@ -35,17 +35,17 @@ import java.util.List;
 public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
     private static final int OP_CODE = Operations.FLOAT_LIST;
     private static final String CLASS_NAME = "IdListData";
-    int mId;
-    float[] mValues;
+    private final int mId;
+    @NonNull private final float[] mValues;
     private static final int MAX_FLOAT_ARRAY = 2000;
 
-    public DataListFloat(int id, float[] values) {
+    public DataListFloat(int id, @NonNull float[] values) {
         mId = id;
         mValues = values;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         // TODO add support for variables in arrays
     }
 
@@ -103,7 +103,7 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
@@ -117,6 +117,7 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         return mValues[index];
     }
 
+    @NonNull
     @Override
     public float[] getFloats() {
         return mValues;

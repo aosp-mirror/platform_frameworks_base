@@ -23,12 +23,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
-import com.android.server.wm.flicker.helpers.ImeAppHelper
-import com.android.server.wm.flicker.helpers.LetterboxAppHelper
 import com.android.server.wm.flicker.helpers.MailAppHelper
-import com.android.server.wm.flicker.helpers.NewTasksAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.window.flags.Flags
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
@@ -51,32 +49,30 @@ open class MinimizeWindowOnAppOpen()
 
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
     private val mailApp = DesktopModeAppHelper(MailAppHelper(instrumentation))
-    private val newTasksApp = DesktopModeAppHelper(NewTasksAppHelper(instrumentation))
-    private val imeApp = DesktopModeAppHelper(ImeAppHelper(instrumentation))
-    private val letterboxAppHelper = DesktopModeAppHelper(LetterboxAppHelper(instrumentation))
+
+    private val maxNum = DesktopModeStatus.getMaxTaskLimit(instrumentation.context)
 
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
+        Assume.assumeTrue(maxNum > 0)
         testApp.enterDesktopMode(wmHelper, device)
-        mailApp.launchViaIntent(wmHelper)
-        newTasksApp.launchViaIntent(wmHelper)
-        imeApp.launchViaIntent(wmHelper)
+        // Launch new [maxNum-1] tasks, which ends up opening [maxNum] tasks in total.
+        for (i in 1..maxNum - 1) {
+            mailApp.launchViaIntent(wmHelper)
+        }
     }
 
     @Test
     open fun openAppToMinimizeWindow() {
-        // Launch a new app while 4 apps are already open on desktop. This should result in the
-        // first app we opened to be minimized.
-        letterboxAppHelper.launchViaIntent(wmHelper)
+        // Launch a new tasks, which ends up opening [maxNum]+1 tasks in total. This should
+        // result in the first app we opened to be minimized.
+        mailApp.launchViaIntent(wmHelper)
     }
 
     @After
     fun teardown() {
         testApp.exit(wmHelper)
         mailApp.exit(wmHelper)
-        newTasksApp.exit(wmHelper)
-        imeApp.exit(wmHelper)
-        letterboxAppHelper.exit(wmHelper)
     }
 }

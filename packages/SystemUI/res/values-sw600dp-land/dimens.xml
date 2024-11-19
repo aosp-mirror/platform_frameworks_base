@@ -20,7 +20,6 @@
     <!-- keyguard-->
     <dimen name="keyguard_indication_margin_bottom">25dp</dimen>
     <dimen name="ambient_indication_margin_bottom">115dp</dimen>
-    <dimen name="lock_icon_margin_bottom">60dp</dimen>
     <!-- margin from keyguard status bar to clock. For split shade it should be
          keyguard_split_shade_top_margin - status_bar_header_height_keyguard = 8dp -->
     <dimen name="keyguard_clock_top_margin">8dp</dimen>

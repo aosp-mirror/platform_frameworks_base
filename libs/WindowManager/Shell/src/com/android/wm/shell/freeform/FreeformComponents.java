@@ -23,6 +23,7 @@ import android.content.Context;
 import android.provider.Settings;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -58,5 +59,13 @@ public class FreeformComponents {
         return context.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                 || Settings.Global.getInt(context.getContentResolver(),
                 DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+    }
+
+    /**
+     * Freeform is enabled or we need the components to enable the app handle when desktop mode is
+     * not enabled
+     */
+    public static boolean requiresFreeformComponents(Context context) {
+        return isFreeformEnabled(context) || DesktopModeStatus.overridesShowAppHandle(context);
     }
 }

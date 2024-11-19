@@ -864,7 +864,8 @@ interface IActivityManager {
 
     /**
      * Suppress or reenable the rate limit on foreground service notification deferral.
-     * This is for use within CTS and is protected by android.permission.WRITE_DEVICE_CONFIG.
+     * This is for use within CTS and is protected by android.permission.WRITE_DEVICE_CONFIG
+     * and WRITE_ALLOWLISTED_DEVICE_CONFIG.
      *
      * @param enable false to suppress rate-limit policy; true to reenable it.
      */

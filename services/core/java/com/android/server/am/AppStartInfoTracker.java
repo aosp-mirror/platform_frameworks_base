@@ -634,12 +634,20 @@ public final class AppStartInfoTracker {
         }
 
         final ApplicationStartInfo info = new ApplicationStartInfo(raw);
+        int uid = raw.getRealUid();
 
-        AppStartInfoContainer container = mData.get(raw.getPackageName(), raw.getRealUid());
+        // Isolated process starts won't be reasonably accessible if stored by their uid, don't
+        // store them.
+        if (com.android.server.am.Flags.appStartInfoIsolatedProcess()
+                && UserHandle.isIsolated(uid)) {
+            return null;
+        }
+
+        AppStartInfoContainer container = mData.get(raw.getPackageName(), uid);
         if (container == null) {
             container = new AppStartInfoContainer(mAppStartInfoHistoryListSize);
-            container.mUid = info.getRealUid();
-            mData.put(raw.getPackageName(), raw.getRealUid(), container);
+            container.mUid = uid;
+            mData.put(raw.getPackageName(), uid, container);
         }
         container.addStartInfoLocked(info);
 
@@ -1010,6 +1018,17 @@ public final class AppStartInfoTracker {
                             new AppStartInfoContainer(mAppStartInfoHistoryListSize);
                     int uid = container.readFromProto(proto, AppsStartInfoProto.Package.USERS,
                             pkgName);
+
+                    // If the isolated process flag is enabled and the uid is that of an isolated
+                    // process, then break early so that the container will not be added to mData.
+                    // This is expected only as a one time mitigation, records added after this flag
+                    // is enabled should always return false for isIsolated and thereby always
+                    // continue on.
+                    if (com.android.server.am.Flags.appStartInfoIsolatedProcess()
+                            && UserHandle.isIsolated(uid)) {
+                        break;
+                    }
+
                     synchronized (mLock) {
                         mData.put(pkgName, uid, container);
                     }

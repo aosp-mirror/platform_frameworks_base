@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
+import com.android.systemui.development.ui.viewmodel.buildNumberViewModelFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
 
@@ -26,5 +27,6 @@ val Kosmos.paginatedGridViewModel by
             qsColumnsViewModelFactory,
             paginatedGridInteractor,
             inFirstPageViewModel,
+            buildNumberViewModelFactory,
         )
     }

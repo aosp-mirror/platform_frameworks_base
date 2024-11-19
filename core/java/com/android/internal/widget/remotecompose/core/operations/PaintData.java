@@ -90,7 +90,7 @@ public class PaintData extends PaintOperation implements VariableSupport {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
