@@ -67,9 +67,11 @@ import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationSt
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -504,7 +506,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isClockVisible_notAllowedByDisableFlags_gone() =
+    fun isClockVisible_notAllowedByDisableFlags_invisible() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.isClockVisible)
             transitionKeyguardToGone()
@@ -512,7 +514,63 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_CLOCK, DISABLE2_NONE)
 
-            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+            assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
+        }
+
+    @Test
+    fun isClockVisible_allowedByFlags_hunActive_notVisible() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isClockVisible)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+            // there is an active HUN
+            headsUpNotificationRepository.setNotifications(
+                fakeHeadsUpRowRepository(isPinned = true)
+            )
+
+            assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
+        }
+
+    @Test
+    fun isClockVisible_allowedByFlags_hunBecomesInactive_visibleAgain() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isClockVisible)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+            // there is an active HUN
+            headsUpNotificationRepository.setNotifications(
+                fakeHeadsUpRowRepository(isPinned = true)
+            )
+
+            // hun goes away
+            headsUpNotificationRepository.setNotifications(listOf())
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    fun isClockVisible_disabledByFlags_hunBecomesInactive_neverVisible() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isClockVisible)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_CLOCK, DISABLE2_NONE)
+            // there is an active HUN
+            headsUpNotificationRepository.setNotifications(
+                fakeHeadsUpRowRepository(isPinned = true)
+            )
+
+            assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
+
+            // hun goes away
+            headsUpNotificationRepository.setNotifications(listOf())
+
+            assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
         }
 
     @Test
@@ -634,7 +692,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -649,7 +707,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -668,7 +726,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 testScope = testScope,
             )
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -683,7 +741,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Bouncer)
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -780,7 +838,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             kosmos.shadeTestUtil.setShadeExpansion(1f)
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -796,7 +854,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -817,7 +875,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             )
             kosmos.keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
@@ -835,10 +893,14 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true, taskInfo = null)
             kosmos.keyguardInteractor.onCameraLaunchDetected(CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP)
 
-            assertThat(clockVisible!!.visibility).isEqualTo(View.GONE)
+            assertThat(clockVisible!!.visibility).isEqualTo(View.INVISIBLE)
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
+
+    // Cribbed from [HeadsUpNotificationInteractorTest.kt]
+    private fun fakeHeadsUpRowRepository(key: String = "test key", isPinned: Boolean = false) =
+        FakeHeadsUpRowRepository(key = key, isPinned = isPinned)
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =
         ActiveNotificationsStore.Builder()

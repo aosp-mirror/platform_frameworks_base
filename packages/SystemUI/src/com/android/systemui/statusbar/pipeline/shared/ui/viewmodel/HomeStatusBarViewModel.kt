@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEvent
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
@@ -138,6 +139,7 @@ constructor(
     collapsedStatusBarInteractor: CollapsedStatusBarInteractor,
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
+    headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
     sceneInteractor: SceneInteractor,
@@ -233,11 +235,13 @@ constructor(
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
+            headsUpNotificationInteractor.showHeadsUpStatusBar,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
-            val showClock = shouldStatusBarBeVisible && visibilityViaDisableFlags.isClockAllowed
-            // TODO(b/364360986): Take CollapsedStatusBarFragment.clockHiddenMode into account.
-            VisibilityModel(showClock.toVisibilityInt(), visibilityViaDisableFlags.animate)
+        ) { shouldStatusBarBeVisible, showHeadsUp, visibilityViaDisableFlags ->
+            val showClock =
+                shouldStatusBarBeVisible && visibilityViaDisableFlags.isClockAllowed && !showHeadsUp
+            // Always use View.INVISIBLE here, so that animations work
+            VisibilityModel(showClock.toVisibleOrInvisible(), visibilityViaDisableFlags.animate)
         }
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
@@ -253,10 +257,11 @@ constructor(
                         visibilityViaDisableFlags.areNotificationIconsAllowed
                 }
             VisibilityModel(
-                showNotificationIconContainer.toVisibilityInt(),
+                showNotificationIconContainer.toVisibleOrGone(),
                 visibilityViaDisableFlags.animate,
             )
         }
+
     private val isSystemInfoVisible =
         combine(
             shouldHomeStatusBarBeVisible,
@@ -264,7 +269,7 @@ constructor(
         ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
             val showSystemInfo =
                 shouldStatusBarBeVisible && visibilityViaDisableFlags.isSystemInfoAllowed
-            VisibilityModel(showSystemInfo.toVisibilityInt(), visibilityViaDisableFlags.animate)
+            VisibilityModel(showSystemInfo.toVisibleOrGone(), visibilityViaDisableFlags.animate)
         }
 
     override val systemInfoCombinedVis =
@@ -284,7 +289,11 @@ constructor(
             )
 
     @View.Visibility
-    private fun Boolean.toVisibilityInt(): Int {
+    private fun Boolean.toVisibleOrGone(): Int {
         return if (this) View.VISIBLE else View.GONE
     }
+
+    // Similar to the above, but uses INVISIBLE in place of GONE
+    @View.Visibility
+    private fun Boolean.toVisibleOrInvisible(): Int = if (this) View.VISIBLE else View.INVISIBLE
 }
