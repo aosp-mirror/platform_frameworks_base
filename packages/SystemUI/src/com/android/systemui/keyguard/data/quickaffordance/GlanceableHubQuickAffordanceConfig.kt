@@ -25,6 +25,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.communal.data.repository.CommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
@@ -98,7 +99,10 @@ constructor(
         if (SceneContainerFlag.isEnabled) {
             sceneInteractor.changeScene(Scenes.Communal, "lockscreen to communal from shortcut")
         } else {
-            communalSceneRepository.changeScene(CommunalScenes.Communal, null)
+            communalSceneRepository.changeScene(
+                CommunalScenes.Communal,
+                transitionKey = CommunalTransitionKeys.SimpleFade,
+            )
         }
         return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
     }

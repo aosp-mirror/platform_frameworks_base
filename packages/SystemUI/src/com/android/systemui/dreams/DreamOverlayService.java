@@ -18,6 +18,7 @@ package com.android.systemui.dreams;
 
 import static android.service.dreams.Flags.dreamWakeRedirect;
 
+import static com.android.systemui.Flags.communalHubOnMobile;
 import static com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
@@ -54,12 +55,14 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.communal.shared.log.CommunalUiEvent;
 import com.android.systemui.communal.shared.model.CommunalScenes;
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
@@ -76,8 +79,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import kotlinx.coroutines.Job;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
 
@@ -483,11 +486,16 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         final DreamOverlayComponent dreamOverlayComponent = mDreamOverlayComponentFactory.create(
                 mLifecycleOwner, complicationComponent.getComplicationHostViewController(),
                 mTouchInsetManager);
+
+        final ArrayList<TouchHandler> touchHandlers = new ArrayList<>(
+                List.of(dreamComplicationComponent.getHideComplicationTouchHandler()));
+        if (!communalHubOnMobile()) {
+            // Do not add the communal touch handler for glanceable hub v2 since there is no dream
+            // to hub swipe gesture.
+            touchHandlers.add(dreamOverlayComponent.getCommunalTouchHandler());
+        }
         final AmbientTouchComponent ambientTouchComponent = mAmbientTouchComponentFactory.create(
-                mLifecycleOwner,
-                new HashSet<>(Arrays.asList(
-                        dreamComplicationComponent.getHideComplicationTouchHandler(),
-                        dreamOverlayComponent.getCommunalTouchHandler())), TAG);
+                mLifecycleOwner, new HashSet<>(touchHandlers), TAG);
 
         setLifecycleStateLocked(Lifecycle.State.STARTED);
 
@@ -568,7 +576,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         } else {
             mCommunalInteractor.changeScene(CommunalScenes.Communal,
                     "dream wake requested",
-                    null);
+                    communalHubOnMobile() ? CommunalTransitionKeys.INSTANCE.getSimpleFade() : null);
         }
     }
 
