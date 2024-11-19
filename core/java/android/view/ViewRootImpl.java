@@ -2514,11 +2514,15 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public void notifyInsetsAnimationRunningStateChanged(boolean running) {
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
-            mInsetsAnimationRunning = running;
             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                 Trace.instant(Trace.TRACE_TAG_VIEW,
                         TextUtils.formatSimple("notifyInsetsAnimationRunningStateChanged(%s)",
                         Boolean.toString(running)));
+            }
+            mInsetsAnimationRunning = running;
+            try {
+                mWindowSession.notifyInsetsAnimationRunningStateChanged(mWindow, running);
+            } catch (RemoteException e) {
             }
         }
     }
