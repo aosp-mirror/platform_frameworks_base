@@ -3230,8 +3230,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
-        return !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
-                .shouldApplyUserMinAspectRatioOverride();
+        return mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
+                .userPreferenceCompatibleWithNonResizability();
     }
 
     boolean isResizeable() {
