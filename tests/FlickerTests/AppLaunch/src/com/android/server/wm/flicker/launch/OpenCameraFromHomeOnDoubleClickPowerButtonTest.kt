@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching camera from launcher by double pressing power button
  *
- * To run this test: `atest FlickerTestsAppLaunch:OpenCameraOnDoubleClickPowerButton`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenCameraFromHomeOnDoubleClickPowerButtonTest`
  *
  * Actions:
  * ```
