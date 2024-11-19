@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"앱이 근처의 초광대역 기기 간 상대적 위치를 파악하도록 허용"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"근처 Wi‑Fi 기기와 상호작용"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"앱이 광역 신호를 보내 근처에 있는 Wi‑Fi 기기의 상대적인 위치를 확인하고 연결할 수 있도록 허용합니다."</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"근처 기기 간 상대 위치 파악"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"앱이 근처 기기 간 상대 위치를 파악하도록 허용"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"기본 NFC 결제 서비스 정보"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
@@ -659,7 +657,7 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서를 세게 누르세요"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"지문을 인식할 수 없습니다. 다시 시도해 주세요"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서를 세게 누르세요"</string>

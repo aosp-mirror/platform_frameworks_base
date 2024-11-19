@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"በአቅራቢያ ባሉ ልዕለ-ሰፊ ባንድ መሣሪያዎች መካከል ያለውን አንጻራዊ አቀማመጣቸውን ለማወቅ ንዲችል ለመተግበሪያው ይፍቀዱ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"በአቅራቢያ ካሉ የWi‑Fi መሣሪያዎች ጋር መስተጋብር መፍጠር"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"መተግበሪያው በአቅራቢያ ያሉ የWi-Fi መሣሪያዎች አንጻራዊ ቦታን እንዲያሳውቅ፣ እንዲያገናኝ እና እንዲያውቅ ያስችለዋል"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"በአቅራቢያ ባሉ መሣሪያዎች መካከል ያለውን አንጻራዊ አካባቢ ይወቁ"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"መተግበሪያው በአቅራቢያ ባሉ መሣሪያዎች መካከል ያለውን አንጻራዊ አካባቢ ለማወቅ እንዲችል ይፍቀዱለት"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ተመራጭ NFC የክፍያ አገልግሎት መረጃ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"እንደ የተመዘገቡ እርዳታዎች እና የጉዞ መሥመር መዳረሻ የመሳሰለ ተመራጭ nfc የክፍያ አገልግሎት መረጃን ለማግኘት ለመተግበሪያው ያፈቅድለታል።"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ቅርብ የግኑኙነትመስክ (NFC) ተቆጣጠር"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"አብራ"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ወደኋላ ተመለስ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"በመጠባበቅ ላይ..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ሳተላይት ኤስኦኤስ አሁን ይገኛል"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"ምንም የሞባይል ወይም Wi-Fi አውታረ መረብ ባይኖርም እንኳን ለድንገተኛ አደጋ አገልግሎቶች መልዕክት መላክ ይችላሉ። Google መልዕክቶች የእርስዎ ነባሪ የመልዕክት መላኪያ መተግበሪያ መሆን አለበት።"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ሳተላይት ኤስኦኤስ አይደገፍም"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ሳተላይት ኤስኦኤስ በዚህ መሣሪያ ላይ አይደገፍም"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ሳተላይት ኤስኦኤስ አልተዋቀረም"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ከበይነመረቡ ጋር መገናኘትዎን ያረጋግጡ እና ውቅረትን እንደገና ይሞክሩ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ሳተላይት ኤስኦኤስ አይገኝም"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ሳተላይት ኤስኦኤስ በዚህ አገር ወይም ክልል ውስጥ አይገኝም"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ሳተላይት ኤስኦኤስ አልተዋቀረም"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"በሳተላይት መልዕክት ለመላክ Google መልዕክቶችን እንደ የእርስዎ ነባሪ የመልዕክት መላኪያ መተግበሪያ ያቀናብሩ"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ሳተላይት ኤስኦኤስ አይገኝም"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"በዚህ አገር ወይም ክልል ውስጥ ሳተላይት ኤስኦኤስ እንደሚገኝ ለመፈተሽ የአካባቢ ቅንብሮችን ያብሩ"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"የሳተላይት መልዕክት ይገኛል"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"የሞባይል ወይም የWi-Fi አውታረ መረብ ከሌለ በሳተላይት መልዕክት መላክ ይችላሉ። Google መልዕክቶች የእርስዎ ነባሪ የመልዕክት መላኪያ መተግበሪያ መሆን አለበት።"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"የሳተላይት መልዕክት አይደገፍም"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"የሳተላይት መልዕክት በዚህ መሣሪያ ላይ አይደገፍም"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"የሳተላይት መልዕክት አልተዋቀረም"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ከበይነመረቡ ጋር መገናኘትዎን ያረጋግጡ እና ውቅረትን እንደገና ይሞክሩ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"የሳተላይት መልዕክት አይገኝም"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"የሳተላይት መልዕክት በዚህ አገር ወይም ክልል ውስጥ አይገኝም"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"የሳተላይት መልዕክት አልተዋቀረም"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"በሳተላይት መልዕክት ለመላክ Google መልዕክቶችን እንደ የእርስዎ ነባሪ የመልዕክት መላኪያ መተግበሪያ ያቀናብሩ"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"የሳተላይት መልዕክት አይገኝም"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"በዚህ አገር ወይም ክልል ውስጥ የሳተላይት መልዕክት እንደሚገኝ ለመፈተሽ የአካባቢ ቅንብሮችን ያብሩ"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"በጣት አሻራ መክፈቻን እንደገና ያዋቅሩ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ከእንግዲህ መለየት አይችልም።"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> እና <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ከእንግዲህ መለየት አይችሉም።"</string>
