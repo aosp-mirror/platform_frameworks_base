@@ -398,6 +398,16 @@ class QSLongPressEffectTest : SysuiTestCase() {
             verify(controller).onTransitionAnimationCancelled(newOccludedState)
         }
 
+    @Test
+    fun onTileLongClick_whileIdle_performsLongClick() =
+        testWhileInState(QSLongPressEffect.State.IDLE) {
+            // WHEN a long-click is detected by the view
+            val longClicks = longPressEffect.onTileLongClick()
+
+            // THEN the long click is handled
+            assertThat(longClicks).isTrue()
+        }
+
     private fun testWithScope(initialize: Boolean = true, test: suspend TestScope.() -> Unit) =
         with(kosmos) {
             testScope.runTest {
