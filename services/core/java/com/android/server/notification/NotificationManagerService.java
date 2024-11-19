@@ -11953,8 +11953,10 @@ public class NotificationManagerService extends SystemService {
                             assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel(),
                                     update);
                         }
+                    } catch (DeadObjectException ex) {
+                        Slog.wtf(TAG, "unable to notify assistant (enqueued): " + info, ex);
                     } catch (RemoteException ex) {
-                        Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                        Slog.e(TAG, "unable to notify assistant (enqueued): " + info, ex);
                     }
                 }
             }
@@ -12075,19 +12077,21 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnToPost) -> {
+                    (info, sbnToPost) -> {
                         try {
                             if (android.app.Flags.noSbnholder()) {
-                                assistant.onNotificationSnoozedUntilContextFull(
+                                info.onNotificationSnoozedUntilContextFull(
                                         sbnToPost, snoozeCriterionId);
                             } else {
                                 final StatusBarNotificationHolder sbnHolder =
                                         new StatusBarNotificationHolder(sbnToPost);
-                                assistant.onNotificationSnoozedUntilContext(
+                                info.onNotificationSnoozedUntilContext(
                                         sbnHolder, snoozeCriterionId);
                             }
+                        } catch (DeadObjectException ex) {
+                            Slog.wtf(TAG, "unable to notify assistant (snoozed): " + info, ex);
                         } catch (RemoteException ex) {
-                            Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (snoozed): " + info, ex);
                         }
                     });
         }
