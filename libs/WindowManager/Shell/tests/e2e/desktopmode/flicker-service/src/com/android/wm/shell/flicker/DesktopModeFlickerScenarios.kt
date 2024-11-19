@@ -50,6 +50,7 @@ import android.tools.flicker.config.common.Components.LAUNCHER
 import android.tools.flicker.config.desktopmode.Components.DESKTOP_MODE_APP
 import android.tools.flicker.config.desktopmode.Components.DESKTOP_WALLPAPER
 import android.tools.flicker.config.desktopmode.Components.NON_RESIZABLE_APP
+import android.tools.flicker.config.desktopmode.Components.SIMPLE_APP
 import android.tools.flicker.extractors.ITransitionMatcher
 import android.tools.flicker.extractors.ShellTransitionScenarioExtractor
 import android.tools.flicker.extractors.TaggedCujTransitionMatcher
@@ -443,6 +444,26 @@ class DesktopModeFlickerScenarios {
                         AppWindowBecomesInvisible(DESKTOP_MODE_APP),
                         AppWindowOnTopAtEnd(LAUNCHER),
                     ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
+            )
+        val OPEN_UNLIMITED_APPS =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("OPEN_UNLIMITED_APPS"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                                return transitions.filter { it.type == TransitionType.OPEN }
+                        }
+                    }
+                ),
+                assertions =
+                        listOf(
+                            AppWindowBecomesVisible(DESKTOP_MODE_APP),
+                            AppWindowIsVisibleAlways(SIMPLE_APP)
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }
