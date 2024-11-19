@@ -820,7 +820,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
-        addActivityOptions(options1, mSideStage);
+        StageTaskListener stageForTask1;
+        if (enableFlexibleSplit()) {
+            stageForTask1 = mStageOrderOperator.getStageForLegacyPosition(splitPosition,
+                    true /*checkAllStagesIfNotActive*/);
+        } else {
+            stageForTask1 = mSideStage;
+        }
+        addActivityOptions(options1, stageForTask1);
         wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
         prepareTasksForSplitScreen(new int[] {taskId}, wct);
 
@@ -865,7 +872,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
-        addActivityOptions(options1, mSideStage);
+        StageTaskListener stageForTask1;
+        if (enableFlexibleSplit()) {
+            stageForTask1 = mStageOrderOperator.getStageForLegacyPosition(splitPosition,
+                    true /*checkAllStagesIfNotActive*/);
+        } else {
+            stageForTask1 = mSideStage;
+        }
+        addActivityOptions(options1, stageForTask1);
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
         prepareTasksForSplitScreen(new int[] {taskId}, wct);
 
@@ -997,14 +1011,29 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setRootForceTranslucent(false, wct);
 
         options1 = options1 != null ? options1 : new Bundle();
-        addActivityOptions(options1, mSideStage);
+        StageTaskListener stageForTask1;
+        if (enableFlexibleSplit()) {
+            stageForTask1 = mStageOrderOperator.getStageForLegacyPosition(splitPosition,
+                    true /*checkAllStagesIfNotActive*/);
+        } else {
+            stageForTask1 = mSideStage;
+        }
+        addActivityOptions(options1, stageForTask1);
         if (shortcutInfo1 != null) {
             wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
         } else {
             wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
         }
+
+        StageTaskListener stageForTask2;
+        if (enableFlexibleSplit()) {
+            stageForTask2 = mStageOrderOperator.getStageForLegacyPosition(
+                    reverseSplitPosition(splitPosition), true /*checkAllStagesIfNotActive*/);
+        } else {
+            stageForTask2 = mMainStage;
+        }
         options2 = options2 != null ? options2 : new Bundle();
-        addActivityOptions(options2, mMainStage);
+        addActivityOptions(options2, stageForTask2);
         if (shortcutInfo2 != null) {
             wct.startShortcut(mContext.getPackageName(), shortcutInfo2, options2);
         } else {
