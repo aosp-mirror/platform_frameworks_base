@@ -120,6 +120,11 @@ package android.nfc {
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public abstract class NfcRoutingTableEntry {
     method public int getNfceeId();
+    method public int getType();
+    field public static final int TYPE_AID = 0; // 0x0
+    field public static final int TYPE_PROTOCOL = 1; // 0x1
+    field public static final int TYPE_SYSTEM_CODE = 3; // 0x3
+    field public static final int TYPE_TECHNOLOGY = 2; // 0x2
   }
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public final class OemLogItems implements android.os.Parcelable {

@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
 /**
- * Represents an AID entry in current routing table.
+ * Represents an Application ID (AID) entry in current routing table.
  * @hide
  */
 @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
@@ -30,7 +30,7 @@ public class RoutingTableAidEntry extends NfcRoutingTableEntry {
 
     /** @hide */
     public RoutingTableAidEntry(int nfceeId, String value) {
-        super(nfceeId);
+        super(nfceeId, TYPE_AID);
         this.mValue = value;
     }
 

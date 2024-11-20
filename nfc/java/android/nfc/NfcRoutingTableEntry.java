@@ -17,7 +17,11 @@ package android.nfc;
 
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class to represent an entry of routing table. This class is abstract and extended by
@@ -30,10 +34,42 @@ import android.annotation.SystemApi;
 @SystemApi
 public abstract class NfcRoutingTableEntry {
     private final int mNfceeId;
+    private final int mType;
+
+    /**
+     * AID routing table type.
+     */
+    public static final int TYPE_AID = 0;
+    /**
+     * Protocol routing table type.
+     */
+    public static final int TYPE_PROTOCOL = 1;
+    /**
+     * Technology routing table type.
+     */
+    public static final int TYPE_TECHNOLOGY = 2;
+    /**
+     * System Code routing table type.
+     */
+    public static final int TYPE_SYSTEM_CODE = 3;
+
+    /**
+     * Possible type of this routing table entry.
+     * @hide
+     */
+    @IntDef(prefix = "TYPE_", value = {
+            TYPE_AID,
+            TYPE_PROTOCOL,
+            TYPE_TECHNOLOGY,
+            TYPE_SYSTEM_CODE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RoutingTableType {}
 
     /** @hide */
-    protected NfcRoutingTableEntry(int nfceeId) {
+    protected NfcRoutingTableEntry(int nfceeId, @RoutingTableType int type) {
         mNfceeId = nfceeId;
+        mType = type;
     }
 
     /**
@@ -42,5 +78,14 @@ public abstract class NfcRoutingTableEntry {
      */
     public int getNfceeId() {
         return mNfceeId;
+    }
+
+    /**
+     * Get the type of this entry.
+     * @return an integer defined in {@link RoutingTableType}
+     */
+    @RoutingTableType
+    public int getType() {
+        return mType;
     }
 }
