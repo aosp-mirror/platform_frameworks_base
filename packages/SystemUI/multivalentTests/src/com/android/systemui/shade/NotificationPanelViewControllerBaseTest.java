@@ -349,6 +349,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
     @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
+    @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -819,6 +820,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mShadeHeaderController,
                 mStatusBarTouchableRegionManager,
+                () -> mStatusBarLongPressGestureDetector,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mScrimController,

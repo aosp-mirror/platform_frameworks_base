@@ -1217,12 +1217,13 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 }
             }
         }
+        Log.d(TAG, "updateFallbackActiveDeviceIfNeeded, earliest group id = " + targetGroupId);
         return targetGroupId;
     }
 
     @Nullable
     private CachedBluetoothDevice getMainDevice(@Nullable List<BluetoothDevice> devices) {
-        if (devices == null || devices.size() == 1) return null;
+        if (devices == null || devices.isEmpty()) return null;
         List<CachedBluetoothDevice> cachedDevices =
                 devices.stream()
                         .map(device -> mDeviceManager.findDevice(device))

@@ -66,6 +66,7 @@ import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SessionCreationConfig;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -200,7 +201,7 @@ public class HintManagerServiceTest {
         when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID),
                 eq(SESSION_TIDS_C), eq(0L), anyInt(),
                 any(SessionConfig.class))).thenAnswer(fakeCreateWithConfig(SESSION_PTRS[2],
-                SESSION_IDS[2]));
+                    SESSION_IDS[2]));
 
         when(mIPowerMock.getInterfaceVersion()).thenReturn(6);
         when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenReturn(mConfig);
@@ -305,6 +306,14 @@ public class HintManagerServiceTest {
         return mService;
     }
 
+    private SessionCreationConfig makeSessionCreationConfig(int[] tids,
+            long targetWorkDurationNanos) {
+        SessionCreationConfig config = new SessionCreationConfig();
+        config.tids = tids;
+        config.targetWorkDurationNanos = targetWorkDurationNanos;
+        return config;
+    }
+
     @Test
     public void testInitializeService() {
         HintManagerService service = createService();
@@ -316,12 +325,14 @@ public class HintManagerServiceTest {
     public void testCreateHintSessionInvalidPid() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(new int[]{TID, 1}, DEFAULT_TARGET_DURATION);
         // Make sure we throw exception when adding a TID doesn't belong to the processes
         // In this case, we add `init` PID into the list.
         SessionConfig config = new SessionConfig();
         assertThrows(SecurityException.class,
                 () -> service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                        new int[]{TID, 1}, DEFAULT_TARGET_DURATION, SessionTag.OTHER, config));
+                        SessionTag.OTHER, creationConfig, config));
     }
 
     @Test
@@ -329,17 +340,23 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         IBinder token = new Binder();
         makeConfigCreationUnsupported();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
+                SessionTag.OTHER, creationConfig, new SessionConfig());
         assertNotNull(a);
 
+        creationConfig.tids = SESSION_TIDS_B;
+        creationConfig.targetWorkDurationNanos = DOUBLED_TARGET_DURATION;
         IHintSession b = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_B, DOUBLED_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
+                SessionTag.OTHER, creationConfig, new SessionConfig());
         assertNotEquals(a, b);
 
+        creationConfig.tids = SESSION_TIDS_C;
+        creationConfig.targetWorkDurationNanos = 0L;
         IHintSession c = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_C, 0L, SessionTag.OTHER, new SessionConfig());
+                SessionTag.OTHER, creationConfig, new SessionConfig());
         assertNotNull(c);
         verify(mNativeWrapperMock, times(3)).halCreateHintSession(anyInt(), anyInt(),
                 any(int[].class), anyLong());
@@ -349,22 +366,28 @@ public class HintManagerServiceTest {
     public void testCreateHintSessionWithConfig() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         SessionConfig config = new SessionConfig();
         IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, config);
+                SessionTag.OTHER, creationConfig, config);
         assertNotNull(a);
         assertEquals(SESSION_IDS[0], config.id);
 
         SessionConfig config2 = new SessionConfig();
+        creationConfig.tids = SESSION_TIDS_B;
+        creationConfig.targetWorkDurationNanos = DOUBLED_TARGET_DURATION;
         IHintSession b = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_B, DOUBLED_TARGET_DURATION, SessionTag.APP, config2);
+                SessionTag.APP, creationConfig, config2);
         assertNotEquals(a, b);
         assertEquals(SESSION_IDS[1], config2.id);
 
         SessionConfig config3 = new SessionConfig();
+        creationConfig.tids = SESSION_TIDS_C;
+        creationConfig.targetWorkDurationNanos = 0L;
         IHintSession c = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_C, 0L, SessionTag.GAME, config3);
+                SessionTag.GAME, creationConfig, config3);
         assertNotNull(c);
         assertEquals(SESSION_IDS[2], config3.id);
         verify(mNativeWrapperMock, times(3)).halCreateHintSessionWithConfig(anyInt(), anyInt(),
@@ -372,13 +395,48 @@ public class HintManagerServiceTest {
     }
 
     @Test
-    public void testPauseResumeHintSession() throws Exception {
+    public void testCreateGraphicsPipelineSessions() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
 
+        final int threadCount =
+                service.getBinderServiceInstance().getMaxGraphicsPipelineThreadsCount();
+        long sessionPtr1 = 1111L;
+        long sessionId1 = 11111L;
+        CountDownLatch stopLatch1 = new CountDownLatch(1);
+        int[] tids1 = createThreads(threadCount, stopLatch1);
+        when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID), eq(tids1),
+                eq(DEFAULT_TARGET_DURATION), anyInt(), any(SessionConfig.class)))
+                .thenAnswer(fakeCreateWithConfig(sessionPtr1, sessionId1));
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(tids1, DEFAULT_TARGET_DURATION);
+
+        creationConfig.modesToEnable = new int[] {1}; // GRAPHICS_PIPELINE
+
+        SessionConfig config = new SessionConfig();
+        IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                SessionTag.OTHER, creationConfig, config);
+        assertNotNull(a);
+        assertEquals(sessionId1, config.id);
+
+        creationConfig.tids = createThreads(1, stopLatch1);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().createHintSessionWithConfig(token,
+                    SessionTag.OTHER, creationConfig, config);
+        });
+    }
+
+    @Test
+    public void testPauseResumeHintSession() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         // Set session to background and calling updateHintAllowedByProcState() would invoke
         // pause();
@@ -414,9 +472,11 @@ public class HintManagerServiceTest {
     public void testCloseHintSession() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
+                SessionTag.OTHER, creationConfig, new SessionConfig());
 
         a.close();
         verify(mNativeWrapperMock, times(1)).halCloseHintSession(anyLong());
@@ -426,9 +486,11 @@ public class HintManagerServiceTest {
     public void testUpdateTargetWorkDuration() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         IHintSession a = service.getBinderServiceInstance().createHintSessionWithConfig(token,
-                SESSION_TIDS_A, DEFAULT_TARGET_DURATION, SessionTag.OTHER, new SessionConfig());
+                SessionTag.OTHER, creationConfig, new SessionConfig());
 
         assertThrows(IllegalArgumentException.class, () -> {
             a.updateTargetWorkDuration(-1L);
@@ -446,10 +508,12 @@ public class HintManagerServiceTest {
     public void testReportActualWorkDuration() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         a.updateTargetWorkDuration(100L);
         a.reportActualWorkDuration(DURATIONS_THREE, TIMESTAMPS_THREE);
@@ -489,10 +553,12 @@ public class HintManagerServiceTest {
     public void testSendHint() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         a.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
         verify(mNativeWrapperMock, times(1)).halSendHint(anyLong(),
@@ -516,10 +582,12 @@ public class HintManagerServiceTest {
     public void testDoHintInBackground() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
@@ -538,10 +606,12 @@ public class HintManagerServiceTest {
     public void testDoHintInForeground() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
@@ -552,10 +622,12 @@ public class HintManagerServiceTest {
     public void testSetThreads() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         a.updateTargetWorkDuration(100L);
 
@@ -591,9 +663,11 @@ public class HintManagerServiceTest {
         when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID), eq(tids1),
                 eq(DEFAULT_TARGET_DURATION), anyInt(), any(SessionConfig.class)))
                 .thenReturn(sessionPtr1);
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(tids1, DEFAULT_TARGET_DURATION);
         AppHintSession session1 = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, tids1, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
         assertNotNull(session1);
 
         // trigger UID state change by making the process foreground->background, but because the
@@ -626,9 +700,11 @@ public class HintManagerServiceTest {
         when(mNativeWrapperMock.halCreateHintSessionWithConfig(eq(TGID), eq(UID), eq(tids1),
                 eq(DEFAULT_TARGET_DURATION), anyInt(), any(SessionConfig.class)))
                 .thenReturn(sessionPtr1);
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(tids1, DEFAULT_TARGET_DURATION);
         AppHintSession session1 = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, tids1, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
         assertNotNull(session1);
 
         // let all session 1 threads to exit and the cleanup should force pause the session 1
@@ -734,10 +810,12 @@ public class HintManagerServiceTest {
     public void testSetMode() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         a.setMode(0, true);
         verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
@@ -746,12 +824,19 @@ public class HintManagerServiceTest {
         a.setMode(0, false);
         verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
                 eq(0), eq(false));
+    }
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            a.setMode(-1, true);
-        });
+    @Test
+    public void testSetModeSessionInBackGround() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
-        reset(mNativeWrapperMock);
+        AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
+
         // Set session to background, then the duration would not be updated.
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
@@ -760,6 +845,40 @@ public class HintManagerServiceTest {
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
         a.setMode(0, true);
         verify(mNativeWrapperMock, never()).halSetMode(anyLong(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testSetModeInvalid() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+
+        AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.setMode(-1, true);
+        });
+    }
+
+    @Test
+    public void testSetModeUponSessionCreation() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+        creationConfig.modesToEnable = new int[] {0, 1};
+
+        AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
+        assertNotNull(a);
+        verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
+                eq(0), eq(true));
+        verify(mNativeWrapperMock, times(1)).halSetMode(anyLong(),
+                eq(1), eq(true));
     }
 
     @Test
@@ -950,9 +1069,12 @@ public class HintManagerServiceTest {
     private void runAppHintSession(HintManagerService service, int logId,
             AtomicReference<Boolean> shouldRun) throws Exception {
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
         // we will start some threads and get their valid TIDs to update
         int threadCount = 3;
         // the list of TIDs
@@ -1017,10 +1139,12 @@ public class HintManagerServiceTest {
     public void testReportActualWorkDuration2() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
+        SessionCreationConfig creationConfig =
+                makeSessionCreationConfig(SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
 
         AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
-                .createHintSessionWithConfig(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION,
-                        SessionTag.OTHER, new SessionConfig());
+                .createHintSessionWithConfig(token, SessionTag.OTHER,
+                        creationConfig, new SessionConfig());
 
         a.updateTargetWorkDuration(100L);
         a.reportActualWorkDuration2(WORK_DURATIONS_FIVE);

@@ -114,16 +114,16 @@ class TransitionAnimator(
             )
         }
 
-        internal fun assertReturnAnimations() {
+        fun assertReturnAnimations() {
             check(returnAnimationsEnabled()) {
                 "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag " +
                     "is disabled"
             }
         }
 
-        internal fun returnAnimationsEnabled() = returnAnimationFrameworkLibrary()
+        fun returnAnimationsEnabled() = returnAnimationFrameworkLibrary()
 
-        internal fun assertLongLivedReturnAnimations() {
+        fun assertLongLivedReturnAnimations() {
             check(longLivedReturnAnimationsEnabled()) {
                 "Long-lived registrations cannot be used when the " +
                     "returnAnimationFrameworkLibrary or the " +
@@ -131,7 +131,7 @@ class TransitionAnimator(
             }
         }
 
-        internal fun longLivedReturnAnimationsEnabled() =
+        fun longLivedReturnAnimationsEnabled() =
             returnAnimationFrameworkLibrary() && returnAnimationFrameworkLongLived()
 
         internal fun WindowAnimationState.toTransitionState() =

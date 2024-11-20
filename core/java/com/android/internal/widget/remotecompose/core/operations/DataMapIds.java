@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -34,7 +35,7 @@ public class DataMapIds implements Operation {
     private static final int OP_CODE = Operations.ID_MAP;
     private static final String CLASS_NAME = "DataMapIds";
     int mId;
-    DataMap mDataMap;
+    final DataMap mDataMap;
 
     private static final int MAX_MAP = 2000;
 
@@ -44,6 +45,7 @@ public class DataMapIds implements Operation {
     public static final byte TYPE_LONG = 3;
     public static final byte TYPE_BOOLEAN = 4;
 
+    @NonNull
     private String typeString(byte type) {
         switch (type) {
             case TYPE_STRING:
@@ -60,7 +62,7 @@ public class DataMapIds implements Operation {
         return "?";
     }
 
-    public DataMapIds(int id, String[] names, byte[] types, int[] ids) {
+    public DataMapIds(int id, @NonNull String[] names, @NonNull byte[] types, @NonNull int[] ids) {
         mId = id;
         mDataMap = new DataMap(names, types, ids);
     }
@@ -88,7 +90,11 @@ public class DataMapIds implements Operation {
     }
 
     public static void apply(
-            @NonNull WireBuffer buffer, int id, @NonNull String[] names, byte[] type, int[] ids) {
+            @NonNull WireBuffer buffer,
+            int id,
+            @NonNull String[] names,
+            @Nullable byte[] type, // todo: can we make this not nullable?
+            @NonNull int[] ids) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(names.length);
@@ -128,7 +134,7 @@ public class DataMapIds implements Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 

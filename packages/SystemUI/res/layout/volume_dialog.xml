@@ -31,10 +31,10 @@
         app:layout_constraintBottom_toBottomOf="@id/volume_dialog_settings"
         app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
         app:layout_constraintStart_toStartOf="@id/volume_dialog_main_slider_container"
-        app:layout_constraintTop_toTopOf="@id/volume_ringer_and_drawer_container" />
+        app:layout_constraintTop_toTopOf="@id/volume_ringer_drawer" />
 
     <include
-        android:id="@id/volume_ringer_and_drawer_container"
+        android:id="@id/volume_ringer_drawer"
         layout="@layout/volume_ringer_drawer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

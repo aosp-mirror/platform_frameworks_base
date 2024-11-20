@@ -243,8 +243,8 @@ import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
 import android.security.authenticationpolicy.AuthenticationPolicyManager;
 import android.security.authenticationpolicy.IAuthenticationPolicyService;
-import android.security.forensic.ForensicManager;
-import android.security.forensic.IForensicService;
+import android.security.intrusiondetection.IIntrusionDetectionService;
+import android.security.intrusiondetection.IntrusionDetectionManager;
 import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
@@ -1818,15 +1818,20 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.FORENSIC_SERVICE, ForensicManager.class,
-                new CachedServiceFetcher<ForensicManager>() {
+        registerService(Context.INTRUSION_DETECTION_SERVICE, IntrusionDetectionManager.class,
+                new CachedServiceFetcher<IntrusionDetectionManager>() {
                     @Override
-                    public ForensicManager createService(ContextImpl ctx)
+                    public IntrusionDetectionManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
+                        if (!android.security.Flags.aflApi()) {
+                            throw new ServiceNotFoundException(
+                                    "Intrusion Detection is not supported");
+                        }
                         IBinder b = ServiceManager.getServiceOrThrow(
-                                Context.FORENSIC_SERVICE);
-                        IForensicService service = IForensicService.Stub.asInterface(b);
-                        return new ForensicManager(service);
+                                Context.INTRUSION_DETECTION_SERVICE);
+                        IIntrusionDetectionService service =
+                                IIntrusionDetectionService.Stub.asInterface(b);
+                        return new IntrusionDetectionManager(service);
                     }
                 });
 

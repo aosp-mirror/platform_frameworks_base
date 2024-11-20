@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -52,8 +53,9 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     private float mTextX;
     private float mTextY;
     private float mTextW;
+    private float mTextH;
 
-    private String mCachedString = "";
+    @Nullable private String mCachedString = "";
 
     @Override
     public void registerListening(@NonNull RemoteContext context) {
@@ -89,7 +91,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     }
 
     public TextLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -114,7 +116,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     }
 
     public TextLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int textId,
@@ -162,6 +164,9 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         mPaint.setTextSize(mFontSize);
         mPaint.setTextStyle(mType, (int) mFontWeight, mFontStyle == 1);
         context.applyPaint(mPaint);
+        if (mCachedString == null) {
+            return;
+        }
         int length = mCachedString.length();
         context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
         if (DEBUG) {
@@ -241,7 +246,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
-            MeasurePass measure,
+            @NonNull MeasurePass measure,
             @NonNull Size size) {
         context.savePaint();
         mPaint.reset();
@@ -250,6 +255,9 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         context.applyPaint(mPaint);
         float[] bounds = new float[4];
         int flags = PaintContext.TEXT_MEASURE_FONT_HEIGHT;
+        if (mCachedString == null) {
+            return;
+        }
         context.getTextBounds(mTextId, 0, mCachedString.length(), flags, bounds);
         context.restorePaint();
         float w = bounds[2] - bounds[0];
@@ -259,6 +267,17 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         size.setHeight(h);
         mTextY = -bounds[1];
         mTextW = w;
+        mTextH = h;
+    }
+
+    @Override
+    public float intrinsicHeight() {
+        return mTextH;
+    }
+
+    @Override
+    public float intrinsicWidth() {
+        return mTextW;
     }
 
     @NonNull

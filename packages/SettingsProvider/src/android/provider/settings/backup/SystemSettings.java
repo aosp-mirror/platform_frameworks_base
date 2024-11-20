@@ -78,6 +78,7 @@ public class SystemSettings {
                 Settings.System.SHOW_WEB_SUGGESTIONS,
                 Settings.System.SIP_CALL_OPTIONS,
                 Settings.System.SIP_RECEIVE_CALLS,
+                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
                 Settings.System.POINTER_SPEED,
                 Settings.System.POINTER_FILL_STYLE,
                 Settings.System.POINTER_STROKE_STYLE,

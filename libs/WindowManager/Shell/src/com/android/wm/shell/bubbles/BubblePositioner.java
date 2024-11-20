@@ -830,6 +830,13 @@ public class BubblePositioner {
         mShowingInBubbleBar = showingInBubbleBar;
     }
 
+    /**
+     * Whether bubbles ar showing in the bubble bar from launcher.
+     */
+    boolean isShowingInBubbleBar() {
+        return mShowingInBubbleBar;
+    }
+
     public void setBubbleBarLocation(BubbleBarLocation location) {
         mBubbleBarLocation = location;
     }

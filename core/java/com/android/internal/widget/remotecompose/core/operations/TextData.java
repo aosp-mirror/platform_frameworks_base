@@ -34,11 +34,11 @@ import java.util.List;
 public class TextData implements Operation, SerializableToString {
     private static final int OP_CODE = Operations.DATA_TEXT;
     private static final String CLASS_NAME = "TextData";
-    public int mTextId;
-    public String mText;
+    public final int mTextId;
+    @NonNull public final String mText;
     public static final int MAX_STRING_SIZE = 4000;
 
-    public TextData(int textId, String text) {
+    public TextData(int textId, @NonNull String text) {
         this.mTextId = textId;
         this.mText = text;
     }
@@ -90,7 +90,7 @@ public class TextData implements Operation, SerializableToString {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 

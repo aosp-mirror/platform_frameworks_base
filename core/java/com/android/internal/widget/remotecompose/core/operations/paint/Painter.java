@@ -16,6 +16,7 @@
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /** Provides a Builder pattern for a PaintBundle */
 class Painter {
@@ -173,8 +174,8 @@ class Painter {
             float centerX,
             float centerY,
             float radius,
-            int[] colors,
-            float[] positions,
+            @NonNull int[] colors,
+            @NonNull float[] positions,
             int tileMode) {
         mPaint.setRadialGradient(colors, 0, positions, centerX, centerY, radius, tileMode);
         return this;
@@ -193,7 +194,8 @@ class Painter {
      *     spaced evenly.
      */
     @NonNull
-    public Painter setSweepGradient(float centerX, float centerY, int[] colors, float[] positions) {
+    public Painter setSweepGradient(
+            float centerX, float centerY, @NonNull int[] colors, @Nullable float[] positions) {
         mPaint.setSweepGradient(colors, 0, positions, centerX, centerY);
         return this;
     }

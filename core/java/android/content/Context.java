@@ -5713,12 +5713,12 @@ public abstract class Context {
     public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
 
     /**
-     * System service name for ForensicService.
-     * The service manages the forensic info on device.
+     * System service name for IntrusionDetectionService.
+     * The service manages the intrusion detection info on device.
      * @hide
      */
     @FlaggedApi(android.security.Flags.FLAG_AFL_API)
-    public static final String FORENSIC_SERVICE = "forensic";
+    public static final String INTRUSION_DETECTION_SERVICE = "intrusion_detection";
 
     /**
      * System service name for the DeviceIdleManager.

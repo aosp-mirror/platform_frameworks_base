@@ -66,10 +66,10 @@ package android {
     field @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public static final String BIND_EXPLICIT_HEALTH_CHECK_SERVICE = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_FIELD_CLASSIFICATION_SERVICE = "android.permission.BIND_FIELD_CLASSIFICATION_SERVICE";
-    field @FlaggedApi("android.security.afl_api") public static final String BIND_FORENSIC_EVENT_TRANSPORT_SERVICE = "android.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE";
     field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
     field public static final String BIND_HOTWORD_DETECTION_SERVICE = "android.permission.BIND_HOTWORD_DETECTION_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
+    field @FlaggedApi("android.security.afl_api") public static final String BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE = "android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE";
     field public static final String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final String BIND_MUSIC_RECOGNITION_SERVICE = "android.permission.BIND_MUSIC_RECOGNITION_SERVICE";
     field public static final String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
@@ -94,7 +94,6 @@ package android {
     field public static final String BIND_TRANSLATION_SERVICE = "android.permission.BIND_TRANSLATION_SERVICE";
     field public static final String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
-    field @FlaggedApi("android.content.pm.verification_service") public static final String BIND_VERIFICATION_AGENT = "android.permission.BIND_VERIFICATION_AGENT";
     field public static final String BIND_VISUAL_QUERY_DETECTION_SERVICE = "android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE";
     field public static final String BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE = "android.permission.BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE";
     field public static final String BIND_WEARABLE_SENSING_SERVICE = "android.permission.BIND_WEARABLE_SENSING_SERVICE";
@@ -135,6 +134,7 @@ package android {
     field public static final String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
     field public static final String CONTROL_OEM_PAID_NETWORK_PREFERENCE = "android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE";
     field public static final String CONTROL_VPN = "android.permission.CONTROL_VPN";
+    field @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") public static final String COPY_ACCOUNTS = "android.permission.COPY_ACCOUNTS";
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
     field public static final String CREATE_VIRTUAL_DEVICE = "android.permission.CREATE_VIRTUAL_DEVICE";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";
@@ -213,12 +213,12 @@ package android {
     field @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public static final String MANAGE_ENHANCED_CONFIRMATION_STATES = "android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES";
     field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
-    field @FlaggedApi("android.security.afl_api") public static final String MANAGE_FORENSIC_STATE = "android.permission.MANAGE_FORENSIC_STATE";
     field public static final String MANAGE_GAME_ACTIVITY = "android.permission.MANAGE_GAME_ACTIVITY";
     field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
     field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE";
     field @FlaggedApi("android.media.tv.flags.media_quality_fw") public static final String MANAGE_GLOBAL_SOUND_QUALITY_SERVICE = "android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
+    field @FlaggedApi("android.security.afl_api") public static final String MANAGE_INTRUSION_DETECTION_STATE = "android.permission.MANAGE_INTRUSION_DETECTION_STATE";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_LOW_POWER_STANDBY = "android.permission.MANAGE_LOW_POWER_STANDBY";
     field public static final String MANAGE_MUSIC_RECOGNITION = "android.permission.MANAGE_MUSIC_RECOGNITION";
@@ -310,10 +310,10 @@ package android {
     field public static final String READ_CONTENT_RATING_SYSTEMS = "android.permission.READ_CONTENT_RATING_SYSTEMS";
     field public static final String READ_DEVICE_CONFIG = "android.permission.READ_DEVICE_CONFIG";
     field public static final String READ_DREAM_STATE = "android.permission.READ_DREAM_STATE";
-    field @FlaggedApi("android.security.afl_api") public static final String READ_FORENSIC_STATE = "android.permission.READ_FORENSIC_STATE";
     field public static final String READ_GLOBAL_APP_SEARCH_DATA = "android.permission.READ_GLOBAL_APP_SEARCH_DATA";
     field @FlaggedApi("android.content.pm.get_resolved_apk_path") public static final String READ_INSTALLED_SESSION_PATHS = "android.permission.READ_INSTALLED_SESSION_PATHS";
     field public static final String READ_INSTALL_SESSIONS = "android.permission.READ_INSTALL_SESSIONS";
+    field @FlaggedApi("android.security.afl_api") public static final String READ_INTRUSION_DETECTION_STATE = "android.permission.READ_INTRUSION_DETECTION_STATE";
     field public static final String READ_NETWORK_USAGE_HISTORY = "android.permission.READ_NETWORK_USAGE_HISTORY";
     field public static final String READ_OEM_UNLOCK_STATE = "android.permission.READ_OEM_UNLOCK_STATE";
     field public static final String READ_PEOPLE_DATA = "android.permission.READ_PEOPLE_DATA";
@@ -347,6 +347,7 @@ package android {
     field public static final String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
     field public static final String REGISTER_STATS_PULL_ATOM = "android.permission.REGISTER_STATS_PULL_ATOM";
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
+    field @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") public static final String REMOVE_ACCOUNTS = "android.permission.REMOVE_ACCOUNTS";
     field public static final String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RENOUNCE_PERMISSIONS = "android.permission.RENOUNCE_PERMISSIONS";
@@ -428,7 +429,6 @@ package android {
     field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String USE_ON_DEVICE_INTELLIGENCE = "android.permission.USE_ON_DEVICE_INTELLIGENCE";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String UWB_PRIVILEGED = "android.permission.UWB_PRIVILEGED";
-    field @FlaggedApi("android.content.pm.verification_service") public static final String VERIFICATION_AGENT = "android.permission.VERIFICATION_AGENT";
     field @FlaggedApi("android.os.vibrator.vendor_vibration_effects") public static final String VIBRATE_VENDOR_EFFECTS = "android.permission.VIBRATE_VENDOR_EFFECTS";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
@@ -572,6 +572,7 @@ package android.accessibilityservice {
 package android.accounts {
 
   public class AccountManager {
+    method @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.COPY_ACCOUNTS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public android.accounts.AccountManagerFuture<java.lang.Boolean> copyAccountToUser(@NonNull android.accounts.Account, @NonNull android.os.UserHandle, @NonNull android.os.UserHandle, @Nullable android.accounts.AccountManagerCallback<java.lang.Boolean>, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.accounts.AccountManagerFuture<android.os.Bundle> finishSessionAsUser(android.os.Bundle, android.app.Activity, android.os.UserHandle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
   }
 
@@ -2321,6 +2322,24 @@ package android.app.ondeviceintelligence {
     field public static final int FEATURE_STATUS_UNAVAILABLE = 0; // 0x0
   }
 
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public final class InferenceInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEndTimeMillis();
+    method public long getStartTimeMillis();
+    method public long getSuspendedTimeMillis();
+    method public int getUid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.InferenceInfo> CREATOR;
+  }
+
+  public static final class InferenceInfo.Builder {
+    ctor public InferenceInfo.Builder(int);
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo build();
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo.Builder setEndTimeMillis(long);
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo.Builder setStartTimeMillis(long);
+    method @NonNull public android.app.ondeviceintelligence.InferenceInfo.Builder setSuspendedTimeMillis(long);
+  }
+
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public class OnDeviceIntelligenceException extends java.lang.Exception {
     ctor public OnDeviceIntelligenceException(int, @NonNull String, @NonNull android.os.PersistableBundle);
     ctor public OnDeviceIntelligenceException(int, @NonNull android.os.PersistableBundle);
@@ -2350,6 +2369,7 @@ package android.app.ondeviceintelligence {
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class OnDeviceIntelligenceManager {
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeature(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeatureDetails(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") @NonNull @RequiresPermission(android.Manifest.permission.DUMP) public java.util.List<android.app.ondeviceintelligence.InferenceInfo> getLatestInferenceInfo(long);
     method @Nullable @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public String getRemoteServicePackageName();
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getVersion(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.LongConsumer);
     method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void listFeatures(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
@@ -4224,11 +4244,9 @@ package android.content.pm {
   }
 
   public class PackageInstaller {
-    method @FlaggedApi("android.content.pm.verification_service") @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public final int getVerificationPolicy();
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @FlaggedApi("android.content.pm.read_install_info") @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
-    method @FlaggedApi("android.content.pm.verification_service") @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT) public final boolean setVerificationPolicy(int);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
     field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
@@ -4239,20 +4257,12 @@ package android.content.pm {
     field @FlaggedApi("android.content.pm.archiving") public static final String EXTRA_DELETE_FLAGS = "android.content.pm.extra.DELETE_FLAGS";
     field public static final String EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS";
     field @Deprecated public static final String EXTRA_RESOLVED_BASE_PATH = "android.content.pm.extra.RESOLVED_BASE_PATH";
-    field @FlaggedApi("android.content.pm.verification_service") public static final String EXTRA_VERIFICATION_FAILURE_REASON = "android.content.pm.extra.VERIFICATION_FAILURE_REASON";
     field public static final int LOCATION_DATA_APP = 0; // 0x0
     field public static final int LOCATION_MEDIA_DATA = 2; // 0x2
     field public static final int LOCATION_MEDIA_OBB = 1; // 0x1
     field public static final int REASON_CONFIRM_PACKAGE_CHANGE = 0; // 0x0
     field public static final int REASON_OWNERSHIP_CHANGED = 1; // 0x1
     field public static final int REASON_REMIND_OWNERSHIP = 2; // 0x2
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_FAILED_REASON_NETWORK_UNAVAILABLE = 1; // 0x1
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_FAILED_REASON_PACKAGE_BLOCKED = 2; // 0x2
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_FAILED_REASON_UNKNOWN = 0; // 0x0
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_POLICY_BLOCK_FAIL_CLOSED = 3; // 0x3
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_POLICY_BLOCK_FAIL_OPEN = 1; // 0x1
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_POLICY_BLOCK_FAIL_WARN = 2; // 0x2
-    field @FlaggedApi("android.content.pm.verification_service") public static final int VERIFICATION_POLICY_NONE = 0; // 0x0
   }
 
   public static class PackageInstaller.InstallInfo {
@@ -4372,7 +4382,6 @@ package android.content.pm {
     method @Deprecated @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT) public abstract void verifyIntentFilter(int, int, @NonNull java.util.List<java.lang.String>);
     field public static final String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final String ACTION_REQUEST_PERMISSIONS_FOR_OTHER = "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
-    field @FlaggedApi("android.content.pm.verification_service") public static final String ACTION_VERIFY_PACKAGE = "android.content.pm.action.VERIFY_PACKAGE";
     field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_APK = 1; // 0x1
     field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_INSTALLER = 2; // 0x2
     field @FlaggedApi("android.content.pm.asl_in_apk_app_metadata_source") public static final int APP_METADATA_SOURCE_SYSTEM_IMAGE = 3; // 0x3
@@ -4700,62 +4709,6 @@ package android.content.pm.verify.domain {
 
   public final class DomainVerificationUserState implements android.os.Parcelable {
     method @NonNull public java.util.UUID getIdentifier();
-  }
-
-}
-
-package android.content.pm.verify.pkg {
-
-  @FlaggedApi("android.content.pm.verification_service") public final class VerificationSession implements android.os.Parcelable {
-    method public int describeContents();
-    method public long extendTimeRemaining(long);
-    method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getDeclaredLibraries();
-    method @NonNull public android.os.PersistableBundle getExtensionParams();
-    method public int getId();
-    method public int getInstallSessionId();
-    method @NonNull public String getPackageName();
-    method @NonNull public android.content.pm.SigningInfo getSigningInfo();
-    method @NonNull public android.net.Uri getStagedPackageUri();
-    method public long getTimeoutTime();
-    method public int getVerificationPolicy();
-    method public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus);
-    method public void reportVerificationComplete(@NonNull android.content.pm.verify.pkg.VerificationStatus, @NonNull android.os.PersistableBundle);
-    method public void reportVerificationIncomplete(int);
-    method public boolean setVerificationPolicy(int);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.pkg.VerificationSession> CREATOR;
-    field public static final int VERIFICATION_INCOMPLETE_NETWORK_UNAVAILABLE = 1; // 0x1
-    field public static final int VERIFICATION_INCOMPLETE_UNKNOWN = 0; // 0x0
-  }
-
-  @FlaggedApi("android.content.pm.verification_service") public final class VerificationStatus implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getAslStatus();
-    method @NonNull public String getFailureMessage();
-    method public boolean isVerified();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.verify.pkg.VerificationStatus> CREATOR;
-    field public static final int VERIFIER_STATUS_ASL_BAD = 2; // 0x2
-    field public static final int VERIFIER_STATUS_ASL_GOOD = 1; // 0x1
-    field public static final int VERIFIER_STATUS_ASL_UNDEFINED = 0; // 0x0
-  }
-
-  public static final class VerificationStatus.Builder {
-    ctor public VerificationStatus.Builder();
-    method @NonNull public android.content.pm.verify.pkg.VerificationStatus build();
-    method @NonNull public android.content.pm.verify.pkg.VerificationStatus.Builder setAslStatus(int);
-    method @NonNull public android.content.pm.verify.pkg.VerificationStatus.Builder setFailureMessage(@NonNull String);
-    method @NonNull public android.content.pm.verify.pkg.VerificationStatus.Builder setVerified(boolean);
-  }
-
-  @FlaggedApi("android.content.pm.verification_service") public abstract class VerifierService extends android.app.Service {
-    ctor public VerifierService();
-    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
-    method public abstract void onPackageNameAvailable(@NonNull String);
-    method public abstract void onVerificationCancelled(@NonNull String);
-    method public abstract void onVerificationRequired(@NonNull android.content.pm.verify.pkg.VerificationSession);
-    method public abstract void onVerificationRetry(@NonNull android.content.pm.verify.pkg.VerificationSession);
-    method public abstract void onVerificationTimeout(int);
   }
 
 }
@@ -8168,6 +8121,14 @@ package android.media.quality {
     method @NonNull public android.media.quality.PictureProfile.Builder setProfileType(int);
   }
 
+  @FlaggedApi("android.media.tv.flags.apply_picture_profiles") public final class PictureProfileHandle implements android.os.Parcelable {
+    method @FlaggedApi("android.media.tv.flags.apply_picture_profiles") public int describeContents();
+    method @FlaggedApi("android.media.tv.flags.apply_picture_profiles") public long getId();
+    method @FlaggedApi("android.media.tv.flags.apply_picture_profiles") public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @FlaggedApi("android.media.tv.flags.apply_picture_profiles") @NonNull public static final android.os.Parcelable.Creator<android.media.quality.PictureProfileHandle> CREATOR;
+    field @NonNull public static final android.media.quality.PictureProfileHandle NONE;
+  }
+
 }
 
 package android.media.session {
@@ -9896,7 +9857,7 @@ package android.media.tv.tuner.frontend {
     method public int getSignalStrength();
     method public int getSnr();
     method public int getSpectralInversion();
-    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @NonNull public android.media.tv.tuner.frontend.StandardExt getStandardExt();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @NonNull public android.media.tv.tuner.frontend.StandardExtension getStandardExtension();
     method @NonNull public int[] getStreamIds();
     method public int getSymbolRate();
     method @IntRange(from=0, to=65535) public int getSystemId();
@@ -9951,7 +9912,7 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_SIGNAL_STRENGTH = 6; // 0x6
     field public static final int FRONTEND_STATUS_TYPE_SNR = 1; // 0x1
     field public static final int FRONTEND_STATUS_TYPE_SPECTRAL = 10; // 0xa
-    field @FlaggedApi("android.media.tv.flags.tuner_w_apis") public static final int FRONTEND_STATUS_TYPE_STANDARD_EXT = 47; // 0x2f
+    field @FlaggedApi("android.media.tv.flags.tuner_w_apis") public static final int FRONTEND_STATUS_TYPE_STANDARD_EXTENSION = 47; // 0x2f
     field public static final int FRONTEND_STATUS_TYPE_STREAM_IDS = 39; // 0x27
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
     field public static final int FRONTEND_STATUS_TYPE_T2_SYSTEM_ID = 29; // 0x1d
@@ -10243,9 +10204,9 @@ package android.media.tv.tuner.frontend {
     method public default void onUnlocked();
   }
 
-  @FlaggedApi("android.media.tv.flags.tuner_w_apis") public final class StandardExt {
-    method public int getDvbsStandardExt();
-    method public int getDvbtStandardExt();
+  @FlaggedApi("android.media.tv.flags.tuner_w_apis") public final class StandardExtension {
+    method public int getDvbsStandardExtension();
+    method public int getDvbtStandardExtension();
   }
 
 }
@@ -12891,13 +12852,13 @@ package android.security.authenticationpolicy {
 
 }
 
-package android.security.forensic {
+package android.security.intrusiondetection {
 
-  @FlaggedApi("android.security.afl_api") public class ForensicManager {
-    method @RequiresPermission(android.Manifest.permission.READ_FORENSIC_STATE) public void addStateCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_FORENSIC_STATE) public void disable(@NonNull java.util.concurrent.Executor, @NonNull android.security.forensic.ForensicManager.CommandCallback);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_FORENSIC_STATE) public void enable(@NonNull java.util.concurrent.Executor, @NonNull android.security.forensic.ForensicManager.CommandCallback);
-    method @RequiresPermission(android.Manifest.permission.READ_FORENSIC_STATE) public void removeStateCallback(@NonNull java.util.function.Consumer<java.lang.Integer>);
+  @FlaggedApi("android.security.afl_api") public class IntrusionDetectionManager {
+    method @RequiresPermission(android.Manifest.permission.READ_INTRUSION_DETECTION_STATE) public void addStateCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE) public void disable(@NonNull java.util.concurrent.Executor, @NonNull android.security.intrusiondetection.IntrusionDetectionManager.CommandCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE) public void enable(@NonNull java.util.concurrent.Executor, @NonNull android.security.intrusiondetection.IntrusionDetectionManager.CommandCallback);
+    method @RequiresPermission(android.Manifest.permission.READ_INTRUSION_DETECTION_STATE) public void removeStateCallback(@NonNull java.util.function.Consumer<java.lang.Integer>);
     field public static final int ERROR_DATA_SOURCE_UNAVAILABLE = 4; // 0x4
     field public static final int ERROR_PERMISSION_DENIED = 1; // 0x1
     field public static final int ERROR_TRANSPORT_UNAVAILABLE = 3; // 0x3
@@ -12907,7 +12868,7 @@ package android.security.forensic {
     field public static final int STATE_UNKNOWN = 0; // 0x0
   }
 
-  public static interface ForensicManager.CommandCallback {
+  public static interface IntrusionDetectionManager.CommandCallback {
     method public void onFailure(int);
     method public void onSuccess();
   }
@@ -18995,6 +18956,10 @@ package android.util {
 }
 
 package android.view {
+
+  public static class SurfaceControl.Transaction implements java.io.Closeable android.os.Parcelable {
+    method @FlaggedApi("android.media.tv.flags.apply_picture_profiles") @NonNull public android.view.SurfaceControl.Transaction setPictureProfileHandle(@NonNull android.view.SurfaceControl, @NonNull android.media.quality.PictureProfileHandle);
+  }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method @NonNull public final java.util.List<android.graphics.Rect> getUnrestrictedPreferKeepClearRects();

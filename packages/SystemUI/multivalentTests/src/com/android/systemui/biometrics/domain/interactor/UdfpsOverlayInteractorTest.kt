@@ -17,22 +17,23 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.graphics.Rect
-import android.hardware.fingerprint.FingerprintManager
 import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.authController
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,28 +45,24 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UdfpsOverlayInteractorTest : SysuiTestCase() {
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
-    private lateinit var testScope: TestScope
+    private val kosmos = testKosmos()
 
-    @Mock private lateinit var fingerprintManager: FingerprintManager
-    @Mock private lateinit var authController: AuthController
+    private val testScope: TestScope = kosmos.testScope
+
+    private val authController: AuthController = kosmos.authController
     @Captor private lateinit var authControllerCallback: ArgumentCaptor<AuthController.Callback>
 
     @Mock private lateinit var udfpsOverlayParams: UdfpsOverlayParams
     @Mock private lateinit var overlayBounds: Rect
-    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
 
     private lateinit var underTest: UdfpsOverlayInteractor
-
-    @Before
-    fun setUp() {
-        testScope = TestScope(StandardTestDispatcher())
-    }
 
     @Test
     fun testShouldInterceptTouch() =
@@ -107,15 +104,26 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
             assertThat(udfpsOverlayParams()).isEqualTo(firstParams)
         }
 
+    @Test
+    fun testPaddingIsNeverNegative() =
+        testScope.runTest {
+            context.orCreateTestableResources.addOverride(R.dimen.pixel_pitch, 60.0f)
+            createUdfpsOverlayInteractor()
+            val padding by collectLastValue(underTest.iconPadding)
+            runCurrent()
+
+            verify(authController).addCallback(authControllerCallback.capture())
+
+            // Simulate the first empty udfps overlay params value.
+            authControllerCallback.value.onUdfpsLocationChanged(UdfpsOverlayParams())
+            runCurrent()
+
+            assertThat(padding).isEqualTo(0)
+            context.orCreateTestableResources.removeOverride(R.dimen.pixel_pitch)
+        }
+
     private fun createUdfpsOverlayInteractor() {
-        underTest =
-            UdfpsOverlayInteractor(
-                context,
-                authController,
-                selectedUserInteractor,
-                fingerprintManager,
-                testScope.backgroundScope
-            )
+        underTest = kosmos.udfpsOverlayInteractor
         testScope.runCurrent()
     }
 }

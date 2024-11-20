@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -45,7 +46,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     int mVerticalPositioning;
 
     public BoxLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -60,7 +61,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     public BoxLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -104,7 +105,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
 
     @Override
     public void computeWrapSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
             @NonNull MeasurePass measure,
@@ -122,7 +123,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
 
     @Override
     public void computeSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
@@ -134,7 +135,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, @NonNull MeasurePass measure) {
+    public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         float selfWidth = selfMeasure.getW() - mPaddingLeft - mPaddingRight;
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;

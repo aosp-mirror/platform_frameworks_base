@@ -173,6 +173,10 @@ public class KeyguardTransitionHandler
         return mKeyguardShowing;
     }
 
+    public boolean isKeyguardAnimating() {
+        return !mStartedTransitions.isEmpty();
+    }
+
     @Override
     public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
         mDreamToken = taskInfo.getActivityType() == ACTIVITY_TYPE_DREAM ? taskInfo.token : null;

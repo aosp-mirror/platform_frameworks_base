@@ -39,7 +39,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.shade.data.repository.fakeShadeRepository
@@ -83,7 +82,6 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 shadeMode = ShadeMode.Single,
             )
             assertThat(actions).isNotEmpty()
-            assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
@@ -101,7 +99,6 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 shadeMode = ShadeMode.Single,
             )
             assertThat(actions).isNotEmpty()
-            assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
@@ -119,7 +116,6 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 shadeMode = ShadeMode.Split,
             )
             assertThat(actions).isNotEmpty()
-            assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
@@ -137,7 +133,6 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 shadeMode = ShadeMode.Split,
             )
             assertThat(actions).isNotEmpty()
-            assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
@@ -155,7 +150,6 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 shadeMode = ShadeMode.Dual,
             )
             assertThat(actions).isNotEmpty()
-            assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(
@@ -171,7 +165,6 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
 
             setUpState(isShadeTouchable = true, isDeviceUnlocked = true, shadeMode = ShadeMode.Dual)
             assertThat(actions).isNotEmpty()
-            assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(

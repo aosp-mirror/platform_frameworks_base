@@ -126,6 +126,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     @Mock protected NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock protected ShadeHeaderController mShadeHeaderController;
     @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock protected StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     @Mock protected DozeParameters mDozeParameters;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected KeyguardBypassController mKeyguardBypassController;
@@ -250,6 +251,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mShadeHeaderController,
                 mStatusBarTouchableRegionManager,
+                () -> mStatusBarLongPressGestureDetector,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mScrimController,

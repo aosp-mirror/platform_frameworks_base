@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -35,20 +36,20 @@ import java.util.List;
 public class DataListIds implements VariableSupport, ArrayAccess, Operation {
     private static final int OP_CODE = Operations.ID_LIST;
     private static final String CLASS_NAME = "IdListData";
-    int mId;
-    int[] mIds;
+    private final int mId;
+    @NonNull private final int[] mIds;
     private static final int MAX_LIST = 2000;
 
-    public DataListIds(int id, int[] ids) {
+    public DataListIds(int id, @NonNull int[] ids) {
         mId = id;
         mIds = ids;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {}
+    public void updateVariables(@NonNull RemoteContext context) {}
 
     @Override
-    public void registerListening(RemoteContext context) {}
+    public void registerListening(@NonNull RemoteContext context) {}
 
     @Override
     public void write(@NonNull WireBuffer buffer) {
@@ -94,7 +95,7 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
@@ -113,6 +114,7 @@ public class DataListIds implements VariableSupport, ArrayAccess, Operation {
         return mIds[index];
     }
 
+    @Nullable
     @Override
     public float[] getFloats() {
         return null;

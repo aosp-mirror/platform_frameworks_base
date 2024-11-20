@@ -156,51 +156,6 @@ java_library {
     },
 }
 
-filegroup {
-    name: "wm_shell-shared-utils",
-    srcs: [
-        "shared/src/com/android/wm/shell/shared/TransitionUtil.java",
-    ],
-}
-
-filegroup {
-    name: "wm_shell-shared-aidls",
-
-    srcs: [
-        "shared/**/*.aidl",
-    ],
-
-    path: "shared/src",
-}
-
-java_library {
-    name: "WindowManager-Shell-shared",
-
-    srcs: [
-        "shared/**/*.java",
-        "shared/**/*.kt",
-        ":wm_shell-shared-aidls",
-    ],
-    static_libs: [
-        "androidx.core_core-animation",
-        "androidx.dynamicanimation_dynamicanimation",
-        "jsr330",
-    ],
-    kotlincflags: ["-Xjvm-default=all"],
-}
-
-java_library {
-    name: "WindowManager-Shell-shared-desktopMode",
-
-    srcs: [
-        "shared/**/desktopmode/*.java",
-        "shared/**/desktopmode/*.kt",
-    ],
-    static_libs: [
-        "com.android.window.flags.window-aconfig-java",
-    ],
-}
-
 android_library {
     name: "WindowManager-Shell",
     srcs: [

@@ -607,7 +607,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mShadeController,
                 mWindowRootViewVisibilityInteractor,
                 mStatusBarKeyguardViewManager,
-                () -> mStatusBarLongPressGestureDetector,
                 mViewMediatorCallback,
                 mInitController,
                 new Handler(TestableLooper.get(this).getLooper()),

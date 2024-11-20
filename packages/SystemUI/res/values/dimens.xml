@@ -368,6 +368,9 @@
     <!-- The vertical space between items in the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
 
+    <!-- Extra space for guts bundle feedback button -->
+    <dimen name="notification_guts_bundle_feedback_size">48dp</dimen>
+
     <dimen name="notification_importance_toggle_size">48dp</dimen>
     <dimen name="notification_importance_button_separation">8dp</dimen>
     <dimen name="notification_importance_drawable_padding">8dp</dimen>
@@ -2056,6 +2059,9 @@
     <!-- UDFPS view attributes -->
     <!-- UDFPS icon size in microns/um -->
     <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Limits the updates to at most one update per debounce duration to avoid too many
+         updates due to quick changes to padding.   -->
+    <integer name="udfps_padding_debounce_duration">100</integer>
     <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
          relies on this value will not be sized correctly. -->
     <item name="pixel_pitch" format="float" type="dimen">-1</item>

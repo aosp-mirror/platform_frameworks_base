@@ -168,7 +168,10 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+            return FlagsParameterization.allCombinationsOf(
+                    android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI
+                )
+                .andSceneContainer()
         }
     }
 
@@ -595,6 +598,43 @@ class NotificationGutsManagerTest(flags: FlagsParameterization) : SysuiTestCase(
         gutsManager.initializeNotificationInfo(row, notificationInfoView)
 
         verify(notificationInfoView)
+            .bindNotification(
+                any<PackageManager>(),
+                any<INotificationManager>(),
+                eq(onUserInteractionCallback),
+                eq(channelEditorDialogController),
+                eq(statusBarNotification.packageName),
+                any<NotificationChannel>(),
+                eq(entry),
+                any<NotificationInfo.OnSettingsClickListener>(),
+                any<NotificationInfo.OnAppSettingsClickListener>(),
+                any<UiEventLogger>(),
+                /* isDeviceProvisioned = */ eq(false),
+                /* isNonblockable = */ eq(false),
+                /* wasShownHighPriority = */ eq(false),
+                eq(assistantFeedbackController),
+                eq(metricsLogger),
+            )
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testInitializeBundleNotificationInfoView() {
+        val infoView: BundleNotificationInfo = mock()
+        val row = spy(helper.createRow())
+        val entry = row.entry
+
+        // Modify the notification entry to have a channel that is in SYSTEM_RESERVED_IDS
+        val channel = NotificationChannel(NotificationChannel.NEWS_ID, "name", 2)
+        NotificationEntryHelper.modifyRanking(entry).setChannel(channel).build()
+
+        whenever(row.isNonblockable).thenReturn(false)
+        val statusBarNotification = entry.sbn
+        // Can we change this to a call to bindGuts instead? We have the row,
+        // we need a MenuItem that we can put the infoView into.
+        gutsManager.initializeBundleNotificationInfo(row, infoView)
+
+        verify(infoView)
             .bindNotification(
                 any<PackageManager>(),
                 any<INotificationManager>(),

@@ -788,9 +788,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 deferResume = false;
                 // Already calls ensureActivityConfig
                 mService.mRootWindowContainer.ensureActivitiesVisible();
-                if (!mService.mRootWindowContainer.resumeFocusedTasksTopActivities()) {
-                    mService.mTaskSupervisor.updateTopResumedActivityIfNeeded("endWCT-effects");
-                }
+                mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
             } else if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                 for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
                     haveConfigChanges.valueAt(i).forAllActivities(r -> {
@@ -816,10 +814,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             if (deferResume) {
                 mService.mTaskSupervisor.endDeferResume();
-                // Transient launching the Recents via HIERARCHY_OP_TYPE_PENDING_INTENT directly
-                // resume the Recents activity with no TRANSACT_EFFECTS_LIFECYCLE. Explicitly
-                // checks if the top resumed activity should be updated after defer-resume ended.
-                mService.mTaskSupervisor.updateTopResumedActivityIfNeeded("endWCT");
             }
             mService.continueWindowLayout();
         }

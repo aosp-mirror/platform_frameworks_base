@@ -2085,8 +2085,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.v(TAG, debugPrefix + " ready=" + jobReady);
         }
-        if (!jobReady) {
-            return job.getPendingJobReasons();
+        final JobRestriction restriction = checkIfRestricted(job);
+        if (DEBUG) {
+            Slog.v(TAG, debugPrefix + " restriction=" + restriction);
+        }
+        if (!jobReady || restriction != null) {
+            return job.getPendingJobReasons(restriction);
         }
 
         final boolean userStarted = areUsersStartedLocked(job);
@@ -2104,18 +2108,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (backingUp) {
             // TODO: Should we make a special reason for this?
             return new int[] { JobScheduler.PENDING_JOB_REASON_APP };
-        }
-
-        final JobRestriction restriction = checkIfRestricted(job);
-        if (DEBUG) {
-            Slog.v(TAG, debugPrefix + " restriction=" + restriction);
-        }
-        if (restriction != null) {
-            // Currently this will return _DEVICE_STATE because of thermal reasons.
-            // TODO (b/372031023): does it make sense to move this along with the
-            //  pendingJobReasons() call above and also get the pending reasons from
-            //  all of the restriction controllers?
-            return new int[] { restriction.getPendingReason() };
         }
 
         // The following can be a little more expensive, so we are doing it later,

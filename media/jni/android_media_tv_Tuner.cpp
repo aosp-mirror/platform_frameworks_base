@@ -2940,10 +2940,10 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                 break;
             }
             case FrontendStatus::Tag::standardExt: {
-                jfieldID field = env->GetFieldID(clazz, "mStandardExt",
-                        "Landroid/media/tv/tuner/frontend/StandardExt;");
+                jfieldID field = env->GetFieldID(clazz, "mStandardExtension",
+                        "Landroid/media/tv/tuner/frontend/StandardExtension;");
                 ScopedLocalRef standardExtClazz(env,
-                        env->FindClass("android/media/tv/tuner/frontend/StandardExt"));
+                        env->FindClass("android/media/tv/tuner/frontend/StandardExtension"));
                 jmethodID initStandardExt = env->GetMethodID(standardExtClazz.get(), "<init>",
                         "(II)V");
 
