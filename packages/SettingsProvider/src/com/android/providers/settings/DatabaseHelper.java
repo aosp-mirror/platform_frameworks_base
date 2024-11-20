@@ -16,14 +16,8 @@
 
 package com.android.providers.settings;
 
-import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -46,16 +40,11 @@ import android.util.Log;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
-import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 import com.android.internal.widget.LockscreenCredential;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +74,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
     private Context mContext;
     private int mUserHandle;
 
-    private static final HashSet<String> mValidTables = new HashSet<String>();
+    private static final HashSet<String> mValidTables = new HashSet<>();
 
     private static final String DATABASE_BACKUP_SUFFIX = "-backup";
 
@@ -100,7 +89,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         // These are old.
         mValidTables.add("bluetooth_devices");
-        mValidTables.add("bookmarks");
         mValidTables.add("favorites");
         mValidTables.add("old_favorites");
         mValidTables.add("android_metadata");
@@ -210,21 +198,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     "channel INTEGER," +
                     "type INTEGER" +
                     ");");
-
-        db.execSQL("CREATE TABLE bookmarks (" +
-                    "_id INTEGER PRIMARY KEY," +
-                    "title TEXT," +
-                    "folder TEXT," +
-                    "intent TEXT," +
-                    "shortcut INTEGER," +
-                    "ordering INTEGER" +
-                    ");");
-
-        db.execSQL("CREATE INDEX bookmarksIndex1 ON bookmarks (folder);");
-        db.execSQL("CREATE INDEX bookmarksIndex2 ON bookmarks (shortcut);");
-
-        // Populate bookmarks table with initial bookmarks
-        loadBookmarks(db);
 
         // Load initial volume levels into DB
         loadVolumeLevels(db);
@@ -392,19 +365,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 30) {
-            /*
-             * Upgrade 31 clears the title for all quick launch shortcuts so the
-             * activities' titles will be resolved at display time. Also, the
-             * folder is changed to '@quicklaunch'.
-             */
-            db.beginTransaction();
-            try {
-                db.execSQL("UPDATE bookmarks SET folder = '@quicklaunch'");
-                db.execSQL("UPDATE bookmarks SET title = ''");
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
             upgradeVersion = 31;
         }
 
@@ -1006,8 +966,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 70) {
-            // Update all built-in bookmarks.  Some of the package names have changed.
-            loadBookmarks(db);
             upgradeVersion = 71;
         }
 
@@ -2042,92 +2000,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
-        }
-    }
-
-    /**
-     * Loads the default set of bookmarked shortcuts from an xml file.
-     *
-     * @param db The database to write the values into
-     */
-    private void loadBookmarks(SQLiteDatabase db) {
-        ContentValues values = new ContentValues();
-
-        PackageManager packageManager = mContext.getPackageManager();
-        try {
-            XmlResourceParser parser = mContext.getResources().getXml(R.xml.bookmarks);
-            XmlUtils.beginDocument(parser, "bookmarks");
-
-            final int depth = parser.getDepth();
-            int type;
-
-            while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                    parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
-                }
-
-                String name = parser.getName();
-                if (!"bookmark".equals(name)) {
-                    break;
-                }
-
-                String pkg = parser.getAttributeValue(null, "package");
-                String cls = parser.getAttributeValue(null, "class");
-                String shortcutStr = parser.getAttributeValue(null, "shortcut");
-                String category = parser.getAttributeValue(null, "category");
-
-                int shortcutValue = shortcutStr.charAt(0);
-                if (TextUtils.isEmpty(shortcutStr)) {
-                    Log.w(TAG, "Unable to get shortcut for: " + pkg + "/" + cls);
-                    continue;
-                }
-
-                final Intent intent;
-                final String title;
-                if (pkg != null && cls != null) {
-                    ActivityInfo info = null;
-                    ComponentName cn = new ComponentName(pkg, cls);
-                    try {
-                        info = packageManager.getActivityInfo(cn, 0);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        String[] packages = packageManager.canonicalToCurrentPackageNames(
-                                new String[] { pkg });
-                        cn = new ComponentName(packages[0], cls);
-                        try {
-                            info = packageManager.getActivityInfo(cn, 0);
-                        } catch (PackageManager.NameNotFoundException e1) {
-                            Log.w(TAG, "Unable to add bookmark: " + pkg + "/" + cls, e);
-                            continue;
-                        }
-                    }
-
-                    intent = new Intent(Intent.ACTION_MAIN, null);
-                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                    intent.setComponent(cn);
-                    title = info.loadLabel(packageManager).toString();
-                } else if (category != null) {
-                    intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, category);
-                    title = "";
-                } else {
-                    Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutStr
-                            + ": missing package/class or category attributes");
-                    continue;
-                }
-
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                values.put(Settings.Bookmarks.INTENT, intent.toUri(0));
-                values.put(Settings.Bookmarks.TITLE, title);
-                values.put(Settings.Bookmarks.SHORTCUT, shortcutValue);
-                db.delete("bookmarks", "shortcut = ?",
-                        new String[] { Integer.toString(shortcutValue) });
-                db.insert("bookmarks", null, values);
-            }
-        } catch (XmlPullParserException e) {
-            Log.w(TAG, "Got execption parsing bookmarks.", e);
-        } catch (IOException e) {
-            Log.w(TAG, "Got execption parsing bookmarks.", e);
         }
     }
 
