@@ -18,6 +18,7 @@ package com.android.systemui.qs.composefragment.viewmodel
 
 import android.content.res.mainResources
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -58,6 +59,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     configurationInteractor,
                     largeScreenHeaderHelper,
                     tileSquishinessInteractor,
+                    falsingInteractor,
                     inFirstPageViewModel,
                     logcatTableLogBuffer(this@Fixture),
                     mediaInRowInLandscapeViewModelFactory,

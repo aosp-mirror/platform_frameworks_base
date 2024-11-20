@@ -18,7 +18,6 @@ package com.android.systemui.qs.composefragment.dagger
 
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.qs.flags.QSComposeFragment

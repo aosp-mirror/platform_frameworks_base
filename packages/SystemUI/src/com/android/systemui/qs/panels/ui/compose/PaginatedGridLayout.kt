@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
+import android.view.MotionEvent
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
@@ -115,7 +117,13 @@ constructor(
                 state = pagerState,
                 modifier =
                     Modifier.sysuiResTag("qs_pager")
-                        .padding(horizontal = { -contentPaddingValue.roundToPx() }),
+                        .padding(horizontal = { -contentPaddingValue.roundToPx() })
+                        .pointerInteropFilter { event ->
+                            if (event.actionMasked == MotionEvent.ACTION_UP) {
+                                viewModel.registerSideSwipeGesture()
+                            }
+                            false
+                        },
                 contentPadding = contentPadding,
                 pageSpacing = if (pages.size > 1) InterPageSpacing else 0.dp,
                 beyondViewportPageCount = 1,

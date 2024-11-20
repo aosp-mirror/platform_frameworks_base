@@ -31,6 +31,8 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.ShadeInterpolation
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -102,6 +104,7 @@ constructor(
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
+    private val falsingInteractor: FalsingInteractor,
     private val inFirstPageViewModel: InFirstPageViewModel,
     @QSFragmentComposeLog private val tableLogBuffer: TableLogBuffer,
     mediaInRowInLandscapeViewModelFactory: MediaInRowInLandscapeViewModel.Factory,
@@ -435,6 +438,10 @@ constructor(
                 bottom.toInt(),
             )
         }
+    }
+
+    fun emitMotionEventForFalsingSwipeNested() {
+        falsingInteractor.isFalseTouch(Classifier.QS_SWIPE_NESTED)
     }
 
     override suspend fun onActivated(): Nothing {
