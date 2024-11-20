@@ -1399,7 +1399,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Use doze brightness if one of following is true:
         // 1. The target `state` isDozeState.
         // 2. Doze power request(POLICY_DOZE) if there's no exception(useNormalBrightnessForDoze).
-        final boolean useDozeBrightness = mFlags.isNormalBrightnessForDozeParameterEnabled()
+        final boolean useDozeBrightness = mFlags.isNormalBrightnessForDozeParameterEnabled(mContext)
                 ? (!mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE)
                         || Display.isDozeState(state) : Display.isDozeState(state);
         DisplayBrightnessState displayBrightnessState =

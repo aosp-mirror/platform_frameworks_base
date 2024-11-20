@@ -207,7 +207,8 @@ public final class DisplayBrightnessStrategySelectorTest {
 
     @Test
     public void selectStrategyWhenValid_useNormalBrightnessForDozeTrue_doNotSelectsDozeStrategy() {
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
