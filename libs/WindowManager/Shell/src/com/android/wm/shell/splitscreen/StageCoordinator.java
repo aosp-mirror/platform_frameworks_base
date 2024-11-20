@@ -1262,6 +1262,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     // Restore focus-ability to the windows and divider
                     wct.setFocusable(mRootTaskInfo.token, true);
 
+                    if (enableFlexibleSplit()) {
+                        mStageOrderOperator.onDoubleTappedDivider();
+                    }
                     setSideStagePosition(reverseSplitPosition(mSideStagePosition), wct);
                     mSyncQueue.queue(wct);
                     mSyncQueue.runInSync(st -> {
