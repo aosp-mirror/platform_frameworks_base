@@ -55,6 +55,7 @@
 #include <ui/FrameStats.h>
 #include <ui/GraphicTypes.h>
 #include <ui/HdrCapabilities.h>
+#include <ui/PictureProfileHandle.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
 #include <ui/StaticDisplayInfo.h>
@@ -818,6 +819,21 @@ static void nativeSetLuts(JNIEnv* env, jclass clazz, jlong transactionObj, jlong
     }
 
     transaction->setLuts(ctrl, base::unique_fd(fd), offsets, dimensions, sizes, samplingKeys);
+}
+
+static void nativeSetPictureProfileId(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                      jlong surfaceControlObj, jlong pictureProfileId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(surfaceControlObj);
+    PictureProfileHandle handle(pictureProfileId);
+    transaction->setPictureProfileHandle(surfaceControl, handle);
+}
+
+static void nativeSetContentPriority(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                     jlong surfaceControlObj, jint priority) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(surfaceControlObj);
+    transaction->setContentPriority(surfaceControl, priority);
 }
 
 static void nativeSetCachingHint(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2351,6 +2367,20 @@ static jboolean nativeBootFinished(JNIEnv* env, jclass clazz) {
     return error == OK ? JNI_TRUE : JNI_FALSE;
 }
 
+static jint nativeGetMaxPictureProfiles(JNIEnv* env, jclass clazz) {
+    const auto displayIds = SurfaceComposerClient::SurfaceComposerClient::getPhysicalDisplayIds();
+    int largestMaxProfiles = 0;
+    for (auto displayId : displayIds) {
+        sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(displayId);
+        int32_t maxProfiles = 0;
+        SurfaceComposerClient::getMaxLayerPictureProfiles(token, &maxProfiles);
+        if (maxProfiles > largestMaxProfiles) {
+            largestMaxProfiles = maxProfiles;
+        }
+    }
+    return largestMaxProfiles;
+}
+
 jlong nativeCreateTpc(JNIEnv* env, jclass clazz, jobject trustedPresentationCallback) {
     return reinterpret_cast<jlong>(
             new TrustedPresentationCallbackWrapper(env, trustedPresentationCallback));
@@ -2672,6 +2702,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
                 (void*)nativeGetDefaultApplyToken },
     {"nativeBootFinished", "()Z",
             (void*)nativeBootFinished },
+    {"nativeGetMaxPictureProfiles", "()I",
+            (void*)nativeGetMaxPictureProfiles },
     {"nativeCreateTpc", "(Landroid/view/SurfaceControl$TrustedPresentationCallback;)J",
             (void*)nativeCreateTpc},
     {"getNativeTrustedPresentationCallbackFinalizer", "()J", (void*)getNativeTrustedPresentationCallbackFinalizer },
@@ -2683,6 +2715,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeNotifyShutdown },
     {"nativeSetLuts", "(JJ[F[I[I[I[I)V", (void*)nativeSetLuts },
     {"nativeEnableDebugLogCallPoints", "(J)V", (void*)nativeEnableDebugLogCallPoints },
+    {"nativeSetPictureProfileId", "(JJJ)V", (void*)nativeSetPictureProfileId },
+    {"nativeSetContentPriority", "(JJI)V", (void*)nativeSetContentPriority },
         // clang-format on
 };
 

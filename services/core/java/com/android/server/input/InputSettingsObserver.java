@@ -117,7 +117,10 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_STROKE_STYLE),
                         (reason) -> updatePointerStrokeStyleFromSettings()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SCALE),
-                        (reason) -> updatePointerScaleFromSettings()));
+                        (reason) -> updatePointerScaleFromSettings()),
+                Map.entry(Settings.System.getUriFor(
+                                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION),
+                        (reason) -> updateTouchpadThreeFingerTapShortcutEnabled()));
     }
 
     /**
@@ -142,10 +145,6 @@ class InputSettingsObserver extends ContentObserver {
         for (Consumer<String> observer : mObservers.values()) {
             observer.accept("just booted");
         }
-
-        // TODO(b/365063048): add an entry to mObservers that calls this instead, once we have a
-        //   setting that can be observed.
-        updateTouchpadThreeFingerTapShortcutEnabled();
 
         configureUserActivityPokeInterval();
     }

@@ -415,7 +415,10 @@ constructor(
             initLongPressEffectCallback()
             init(
                 { _: View -> longPressEffect.onTileClick() },
-                { _: View -> true }, // Haptics and long-clicks are handled by [QSLongPressEffect]
+                { _: View ->
+                    longPressEffect.onTileLongClick()
+                    true
+                }, // Haptics and long-clicks are handled by [QSLongPressEffect]
             )
         } else {
             val expandable = Expandable.fromView(this)

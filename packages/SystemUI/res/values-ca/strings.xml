@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Entrada"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Audiòfons"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"S\'està activant…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"No es pot ajustar la brillantor perquè\n està controlada per l\'aplicació superior"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Gira automàticament"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Gira la pantalla automàticament"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Ubicació"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Fes clic per vincular un dispositiu nou"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"No s\'ha pogut actualitzar el valor predefinit"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Valors predefinits"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Seleccionat"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Eines"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Subtítols instantanis"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Nota"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vols desbloquejar el micròfon del dispositiu?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vols desbloquejar la càmera del dispositiu?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vols desbloquejar la càmera i el micròfon del dispositiu?"</string>
@@ -454,7 +454,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivat"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"No definit"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestiona a la configuració"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hi ha cap mode actiu}=1{{mode} està actiu}many{Hi ha # de modes actius}other{Hi ha # modes actius}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Cap mode actiu}=1{{mode} està actiu}many{# de modes actius}other{# modes actius}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalitza"</string>
@@ -593,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comença ara"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hi ha cap notificació"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hi ha cap notificació nova"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"La moderació de notificacions està activada"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"El volum i les alertes del dispositiu es redueixen automàticament durant 2 minuts com a màxim quan reps massa notificacions alhora."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Desactiva"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Desbloqueja per veure notif. anteriors"</string>
@@ -872,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Canvia a l\'aplicació de la dreta o de sota amb la pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Canvia a l\'aplicació de l\'esquerra o de dalt amb la pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Durant el mode de pantalla dividida: substitueix una app per una altra"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Mou la finestra activa entre pantalles"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Canvia a l\'idioma següent"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Caniva a l\'idioma anterior"</string>
@@ -1222,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Utilitza menys de <xliff:g id="LENGTH">%1$d</xliff:g> caràcters"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilació"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"El número de compilació s\'ha copiat al porta-retalls."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Conversa oberta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversa"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Toca una conversa per afegir-la a la teva pantalla d\'inici"</string>
@@ -1357,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Per a una resolució més alta, gira el telèfon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositiu plegable desplegant-se"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositiu plegable girant"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"plegat"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"desplegat"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1416,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilitat"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tecles de drecera"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalitza les tecles de drecera"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Prem la tecla per assignar la drecera"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Dreceres de cerca"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"No hi ha cap resultat de la cerca"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Replega la icona"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icona de la tecla d\'acció o Meta"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Icona del signe més"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalitza"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Fet"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Desplega la icona"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Ansa per arrossegar"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Configuració del teclat"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Configura la drecera"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancel·la"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Prem una tecla"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"La combinació de tecles ja s\'està utilitzant. Prova-ho amb una altra tecla."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navega amb el teclat"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Aprèn les tecles de drecera"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navega amb el ratolí tàctil"</string>
@@ -1458,7 +1453,7 @@
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Ben fet!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Has completat el gest per anar a la pantalla d\'inici"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Mostra les aplicacions recents"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Llisca cap amunt amb tres dits i mantén premut al ratolí tàctil"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Llisca cap amunt amb tres dits i mantén-los premuts al ratolí tàctil"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Ben fet!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Has completat el gest per veure les aplicacions recents."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Mostra totes les aplicacions"</string>
@@ -1482,7 +1477,7 @@
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Utilitza el ratolí tàctil per anar a la pantalla d\'inici"</string>
     <string name="home_edu_notification_content" msgid="6631697734535766588">"Llisca tres dits cap amunt. Toca per aprendre més gestos."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"Utilitza el ratolí tàctil per veure les aplicacions recents"</string>
-    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Llisca cap amunt amb tres dits i mantén premut. Toca per aprendre més gestos."</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Llisca cap amunt amb tres dits i mantén-los premut. Toca per aprendre més gestos."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Utilitza el teclat per veure totes les aplicacions"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Prem la tecla d\'acció en qualsevol moment. Toca per aprendre més gestos."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"L\'atenuació extra ara forma part del control lliscant de brillantor"</string>

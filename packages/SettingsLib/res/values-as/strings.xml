@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টাৰ্মিনেল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শ্বেলৰ এক্সেছ দিয়া টাৰ্মিনেল এপ্ সক্ষম কৰক"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux বিকাশৰ পৰিৱেশ"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidত Linux টাৰ্মিনেল চলাওক"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(পৰীক্ষামূলক) Androidত Linux টাৰ্মিনেল চলাওক"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"আপুনি যদি অক্ষম কৰে, Linux টাৰ্মিনেলৰ ডেটা মচি পেলোৱা হ’ব"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পৰীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP পৰীক্ষণ আচৰণ ছেট কৰক"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"বাহ্যিক ডিভাইচ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"সংযোগ হৈ থকা ডিভাইচ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফ’নটো"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"এনালগ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"অক্স"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইচটো প্লে\' কৰিব নোৱাৰি"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"সলনি কৰিবলৈ একাউণ্ট আপগ্ৰে’ড কৰক"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ইয়াত ডাউনল’ডসমূহ প্লে’ কৰিব নোৱাৰি"</string>

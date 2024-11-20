@@ -141,4 +141,9 @@ public class RemoteComposeDocument {
         }
         return mDocument.getStats();
     }
+
+    public int hasSensorListeners(int[] ids) {
+
+        return 0;
+    }
 }

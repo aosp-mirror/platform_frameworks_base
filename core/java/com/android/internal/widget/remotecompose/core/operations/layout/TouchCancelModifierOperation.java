@@ -70,6 +70,12 @@ public class TouchCancelModifierOperation extends ListActionsOperation implement
         applyActions(context, document, component, x, y, true);
     }
 
+    @Override
+    public void onTouchDrag(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        // nothing
+    }
+
     public static String name() {
         return "TouchCancelModifier";
     }

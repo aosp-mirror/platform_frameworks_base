@@ -1823,14 +1823,16 @@ public final class PowerManager {
     }
 
     /**
-     * Returns the interactive state for a specific display, which may not be the same as the
-     * global wakefulness (which is true when any display is awake).
+     * Returns true if the specified display is in an interactive state. This may not be the
+     * same as the global wakefulness (which is true when any display is interactive).
+     * @see #isInteractive()
      *
-     * @param displayId
-     * @return whether the given display is present and interactive, or false
+     * @param displayId The Display ID to check for interactivity.
+     * @return True if the display is in an interactive state.
      *
      * @hide
      */
+    @TestApi
     public boolean isInteractive(int displayId) {
         return mInteractiveCache.query(displayId);
     }

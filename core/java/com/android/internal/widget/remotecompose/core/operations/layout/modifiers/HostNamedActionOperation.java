@@ -18,7 +18,6 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -39,6 +38,7 @@ public class HostNamedActionOperation implements ActionOperation {
     public static final int FLOAT_TYPE = 0;
     public static final int INT_TYPE = 1;
     public static final int STRING_TYPE = 2;
+    public static final int FLOAT_ARRAY_TYPE = 3;
     public static final int NONE_TYPE = -1;
 
     int mTextId = -1;
@@ -72,22 +72,22 @@ public class HostNamedActionOperation implements ActionOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void write(WireBuffer buffer) {}
+    public void write(@NonNull WireBuffer buffer) {}
 
     @Override
     public void runAction(
             @NonNull RemoteContext context,
-            CoreDocument document,
-            Component component,
+            @NonNull CoreDocument document,
+            @NonNull Component component,
             float x,
             float y) {
         Object value = null;
@@ -98,6 +98,8 @@ public class HostNamedActionOperation implements ActionOperation {
                 value = context.mRemoteComposeState.getFromId(mValueId);
             } else if (mType == FLOAT_TYPE) {
                 value = context.mRemoteComposeState.getFloat(mValueId);
+            } else if (mType == FLOAT_ARRAY_TYPE) {
+                value = context.mRemoteComposeState.getFloats(mValueId);
             }
         }
         context.runNamedAction(mTextId, value);

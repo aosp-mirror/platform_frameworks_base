@@ -1327,7 +1327,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Promote the provided bubble from the overflow view. */
     public void promoteBubbleFromOverflow(Bubble bubble) {
-        mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        if (isShowingAsBubbleBar()) {
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR);
+        } else {
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        }
         ProtoLog.d(WM_SHELL_BUBBLES, "promoteBubbleFromOverflow=%s", bubble.getKey());
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.setShouldAutoExpand(true);
@@ -1350,11 +1354,7 @@ public class BubbleController implements ConfigurationChangeListener,
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
             mLayerView.showExpandedView(mBubbleData.getOverflow());
-            if (wasExpanded) {
-                mLogger.log(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
-            } else {
-                mLogger.log(BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
-            }
+            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_SELECTED);
             return;
         }
 

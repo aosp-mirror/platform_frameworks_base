@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ایپ کو قریبی الٹرا وائڈ بینڈ آلات کے مابین متعلقہ پوزیشن کا تعین کرنے کی اجازت دیں"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏قریبی Wi-Fi آلات کے ساتھ تعامل کریں"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏ایپ کو اشتہار دینے، منسلک کرنے اور قریبی Wi-Fi آلات کی متعلقہ پوزیشن کا تعین کرنے کی اجازت دیتا ہے"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"قریبی آلات کے مابین متعلقہ پوزیشن کا تعین کریں"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ایپ کو قریبی آلات کے مابین متعلقہ پوزیشن کا تعین کرنے کی اجازت دیں"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏ترجیح شدہ NFC ادائیگی کی سروس کی معلومات"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏ایپ کو رجسٹرشدہ ایڈز اور روٹ ڈسٹنیشن جیسی ترجیح شدہ nfc ادائیگی سروس کی معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>
@@ -2409,7 +2407,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> پر سیٹ ہے… تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"فزیکل کی بورڈز کنفیگر کئے گئے"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"کی بورڈز دیکھنے کے لیے تھپتھپائیں"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"نجی"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"پرائیویٹ"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"کلون"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"دفتری پروفائل"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"دوسری دفتری پروفائل"</string>

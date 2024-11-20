@@ -1012,4 +1012,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             }
         }
     }
+
+    @Override
+    public void notifyInsetsAnimationRunningStateChanged(IWindow window, boolean running) {
+        synchronized (mService.mGlobalLock) {
+            final WindowState win = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (win != null) {
+                win.notifyInsetsAnimationRunningStateChanged(running);
+            }
+        }
+    }
 }

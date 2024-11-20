@@ -56,6 +56,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.flags.EnableSceneContainer
@@ -2532,6 +2533,146 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isAlternateBouncerVisible).isFalse()
         }
 
+    @Test
+    fun handleDeviceUnlockStatus_deviceLockedWhileOnDream_stayOnDream() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            // Unlock device.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+
+            // Change to Dream.
+            sceneInteractor.changeScene(Scenes.Dream, "test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Dream)
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+
+            // Lock device, and verify stay on dream.
+            kosmos.fakeDeviceEntryRepository.deviceUnlockStatus.value =
+                DeviceUnlockStatus(isUnlocked = false, deviceUnlockSource = null)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
+        }
+
+    @Test
+    fun handleDeviceUnlockStatus_deviceLockedWhileOnCommunal_stayOnCommunal() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            // Unlock device.
+            kosmos.deviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+
+            // Change to Communal.
+            sceneInteractor.changeScene(Scenes.Communal, "test")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Communal)
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+
+            // Lock device, and verify stay on Communal.
+            kosmos.fakeDeviceEntryRepository.deviceUnlockStatus.value =
+                DeviceUnlockStatus(isUnlocked = false, deviceUnlockSource = null)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+        }
+
+    @Test
+    fun replacesLockscreenSceneOnBackStack_whenFaceUnlocked_fromShade_noAlternateBouncer() =
+        testScope.runTest {
+            val transitionState =
+                prepareState(
+                    isDeviceUnlocked = false,
+                    initialSceneKey = Scenes.Lockscreen,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                )
+            underTest.start()
+
+            val isUnlocked by
+                collectLastValue(
+                    kosmos.deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked }
+                )
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val backStack by collectLastValue(sceneBackInteractor.backStack)
+            val isAlternateBouncerVisible by
+                collectLastValue(kosmos.alternateBouncerInteractor.isVisible)
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Change to shade.
+            sceneInteractor.changeScene(Scenes.Shade, "")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.Shade)
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Show the alternate bouncer.
+            kosmos.alternateBouncerInteractor.forceShow()
+            kosmos.sysuiStatusBarStateController.leaveOpen = true // leave shade open
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isTrue()
+
+            // Simulate race condition by hiding the alternate bouncer *before* the face unlock:
+            kosmos.alternateBouncerInteractor.hide()
+            runCurrent()
+            assertThat(isUnlocked).isFalse()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Lockscreen)
+            assertThat(isAlternateBouncerVisible).isFalse()
+
+            // Trigger a face unlock.
+            updateFaceAuthStatus(isSuccess = true)
+            runCurrent()
+            assertThat(isUnlocked).isTrue()
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Gone)
+            assertThat(isAlternateBouncerVisible).isFalse()
+        }
+
     private fun TestScope.emulateSceneTransition(
         transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
         toScene: SceneKey,
@@ -2768,15 +2909,16 @@ class SceneContainerStartableTest : SysuiTestCase() {
     }
 
     private fun updateFaceAuthStatus(isSuccess: Boolean) {
-        if (isSuccess) {
-            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
-                SuccessFaceAuthenticationStatus(
-                    successResult = Mockito.mock(FaceManager.AuthenticationResult::class.java)
-                )
-            )
-        } else {
-            kosmos.fakeDeviceEntryFaceAuthRepository.setAuthenticationStatus(
-                FailedFaceAuthenticationStatus()
+        with(kosmos.fakeDeviceEntryFaceAuthRepository) {
+            isAuthenticated.value = isSuccess
+            setAuthenticationStatus(
+                if (isSuccess) {
+                    SuccessFaceAuthenticationStatus(
+                        successResult = Mockito.mock(FaceManager.AuthenticationResult::class.java)
+                    )
+                } else {
+                    FailedFaceAuthenticationStatus()
+                }
             )
         }
     }

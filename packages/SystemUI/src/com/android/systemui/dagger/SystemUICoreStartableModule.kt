@@ -29,6 +29,7 @@ import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
+import com.android.systemui.dreams.DreamOverlayRegistrant
 import com.android.systemui.dreams.homecontrols.system.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.haptics.msdl.MSDLCoreStartable
@@ -328,4 +329,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(MSDLCoreStartable::class)
     abstract fun bindMSDLCoreStartable(impl: MSDLCoreStartable): CoreStartable
+
+    /** Inject into DreamOverlay. */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamOverlayRegistrant::class)
+    abstract fun bindDreamOverlayRegistrant(
+        dreamOverlayRegistrant: DreamOverlayRegistrant
+    ): CoreStartable
 }

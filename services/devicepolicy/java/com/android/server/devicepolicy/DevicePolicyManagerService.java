@@ -19245,21 +19245,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private boolean isAnyResetPasswordTokenActiveForUser(int userId) {
+    private boolean isAnyResetPasswordTokenActiveForUserLocked(int userId) {
         return mDevicePolicyEngine
                 .getLocalPoliciesSetByAdmins(PolicyDefinition.RESET_PASSWORD_TOKEN, userId)
-                .values()
+                .entrySet()
                 .stream()
-                .anyMatch((p) -> isResetPasswordTokenActiveForUserLocked(p.getValue(), userId));
+                .anyMatch((e) -> {
+                    EnforcingAdmin admin = e.getKey();
+                    PolicyValue<Long> policyValue = e.getValue();
+                    return isResetPasswordTokenActiveForUserLocked(policyValue.getValue(), userId)
+                              && isEncryptionAware(admin.getPackageName(), userId);
+                });
     }
 
     private boolean isResetPasswordTokenActiveForUserLocked(
             long passwordTokenHandle, int userHandle) {
-        if (passwordTokenHandle != 0) {
-            return mInjector.binderWithCleanCallingIdentity(() ->
+        return passwordTokenHandle != 0 && mInjector.binderWithCleanCallingIdentity(() ->
                     mLockPatternUtils.isEscrowTokenActive(passwordTokenHandle, userHandle));
-        }
-        return false;
     }
 
     @Override
@@ -21108,10 +21110,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()),
                 String.format(NOT_SYSTEM_CALLER_MSG,
                         "call canProfileOwnerResetPasswordWhenLocked"));
-        if (Flags.resetPasswordWithTokenCoexistence()) {
-            return isAnyResetPasswordTokenActiveForUser(userId);
-        }
         synchronized (getLockObject()) {
+            if (Flags.resetPasswordWithTokenCoexistence()) {
+                return isAnyResetPasswordTokenActiveForUserLocked(userId);
+            }
             final ActiveAdmin poAdmin = getProfileOwnerAdminLocked(userId);
             DevicePolicyData policy = getUserData(userId);
             if (poAdmin == null
@@ -21120,24 +21122,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             policy.mPasswordTokenHandle, userId)) {
                 return false;
             }
-            final ApplicationInfo poAppInfo;
-            try {
-                poAppInfo = mIPackageManager.getApplicationInfo(
-                        poAdmin.info.getPackageName(), 0 /* flags */, userId);
-            } catch (RemoteException e) {
-                Slogf.e(LOG_TAG, "Failed to query PO app info", e);
-                return false;
-            }
-            if (poAppInfo == null) {
-                Slogf.wtf(LOG_TAG, "Cannot find AppInfo for profile owner");
-                return false;
-            }
-            if (!poAppInfo.isEncryptionAware()) {
-                return false;
-            }
-            Slogf.d(LOG_TAG, "PO should be able to reset password from direct boot");
-            return true;
+            return isEncryptionAware(poAdmin.info.getPackageName(), userId);
         }
+    }
+
+    private boolean isEncryptionAware(String packageName, int userId) {
+        final ApplicationInfo poAppInfo;
+        try {
+            poAppInfo = mIPackageManager.getApplicationInfo(packageName, 0 /* flags */, userId);
+        } catch (RemoteException e) {
+            Slogf.e(LOG_TAG, "Failed to query PO / role holder's app info", e);
+            return false;
+        }
+        if (poAppInfo == null) {
+            Slogf.wtf(LOG_TAG, "Cannot find AppInfo for PO / role holder");
+            return false;
+        }
+        if (!poAppInfo.isEncryptionAware()) {
+            return false;
+        }
+        Slogf.d(LOG_TAG, "PO / role holder should be able to reset password from direct boot");
+        return true;
     }
 
     @Override

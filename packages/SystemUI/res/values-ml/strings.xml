@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ഇൻപുട്ട്"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"ശ്രവണ സഹായികൾ"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ഓണാക്കുന്നു…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"തെളിച്ചം അഡ്‌ജസ്റ്റ് ചെയ്യാനാകില്ല, അത്\n നിയന്ത്രിക്കുന്നത് ഏറ്റവും മുകളിലുള്ള ആപ്പാണ്"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"സ്‌ക്രീൻ സ്വയമേവ തിരിയൽ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"സ്‌ക്രീൻ സ്വയമേവ തിരിക്കുക"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ലൊക്കേഷൻ"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"പുതിയ ഉപകരണം ജോടിയാക്കാൻ ക്ലിക്ക് ചെയ്യുക"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"പ്രീസെറ്റ് അപ്ഡേറ്റ് ചെയ്യാനായില്ല"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"പ്രീസെറ്റ്"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"തിരഞ്ഞെടുത്തു"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ടൂളുകൾ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"തത്സമയ ക്യാപ്ഷൻ"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"കുറിപ്പ്"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ഉപകരണ മൈക്രോഫോൺ അൺബ്ലോക്ക് ചെയ്യണോ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ഉപകരണ ക്യാമറ അൺബ്ലോക്ക് ചെയ്യണോ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ഉപകരണ ക്യാമറയോ മൈക്രോഫോണോ അൺബ്ലോക്ക് ചെയ്യണോ?"</string>
@@ -593,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"ഇപ്പോൾ ആരംഭിക്കുക"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"പുതിയ അറിയിപ്പുകളൊന്നുമില്ല"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"അറിയിപ്പിന്റെ ശബ്ദം കുറയ്ക്കൽ ഇപ്പോൾ ഓണാണ്"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"നിരവധി അറിയിപ്പ് ഒരുമിച്ച് ലഭിക്കുമ്പോൾ, ഉപകരണത്തിന്റെ ശബ്‌ദവും മുന്നറിയിപ്പും 2 മിനിറ്റ് വരെ സ്വയമേവ കുറയ്ക്കും."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ഓഫാക്കുക"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"പഴയ അറിയിപ്പുകൾ കാണാൻ അൺലോക്ക് ചെയ്യുക"</string>
@@ -872,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ വലതുവശത്തെ/താഴത്തെ ആപ്പിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ ഇടതുവശത്തെ/മുകളിലെ ആപ്പിലേക്ക് മാറൂ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"സ്‌ക്രീൻ വിഭജന മോഡിൽ: ഒരു ആപ്പിൽ നിന്ന് മറ്റൊന്നിലേക്ക് മാറുക"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"സജീവ വിൻഡോകൾ ഡിസ്‌പ്ലേകൾക്ക് ഇടയിൽ നീക്കുക"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ഇൻപുട്ട്"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"അടുത്ത ഭാഷയിലേക്ക് മാറുക"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"മുമ്പത്തെ ഭാഷയിലേക്ക് മാറുക"</string>
@@ -1222,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g>-ൽ കുറവ് പ്രതീകങ്ങൾ ഉപയോഗിക്കുക"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ബിൽഡ് നമ്പർ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ക്ലിപ്പ്ബോർഡിലേക്ക് ബിൽഡ് നമ്പർ പകർത്തി."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"സംഭാഷണം തുറക്കുക"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"സംഭാഷണ വിജറ്റുകൾ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"നിങ്ങളുടെ ഹോം സ്‌ക്രീനിൽ ചേർക്കാൻ സംഭാഷണത്തിൽ ടാപ്പ് ചെയ്യുക"</string>
@@ -1357,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ഉയർന്ന റെസല്യൂഷന്, ഫോൺ ഫ്ലിപ്പ് ചെയ്യുക"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം അൺഫോൾഡ് ആകുന്നു"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ഫോൾഡ് ചെയ്യാവുന്ന ഉപകരണം, കറങ്ങുന്ന വിധത്തിൽ ഫ്ലിപ്പ് ആകുന്നു"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ഫോൾഡ് ചെയ്തത്"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"അൺഫോൾഡ് ചെയ്തത്"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1416,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ഉപയോഗസഹായി"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"കീബോഡ് കുറുക്കുവഴികൾ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"കീബോർഡ് കുറുക്കുവഴികൾ ഇഷ്ടാനുസൃതമാക്കുക"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"കുറുക്കുവഴി അസൈൻ ചെയ്യാൻ കീ അമർത്തുക"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"തിരയൽ കുറുക്കുവഴികൾ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"തിരയൽ ഫലങ്ങളൊന്നുമില്ല"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ചുരുക്കൽ ഐക്കൺ"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ആക്ഷൻ/മെറ്റാ കീ ഐക്കൺ"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"പ്ലസ് ഐക്കൺ"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"പൂർത്തിയായി"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"വികസിപ്പിക്കൽ ഐക്കൺ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"അല്ലെങ്കിൽ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"വലിച്ചിടുന്നതിനുള്ള ഹാൻഡിൽ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"കീബോർഡ് ക്രമീകരണം"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"കുറുക്കുവഴി സജ്ജീകരിക്കുക"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"റദ്ദാക്കുക"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"കീ അമർത്തുക"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"കീ കോമ്പിനേഷൻ ഇതിനകം ഉപയോഗത്തിലുണ്ട്. മറ്റൊരു കീ പരീക്ഷിക്കുക."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"നിങ്ങളുടെ കീബോർഡ് ഉപയോഗിച്ച് നാവിഗേറ്റ് ചെയ്യുക"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"കീബോർഡ് കുറുക്കുവഴികൾ മനസ്സിലാക്കുക"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"നിങ്ങളുടെ ടച്ച്‌പാഡ് ഉപയോഗിച്ച് നാവിഗേറ്റ് ചെയ്യുക"</string>

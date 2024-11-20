@@ -39,7 +39,6 @@ import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.Logger
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
-import com.android.systemui.shared.clocks.ClockAnimation
 import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.DigitTranslateAnimator
 import com.android.systemui.shared.clocks.DimensionParser
@@ -96,9 +95,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
 
     @VisibleForTesting
     var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator = { layout, invalidateCb ->
-        TextAnimator(layout, ClockAnimation.NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb).also {
-            it.typefaceCache = typefaceCache
-        }
+        TextAnimator(layout, typefaceCache, invalidateCb)
     }
 
     override var verticalAlignment: VerticalAlignment = VerticalAlignment.BASELINE

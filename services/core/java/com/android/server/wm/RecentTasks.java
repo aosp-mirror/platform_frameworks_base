@@ -2025,21 +2025,8 @@ class RecentTasks {
         // Fill in some deprecated values.
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
-        rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
         if (!getTasksAllowed) {
             Task.trimIneffectiveInfo(tr, rti);
-        }
-
-        // Fill in organized child task info for the task created by organizer.
-        if (tr.mCreatedByOrganizer) {
-            for (int i = tr.getChildCount() - 1; i >= 0; i--) {
-                final Task childTask = tr.getChildAt(i).asTask();
-                if (childTask != null && childTask.isOrganized()) {
-                    final ActivityManager.RecentTaskInfo cti = new ActivityManager.RecentTaskInfo();
-                    childTask.fillTaskInfo(cti, true /* stripExtras */, tda);
-                    rti.childrenTaskInfos.add(cti);
-                }
-            }
         }
         return rti;
     }

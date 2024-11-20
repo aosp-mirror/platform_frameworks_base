@@ -484,7 +484,7 @@
 
     <!-- Whether to show the system notification to users whenever there is a change
      in the satellite availability state at the current location. -->
-    <bool name="config_satellite_should_notify_availability">false</bool>
+    <bool name="config_satellite_should_notify_availability">true</bool>
     <java-symbol type="bool" name="config_satellite_should_notify_availability" />
 
 </resources>

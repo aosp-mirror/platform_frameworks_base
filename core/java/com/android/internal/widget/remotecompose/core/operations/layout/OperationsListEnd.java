@@ -16,7 +16,6 @@
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -40,13 +39,13 @@ public class OperationsListEnd implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         // nothing
     }
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
@@ -63,7 +62,7 @@ public class OperationsListEnd implements Operation {
         buffer.start(id());
     }
 
-    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new OperationsListEnd());
     }
 
