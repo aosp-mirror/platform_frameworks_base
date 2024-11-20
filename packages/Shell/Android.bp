@@ -27,6 +27,7 @@ android_app {
     ],
     flags_packages: [
         "android.security.flags-aconfig",
+        "android.permission.flags-aconfig",
     ],
     platform_apis: true,
     certificate: "platform",
@@ -51,5 +52,6 @@ android_library {
     manifest: "AndroidManifest.xml",
     flags_packages: [
         "android.security.flags-aconfig",
+        "android.permission.flags-aconfig",
     ],
 }
