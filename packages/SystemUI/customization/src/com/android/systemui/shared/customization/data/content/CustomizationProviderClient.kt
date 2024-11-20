@@ -25,6 +25,7 @@ import android.database.ContentObserver
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import androidx.annotation.DrawableRes
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
@@ -60,6 +61,11 @@ interface CustomizationProviderClient {
     suspend fun queryFlags(): List<Flag>
 
     /**
+     * Returns [Bundle] where the keys are from [CustomizationProviderContract.RuntimeValuesTable]
+     */
+    suspend fun queryRuntimeValues(): Bundle
+
+    /**
      * Returns [Flow] for observing the collection of slots.
      *
      * @see [querySlots]
@@ -72,6 +78,13 @@ interface CustomizationProviderClient {
      * @see [queryFlags]
      */
     fun observeFlags(): Flow<List<Flag>>
+
+    /**
+     * Returns [Flow] for observing the variables from the System UI.
+     *
+     * @see [queryRuntimeValues]
+     */
+    fun observeRuntimeValues(): Flow<Bundle>
 
     /**
      * Returns all available affordances supported by the device, regardless of current slot
@@ -262,12 +275,40 @@ class CustomizationProviderClientImpl(
         } ?: emptyList()
     }
 
+    override suspend fun queryRuntimeValues(): Bundle {
+        return withContext(backgroundDispatcher) {
+            Bundle().apply {
+                context.contentResolver
+                    .query(Contract.RuntimeValuesTable.URI, null, null, null, null)
+                    ?.use { cursor ->
+                        val nameColumnIndex =
+                            cursor.getColumnIndex(Contract.FlagsTable.Columns.NAME)
+                        val valueColumnIndex =
+                            cursor.getColumnIndex(Contract.FlagsTable.Columns.VALUE)
+                        if (nameColumnIndex >= 0 && valueColumnIndex >= 0) {
+                            while (cursor.moveToNext()) {
+                                when (val name = cursor.getString(nameColumnIndex)) {
+                                    Contract.RuntimeValuesTable.KEY_IS_SHADE_LAYOUT_WIDE -> {
+                                        putBoolean(name, cursor.getInt(valueColumnIndex) == 1)
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
     override fun observeSlots(): Flow<List<CustomizationProviderClient.Slot>> {
         return observeUri(Contract.LockScreenQuickAffordances.SlotTable.URI).map { querySlots() }
     }
 
     override fun observeFlags(): Flow<List<CustomizationProviderClient.Flag>> {
         return observeUri(Contract.FlagsTable.URI).map { queryFlags() }
+    }
+
+    override fun observeRuntimeValues(): Flow<Bundle> {
+        return observeUri(Contract.RuntimeValuesTable.URI).map { queryRuntimeValues() }
     }
 
     override suspend fun queryAffordances(): List<CustomizationProviderClient.Affordance> {
