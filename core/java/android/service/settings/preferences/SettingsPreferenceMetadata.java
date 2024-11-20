@@ -19,7 +19,7 @@ package android.service.settings.preferences;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SuppressLint;
-import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -63,7 +63,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
     private final boolean mRestricted;
     private final int mSensitivity;
     @Nullable
-    private final PendingIntent mLaunchIntent;
+    private final Intent mLaunchIntent;
     @NonNull
     private final Bundle mExtras;
 
@@ -149,6 +149,8 @@ public final class SettingsPreferenceMetadata implements Parcelable {
 
     /**
      * Returns whether Preference is restricted.
+     * <p>If true, this means the Preference is treated as a Restricted Preference which indicates
+     * that it could be conditionally disabled/unavailable due to admin settings.
      */
     public boolean isRestricted() {
         return mRestricted;
@@ -165,14 +167,18 @@ public final class SettingsPreferenceMetadata implements Parcelable {
     /**
      * Returns the intent to launch the host app page for this Preference.
      */
+    @SuppressLint("IntentBuilderName")
     @Nullable
-    public PendingIntent getLaunchIntent() {
+    public Intent getLaunchIntent() {
         return mLaunchIntent;
     }
 
     /**
      * Returns any additional fields specific to this preference.
-     * <p>Treat all data as optional.
+     * <p>Treat all data as optional. This may contain unstructured data for a given preference,
+     * where the type and format of this data may only known by inspecting the source code of that
+     * preference. As such, any access of this data must handle failures gracefully to account for
+     * changing or missing data.
      */
     @NonNull
     public Bundle getExtras() {
@@ -236,8 +242,8 @@ public final class SettingsPreferenceMetadata implements Parcelable {
         mWritable = in.readBoolean();
         mRestricted = in.readBoolean();
         mSensitivity = in.readInt();
-        mLaunchIntent = in.readParcelable(PendingIntent.class.getClassLoader(),
-                PendingIntent.class);
+        mLaunchIntent = in.readParcelable(Intent.class.getClassLoader(),
+                Intent.class);
         mExtras = Objects.requireNonNullElseGet(in.readBundle(), Bundle::new);
     }
 
@@ -298,7 +304,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
         private boolean mWritable = false;
         private boolean mRestricted = false;
         @WriteSensitivity private int mSensitivity = INTENT_ONLY;
-        private PendingIntent mLaunchIntent;
+        private Intent mLaunchIntent;
         private Bundle mExtras;
 
         /**
@@ -411,7 +417,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
          * Sets the intent to launch the host app page for this preference.
          */
         @NonNull
-        public Builder setLaunchIntent(@Nullable PendingIntent launchIntent) {
+        public Builder setLaunchIntent(@Nullable Intent launchIntent) {
             mLaunchIntent = launchIntent;
             return this;
         }

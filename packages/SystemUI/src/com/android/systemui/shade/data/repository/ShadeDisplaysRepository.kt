@@ -17,10 +17,7 @@
 package com.android.systemui.shade.data.repository
 
 import android.view.Display
-import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shade.ShadePrimaryDisplayCommand
-import com.android.systemui.statusbar.commandline.CommandRegistry
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,9 +38,7 @@ interface ShadeDisplaysRepository {
 
 /** Source of truth for the display currently holding the shade. */
 @SysUISingleton
-class ShadeDisplaysRepositoryImpl
-@Inject
-constructor(private val commandRegistry: CommandRegistry) : ShadeDisplaysRepository, CoreStartable {
+class ShadeDisplaysRepositoryImpl @Inject constructor() : ShadeDisplaysRepository {
     private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
 
     override val displayId: StateFlow<Int>
@@ -55,11 +50,5 @@ constructor(private val commandRegistry: CommandRegistry) : ShadeDisplaysReposit
 
     override fun resetDisplayId() {
         _displayId.value = Display.DEFAULT_DISPLAY
-    }
-
-    override fun start() {
-        commandRegistry.registerCommand("shade_display_override") {
-            ShadePrimaryDisplayCommand(this)
-        }
     }
 }

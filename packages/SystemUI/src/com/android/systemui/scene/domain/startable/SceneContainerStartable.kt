@@ -46,6 +46,7 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.keyguardScenes
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
@@ -352,14 +353,13 @@ constructor(
                     val isAlternateBouncerVisible = alternateBouncerInteractor.isVisibleState()
                     val isOnPrimaryBouncer = renderedScenes.contains(Scenes.Bouncer)
                     if (!deviceUnlockStatus.isUnlocked) {
-                        return@mapNotNull if (isOnLockscreen || isOnPrimaryBouncer) {
-                            // Already on lockscreen or bouncer, no need to change scenes.
+                        return@mapNotNull if (renderedScenes.any { it in keyguardScenes }) {
+                            // Already on a keyguard scene, no need to change scenes.
                             null
                         } else {
-                            // The device locked while on a scene that's not Lockscreen or Bouncer,
-                            // go to Lockscreen.
-                            Scenes.Lockscreen to
-                                "device locked in non-Lockscreen and non-Bouncer scene"
+                            // The device locked while on a scene that's not a keyguard scene, go
+                            // to Lockscreen.
+                            Scenes.Lockscreen to "device locked in a non-keyguard scene"
                         }
                     }
 
@@ -430,8 +430,13 @@ constructor(
                                             "mechanism: ${deviceUnlockStatus.deviceUnlockSource}"
                                 else -> null
                             }
-                        // Not on lockscreen or bouncer, so remain in the current scene.
-                        else -> null
+                        // Not on lockscreen or bouncer, so remain in the current scene but since
+                        // unlocked, replace the Lockscreen scene from the bottom of the navigation
+                        // back stack with the Gone scene.
+                        else -> {
+                            replaceLockscreenSceneOnBackStack()
+                            null
+                        }
                     }
                 }
                 .collect { (targetSceneKey, loggingReason) ->
@@ -440,17 +445,19 @@ constructor(
         }
     }
 
-    /** If the [Scenes.Lockscreen] is on the backstack, replaces it with [Scenes.Gone]. */
+    /**
+     * If the [Scenes.Lockscreen] is on the bottom of the navigation backstack, replaces it with
+     * [Scenes.Gone].
+     */
     private fun replaceLockscreenSceneOnBackStack() {
         sceneBackInteractor.updateBackStack { stack ->
             val list = stack.asIterable().toMutableList()
-            check(list.last() == Scenes.Lockscreen) {
-                "The bottommost/last SceneKey of the back stack isn't" +
-                    " the Lockscreen scene like expected. The back" +
-                    " stack is $stack."
+            if (list.lastOrNull() == Scenes.Lockscreen) {
+                list[list.size - 1] = Scenes.Gone
+                sceneStackOf(*list.toTypedArray())
+            } else {
+                stack
             }
-            list[list.size - 1] = Scenes.Gone
-            sceneStackOf(*list.toTypedArray())
         }
     }
 

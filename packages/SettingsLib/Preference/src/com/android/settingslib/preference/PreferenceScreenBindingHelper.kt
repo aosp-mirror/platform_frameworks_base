@@ -57,8 +57,11 @@ class PreferenceScreenBindingHelper(
 
     private val preferenceLifecycleContext =
         object : PreferenceLifecycleContext(context) {
-            override fun notifyPreferenceChange(preference: PreferenceMetadata) =
-                notifyChange(preference.key, CHANGE_REASON_STATE)
+            override fun <T> findPreference(key: String) =
+                preferenceScreen.findPreference(key) as T?
+
+            override fun notifyPreferenceChange(key: String) =
+                notifyChange(key, CHANGE_REASON_STATE)
 
             @Suppress("DEPRECATION")
             override fun startActivityForResult(

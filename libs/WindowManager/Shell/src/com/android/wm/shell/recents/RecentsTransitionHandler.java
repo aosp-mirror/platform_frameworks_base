@@ -32,6 +32,9 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_ANIMATING;
+import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_NOT_RUNNING;
+import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED;
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
 import static com.android.wm.shell.shared.split.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_END_RECENTS_TRANSITION;
@@ -166,13 +169,19 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         // only care about latest one.
         mAnimApp = appThread;
 
-        // TODO(b/366021931): Formalize this later
-        final boolean isSyntheticRequest = options.containsKey("is_synthetic_recents_transition");
-        if (isSyntheticRequest) {
-            return startSyntheticRecentsTransition(listener);
-        } else {
-            return startRealRecentsTransition(intent, fillIn, options, listener);
+        for (int i = 0; i < mStateListeners.size(); i++) {
+            mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_REQUESTED);
         }
+        // TODO(b/366021931): Formalize this later
+        final boolean isSyntheticRequest = options.getBoolean(
+                "is_synthetic_recents_transition", /* defaultValue= */ false);
+        final IBinder transition;
+        if (isSyntheticRequest) {
+            transition = startSyntheticRecentsTransition(listener);
+        } else {
+            transition = startRealRecentsTransition(intent, fillIn, options, listener);
+        }
+        return transition;
     }
 
     /**
@@ -542,7 +551,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
             mPendingFinishTransition = null;
             mControllers.remove(this);
             for (int i = 0; i < mStateListeners.size(); i++) {
-                mStateListeners.get(i).onAnimationStateChanged(false);
+                mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_NOT_RUNNING);
             }
         }
 
@@ -578,7 +587,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                         new RemoteAnimationTarget[0],
                         new Rect(0, 0, 0, 0), new Rect(), new Bundle());
                 for (int i = 0; i < mStateListeners.size(); i++) {
-                    mStateListeners.get(i).onAnimationStateChanged(true);
+                    mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_ANIMATING);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error starting recents animation", e);
@@ -809,7 +818,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
                         new Rect(0, 0, 0, 0), new Rect(), b);
                 for (int i = 0; i < mStateListeners.size(); i++) {
-                    mStateListeners.get(i).onAnimationStateChanged(true);
+                    mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_ANIMATING);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error starting recents animation", e);

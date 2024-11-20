@@ -67,6 +67,7 @@ import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
 import com.android.server.compat.PlatformCompat;
 
+import org.junit.internal.management.ManagementFactory;
 import org.junit.runner.Description;
 
 import java.io.File;
@@ -203,6 +204,8 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Some process-wide initialization. (maybe redirect stdout/stderr)
         RavenwoodCommonUtils.loadJniLibrary(LIBRAVENWOOD_INITIALIZER_NAME);
+
+        dumpCommandLineArgs();
 
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "globalInitInner()");
@@ -586,6 +589,20 @@ public class RavenwoodRuntimeEnvironmentController {
         if (!result) {
             throw new IllegalArgumentException((write ? "Write" : "Read")
                     + " access to system property '" + key + "' denied via RavenwoodConfig");
+        }
+    }
+
+    private static void dumpCommandLineArgs() {
+        Log.i(TAG, "JVM arguments:");
+
+        // Note, we use the wrapper in JUnit4, not the actual class (
+        // java.lang.management.ManagementFactory), because we can't see the later at the build
+        // because this source file is compiled for the device target, where ManagementFactory
+        // doesn't exist.
+        var args = ManagementFactory.getRuntimeMXBean().getInputArguments();
+
+        for (var arg : args) {
+            Log.i(TAG, "  " + arg);
         }
     }
 }

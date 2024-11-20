@@ -370,7 +370,8 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
         if (mRecentsHandler != null) {
             if (mSplitHandler.isSplitScreenVisible()) {
                 return this::setRecentsTransitionDuringSplit;
-            } else if (mKeyguardHandler.isKeyguardShowing()) {
+            } else if (mKeyguardHandler.isKeyguardShowing()
+                    && !mKeyguardHandler.isKeyguardAnimating()) {
                 return this::setRecentsTransitionDuringKeyguard;
             } else if (mDesktopTasksController != null
                     // Check on the default display. Recents/gesture nav is only available there

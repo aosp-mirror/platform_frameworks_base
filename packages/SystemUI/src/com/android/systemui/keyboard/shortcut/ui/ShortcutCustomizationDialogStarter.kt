@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.shortcut.ui
 
 import android.app.Dialog
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.create
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 
 class ShortcutCustomizationDialogStarter
 @AssistedInject
@@ -48,7 +50,7 @@ constructor(
         viewModel.shortcutCustomizationUiState.collect { uiState ->
             if (
                 uiState is ShortcutCustomizationUiState.AddShortcutDialog &&
-                    !uiState.isDialogShowing
+                !uiState.isDialogShowing
             ) {
                 dialog = createAddShortcutDialog().also { it.show() }
                 viewModel.onAddShortcutDialogShown()
@@ -57,6 +59,7 @@ constructor(
                 dialog = null
             }
         }
+        awaitCancellation()
     }
 
     fun onShortcutCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo) {
@@ -66,14 +69,21 @@ constructor(
     private fun createAddShortcutDialog(): Dialog {
         return dialogFactory.create(dialogDelegate = ShortcutCustomizationDialogDelegate()) { dialog
             ->
-            val uiState by viewModel.shortcutCustomizationUiState.collectAsStateWithLifecycle()
+            val uiState by
+                viewModel.shortcutCustomizationUiState.collectAsStateWithLifecycle(
+                    initialValue = ShortcutCustomizationUiState.Inactive
+                )
             AssignNewShortcutDialog(
                 uiState = uiState,
                 modifier = Modifier.width(364.dp).wrapContentHeight().padding(vertical = 24.dp),
                 onKeyPress = { viewModel.onKeyPressed(it) },
                 onCancel = { dialog.dismiss() },
             )
-            dialog.setOnDismissListener { viewModel.onAddShortcutDialogDismissed() }
+            dialog.setOnDismissListener { viewModel.onDialogDismissed() }
+
+            // By default, apps cannot intercept action key. The system always handles it. This
+            // flag is needed to enable customisation dialog window to intercept action key
+            dialog.window?.addPrivateFlags(PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
         }
     }
 

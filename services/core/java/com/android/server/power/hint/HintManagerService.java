@@ -52,6 +52,7 @@ import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SessionCreationConfig;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -70,6 +71,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.power.hint.HintManagerService.AppHintSession.SessionModes;
 import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
@@ -102,6 +104,8 @@ public final class HintManagerService extends SystemService {
 
     @VisibleForTesting final long mHintSessionPreferredRate;
 
+    @VisibleForTesting static final int MAX_GRAPHICS_PIPELINE_THREADS_COUNT = 5;
+
     // Multi-level map storing all active AppHintSessions.
     // First level is keyed by the UID of the client process creating the session.
     // Second level is keyed by an IBinder passed from client process. This is used to observe
@@ -129,6 +133,14 @@ public final class HintManagerService extends SystemService {
     @GuardedBy("mSessionSnapshotMapLock")
     private ArrayMap<Integer, ArrayMap<Integer, AppHintSessionSnapshot>> mSessionSnapshotMap;
 
+    /*
+     * App UID to Thread mapping.
+     * Thread is a sub class bookkeeping TID, thread mode (especially graphics pipeline mode)
+     * This is to bookkeep and track the thread usage.
+     */
+    @GuardedBy("mThreadsUsageObject")
+    private ArrayMap<Integer, ArraySet<ThreadUsageTracker>> mThreadsUsageMap;
+
     /** Lock to protect mActiveSessions and the UidObserver. */
     private final Object mLock = new Object();
 
@@ -143,6 +155,9 @@ public final class HintManagerService extends SystemService {
      * mSessionSnapshotMapLock first then mLock.
      */
     private final Object mSessionSnapshotMapLock = new Object();
+
+    /** Lock to protect mThreadsUsageMap. */
+    private final Object mThreadsUsageObject = new Object();
 
     @GuardedBy("mNonIsolatedTidsLock")
     private final Map<Integer, Set<Long>> mNonIsolatedTids;
@@ -262,6 +277,7 @@ public final class HintManagerService extends SystemService {
         mActiveSessions = new ArrayMap<>();
         mChannelMap = new ArrayMap<>();
         mSessionSnapshotMap = new ArrayMap<>();
+        mThreadsUsageMap = new ArrayMap<>();
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
         mHintSessionPreferredRate = mNativeWrapper.halGetHintSessionPreferredRate();
@@ -357,6 +373,36 @@ public final class HintManagerService extends SystemService {
         }
     }
 
+    private static class ThreadUsageTracker {
+        /*
+         * Thread object for tracking thread usage per UID
+         */
+        int mTid;
+        boolean mIsGraphicsPipeline;
+
+        ThreadUsageTracker(int tid) {
+            mTid = tid;
+            mIsGraphicsPipeline = false;
+        }
+
+        ThreadUsageTracker(int tid, boolean isGraphicsPipeline) {
+            mTid = tid;
+            mIsGraphicsPipeline = isGraphicsPipeline;
+        }
+
+        public int getTid() {
+            return mTid;
+        }
+
+        public boolean isGraphicsPipeline() {
+            return mIsGraphicsPipeline;
+        }
+
+        public void setGraphicsPipeline(boolean isGraphicsPipeline) {
+            mIsGraphicsPipeline = isGraphicsPipeline;
+        }
+    }
+
     private class AppHintSessionSnapshot {
         /*
          * Per-Uid and Per-SessionTag snapshot that tracks metrics including
@@ -368,6 +414,7 @@ public final class HintManagerService extends SystemService {
         int mMaxConcurrentSession;
         int mMaxThreadCount;
         int mPowerEfficientSessionCount;
+        int mGraphicsPipelineSessionCount;
 
         final int mTargetDurationNsCountPQSize = 100;
         PriorityQueue<TargetDurationRecord> mTargetDurationNsCountPQ;
@@ -425,6 +472,7 @@ public final class HintManagerService extends SystemService {
             mMaxConcurrentSession = 0;
             mMaxThreadCount = 0;
             mPowerEfficientSessionCount = 0;
+            mGraphicsPipelineSessionCount = 0;
             mTargetDurationNsCountPQ = new PriorityQueue<>(1);
         }
 
@@ -441,6 +489,10 @@ public final class HintManagerService extends SystemService {
 
         void logPowerEfficientSession() {
             mPowerEfficientSessionCount += 1;
+        }
+
+        void logGraphicsPipelineSession() {
+            mGraphicsPipelineSessionCount += 1;
         }
 
         void updateThreadCount(int threadCount) {
@@ -471,6 +523,10 @@ public final class HintManagerService extends SystemService {
 
         int getPowerEfficientSessionCount() {
             return mPowerEfficientSessionCount;
+        }
+
+        int getGraphicsPipelineSessionCount() {
+            return mGraphicsPipelineSessionCount;
         }
 
         long[] targetDurationNsList() {
@@ -1163,24 +1219,40 @@ public final class HintManagerService extends SystemService {
                 + " doesn't belong to the calling application " + callingUid;
     }
 
+    private boolean contains(final int[] array, final int target) {
+        for (int element : array) {
+            if (element == target) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @VisibleForTesting
     final class BinderService extends IHintManager.Stub {
         @Override
         public IHintSession createHintSessionWithConfig(@NonNull IBinder token,
-                @NonNull int[] tids, long durationNanos, @SessionTag int tag,
-                SessionConfig config) {
+                    @SessionTag int tag, SessionCreationConfig creationConfig,
+                    SessionConfig config) {
             if (!isHalSupported()) {
                 throw new UnsupportedOperationException("PowerHAL is not supported!");
             }
 
             java.util.Objects.requireNonNull(token);
-            java.util.Objects.requireNonNull(tids);
+            java.util.Objects.requireNonNull(creationConfig.tids);
+
+            final int[] tids = creationConfig.tids;
             Preconditions.checkArgument(tids.length != 0, "tids should"
                     + " not be empty.");
+
 
             final int callingUid = Binder.getCallingUid();
             final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final long identity = Binder.clearCallingIdentity();
+            final long durationNanos = creationConfig.targetWorkDurationNanos;
+
+            Preconditions.checkArgument(checkGraphicsPipelineValid(creationConfig, callingUid),
+                    "not enough of available graphics pipeline thread.");
             try {
                 final IntArray nonIsolated = powerhintThreadCleanup() ? new IntArray(tids.length)
                         : null;
@@ -1274,8 +1346,9 @@ public final class HintManagerService extends SystemService {
                             .computeIfAbsent(tag, k -> new AppHintSessionSnapshot())
                             .updateUponSessionCreation(tids.length, durationNanos);
                 }
+                AppHintSession hs = null;
                 synchronized (mLock) {
-                    AppHintSession hs = new AppHintSession(callingUid, callingTgid, tag, tids,
+                    hs = new AppHintSession(callingUid, callingTgid, tag, tids,
                             token, halSessionPtr, durationNanos);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
                             mActiveSessions.get(callingUid);
@@ -1290,9 +1363,29 @@ public final class HintManagerService extends SystemService {
                     }
                     sessionSet.add(hs);
                     mUsesFmq = mUsesFmq || hasChannel(callingTgid, callingUid);
-
-                    return hs;
                 }
+
+                if (hs != null) {
+                    boolean isGraphicsPipeline = false;
+                    if (creationConfig.modesToEnable != null) {
+                        for (int sessionMode : creationConfig.modesToEnable) {
+                            if (sessionMode == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
+                                isGraphicsPipeline = true;
+                            }
+                            hs.setMode(sessionMode, true);
+                        }
+                    }
+
+                    synchronized (mThreadsUsageObject) {
+                        mThreadsUsageMap.computeIfAbsent(callingUid, k -> new ArraySet<>());
+                        ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(callingUid);
+                        for (int i = 0; i < tids.length; ++i) {
+                            threadsSet.add(new ThreadUsageTracker(tids[i], isGraphicsPipeline));
+                        }
+                    }
+                }
+
+                return hs;
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1332,6 +1425,11 @@ public final class HintManagerService extends SystemService {
         @Override
         public long getHintSessionPreferredRate() {
             return mHintSessionPreferredRate;
+        }
+
+        @Override
+        public int getMaxGraphicsPipelineThreadsCount() {
+            return MAX_GRAPHICS_PIPELINE_THREADS_COUNT;
         }
 
         @Override
@@ -1470,6 +1568,7 @@ public final class HintManagerService extends SystemService {
                 return;
             }
             pw.println("HintSessionPreferredRate: " + mHintSessionPreferredRate);
+            pw.println("MaxGraphicsPipelineThreadsCount: " + MAX_GRAPHICS_PIPELINE_THREADS_COUNT);
             pw.println("HAL Support: " + isHalSupported());
             pw.println("Active Sessions:");
             synchronized (mLock) {
@@ -1507,6 +1606,45 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        private boolean checkGraphicsPipelineValid(SessionCreationConfig creationConfig, int uid) {
+            if (creationConfig.modesToEnable == null) {
+                return true;
+            }
+            boolean setGraphicsPipeline = false;
+            for (int modeToEnable : creationConfig.modesToEnable) {
+                if (modeToEnable == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
+                    setGraphicsPipeline = true;
+                }
+            }
+            if (!setGraphicsPipeline) {
+                return true;
+            }
+
+            synchronized (mThreadsUsageObject) {
+                // count used graphics pipeline threads for the calling UID
+                // consider the case that new tids are overlapping with in session tids
+                ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(uid);
+                if (threadsSet == null) {
+                    return true;
+                }
+
+                final int newThreadCount = creationConfig.tids.length;
+                int graphicsPipelineThreadCount = 0;
+                for (ThreadUsageTracker t : threadsSet) {
+                    // count graphics pipeline threads in use
+                    // and exclude overlapping ones
+                    if (t.isGraphicsPipeline()) {
+                        graphicsPipelineThreadCount++;
+                        if (contains(creationConfig.tids, t.getTid())) {
+                            graphicsPipelineThreadCount--;
+                        }
+                    }
+                }
+                return graphicsPipelineThreadCount + newThreadCount
+                        <= MAX_GRAPHICS_PIPELINE_THREADS_COUNT;
+            }
+        }
+
         private void logPerformanceHintSessionAtom(int uid, long sessionId,
                 long targetDuration, int[] tids, @SessionTag int sessionTag) {
             FrameworkStatsLog.write(FrameworkStatsLog.PERFORMANCE_HINT_SESSION_REPORTED, uid,
@@ -1537,11 +1675,14 @@ public final class HintManagerService extends SystemService {
         protected boolean mUpdateAllowedByProcState;
         protected int[] mNewThreadIds;
         protected boolean mPowerEfficient;
+        protected boolean mGraphicsPipeline;
         protected boolean mHasBeenPowerEfficient;
+        protected boolean mHasBeenGraphicsPipeline;
         protected boolean mShouldForcePause;
 
-        private enum SessionModes {
+        enum SessionModes {
             POWER_EFFICIENCY,
+            GRAPHICS_PIPELINE,
         };
 
         protected AppHintSession(
@@ -1556,7 +1697,9 @@ public final class HintManagerService extends SystemService {
             mTargetDurationNanos = durationNanos;
             mUpdateAllowedByProcState = true;
             mPowerEfficient = false;
+            mGraphicsPipeline = false;
             mHasBeenPowerEfficient = false;
+            mHasBeenGraphicsPipeline = false;
             mShouldForcePause = false;
             final boolean allowed = mUidObserver.isUidForeground(mUid);
             updateHintAllowedByProcState(allowed);
@@ -1677,6 +1820,25 @@ public final class HintManagerService extends SystemService {
                 }
                 sessionSnapshot.updateUponSessionClose();
             }
+
+            if (mGraphicsPipeline) {
+                synchronized (mThreadsUsageObject) {
+                    ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(mUid);
+                    if (threadsSet == null) {
+                        Slogf.w(TAG, "Threads Set is null for uid " + mUid);
+                        return;
+                    }
+                    // remove all tids associated with this session
+                    for (int i = 0; i < threadsSet.size(); ++i) {
+                        if (contains(mThreadIds, threadsSet.valueAt(i).getTid())) {
+                            threadsSet.removeAt(i);
+                        }
+                    }
+                    if (threadsSet.isEmpty()) {
+                        mThreadsUsageMap.remove(mUid);
+                    }
+                }
+            }
             if (powerhintThreadCleanup()) {
                 synchronized (mNonIsolatedTidsLock) {
                     final int[] tids = getTidsInternal();
@@ -1713,6 +1875,33 @@ public final class HintManagerService extends SystemService {
                 throw new IllegalArgumentException("Thread id list can't be empty.");
             }
 
+
+            final int callingUid = Binder.getCallingUid();
+            if (mGraphicsPipeline) {
+                synchronized (mThreadsUsageObject) {
+                    // replace original tids with new tids
+                    ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(callingUid);
+                    int graphicsPipelineThreadCount = 0;
+                    if (threadsSet != null) {
+                        // We count the graphics pipeline threads that are
+                        // *not* in this session, since those in this session
+                        // will be replaced. Then if the count plus the new tids
+                        // is over max available graphics pipeline threads we raise
+                        // an exception.
+                        for (ThreadUsageTracker t : threadsSet) {
+                            if (t.isGraphicsPipeline() && !contains(mThreadIds, t.getTid())) {
+                                graphicsPipelineThreadCount++;
+                            }
+                        }
+                        if (graphicsPipelineThreadCount + tids.length
+                                > MAX_GRAPHICS_PIPELINE_THREADS_COUNT) {
+                            throw new IllegalArgumentException(
+                                    "Not enough available graphics pipeline threads.");
+                        }
+                    }
+                }
+            }
+
             synchronized (this) {
                 if (mHalSessionPtr == 0) {
                     return;
@@ -1724,7 +1913,6 @@ public final class HintManagerService extends SystemService {
                     return;
                 }
                 if (checkTid) {
-                    final int callingUid = Binder.getCallingUid();
                     final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
                     final IntArray nonIsolated = powerhintThreadCleanup() ? new IntArray() : null;
                     final long identity = Binder.clearCallingIdentity();
@@ -1770,6 +1958,23 @@ public final class HintManagerService extends SystemService {
                     }
                 }
                 mNativeWrapper.halSetThreads(mHalSessionPtr, tids);
+
+                synchronized (mThreadsUsageObject) {
+                    // replace old tids with new ones
+                    ArraySet<ThreadUsageTracker> threadsSet = mThreadsUsageMap.get(callingUid);
+                    if (threadsSet == null) {
+                        mThreadsUsageMap.put(callingUid, new ArraySet<ThreadUsageTracker>());
+                        threadsSet = mThreadsUsageMap.get(callingUid);
+                    }
+                    for (int i = 0; i < threadsSet.size(); ++i) {
+                        if (contains(mThreadIds, threadsSet.valueAt(i).getTid())) {
+                            threadsSet.removeAt(i);
+                        }
+                    }
+                    for (int tid : tids) {
+                        threadsSet.add(new ThreadUsageTracker(tid, mGraphicsPipeline));
+                    }
+                }
                 mThreadIds = tids;
                 mNewThreadIds = null;
                 // if the update is allowed but the session is force paused by tid clean up, then
@@ -1831,26 +2036,49 @@ public final class HintManagerService extends SystemService {
                         + " greater than zero.");
                 if (mode == SessionModes.POWER_EFFICIENCY.ordinal()) {
                     mPowerEfficient = enabled;
+                } else if (mode == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
+                    mGraphicsPipeline = enabled;
                 }
                 mNativeWrapper.halSetMode(mHalSessionPtr, mode, enabled);
             }
-            if (enabled && (mode == SessionModes.POWER_EFFICIENCY.ordinal())) {
-                if (!mHasBeenPowerEfficient) {
-                    mHasBeenPowerEfficient = true;
-                    synchronized (mSessionSnapshotMapLock) {
-                        ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
-                                mSessionSnapshotMap.get(mUid);
-                        if (sessionSnapshots == null) {
-                            Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
-                            return;
+            if (enabled) {
+                if (mode == SessionModes.POWER_EFFICIENCY.ordinal()) {
+                    if (!mHasBeenPowerEfficient) {
+                        mHasBeenPowerEfficient = true;
+                        synchronized (mSessionSnapshotMapLock) {
+                            ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                                    mSessionSnapshotMap.get(mUid);
+                            if (sessionSnapshots == null) {
+                                Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
+                                return;
+                            }
+                            AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
+                            if (sessionSnapshot == null) {
+                                Slogf.w(TAG, "Session snapshot is null for uid " + mUid
+                                        + " and tag " + mTag);
+                                return;
+                            }
+                            sessionSnapshot.logPowerEfficientSession();
                         }
-                        AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
-                        if (sessionSnapshot == null) {
-                            Slogf.w(TAG, "Session snapshot is null for uid " + mUid
-                                    + " and tag " + mTag);
-                            return;
+                    }
+                } else if (mode == SessionModes.GRAPHICS_PIPELINE.ordinal()) {
+                    if (!mHasBeenGraphicsPipeline) {
+                        mHasBeenGraphicsPipeline = true;
+                        synchronized (mSessionSnapshotMapLock) {
+                            ArrayMap<Integer, AppHintSessionSnapshot> sessionSnapshots =
+                                    mSessionSnapshotMap.get(mUid);
+                            if (sessionSnapshots == null) {
+                                Slogf.w(TAG, "Session snapshot map is null for uid " + mUid);
+                                return;
+                            }
+                            AppHintSessionSnapshot sessionSnapshot = sessionSnapshots.get(mTag);
+                            if (sessionSnapshot == null) {
+                                Slogf.w(TAG, "Session snapshot is null for uid " + mUid
+                                        + " and tag " + mTag);
+                                return;
+                            }
+                            sessionSnapshot.logGraphicsPipelineSession();
                         }
-                        sessionSnapshot.logPowerEfficientSession();
                     }
                 }
             }
@@ -1874,6 +2102,12 @@ public final class HintManagerService extends SystemService {
         public boolean isPowerEfficient() {
             synchronized (this) {
                 return mPowerEfficient;
+            }
+        }
+
+        public boolean isGraphicsPipeline() {
+            synchronized (this) {
+                return mGraphicsPipeline;
             }
         }
 
@@ -1964,6 +2198,7 @@ public final class HintManagerService extends SystemService {
                 pw.println(prefix + "SessionAllowedByProcState: " + mUpdateAllowedByProcState);
                 pw.println(prefix + "SessionForcePaused: " + mShouldForcePause);
                 pw.println(prefix + "PowerEfficient: " + (mPowerEfficient ? "true" : "false"));
+                pw.println(prefix + "GraphicsPipeline: " + (mGraphicsPipeline ? "true" : "false"));
             }
         }
 

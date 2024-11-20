@@ -43,7 +43,7 @@ fun checkClass(cn: ClassNode, classes: ClassNodes): Boolean {
     }
     var allOk = true
 
-    log.i("Checking ${cn.name.toHumanReadableClassName()}")
+    log.v("Checking ${cn.name.toHumanReadableClassName()}")
 
     // See if there's any class that extends a legacy base class.
     // But ignore the base classes in android.test.

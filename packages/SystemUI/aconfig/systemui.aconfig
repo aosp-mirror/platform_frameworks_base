@@ -1780,6 +1780,16 @@ flag {
 }
 
 flag {
+    name: "notification_reentrant_dismiss"
+    namespace: "systemui"
+    description: "Posts to avoid a crashing reentrant pipeline run"
+    bug: "328328054"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+      }
+}
+
+flag {
     name: "stoppable_fgs_system_app"
     namespace: "systemui"
     description: "System app with foreground service can opt in to be stoppable."
@@ -1797,4 +1807,25 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "gsf_bouncer"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Bouncer surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "gsf_quick_settings"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Quick Settings surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "glanceable_hub_shortcut_button"
+    namespace: "systemui"
+    description: "Adds a shortcut button to lockscreen to show glanceable hub."
+    bug: "378173531"
 }

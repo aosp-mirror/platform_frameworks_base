@@ -3109,17 +3109,20 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (isTracking()) {
             onTrackingStopped(true);
         }
-        if (isExpanded() && mBarState != KEYGUARD && !mQsController.getExpanded()) {
-            mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
-            expandToQs();
-        } else {
-            if (mBarState == KEYGUARD) {
-                mShadeLog.d("Lockscreen Status Bar was long pressed. Expanding to Notifications.");
-                mLockscreenShadeTransitionController.goToLockedShade(
-                        /* expandedView= */null, /* needsQSAnimation= */false);
+        if (!mQsController.getExpanded()) {
+            performHapticFeedback(HapticFeedbackConstants.GESTURE_START);
+            if (isExpanded() && mBarState != KEYGUARD) {
+                mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
+                mQsController.flingQs(0, FLING_EXPAND);
             } else {
-                mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
-                expandToNotifications();
+                if (mBarState == KEYGUARD) {
+                    mShadeLog.d("Lockscreen Status Bar was long pressed. Expanding to Notifications.");
+                    mLockscreenShadeTransitionController.goToLockedShade(
+                            /* expandedView= */null, /* needsQSAnimation= */true);
+                } else {
+                    mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
+                    expandToNotifications();
+                }
             }
         }
     }

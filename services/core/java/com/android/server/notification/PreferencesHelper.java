@@ -184,6 +184,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final boolean DEFAULT_SHOW_BADGE = true;
 
     private static final boolean DEFAULT_APP_LOCKED_IMPORTANCE  = false;
+    private static final boolean DEFAULT_CAN_HAVE_PROMOTED_NOTIFS = true;
 
     static final boolean DEFAULT_BUBBLES_ENABLED = true;
     @VisibleForTesting
@@ -369,8 +370,8 @@ public class PreferencesHelper implements RankingConfig {
                     null, ATT_USER_DEMOTED_INVALID_MSG_APP, false);
             r.hasSentValidBubble = parser.getAttributeBoolean(null, ATT_SENT_VALID_BUBBLE, false);
             if (android.app.Flags.uiRichOngoing()) {
-                r.canHavePromotedNotifs =
-                        parser.getAttributeBoolean(null, ATT_PROMOTE_NOTIFS, false);
+                r.canHavePromotedNotifs = parser.getAttributeBoolean(null, ATT_PROMOTE_NOTIFS,
+                        DEFAULT_CAN_HAVE_PROMOTED_NOTIFS);
             }
 
             final int innerDepth = parser.getDepth();
@@ -748,7 +749,7 @@ public class PreferencesHelper implements RankingConfig {
                 r.userDemotedMsgApp);
         out.attributeBoolean(null, ATT_SENT_VALID_BUBBLE, r.hasSentValidBubble);
         if (android.app.Flags.uiRichOngoing()) {
-            if (r.canHavePromotedNotifs) {
+            if (r.canHavePromotedNotifs != DEFAULT_CAN_HAVE_PROMOTED_NOTIFS) {
                 out.attributeBoolean(null, ATT_PROMOTE_NOTIFS, r.canHavePromotedNotifs);
             }
         }
@@ -2331,7 +2332,8 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(" fixedImportance=");
                     pw.print(r.fixedImportance);
                 }
-                if (android.app.Flags.uiRichOngoing() && r.canHavePromotedNotifs) {
+                if (android.app.Flags.uiRichOngoing()
+                        && r.canHavePromotedNotifs != DEFAULT_CAN_HAVE_PROMOTED_NOTIFS) {
                     pw.print(" promoted=");
                     pw.print(r.canHavePromotedNotifs);
                 }
@@ -3184,7 +3186,8 @@ public class PreferencesHelper implements RankingConfig {
         long creationTime;
 
         @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
-        boolean canHavePromotedNotifs = false;
+        // Until we enable the UI, we should return false.
+        boolean canHavePromotedNotifs = android.app.Flags.uiRichOngoing();
 
         @UserIdInt int userId;
 

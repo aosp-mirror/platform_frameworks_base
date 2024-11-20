@@ -88,7 +88,7 @@ public class BaseHeadsUpManager
         implements HeadsUpManager, HeadsUpRepository, OnHeadsUpChangedListener {
     private static final String TAG = "BaseHeadsUpManager";
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
-
+    private static final String REASON_REORDER_ALLOWED = "mOnReorderingAllowedListener";
     protected final ListenerSet<OnHeadsUpChangedListener> mListeners = new ListenerSet<>();
 
     protected final Context mContext;
@@ -633,7 +633,7 @@ public class BaseHeadsUpManager
             }
             entry.demoteStickyHun();
             mHeadsUpEntryMap.remove(key);
-            onEntryRemoved(finalHeadsUpEntry);
+            onEntryRemoved(finalHeadsUpEntry, reason);
             // TODO(b/328390331) move accessibility events to the view layer
             entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
             if (NotificationThrottleHun.isEnabled()) {
@@ -648,8 +648,9 @@ public class BaseHeadsUpManager
     /**
      * Manager-specific logic that should occur when an entry is removed.
      * @param headsUpEntry entry removed
+     * @param reason why onEntryRemoved was called
      */
-    protected void onEntryRemoved(HeadsUpEntry headsUpEntry) {
+    protected void onEntryRemoved(HeadsUpEntry headsUpEntry, String reason) {
         NotificationEntry entry = headsUpEntry.mEntry;
         entry.setHeadsUp(false);
         setEntryPinned(headsUpEntry, false /* isPinned */, "onEntryRemoved");
@@ -664,10 +665,17 @@ public class BaseHeadsUpManager
         updateTopHeadsUpFlow();
         updateHeadsUpFlow();
         if (NotificationThrottleHun.isEnabled()) {
-            if (headsUpEntry.mEntry != null) {
-                if (mEntriesToRemoveWhenReorderingAllowed.contains(headsUpEntry.mEntry)) {
-                    mEntriesToRemoveWhenReorderingAllowed.remove(headsUpEntry.mEntry);
-                }
+            NotificationEntry notifEntry = headsUpEntry.mEntry;
+            if (notifEntry == null) {
+                return;
+            }
+            // If reorder was just allowed and we called onEntryRemoved while iterating over
+            // mEntriesToRemoveWhenReorderingAllowed, we should not remove from this list (and cause
+            // ArrayIndexOutOfBoundsException). We don't need to in this case anyway, because we
+            // clear mEntriesToRemoveWhenReorderingAllowed after removing these entries.
+            if (!reason.equals(REASON_REORDER_ALLOWED)
+                    && mEntriesToRemoveWhenReorderingAllowed.contains(notifEntry)) {
+                mEntriesToRemoveWhenReorderingAllowed.remove(notifEntry);
             }
         }
     }
@@ -1135,7 +1143,8 @@ public class BaseHeadsUpManager
                 && Notification.CATEGORY_CALL.equals(n.category));
     }
 
-    private final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
+    @VisibleForTesting
+    public final OnReorderingAllowedListener mOnReorderingAllowedListener = () -> {
         if (NotificationThrottleHun.isEnabled()) {
             mAvalancheController.setEnableAtRuntime(true);
             if (mEntriesToRemoveWhenReorderingAllowed.isEmpty()) {
@@ -1146,7 +1155,7 @@ public class BaseHeadsUpManager
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (entry != null && isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
-                removeEntry(entry.getKey(), "mOnReorderingAllowedListener");
+                removeEntry(entry.getKey(), REASON_REORDER_ALLOWED);
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();

@@ -286,57 +286,15 @@ public abstract class WMShellModule {
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             IWindowManager windowManager,
-            ShellCommandHandler shellCommandHandler,
             ShellTaskOrganizer taskOrganizer,
-            @DynamicOverride DesktopRepository desktopRepository,
             DisplayController displayController,
-            ShellController shellController,
-            DisplayInsetsController displayInsetsController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
-            Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            InteractionJankMonitor interactionJankMonitor,
-            AppToWebGenericLinksParser genericLinksParser,
-            AssistContentRequester assistContentRequester,
-            MultiInstanceHelper multiInstanceHelper,
-            Optional<DesktopTasksLimiter> desktopTasksLimiter,
-            AppHandleEducationController appHandleEducationController,
-            AppToWebEducationController appToWebEducationController,
-            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
             FocusTransitionObserver focusTransitionObserver,
-            DesktopModeEventLogger desktopModeEventLogger) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
-            return new DesktopModeWindowDecorViewModel(
-                    context,
-                    mainExecutor,
-                    mainHandler,
-                    mainChoreographer,
-                    bgExecutor,
-                    shellInit,
-                    shellCommandHandler,
-                    windowManager,
-                    taskOrganizer,
-                    desktopRepository,
-                    displayController,
-                    shellController,
-                    displayInsetsController,
-                    syncQueue,
-                    transitions,
-                    desktopTasksController,
-                    rootTaskDisplayAreaOrganizer,
-                    interactionJankMonitor,
-                    genericLinksParser,
-                    assistContentRequester,
-                    multiInstanceHelper,
-                    desktopTasksLimiter,
-                    appHandleEducationController,
-                    appToWebEducationController,
-                    windowDecorCaptionHandleRepository,
-                    desktopActivityOrientationHandler,
-                    focusTransitionObserver,
-                    desktopModeEventLogger);
+            Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel) {
+        if (desktopModeWindowDecorViewModel.isPresent()) {
+            return desktopModeWindowDecorViewModel.get();
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -406,7 +364,7 @@ public abstract class WMShellModule {
             Optional<TaskChangeListener> taskChangeListener) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
-        ShellInit init = FreeformComponents.isFreeformEnabled(context) ? shellInit : null;
+        ShellInit init = FreeformComponents.requiresFreeformComponents(context) ? shellInit : null;
         return new FreeformTaskListener(
                 context,
                 init,
@@ -847,7 +805,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             ShellTaskOrganizer shellTaskOrganizer,
             ShellCommandHandler shellCommandHandler) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.of(
                     new DesktopImmersiveController(
                             shellInit,
@@ -908,7 +866,7 @@ public abstract class WMShellModule {
             Context context,
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellMainThread Handler mainHandler,
-            Choreographer mainChoreographer,
+            @ShellMainThread Choreographer mainChoreographer,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -934,7 +892,7 @@ public abstract class WMShellModule {
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger
     ) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (!DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.empty();
         }
         return Optional.of(new DesktopModeWindowDecorViewModel(context, shellExecutor, mainHandler,
@@ -1074,7 +1032,8 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer
     ) {
-        if (!DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                && !DesktopModeStatus.overridesShowAppHandle(context)) {
             return Optional.empty();
         }
         return Optional.of(

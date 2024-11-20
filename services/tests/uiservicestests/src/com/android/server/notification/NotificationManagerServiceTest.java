@@ -17405,6 +17405,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_noPermission() throws Exception {
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isFalse();
+
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))

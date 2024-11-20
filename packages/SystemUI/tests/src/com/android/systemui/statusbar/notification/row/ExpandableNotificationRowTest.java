@@ -45,6 +45,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -551,12 +552,26 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_NOTIFICATION_REENTRANT_DISMISS)
+    public void testCanDismiss_immediately() throws Exception {
+        ExpandableNotificationRow row =
+                mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
+        when(mNotificationTestHelper.getDismissibilityProvider().isDismissable(row.getEntry()))
+                .thenReturn(true);
+        row.performDismiss(false);
+        verify(mNotificationTestHelper.getOnUserInteractionCallback())
+                .registerFutureDismissal(any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATION_REENTRANT_DISMISS)
     public void testCanDismiss() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
         when(mNotificationTestHelper.getDismissibilityProvider().isDismissable(row.getEntry()))
                 .thenReturn(true);
         row.performDismiss(false);
+        TestableLooper.get(this).processAllMessages();
         verify(mNotificationTestHelper.getOnUserInteractionCallback())
                 .registerFutureDismissal(any(), anyInt());
     }

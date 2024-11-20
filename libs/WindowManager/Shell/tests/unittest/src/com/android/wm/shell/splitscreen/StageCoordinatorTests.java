@@ -141,8 +141,8 @@ public class StageCoordinatorTests extends ShellTestCase {
                 Optional.empty()));
         mDividerLeash = new SurfaceControl.Builder().setName("fakeDivider").build();
 
-        when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
-        when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
+        when(mSplitLayout.getTopLeftBounds()).thenReturn(mBounds1);
+        when(mSplitLayout.getBottomRightBounds()).thenReturn(mBounds2);
         when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
         when(mSplitLayout.isLeftRightSplit()).thenReturn(false);
         when(mSplitLayout.applyTaskChanges(any(), any(), any())).thenReturn(true);

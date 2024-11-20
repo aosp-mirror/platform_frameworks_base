@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
+import static com.android.systemui.flags.Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 import static com.android.systemui.statusbar.policy.RemoteInputView.FOCUS_ANIMATION_MIN_SCALE;
@@ -75,8 +76,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.CallLayout;
+import com.android.systemui.Flags;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
@@ -293,7 +294,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private static boolean shouldSimulateSlowMeasure() {
         return Compile.IS_DEBUG && RefactorFlag.forView(
-                Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE).isEnabled();
+                ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE).isEnabled();
     }
 
     private static final String SLOW_MEASURE_SIMULATE_DELAY_PROPERTY =
@@ -1370,6 +1371,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             items.add(NotificationMenuRow.createPartialConversationItem(mContext));
             items.add(NotificationMenuRow.createInfoItem(mContext));
             items.add(NotificationMenuRow.createSnoozeItem(mContext));
+            if (android.app.Flags.notificationClassificationUi()) {
+                items.add(NotificationMenuRow.createBundleItem(mContext));
+            }
             mMenuRow.setMenuItems(items);
         }
         if (existed) {
@@ -1679,7 +1683,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         dismiss(fromAccessibility);
         if (canEntryBeDismissed()) {
             if (mOnUserInteractionCallback != null) {
-                mOnUserInteractionCallback.registerFutureDismissal(mEntry, REASON_CANCEL).run();
+                if (Flags.notificationReentrantDismiss()) {
+                    Runnable futureDismissal = mOnUserInteractionCallback.registerFutureDismissal(
+                            mEntry, REASON_CANCEL);
+                    post(futureDismissal);
+                } else {
+                    mOnUserInteractionCallback.registerFutureDismissal(mEntry, REASON_CANCEL).run();
+                }
             }
         }
     }
@@ -1986,7 +1996,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mColorUpdateLogger = colorUpdateLogger;
         mDismissibilityProvider = dismissibilityProvider;
         mFeatureFlags = featureFlags;
-        setHapticFeedbackEnabled(!com.android.systemui.Flags.msdlFeedback());
+        setHapticFeedbackEnabled(!Flags.msdlFeedback());
     }
 
     private void initDimens() {

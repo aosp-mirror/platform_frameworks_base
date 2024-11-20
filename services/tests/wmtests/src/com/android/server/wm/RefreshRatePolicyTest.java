@@ -270,6 +270,46 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
     }
 
     @Test
+    public void testInsetsAnimationAppOverridePreferredModeId() {
+        final WindowState overrideWindow = createWindow("overrideWindow");
+        overrideWindow.mAttrs.packageName = "com.android.test";
+        overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
+        parcelLayoutParams(overrideWindow);
+        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_LOW_EXACT, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+
+        overrideWindow.notifyInsetsAnimationRunningStateChanged(true);
+        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testInsetsAnimationAppOverridePreferredRefreshRate() {
+        final WindowState overrideWindow = createWindow("overrideWindow");
+        overrideWindow.mAttrs.packageName = "com.android.test";
+        overrideWindow.mAttrs.preferredRefreshRate = LOW_REFRESH_RATE;
+        parcelLayoutParams(overrideWindow);
+        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_LOW_PREFERRED, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+
+        overrideWindow.notifyInsetsAnimationRunningStateChanged(true);
+        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+    }
+
+    @Test
     public void testAnimatingCamera() {
         final WindowState cameraUsingWindow = createWindow("cameraUsingWindow");
         cameraUsingWindow.mAttrs.packageName = "com.android.test";

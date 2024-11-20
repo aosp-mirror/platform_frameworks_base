@@ -69,7 +69,7 @@ public class Utils {
      * @param value
      * @return
      */
-    public static String floatToString(float idvalue, float value) {
+    public static @NonNull String floatToString(float idvalue, float value) {
         if (Float.isNaN(idvalue)) {
             if (idFromNan(value) == 0) {
                 return "NaN";
@@ -85,7 +85,7 @@ public class Utils {
      * @param value
      * @return
      */
-    public static String floatToString(float value) {
+    public static @NonNull String floatToString(float value) {
         if (Float.isNaN(value)) {
             if (idFromNan(value) == 0) {
                 return "NaN";
@@ -100,7 +100,7 @@ public class Utils {
      *
      * @param str
      */
-    public static void log(String str) {
+    public static void log(@NonNull String str) {
         StackTraceElement s = new Throwable().getStackTrace()[1];
         System.out.println(
                 "("
@@ -119,7 +119,7 @@ public class Utils {
      * @param str
      * @param n
      */
-    public static void logStack(String str, int n) {
+    public static void logStack(@NonNull String str, int n) {
         StackTraceElement[] st = new Throwable().getStackTrace();
         for (int i = 1; i < n + 1; i++) {
             StackTraceElement s = st[i];

@@ -62,7 +62,7 @@ public class ComponentModifiers extends PaintOperation
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         // nothing
     }
 
@@ -73,7 +73,7 @@ public class ComponentModifiers extends PaintOperation
         }
     }
 
-    public void add(ModifierOperation operation) {
+    public void add(@NonNull ModifierOperation operation) {
         mList.add(operation);
     }
 
@@ -109,7 +109,7 @@ public class ComponentModifiers extends PaintOperation
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(@NonNull RemoteContext context, float width, float height) {
         float w = width;
         float h = height;
         for (ModifierOperation op : mList) {
@@ -126,13 +126,17 @@ public class ComponentModifiers extends PaintOperation
         }
     }
 
-    public void addAll(ArrayList<ModifierOperation> operations) {
+    public void addAll(@NonNull ArrayList<ModifierOperation> operations) {
         mList.addAll(operations);
     }
 
     @Override
     public void onClick(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            @NonNull RemoteContext context,
+            @NonNull CoreDocument document,
+            @NonNull Component component,
+            float x,
+            float y) {
         for (ModifierOperation op : mList) {
             if (op instanceof ClickHandler) {
                 ((ClickHandler) op).onClick(context, document, component, x, y);
@@ -168,5 +172,111 @@ public class ComponentModifiers extends PaintOperation
                 ((TouchHandler) op).onTouchCancel(context, document, component, x, y);
             }
         }
+    }
+
+    @Override
+    public void onTouchDrag(
+            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        for (ModifierOperation op : mList) {
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchDrag(context, document, component, x, y);
+            }
+        }
+    }
+
+    public boolean hasHorizontalScroll() {
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isHorizontalScroll()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean hasVerticalScroll() {
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isVerticalScroll()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public float getScrollX() {
+        float scroll = 0;
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isHorizontalScroll()) {
+                    scroll = Math.min(scroll, scrollModifier.getScrollX());
+                }
+            }
+        }
+        return scroll;
+    }
+
+    public float getScrollY() {
+        float scroll = 0;
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isVerticalScroll()) {
+                    scroll = Math.min(scroll, scrollModifier.getScrollY());
+                }
+            }
+        }
+        return scroll;
+    }
+
+    public void setHorizontalScrollDimension(float hostDimension, float contentDimension) {
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isHorizontalScroll()) {
+                    scrollModifier.setHorizontalScrollDimension(hostDimension, contentDimension);
+                }
+            }
+        }
+    }
+
+    public void setVerticalScrollDimension(float hostDimension, float contentDimension) {
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isVerticalScroll()) {
+                    scrollModifier.setVerticalScrollDimension(hostDimension, contentDimension);
+                }
+            }
+        }
+    }
+
+    public float getHorizontalScrollDimension() {
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isHorizontalScroll()) {
+                    return scrollModifier.getContentDimension();
+                }
+            }
+        }
+        return 0f;
+    }
+
+    public float getVerticalScrollDimension() {
+        for (ModifierOperation op : mList) {
+            if (op instanceof ScrollModifierOperation) {
+                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
+                if (scrollModifier.isVerticalScroll()) {
+                    return scrollModifier.getContentDimension();
+                }
+            }
+        }
+        return 0f;
     }
 }

@@ -210,16 +210,16 @@ final class AppLaunchShortcutManager {
 
     /**
      * Handle the shortcut to {@link IShortcutService}
-     * @param keyCode The key code of the event.
-     * @param metaState The meta key modifier state.
-     * @return True if invoked the shortcut, otherwise false.
+     * @return true if invoked the shortcut, otherwise false.
      */
-    private boolean handleShortcutService(int keyCode, int metaState) {
-        final long shortcutCodeMeta = metaState & SHORTCUT_CODE_META_MASK;
+    public boolean handleShortcutService(KeyEvent event) {
+        // TODO(b/358569822): Ideally shortcut service custom shortcuts should be either
+        //  migrated to bookmarks or customizable shortcut APIs.
+        final long shortcutCodeMeta = event.getMetaState() & SHORTCUT_CODE_META_MASK;
         if (shortcutCodeMeta == 0) {
             return false;
         }
-        long shortcutCode = keyCode | (shortcutCodeMeta << Integer.SIZE);
+        long shortcutCode = event.getKeyCode() | (shortcutCodeMeta << Integer.SIZE);
         IShortcutService shortcutService = mShortcutKeyServices.get(shortcutCode);
         if (shortcutService != null) {
             try {
@@ -292,7 +292,6 @@ final class AppLaunchShortcutManager {
             return InterceptKeyResult.DO_NOTHING;
         }
 
-        final int metaState = event.getModifiers();
         final int keyCode = event.getKeyCode();
         if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -313,15 +312,7 @@ final class AppLaunchShortcutManager {
         }
 
         // Intercept shortcuts defined in bookmarks or through application launch keycodes
-        AppLaunchData appLaunchData = interceptShortcut(event);
-
-        // TODO(b/358569822): Ideally shortcut service custom shortcuts should be either
-        //  migrated to bookmarks or customizable shortcut APIs.
-        if (appLaunchData == null && handleShortcutService(keyCode, metaState)) {
-            return InterceptKeyResult.CONSUME_KEY;
-        }
-
-        return new InterceptKeyResult(/* consumed =*/ false, appLaunchData);
+        return new InterceptKeyResult(/* consumed =*/ false, interceptShortcut(event));
     }
 
     /**
