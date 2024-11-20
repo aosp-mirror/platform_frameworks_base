@@ -27,11 +27,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.AutoTransitionTestAssertionScope
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.Default4FrameLinearTransition
 import com.android.compose.animation.scene.Edge
@@ -56,6 +59,37 @@ class NestedSharedElementTest {
         val NestedSceneB = SceneKey("NestedSceneB")
         val NestedNestedSceneA = SceneKey("NestedNestedSceneA")
         val NestedNestedSceneB = SceneKey("NestedNestedSceneB")
+    }
+
+    private val elementVariant1 = SharedElement(0.dp, 0.dp, 100.dp, 100.dp, Color.Red)
+    private val elementVariant2 = SharedElement(40.dp, 80.dp, 60.dp, 20.dp, Color.Blue)
+    private val elementVariant3 = SharedElement(80.dp, 40.dp, 140.dp, 180.dp, Color.Yellow)
+    private val elementVariant4 = SharedElement(120.dp, 240.dp, 20.dp, 140.dp, Color.Green)
+
+    private class SharedElement(
+        val x: Dp,
+        val y: Dp,
+        val width: Dp,
+        val height: Dp,
+        val color: Color = Color.Black,
+        val alpha: Float = 0.8f,
+    )
+
+    @Composable
+    private fun ContentScope.SharedElement(element: SharedElement) {
+        Box(Modifier.fillMaxSize()) {
+            Box(
+                Modifier.offset(element.x, element.y)
+                    .element(TestElements.Foo)
+                    .size(element.width, element.height)
+                    .background(element.color)
+                    .alpha(element.alpha)
+            )
+        }
+    }
+
+    private val contentWithSharedElement: @Composable ContentScope.() -> Unit = {
+        SharedElement(elementVariant1)
     }
 
     private val nestedState: MutableSceneTransitionLayoutState =
@@ -88,29 +122,8 @@ class NestedSharedElementTest {
 
     private val nestedStlWithSharedElement: @Composable ContentScope.() -> Unit = {
         NestedSceneTransitionLayout(nestedState, modifier = Modifier) {
-            scene(Scenes.NestedSceneB) {
-                Box(Modifier.fillMaxSize()) {
-                    Box(
-                        Modifier.offset(50.dp, 10.dp)
-                            .element(TestElements.Foo)
-                            .size(60.dp, 40.dp)
-                            .background(Color.Blue)
-                            .alpha(0.8f)
-                    )
-                }
-            }
-            scene(Scenes.NestedSceneA) {
-                Box(Modifier.fillMaxSize()) {
-                    // Foo is at (10, 50) with a size of (20, 80).
-                    Box(
-                        Modifier.offset(10.dp, 50.dp)
-                            .element(TestElements.Foo)
-                            .size(20.dp, 80.dp)
-                            .background(Color.Red)
-                            .alpha(0.8f)
-                    )
-                }
-            }
+            scene(Scenes.NestedSceneA) { SharedElement(elementVariant2) }
+            scene(Scenes.NestedSceneB) { SharedElement(elementVariant3) }
         }
     }
 
@@ -118,54 +131,11 @@ class NestedSharedElementTest {
         NestedSceneTransitionLayout(nestedState, modifier = Modifier) {
             scene(Scenes.NestedSceneA) {
                 NestedSceneTransitionLayout(state = nestedNestedState, modifier = Modifier) {
-                    scene(Scenes.NestedNestedSceneA) {
-                        Box(Modifier.fillMaxSize()) {
-                            Box(
-                                Modifier.offset(130.dp, 90.dp)
-                                    .element(TestElements.Foo)
-                                    .size(100.dp, 80.dp)
-                                    .background(Color.DarkGray)
-                                    .alpha(0.8f)
-                            )
-                        }
-                    }
-                    scene(Scenes.NestedNestedSceneB) {
-                        Box(Modifier.fillMaxSize()) {
-                            Box(
-                                Modifier.offset(50.dp, 10.dp)
-                                    .element(TestElements.Foo)
-                                    .size(60.dp, 40.dp)
-                                    .background(Color.Blue)
-                                    .alpha(0.8f)
-                            )
-                        }
-                    }
+                    scene(Scenes.NestedNestedSceneA) { SharedElement(elementVariant4) }
+                    scene(Scenes.NestedNestedSceneB) { SharedElement(elementVariant3) }
                 }
             }
-            scene(Scenes.NestedSceneB) {
-                Box(Modifier.fillMaxSize()) {
-                    // Foo is at (10, 50) with a size of (20, 80).
-                    Box(
-                        Modifier.offset(10.dp, 50.dp)
-                            .element(TestElements.Foo)
-                            .size(20.dp, 80.dp)
-                            .background(Color.Red)
-                            .alpha(0.8f)
-                    )
-                }
-            }
-        }
-    }
-
-    private val contentWithSharedElement: @Composable ContentScope.() -> Unit = {
-        Box(Modifier.fillMaxSize()) {
-            Box(
-                Modifier.offset(50.dp, 70.dp)
-                    .element(TestElements.Foo)
-                    .size(10.dp, 40.dp)
-                    .background(Color.Magenta)
-                    .alpha(0.8f)
-            )
+            scene(Scenes.NestedSceneB) { SharedElement(elementVariant2) }
         }
     }
 
@@ -175,44 +145,14 @@ class NestedSharedElementTest {
             fromSceneContent = nestedStlWithSharedElement,
             toSceneContent = contentWithSharedElement,
         ) {
-            before {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(20.dp, 80.dp)
-            }
-            at(0) {
-                // Shared elements are by default placed and drawn only in the scene with highest
-                // zIndex.
+            before { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
+            atAllFrames(4) {
                 onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
 
                 onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                    .assertSizeIsEqualTo(20.dp, 80.dp)
+                    .assertBetweenElementVariants(elementVariant2, elementVariant1, this)
             }
-            at(16) {
-                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(20.dp, 55.dp)
-                    .assertSizeIsEqualTo(17.5.dp, 70.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(30.dp, 60.dp)
-                    .assertSizeIsEqualTo(15.dp, 60.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(40.dp, 65.dp)
-                    .assertSizeIsEqualTo(12.5.dp, 50.dp)
-            }
-            after {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 70.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(10.dp, 40.dp)
-            }
+            after { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
         }
     }
 
@@ -222,44 +162,14 @@ class NestedSharedElementTest {
             fromSceneContent = contentWithSharedElement,
             toSceneContent = nestedStlWithSharedElement,
         ) {
-            before {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 70.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(10.dp, 40.dp)
-            }
-            at(0) {
-                // Shared elements placed in NestedSTLs are by default drawn only in the STL with
-                // the lowest nestingDepth and the scene in which the element is placed directly.
+            before { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
+            atAllFrames(4) {
                 onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
 
                 onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(50.dp, 70.dp)
-                    .assertSizeIsEqualTo(10.dp, 40.dp)
+                    .assertBetweenElementVariants(elementVariant1, elementVariant2, this)
             }
-            at(16) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(40.dp, 65.dp)
-                    .assertSizeIsEqualTo(12.5.dp, 50.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(30.dp, 60.dp)
-                    .assertSizeIsEqualTo(15.dp, 60.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(20.dp, 55.dp)
-                    .assertSizeIsEqualTo(17.5.dp, 70.dp)
-            }
-            after {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(20.dp, 80.dp)
-            }
+            after { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
         }
     }
 
@@ -269,44 +179,14 @@ class NestedSharedElementTest {
             fromSceneContent = contentWithSharedElement,
             toSceneContent = nestedNestedStlWithSharedElement,
         ) {
-            before {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 70.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(10.dp, 40.dp)
-            }
-            at(0) {
-                // Shared elements placed in NestedSTLs are by default drawn only in the STL with
-                // the lowest nestingDepth and the scene in which the element is placed directly.
+            before { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
+            atAllFrames(4) {
                 onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
 
                 onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(50.dp, 70.dp)
-                    .assertSizeIsEqualTo(10.dp, 40.dp)
+                    .assertBetweenElementVariants(elementVariant1, elementVariant4, this)
             }
-            at(16) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(70.dp, 75.dp)
-                    .assertSizeIsEqualTo(32.5.dp, 50.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(90.dp, 80.dp)
-                    .assertSizeIsEqualTo(55.dp, 60.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(110.dp, 85.dp)
-                    .assertSizeIsEqualTo(77.5.dp, 70.dp)
-            }
-            after {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(130.dp, 90.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(100.dp, 80.dp)
-            }
+            after { onElement(TestElements.Foo).assertElementVariant(elementVariant4) }
         }
     }
 
@@ -317,49 +197,15 @@ class NestedSharedElementTest {
             toSceneContent = { Box(modifier = Modifier.fillMaxSize()) },
             changeState = { nestedState.setTargetScene(Scenes.NestedSceneB, this) },
         ) {
-            before {
-                onElement(TestElements.Foo)
-                    .assertPositionInRootIsEqualTo(130.dp, 90.dp)
-                    .assertSizeIsEqualTo(100.dp, 80.dp)
-            }
-            at(0) {
-                // Shared elements placed in NestedSTLs are by default drawn only in the STL with
-                // the lowest nestingDepth and the scene in which the element is placed directly.
+            before { onElement(TestElements.Foo).assertElementVariant(elementVariant4) }
+            atAllFrames(4) {
                 onElement(TestElements.Foo, Scenes.NestedSceneA).assertIsNotDisplayed()
                 onElement(TestElements.Foo, Scenes.NestedNestedSceneA).assertIsNotDisplayed()
 
                 onElement(TestElements.Foo, Scenes.NestedSceneB)
-                    .assertPositionInRootIsEqualTo(130.dp, 90.dp)
-                    .assertSizeIsEqualTo(100.dp, 80.dp)
+                    .assertBetweenElementVariants(elementVariant4, elementVariant2, this)
             }
-            at(16) {
-                onElement(TestElements.Foo, Scenes.NestedSceneA).assertIsNotDisplayed()
-                onElement(TestElements.Foo, Scenes.NestedNestedSceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, Scenes.NestedSceneB)
-                    .assertPositionInRootIsEqualTo(100.dp, 80.dp)
-                    .assertSizeIsEqualTo(80.dp, 80.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, Scenes.NestedSceneA).assertIsNotDisplayed()
-                onElement(TestElements.Foo, Scenes.NestedNestedSceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, Scenes.NestedSceneB)
-                    .assertPositionInRootIsEqualTo(70.dp, 70.dp)
-                    .assertSizeIsEqualTo(60.dp, 80.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, Scenes.NestedSceneA).assertIsNotDisplayed()
-                onElement(TestElements.Foo, Scenes.NestedNestedSceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, Scenes.NestedSceneB)
-                    .assertPositionInRootIsEqualTo(40.dp, 60.dp)
-                    .assertSizeIsEqualTo(40.dp, 80.dp)
-            }
-            after {
-                onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                onElement(TestElements.Foo).assertSizeIsEqualTo(20.dp, 80.dp)
-            }
+            after { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
         }
     }
 
@@ -380,75 +226,58 @@ class NestedSharedElementTest {
                 // We can't reference the element inside the NestedSTL as of today
             },
         ) {
-            before { onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 70.dp) }
-            at(0) {
+            before { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
+            atAllFrames(4) {
                 onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(50.dp, 70.dp)
-                    .assertSizeIsEqualTo(10.dp, 40.dp)
+                    .assertPositionInRootIsEqualTo(
+                        interpolate(elementVariant1.x, 0.dp),
+                        elementVariant1.y,
+                    )
+                    .assertSizeIsEqualTo(elementVariant1.width, elementVariant1.height)
             }
-            at(16) {
-                onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(37.5.dp, 70.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(25.dp, 70.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(12.5.dp, 70.dp)
-            }
-            after { onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp) }
+            after { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
         }
     }
 
     @Test
     fun nestedSharedElementTransition_transitionInsideNestedStl() {
         rule.testTransition(
-            layoutModifier = Modifier.fillMaxSize().background(Color.Gray),
+            layoutModifier = Modifier.fillMaxSize(),
             fromSceneContent = nestedStlWithSharedElement,
             toSceneContent = contentWithSharedElement,
             changeState = { nestedState.setTargetScene(Scenes.NestedSceneB, animationScope = this) },
         ) {
-            before {
-                onElement(TestElements.Foo)
-                    .assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                    .assertSizeIsEqualTo(20.dp, 80.dp)
-            }
-            at(0) {
-                onElement(TestElements.Foo, Scenes.NestedSceneB).assertIsNotDisplayed()
+            before { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
+            atAllFrames(4) {
+                onElement(TestElements.Foo, Scenes.NestedSceneA).assertIsNotDisplayed()
 
-                onElement(TestElements.Foo, scene = Scenes.NestedSceneA)
-                    .assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                    .assertSizeIsEqualTo(20.dp, 80.dp)
-            }
-            at(16) {
-                onElement(TestElements.Foo, Scenes.NestedSceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, scene = Scenes.NestedSceneA)
-                    .assertPositionInRootIsEqualTo(20.dp, 40.dp)
-                    .assertSizeIsEqualTo(30.dp, 70.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, Scenes.NestedSceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, scene = Scenes.NestedSceneA)
-                    .assertPositionInRootIsEqualTo(30.dp, 30.dp)
-                    .assertSizeIsEqualTo(40.dp, 60.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, Scenes.NestedSceneB).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, scene = Scenes.NestedSceneA)
-                    .assertPositionInRootIsEqualTo(40.dp, 20.dp)
-                    .assertSizeIsEqualTo(50.dp, 50.dp)
+                onElement(TestElements.Foo, scene = Scenes.NestedSceneB)
+                    .assertBetweenElementVariants(elementVariant2, elementVariant3, this)
             }
             after {
                 onElement(TestElements.Foo, Scenes.NestedSceneA).assertIsNotDisplayed()
-                onElement(TestElements.Foo)
-                    .assertPositionInRootIsEqualTo(50.dp, 10.dp)
-                    .assertSizeIsEqualTo(60.dp, 40.dp)
+                onElement(TestElements.Foo).assertElementVariant(elementVariant3)
             }
         }
+    }
+
+    private fun SemanticsNodeInteraction.assertElementVariant(variant: SharedElement) {
+        assertPositionInRootIsEqualTo(variant.x, variant.y)
+        assertSizeIsEqualTo(variant.width, variant.height)
+    }
+
+    private fun SemanticsNodeInteraction.assertBetweenElementVariants(
+        from: SharedElement,
+        to: SharedElement,
+        assertScope: AutoTransitionTestAssertionScope,
+    ) {
+        assertPositionInRootIsEqualTo(
+            assertScope.interpolate(from.x, to.x),
+            assertScope.interpolate(from.y, to.y),
+        )
+        assertSizeIsEqualTo(
+            assertScope.interpolate(from.width, to.width),
+            assertScope.interpolate(from.height, to.height),
+        )
     }
 }

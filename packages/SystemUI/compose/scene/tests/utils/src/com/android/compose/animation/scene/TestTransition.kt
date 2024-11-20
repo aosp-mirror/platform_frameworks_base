@@ -29,6 +29,9 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 import platform.test.motion.MotionTestRule
 import platform.test.motion.RecordedMotion
@@ -64,6 +67,16 @@ interface TransitionTestBuilder {
     fun at(timestamp: Long, builder: TransitionTestAssertionScope.() -> Unit)
 
     /**
+     * Run the same assertion for all frames of a transition.
+     *
+     * @param totalFrames needs to be the exact number of frames of the transition that is run,
+     *   otherwise the passed progress will be incorrect. That is the duration in ms divided by 16.
+     * @param builder is passed a progress Float which can be used to calculate values for the
+     *   specific frame. Or use [AutoTransitionTestAssertionScope.interpolate].
+     */
+    fun atAllFrames(totalFrames: Int, builder: AutoTransitionTestAssertionScope.(Float) -> Unit)
+
+    /**
      * Assert on the state of the layout after the transition finished.
      *
      * This should be called maximum once, after [before] or [at] is called.
@@ -82,6 +95,12 @@ interface TransitionTestAssertionScope {
      * you are matching.
      */
     fun onElement(element: ElementKey, scene: SceneKey? = null): SemanticsNodeInteraction
+}
+
+interface AutoTransitionTestAssertionScope : TransitionTestAssertionScope {
+
+    /** Linear interpolate [from] and [to] with the current progress of the transition. */
+    fun <T> interpolate(from: T, to: T): T
 }
 
 val Default4FrameLinearTransition: TransitionBuilder.() -> Unit = {
@@ -302,12 +321,29 @@ fun ComposeContentTestRule.testTransition(
 ) {
     val test = transitionTest(builder)
     val assertionScope =
-        object : TransitionTestAssertionScope {
+        object : AutoTransitionTestAssertionScope {
+            var progress = 0f
+
             override fun onElement(
                 element: ElementKey,
                 scene: SceneKey?,
             ): SemanticsNodeInteraction {
                 return onNode(isElement(element, scene))
+            }
+
+            override fun <T> interpolate(from: T, to: T): T {
+                @Suppress("UNCHECKED_CAST")
+                return when {
+                    from is Float && to is Float -> lerp(from, to, progress)
+                    from is Int && to is Int -> lerp(from, to, progress)
+                    from is Long && to is Long -> lerp(from, to, progress)
+                    from is Dp && to is Dp -> lerp(from, to, progress)
+                    else ->
+                        throw UnsupportedOperationException(
+                            "Interpolation not supported for this type"
+                        )
+                }
+                    as T
             }
         }
 
@@ -330,14 +366,28 @@ fun ComposeContentTestRule.testTransition(
     mainClock.advanceTimeByFrame()
     waitForIdle()
 
+    var currentTime = 0L
     // Test the assertions at specific points in time.
     test.timestamps.forEach { tsAssertion ->
         if (tsAssertion.timestampDelta > 0L) {
             mainClock.advanceTimeBy(tsAssertion.timestampDelta)
             waitForIdle()
+            currentTime += tsAssertion.timestampDelta.toInt()
         }
 
-        tsAssertion.assertion(assertionScope)
+        assertionScope.progress = tsAssertion.progress
+        try {
+            tsAssertion.assertion(assertionScope, tsAssertion.progress)
+        } catch (assertionError: AssertionError) {
+            if (assertionScope.progress > 0) {
+                throw AssertionError(
+                    "Transition assertion failed at ${currentTime}ms " +
+                        "at progress: ${assertionScope.progress}f",
+                    assertionError,
+                )
+            }
+            throw assertionError
+        }
     }
 
     // Go to the end state and test it.
@@ -380,7 +430,25 @@ private fun transitionTest(builder: TransitionTestBuilder.() -> Unit): Transitio
                     val delta = timestamp - currentTimestamp
                     currentTimestamp = timestamp
 
-                    timestamps.add(TimestampAssertion(delta, builder))
+                    timestamps.add(TimestampAssertion(delta, { builder() }, 0f))
+                }
+
+                override fun atAllFrames(
+                    totalFrames: Int,
+                    builder: AutoTransitionTestAssertionScope.(Float) -> Unit,
+                ) {
+                    check(after == null) { "atFrames(...) {} must be called before after {}" }
+                    check(currentTimestamp == 0L) {
+                        "atFrames(...) can't be called multiple times or after at(...)"
+                    }
+
+                    for (frame in 0 until totalFrames) {
+                        val timestamp = frame * 16L
+                        val delta = timestamp - currentTimestamp
+                        val progress = frame.toFloat() / totalFrames
+                        currentTimestamp = timestamp
+                        timestamps.add(TimestampAssertion(delta, builder, progress))
+                    }
                 }
 
                 override fun after(builder: TransitionTestAssertionScope.() -> Unit) {
@@ -405,5 +473,6 @@ private class TransitionTest(
 
 private class TimestampAssertion(
     val timestampDelta: Long,
-    val assertion: TransitionTestAssertionScope.() -> Unit,
+    val assertion: AutoTransitionTestAssertionScope.(Float) -> Unit,
+    val progress: Float,
 )
