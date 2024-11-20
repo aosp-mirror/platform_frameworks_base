@@ -1868,6 +1868,19 @@ public class NotificationManager {
     /**
      * @hide
      */
+    @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+    public void setTypeAdjustmentForPackageState(@NonNull String pkg, boolean enabled) {
+        INotificationManager service = getService();
+        try {
+            service.setTypeAdjustmentForPackageState(pkg, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
     public List<String> getEnabledNotificationListenerPackages() {
         INotificationManager service = getService();
         try {
