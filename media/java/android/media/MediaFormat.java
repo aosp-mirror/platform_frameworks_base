@@ -16,12 +16,12 @@
 
 package android.media;
 
-
 import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
+import static android.media.codec.Flags.FLAG_APV_SUPPORT;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NUM_INPUT_SLOTS;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
-import static android.media.codec.Flags.FLAG_APV_SUPPORT;
+import static android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES;
 
 import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
@@ -1794,6 +1794,27 @@ public final class MediaFormat {
      */
     @FlaggedApi(FLAG_NUM_INPUT_SLOTS)
     public static final String KEY_NUM_SLOTS = "num-slots";
+
+    /**
+     * A key describing the picture profile ID to be applied to {@link MediaCodec}.
+     * <p>
+     * The associated value is a string.
+     * <p>
+     * @see {@link android.media.quality.PictureProfile}
+     * @see {@link android.media.quality.PictureProfile#getProfileId}
+     */
+    @FlaggedApi(FLAG_APPLY_PICTURE_PROFILES)
+    public static final String KEY_PICTURE_PROFILE_ID = "picture-profile-id";
+
+    /**
+     * A key describing the picture profile instance to be applied to {@link MediaCodec}.
+     * <p>
+     * The associated value is an instance of {@link android.media.quality.PictureProfile}.
+     * <p>
+     * @see {@link android.media.quality.PictureProfile}
+     */
+    @FlaggedApi(FLAG_APPLY_PICTURE_PROFILES)
+    public static final String KEY_PICTURE_PROFILE_INSTANCE = "picture-profile-instance";
 
     /**
      * QpOffsetRect constitutes the metadata required for encoding a region of interest in an
