@@ -31,6 +31,7 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
 
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -119,6 +120,8 @@ public class PipTransition extends PipTransitionController implements
 
     @Nullable
     private Transitions.TransitionFinishCallback mFinishCallback;
+
+    private ValueAnimator mTransitionAnimator;
 
     public PipTransition(
             Context context,
@@ -209,7 +212,12 @@ public class PipTransition extends PipTransitionController implements
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
-            @NonNull Transitions.TransitionFinishCallback finishCallback) {}
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        // Just jump-cut the current animation if any, but do not merge.
+        if (info.getType() == TRANSIT_EXIT_PIP) {
+            end();
+        }
+    }
 
     @Override
     public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
@@ -269,6 +277,14 @@ public class PipTransition extends PipTransitionController implements
         }
         mFinishCallback = null;
         return false;
+    }
+
+    @Override
+    public void end() {
+        if (mTransitionAnimator != null && mTransitionAnimator.isRunning()) {
+            mTransitionAnimator.end();
+            mTransitionAnimator = null;
+        }
     }
 
     //
@@ -438,7 +454,7 @@ public class PipTransition extends PipTransitionController implements
             }
             finishTransition();
         });
-        animator.start();
+        cacheAndStartTransitionAnimator(animator);
         return true;
     }
 
@@ -538,7 +554,7 @@ public class PipTransition extends PipTransitionController implements
                 PipAlphaAnimator.FADE_IN);
         // This should update the pip transition state accordingly after we stop playing.
         animator.setAnimationEndCallback(this::finishTransition);
-        animator.start();
+        cacheAndStartTransitionAnimator(animator);
         return true;
     }
 
@@ -608,7 +624,7 @@ public class PipTransition extends PipTransitionController implements
             }
             finishTransition();
         });
-        animator.start();
+        cacheAndStartTransitionAnimator(animator);
         return true;
     }
 
@@ -834,17 +850,17 @@ public class PipTransition extends PipTransitionController implements
         return leash;
     }
 
+    void cacheAndStartTransitionAnimator(@NonNull ValueAnimator animator) {
+        mTransitionAnimator = animator;
+        mTransitionAnimator.start();
+    }
+
     //
     // Miscellaneous callbacks and listeners
     //
 
     @Override
     public void finishTransition() {
-        if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(null /* finishWct */);
-            mFinishCallback = null;
-        }
-
         final int currentState = mPipTransitionState.getState();
         int nextState = PipTransitionState.UNDEFINED;
         switch (currentState) {
@@ -859,6 +875,14 @@ public class PipTransition extends PipTransitionController implements
                 break;
         }
         mPipTransitionState.setState(nextState);
+
+        if (mFinishCallback != null) {
+            // Need to unset mFinishCallback first because onTransitionFinished can re-enter this
+            // handler if there is a pending PiP animation.
+            final Transitions.TransitionFinishCallback finishCallback = mFinishCallback;
+            mFinishCallback = null;
+            finishCallback.onTransitionFinished(null /* finishWct */);
+        }
     }
 
     @Override
