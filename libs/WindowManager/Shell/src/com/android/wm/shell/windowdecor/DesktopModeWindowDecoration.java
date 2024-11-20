@@ -1415,7 +1415,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mHandleMenu.show(
                 /* onToDesktopClickListener= */ () -> {
                     mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
-                    mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
                     return Unit.INSTANCE;
                 },
                 /* onToFullscreenClickListener= */ mOnToFullscreenClickListener,
