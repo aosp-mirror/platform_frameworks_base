@@ -7671,10 +7671,11 @@ package android.media {
     method public boolean isActive();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean isMuted();
     method public boolean isSpatialized();
-    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_APP_OPS = 8; // 0x8
+    field @Deprecated @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_APP_OPS = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_CLIENT_VOLUME = 16; // 0x10
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_MASTER = 1; // 0x1
     field @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_OP_CONTROL_AUDIO = 128; // 0x80
+    field @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_OP_PLAY_AUDIO = 8; // 0x8
     field @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_PORT_VOLUME = 64; // 0x40
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_STREAM_MUTED = 4; // 0x4
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_STREAM_VOLUME = 2; // 0x2
