@@ -17,12 +17,10 @@ package android.hardware.contexthub;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ParcelableHolder;
 
 import androidx.annotation.NonNull;
 
@@ -76,15 +74,12 @@ public final class HubServiceInfo implements Parcelable {
     private final int mMajorVersion;
     private final int mMinorVersion;
 
-    @NonNull private final ParcelableHolder mExtendedInfo;
-
     /** @hide */
     public HubServiceInfo(android.hardware.contexthub.Service service) {
         mServiceDescriptor = service.serviceDescriptor;
         mFormat = service.format;
         mMajorVersion = service.majorVersion;
         mMinorVersion = service.minorVersion;
-        mExtendedInfo = service.extendedInfo;
     }
 
     private HubServiceInfo(Parcel in) {
@@ -92,20 +87,17 @@ public final class HubServiceInfo implements Parcelable {
         mFormat = in.readInt();
         mMajorVersion = in.readInt();
         mMinorVersion = in.readInt();
-        mExtendedInfo = ParcelableHolder.CREATOR.createFromParcel(in);
     }
 
     public HubServiceInfo(
             @NonNull String serviceDescriptor,
             @ServiceFormat int format,
             int majorVersion,
-            int minorVersion,
-            @NonNull ParcelableHolder extendedInfo) {
+            int minorVersion) {
         mServiceDescriptor = serviceDescriptor;
         mFormat = format;
         mMajorVersion = majorVersion;
         mMinorVersion = minorVersion;
-        mExtendedInfo = extendedInfo;
     }
 
     /** Get the unique identifier of this service. See {@link Builder} for more information. */
@@ -134,17 +126,10 @@ public final class HubServiceInfo implements Parcelable {
         return mMinorVersion;
     }
 
-    /** Get the {@link ParcelableHolder} for the extended information about the service. */
-    @NonNull
-    public ParcelableHolder getExtendedInfo() {
-        return mExtendedInfo;
-    }
-
     /** Parcel implementation details */
     @Override
     public int describeContents() {
-        // Passthrough describeContents flags for mExtendedInfo because we don't have FD otherwise.
-        return mExtendedInfo.describeContents();
+        return 0;
     }
 
     /** Parcel implementation details */
@@ -154,7 +139,6 @@ public final class HubServiceInfo implements Parcelable {
         dest.writeInt(mFormat);
         dest.writeInt(mMajorVersion);
         dest.writeInt(mMinorVersion);
-        mExtendedInfo.writeToParcel(dest, flags);
     }
 
     /** Builder for a {@link HubServiceInfo} object. */
@@ -164,9 +148,6 @@ public final class HubServiceInfo implements Parcelable {
         @ServiceFormat private final int mFormat;
         private final int mMajorVersion;
         private final int mMinorVersion;
-
-        private final ParcelableHolder mExtendedInfo =
-                new ParcelableHolder(Parcelable.PARCELABLE_STABILITY_VINTF);
 
         /**
          * Create a builder for {@link HubServiceInfo} with a service descriptor.
@@ -220,20 +201,6 @@ public final class HubServiceInfo implements Parcelable {
         }
 
         /**
-         * Set the extended information of this service.
-         *
-         * @param extendedInfo Parcelable with extended information about this service. The
-         *     parcelable needs to have at least VINTF stability. Null can be used to clear a
-         *     previously set value.
-         * @throws android.os.BadParcelableException if the parcelable cannot be used.
-         */
-        @NonNull
-        public Builder setExtendedInfo(@Nullable Parcelable extendedInfo) {
-            mExtendedInfo.setParcelable(extendedInfo);
-            return this;
-        }
-
-        /**
          * Build the {@link HubServiceInfo} object.
          *
          * @throws IllegalStateException if the Builder is missing required info.
@@ -244,7 +211,7 @@ public final class HubServiceInfo implements Parcelable {
                 throw new IllegalStateException("Major and minor version must be set.");
             }
             return new HubServiceInfo(
-                    mServiceDescriptor, mFormat, mMajorVersion, mMinorVersion, mExtendedInfo);
+                    mServiceDescriptor, mFormat, mMajorVersion, mMinorVersion);
         }
     }
 
