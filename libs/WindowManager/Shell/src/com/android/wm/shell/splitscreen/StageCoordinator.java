@@ -2177,11 +2177,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mDividerFadeInAnimator.cancel();
         }
 
-        mSplitLayout.getRefDividerBounds(mTempRect1);
         if (t != null) {
+            updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
             t.setVisibility(dividerLeash, mDividerVisible);
-            t.setLayer(dividerLeash, Integer.MAX_VALUE);
-            t.setPosition(dividerLeash, mTempRect1.left, mTempRect1.top);
         } else if (mDividerVisible) {
             final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
             mDividerFadeInAnimator = ValueAnimator.ofFloat(0f, 1f);
@@ -2201,11 +2199,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mDividerFadeInAnimator.cancel();
                         return;
                     }
-                    mSplitLayout.getRefDividerBounds(mTempRect1);
+                    updateSurfaceBounds(mSplitLayout, transaction, false /* applyResizingOffset */);
                     transaction.show(dividerLeash);
                     transaction.setAlpha(dividerLeash, 0);
-                    transaction.setLayer(dividerLeash, Integer.MAX_VALUE);
-                    transaction.setPosition(dividerLeash, mTempRect1.left, mTempRect1.top);
                     transaction.apply();
                 }
 
