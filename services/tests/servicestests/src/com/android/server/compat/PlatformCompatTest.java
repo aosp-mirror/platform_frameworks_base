@@ -18,6 +18,7 @@ package com.android.server.compat;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.never;
@@ -25,13 +26,15 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.testng.Assert.assertThrows;
 
 import android.compat.Compatibility.ChangeConfig;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Build;
+import android.os.PermissionEnforcer;
+import android.permission.PermissionCheckerManager;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -77,6 +80,22 @@ public class PlatformCompatTest {
             .thenReturn(-1);
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
             .thenThrow(new PackageManager.NameNotFoundException());
+
+        var allGrantingPermissionEnforcer = new PermissionEnforcer() {
+            @Override
+            protected int checkPermission(String permission, AttributionSource source) {
+                return PermissionCheckerManager.PERMISSION_GRANTED;
+            }
+
+            @Override
+            protected int checkPermission(String permission, int pid, int uid) {
+                return PermissionCheckerManager.PERMISSION_GRANTED;
+            }
+        };
+
+        when(mContext.getSystemService(eq(Context.PERMISSION_ENFORCER_SERVICE)))
+                .thenReturn(allGrantingPermissionEnforcer);
+
         mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig, mBuildClassifier);
         // Assume userdebug/eng non-final build

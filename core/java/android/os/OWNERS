@@ -128,3 +128,6 @@ per-file StatsServiceManager.java = file:/services/core/java/com/android/server/
 
 # Dropbox
 per-file DropBoxManager* = mwachens@google.com
+
+# Flags
+per-file flags.aconfig = file:/FF_LEADS_OWNERS

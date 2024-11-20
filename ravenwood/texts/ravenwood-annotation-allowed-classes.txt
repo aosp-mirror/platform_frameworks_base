@@ -366,3 +366,9 @@ com.android.server.utils.TimingsTraceAndSlog
 
 android.os.IpcDataCache
 android.app.PropertyInvalidatedCache
+
+android.app.compat.*
+com.android.server.compat.*
+com.android.internal.compat.*
+android.app.AppCompatCallbacks
+

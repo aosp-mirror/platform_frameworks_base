@@ -24,6 +24,7 @@ import android.platform.test.ravenwood.RavenwoodRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -32,6 +33,10 @@ import org.junit.runner.RunWith;
 
 /**
  * Test for @Config field extraction and validation.
+ *
+ * TODO(b/377765941) Most of the tests here will be obsolete and deleted with b/377765941, but
+ * some of the tests may need to be re-implemented one way or another. (e.g. the package name
+ * test.) Until that happens, we'll keep all tests here but add an {@code @Ignore} instead.
  */
 @NoRavenizer // This class shouldn't be executed with RavenwoodAwareTestRunner.
 public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase {
@@ -59,6 +64,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunFinished: 1,0,0,0
     """)
     // CHECKSTYLE:ON
+    @Ignore // Package name is no longer set via config.
     public static class ConfigInBaseClassTest extends ConfigInBaseClass {
         @Test
         public void test() {
@@ -83,6 +89,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunFinished: 1,0,0,0
     """)
     // CHECKSTYLE:ON
+    @Ignore // Package name is no longer set via config.
     public static class ConfigOverridingTest extends ConfigInBaseClass {
         static String PACKAGE_NAME_OVERRIDE = "com.ConfigOverridingTest";
 
@@ -376,6 +383,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunFinished: 1,0,0,0
     """)
     // CHECKSTYLE:ON
+    @Ignore // Package name is no longer set via config.
     public static class RuleInBaseClassSuccessTest extends RuleInBaseClass {
 
         @Test
@@ -437,6 +445,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunFinished: 1,1,0,0
     """)
     // CHECKSTYLE:ON
+    @Ignore // Package name is no longer set via config.
     public static class RuleWithDifferentTypeInBaseClassSuccessTest extends RuleWithDifferentTypeInBaseClass {
 
         @Test
