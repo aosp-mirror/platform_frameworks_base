@@ -10521,6 +10521,27 @@ public class NotificationManagerService extends SystemService {
                             mGroupHelper.onNotificationRemoved(r, mNotificationList);
                         }
                     });
+
+                    // Wait 3 seconds so that the app has a chance to cancel/post
+                    // a group summary or children
+                    final NotificationRecord groupSummary = mSummaryByGroupKey.get(r.getGroupKey());
+                    if (groupSummary != null
+                            && !GroupHelper.isAggregatedGroup(groupSummary)
+                            && !groupSummary.getKey().equals(canceledKey)) {
+                        // We only care about app-provided valid group summaries
+                        final String summaryKey = groupSummary.getKey();
+                        mHandler.removeCallbacksAndEqualMessages(summaryKey);
+                        mHandler.postDelayed(() -> {
+                            synchronized (mNotificationLock) {
+                                NotificationRecord summaryRecord = mNotificationsByKey.get(
+                                        summaryKey);
+                                if (summaryRecord != null) {
+                                    mGroupHelper.onGroupedNotificationRemovedWithDelay(
+                                            summaryRecord, mNotificationList, mSummaryByGroupKey);
+                                }
+                            }
+                        }, summaryKey, DELAY_FORCE_REGROUP_TIME);
+                    }
                 } else {
                     mHandler.post(new Runnable() {
                         @Override
