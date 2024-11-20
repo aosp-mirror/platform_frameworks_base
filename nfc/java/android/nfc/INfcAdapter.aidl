@@ -31,6 +31,7 @@ import android.nfc.INfcCardEmulation;
 import android.nfc.INfcFCardEmulation;
 import android.nfc.INfcOemExtensionCallback;
 import android.nfc.INfcUnlockHandler;
+import android.nfc.IT4tNdefNfcee;
 import android.nfc.ITagRemovedCallback;
 import android.nfc.INfcDta;
 import android.nfc.INfcWlcStateListener;
@@ -122,4 +123,5 @@ interface INfcAdapter
     void indicateDataMigration(boolean inProgress, String pkg);
     int commitRouting();
     boolean isTagIntentAllowed(in String pkg, in int Userid);
+    IT4tNdefNfcee getT4tNdefNfceeInterface();
 }
