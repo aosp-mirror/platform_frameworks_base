@@ -627,8 +627,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         StatusBarRootModernization.assertInLegacyMode();
 
         // TODO(b/328393714) use HeadsUpNotificationInteractor.showHeadsUpStatusBar instead.
-        boolean headsUpVisible =
-                mHomeStatusBarComponent.getHeadsUpAppearanceController().shouldBeVisible();
+        boolean headsUpVisible = mHomeStatusBarComponent
+                .getHeadsUpAppearanceController()
+                .shouldHeadsUpStatusBarBeVisible();
 
         if (SceneContainerFlag.isEnabled()) {
             // With the scene container, only use the value calculated by the view model to

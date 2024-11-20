@@ -1247,6 +1247,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
+    public PinnedStatus getPinnedStatus() {
+        return mPinnedStatus;
+    }
+
+    @Override
     public int getPinnedHeadsUpHeight() {
         return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
     }
