@@ -30,22 +30,27 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class RoutingTableTechnologyEntry extends NfcRoutingTableEntry {
     /**
-     * Technology-A
+     * Technology-A.
+     * <p>Tech-A is mostly used for payment and ticketing applications. It supports various
+     * Tag platforms including Type 1, Type 2 and Type 4A tags. </p>
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int TECHNOLOGY_A = 0;
     /**
-     * Technology-B
+     * Technology-B which is based on ISO/IEC 14443-3 standard.
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int TECHNOLOGY_B = 1;
     /**
-     * Technology-F
+     * Technology-F.
+     * <p>Tech-F is a standard which supports Type 3 Tags and NFC-DEP protocol etc.</p>
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int TECHNOLOGY_F = 2;
     /**
-     * Technology-V
+     * Technology-V.
+     * <p>Tech-V is an NFC technology used for communication with passive tags that operate
+     * at a longer range than other NFC technologies. </p>
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int TECHNOLOGY_V = 3;
@@ -73,7 +78,7 @@ public class RoutingTableTechnologyEntry extends NfcRoutingTableEntry {
 
     /** @hide */
     public RoutingTableTechnologyEntry(int nfceeId, @TechnologyValue int value) {
-        super(nfceeId);
+        super(nfceeId, TYPE_TECHNOLOGY);
         this.mValue = value;
     }
 
