@@ -451,6 +451,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * Value of {@link #colorMode} indicating that the activity should use a
      * high dynamic range if the presentation display supports it.
      *
+     * <p>Note: This does not impact SurfaceViews or SurfaceControls, as those have their own
+     * independent HDR support.</p>
+     *
+     * <p><b>Important:</b> Although this value was added in API 26, it is strongly recommended
+     * to avoid using it until API 34 which is when HDR support for the UI toolkit was officially
+     * added.</p>
+     *
      * @see android.R.attr#colorMode
      */
     public static final int COLOR_MODE_HDR = 2;
