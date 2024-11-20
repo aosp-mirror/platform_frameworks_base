@@ -643,6 +643,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.addCaptionInset(wct);
         mDesktopTasksController.moveTaskToDesktop(taskId, wct, source);
         decoration.closeHandleMenu();
+
+        if (source == DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON) {
+            mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_DESKTOP_MODE);
+        }
     }
 
     private void onToFullscreen(int taskId) {
@@ -658,6 +663,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             mDesktopTasksController.moveToFullscreen(taskId,
                     DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
         }
+        mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_FULL_SCREEN);
     }
 
     private void onToSplitScreen(int taskId) {
@@ -670,6 +677,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         // we shouldn't receive input for it any longer.
         decoration.disposeStatusBarInputLayer();
         mDesktopTasksController.requestSplit(decoration.mTaskInfo, false /* leftOrTop */);
+        mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_SPLIT_SCREEN);
     }
 
     private void onNewWindow(int taskId) {

@@ -106,7 +106,13 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
         DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724),
         @UiEvent(doc = "Tap on the window Handle to open the Handle Menu")
-        DESKTOP_WINDOW_APP_HANDLE_TAP(1998);
+        DESKTOP_WINDOW_APP_HANDLE_TAP(1998),
+        @UiEvent(doc = "Tap on the desktop mode option under app handle menu")
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_DESKTOP_MODE(1999),
+        @UiEvent(doc = "Tap on the split screen option under app handle menu")
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_SPLIT_SCREEN(2000),
+        @UiEvent(doc = "Tap on the full screen option under app handle menu")
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_FULL_SCREEN(2001);
 
         override fun getId(): Int = mId
     }
