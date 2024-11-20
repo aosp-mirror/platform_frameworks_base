@@ -492,6 +492,28 @@ public final class NfcOemExtension {
     }
 
     /**
+     * Get an instance of {@link T4tNdefNfcee} object for performing T4T (Type-4 Tag)
+     * NDEF (NFC Data Exchange Format) NFCEE (NFC Execution Environment) operations.
+     * This can be used to write NDEF data to emulate a T4T tag in an NFCEE
+     * (NFC Execution Environment - eSE, SIM, etc). Refer to the NFC forum specification
+     * "NFCForum-TS-NCI-2.3 section 10.4" and "NFCForum-TS-T4T-1.1 section 4.2" for more details.
+     *
+     * This is a singleton object which shall be used by OEM extension module to do NDEF-NFCEE
+     * read/write operations.
+     *
+     * <p>Returns {@link T4tNdefNfcee}
+     * <p>Does not cause any RF activity and does not block.
+     * @return NFC Data Exchange Format (NDEF) NFC Execution Environment (NFCEE) object
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public T4tNdefNfcee getT4tNdefNfcee() {
+        return T4tNdefNfcee.getInstance();
+    }
+
+    /**
      * Register an {@link Callback} to listen for NFC oem extension callbacks
      * Multiple clients can register and callbacks will be invoked asynchronously.
      *
