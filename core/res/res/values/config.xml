@@ -2731,6 +2731,8 @@
     </string-array>
     <!-- The list of supported dream complications -->
     <integer-array name="config_supportedDreamComplications">
+        <!-- COMPLICATION_TYPE_TIME -->
+        <item>1</item>
     </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
