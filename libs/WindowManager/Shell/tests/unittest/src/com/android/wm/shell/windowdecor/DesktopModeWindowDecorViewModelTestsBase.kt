@@ -54,6 +54,7 @@ import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
+import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger
 import com.android.wm.shell.desktopmode.DesktopRepository
@@ -112,6 +113,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     protected val displayInsetsController = mock<DisplayInsetsController>()
     protected val mockSyncQueue = mock<SyncTransactionQueue>()
     protected val mockDesktopTasksController = mock<DesktopTasksController>()
+    protected val mockDesktopImmersiveController = mock<DesktopImmersiveController>()
     protected val mockInputMonitor = mock<InputMonitor>()
     protected val mockTransitions = mock<Transitions>()
     internal val mockInputMonitorFactory =
@@ -183,6 +185,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             mockSyncQueue,
             mockTransitions,
             Optional.of(mockDesktopTasksController),
+            mockDesktopImmersiveController,
             mockGenericLinksParser,
             mockAssistContentRequester,
             mockMultiInstanceHelper,
