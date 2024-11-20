@@ -61,40 +61,74 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiSt
 import com.android.systemui.res.R
 
 @Composable
-fun AssignNewShortcutDialog(
+fun ShortcutCustomizationDialog(
     uiState: ShortcutCustomizationUiState,
     modifier: Modifier = Modifier,
     onKeyPress: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
     onConfirmSetShortcut: () -> Unit,
+    onConfirmDeleteShortcut: () -> Unit,
 ) {
-    if (uiState is ShortcutCustomizationUiState.AddShortcutDialog) {
-        Column(modifier = modifier) {
-            Title(
-                uiState.shortcutLabel,
-                modifier = Modifier.padding(horizontal = 24.dp).width(316.dp),
-            )
-            Description(
-                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp).width(316.dp)
-            )
-            PromptShortcutModifier(
-                modifier =
-                    Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
-                        .width(131.dp)
-                        .height(48.dp),
-                defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
-            )
-            SelectedKeyCombinationContainer(
-                shouldShowError = uiState.errorMessage.isNotEmpty(),
-                onKeyPress = onKeyPress,
-                pressedKeys = uiState.pressedKeys,
-            )
-            ErrorMessageContainer(uiState.errorMessage)
-            DialogButtons(
-                onCancel,
-                isSetShortcutButtonEnabled = uiState.pressedKeys.isNotEmpty(),
-                onConfirm = onConfirmSetShortcut,
-            )
+    when (uiState) {
+        is ShortcutCustomizationUiState.AddShortcutDialog -> {
+            Column(modifier = modifier) {
+                Title(uiState.shortcutLabel)
+                Description(
+                    text =
+                        stringResource(
+                            id = R.string.shortcut_customize_mode_add_shortcut_description
+                        )
+                )
+                PromptShortcutModifier(
+                    modifier =
+                        Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
+                            .width(131.dp)
+                            .height(48.dp),
+                    defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
+                )
+                SelectedKeyCombinationContainer(
+                    shouldShowError = uiState.errorMessage.isNotEmpty(),
+                    onKeyPress = onKeyPress,
+                    pressedKeys = uiState.pressedKeys,
+                )
+                ErrorMessageContainer(uiState.errorMessage)
+                DialogButtons(
+                    onCancel,
+                    isConfirmButtonEnabled = uiState.pressedKeys.isNotEmpty(),
+                    onConfirm = onConfirmSetShortcut,
+                    confirmButtonText =
+                        stringResource(
+                            R.string.shortcut_helper_customize_dialog_set_shortcut_button_label
+                        ),
+                )
+            }
+        }
+        is ShortcutCustomizationUiState.DeleteShortcutDialog -> {
+            Column(modifier) {
+                Title(
+                    title =
+                        stringResource(
+                            id = R.string.shortcut_customize_mode_remove_shortcut_dialog_title
+                        )
+                )
+                Description(
+                    text =
+                        stringResource(
+                            id = R.string.shortcut_customize_mode_remove_shortcut_description
+                        )
+                )
+                DialogButtons(
+                    onCancel = onCancel,
+                    onConfirm = onConfirmDeleteShortcut,
+                    confirmButtonText =
+                        stringResource(
+                            R.string.shortcut_helper_customize_dialog_remove_button_label
+                        ),
+                )
+            }
+        }
+        else -> {
+            /* No-Op */
         }
     }
 }
@@ -102,8 +136,9 @@ fun AssignNewShortcutDialog(
 @Composable
 fun DialogButtons(
     onCancel: () -> Unit,
-    isSetShortcutButtonEnabled: Boolean,
+    isConfirmButtonEnabled: Boolean = true,
     onConfirm: () -> Unit,
+    confirmButtonText: String,
 ) {
     Row(
         modifier =
@@ -126,9 +161,8 @@ fun DialogButtons(
             color = MaterialTheme.colorScheme.primary,
             width = 116.dp,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            text =
-                stringResource(R.string.shortcut_helper_customize_dialog_set_shortcut_button_label),
-            enabled = isSetShortcutButtonEnabled,
+            text = confirmButtonText,
+            enabled = isConfirmButtonEnabled,
         )
     }
 }
@@ -262,23 +296,28 @@ private fun ShortcutTextKey(key: ShortcutKey.Text) {
 }
 
 @Composable
-private fun Title(title: String, modifier: Modifier = Modifier) {
+private fun Title(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.headlineSmall,
         fontSize = 24.sp,
-        modifier = modifier.wrapContentSize(Alignment.Center),
+        modifier =
+            Modifier.padding(horizontal = 24.dp).width(316.dp).wrapContentSize(Alignment.Center),
         color = MaterialTheme.colorScheme.onSurface,
         lineHeight = 32.sp,
+        fontWeight = FontWeight.W400,
     )
 }
 
 @Composable
-private fun Description(modifier: Modifier = Modifier) {
+private fun Description(text: String) {
     Text(
-        text = stringResource(id = R.string.shortcut_helper_customize_mode_sub_title),
+        text = text,
         style = MaterialTheme.typography.bodyMedium,
-        modifier = modifier.wrapContentSize(Alignment.Center),
+        modifier =
+            Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
+                .width(316.dp)
+                .wrapContentSize(Alignment.Center),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
