@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -42,7 +43,9 @@ public final class TestRunningTaskInfoBuilder {
     private int mParentTaskId = INVALID_TASK_ID;
     private int mUid = INVALID_TASK_ID;
     private int mTaskId = INVALID_TASK_ID;
+    private int mUserId = -1;
     private Intent mBaseIntent = new Intent();
+    private ComponentName mBaseActivity = null;
     private @WindowConfiguration.ActivityType int mActivityType = ACTIVITY_TYPE_STANDARD;
     private @WindowConfiguration.WindowingMode int mWindowingMode = WINDOWING_MODE_UNDEFINED;
     private int mDisplayId = Display.DEFAULT_DISPLAY;
@@ -87,12 +90,26 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    /** Sets the task info's user id. */
+    public TestRunningTaskInfoBuilder setUserId(int userId) {
+        mUserId = userId;
+        return this;
+    }
+
     /**
      * Set {@link ActivityManager.RunningTaskInfo#baseIntent} for the task info, by default
      * an empty intent is assigned
      */
     public TestRunningTaskInfoBuilder setBaseIntent(@NonNull Intent intent) {
         mBaseIntent = intent;
+        return this;
+    }
+
+    /**
+     * Set {@link ActivityManager.RunningTaskInfo#baseActivity} for the task info.
+     */
+    public TestRunningTaskInfoBuilder setBaseActivity(@NonNull ComponentName activity) {
+        mBaseActivity = activity;
         return this;
     }
 
@@ -164,6 +181,8 @@ public final class TestRunningTaskInfoBuilder {
         info.isTopActivityTransparent = mIsTopActivityTransparent;
         info.numActivities = mNumActivities;
         info.lastActiveTime = mLastActiveTime;
+        info.userId = mUserId;
+        info.baseActivity = mBaseActivity;
         return info;
     }
 }
