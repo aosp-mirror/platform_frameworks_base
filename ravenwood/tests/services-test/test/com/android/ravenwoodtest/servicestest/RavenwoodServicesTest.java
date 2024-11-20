@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.hardware.SerialManager;
 import android.hardware.SerialManagerInternal;
-import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
 
@@ -70,7 +69,8 @@ public class RavenwoodServicesTest {
     }
 
     @Test
-    @DisabledOnRavenwood(reason="AOSP is missing resources support")
+    @android.platform.test.annotations.DisabledOnRavenwood(
+            reason = "AOSP is missing resources support")
     public void testSimple() {
         // Verify that we can obtain a manager, and talk to the backend service, and that no
         // serial ports are configured by default

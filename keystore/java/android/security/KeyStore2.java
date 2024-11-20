@@ -101,7 +101,7 @@ public class KeyStore2 {
         R execute(IKeystoreService service) throws RemoteException;
     }
 
-    private <R> R handleRemoteExceptionWithRetry(@NonNull CheckedRemoteRequest<R> request)
+    <R> R handleRemoteExceptionWithRetry(@NonNull CheckedRemoteRequest<R> request)
             throws KeyStoreException {
         IKeystoreService service = getService(false /* retryLookup */);
         boolean firstTry = true;
@@ -367,6 +367,18 @@ public class KeyStore2 {
         if (wasInterrupted) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Returns tag-specific info required to interpret a tag's attested value.
+     * @see IKeystoreService#getSupplementaryAttestationInfo(Tag) for more details.
+     * @param tag
+     * @return
+     * @throws KeyStoreException
+     * @hide
+     */
+    public byte[] getSupplementaryAttestationInfo(int tag) throws KeyStoreException {
+        return KeyStore2HalVersion.getSupplementaryAttestationInfoHelper(tag, this);
     }
 
     static KeyStoreException getKeyStoreException(int errorCode, String serviceErrorMessage) {
