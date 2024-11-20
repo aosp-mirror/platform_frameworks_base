@@ -214,7 +214,7 @@ public class RemoteCallbackList<E extends IInterface> {
             if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
                 try {
                     mBinder.removeFrozenStateChangeCallback(this);
-                } catch (UnsupportedOperationException e) {
+                } catch (UnsupportedOperationException | IllegalArgumentException e) {
                     // The kernel does not support frozen notifications. Ignore the error and move
                     // on.
                 }
