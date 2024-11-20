@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.RemoteException;
@@ -223,13 +224,14 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
-        private void setImeInputTargetRequestedVisibility(boolean visible) {
+        private void setImeInputTargetRequestedVisibility(boolean visible,
+                @NonNull ImeTracker.Token statsToken) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
                 return;
             }
             for (OnInsetsChangedListener listener : listeners) {
-                listener.setImeInputTargetRequestedVisibility(visible);
+                listener.setImeInputTargetRequestedVisibility(visible, statsToken);
             }
         }
 
@@ -276,10 +278,11 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
 
             @Override
-            public void setImeInputTargetRequestedVisibility(boolean visible)
+            public void setImeInputTargetRequestedVisibility(boolean visible,
+                    @NonNull ImeTracker.Token statsToken)
                     throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.setImeInputTargetRequestedVisibility(visible);
+                    PerDisplay.this.setImeInputTargetRequestedVisibility(visible, statsToken);
                 });
             }
         }
@@ -345,7 +348,10 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
          * Called to set the requested visibility of the IME in DisplayImeController. Invoked by
          * {@link com.android.server.wm.DisplayContent.RemoteInsetsControlTarget}.
          * @param visible requested status of the IME
+         * @param statsToken the token tracking the current IME request
          */
-        default void setImeInputTargetRequestedVisibility(boolean visible) {}
+        default void setImeInputTargetRequestedVisibility(boolean visible,
+                @NonNull ImeTracker.Token statsToken) {
+        }
     }
 }

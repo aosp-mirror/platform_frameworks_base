@@ -172,10 +172,10 @@ public class DisplayImeControllerTest extends ShellTestCase {
         var mockPp = mock(DisplayImeController.ImePositionProcessor.class);
         mDisplayImeController.addPositionProcessor(mockPp);
 
-        mPerDisplay.setImeInputTargetRequestedVisibility(true);
+        mPerDisplay.setImeInputTargetRequestedVisibility(true, null /* statsToken */);
         verify(mockPp).onImeRequested(anyInt(), eq(true));
 
-        mPerDisplay.setImeInputTargetRequestedVisibility(false);
+        mPerDisplay.setImeInputTargetRequestedVisibility(false, null /* statsToken */);
         verify(mockPp).onImeRequested(anyInt(), eq(false));
     }
 
