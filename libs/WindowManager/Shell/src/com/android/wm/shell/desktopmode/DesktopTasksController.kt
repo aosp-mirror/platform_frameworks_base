@@ -1689,8 +1689,11 @@ class DesktopTasksController(
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)
                 // In some launches home task is moved behind new task being launched. Make sure
-                // that's not the case for launches in desktop.
-                if (task.baseIntent.flags.and(Intent.FLAG_ACTIVITY_TASK_ON_HOME) != 0) {
+                // that's not the case for launches in desktop. Also, if this launch is the first
+                // one to trigger the desktop mode (e.g., when [forceEnterDesktop()]), activate the
+                // desktop mode here.
+                if (task.baseIntent.flags.and(Intent.FLAG_ACTIVITY_TASK_ON_HOME) != 0
+                    || !isDesktopModeShowing(task.displayId)) {
                     bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
                     wct.reorder(task.token, true)
                 }
