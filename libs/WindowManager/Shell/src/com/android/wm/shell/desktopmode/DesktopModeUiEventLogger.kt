@@ -118,7 +118,13 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "When user successfully drags the app handle to split screen")
         DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN(2003),
         @UiEvent(doc = "When user successfully drags the app handle to full screen")
-        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_FULL_SCREEN(2004);
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_FULL_SCREEN(2004),
+        @UiEvent(doc = "Drag the window header to the top to switch to full screen mode")
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_FULL_SCREEN(2005),
+        @UiEvent(doc = "Drag the window header to an edge to tile it to the left side")
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_LEFT(2006),
+        @UiEvent(doc = "Drag the window header to an edge to tile it to the right side")
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_RIGHT(2007);
 
         override fun getId(): Int = mId
     }

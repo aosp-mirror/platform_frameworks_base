@@ -2029,6 +2029,10 @@ class DesktopTasksController(
                 if (DesktopModeStatus.shouldMaximizeWhenDragToTopEdge(context)) {
                     dragToMaximizeDesktopTask(taskInfo, taskSurface, currentDragBounds, motionEvent)
                 } else {
+                    desktopModeUiEventLogger.log(
+                        taskInfo,
+                        DesktopUiEventEnum.DESKTOP_WINDOW_APP_HEADER_DRAG_TO_FULL_SCREEN
+                    )
                     moveToFullscreenWithAnimation(
                         taskInfo,
                         position,
@@ -2037,6 +2041,10 @@ class DesktopTasksController(
                 }
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_LEFT
+                )
                 handleSnapResizingTaskOnDrag(
                     taskInfo,
                     SnapPosition.LEFT,
@@ -2048,6 +2056,10 @@ class DesktopTasksController(
                 )
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_RIGHT
+                )
                 handleSnapResizingTaskOnDrag(
                     taskInfo,
                     SnapPosition.RIGHT,
