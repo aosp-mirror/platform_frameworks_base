@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy
+package com.android.systemui.statusbar.notification.headsup
 
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.INFO
@@ -52,7 +52,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         caller: String,
         isEnabled: Boolean,
         notifEntryKey: String,
-        outcome: String
+        outcome: String,
     ) {
         buffer.log(
             TAG,
@@ -63,7 +63,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str3 = outcome
                 bool1 = isEnabled
             },
-            { "$str1\n\t=> AC[isEnabled:$bool1] update: $str2\n\t=> $str3" }
+            { "$str1\n\t=> AC[isEnabled:$bool1] update: $str2\n\t=> $str3" },
         )
     }
 
@@ -71,7 +71,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         caller: String,
         isEnabled: Boolean,
         notifEntryKey: String,
-        outcome: String
+        outcome: String,
     ) {
         buffer.log(
             TAG,
@@ -82,7 +82,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str3 = outcome
                 bool1 = isEnabled
             },
-            { "$str1\n\t=> AC[isEnabled:$bool1] delete: $str2\n\t=> $str3" }
+            { "$str1\n\t=> AC[isEnabled:$bool1] delete: $str2\n\t=> $str3" },
         )
     }
 
@@ -99,7 +99,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 long1 = delayMillis
                 str2 = reason
             },
-            { "schedule auto remove of $str1 in $long1 ms reason: $str2" }
+            { "schedule auto remove of $str1 in $long1 ms reason: $str2" },
         )
     }
 
@@ -111,7 +111,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = entry.logKey
                 str2 = reason
             },
-            { "request: reschedule auto remove of $str1 reason: $str2" }
+            { "request: reschedule auto remove of $str1 reason: $str2" },
         )
     }
 
@@ -124,7 +124,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 long1 = delayMillis
                 str2 = reason
             },
-            { "reschedule auto remove of $str1 in $long1 ms reason: $str2" }
+            { "reschedule auto remove of $str1 in $long1 ms reason: $str2" },
         )
     }
 
@@ -136,7 +136,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = entry.logKey
                 str2 = reason ?: "unknown"
             },
-            { "request: cancel auto remove of $str1 reason: $str2" }
+            { "request: cancel auto remove of $str1 reason: $str2" },
         )
     }
 
@@ -148,7 +148,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = entry.logKey
                 str2 = reason ?: "unknown"
             },
-            { "cancel auto remove of $str1 reason: $str2" }
+            { "cancel auto remove of $str1 reason: $str2" },
         )
     }
 
@@ -161,7 +161,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str2 = reason
                 bool1 = isWaiting
             },
-            { "request: $str2 => remove entry $str1 isWaiting: $isWaiting" }
+            { "request: $str2 => remove entry $str1 isWaiting: $isWaiting" },
         )
     }
 
@@ -174,7 +174,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str2 = reason
                 bool1 = isWaiting
             },
-            { "$str2 => remove entry $str1 isWaiting: $isWaiting" }
+            { "$str2 => remove entry $str1 isWaiting: $isWaiting" },
         )
     }
 
@@ -190,7 +190,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         key: String,
         releaseImmediately: Boolean,
         isWaiting: Boolean,
-        reason: String
+        reason: String,
     ) {
         buffer.log(
             TAG,
@@ -204,7 +204,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             {
                 "remove notification $str1 releaseImmediately: $bool1 isWaiting: $bool2 " +
                     "reason: $str2"
-            }
+            },
         )
     }
 
@@ -216,7 +216,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = logKey(key)
                 str2 = reason
             },
-            { "remove notification $str1 when headsUpEntry is null, reason: $str2" }
+            { "remove notification $str1 when headsUpEntry is null, reason: $str2" },
         )
     }
 
@@ -233,7 +233,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = alert
                 bool2 = hasEntry
             },
-            { "request: update notification $str1 alert: $bool1 hasEntry: $bool2" }
+            { "request: update notification $str1 alert: $bool1 hasEntry: $bool2" },
         )
     }
 
@@ -246,7 +246,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = alert
                 bool2 = hasEntry
             },
-            { "update notification $str1 alert: $bool1 hasEntry: $bool2" }
+            { "update notification $str1 alert: $bool1 hasEntry: $bool2" },
         )
     }
 
@@ -259,7 +259,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = updatePostTime
                 str2 = reason ?: "unknown"
             },
-            { "update entry $str1 updatePostTime: $bool1 reason: $str2" }
+            { "update entry $str1 updatePostTime: $bool1 reason: $str2" },
         )
     }
 
@@ -268,7 +268,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             TAG,
             INFO,
             { int1 = packageSnoozeLengthMs },
-            { "snooze length changed: ${int1}ms" }
+            { "snooze length changed: ${int1}ms" },
         )
     }
 
@@ -281,7 +281,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = isPinned
                 str2 = reason
             },
-            { "$str2 => set entry pinned $str1 pinned: $bool1" }
+            { "$str2 => set entry pinned $str1 pinned: $bool1" },
         )
     }
 
@@ -290,16 +290,12 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             TAG,
             INFO,
             { bool1 = hasPinnedNotification },
-            { "has pinned notification changed to $bool1" }
+            { "has pinned notification changed to $bool1" },
         )
     }
 
     fun logRemoveEntryAfterExpand(entry: NotificationEntry) {
-        buffer.log(TAG, VERBOSE, {
-            str1 = entry.logKey
-        }, {
-            "remove entry after expand: $str1"
-        })
+        buffer.log(TAG, VERBOSE, { str1 = entry.logKey }, { "remove entry after expand: $str1" })
     }
 }
 

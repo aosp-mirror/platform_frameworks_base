@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.icon.IconBuilder
 import com.android.systemui.statusbar.notification.icon.IconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
@@ -77,7 +78,6 @@ import com.android.systemui.statusbar.notification.row.shared.NotificationRowCon
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartActionInflaterImpl
 import com.android.systemui.statusbar.policy.SmartReplyConstants
 import com.android.systemui.statusbar.policy.SmartReplyInflaterImpl

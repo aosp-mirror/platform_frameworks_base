@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.notification.headsup
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.policy.BaseHeadsUpManager
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import dagger.Binds
 import dagger.Module
 

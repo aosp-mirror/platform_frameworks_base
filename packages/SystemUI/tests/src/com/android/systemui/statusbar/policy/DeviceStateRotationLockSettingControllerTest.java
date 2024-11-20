@@ -354,8 +354,8 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
     }
 
     private static DeviceState createDeviceState(int identifier, @NonNull String name,
-            @NonNull Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties,
-            @NonNull Set<@DeviceState.PhysicalDeviceStateProperties Integer> physicalProperties) {
+            @NonNull Set<Integer> systemProperties,
+            @NonNull Set<Integer> physicalProperties) {
         DeviceState.Configuration deviceStateConfiguration = new DeviceState.Configuration.Builder(
                 identifier, name).setSystemProperties(systemProperties).setPhysicalProperties(
                 physicalProperties).build();

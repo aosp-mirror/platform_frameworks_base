@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.notification.headsup;
 
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 
@@ -54,18 +54,17 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

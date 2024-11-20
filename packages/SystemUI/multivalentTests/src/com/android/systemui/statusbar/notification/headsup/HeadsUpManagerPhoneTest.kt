@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy
+package com.android.systemui.statusbar.notification.headsup
 
 import android.os.Handler
 import android.platform.test.annotations.EnableFlags
@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter

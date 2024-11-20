@@ -72,7 +72,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.wmshell.BubblesManager;
 

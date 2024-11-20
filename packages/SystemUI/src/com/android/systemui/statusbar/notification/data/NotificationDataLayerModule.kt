@@ -16,7 +16,7 @@
 package com.android.systemui.statusbar.notification.data
 
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
-import com.android.systemui.statusbar.policy.BaseHeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.BaseHeadsUpManager
 import dagger.Binds
 import dagger.Module
 
