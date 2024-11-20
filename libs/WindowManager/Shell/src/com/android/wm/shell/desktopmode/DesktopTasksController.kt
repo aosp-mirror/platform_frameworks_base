@@ -821,12 +821,12 @@ class DesktopTasksController(
     fun toggleDesktopTaskSize(
         taskInfo: RunningTaskInfo,
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
     ) {
         val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
             resizeTrigger,
-            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            inputMethod,
             taskInfo,
             currentTaskBounds.width(),
             currentTaskBounds.height(),
@@ -879,7 +879,7 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger, DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            resizeTrigger, inputMethod,
             taskInfo, destinationBounds.width(),
             destinationBounds.height(), displayController
         )
@@ -911,7 +911,11 @@ class DesktopTasksController(
             return
         }
 
-        toggleDesktopTaskSize(taskInfo, ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent)
+        toggleDesktopTaskSize(
+            taskInfo,
+            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
+            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
+        )
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {

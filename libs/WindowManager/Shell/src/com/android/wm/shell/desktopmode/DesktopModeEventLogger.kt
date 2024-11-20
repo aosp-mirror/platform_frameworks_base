@@ -446,6 +446,7 @@ class DesktopModeEventLogger {
             val displayArea: Int?,
         )
 
+        @JvmStatic
         fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
             if (e == null) return InputMethod.UNKNOWN_INPUT_METHOD
 

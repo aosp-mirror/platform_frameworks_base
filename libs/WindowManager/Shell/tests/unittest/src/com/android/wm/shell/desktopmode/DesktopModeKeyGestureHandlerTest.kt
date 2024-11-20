@@ -266,7 +266,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         verify(desktopTasksController).toggleDesktopTaskSize(
             task,
             ResizeTrigger.MAXIMIZE_MENU,
-            null
+            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
         )
     }
 
