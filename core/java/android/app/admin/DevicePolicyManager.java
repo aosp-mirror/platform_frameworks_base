@@ -14196,7 +14196,7 @@ public class DevicePolicyManager {
      * </ul>
      * <p>
      * The following methods are supported for the parent instance but can only be called by the
-     * profile owner of a managed profile that was created during the device provisioning flow:
+     * profile owner on an <a href="#organization-owned">organization owned</a> managed profile:
      * <ul>
      * <li>{@link #getPasswordComplexity}</li>
      * <li>{@link #setCameraDisabled}</li>
@@ -14204,11 +14204,6 @@ public class DevicePolicyManager {
      * <li>{@link #setAccountManagementDisabled(ComponentName, String, boolean)}</li>
      * <li>{@link #setPermittedInputMethods}</li>
      * <li>{@link #getPermittedInputMethods}</li>
-     * </ul>
-     *
-     * <p>The following methods can be called by the profile owner of a managed profile
-     * on an organization-owned device:
-     * <ul>
      * <li>{@link #wipeData}</li>
      * </ul>
      *
