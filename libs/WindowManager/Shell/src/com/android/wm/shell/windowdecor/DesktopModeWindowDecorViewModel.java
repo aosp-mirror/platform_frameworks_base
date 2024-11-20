@@ -33,6 +33,7 @@ import static android.view.WindowInsets.Type.statusBars;
 import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU;
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
+import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
@@ -590,7 +591,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.closeMaximizeMenu();
     }
 
-    public void onSnapResize(int taskId, boolean left, @Nullable MotionEvent motionEvent) {
+    public void onSnapResize(int taskId, boolean left, InputMethod inputMethod) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
         if (decoration == null) {
             return;
@@ -602,7 +603,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 decoration.mTaskInfo,
                 left ? SnapPosition.LEFT : SnapPosition.RIGHT,
                 left ? ResizeTrigger.SNAP_LEFT_MENU : ResizeTrigger.SNAP_RIGHT_MENU,
-                motionEvent,
+                inputMethod,
                 decoration);
 
         decoration.closeHandleMenu();
@@ -1553,6 +1554,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, taskPositioner);
+        InputMethod inputMethod = DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(
+                touchEventListener.mMotionEvent);
         windowDecoration.setOnMaximizeOrRestoreClickListener(() -> {
             onMaximizeOrRestore(taskInfo.taskId, "maximize_menu", ResizeTrigger.MAXIMIZE_MENU,
                     touchEventListener.mMotionEvent);
@@ -1563,11 +1566,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return Unit.INSTANCE;
         });
         windowDecoration.setOnLeftSnapClickListener(() -> {
-            onSnapResize(taskInfo.taskId, /* isLeft= */ true, touchEventListener.mMotionEvent);
+            onSnapResize(taskInfo.taskId, /* isLeft= */ true, inputMethod);
             return Unit.INSTANCE;
         });
         windowDecoration.setOnRightSnapClickListener(() -> {
-            onSnapResize(taskInfo.taskId, /* isLeft= */ false, touchEventListener.mMotionEvent);
+            onSnapResize(taskInfo.taskId, /* isLeft= */ false, inputMethod);
             return Unit.INSTANCE;
         });
         windowDecoration.setOnToDesktopClickListener(desktopModeTransitionSource -> {
