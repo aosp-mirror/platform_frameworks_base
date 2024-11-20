@@ -4503,13 +4503,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         if (shortcutType == HARDWARE) {
             skipVolumeShortcutDialogTimeoutRestriction(userId);
-            if (com.android.server.accessibility.Flags.enableHardwareShortcutDisablesWarning()) {
-                persistIntToSetting(
-                        userId,
-                        Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
-                        AccessibilityShortcutController.DialogStatus.SHOWN
-                );
-            }
+            persistIntToSetting(
+                    userId,
+                    Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                    AccessibilityShortcutController.DialogStatus.SHOWN
+            );
         } else if (shortcutType == SOFTWARE) {
             // Update the A11y FAB size to large when the Magnification shortcut is
             // enabled and the user hasn't changed the floating button size
