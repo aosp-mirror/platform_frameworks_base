@@ -909,4 +909,11 @@ public class PipTransition extends PipTransitionController implements
                 break;
         }
     }
+
+    @Override
+    public boolean isPackageActiveInPip(@Nullable String packageName) {
+        return packageName != null
+                && mPipBoundsState.getLastPipComponentName() != null
+                && packageName.equals(mPipBoundsState.getLastPipComponentName().getPackageName());
+    }
 }
