@@ -112,7 +112,13 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Tap on the split screen option under app handle menu")
         DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_SPLIT_SCREEN(2000),
         @UiEvent(doc = "Tap on the full screen option under app handle menu")
-        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_FULL_SCREEN(2001);
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_FULL_SCREEN(2001),
+        @UiEvent(doc = "When user successfully drags the app handle to desktop mode")
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_DESKTOP_MODE(2002),
+        @UiEvent(doc = "When user successfully drags the app handle to split screen")
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN(2003),
+        @UiEvent(doc = "When user successfully drags the app handle to full screen")
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_FULL_SCREEN(2004);
 
         override fun getId(): Int = mId
     }

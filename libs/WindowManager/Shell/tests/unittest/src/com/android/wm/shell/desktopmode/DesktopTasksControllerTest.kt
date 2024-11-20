@@ -217,6 +217,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock private lateinit var freeformTaskTransitionStarter: FreeformTaskTransitionStarter
   @Mock private lateinit var mockHandler: Handler
   @Mock private lateinit var desktopModeEventLogger: DesktopModeEventLogger
+  @Mock private lateinit var desktopModeUiEventLogger: DesktopModeUiEventLogger
   @Mock lateinit var persistentRepository: DesktopPersistentRepository
   @Mock lateinit var motionEvent: MotionEvent
   @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
@@ -343,6 +344,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         mockInteractionJankMonitor,
         mockHandler,
         desktopModeEventLogger,
+        desktopModeUiEventLogger,
         desktopTilingDecorViewModel,
       )
   }
