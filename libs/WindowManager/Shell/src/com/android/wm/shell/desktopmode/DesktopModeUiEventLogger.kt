@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager.RunningTaskInfo
+import android.content.pm.PackageManager
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEvent
@@ -27,6 +29,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 /** Log Aster UIEvents for desktop windowing mode. */
 class DesktopModeUiEventLogger(
     private val uiEventLogger: UiEventLogger,
+    private val packageManager: PackageManager,
 ) {
     private val instanceIdSequence = InstanceIdSequence(Integer.MAX_VALUE)
 
@@ -43,6 +46,17 @@ class DesktopModeUiEventLogger(
             return
         }
         uiEventLogger.log(event, uid, packageName)
+    }
+
+    /** Logs an event for a CUI on a particular task. */
+    fun log(taskInfo: RunningTaskInfo, event: DesktopUiEventEnum) {
+        val packageName = taskInfo.baseActivity?.packageName
+        if (packageName == null) {
+            logD("Skip logging due to null base activity")
+            return
+        }
+        val uid = getUid(packageName, taskInfo.userId)
+        log(uid, packageName, event)
     }
 
     /** Retrieves a new instance id for a new interaction. */
@@ -70,6 +84,12 @@ class DesktopModeUiEventLogger(
         uiEventLogger.logWithInstanceId(event, uid, packageName, instanceId)
     }
 
+    private fun getUid(packageName: String, userId: Int): Int = try {
+        packageManager.getApplicationInfoAsUser(packageName, /* flags= */ 0, userId).uid
+    } catch (e: PackageManager.NameNotFoundException) {
+        INVALID_PACKAGE_UID
+    }
+
     private fun logD(msg: String, vararg arguments: Any?) {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }
@@ -84,12 +104,15 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Tap on the window header maximize button in desktop windowing mode")
         DESKTOP_WINDOW_MAXIMIZE_BUTTON_TAP(1723),
         @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
-        DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724);
+        DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724),
+        @UiEvent(doc = "Tap on the window Handle to open the Handle Menu")
+        DESKTOP_WINDOW_APP_HANDLE_TAP(1998);
 
         override fun getId(): Int = mId
     }
 
     companion object {
         private const val TAG = "DesktopModeUiEventLogger"
+        private const val INVALID_PACKAGE_UID = -1
     }
 }

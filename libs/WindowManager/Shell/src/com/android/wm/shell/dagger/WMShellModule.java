@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.UserManager;
@@ -893,7 +894,8 @@ public abstract class WMShellModule {
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             FocusTransitionObserver focusTransitionObserver,
-            DesktopModeEventLogger desktopModeEventLogger
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeUiEventLogger desktopModeUiEventLogger
     ) {
         if (!DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.empty();
@@ -906,7 +908,7 @@ public abstract class WMShellModule {
                 assistContentRequester, multiInstanceHelper, desktopTasksLimiter,
                 appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
-                focusTransitionObserver, desktopModeEventLogger));
+                focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger));
     }
 
     @WMSingleton
@@ -1234,9 +1236,10 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static DesktopModeUiEventLogger provideDesktopUiEventLogger(
-            UiEventLogger uiEventLogger
+            UiEventLogger uiEventLogger,
+            PackageManager packageManager
     ) {
-        return new DesktopModeUiEventLogger(uiEventLogger);
+        return new DesktopModeUiEventLogger(uiEventLogger, packageManager);
     }
 
     //

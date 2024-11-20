@@ -108,6 +108,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger;
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.DesktopUiEventEnum;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -228,6 +230,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final TaskPositionerFactory mTaskPositionerFactory;
     private final FocusTransitionObserver mFocusTransitionObserver;
     private final DesktopModeEventLogger mDesktopModeEventLogger;
+    private final DesktopModeUiEventLogger mDesktopModeUiEventLogger;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -257,7 +260,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             FocusTransitionObserver focusTransitionObserver,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeUiEventLogger desktopModeUiEventLogger) {
         this(
                 context,
                 shellExecutor,
@@ -292,7 +296,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 activityOrientationChangeHandler,
                 new TaskPositionerFactory(),
                 focusTransitionObserver,
-                desktopModeEventLogger);
+                desktopModeEventLogger,
+                desktopModeUiEventLogger);
     }
 
     @VisibleForTesting
@@ -330,7 +335,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             TaskPositionerFactory taskPositionerFactory,
             FocusTransitionObserver focusTransitionObserver,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeUiEventLogger desktopModeUiEventLogger) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -393,6 +399,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mTaskPositionerFactory = taskPositionerFactory;
         mFocusTransitionObserver = focusTransitionObserver;
         mDesktopModeEventLogger = desktopModeEventLogger;
+        mDesktopModeUiEventLogger = desktopModeUiEventLogger;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -803,6 +810,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             } else if (id == R.id.back_button) {
                 mTaskOperations.injectBackKey(mDisplayId);
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
+                if (id == R.id.caption_handle && !decoration.mTaskInfo.isFreeform()) {
+                    // Clicking the App Handle.
+                    mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                            DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_TAP);
+                }
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
                     openHandleMenu(mTaskId);
