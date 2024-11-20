@@ -492,9 +492,8 @@ class DesktopTilingWindowDecoration(
 
     // Only called if [taskInfo] relates to a focused task
     private fun isTilingRefocused(taskInfo: RunningTaskInfo): Boolean {
-        return !isTilingFocused &&
-            (taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
-                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId)
+        return taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
+                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId
     }
 
     private fun buildTiledTasksMoveToFront(leftOnTop: Boolean): WindowContainerTransaction {
