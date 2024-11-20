@@ -33,6 +33,15 @@ import java.util.Set;
 final class WritableNamespaces {
     public static final Set<String> ALLOWLIST =
             new ArraySet<String>(Arrays.asList(
-                    "exo"
+                    "captive_portal_login",
+                    "connectivity",
+                    "exo",
+                    "nearby",
+                    "netd_native",
+                    "network_security",
+                    "on_device_personalization",
+                    "tethering",
+                    "tethering_u_or_later_native",
+                    "thread_network"
             ));
 }
