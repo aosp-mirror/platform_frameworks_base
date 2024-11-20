@@ -31,7 +31,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Settings to configure ambient backlight hardware.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightSettings implements Parcelable {
@@ -60,16 +59,6 @@ public final class AmbientBacklightSettings implements Parcelable {
      */
     public static final int SOURCE_AUDIO_VIDEO = 3;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({COLOR_FORMAT_RGB888})
-    public @interface ColorFormat {}
-
-    /**
-     * The color format is RGB888.
-     * @hide
-     */
-    public static final int COLOR_FORMAT_RGB888 = 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -201,7 +190,6 @@ public final class AmbientBacklightSettings implements Parcelable {
      *
      * <p>Letter-box is a technique to keep the original aspect ratio when displayed on a screen
      * with different aspect ratio. Black bars are added to the top and bottom.
-     * @hide
      */
     public boolean isLetterboxOmitted() {
         return mIsLetterboxOmitted;
@@ -210,9 +198,8 @@ public final class AmbientBacklightSettings implements Parcelable {
     /**
      * Gets the detection threshold of the ambient light.
      *
-     * <p>If the color of a color zone is changed by the difference is smaller than the threshold,
+     * <p>If the color of a color zone is changed but the difference is smaller than the threshold,
      * the change is ignored.
-     * @hide
      */
     public int getThreshold() {
         return mThreshold;
