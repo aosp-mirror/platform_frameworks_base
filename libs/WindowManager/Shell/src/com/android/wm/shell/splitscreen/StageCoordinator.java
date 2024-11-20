@@ -507,8 +507,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (enableFlexibleSplit()) {
             StageTaskListener stageToDeactivate = mStageOrderOperator.getAllStages().stream()
                     .filter(stage -> stage.getId() == stageToTop)
-                    .findFirst().orElseThrow();
-            stageToDeactivate.deactivate(wct, true /*toTop*/);
+                    .findFirst().orElse(null);
+            if (stageToDeactivate != null) {
+                stageToDeactivate.deactivate(wct, true /*toTop*/);
+            } else {
+                // If no one stage is meant to go to the top, deactivate all stages to move any
+                // child tasks out from under their respective stage root tasks.
+                mStageOrderOperator.getAllStages().forEach(stage ->
+                        stage.deactivate(wct, false /*reparentTasksToTop*/));
+            }
             mStageOrderOperator.onExitingSplit();
         } else {
             mMainStage.deactivate(wct, stageToTop == STAGE_TYPE_MAIN);
@@ -1848,13 +1855,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         if (present) {
             updateRecentTasksSplitPair();
-        } else if (mMainStage.getChildCount() == 0 && mSideStage.getChildCount() == 0) {
-            mRecentTasks.ifPresent(recentTasks -> {
-                // remove the split pair mapping from recentTasks, and disable further updates
-                // to splits in the recents until we enter split again.
-                recentTasks.removeSplitPair(taskId);
-            });
-            dismissSplitScreen(-1, EXIT_REASON_ROOT_TASK_VANISHED);
+        } else {
+            // TODO (b/349828130): Test b/333270112 for flex split (launch adjacent for flex
+            //  currently not working)
+            boolean allRootsEmpty = enableFlexibleSplit()
+                    ? runForActiveStagesAllMatch(stageTaskListener ->
+                        stageTaskListener.getChildCount() == 0)
+                    : mMainStage.getChildCount() == 0 && mSideStage.getChildCount() == 0;
+            if (allRootsEmpty) {
+                mRecentTasks.ifPresent(recentTasks -> {
+                    // remove the split pair mapping from recentTasks, and disable further updates
+                    // to splits in the recents until we enter split again.
+                    recentTasks.removeSplitPair(taskId);
+                });
+                dismissSplitScreen(INVALID_TASK_ID, EXIT_REASON_ROOT_TASK_VANISHED);
+            }
         }
 
         for (int i = mListeners.size() - 1; i >= 0; --i) {
