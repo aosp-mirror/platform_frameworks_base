@@ -98,7 +98,10 @@ constructor(
                     RingerDrawerState.Open(ringerMode)
                 }
                 is RingerDrawerState.Open -> {
-                    RingerDrawerState.Closed(ringerMode)
+                    RingerDrawerState.Closed(
+                        ringerMode,
+                        (drawerState.value as RingerDrawerState.Open).mode,
+                    )
                 }
                 is RingerDrawerState.Closed -> {
                     RingerDrawerState.Open(ringerMode)

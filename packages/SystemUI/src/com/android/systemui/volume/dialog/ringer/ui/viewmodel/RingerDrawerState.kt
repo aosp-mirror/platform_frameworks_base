@@ -25,7 +25,8 @@ sealed interface RingerDrawerState {
     data class Open(val mode: RingerMode) : RingerDrawerState
 
     /** When clicked to close drawer */
-    data class Closed(val mode: RingerMode) : RingerDrawerState
+    data class Closed(val currentMode: RingerMode, val previousMode: RingerMode) :
+        RingerDrawerState
 
     /** Initial state when volume dialog is shown with a closed drawer. */
     interface Initial : RingerDrawerState {
