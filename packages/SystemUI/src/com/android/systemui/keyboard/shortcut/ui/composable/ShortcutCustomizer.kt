@@ -66,6 +66,7 @@ fun AssignNewShortcutDialog(
     modifier: Modifier = Modifier,
     onKeyPress: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
+    onConfirmSetShortcut: () -> Unit,
 ) {
     if (uiState is ShortcutCustomizationUiState.AddShortcutDialog) {
         Column(modifier = modifier) {
@@ -84,18 +85,26 @@ fun AssignNewShortcutDialog(
                 defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
             )
             SelectedKeyCombinationContainer(
-                shouldShowErrorMessage = uiState.shouldShowErrorMessage,
+                shouldShowError = uiState.errorMessage.isNotEmpty(),
                 onKeyPress = onKeyPress,
                 pressedKeys = uiState.pressedKeys,
             )
-            KeyCombinationAlreadyInUseErrorMessage(uiState.shouldShowErrorMessage)
-            DialogButtons(onCancel, isSetShortcutButtonEnabled = uiState.pressedKeys.isNotEmpty())
+            ErrorMessageContainer(uiState.errorMessage)
+            DialogButtons(
+                onCancel,
+                isSetShortcutButtonEnabled = uiState.pressedKeys.isNotEmpty(),
+                onConfirm = onConfirmSetShortcut,
+            )
         }
     }
 }
 
 @Composable
-fun DialogButtons(onCancel: () -> Unit, isSetShortcutButtonEnabled: Boolean) {
+fun DialogButtons(
+    onCancel: () -> Unit,
+    isSetShortcutButtonEnabled: Boolean,
+    onConfirm: () -> Unit,
+) {
     Row(
         modifier =
             Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
@@ -113,7 +122,7 @@ fun DialogButtons(onCancel: () -> Unit, isSetShortcutButtonEnabled: Boolean) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         ShortcutHelperButton(
-            onClick = {},
+            onClick = onConfirm,
             color = MaterialTheme.colorScheme.primary,
             width = 116.dp,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -125,11 +134,11 @@ fun DialogButtons(onCancel: () -> Unit, isSetShortcutButtonEnabled: Boolean) {
 }
 
 @Composable
-fun KeyCombinationAlreadyInUseErrorMessage(shouldShowErrorMessage: Boolean) {
-    if (shouldShowErrorMessage) {
+fun ErrorMessageContainer(errorMessage: String) {
+    if (errorMessage.isNotEmpty()) {
         Box(modifier = Modifier.padding(horizontal = 16.dp).width(332.dp).height(40.dp)) {
             Text(
-                text = stringResource(R.string.shortcut_helper_customize_dialog_error_message),
+                text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
@@ -143,7 +152,7 @@ fun KeyCombinationAlreadyInUseErrorMessage(shouldShowErrorMessage: Boolean) {
 
 @Composable
 fun SelectedKeyCombinationContainer(
-    shouldShowErrorMessage: Boolean,
+    shouldShowError: Boolean,
     onKeyPress: (KeyEvent) -> Boolean,
     pressedKeys: List<ShortcutKey>,
 ) {
@@ -151,7 +160,7 @@ fun SelectedKeyCombinationContainer(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val outlineColor =
         if (!isFocused) MaterialTheme.colorScheme.outline
-        else if (shouldShowErrorMessage) MaterialTheme.colorScheme.error
+        else if (shouldShowError) MaterialTheme.colorScheme.error
         else MaterialTheme.colorScheme.primary
     val focusRequester = remember { FocusRequester() }
 
@@ -179,7 +188,7 @@ fun SelectedKeyCombinationContainer(
                 PressedKeysTextContainer(pressedKeys)
             }
             Spacer(modifier = Modifier.weight(1f))
-            if (shouldShowErrorMessage) {
+            if (shouldShowError) {
                 Icon(
                     imageVector = Icons.Default.ErrorOutline,
                     contentDescription = null,
