@@ -7950,6 +7950,13 @@
     <permission android:name="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY"
                 android:protectionLevel="signature|role"/>
 
+    <!-- Allows an application to create displays that mirror other displays' content.
+         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
+         @hide @SystemApi -->
+    <permission android:name="android.permission.ADD_MIRROR_DISPLAY"
+        android:protectionLevel="internal|role"
+        android:featureFlag="android.companion.virtualdevice.flags.enable_limited_vdm_role" />
+
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|role" />

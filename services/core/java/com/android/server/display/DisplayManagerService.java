@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
+import static android.Manifest.permission.ADD_MIRROR_DISPLAY;
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
@@ -1673,15 +1674,10 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private boolean canCreateMirrorDisplays(IVirtualDevice virtualDevice) {
-        if (virtualDevice == null) {
-            return false;
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            return checkCallingPermission(ADD_MIRROR_DISPLAY, "canCreateMirrorDisplays");
         }
-        try {
-            return virtualDevice.canCreateMirrorDisplays();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to query virtual device for permissions", e);
-            return false;
-        }
+        return virtualDevice != null;
     }
 
     private boolean canProjectVideo(IMediaProjection projection) {
@@ -1814,7 +1810,7 @@ public final class DisplayManagerService extends SystemService {
             // display.
             if (!canProjectVideo(projection) && !canCreateMirrorDisplays(virtualDevice)
                     && !hasVideoOutputPermission("createVirtualDisplayInternal")) {
-                throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
+                throw new SecurityException("Requires ADD_MIRROR_DISPLAY, CAPTURE_VIDEO_OUTPUT or "
                         + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                         + "MediaProjection token in order to create a screen sharing virtual "
                         + "display. In order to create a virtual display that does not perform "
