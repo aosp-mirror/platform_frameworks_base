@@ -20,10 +20,9 @@ package com.android.wm.shell.desktopmode
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
-import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.Companion.DesktopUiEventEnum.DESKTOP_WINDOW_EDGE_DRAG_RESIZE
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.DesktopUiEventEnum.DESKTOP_WINDOW_EDGE_DRAG_RESIZE
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -39,13 +38,12 @@ import org.junit.runner.RunWith
 class DesktopModeUiEventLoggerTest : ShellTestCase() {
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var logger: DesktopModeUiEventLogger
-    private val instanceIdSequence = InstanceIdSequence(/* instanceIdMax */ 1 shl 20)
 
 
     @Before
     fun setUp() {
         uiEventLoggerFake = UiEventLoggerFake()
-        logger = DesktopModeUiEventLogger(uiEventLoggerFake, instanceIdSequence)
+        logger = DesktopModeUiEventLogger(uiEventLoggerFake)
     }
 
     @Test
