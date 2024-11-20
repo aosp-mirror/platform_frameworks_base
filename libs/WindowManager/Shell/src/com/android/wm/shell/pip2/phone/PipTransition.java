@@ -371,7 +371,9 @@ public class PipTransition extends PipTransitionController implements
 
         // Update the src-rect-hint in params in place, to set up initial animator transform.
         Rect sourceRectHint = getAdjustedSourceRectHint(info, pipChange, pipActivityChange);
-        pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint().set(sourceRectHint);
+        final PictureInPictureParams params = getPipParams(pipChange);
+        params.copyOnlySet(
+                new PictureInPictureParams.Builder().setSourceRectHint(sourceRectHint).build());
 
         // Config-at-end transitions need to have their activities transformed before starting
         // the animation; this makes the buffer seem like it's been updated to final size.
@@ -416,9 +418,7 @@ public class PipTransition extends PipTransitionController implements
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect startBounds = pipChange.getStartAbsBounds();
         final Rect endBounds = pipChange.getEndAbsBounds();
-        final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams != null
-                ? pipChange.getTaskInfo().pictureInPictureParams
-                : new PictureInPictureParams.Builder().build();
+        final PictureInPictureParams params = getPipParams(pipChange);
         final Rect adjustedSourceRectHint = getAdjustedSourceRectHint(info, pipChange,
                 pipActivityChange);
 
@@ -598,10 +598,10 @@ public class PipTransition extends PipTransitionController implements
         PictureInPictureParams params = null;
         if (pipChange.getTaskInfo() != null) {
             // single activity
-            params = pipChange.getTaskInfo().pictureInPictureParams;
+            params = getPipParams(pipChange);
         } else if (parentBeforePip != null && parentBeforePip.getTaskInfo() != null) {
             // multi activity
-            params = parentBeforePip.getTaskInfo().pictureInPictureParams;
+            params = getPipParams(parentBeforePip);
         }
         final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, endBounds,
                 startBounds);
@@ -842,17 +842,23 @@ public class PipTransition extends PipTransitionController implements
                     initActivityPos.y);
         }
     }
-
-    @NonNull
-    private SurfaceControl getLeash(TransitionInfo.Change change) {
-        SurfaceControl leash = change.getLeash();
-        Preconditions.checkNotNull(leash, "Leash is null for change=" + change);
-        return leash;
-    }
-
     void cacheAndStartTransitionAnimator(@NonNull ValueAnimator animator) {
         mTransitionAnimator = animator;
         mTransitionAnimator.start();
+    }
+
+    @NonNull
+    private static PictureInPictureParams getPipParams(@NonNull TransitionInfo.Change pipChange) {
+        return pipChange.getTaskInfo().pictureInPictureParams != null
+                ? pipChange.getTaskInfo().pictureInPictureParams
+                : new PictureInPictureParams.Builder().build();
+    }
+
+    @NonNull
+    private static SurfaceControl getLeash(TransitionInfo.Change change) {
+        SurfaceControl leash = change.getLeash();
+        Preconditions.checkNotNull(leash, "Leash is null for change=" + change);
+        return leash;
     }
 
     //
