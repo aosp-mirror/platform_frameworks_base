@@ -150,6 +150,7 @@ import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
+import android.net.ConnectivityFrameworkInitializerBaklava;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.INetworkPolicyManager;
 import android.net.IPacProxyManager;
@@ -160,7 +161,6 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.vcn.VcnFrameworkInitializer;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
@@ -1691,7 +1691,7 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
-            VcnFrameworkInitializer.registerServiceWrappers();
+            ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();
 
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();
