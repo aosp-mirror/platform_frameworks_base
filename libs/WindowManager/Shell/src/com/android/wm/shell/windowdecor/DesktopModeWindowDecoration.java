@@ -1428,7 +1428,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* openInBrowserClickListener= */ (intent) -> {
                     mOpenInBrowserClickListener.accept(intent);
                     onCapturedLinkExpired();
-                    if (Flags.enableDesktopWindowingAppToWebEducation()) {
+                    if (Flags.enableDesktopWindowingAppToWebEducationIntegration()) {
                         mWindowDecorCaptionHandleRepository.onAppToWebUsage();
                     }
                     return Unit.INSTANCE;
@@ -1681,7 +1681,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Returns true if at least one education flag is enabled. */
     private boolean isEducationEnabled() {
         return Flags.enableDesktopWindowingAppHandleEducation()
-                || Flags.enableDesktopWindowingAppToWebEducation();
+                || Flags.enableDesktopWindowingAppToWebEducationIntegration();
     }
 
     @Override

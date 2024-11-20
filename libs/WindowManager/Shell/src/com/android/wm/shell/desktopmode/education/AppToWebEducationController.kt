@@ -116,7 +116,12 @@ class AppToWebEducationController(
     }
 
     private inline fun runIfEducationFeatureEnabled(block: () -> Unit) {
-        if (canEnterDesktopMode(context) && Flags.enableDesktopWindowingAppToWebEducation()) block()
+        if (
+            canEnterDesktopMode(context) &&
+                Flags.enableDesktopWindowingAppToWebEducationIntegration()
+        ) {
+            block()
+        }
     }
 
     private fun showEducation(captionState: CaptionState, colorScheme: EducationColorScheme) {
