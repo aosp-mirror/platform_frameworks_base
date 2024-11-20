@@ -16,6 +16,7 @@
 package com.android.internal.widget.remotecompose.core.operations.layout.managers;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -60,7 +61,7 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
     public boolean inTransition = false;
 
     public StateLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -132,21 +133,21 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
 
     @Override
     public void computeSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         LayoutManager layout = getLayout(currentLayoutIndex);
         layout.computeSize(context, minWidth, maxWidth, minHeight, maxHeight, measure);
     }
 
     @Override
     public void internalLayoutMeasure(
-            PaintContext context,
+            @NonNull PaintContext context,
             // layoutInfo: LayoutInfo,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         LayoutManager layout = getLayout(currentLayoutIndex);
         //        layout.internalLayoutMeasure(context, layoutInfo, measure)
         layout.internalLayoutMeasure(context, measure);
@@ -155,13 +156,18 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
     /** Subclasses can implement this to provide wrap sizing */
     @Override
     public void computeWrapSize(
-            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
+            @NonNull PaintContext context,
+            float maxWidth,
+            float maxHeight,
+            @NonNull MeasurePass measure,
+            @NonNull Size size) {
         LayoutManager layout = getLayout(currentLayoutIndex);
         layout.computeWrapSize(context, maxWidth, maxHeight, measure, size);
     }
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document, float x, float y) {
+    public void onClick(
+            @NonNull RemoteContext context, @NonNull CoreDocument document, float x, float y) {
         if (!contains(x, y)) {
             return;
         }
@@ -352,7 +358,7 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
         }
     }
 
-    public LayoutManager getLayout(int idx) {
+    public @NonNull LayoutManager getLayout(int idx) {
         int index = 0;
         for (Component pane : mChildrenComponents) {
             if (pane instanceof LayoutComponent) {

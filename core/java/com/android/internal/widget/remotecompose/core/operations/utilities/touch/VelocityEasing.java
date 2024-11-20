@@ -212,7 +212,6 @@ public class VelocityEasing {
                 mStage[1].setUp(peak_v, d1, t1, 0f, destination, t2 + t1);
                 mDuration = t2 + t1;
                 if (mDuration > maxTime) {
-                    System.out.println(" fail ");
                     return false;
                 }
             }

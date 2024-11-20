@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 
@@ -26,15 +28,15 @@ public interface Measurable {
      * does not apply the measure to the component.
      */
     void measure(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure);
+            @NonNull MeasurePass measure);
 
     /** Apply a given measure to the component */
-    void layout(RemoteContext context, MeasurePass measure);
+    void layout(@NonNull RemoteContext context, @NonNull MeasurePass measure);
 
     /**
      * Return true if the component needs to be remeasured

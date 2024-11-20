@@ -35,17 +35,17 @@ public abstract class PaintOperation implements Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
-    public abstract void paint(PaintContext context);
+    public abstract void paint(@NonNull PaintContext context);
 
     /**
      * Will return true if the operation is similar enough to the current one, in the context of an
      * animated transition.
      */
-    public boolean suitableForTransition(Operation op) {
+    public boolean suitableForTransition(@NonNull Operation op) {
         // by default expects the op to not be suitable
         return false;
     }

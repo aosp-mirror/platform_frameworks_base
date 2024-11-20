@@ -325,7 +325,7 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        if (Flags.offloadApi()) {
+        if (Flags.offloadApi() && Flags.offloadImplementation()) {
             HubInfoRegistry registry;
             try {
                 registry = new HubInfoRegistry(mContextHubWrapper);
@@ -527,8 +527,8 @@ public class ContextHubService extends IContextHubService.Stub {
         try {
             mContextHubWrapper.registerEndpointCallback(
                     new ContextHubHalEndpointCallback(mHubInfoRegistry));
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while registering IEndpointCallback", e);
+        } catch (RemoteException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while registering IEndpointCallback", e);
         }
     }
 

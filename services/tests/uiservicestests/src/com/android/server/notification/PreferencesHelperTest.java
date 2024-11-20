@@ -256,6 +256,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
+                android.app.Flags.FLAG_API_RICH_ONGOING,
                 FLAG_NOTIFICATION_CLASSIFICATION, FLAG_MODES_UI);
     }
 
@@ -6511,9 +6512,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    @DisableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
     public void testNoAppHasPermissionToPromoteByDefault() {
         mHelper.setShowBadge(PKG_P, UID_P, true);
         assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING,
+            android.app.Flags.FLAG_UI_RICH_ONGOING})
+    public void testAllAppsHavePermissionToPromoteByDefault() {
+        mHelper.setShowBadge(PKG_P, UID_P, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
     }
 
     @Test

@@ -59,11 +59,11 @@ public class HeightModifierOperation extends DimensionModifierOperation {
         apply(buffer, mType.ordinal(), mValue);
     }
 
-    public HeightModifierOperation(Type type, float value) {
+    public HeightModifierOperation(@NonNull Type type, float value) {
         super(type, value);
     }
 
-    public HeightModifierOperation(Type type) {
+    public HeightModifierOperation(@NonNull Type type) {
         super(type);
     }
 

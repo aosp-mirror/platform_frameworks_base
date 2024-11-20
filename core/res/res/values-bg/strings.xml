@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Разрешаване на приложението да определя относителната позиция между устройствата с ултрашироколентови сигнали в близост"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"взаимодействие с устройствата с Wi-Fi в близост"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Разрешава на приложението да рекламира, да се свързва и да определя относителната позиция на устройствата с Wi-Fi в близост"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"опр. на относителната позиция м/у у-вата в близост"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Разрешаване на приложението да определя относителната позиция между устройствата в близост"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информация за предпочитаната услуга за плащане чрез NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Включване"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Назад"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Изчаква..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Функцията „SOS чрез сателит“ вече е налице"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Можете да изпращате съобщения до службите за спешни случаи, ако нямате връзка с мобилна или Wi-Fi мрежа. Google Messages трябва да е основното ви приложение за съобщения."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Функцията „SOS чрез сателит“ не се поддържа"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Функцията „SOS чрез сателит“ не се поддържа на това устройство"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Функцията „SOS чрез сателит“ не е настроена"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Проверете дали имате връзка с интернет, и опитайте да настроите отново"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Функцията „SOS чрез сателит“ не е налице"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Функцията „SOS чрез сателит“ не е налице в тази държава или регион"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Функцията „SOS чрез сателит“ не е настроена"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"За да изпращате съобщения чрез сателит, задайте Google Messages като основното си приложение за съобщения"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Функцията „SOS чрез сателит“ не е налице"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"За да проверите дали функцията „SOS чрез сателит“ е налице в тази държава или регион, включете настройките за местоположението"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Функцията за сателитни съобщения е налице"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Можете да изпращате съобщения чрез сателит, ако нямате връзка с мобилна или Wi-Fi мрежа. Google Messages трябва да е основното ви приложение за съобщения."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Функцията за сателитни съобщения не се поддържа"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Функцията за сателитни съобщения не се поддържа на това устройство"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Функцията за сателитни съобщения не е настроена"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Проверете дали имате връзка с интернет, и опитайте да настроите отново"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Функцията за сателитни съобщения не е налице"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Функцията за сателитни съобщения не е налице в тази държава или регион"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Функцията за сателитни съобщения не е настроена"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"За да изпращате съобщения чрез сателит, задайте Google Messages като основното си приложение за съобщения"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Функцията за сателитни съобщения не е налице"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"За да проверите дали функцията за сателитни съобщения е налице в тази държава или регион, включете настройките за местоположението"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Повторно настройване на „Отключване с отпечатък“"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> вече не може да се разпознае."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> вече не могат да бъдат разпознати."</string>

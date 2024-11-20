@@ -88,6 +88,17 @@ flag {
 }
 
 flag {
+    name: "input_manager_lifecycle_support"
+    namespace: "input"
+    description: "Add support for Lifecycle support in input manager"
+    bug: "362473586"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     namespace: "input_native"
     name: "manage_key_gestures"
     description: "Manage key gestures through Input APIs"
@@ -103,8 +114,8 @@ flag {
 }
 
 flag {
-    namespace: "input_native"
-    name: "use_key_gesture_event_handler_multi_press_gestures"
+    namespace: "input"
+    name: "use_key_gesture_event_handler_multi_key_gestures"
     description: "Use KeyGestureEvent handler APIs to control multi key press gestures"
     bug: "358569822"
 }

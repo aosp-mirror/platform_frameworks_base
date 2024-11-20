@@ -905,10 +905,10 @@ public class VibrationThreadTest {
         fakeVibrator.setMinEnvelopeEffectControlPointDurationMillis(20);
 
         VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
-                .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20)
-                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30)
-                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20)
-                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*durationMillis=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 30)
                 .build();
         HalVibration vibration = startThreadAndDispatcher(effect);
         waitForCompletion();
@@ -930,6 +930,41 @@ public class VibrationThreadTest {
 
     @Test
     @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void vibrate_singleVibratorBasicPwle_runsComposePwleV2() {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        fakeVibrator.setResonantFrequency(150);
+        fakeVibrator.setFrequenciesHz(new float[]{50f, 100f, 120f, 150f});
+        fakeVibrator.setOutputAccelerationsGs(new float[]{0.05f, 1.0f, 3.0f, 2.0f});
+        fakeVibrator.setMaxEnvelopeEffectSize(10);
+        fakeVibrator.setMinEnvelopeEffectControlPointDurationMillis(20);
+
+        VibrationEffect effect = new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 1.0f)
+                .addControlPoint(/*intensity=*/ 1.0f, /*sharpness=*/ 1.0f, /*durationMillis=*/ 20)
+                .addControlPoint(/*intensity=*/ 1.0f, /*sharpness=*/ 1.0f, /*durationMillis=*/ 100)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 1.0f, /*durationMillis=*/ 100)
+                .build();
+
+        HalVibration vibration = startThreadAndDispatcher(effect);
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(220L));
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+        verify(mControllerCallbacks).onComplete(eq(VIBRATOR_ID), eq(vibration.id));
+        verifyCallbacksTriggered(vibration, Status.FINISHED);
+        assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
+        assertEquals(Arrays.asList(
+                expectedPwle(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 150f, /*timeMillis=*/ 0),
+                expectedPwle(/*amplitude=*/ 1.0f, /*frequencyHz=*/ 150f, /*timeMillis=*/ 20),
+                expectedPwle(/*amplitude=*/ 1.0f, /*frequencyHz=*/ 150f, /*timeMillis=*/ 100),
+                expectedPwle(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 150f, /*timeMillis=*/ 100)
+        ), fakeVibrator.getEffectPwlePoints(vibration.id));
+
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorPwle_withInitialFrequency_runsComposePwleV2() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
@@ -941,10 +976,10 @@ public class VibrationThreadTest {
 
         VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
                 .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
-                .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*timeMillis=*/ 20)
-                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*timeMillis=*/ 30)
-                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 20)
-                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*timeMillis=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.1f, /*frequencyHz=*/ 60f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*durationMillis=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 30)
                 .build();
 
         HalVibration vibration = startThreadAndDispatcher(effect);

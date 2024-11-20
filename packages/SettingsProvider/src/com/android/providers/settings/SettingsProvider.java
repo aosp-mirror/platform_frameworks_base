@@ -2434,28 +2434,40 @@ public class SettingsProvider extends ContentProvider {
                 context.checkCallingOrSelfPermission(
                 Manifest.permission.WRITE_DEVICE_CONFIG)
                 == PackageManager.PERMISSION_GRANTED;
-        boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
+        // Only the shell user and tests request the allowlist permission; this is used to force
+        // the WRITE_ALLOWLISTED_DEVICE_CONFIG path to log any flags that need to be allowlisted.
+        boolean isRestrictedShell = android.security.Flags.protectDeviceConfigFlags()
+                && hasAllowlistPermission;
 
-        if (isRoot) {
-            return;
-        }
-
-        if (hasWritePermission) {
+        if (!isRestrictedShell && hasWritePermission) {
             assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
-                for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
-                    if (flag.startsWith(allowlistedPrefix)) {
+                if (isRestrictedShell) {
+                    int delimiterIndex = flag.indexOf("/");
+                    String flagNamespace;
+                    if (delimiterIndex != -1) {
+                        flagNamespace = flag.substring(0, delimiterIndex);
+                    } else {
+                        flagNamespace = flag;
+                    }
+                    if (WritableNamespaces.ALLOWLIST.contains(flagNamespace)) {
                         namespaceAllowed = true;
-                        break;
+                    }
+                } else {
+                    for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
+                        if (flag.startsWith(allowlistedPrefix)) {
+                            namespaceAllowed = true;
+                            break;
+                        }
                     }
                 }
 
                 if (!namespaceAllowed && !DeviceConfig.getAdbWritableFlags().contains(flag)) {
-                    throw new SecurityException("Permission denial for flag '"
-                        + flag
-                        + "'; allowlist permission granted, but must add flag to the allowlist.");
+                    Slog.wtf(LOG_TAG, "Permission denial for flag '" + flag
+                            + "'; allowlist permission granted, but must add flag to the "
+                            + "allowlist");
                 }
             }
             assertCallingUserDenyList(flags);

@@ -614,10 +614,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Приложение сможет определять относительное позиционирование устройств с технологией сверхширокополосной связи поблизости"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Взаимодействие с устройствами Wi‑Fi поблизости"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Приложение сможет передавать данные на устройства Wi‑Fi рядом, подключаться к ним и определять их примерное местоположение."</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"относительное местоположение устройств поблизости"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Приложение сможет определять относительное местоположение устройств поблизости."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сведения о предпочтительном платежном сервисе NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Управление NFC-модулем"</string>
@@ -2444,11 +2442,11 @@
     <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Спутниковый SOS не настроен"</string>
     <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Проверьте подключение к интернету и повторите попытку."</string>
     <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Спутниковый SOS недоступен"</string>
-    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Функция недоступна в этой стране или регионе."</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Функция недоступна в стране или в этом регионе."</string>
     <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Спутниковый SOS не настроен"</string>
     <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Чтобы использовать эту функцию, необходимо выбрать Google Сообщения в качестве мессенджера по умолчанию."</string>
     <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Спутниковый SOS недоступен"</string>
-    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Чтобы узнать, можно ли использовать спутниковый SOS в этой стране или регионе, включите настройки геолокации."</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Чтобы узнать, можно ли использовать спутниковый SOS в стране или в этом регионе, включите настройки геолокации."</string>
     <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Доступен спутниковый обмен сообщениями"</string>
     <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Вы можете обмениваться сообщениями по спутниковой связи, даже когда подключение к мобильной сети или Wi-Fi недоступно. Google Сообщения должны быть выбраны в качестве мессенджера по умолчанию."</string>
     <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Спутниковый обмен сообщениями не поддерживается"</string>
@@ -2456,11 +2454,11 @@
     <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Спутниковый обмен сообщениями не настроен"</string>
     <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Проверьте подключение к интернету и повторите попытку."</string>
     <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Спутниковый обмен сообщениями недоступен"</string>
-    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Функция недоступна в этой стране или регионе."</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Функция недоступна в стране или в этом регионе."</string>
     <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Спутниковый обмен сообщениями не настроен"</string>
     <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Чтобы использовать эту функцию, необходимо выбрать Google Сообщения в качестве мессенджера по умолчанию."</string>
     <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Спутниковый обмен сообщениями недоступен"</string>
-    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Чтобы узнать, можно ли обмениваться сообщениями по спутниковой связи в этой стране или регионе, включите настройки геолокации."</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Чтобы узнать, можно ли обмениваться сообщениями по спутниковой связи в стране или в этом регионе, включите настройки геолокации."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Настройте разблокировку по отпечатку пальца заново"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Отпечаток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" больше нельзя распознать."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Отпечатки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" и \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" больше нельзя распознать."</string>

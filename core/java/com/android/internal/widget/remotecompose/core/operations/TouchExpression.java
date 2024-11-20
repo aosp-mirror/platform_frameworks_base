@@ -20,6 +20,8 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -71,6 +73,7 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
     boolean mWrapMode = false;
     float[] mNotches;
     float[] mStopSpec;
+    float[] mOutStopSpec;
     int mTouchEffects;
     float mVelocityId;
 
@@ -98,6 +101,9 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         mOutDefValue = mDefValue = defValue;
         mMode = STOP_ABSOLUTE_POS == stopMode ? 1 : 0;
         mOutMax = mMax = max;
+        if (stopSpec != null) {
+            mOutStopSpec = Arrays.copyOf(stopSpec, stopSpec.length);
+        }
         mTouchEffects = touchEffects;
         mVelocityId = velocityId;
         if (Float.isNaN(min) && Utils.idFromNan(min) == 0) {
@@ -108,10 +114,8 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         mStopMode = stopMode;
         mStopSpec = stopSpec;
         if (easingSpec != null) {
-            Utils.log("easingSpec  " + Arrays.toString(easingSpec));
             if (easingSpec.length >= 4) {
                 if (Float.floatToRawIntBits(easingSpec[0]) == 0) {
-                    Utils.log("easingSpec[2]  " + easingSpec[2]);
                     mMaxTime = easingSpec[1];
                     mMaxAcceleration = easingSpec[2];
                     mMaxVelocity = easingSpec[3];
@@ -125,6 +129,9 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
         if (mPreCalcValue == null || mPreCalcValue.length != mSrcExp.length) {
             mPreCalcValue = new float[mSrcExp.length];
+        }
+        if (mOutStopSpec == null || mOutStopSpec.length != mStopSpec.length) {
+            mOutStopSpec = new float[mStopSpec.length];
         }
         if (Float.isNaN(mMax)) {
             mOutMax = context.getFloat(Utils.idFromNan(mMax));
@@ -148,6 +155,15 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
             } else {
                 mPreCalcValue[i] = mSrcExp[i];
+            }
+        }
+        for (int i = 0; i < mStopSpec.length; i++) {
+            float v = mStopSpec[i];
+            if (Float.isNaN(v)) {
+                float newValue = context.getFloat(Utils.idFromNan(v));
+                mOutStopSpec[i] = newValue;
+            } else {
+                mOutStopSpec[i] = v;
             }
         }
         float v = mLastCalculatedValue;
@@ -181,6 +197,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
                 context.listensTo(Utils.idFromNan(v), this);
             }
         }
+        for (float v : mStopSpec) {
+            if (Float.isNaN(v)) {
+                context.listensTo(Utils.idFromNan(v), this);
+            }
+        }
     }
 
     private float wrap(float pos) {
@@ -211,12 +232,14 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
             case STOP_INSTANTLY:
                 return pos;
             case STOP_NOTCHES_EVEN:
-                int evenSpacing = (int) mStopSpec[0];
-                float step = (mOutMax - min) / evenSpacing;
+                int evenSpacing = (int) mOutStopSpec[0];
+                float notchMax = (mOutStopSpec.length > 1) ? mOutStopSpec[1] : mOutMax;
+                float step = (notchMax - min) / evenSpacing;
 
                 float notch = min + step * (int) (0.5f + (target - mOutMin) / step);
-
-                notch = Math.max(Math.min(notch, mOutMax), min);
+                if (!mWrapMode) {
+                    notch = Math.max(Math.min(notch, mOutMax), min);
+                }
                 return notch;
             case STOP_NOTCHES_PERCENTS:
                 positions = new float[mStopSpec.length];
@@ -265,7 +288,6 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         float next = mCurrentValue;
         mLastValue = next;
 
-        //        System.out.println(mStopMode + "    " + prev + "  -> " + next);
         float min = (mWrapMode) ? 0 : mOutMin;
         float max = mOutMax;
 
@@ -309,7 +331,7 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
     @Override
     public void apply(RemoteContext context) {
-        Component comp = context.lastComponent;
+        Component comp = context.mLastComponent;
         if (comp != null) {
             float x = comp.getX();
             float y = comp.getY();
@@ -329,7 +351,6 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         updateVariables(context);
         if (mUnmodified) {
             mCurrentValue = mOutDefValue;
-
             context.loadFloat(mId, wrap(mCurrentValue));
             return;
         }
@@ -337,7 +358,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
             float time = context.getAnimationTime() - mTouchUpTime;
             float value = mEasyTouch.getPos(time);
             mCurrentValue = value;
-            value = wrap(value);
+            if (mWrapMode) {
+                value = wrap(value);
+            } else {
+                value = Math.min(Math.max(value, mOutMin), mOutMax);
+            }
             context.loadFloat(mId, value);
             if (mEasyTouch.getDuration() < time) {
                 mEasingToStop = false;
@@ -410,7 +435,8 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         mTouchUpTime = context.getAnimationTime();
 
         float dest = getStopPosition(value, slope);
-        mEasyTouch.config(value, dest, slope, mMaxTime, mMaxAcceleration, mMaxVelocity, null);
+        float time = mMaxTime * Math.abs(dest - value) / (2 * mMaxVelocity);
+        mEasyTouch.config(value, dest, slope, time, mMaxAcceleration, mMaxVelocity, null);
         mEasingToStop = true;
     }
 
@@ -543,7 +569,6 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         int stopLen = stopLogic & 0xFFFF;
         int stopMode = stopLogic >> 16;
 
-        Utils.log("stopMode " + stopMode + " stopLen " + stopLen);
         float[] stopsData = new float[stopLen];
         for (int i = 0; i < stopsData.length; i++) {
             stopsData[i] = buffer.readFloat();
@@ -592,8 +617,9 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
                 .field(FLOAT, "wrapValue", "> [Wrap value] ");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

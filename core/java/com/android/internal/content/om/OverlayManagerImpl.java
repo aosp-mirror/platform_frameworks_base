@@ -35,6 +35,7 @@ import android.content.om.OverlayManagerTransaction.Request;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
+import android.content.res.AssetManager;
 import android.os.FabricatedOverlayInfo;
 import android.os.FabricatedOverlayInternal;
 import android.os.FabricatedOverlayInternalEntry;
@@ -60,8 +61,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This class provides the functionalities of registering an overlay, unregistering an overlay, and
- * getting the list of overlays information.
+ * This class provides the functionalities for managing self-targeting overlays, including
+ * registering an overlay, unregistering an overlay, and getting the list of overlays information.
  */
 public class OverlayManagerImpl {
     private static final String TAG = "OverlayManagerImpl";
@@ -234,14 +235,17 @@ public class OverlayManagerImpl {
         Preconditions.checkArgument(!entryList.isEmpty(), "overlay entries shouldn't be empty");
         final String overlayName = checkOverlayNameValid(overlayInternal.overlayName);
         checkPackageName(overlayInternal.packageName);
-        checkPackageName(overlayInternal.targetPackageName);
-        Preconditions.checkStringNotEmpty(
-                overlayInternal.targetOverlayable,
-                "Target overlayable should be neither null nor empty string.");
+        Preconditions.checkStringNotEmpty(overlayInternal.targetPackageName);
 
         final ApplicationInfo applicationInfo = mContext.getApplicationInfo();
-        final String targetPackage = Preconditions.checkStringNotEmpty(
-                applicationInfo.getBaseCodePath());
+        String targetPackage = null;
+        if (TextUtils.equals(overlayInternal.targetPackageName, "android")) {
+            targetPackage = AssetManager.FRAMEWORK_APK_PATH;
+        } else {
+            targetPackage = Preconditions.checkStringNotEmpty(
+                    applicationInfo.getBaseCodePath());
+        }
+
         final Path frroPath = mBasePath.resolve(overlayName + FRRO_EXTENSION);
         final Path idmapPath = mBasePath.resolve(overlayName + IDMAP_EXTENSION);
 

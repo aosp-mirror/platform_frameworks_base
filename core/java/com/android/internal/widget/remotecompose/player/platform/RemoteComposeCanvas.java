@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
@@ -194,6 +195,20 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         }
     }
 
+    public int hasSensorListeners(int[] ids) {
+        int count = 0;
+        for (int id = RemoteContext.ID_ACCELERATION_X; id <= RemoteContext.ID_LIGHT; id++) {
+            if (mARContext.mRemoteComposeState.hasListener(id)) {
+                ids[count++] = id;
+            }
+        }
+        return count;
+    }
+
+    public void setExternalFloat(int id, float value) {
+        mARContext.loadFloat(id, value);
+    }
+
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
@@ -344,7 +359,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mARContext.setAnimationEnabled(true);
         mARContext.currentTime = System.currentTimeMillis();
         mARContext.setDebug(mDebug);
+        float density = getContext().getResources().getDisplayMetrics().density;
         mARContext.useCanvas(canvas);
+        mARContext.setDensity(density);
         mARContext.mWidth = getWidth();
         mARContext.mHeight = getHeight();
         mDocument.paint(mARContext, mTheme);

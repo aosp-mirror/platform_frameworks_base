@@ -82,7 +82,6 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
     private val mJavaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
 
     @Mock private lateinit var mShadeInteractor: ShadeInteractor
-
     @Mock private lateinit var dumpManager: DumpManager
     private lateinit var mAvalancheController: AvalancheController
 
@@ -203,6 +202,25 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
         hmp.showNotification(notifEntry)
         assertThat(hmp.mEntriesToRemoveWhenReorderingAllowed.contains(notifEntry)).isTrue()
+    }
+
+    class TestAnimationStateHandler : AnimationStateHandler {
+        override fun setHeadsUpGoingAwayAnimationsAllowed(allowed: Boolean) {}
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testReorderingAllowed_clearsListOfEntriesToRemove() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        hmp.showNotification(notifEntry)
+        assertThat(hmp.mEntriesToRemoveWhenReorderingAllowed.contains(notifEntry)).isTrue()
+
+        hmp.setAnimationStateHandler(TestAnimationStateHandler())
+        hmp.mOnReorderingAllowedListener.onReorderingAllowed()
+        assertThat(hmp.mEntriesToRemoveWhenReorderingAllowed.isEmpty()).isTrue()
     }
 
     @Test

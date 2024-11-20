@@ -27,6 +27,7 @@ import static android.system.OsConstants.O_CLOEXEC;
 import static android.system.OsConstants.O_RDONLY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.hardware.input.Flags.inputManagerLifecycleSupport;
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
 import static com.android.tradeinmode.flags.Flags.enableTradeInMode;
 
@@ -252,7 +253,7 @@ import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
 import com.android.server.security.authenticationpolicy.AuthenticationPolicyService;
 import com.android.server.security.authenticationpolicy.SecureLockDeviceService;
-import com.android.server.security.forensic.ForensicService;
+import com.android.server.security.intrusiondetection.IntrusionDetectionService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
@@ -1654,7 +1655,12 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("StartInputManagerService");
-            inputManager = new InputManagerService(context);
+            if (inputManagerLifecycleSupport()) {
+                inputManager = mSystemServiceManager.startService(
+                        InputManagerService.Lifecycle.class).getService();
+            } else {
+                inputManager = new InputManagerService(context);
+            }
             t.traceEnd();
 
             t.traceBegin("DeviceStateManagerService");
@@ -1675,8 +1681,10 @@ public final class SystemServer implements Dumpable {
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_HIGH
                             | DUMP_FLAG_PROTO);
-            ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
-                    /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
+            if (!inputManagerLifecycleSupport()) {
+                ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
+                        /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
+            }
             t.traceEnd();
 
             t.traceBegin("SetWindowManagerService");
@@ -1764,8 +1772,8 @@ public final class SystemServer implements Dumpable {
 
             if (!isWatch && !isTv && !isAutomotive
                     && android.security.Flags.aflApi()) {
-                t.traceBegin("StartForensicService");
-                mSystemServiceManager.startService(ForensicService.class);
+                t.traceBegin("StartIntrusionDetectionService");
+                mSystemServiceManager.startService(IntrusionDetectionService.class);
                 t.traceEnd();
             }
 
@@ -3350,16 +3358,18 @@ public final class SystemServer implements Dumpable {
                 reportWtf("Notifying NetworkTimeService running", e);
             }
             t.traceEnd();
-            t.traceBegin("MakeInputManagerServiceReady");
-            try {
-                // TODO(BT) Pass parameter to input manager
-                if (inputManagerF != null) {
-                    inputManagerF.systemRunning();
+            if (!inputManagerLifecycleSupport()) {
+                t.traceBegin("MakeInputManagerServiceReady");
+                try {
+                    // TODO(BT) Pass parameter to input manager
+                    if (inputManagerF != null) {
+                        inputManagerF.systemRunning();
+                    }
+                } catch (Throwable e) {
+                    reportWtf("Notifying InputManagerService running", e);
                 }
-            } catch (Throwable e) {
-                reportWtf("Notifying InputManagerService running", e);
+                t.traceEnd();
             }
-            t.traceEnd();
             t.traceBegin("MakeTelephonyRegistryReady");
             try {
                 if (telephonyRegistryF != null) {

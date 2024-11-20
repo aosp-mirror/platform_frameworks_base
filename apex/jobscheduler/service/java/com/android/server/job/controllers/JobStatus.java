@@ -66,6 +66,7 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobServerProtoEnums;
 import com.android.server.job.JobStatusDumpProto;
 import com.android.server.job.JobStatusShortInfoProto;
+import com.android.server.job.restrictions.JobRestriction;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -2179,10 +2180,19 @@ public final class JobStatus {
      * This will return all potential reasons why the job is pending.
      */
     @NonNull
-    public int[] getPendingJobReasons() {
+    public int[] getPendingJobReasons(@Nullable JobRestriction restriction) {
         final int unsatisfiedConstraints = ~satisfiedConstraints
                 & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
         final ArrayList<Integer> reasons = constraintsToPendingJobReasons(unsatisfiedConstraints);
+
+        if (restriction != null) {
+            // Currently only ThermalStatusRestriction extends the JobRestriction class and
+            // returns PENDING_JOB_REASON_DEVICE_STATE if the job is restricted because of thermal.
+            @JobScheduler.PendingJobReason final int reason = restriction.getPendingReason();
+            if (!reasons.contains(reason)) {
+                reasons.addLast(reason);
+            }
+        }
 
         if (reasons.isEmpty()) {
             if (getEffectiveStandbyBucket() == NEVER_INDEX) {

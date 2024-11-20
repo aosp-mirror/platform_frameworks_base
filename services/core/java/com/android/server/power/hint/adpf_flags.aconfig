@@ -1,0 +1,7 @@
+# New location for generic ADPF flags across the system
+# This will be moved to the top-level frameworks/base adpf library
+# once it lands
+
+package: "android.adpf"
+container: "system"
+

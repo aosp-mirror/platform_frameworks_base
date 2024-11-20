@@ -613,10 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite-i aplicației să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"să interacționeze cu dispozitive Wi‑Fi din apropiere"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite aplicației să se conecteze la dispozitive Wi-Fi din apropiere, să transmită anunțuri și să stabilească poziția relativă a acestora"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"stabilește poziția dispozitivelor din apropiere"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permite-i aplicației să stabilească poziția relativă dintre dispozitivele din apropiere"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informații despre serviciul de plăți NFC preferat"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlare schimb de date prin Near Field Communication"</string>
@@ -2437,7 +2435,7 @@
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Înapoi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"În așteptare..."</string>
     <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Funcția SOS prin satelit este acum disponibilă"</string>
-    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Poți să trimiți mesaje serviciilor de urgență dacă nu este disponibilă o rețea mobilă sau Wi-Fi. Mesaje Google trebuie să fie aplicația ta pentru mesaje prestabilită."</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Poți să trimiți mesaje serviciilor de urgență dacă nu este disponibilă o rețea mobilă sau Wi-Fi. Mesaje Google trebuie să fie aplicația ta prestabilită pentru mesaje."</string>
     <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Funcția SOS prin satelit nu este acceptată"</string>
     <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Funcția SOS prin satelit nu este acceptată pe acest dispozitiv"</string>
     <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Funcția SOS prin satelit nu este configurată"</string>
@@ -2445,11 +2443,11 @@
     <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Funcția SOS prin satelit nu este disponibilă"</string>
     <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Funcția SOS prin satelit nu este disponibilă în această țară sau regiune"</string>
     <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Funcția SOS prin satelit nu este configurată"</string>
-    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Pentru a trimite mesaje prin satelit, setează Mesaje Google ca aplicație pentru mesaje prestabilită"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Pentru a trimite mesaje prin satelit, setează Mesaje Google ca aplicație prestabilită pentru mesaje"</string>
     <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Funcția SOS prin satelit nu este disponibilă"</string>
     <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Pentru a verifica dacă funcția SOS prin satelit este disponibilă în această țară sau regiune, activează setările privind locația"</string>
     <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Mesajele prin satelit sunt disponibile"</string>
-    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Dacă nu este disponibilă o rețea mobilă sau Wi-Fi, poți să trimiți mesaje prin satelit. Mesaje Google trebuie să fie aplicația ta pentru mesaje prestabilită."</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Dacă nu este disponibilă o rețea mobilă sau Wi-Fi, poți să trimiți mesaje prin satelit. Mesaje Google trebuie să fie aplicația ta prestabilită pentru mesaje."</string>
     <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Mesajele prin satelit nu sunt acceptate"</string>
     <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Mesajele prin satelit nu sunt acceptate pe acest dispozitiv"</string>
     <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Mesajele prin satelit nu sunt configurate"</string>
@@ -2457,7 +2455,7 @@
     <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Mesajele prin satelit nu sunt disponibile"</string>
     <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Mesajele prin satelit nu sunt disponibile în această țară sau regiune"</string>
     <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Mesajele prin satelit nu sunt configurate"</string>
-    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Pentru a trimite mesaje prin satelit, setează Mesaje Google ca aplicație pentru mesaje prestabilită"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Pentru a trimite mesaje prin satelit, setează Mesaje Google ca aplicație prestabilită pentru mesaje"</string>
     <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Mesajele prin satelit nu sunt disponibile"</string>
     <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Pentru a verifica dacă mesajele prin satelit sunt disponibile în această țară sau regiune, activează setările privind locația"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurează din nou Deblocarea cu amprenta"</string>

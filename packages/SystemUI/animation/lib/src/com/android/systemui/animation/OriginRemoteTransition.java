@@ -44,6 +44,7 @@ import java.util.List;
 /**
  * An implementation of {@link IRemoteTransition} that accepts a {@link UIComponent} as the origin
  * and automatically attaches it to the transition leash before the transition starts.
+ *
  * @hide
  */
 public class OriginRemoteTransition extends IRemoteTransition.Stub {
@@ -258,8 +259,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
             // The transition didn't start. Ensure we apply the start transaction and report
             // finish afterwards.
             mStartTransaction
-                    .addTransactionCommittedListener(
-                            mContext.getMainExecutor(), this::finishInternal)
+                    .addTransactionCommittedListener(mHandler::post, this::finishInternal)
                     .apply();
             return;
         }
@@ -268,8 +268,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         mPlayer.onEnd(finished);
         // Detach the origin from the transition leash and report finish after it's done.
         mOriginTransaction
-                .detachFromTransitionLeash(
-                        mOrigin, mContext.getMainExecutor(), this::finishInternal)
+                .detachFromTransitionLeash(mOrigin, mHandler::post, this::finishInternal)
                 .commit();
     }
 
@@ -329,7 +328,9 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
                 /* baseBounds= */ maxBounds);
     }
 
-    /** An interface that represents an origin transitions.
+    /**
+     * An interface that represents an origin transitions.
+     *
      * @hide
      */
     public interface TransitionPlayer {

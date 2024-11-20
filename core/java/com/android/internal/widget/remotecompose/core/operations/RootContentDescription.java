@@ -60,7 +60,7 @@ public class RootContentDescription implements RemoteComposeOperation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return toString();
     }
 

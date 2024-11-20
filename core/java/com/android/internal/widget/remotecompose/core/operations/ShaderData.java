@@ -48,7 +48,7 @@ public class ShaderData implements Operation, VariableSupport {
     int mShaderID; // allows shaders to be referenced by number
     @Nullable HashMap<String, float[]> mUniformRawFloatMap = null;
     @Nullable HashMap<String, float[]> mUniformFloatMap = null;
-    @Nullable HashMap<String, int[]> mUniformIntMap = null;
+    @Nullable HashMap<String, int[]> mUniformIntMap;
     @Nullable HashMap<String, Integer> mUniformBitmapMap = null;
 
     public ShaderData(
@@ -104,8 +104,8 @@ public class ShaderData implements Operation, VariableSupport {
      * @param name name of uniform
      * @return value of uniform
      */
-    public float[] getUniformFloats(String name) {
-        return mUniformFloatMap.get(name);
+    public @NonNull float[] getUniformFloats(@NonNull String name) {
+        return mUniformFloatMap != null ? mUniformFloatMap.get(name) : new float[0];
     }
 
     /**
@@ -125,8 +125,8 @@ public class ShaderData implements Operation, VariableSupport {
      * @param name Name of uniform
      * @return value of uniform
      */
-    public int[] getUniformInts(String name) {
-        return mUniformIntMap.get(name);
+    public @NonNull int[] getUniformInts(@NonNull String name) {
+        return mUniformIntMap != null ? mUniformIntMap.get(name) : new int[0];
     }
 
     /**
@@ -146,8 +146,10 @@ public class ShaderData implements Operation, VariableSupport {
      * @param name Name of bitmap uniform
      * @return Bitmap ID
      */
-    public int getUniformBitmapId(String name) {
-        return mUniformBitmapMap.get(name);
+    public int getUniformBitmapId(@NonNull String name) {
+        return mUniformBitmapMap != null
+                ? mUniformBitmapMap.get(name)
+                : -1; // TODO: what is the proper return value here? -- bbade@
     }
 
     @Override
@@ -169,7 +171,7 @@ public class ShaderData implements Operation, VariableSupport {
 
     @Override
     public void updateVariables(@NonNull RemoteContext context) {
-        for (String name : mUniformRawFloatMap.keySet()) {
+        for (String name : mUniformRawFloatMap.keySet()) { // TODO: potential npe
             float[] value = mUniformRawFloatMap.get(name);
             float[] out = null;
             for (int i = 0; i < value.length; i++) {
@@ -186,7 +188,7 @@ public class ShaderData implements Operation, VariableSupport {
 
     @Override
     public void registerListening(@NonNull RemoteContext context) {
-        for (String name : mUniformRawFloatMap.keySet()) {
+        for (String name : mUniformRawFloatMap.keySet()) { // TODO: potential npe
             float[] value = mUniformRawFloatMap.get(name);
             for (float v : value) {
                 if (Float.isNaN(v)) {
@@ -340,7 +342,7 @@ public class ShaderData implements Operation, VariableSupport {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

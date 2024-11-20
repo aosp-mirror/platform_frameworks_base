@@ -1035,6 +1035,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
     }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun testBouncerShown_setsLifecycleState() {
         val client = client
@@ -1060,6 +1061,39 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
         // Bouncer closes.
         bouncerRepository.setPrimaryShow(false)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes back to RESUMED.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun testBouncerShown_withSceneContainer_setsLifecycleState() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            false, /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+
+        // Bouncer shows.
+        kosmos.sceneInteractor.changeScene(Scenes.Bouncer, "test")
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes from resumed back to started when the bouncer shows.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+        // Bouncer closes.
+        kosmos.sceneInteractor.changeScene(Scenes.Dream, "test")
         testScope.runCurrent()
         mMainExecutor.runAllReady()
 

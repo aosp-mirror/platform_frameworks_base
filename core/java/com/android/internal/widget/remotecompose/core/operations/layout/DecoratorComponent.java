@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 
 /**
@@ -22,5 +24,5 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
  * measured. Eg borders, background, clips, etc.
  */
 public interface DecoratorComponent {
-    void layout(RemoteContext context, float width, float height);
+    void layout(@NonNull RemoteContext context, float width, float height);
 }

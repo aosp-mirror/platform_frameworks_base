@@ -400,7 +400,9 @@ public class PipTransition extends PipTransitionController implements
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect startBounds = pipChange.getStartAbsBounds();
         final Rect endBounds = pipChange.getEndAbsBounds();
-        final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
+        final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams != null
+                ? pipChange.getTaskInfo().pictureInPictureParams
+                : new PictureInPictureParams.Builder().build();
         final Rect adjustedSourceRectHint = getAdjustedSourceRectHint(info, pipChange,
                 pipActivityChange);
 

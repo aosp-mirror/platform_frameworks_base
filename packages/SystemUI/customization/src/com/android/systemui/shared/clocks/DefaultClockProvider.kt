@@ -67,7 +67,10 @@ class DefaultClockProvider(
             val buffers = messageBuffers ?: ClockMessageBuffers(LogUtil.DEFAULT_MESSAGE_BUFFER)
             val fontAxes = ClockFontAxis.merge(FlexClockController.FONT_AXES, settings.axes)
             val clockSettings = settings.copy(axes = fontAxes.map { it.toSetting() })
-            val typefaceCache = TypefaceCache(buffers.infraMessageBuffer) { FLEX_TYPEFACE }
+            val typefaceCache =
+                TypefaceCache(buffers.infraMessageBuffer, NUM_CLOCK_FONT_ANIMATION_STEPS) {
+                    FLEX_TYPEFACE
+                }
             FlexClockController(
                 ClockContext(
                     ctx,
@@ -110,6 +113,8 @@ class DefaultClockProvider(
     }
 
     companion object {
+        const val NUM_CLOCK_FONT_ANIMATION_STEPS = 30
+
         // TODO(b/364681643): Variations for retargetted DIGITAL_CLOCK_FLEX
         val LEGACY_FLEX_LS_VARIATION =
             listOf(

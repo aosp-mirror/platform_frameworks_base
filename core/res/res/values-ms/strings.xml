@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Benarkan apl menentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan peranti Wi-Fi berdekatan"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Membenarkan apl mengiklankan, menyambung dan menentukan kedudukan relatif peranti Wi-Fi berdekatan"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"tentukan kedudukan relatif antara peranti berdekatan"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Benarkan apl menentukan kedudukan relatif antara peranti berdekatan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>

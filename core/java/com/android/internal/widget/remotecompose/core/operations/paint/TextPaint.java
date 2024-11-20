@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import android.annotation.NonNull;
+
+// TODO: this interface is unused. Delete it.
 public interface TextPaint {
     void setARGB(int a, int r, int g, int b);
 
@@ -28,7 +31,7 @@ public interface TextPaint {
 
     void setFlags(int flags);
 
-    void setFontFeatureSettings(String settings);
+    void setFontFeatureSettings(@NonNull String settings);
 
     void setHinting(int mode);
 

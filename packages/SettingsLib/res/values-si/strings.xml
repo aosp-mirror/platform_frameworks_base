@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"පැතිකඩ තෝරන්න"</string>
     <string name="category_personal" msgid="6236798763159385225">"පෞද්ගලික"</string>
     <string name="category_work" msgid="4014193632325996115">"කාර්යාලය"</string>
-    <string name="category_private" msgid="4244892185452788977">"පෞද්ගලික"</string>
+    <string name="category_private" msgid="4244892185452788977">"රහසිගත"</string>
     <string name="category_clone" msgid="1554511758987195974">"ක්ලෝන කරන්න"</string>
     <string name="development_settings_title" msgid="140296922921597393">"වර්ධක විකල්ප"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"සංවර්ධක විකල්ප සබල කිරීම"</string>
@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux සංවර්ධන පරිසරය"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android මත Linux ටර්මිනලය ධාවනය කරන්න"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(පර්යේෂණාත්මක) Android මත Linux ටර්මිනලය ධාවනය කරන්න"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ඔබ අබල කරන්නේ නම්, Linux ටර්මිනල් දත්ත හිස් වනු ඇත"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP පරික්ෂාව"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP පරික්ෂා හැසිරීම සකසන්න"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"නිදොස්කරණය"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"බාහිර උපාංගය"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"සම්බන්ධ කළ උපාංගය"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"මෙම දුරකථනය"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ප්‍රතිසමය"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"මෙම උපාංගය මත ධාවනය කළ නොහැක"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"මාරු වීමට ගිණුම උත්ශ්‍රේණි කරන්න"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"මෙහි බාගැනීම් වාදනය කළ නොහැක"</string>

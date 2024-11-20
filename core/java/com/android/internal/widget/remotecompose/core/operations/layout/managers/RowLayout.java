@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -51,7 +52,7 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
     float mSpacedBy = 0f;
 
     public RowLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -68,7 +69,7 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     public RowLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -119,7 +120,7 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
 
     @Override
     public void computeWrapSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
             @NonNull MeasurePass measure,
@@ -143,7 +144,7 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
 
     @Override
     public void computeSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
@@ -162,7 +163,17 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, @NonNull MeasurePass measure) {
+    public float intrinsicWidth() {
+        float width = computeModifierDefinedWidth();
+        float componentWidths = 0f;
+        for (Component c : mChildrenComponents) {
+            componentWidths += c.intrinsicWidth();
+        }
+        return Math.max(width, componentWidths);
+    }
+
+    @Override
+    public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         DebugLog.s(
                 () ->
@@ -185,6 +196,17 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;
         float childrenWidth = 0f;
         float childrenHeight = 0f;
+
+        if (mComponentModifiers.hasHorizontalScroll()) {
+            selfWidth =
+                    mComponentModifiers.getHorizontalScrollDimension()
+                            - mPaddingLeft
+                            - mPaddingRight;
+        }
+        if (mComponentModifiers.hasVerticalScroll()) {
+            selfHeight =
+                    mComponentModifiers.getVerticalScrollDimension() - mPaddingTop - mPaddingBottom;
+        }
 
         boolean hasWeights = false;
         float totalWeights = 0f;

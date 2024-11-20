@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"入力"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"補聴器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ON にしています…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"明るさはトップ アプリによって\n制御されているため、調整できません"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自動回転"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"画面を自動回転します"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置情報"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"クリックすると、新しいデバイスをペア設定できます"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"プリセットを更新できませんでした"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"プリセット"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"選択中"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ツール"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"自動字幕起こし"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"注"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"デバイスのカメラのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"デバイスのカメラとマイクのブロックを解除しますか？"</string>
@@ -871,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"分割画面の使用時に右側または下部のアプリに切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"分割画面の使用時に左側または上部のアプリに切り替える"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"分割画面中: アプリを順に置換する"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"アクティブなウィンドウをディスプレイ間で移動する"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"入力"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"次の言語に切り替える"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"前の言語に切り替える"</string>
@@ -1221,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"使用できる文字数は <xliff:g id="LENGTH">%1$d</xliff:g> 文字未満です"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"空の会話"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"会話ウィジェット"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"会話をタップするとホーム画面に追加されます"</string>
@@ -1356,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"高解像度で撮るにはスマートフォンを裏返してください"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"折りたたみ式デバイスが広げられている"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"折りたたみ式デバイスがひっくり返されている"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"折りたたんだ状態"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"広げた状態"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1415,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ユーザー補助"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"キーボード ショートカット"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"キーボード ショートカットをカスタマイズする"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"ショートカットを割り当てるキーを押してください"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"検索ショートカット"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"検索結果がありません"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"アクションキーまたはメタキーのアイコン"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"プラスアイコン"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"カスタマイズ"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完了"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"開くアイコン"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"または"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ドラッグ ハンドル"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"キーボードの設定"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ショートカットの設定"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"キャンセル"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"キーを押してください"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"このキーの組み合わせはすでに使用されています。別のキーを試してください。"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"キーボードを使用して移動する"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"キーボード ショートカットの詳細"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"タッチパッドを使用して移動する"</string>
@@ -1449,21 +1445,21 @@
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"最近使ったアプリを表示する"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完了"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"戻る"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"タッチパッドを 3 本の指で左右にスワイプします"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"タッチパッドを 3 本の指で左または右にスワイプします"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"その調子です！"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"「戻る」操作を学習しました。"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"「戻る」ジェスチャーを学習しました。"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ホームに移動"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"タッチパッドを 3 本の指で上にスワイプします"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"よくできました！"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"「ホームに移動」操作を学習しました"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"「ホームに移動」ジェスチャーを学習しました"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"最近使ったアプリを表示する"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"タッチパッドを 3 本の指で上にスワイプして長押しします"</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"よくできました"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"「最近使ったアプリを表示する」操作を学習しました。"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"よくできました！"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"「最近使ったアプリを表示する」ジェスチャーを学習しました。"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"すべてのアプリを表示"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"キーボードのアクションキーを押します"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"完了です！"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"「すべてのアプリを表示する」操作を学習しました"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"「すべてのアプリを表示する」ジェスチャーを学習しました"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>

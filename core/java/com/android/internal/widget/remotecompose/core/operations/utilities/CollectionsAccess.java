@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.Nullable;
+
 /**
  * interface to allow expressions to access collections Todo define a convention for when access is
  * unavailable
@@ -22,6 +24,7 @@ package com.android.internal.widget.remotecompose.core.operations.utilities;
 public interface CollectionsAccess {
     float getFloatValue(int id, int index);
 
+    @Nullable
     float[] getFloats(int id);
 
     int getListLength(int id);

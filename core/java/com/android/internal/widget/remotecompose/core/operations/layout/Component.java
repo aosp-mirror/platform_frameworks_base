@@ -50,12 +50,12 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     protected float mY;
     protected float mWidth;
     protected float mHeight;
-    protected Component mParent;
+    @Nullable protected Component mParent;
     protected int mAnimationId = -1;
-    public Visibility mVisibility = Visibility.VISIBLE;
-    public Visibility mScheduledVisibility = Visibility.VISIBLE;
+    @NonNull public Visibility mVisibility = Visibility.VISIBLE;
+    @NonNull public Visibility mScheduledVisibility = Visibility.VISIBLE;
     @NonNull public ArrayList<Operation> mList = new ArrayList<>();
-    public PaintOperation mPreTranslate;
+    public PaintOperation mPreTranslate; // todo, can we initialize this here and make it NonNull?
     public boolean mNeedsMeasure = true;
     public boolean mNeedsRepaint = false;
     @Nullable public AnimateMeasure mAnimateMeasure;
@@ -99,6 +99,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return mAnimationId;
     }
 
+    @Nullable
     public Component getParent() {
         return mParent;
     }
@@ -160,7 +161,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     public Component(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -177,7 +178,12 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     public Component(
-            int componentId, float x, float y, float width, float height, Component parent) {
+            int componentId,
+            float x,
+            float y,
+            float width,
+            float height,
+            @Nullable Component parent) {
         this(parent, componentId, -1, x, y, width, height);
     }
 
@@ -211,7 +217,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return mNeedsMeasure;
     }
 
-    public void setParent(Component parent) {
+    public void setParent(@Nullable Component parent) {
         mParent = parent;
     }
 
@@ -222,8 +228,8 @@ public class Component extends PaintOperation implements Measurable, Serializabl
      * @param context the current context
      */
     public void updateVariables(@NonNull RemoteContext context) {
-        Component prev = context.lastComponent;
-        context.lastComponent = this;
+        Component prev = context.mLastComponent;
+        context.mLastComponent = this;
 
         if (!mComponentValues.isEmpty()) {
             updateComponentValues(context);
@@ -236,11 +242,19 @@ public class Component extends PaintOperation implements Measurable, Serializabl
                 o.apply(context);
             }
         }
-        context.lastComponent = prev;
+        context.mLastComponent = prev;
     }
 
-    public void addComponentValue(ComponentValue v) {
+    public void addComponentValue(@NonNull ComponentValue v) {
         mComponentValues.add(v);
+    }
+
+    public float intrinsicWidth() {
+        return getWidth();
+    }
+
+    public float intrinsicHeight() {
+        return getHeight();
     }
 
     public enum Visibility {
@@ -253,13 +267,13 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (mVisibility != Visibility.VISIBLE || mParent == null) {
             return mVisibility == Visibility.VISIBLE;
         }
-        if (mParent != null) {
+        if (mParent != null) { // TODO: this is always true -- bbade@
             return mParent.isVisible();
         }
         return true;
     }
 
-    public void setVisibility(Visibility visibility) {
+    public void setVisibility(@NonNull Visibility visibility) {
         if (visibility != mVisibility || visibility != mScheduledVisibility) {
             mScheduledVisibility = visibility;
             invalidateMeasure();
@@ -267,7 +281,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     @Override
-    public boolean suitableForTransition(Operation o) {
+    public boolean suitableForTransition(@NonNull Operation o) {
         if (!(o instanceof Component)) {
             return false;
         }
@@ -291,7 +305,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     @Override
     public void measure(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
@@ -358,16 +372,27 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         return x >= lx1 && x < lx2 && y >= ly1 && y < ly2;
     }
 
-    public void onClick(RemoteContext context, CoreDocument document, float x, float y) {
+    public float getScrollX() {
+        return 0;
+    }
+
+    public float getScrollY() {
+        return 0;
+    }
+
+    public void onClick(
+            @NonNull RemoteContext context, @NonNull CoreDocument document, float x, float y) {
         if (!contains(x, y)) {
             return;
         }
+        float cx = x - getScrollX();
+        float cy = y - getScrollY();
         for (Operation op : mList) {
             if (op instanceof Component) {
-                ((Component) op).onClick(context, document, x, y);
+                ((Component) op).onClick(context, document, cx, cy);
             }
             if (op instanceof ClickHandler) {
-                ((ClickHandler) op).onClick(context, document, this, x, y);
+                ((ClickHandler) op).onClick(context, document, this, cx, cy);
             }
         }
     }
@@ -376,12 +401,14 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (!contains(x, y)) {
             return;
         }
+        float cx = x - getScrollX();
+        float cy = y - getScrollY();
         for (Operation op : mList) {
             if (op instanceof Component) {
-                ((Component) op).onTouchDown(context, document, x, y);
+                ((Component) op).onTouchDown(context, document, cx, cy);
             }
             if (op instanceof TouchHandler) {
-                ((TouchHandler) op).onTouchDown(context, document, this, x, y);
+                ((TouchHandler) op).onTouchDown(context, document, this, cx, cy);
             }
         }
     }
@@ -391,12 +418,14 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (!force && !contains(x, y)) {
             return;
         }
+        float cx = x - getScrollX();
+        float cy = y - getScrollY();
         for (Operation op : mList) {
             if (op instanceof Component) {
-                ((Component) op).onTouchUp(context, document, x, y, force);
+                ((Component) op).onTouchUp(context, document, cx, cy, force);
             }
             if (op instanceof TouchHandler) {
-                ((TouchHandler) op).onTouchUp(context, document, this, x, y);
+                ((TouchHandler) op).onTouchUp(context, document, this, cx, cy);
             }
         }
     }
@@ -406,12 +435,31 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (!force && !contains(x, y)) {
             return;
         }
+        float cx = x - getScrollX();
+        float cy = y - getScrollY();
         for (Operation op : mList) {
             if (op instanceof Component) {
-                ((Component) op).onTouchCancel(context, document, x, y, force);
+                ((Component) op).onTouchCancel(context, document, cx, cy, force);
             }
             if (op instanceof TouchHandler) {
-                ((TouchHandler) op).onTouchCancel(context, document, this, x, y);
+                ((TouchHandler) op).onTouchCancel(context, document, this, cx, cy);
+            }
+        }
+    }
+
+    public void onTouchDrag(
+            RemoteContext context, CoreDocument document, float x, float y, boolean force) {
+        if (!force && !contains(x, y)) {
+            return;
+        }
+        float cx = x - getScrollX();
+        float cy = y - getScrollY();
+        for (Operation op : mList) {
+            if (op instanceof Component) {
+                ((Component) op).onTouchDrag(context, document, cx, cy, force);
+            }
+            if (op instanceof TouchHandler) {
+                ((TouchHandler) op).onTouchDrag(context, document, this, cx, cy);
             }
         }
     }
@@ -480,7 +528,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         // nothing
     }
 
@@ -502,7 +550,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         StringBuilder builder = new StringBuilder();
         builder.append(indent);
         builder.append(toString());
@@ -602,8 +650,8 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (mPreTranslate != null) {
             mPreTranslate.paint(context);
         }
-        Component prev = context.getContext().lastComponent;
-        context.getContext().lastComponent = this;
+        Component prev = context.getContext().mLastComponent;
+        context.getContext().mLastComponent = this;
         context.save();
         context.translate(mX, mY);
         if (context.isVisualDebug()) {
@@ -618,7 +666,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             }
         }
         context.restore();
-        context.getContext().lastComponent = prev;
+        context.getContext().mLastComponent = prev;
     }
 
     public boolean applyAnimationAsNeeded(@NonNull PaintContext context) {

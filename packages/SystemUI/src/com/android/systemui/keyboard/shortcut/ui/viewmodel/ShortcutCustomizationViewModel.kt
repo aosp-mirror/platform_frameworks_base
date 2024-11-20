@@ -17,14 +17,22 @@
 package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.nativeKeyCode
+import androidx.compose.ui.input.key.type
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomizationInteractor
+import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 class ShortcutCustomizationViewModel
@@ -35,7 +43,21 @@ constructor(private val shortcutCustomizationInteractor: ShortcutCustomizationIn
     private val _shortcutCustomizationUiState =
         MutableStateFlow<ShortcutCustomizationUiState>(ShortcutCustomizationUiState.Inactive)
 
-    val shortcutCustomizationUiState = _shortcutCustomizationUiState.asStateFlow()
+    val shortcutCustomizationUiState =
+        shortcutCustomizationInteractor.pressedKeys
+            .map { keys ->
+                // Note that Action Key is excluded as it's already displayed on the UI
+                keys.filter {
+                    it != shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey()
+                }
+            }
+            .combine(_shortcutCustomizationUiState) { keys, uiState ->
+                if (uiState is ShortcutCustomizationUiState.AddShortcutDialog) {
+                    uiState.copy(pressedKeys = keys)
+                } else {
+                    uiState
+                }
+            }
 
     fun onShortcutCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo) {
         when (requestInfo) {
@@ -44,10 +66,10 @@ constructor(private val shortcutCustomizationInteractor: ShortcutCustomizationIn
                     ShortcutCustomizationUiState.AddShortcutDialog(
                         shortcutLabel = requestInfo.label,
                         shouldShowErrorMessage = false,
-                        isValidKeyCombination = false,
                         defaultCustomShortcutModifierKey =
                             shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
                         isDialogShowing = false,
+                        pressedKeys = emptyList(),
                     )
                 _shortcutBeingCustomized.value = requestInfo
             }
@@ -62,18 +84,48 @@ constructor(private val shortcutCustomizationInteractor: ShortcutCustomizationIn
         }
     }
 
-    fun onAddShortcutDialogDismissed() {
+    fun onDialogDismissed() {
         _shortcutBeingCustomized.value = null
         _shortcutCustomizationUiState.value = ShortcutCustomizationUiState.Inactive
+        shortcutCustomizationInteractor.updateUserSelectedKeyCombination(null)
     }
 
     fun onKeyPressed(keyEvent: KeyEvent): Boolean {
-        // TODO Not yet implemented b/373638584
+        if ((keyEvent.isMetaPressed && keyEvent.type == KeyEventType.KeyDown)) {
+            updatePressedKeys(keyEvent)
+            return true
+        }
         return false
+    }
+
+    private fun updatePressedKeys(keyEvent: KeyEvent) {
+        val isModifier = SUPPORTED_MODIFIERS.contains(keyEvent.key)
+        val keyCombination =
+            KeyCombination(
+                modifiers = keyEvent.nativeKeyEvent.modifiers,
+                keyCode = if (!isModifier) keyEvent.key.nativeKeyCode else null,
+            )
+        shortcutCustomizationInteractor.updateUserSelectedKeyCombination(keyCombination)
     }
 
     @AssistedFactory
     interface Factory {
         fun create(): ShortcutCustomizationViewModel
+    }
+
+    companion object {
+        private val SUPPORTED_MODIFIERS =
+            listOf(
+                Key.MetaLeft,
+                Key.MetaRight,
+                Key.CtrlRight,
+                Key.CtrlLeft,
+                Key.AltLeft,
+                Key.AltRight,
+                Key.ShiftLeft,
+                Key.ShiftRight,
+                Key.Function,
+                Key.Symbol,
+            )
     }
 }
