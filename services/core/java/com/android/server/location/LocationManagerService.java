@@ -108,6 +108,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.location.eventlog.LocationEventLog;
+import com.android.server.location.fudger.LocationFudgerCache;
 import com.android.server.location.geofence.GeofenceManager;
 import com.android.server.location.geofence.GeofenceProxy;
 import com.android.server.location.gnss.GnssConfiguration;
@@ -262,6 +263,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
     private ProxyGeocodeProvider mGeocodeProvider;
 
     private @Nullable ProxyPopulationDensityProvider mPopulationDensityProvider = null;
+
+    // A cache for population density lookups. Used if density-based coarse locations are enabled.
+    private @Nullable LocationFudgerCache mLocationFudgerCache = null;
 
     private final Object mDeprecatedGnssBatchingLock = new Object();
     @GuardedBy("mDeprecatedGnssBatchingLock")
@@ -538,6 +542,9 @@ public class LocationManagerService extends ILocationManager.Stub implements
             if (mPopulationDensityProvider == null) {
                 Log.e(TAG, "no population density provider found");
             }
+        }
+        if (mPopulationDensityProvider != null && Flags.densityBasedCoarseLocations()) {
+            setLocationFudgerCache(new LocationFudgerCache(mPopulationDensityProvider));
         }
 
         // bind to hardware activity recognition
