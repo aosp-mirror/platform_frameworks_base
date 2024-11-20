@@ -2174,6 +2174,16 @@
         <item>com.android.location.fused</item>
     </string-array>
 
+    <!-- Package name providing population density location support. -->
+    <string name="config_populationDensityProviderPackageName" translatable="false">com.android.location.populationdensity</string>
+
+    <!-- Whether to enable population density provider overlay, which allows the population density provider to
+         be replaced by an app at run-time. When disabled, only the
+         config_populationDensityProviderPackageName package will be searched for a population density
+         provider, otherwise any system package is eligible. Anyone who wants to disable the overlay
+         mechanism can set it to false. -->
+    <bool name="config_enablePopulationDensityProviderOverlay" translatable="false">true</bool>
+
    <!-- Package name of the extension software fallback. -->
     <string name="config_extensionFallbackPackageName" translatable="false"></string>
 

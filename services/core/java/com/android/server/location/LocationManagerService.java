@@ -147,6 +147,7 @@ import com.android.server.location.provider.PassiveLocationProviderManager;
 import com.android.server.location.provider.StationaryThrottlingLocationProvider;
 import com.android.server.location.provider.proxy.ProxyGeocodeProvider;
 import com.android.server.location.provider.proxy.ProxyLocationProvider;
+import com.android.server.location.provider.proxy.ProxyPopulationDensityProvider;
 import com.android.server.location.settings.LocationSettings;
 import com.android.server.location.settings.LocationUserSettings;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
@@ -259,6 +260,8 @@ public class LocationManagerService extends ILocationManager.Stub implements
     private final GeofenceManager mGeofenceManager;
     private volatile @Nullable GnssManagerService mGnssManagerService = null;
     private ProxyGeocodeProvider mGeocodeProvider;
+
+    private @Nullable ProxyPopulationDensityProvider mPopulationDensityProvider = null;
 
     private final Object mDeprecatedGnssBatchingLock = new Object();
     @GuardedBy("mDeprecatedGnssBatchingLock")
@@ -392,6 +395,25 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
     }
 
+    @VisibleForTesting
+    protected void setProxyPopulationDensityProvider(ProxyPopulationDensityProvider provider) {
+        if (Flags.populationDensityProvider()) {
+            mPopulationDensityProvider = provider;
+        }
+    }
+
+    @VisibleForTesting
+    protected void setLocationFudgerCache(LocationFudgerCache cache) {
+        if (!Flags.densityBasedCoarseLocations()) {
+            return;
+        }
+
+        mLocationFudgerCache = cache;
+        for (LocationProviderManager manager : mProviderManagers) {
+            manager.setLocationFudgerCache(cache);
+        }
+    }
+
     private void removeLocationProviderManager(LocationProviderManager manager) {
         synchronized (mProviderManagers) {
             boolean removed = mProviderManagers.remove(manager);
@@ -508,6 +530,14 @@ public class LocationManagerService extends ILocationManager.Stub implements
         mGeocodeProvider = ProxyGeocodeProvider.createAndRegister(mContext);
         if (mGeocodeProvider == null) {
             Log.e(TAG, "no geocoder provider found");
+        }
+
+        if (Flags.populationDensityProvider()) {
+            setProxyPopulationDensityProvider(
+                    ProxyPopulationDensityProvider.createAndRegister(mContext));
+            if (mPopulationDensityProvider == null) {
+                Log.e(TAG, "no population density provider found");
+            }
         }
 
         // bind to hardware activity recognition
