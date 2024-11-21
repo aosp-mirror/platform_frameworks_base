@@ -327,7 +327,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
                 DEFAULT_GENERATED_PREVIEW_RESET_INTERVAL_MS);
         final int generatedPreviewMaxCallsPerInterval = DeviceConfig.getInt(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
+                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL,
                 DEFAULT_GENERATED_PREVIEW_MAX_CALLS_PER_INTERVAL);
         mGeneratedPreviewsApiCounter = new ApiCounter(generatedPreviewResetInterval,
                 generatedPreviewMaxCallsPerInterval);

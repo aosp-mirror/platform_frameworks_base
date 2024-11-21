@@ -142,33 +142,31 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure the given system property as immutable for the duration of the test.
-         * Read access to the key is allowed, and write access will fail. When {@code value} is
-         * {@code null}, the value is left as undefined.
-         *
-         * All properties in the {@code debug.*} namespace are automatically mutable, with no
-         * developer action required.
-         *
-         * Has no effect on non-Ravenwood environments.
+         * @deprecated Use {@link RavenwoodRule.Builder#setSystemPropertyImmutable(String, Object)}
          */
+        @Deprecated
         public Builder setSystemPropertyImmutable(@NonNull String key,
+                @Nullable Object value) {
+            return this;
+        }
+
+        /**
+         * @deprecated Use {@link RavenwoodRule.Builder#setSystemPropertyMutable(String, Object)}
+         */
+        @Deprecated
+        public Builder setSystemPropertyMutable(@NonNull String key,
+                @Nullable Object value) {
+            return this;
+        }
+
+        Builder setSystemPropertyImmutableReal(@NonNull String key,
                 @Nullable Object value) {
             mConfig.mSystemProperties.setValue(key, value);
             mConfig.mSystemProperties.setAccessReadOnly(key);
             return this;
         }
 
-        /**
-         * Configure the given system property as mutable for the duration of the test.
-         * Both read and write access to the key is allowed, and its value will be reset between
-         * each test. When {@code value} is {@code null}, the value is left as undefined.
-         *
-         * All properties in the {@code debug.*} namespace are automatically mutable, with no
-         * developer action required.
-         *
-         * Has no effect on non-Ravenwood environments.
-         */
-        public Builder setSystemPropertyMutable(@NonNull String key,
+        Builder setSystemPropertyMutableReal(@NonNull String key,
                 @Nullable Object value) {
             mConfig.mSystemProperties.setValue(key, value);
             mConfig.mSystemProperties.setAccessReadWrite(key);

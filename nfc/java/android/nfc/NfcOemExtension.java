@@ -173,6 +173,31 @@ public final class NfcOemExtension {
     public @interface HostCardEmulationAction {}
 
     /**
+     * Status code returned when the polling state change request succeeded.
+     * @see #pausePolling()
+     * @see #resumePolling()
+     */
+    public static final int POLLING_STATE_CHANGE_SUCCEEDED = 1;
+    /**
+     * Status code returned when the polling state change request is already in
+     * required state.
+     * @see #pausePolling()
+     * @see #resumePolling()
+     */
+    public static final int POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE = 2;
+    /**
+     * Possible status codes for {@link #pausePolling()} and
+     * {@link #resumePolling()}.
+     * @hide
+     */
+    @IntDef(value = {
+            POLLING_STATE_CHANGE_SUCCEEDED,
+            POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PollingStateChangeStatusCode {}
+
+    /**
      * Status OK
      */
     public static final int STATUS_OK = 0;
@@ -467,6 +492,28 @@ public final class NfcOemExtension {
     }
 
     /**
+     * Get an instance of {@link T4tNdefNfcee} object for performing T4T (Type-4 Tag)
+     * NDEF (NFC Data Exchange Format) NFCEE (NFC Execution Environment) operations.
+     * This can be used to write NDEF data to emulate a T4T tag in an NFCEE
+     * (NFC Execution Environment - eSE, SIM, etc). Refer to the NFC forum specification
+     * "NFCForum-TS-NCI-2.3 section 10.4" and "NFCForum-TS-T4T-1.1 section 4.2" for more details.
+     *
+     * This is a singleton object which shall be used by OEM extension module to do NDEF-NFCEE
+     * read/write operations.
+     *
+     * <p>Returns {@link T4tNdefNfcee}
+     * <p>Does not cause any RF activity and does not block.
+     * @return NFC Data Exchange Format (NDEF) NFC Execution Environment (NFCEE) object
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public T4tNdefNfcee getT4tNdefNfcee() {
+        return T4tNdefNfcee.getInstance();
+    }
+
+    /**
      * Register an {@link Callback} to listen for NFC oem extension callbacks
      * Multiple clients can register and callbacks will be invoked asynchronously.
      *
@@ -653,24 +700,32 @@ public final class NfcOemExtension {
 
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
-     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
-     * use {@link #resumePolling()} to resume the polling.
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely.
+     * Use {@link #resumePolling() to resume the polling.
      * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
+     * @return status of the operation
+     * @throws IllegalArgumentException if timeoutInMs value is invalid
+     *         (0 < timeoutInMs < max).
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void pausePolling(@DurationMillisLong int timeoutInMs) {
-        NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
+    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong int timeoutInMs) {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.pausePolling(timeoutInMs),
+                POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
     }
 
     /**
      * Resumes default NFC tag reader mode polling for the current device state if polling is
      * paused. Calling this while already in polling is a no-op.
+     * @return status of the operation
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void resumePolling() {
-        NfcAdapter.callService(() -> NfcAdapter.sService.resumePolling());
+    public @PollingStateChangeStatusCode int resumePolling() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.resumePolling(),
+                POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
     }
 
     /**
