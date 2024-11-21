@@ -755,6 +755,7 @@ public class GenericWindowPolicyControllerTest {
 
         verify(mActivityListener, after(TIMEOUT_MILLIS).never())
                 .onSecureWindowShown(eq(DISPLAY_ID), eq(activityInfo));
+        verify(mActivityListener, never()).onSecureWindowHidden(eq(DISPLAY_ID));
         verify(mActivityListener, never())
                 .onActivityLaunchBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
@@ -776,6 +777,10 @@ public class GenericWindowPolicyControllerTest {
                 .onSecureWindowShown(eq(DISPLAY_ID), eq(activityInfo));
         verify(mActivityListener, after(TIMEOUT_MILLIS).never())
                 .onActivityLaunchBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
+
+        assertThat(gwpc.keepActivityOnWindowFlagsChanged(activityInfo, 0, 0)).isTrue();
+
+        verify(mActivityListener, timeout(TIMEOUT_MILLIS)).onSecureWindowHidden(eq(DISPLAY_ID));
     }
 
     @Test
@@ -794,6 +799,7 @@ public class GenericWindowPolicyControllerTest {
 
         verify(mActivityListener, after(TIMEOUT_MILLIS).never())
                 .onSecureWindowShown(eq(DISPLAY_ID), eq(activityInfo));
+        verify(mActivityListener, never()).onSecureWindowHidden(eq(DISPLAY_ID));
         verify(mActivityListener, never())
                 .onActivityLaunchBlocked(eq(DISPLAY_ID), eq(activityInfo), any());
     }
