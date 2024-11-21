@@ -18,6 +18,8 @@ package com.android.server.biometrics.sensors;
 
 import android.util.SparseArray;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Tracks biometric performance across sensors and users.
  */
@@ -25,17 +27,12 @@ public class PerformanceTracker {
 
     private static final String TAG = "PerformanceTracker";
     // Keyed by SensorId
-    private static SparseArray<PerformanceTracker> sTrackers;
+    private static final ConcurrentHashMap<Integer, PerformanceTracker> sTrackers =
+            new ConcurrentHashMap<>();
 
     public static PerformanceTracker getInstanceForSensorId(int sensorId) {
-        if (sTrackers == null) {
-            sTrackers = new SparseArray<>();
-        }
-
-        if (!sTrackers.contains(sensorId)) {
-            sTrackers.put(sensorId, new PerformanceTracker());
-        }
-        return sTrackers.get(sensorId);
+        PerformanceTracker tracker = sTrackers.putIfAbsent(sensorId, new PerformanceTracker());
+        return tracker != null ? tracker : sTrackers.get(sensorId);
     }
 
     private static class Info {
