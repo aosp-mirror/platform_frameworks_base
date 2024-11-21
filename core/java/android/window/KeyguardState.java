@@ -30,28 +30,23 @@ import java.util.Objects;
  */
 public final class KeyguardState implements Parcelable {
 
-    private final int mDisplayId;
-
     private final boolean mKeyguardShowing;
 
     private final boolean mAodShowing;
 
 
-    private KeyguardState(int displayId, boolean keyguardShowing, boolean aodShowing) {
-        mDisplayId = displayId;
+    private KeyguardState(boolean keyguardShowing, boolean aodShowing) {
         mKeyguardShowing = keyguardShowing;
         mAodShowing = aodShowing;
     }
 
     private KeyguardState(Parcel in) {
-        mDisplayId = in.readInt();
         mKeyguardShowing = in.readBoolean();
         mAodShowing = in.readBoolean();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mDisplayId);
         dest.writeBoolean(mKeyguardShowing);
         dest.writeBoolean(mAodShowing);
     }
@@ -70,13 +65,6 @@ public final class KeyguardState implements Parcelable {
                 }
             };
 
-    /**
-     * Gets the display id of this {@link KeyguardState}.
-     */
-    public int getDisplayId() {
-        return mDisplayId;
-    }
-
     /** Returns the keyguard showing value. */
     public boolean getKeyguardShowing() {
         return mKeyguardShowing;
@@ -89,15 +77,14 @@ public final class KeyguardState implements Parcelable {
 
     @Override
     public String toString() {
-        return "KeyguardState{ displayId=" + mDisplayId
-                + ", keyguardShowing=" + mKeyguardShowing
+        return "KeyguardState{ keyguardShowing=" + mKeyguardShowing
                 + ", aodShowing=" + mAodShowing
                 + '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayId, mKeyguardShowing, mAodShowing);
+        return Objects.hash(mKeyguardShowing, mAodShowing);
     }
 
     @Override
@@ -105,8 +92,7 @@ public final class KeyguardState implements Parcelable {
         if (!(obj instanceof KeyguardState other)) {
             return false;
         }
-        return mDisplayId == other.mDisplayId
-                && mKeyguardShowing == other.mKeyguardShowing
+        return mKeyguardShowing == other.mKeyguardShowing
                 && mAodShowing == other.mAodShowing;
     }
 
@@ -117,18 +103,11 @@ public final class KeyguardState implements Parcelable {
 
     /** Builder to construct the {@link KeyguardState}. */
     public static final class Builder {
-
-        private final int mDisplayId;
-
         private boolean mKeyguardShowing;
 
         private boolean mAodShowing;
 
-        /**
-         * @param displayId the display of this {@link KeyguardState}.
-         */
-        public Builder(int displayId) {
-            mDisplayId = displayId;
+        public Builder() {
         }
 
         /**
@@ -154,7 +133,7 @@ public final class KeyguardState implements Parcelable {
          */
         @NonNull
         public KeyguardState build() {
-            return new KeyguardState(mDisplayId, mKeyguardShowing, mAodShowing);
+            return new KeyguardState(mKeyguardShowing, mAodShowing);
         }
     }
 }

@@ -42,7 +42,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
@@ -444,10 +443,8 @@ public class KeyguardTransitionHandler
         @Override
         public void startKeyguardTransition(boolean keyguardShowing, boolean aodShowing) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            for (Display display : mDisplayController.getDisplays()) {
-                wct.addKeyguardState(new KeyguardState.Builder(display.getDisplayId())
-                        .setKeyguardShowing(keyguardShowing).setAodShowing(aodShowing).build());
-            }
+            wct.addKeyguardState(new KeyguardState.Builder().setKeyguardShowing(keyguardShowing)
+                    .setAodShowing(aodShowing).build());
             mMainExecutor.execute(() -> {
                 mTransitions.startTransition(keyguardShowing ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK,
                         wct, KeyguardTransitionHandler.this);
