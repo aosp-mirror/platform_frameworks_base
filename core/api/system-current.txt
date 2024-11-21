@@ -5275,9 +5275,8 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public final class HubServiceInfo implements android.os.Parcelable {
-    ctor public HubServiceInfo(@NonNull String, int, int, int, @NonNull android.os.ParcelableHolder);
+    ctor public HubServiceInfo(@NonNull String, int, int, int);
     method public int describeContents();
-    method @NonNull public android.os.ParcelableHolder getExtendedInfo();
     method public int getFormat();
     method public int getMajorVersion();
     method public int getMinorVersion();
@@ -5292,7 +5291,6 @@ package android.hardware.contexthub {
   public static final class HubServiceInfo.Builder {
     ctor public HubServiceInfo.Builder(@NonNull String, int, int, int);
     method @NonNull public android.hardware.contexthub.HubServiceInfo build();
-    method @NonNull public android.hardware.contexthub.HubServiceInfo.Builder setExtendedInfo(@Nullable android.os.Parcelable);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
