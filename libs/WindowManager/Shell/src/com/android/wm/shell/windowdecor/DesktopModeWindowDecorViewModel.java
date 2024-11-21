@@ -1575,8 +1575,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, taskPositioner);
-        InputMethod inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(
-                touchEventListener.mMotionEvent);
         windowDecoration.setOnMaximizeOrRestoreClickListener(() -> {
             onMaximizeOrRestore(taskInfo.taskId, "maximize_menu", ResizeTrigger.MAXIMIZE_MENU,
                     touchEventListener.mMotionEvent);
@@ -1587,11 +1585,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return Unit.INSTANCE;
         });
         windowDecoration.setOnLeftSnapClickListener(() -> {
-            onSnapResize(taskInfo.taskId, /* isLeft= */ true, inputMethod);
+            onSnapResize(taskInfo.taskId, /* isLeft= */ true,
+                    DesktopModeEventLogger.getInputMethodFromMotionEvent(
+                            touchEventListener.mMotionEvent));
             return Unit.INSTANCE;
         });
         windowDecoration.setOnRightSnapClickListener(() -> {
-            onSnapResize(taskInfo.taskId, /* isLeft= */ false, inputMethod);
+            onSnapResize(taskInfo.taskId, /* isLeft= */ false,
+                    DesktopModeEventLogger.getInputMethodFromMotionEvent(
+                            touchEventListener.mMotionEvent));
             return Unit.INSTANCE;
         });
         windowDecoration.setOnToDesktopClickListener(desktopModeTransitionSource -> {
