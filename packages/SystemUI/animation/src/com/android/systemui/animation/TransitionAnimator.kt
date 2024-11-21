@@ -27,6 +27,8 @@ import android.graphics.drawable.GradientDrawable
 import android.util.FloatProperty
 import android.util.Log
 import android.util.MathUtils
+import android.util.TimeUtils
+import android.view.Choreographer
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
@@ -366,6 +368,7 @@ class TransitionAnimator(
         @get:VisibleForTesting val springY: SpringAnimation,
         @get:VisibleForTesting val springScale: SpringAnimation,
         private val springState: SpringState,
+        private val startFrameTime: Long,
         private val onAnimationStart: Runnable,
     ) : Animation {
         @get:VisibleForTesting
@@ -374,6 +377,42 @@ class TransitionAnimator(
 
         override fun start() {
             onAnimationStart.run()
+
+            // If no start frame time is provided, we start the springs normally.
+            if (startFrameTime < 0) {
+                startSprings()
+                return
+            }
+
+            // This function is not guaranteed to be called inside a frame. We try to access the
+            // frame time immediately, but if we're not inside a frame this will throw an exception.
+            // We must then post a callback to be run at the beginning of the next frame.
+            try {
+                initAndStartSprings(Choreographer.getInstance().frameTime)
+            } catch (_: IllegalStateException) {
+                Choreographer.getInstance().postFrameCallback { frameTimeNanos ->
+                    initAndStartSprings(frameTimeNanos / TimeUtils.NANOS_PER_MS)
+                }
+            }
+        }
+
+        private fun initAndStartSprings(frameTime: Long) {
+            // Initialize the spring as if it had started at the time that its start state
+            // was created.
+            springX.doAnimationFrame(startFrameTime)
+            springY.doAnimationFrame(startFrameTime)
+            springScale.doAnimationFrame(startFrameTime)
+            // Move the spring time forward to the current frame, so it updates its internal state
+            // following the initial momentum over the elapsed time.
+            springX.doAnimationFrame(frameTime)
+            springY.doAnimationFrame(frameTime)
+            springScale.doAnimationFrame(frameTime)
+            // Actually start the spring. We do this after the previous calls because the framework
+            // doesn't like it when you call doAnimationFrame() after start() with an earlier time.
+            startSprings()
+        }
+
+        private fun startSprings() {
             springX.start()
             springY.start()
             springScale.start()
@@ -471,7 +510,9 @@ class TransitionAnimator(
      * is true.
      *
      * If [startVelocity] (expressed in pixels per second) is not null, a multi-spring animation
-     * using it for the initial momentum will be used instead of the default interpolators.
+     * using it for the initial momentum will be used instead of the default interpolators. In this
+     * case, [startFrameTime] (if non-negative) represents the frame time at which the springs
+     * should be started.
      */
     fun startAnimation(
         controller: Controller,
@@ -480,6 +521,7 @@ class TransitionAnimator(
         fadeWindowBackgroundLayer: Boolean = true,
         drawHole: Boolean = false,
         startVelocity: PointF? = null,
+        startFrameTime: Long = -1,
     ): Animation {
         if (!controller.isLaunching) assertReturnAnimations()
         if (startVelocity != null) assertLongLivedReturnAnimations()
@@ -502,6 +544,7 @@ class TransitionAnimator(
                 fadeWindowBackgroundLayer,
                 drawHole,
                 startVelocity,
+                startFrameTime,
             )
             .apply { start() }
     }
@@ -515,6 +558,7 @@ class TransitionAnimator(
         fadeWindowBackgroundLayer: Boolean = true,
         drawHole: Boolean = false,
         startVelocity: PointF? = null,
+        startFrameTime: Long = -1,
     ): Animation {
         val transitionContainer = controller.transitionContainer
         val transitionContainerOverlay = transitionContainer.overlay
@@ -537,6 +581,7 @@ class TransitionAnimator(
                 startState,
                 endState,
                 startVelocity,
+                startFrameTime,
                 windowBackgroundLayer,
                 transitionContainer,
                 transitionContainerOverlay,
@@ -722,6 +767,7 @@ class TransitionAnimator(
         startState: State,
         endState: State,
         startVelocity: PointF,
+        startFrameTime: Long,
         windowBackgroundLayer: GradientDrawable,
         transitionContainer: View,
         transitionContainerOverlay: ViewGroupOverlay,
@@ -912,7 +958,7 @@ class TransitionAnimator(
                     }
                 }
 
-        return MultiSpringAnimation(springX, springY, springScale, springState) {
+        return MultiSpringAnimation(springX, springY, springScale, springState, startFrameTime) {
             onAnimationStart(
                 controller,
                 isExpandingFullyAbove,
