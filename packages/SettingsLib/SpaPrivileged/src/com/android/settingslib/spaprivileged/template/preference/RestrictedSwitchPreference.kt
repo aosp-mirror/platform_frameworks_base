@@ -25,12 +25,25 @@ import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvid
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreferenceModel.Companion.RestrictedSwitchWrapper
 
+/**
+ * @param ifBlockedByAdminOverrideCheckedValueTo if this is not null and there is an admin
+ *   restriction, the switch's checked status will be overridden.
+ *
+ *   And if there is an admin summary, such as "Enabled by admin" or "Disabled by admin", will also
+ *   be overridden.
+ */
 @Composable
 fun RestrictedSwitchPreference(
     model: SwitchPreferenceModel,
     restrictions: Restrictions,
+    ifBlockedByAdminOverrideCheckedValueTo: Boolean? = null,
 ) {
-    RestrictedSwitchPreference(model, restrictions, ::RestrictionsProviderImpl)
+    RestrictedSwitchPreference(
+        model = model,
+        restrictions = restrictions,
+        ifBlockedByAdminOverrideCheckedValueTo = ifBlockedByAdminOverrideCheckedValueTo,
+        restrictionsProviderFactory = ::RestrictionsProviderImpl,
+    )
 }
 
 @VisibleForTesting
@@ -38,13 +51,18 @@ fun RestrictedSwitchPreference(
 internal fun RestrictedSwitchPreference(
     model: SwitchPreferenceModel,
     restrictions: Restrictions,
+    ifBlockedByAdminOverrideCheckedValueTo: Boolean? = null,
     restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
     if (restrictions.isEmpty()) {
         SwitchPreference(model)
         return
     }
-    restrictionsProviderFactory.RestrictedSwitchWrapper(model, restrictions) {
+    restrictionsProviderFactory.RestrictedSwitchWrapper(
+        model = model,
+        restrictions = restrictions,
+        ifBlockedByAdminOverrideCheckedValueTo = ifBlockedByAdminOverrideCheckedValueTo,
+    ) {
         SwitchPreference(it)
     }
 }
