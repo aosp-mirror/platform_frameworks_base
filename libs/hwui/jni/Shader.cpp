@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "ColorFilter.h"
 #include "Gainmap.h"
 #include "GraphicsJNI.h"
 #include "RuntimeEffectUtils.h"
@@ -331,6 +332,15 @@ static void RuntimeShader_updateShader(JNIEnv* env, jobject, jlong shaderBuilder
     builder->child(name.c_str()) = sk_ref_sp(shader);
 }
 
+static void RuntimeShader_updateColorFilter(JNIEnv* env, jobject, jlong shaderBuilder,
+                                            jstring jUniformName, jlong colorFilterHandle) {
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
+    ScopedUtfChars name(env, jUniformName);
+    auto* childEffect = reinterpret_cast<ColorFilter*>(colorFilterHandle);
+
+    UpdateChild(env, builder, name.c_str(), childEffect->getInstance().release());
+}
+
 static void RuntimeShader_updateChild(JNIEnv* env, jobject, jlong shaderBuilder,
                                       jstring jUniformName, jlong childHandle) {
     SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
@@ -380,6 +390,8 @@ static const JNINativeMethod gRuntimeShaderMethods[] = {
         {"nativeUpdateUniforms", "(JLjava/lang/String;IIIII)V",
          (void*)RuntimeShader_updateIntUniforms},
         {"nativeUpdateShader", "(JLjava/lang/String;J)V", (void*)RuntimeShader_updateShader},
+        {"nativeUpdateColorFilter", "(JLjava/lang/String;J)V",
+         (void*)RuntimeShader_updateColorFilter},
         {"nativeUpdateChild", "(JLjava/lang/String;J)V", (void*)RuntimeShader_updateChild},
 };
 

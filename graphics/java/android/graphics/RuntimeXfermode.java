@@ -285,7 +285,8 @@ public class RuntimeXfermode extends Xfermode {
         if (colorFilter == null) {
             throw new NullPointerException("The colorFilter parameter must not be null");
         }
-        nativeUpdateChild(mBuilderNativeInstance, filterName, colorFilter.getNativeInstance());
+        nativeUpdateColorFilter(mBuilderNativeInstance, filterName,
+                colorFilter.getNativeInstance());
     }
 
     /**
@@ -325,5 +326,6 @@ public class RuntimeXfermode extends Xfermode {
             long builder, String uniformName, int value1, int value2, int value3,
             int value4, int count);
     private static native void nativeUpdateChild(long builder, String childName, long child);
+    private static native void nativeUpdateColorFilter(long builder, String childName, long filter);
 
 }

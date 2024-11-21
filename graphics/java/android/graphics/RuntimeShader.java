@@ -264,6 +264,9 @@ public class RuntimeShader extends Shader {
      * enable better heap tracking & tooling support
      */
     private ArrayMap<String, Shader> mShaderUniforms = new ArrayMap<>();
+    private ArrayMap<String, ColorFilter> mColorFilterUniforms = new ArrayMap<>();
+    private ArrayMap<String, RuntimeXfermode> mXfermodeUniforms = new ArrayMap<>();
+
 
     /**
      * Creates a new RuntimeShader.
@@ -544,8 +547,10 @@ public class RuntimeShader extends Shader {
         if (colorFilter == null) {
             throw new NullPointerException("The colorFilter parameter must not be null");
         }
-        nativeUpdateChild(mNativeInstanceRuntimeShaderBuilder, filterName,
+        mColorFilterUniforms.put(filterName, colorFilter);
+        nativeUpdateColorFilter(mNativeInstanceRuntimeShaderBuilder, filterName,
                 colorFilter.getNativeInstance());
+        discardNativeInstance();
     }
 
     /**
@@ -563,8 +568,10 @@ public class RuntimeShader extends Shader {
         if (xfermode == null) {
             throw new NullPointerException("The xfermode parameter must not be null");
         }
+        mXfermodeUniforms.put(xfermodeName, xfermode);
         nativeUpdateChild(mNativeInstanceRuntimeShaderBuilder, xfermodeName,
                 xfermode.createNativeInstance());
+        discardNativeInstance();
     }
 
 
@@ -594,6 +601,8 @@ public class RuntimeShader extends Shader {
             int value4, int count);
     private static native void nativeUpdateShader(
             long shaderBuilder, String shaderName, long shader);
+    private static native void nativeUpdateColorFilter(
+            long shaderBuilder, String colorFilterName, long colorFilter);
     private static native void nativeUpdateChild(
             long shaderBuilder, String childName, long child);
 }
