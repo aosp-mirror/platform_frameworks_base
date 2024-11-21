@@ -19,6 +19,7 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PC;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_OBSERVER;
@@ -280,6 +281,17 @@ public class RecentTasksController implements TaskStackListenerCallback,
         // so we should also invalidate the change id to ensure we load a new list instead of
         // reusing a stale list.
         notifyRecentTasksChanged();
+    }
+
+    /**
+     * This method only gets notified when a task is removed from recents as a result of another
+     * task being added to recent tasks.
+     */
+    @Override
+    public void onRecentTaskRemovedForAddTask(int taskId) {
+        mDesktopRepository.ifPresent(
+                repo -> repo.removeFreeformTask(INVALID_DISPLAY, taskId)
+        );
     }
 
     public void onTaskAdded(RunningTaskInfo taskInfo) {
