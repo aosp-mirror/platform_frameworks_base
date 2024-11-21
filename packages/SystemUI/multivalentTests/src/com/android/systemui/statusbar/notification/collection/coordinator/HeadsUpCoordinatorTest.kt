@@ -43,7 +43,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
-import com.android.systemui.statusbar.notification.headsup.BaseHeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl
 import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
@@ -100,7 +100,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private val notifPipeline: NotifPipeline = mock()
     private val logger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
-    private val headsUpManager: BaseHeadsUpManager = mock()
+    private val headsUpManager: HeadsUpManagerImpl = mock()
     private val headsUpViewBinder: HeadsUpViewBinder = mock()
     private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
     private val remoteInputManager: NotificationRemoteInputManager = mock()

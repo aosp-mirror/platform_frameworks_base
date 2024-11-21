@@ -24,7 +24,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.notification.headsup.BaseHeadsUpManager.HeadsUpEntry
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl.HeadsUpEntry
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.util.Compile
 import java.io.PrintWriter

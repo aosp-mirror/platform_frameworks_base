@@ -86,7 +86,7 @@ import kotlinx.coroutines.flow.StateFlowKt;
  * they simply peek from the top of the screen.
  */
 @SysUISingleton
-public class BaseHeadsUpManager
+public class HeadsUpManagerImpl
         implements HeadsUpManager, HeadsUpRepository, OnHeadsUpChangedListener {
     private static final String TAG = "BaseHeadsUpManager";
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
@@ -182,7 +182,7 @@ public class BaseHeadsUpManager
     }
 
     @Inject
-    public BaseHeadsUpManager(
+    public HeadsUpManagerImpl(
             @NonNull final Context context,
             HeadsUpManagerLogger logger,
             StatusBarStateController statusBarStateController,
@@ -419,7 +419,7 @@ public class BaseHeadsUpManager
 
     @Override
     public boolean shouldSwallowClick(@NonNull String key) {
-        BaseHeadsUpManager.HeadsUpEntry entry = getHeadsUpEntry(key);
+        HeadsUpManagerImpl.HeadsUpEntry entry = getHeadsUpEntry(key);
         return entry != null && mSystemClock.elapsedRealtime() < entry.mPostTime;
     }
 
@@ -562,7 +562,7 @@ public class BaseHeadsUpManager
     }
 
     protected void setEntryPinned(
-            @NonNull BaseHeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned,
+            @NonNull HeadsUpManagerImpl.HeadsUpEntry headsUpEntry, boolean isPinned,
             String reason) {
         mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned, reason);
         NotificationEntry entry = headsUpEntry.mEntry;

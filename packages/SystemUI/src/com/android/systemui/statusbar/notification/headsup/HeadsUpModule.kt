@@ -22,5 +22,5 @@ import dagger.Module
 
 @Module
 interface HeadsUpModule {
-    @Binds @SysUISingleton fun bindsHeadsUpManager(hum: BaseHeadsUpManager): HeadsUpManager
+    @Binds @SysUISingleton fun bindsHeadsUpManager(hum: HeadsUpManagerImpl): HeadsUpManager
 }

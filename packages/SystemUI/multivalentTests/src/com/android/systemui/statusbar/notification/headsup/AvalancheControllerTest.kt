@@ -78,7 +78,7 @@ class AvalancheControllerTest : SysuiTestCase() {
     private val mGlobalSettings = FakeGlobalSettings()
     private val mSystemClock = FakeSystemClock()
     private val mExecutor = FakeExecutor(mSystemClock)
-    private lateinit var testableHeadsUpManager: BaseHeadsUpManager
+    private lateinit var testableHeadsUpManager: HeadsUpManagerImpl
 
     @Before
     fun setUp() {
@@ -116,7 +116,7 @@ class AvalancheControllerTest : SysuiTestCase() {
             )
     }
 
-    private fun createHeadsUpEntry(id: Int): BaseHeadsUpManager.HeadsUpEntry {
+    private fun createHeadsUpEntry(id: Int): HeadsUpManagerImpl.HeadsUpEntry {
         return testableHeadsUpManager.createHeadsUpEntry(
             NotificationEntryBuilder()
                 .setSbn(HeadsUpManagerTestUtil.createSbn(id, Notification.Builder(mContext, "")))
@@ -124,7 +124,7 @@ class AvalancheControllerTest : SysuiTestCase() {
         )
     }
 
-    private fun createFsiHeadsUpEntry(id: Int): BaseHeadsUpManager.HeadsUpEntry {
+    private fun createFsiHeadsUpEntry(id: Int): HeadsUpManagerImpl.HeadsUpEntry {
         return testableHeadsUpManager.createHeadsUpEntry(createFullScreenIntentEntry(id, mContext))
     }
 
