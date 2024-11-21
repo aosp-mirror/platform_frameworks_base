@@ -86,3 +86,13 @@ flag {
   description: "Highlight single field after autofill selection"
   bug: "41496744"
 }
+
+flag {
+  name: "metrics_fixes"
+  namespace: "autofill"
+  description: "Fixes various framework reported metrics"
+  bug: "362581326, 363011343"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
