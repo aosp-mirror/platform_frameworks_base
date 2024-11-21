@@ -27,10 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
-import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutCustomizationDialog
+import com.android.systemui.keyboard.shortcut.ui.composable.AssignNewShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.AddShortcutDialog
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.DeleteShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -52,11 +50,12 @@ constructor(
 
     override suspend fun onActivated(): Nothing {
         viewModel.shortcutCustomizationUiState.collect { uiState ->
-            val shouldShowAddDialog = uiState is AddShortcutDialog && !uiState.isDialogShowing
-            val shouldShowDeleteDialog = uiState is DeleteShortcutDialog && !uiState.isDialogShowing
-            if (shouldShowDeleteDialog || shouldShowAddDialog) {
-                dialog = createDialog().also { it.show() }
-                viewModel.onDialogShown()
+            if (
+                uiState is ShortcutCustomizationUiState.AddShortcutDialog &&
+                !uiState.isDialogShowing
+            ) {
+                dialog = createAddShortcutDialog().also { it.show() }
+                viewModel.onAddShortcutDialogShown()
             } else if (uiState is ShortcutCustomizationUiState.Inactive) {
                 dialog?.dismiss()
                 dialog = null
@@ -69,7 +68,7 @@ constructor(
         viewModel.onShortcutCustomizationRequested(requestInfo)
     }
 
-    private fun createDialog(): Dialog {
+    private fun createAddShortcutDialog(): Dialog {
         return dialogFactory.create(dialogDelegate = ShortcutCustomizationDialogDelegate()) { dialog
             ->
             val uiState by
@@ -77,7 +76,7 @@ constructor(
                 initialValue = ShortcutCustomizationUiState.Inactive
             )
             val coroutineScope = rememberCoroutineScope()
-            ShortcutCustomizationDialog(
+            AssignNewShortcutDialog(
                 uiState = uiState,
                 modifier = Modifier
                     .width(364.dp)
@@ -88,7 +87,6 @@ constructor(
                 onConfirmSetShortcut = {
                     coroutineScope.launch { viewModel.onSetShortcut() }
                 },
-                onConfirmDeleteShortcut = { viewModel.onDeleteShortcut() },
             )
             dialog.setOnDismissListener { viewModel.onDialogDismissed() }
 
