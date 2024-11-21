@@ -41,6 +41,7 @@ import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.StatusBarLongPressGestureDetector
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -342,7 +343,7 @@ private constructor(
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
         @DisplaySpecific private val darkIconDispatcher: DarkIconDispatcher,
-        @DisplaySpecific private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
+        private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -369,7 +370,7 @@ private constructor(
                 configurationController,
                 statusOverlayHoverListenerFactory,
                 darkIconDispatcher,
-                statusBarContentInsetsProvider,
+                statusBarContentInsetsProviderStore.defaultDisplay,
             )
         }
     }
