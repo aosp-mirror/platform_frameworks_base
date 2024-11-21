@@ -402,7 +402,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     }
 
     void animateExpansionWhenTaskViewVisible(Runnable animateExpansion) {
-        if (mVisibilityState == TaskViewVisibilityState.VISIBLE) {
+        if (mVisibilityState == TaskViewVisibilityState.VISIBLE || mIsOverflow) {
             animateExpansion.run();
         } else {
             mAnimateExpansion = animateExpansion;
