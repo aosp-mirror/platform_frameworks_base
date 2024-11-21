@@ -370,6 +370,7 @@ java_defaults {
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
         "error_prone_android_framework",
+        "systemfeatures-metadata-processor",
     ],
     // Exports needed for staledataclass-annotation-processor, see b/139342589.
     javacflags: [
