@@ -55,6 +55,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.InsetsController;
 import android.view.InsetsSource;
@@ -142,6 +143,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     @ShellMainThread
     private final Handler mHandler;
 
+    /** Singleton source of truth for the current state of split screen on this device. */
+    private final SplitState mSplitState;
+
     private int mDividerWindowWidth;
     private int mDividerInsets;
     private int mDividerSize;
@@ -204,7 +208,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
             DisplayController displayController, DisplayImeController displayImeController,
-            ShellTaskOrganizer taskOrganizer, int parallaxType, @ShellMainThread Handler handler) {
+            ShellTaskOrganizer taskOrganizer, int parallaxType, SplitState splitState,
+            @ShellMainThread Handler handler) {
         mHandler = handler;
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
@@ -220,6 +225,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
         mSurfaceEffectPolicy = new ResizingEffectPolicy(parallaxType);
+        mSplitState = splitState;
 
         final Resources res = mContext.getResources();
         mDimNonImeSide = res.getBoolean(R.bool.config_dimNonImeAttachedSide);
@@ -381,6 +387,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mDividerSnapAlgorithm.calculateNearestSnapPosition(mDividerPosition);
     }
 
+    /** Updates the {@link SplitState} using the current divider position. */
+    public void updateStateWithCurrentPosition() {
+        mSplitState.set(calculateCurrentSnapPosition());
+    }
+
     /**
      * Returns the divider position as a fraction from 0 to 1.
      */
@@ -413,7 +424,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             removeTouchZones();
         }
 
-        int currentPosition = calculateCurrentSnapPosition();
+        int currentPosition = mSplitState.get();
+        // TODO (b/349828130): Can delete this warning after brief soak time.
+        if (currentPosition != calculateCurrentSnapPosition()) {
+            Log.wtf(TAG, "SplitState is " + mSplitState.get()
+                    + ", expected " + calculateCurrentSnapPosition());
+        }
+
         switch (currentPosition) {
             case SNAP_TO_2_10_90:
             case SNAP_TO_3_10_45_45:
@@ -764,7 +781,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 break;
             default:
                 flingDividerPosition(currentPosition, snapTarget.position, duration, interpolator,
-                        () -> setDividerPosition(snapTarget.position, true /* applyLayoutChange */));
+                        () -> {
+                            setDividerPosition(snapTarget.position, true /* applyLayoutChange */);
+                            mSplitState.set(snapTarget.snapPosition);
+                        });
                 break;
         }
     }
@@ -836,10 +856,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Fling divider from current position to center position. */
     public void flingDividerToCenter(@Nullable Runnable finishCallback) {
-        final int pos = mDividerSnapAlgorithm.getMiddleTarget().position;
+        final SnapTarget target = mDividerSnapAlgorithm.getMiddleTarget();
+        final int pos = target.position;
         flingDividerPosition(getDividerPosition(), pos, FLING_ENTER_DURATION, FAST_OUT_SLOW_IN,
                 () -> {
                     setDividerPosition(pos, true /* applyLayoutChange */);
+                    mSplitState.set(target.snapPosition);
                     if (finishCallback != null) {
                         finishCallback.run();
                     }

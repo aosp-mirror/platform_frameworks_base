@@ -72,6 +72,7 @@ import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
@@ -865,6 +866,12 @@ public abstract class WMShellBaseModule {
             return splitscreenController;
         }
         return Optional.empty();
+    }
+
+    @WMSingleton
+    @Provides
+    static SplitState provideSplitState() {
+        return new SplitState();
     }
 
     //
