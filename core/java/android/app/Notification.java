@@ -818,12 +818,12 @@ public class Notification implements Parcelable
                      R.layout.notification_2025_template_heads_up_base,
                      R.layout.notification_2025_template_header,
                      R.layout.notification_2025_template_collapsed_messaging,
+                     R.layout.notification_2025_template_collapsed_media,
                      R.layout.notification_template_material_big_picture,
                      R.layout.notification_template_material_big_text,
                      R.layout.notification_template_material_inbox,
                      R.layout.notification_template_material_big_messaging,
                      R.layout.notification_template_material_conversation,
-                     R.layout.notification_template_material_media,
                      R.layout.notification_template_material_big_media,
                      R.layout.notification_template_material_call,
                      R.layout.notification_template_material_big_call,
@@ -5924,7 +5924,7 @@ public class Notification implements Parcelable
                     || resId == getCompactHeadsUpBaseLayoutResource()
                     || resId == getMessagingCompactHeadsUpLayoutResource()
                     || resId == getCollapsedMessagingLayoutResource()
-                    || resId == R.layout.notification_template_material_media);
+                    || resId == getCollapsedMediaLayoutResource());
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -7582,6 +7582,14 @@ public class Notification implements Parcelable
 
         private int getExpandedMessagingLayoutResource() {
             return R.layout.notification_template_material_big_messaging;
+        }
+
+        private int getCollapsedMediaLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_media;
+            } else {
+                return R.layout.notification_template_material_media;
+            }
         }
 
         private int getConversationLayoutResource() {
@@ -10484,7 +10492,7 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews template = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_media, p,
+                    mBuilder.getCollapsedMediaLayoutResource(), p,
                     null /* result */);
 
             for (int i = 0; i < MAX_MEDIA_BUTTONS_IN_COMPACT; i++) {
