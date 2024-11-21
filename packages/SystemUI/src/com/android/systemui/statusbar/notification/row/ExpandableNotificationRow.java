@@ -35,6 +35,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -107,6 +108,7 @@ import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderVi
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationCompactMessagingTemplateViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.notification.shared.NotificationAddXOnHoverToDismiss;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.shared.TransparentHeaderFix;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -124,6 +126,7 @@ import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
+import com.android.systemui.util.ListenerSet;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.io.PrintWriter;
@@ -428,6 +431,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTopRoundnessDuringLaunchAnimation;
     private float mBottomRoundnessDuringLaunchAnimation;
     private float mSmallRoundness;
+
+    private ListenerSet<DismissButtonTargetVisibilityListener>
+            mDismissButtonTargetVisibilityListeners
+            = new ListenerSet();
 
     public NotificationContentView[] getLayouts() {
         return Arrays.copyOf(mLayouts, mLayouts.length);
@@ -736,6 +743,73 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         for (NotificationContentView l : mLayouts) {
             updateLimitsForView(l);
         }
+    }
+
+    public interface DismissButtonTargetVisibilityListener {
+        // Called when the notification dismiss button's target visibility changes.
+        // NOTE: This can be called when the dismiss button already has the target visibility.
+        void onTargetVisibilityChanged(boolean targetVisible);
+    }
+
+    public void addDismissButtonTargetStateListener(
+            DismissButtonTargetVisibilityListener listener) {
+        if (NotificationAddXOnHoverToDismiss.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        mDismissButtonTargetVisibilityListeners.addIfAbsent(listener);
+    }
+
+    public void removeDismissButtonTargetStateListener(
+            DismissButtonTargetVisibilityListener listener) {
+        if (NotificationAddXOnHoverToDismiss.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        mDismissButtonTargetVisibilityListeners.remove(listener);
+    }
+
+    @Override
+    public boolean onInterceptHoverEvent(MotionEvent event) {
+        if (!NotificationAddXOnHoverToDismiss.isEnabled()) {
+            return super.onInterceptHoverEvent(event);
+        }
+
+        // Do not bother checking the dismiss button's target visibility if the notification cannot
+        // be dismissed.
+        if (!canEntryBeDismissed()) {
+            return false;
+        }
+
+        final Boolean targetVisible = getDismissButtonTargetVisibilityIfAny(event);
+        if (targetVisible != null) {
+            for (DismissButtonTargetVisibilityListener listener :
+                    mDismissButtonTargetVisibilityListeners) {
+                listener.onTargetVisibilityChanged(targetVisible.booleanValue());
+            }
+        }
+
+        // Do not consume the hover event so that children still have a chance to process it.
+        return false;
+    }
+
+    private @Nullable Boolean getDismissButtonTargetVisibilityIfAny(MotionEvent event) {
+        // Returns the dismiss button's target visibility resulted by `event`. Returns null if the
+        // target visibility should not change.
+
+        if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+            // The notification dismiss button should be hidden when the hover exit event is located
+            // outside of the notification. NOTE: The hover exit event can be inside the
+            // notification if hover moves from one hoverable child to another.
+            final Rect localBounds = new Rect(0, 0, this.getWidth(), this.getActualHeight());
+            if (!localBounds.contains((int) event.getX(), (int) event.getY())) {
+                return Boolean.FALSE;
+            }
+        } else if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+            return Boolean.TRUE;
+        }
+
+        return null;
     }
 
     private void updateLimitsForView(NotificationContentView layout) {
@@ -2205,6 +2279,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mTranslateableViews.remove(mGutsStub);
         // We don't handle focus highlight in this view, it's done in background drawable instead
         setDefaultFocusHighlightEnabled(false);
+
+        if (NotificationAddXOnHoverToDismiss.isEnabled()) {
+            addDismissButtonTargetStateListener(findViewById(R.id.backgroundNormal));
+        }
     }
 
     /**

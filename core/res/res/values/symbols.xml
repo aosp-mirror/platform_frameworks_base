@@ -5102,7 +5102,6 @@
   <java-symbol type="layout" name="notification_expand_button"/>
   <java-symbol type="id" name="close_button" />
   <java-symbol type="layout" name="notification_close_button"/>
-  <java-symbol type="id" name="notification_buttons_column" />
 
   <java-symbol type="bool" name="config_supportsMicToggle" />
   <java-symbol type="bool" name="config_supportsCamToggle" />
