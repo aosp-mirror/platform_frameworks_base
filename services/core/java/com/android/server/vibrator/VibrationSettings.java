@@ -192,7 +192,7 @@ final class VibrationSettings {
     @GuardedBy("mLock")
     private boolean mVibrateOn;
     @GuardedBy("mLock")
-    private int mRingerMode;
+    private int mRingerMode = AudioManager.RINGER_MODE_NORMAL;
     @GuardedBy("mLock")
     private boolean mOnWirelessCharger;
 
@@ -235,7 +235,7 @@ final class VibrationSettings {
     public void onSystemReady() {
         PowerManagerInternal pm = LocalServices.getService(PowerManagerInternal.class);
         AudioManager am = mContext.getSystemService(AudioManager.class);
-        int ringerMode = am.getRingerModeInternal();
+        int ringerMode = (am == null) ? mRingerMode : am.getRingerModeInternal();
 
         synchronized (mLock) {
             mPowerManagerInternal = pm;
@@ -615,10 +615,10 @@ final class VibrationSettings {
 
     private void updateRingerMode() {
         synchronized (mLock) {
-            // If audio manager was not loaded yet then assume most restrictive mode.
+            // If audio manager was not loaded yet then assume normal mode.
             // This will be loaded again as soon as the audio manager is loaded in onSystemReady.
             mRingerMode = (mAudioManager == null)
-                    ? AudioManager.RINGER_MODE_SILENT
+                    ? AudioManager.RINGER_MODE_NORMAL
                     : mAudioManager.getRingerModeInternal();
         }
     }
