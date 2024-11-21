@@ -74,10 +74,12 @@ import com.android.systemui.haptics.msdl.qs.TileHapticsViewModel
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.compose.BounceableInfo
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.InactiveCornerRadius
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.TileHeight
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
+import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileUiState
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.toUiState
@@ -117,6 +119,7 @@ fun Tile(
     bounceableInfo: BounceableInfo,
     tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
     modifier: Modifier = Modifier,
+    detailsViewModel: DetailsViewModel?,
 ) {
     val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
     val currentBounceableInfo by rememberUpdatedState(bounceableInfo)
@@ -158,12 +161,20 @@ fun Tile(
     ) { expandable ->
         TileContainer(
             onClick = {
-                tile.onClick(expandable)
-                hapticsViewModel?.setTileInteractionState(
-                    TileHapticsViewModel.TileInteractionState.CLICKED
-                )
-                if (uiState.accessibilityUiState.toggleableState != null) {
-                    coroutineScope.launch { currentBounceableInfo.bounceable.animateBounce() }
+                var hasDetails = false
+                if (QsDetailedView.isEnabled) {
+                    hasDetails = detailsViewModel?.onTileClicked(tile.spec) == true
+                }
+                if (!hasDetails) {
+                    // For those tile's who doesn't have a detailed view, process with their
+                    // `onClick` behavior.
+                    tile.onClick(expandable)
+                    hapticsViewModel?.setTileInteractionState(
+                        TileHapticsViewModel.TileInteractionState.CLICKED
+                    )
+                    if (uiState.accessibilityUiState.toggleableState != null) {
+                        coroutineScope.launch { currentBounceableInfo.bounceable.animateBounce() }
+                    }
                 }
             },
             onLongClick = {
