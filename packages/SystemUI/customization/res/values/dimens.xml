@@ -33,6 +33,7 @@
     <dimen name="small_clock_height">114dp</dimen>
     <dimen name="small_clock_padding_top">28dp</dimen>
     <dimen name="clock_padding_start">28dp</dimen>
+    <dimen name="weather_date_icon_padding">28dp</dimen>
 
     <!-- When large clock is showing, offset the smartspace by this amount -->
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
