@@ -25,6 +25,7 @@ import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAlways
 import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowAlignsWithOnlyOneDisplayCornerAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowBecomesInvisible
+import android.tools.flicker.assertors.assertions.AppWindowBecomesPinned
 import android.tools.flicker.assertors.assertions.AppWindowBecomesTopWindow
 import android.tools.flicker.assertors.assertions.AppWindowBecomesVisible
 import android.tools.flicker.assertors.assertions.AppWindowCoversLeftHalfScreenAtEnd
@@ -464,6 +465,26 @@ class DesktopModeFlickerScenarios {
                             AppWindowBecomesVisible(DESKTOP_MODE_APP),
                             AppWindowIsVisibleAlways(SIMPLE_APP)
                         ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val MINIMIZE_AUTO_PIP_APP =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("MINIMIZE_AUTO_PIP_APP"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> =
+                            transitions.filter { it.type == TransitionType.PIP }
+                    }
+                ),
+                assertions =
+                AssertionTemplates.COMMON_ASSERTIONS +
+                    listOf(
+                        AppWindowBecomesPinned(DESKTOP_MODE_APP),
+                    ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING })
             )
     }
 }

@@ -3030,8 +3030,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
 
-                final WindowToken token = wc.asWindowToken();
-                if (token != null && token.isFromClient()) {
+                final WindowToken token = wc != null ? wc.asWindowToken() : null;
+                if (token != null && token.isFromClient() && token.getDisplayContent() != null) {
                     removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
             }

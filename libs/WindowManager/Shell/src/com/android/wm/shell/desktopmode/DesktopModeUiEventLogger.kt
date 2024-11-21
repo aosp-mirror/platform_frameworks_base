@@ -106,7 +106,25 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
         DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724),
         @UiEvent(doc = "Tap on the window Handle to open the Handle Menu")
-        DESKTOP_WINDOW_APP_HANDLE_TAP(1998);
+        DESKTOP_WINDOW_APP_HANDLE_TAP(1998),
+        @UiEvent(doc = "Tap on the desktop mode option under app handle menu")
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_DESKTOP_MODE(1999),
+        @UiEvent(doc = "Tap on the split screen option under app handle menu")
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_SPLIT_SCREEN(2000),
+        @UiEvent(doc = "Tap on the full screen option under app handle menu")
+        DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_FULL_SCREEN(2001),
+        @UiEvent(doc = "When user successfully drags the app handle to desktop mode")
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_DESKTOP_MODE(2002),
+        @UiEvent(doc = "When user successfully drags the app handle to split screen")
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN(2003),
+        @UiEvent(doc = "When user successfully drags the app handle to full screen")
+        DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_FULL_SCREEN(2004),
+        @UiEvent(doc = "Drag the window header to the top to switch to full screen mode")
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_FULL_SCREEN(2005),
+        @UiEvent(doc = "Drag the window header to an edge to tile it to the left side")
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_LEFT(2006),
+        @UiEvent(doc = "Drag the window header to an edge to tile it to the right side")
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_RIGHT(2007);
 
         override fun getId(): Int = mId
     }

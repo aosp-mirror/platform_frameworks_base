@@ -229,6 +229,7 @@ final class InstallPackageHelper {
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageManagerServiceInjector mInjector;
     private final UpdateOwnershipHelper mUpdateOwnershipHelper;
+    private final InstallDependencyHelper mInstallDependencyHelper;
 
     private final Object mInternalLock = new Object();
     @GuardedBy("mInternalLock")
@@ -239,7 +240,8 @@ final class InstallPackageHelper {
                          AppDataHelper appDataHelper,
                          RemovePackageHelper removePackageHelper,
                          DeletePackageHelper deletePackageHelper,
-                         BroadcastHelper broadcastHelper) {
+                         BroadcastHelper broadcastHelper,
+                         InstallDependencyHelper installDependencyHelper) {
         mPm = pm;
         mInjector = pm.mInjector;
         mAppDataHelper = appDataHelper;
@@ -253,6 +255,7 @@ final class InstallPackageHelper {
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
         mUpdateOwnershipHelper = pm.mInjector.getUpdateOwnershipHelper();
+        mInstallDependencyHelper = installDependencyHelper;
     }
 
     /**
@@ -1363,6 +1366,10 @@ final class InstallPackageHelper {
                     request.setReturnCode(PackageManager.INSTALL_UNKNOWN);
                 }
             }
+        }
+
+        for (InstallRequest request : requests) {
+            mInstallDependencyHelper.notifySessionComplete(request.getSessionId(), success);
         }
     }
 

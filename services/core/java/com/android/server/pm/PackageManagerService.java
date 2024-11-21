@@ -2118,7 +2118,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mBroadcastHelper);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper, mRemovePackageHelper,
-                mDeletePackageHelper, mBroadcastHelper);
+                mDeletePackageHelper, mBroadcastHelper,
+                injector.getPackageInstallerService().getInstallDependencyHelper());
 
         mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
                 mInjector.getUserManagerInternal(), mDeletePackageHelper);

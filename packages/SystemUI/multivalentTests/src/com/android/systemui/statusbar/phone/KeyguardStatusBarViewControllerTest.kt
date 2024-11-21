@@ -160,7 +160,7 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
 
         Mockito.`when`(iconManagerFactory.create(ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(iconManager)
-        Mockito.`when`(statusBarContentInsetsProviderStore.defaultDisplay)
+        Mockito.`when`(statusBarContentInsetsProviderStore.forDisplay(context.displayId))
             .thenReturn(kosmos.statusBarContentInsetsProvider)
         allowTestableLooperAsMainThread()
         looper.runWithLooper {
@@ -178,6 +178,7 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
     private fun createController(): KeyguardStatusBarViewController {
         return KeyguardStatusBarViewController(
             kosmos.testDispatcher,
+            context,
             keyguardStatusBarView,
             carrierTextController,
             configurationController,

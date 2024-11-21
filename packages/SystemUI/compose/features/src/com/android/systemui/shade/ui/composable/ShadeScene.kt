@@ -353,13 +353,24 @@ private fun SceneScope.SingleShade(
                     )
                 }
 
+                val qqsLayoutPaddingBottom =
+                    dimensionResource(id = R.dimen.qqs_layout_padding_bottom)
                 ShadeMediaCarousel(
                     isVisible = isMediaVisible,
                     isInRow = mediaInRow,
                     mediaHost = mediaHost,
                     mediaOffsetProvider = mediaOffsetProvider,
                     carouselController = mediaCarouselController,
-                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media),
+                    modifier =
+                        Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media)
+                            .padding(
+                                horizontal =
+                                    shadeHorizontalPadding +
+                                        dimensionResource(id = R.dimen.qs_horizontal_margin)
+                            )
+                            .thenIf(!mediaInRow) {
+                                Modifier.padding(bottom = qqsLayoutPaddingBottom)
+                            },
                     usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
                     isInSplitShade = false,
                 )
@@ -562,10 +573,14 @@ private fun SceneScope.SplitShade(
                                 mediaOffsetProvider = mediaOffsetProvider,
                                 modifier =
                                     Modifier.thenIf(
-                                        MediaContentPicker.shouldElevateMedia(layoutState)
-                                    ) {
-                                        Modifier.zIndex(1f)
-                                    },
+                                            MediaContentPicker.shouldElevateMedia(layoutState)
+                                        ) {
+                                            Modifier.zIndex(1f)
+                                        }
+                                        .padding(
+                                            horizontal =
+                                                dimensionResource(id = R.dimen.qs_horizontal_margin)
+                                        ),
                                 carouselController = mediaCarouselController,
                                 isInSplitShade = true,
                             )

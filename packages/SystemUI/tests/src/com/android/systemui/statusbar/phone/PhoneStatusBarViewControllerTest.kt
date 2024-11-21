@@ -401,7 +401,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 configurationController,
                 mStatusOverlayHoverListenerFactory,
                 fakeDarkIconDispatcher,
-                statusBarContentInsetsProviderStore,
+                statusBarContentInsetsProvider,
             )
             .create(view)
             .also { it.init() }
