@@ -4611,6 +4611,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (fromOrientation != requestedOrientation) {
                 return false;
             }
+
+            // If another activity above the activity which has starting window, allows to steal the
+            // starting window if the above activity isn't drawn.
+            if (task.getChildCount() >= 3
+                    && fromActivity.mStartingData.mAssociatedTask == null) {
+                final ActivityRecord aboveFrom = task.getActivityAbove(fromActivity);
+                if (aboveFrom != null && aboveFrom != this && !aboveFrom.mReportedDrawn) {
+                    return false;
+                }
+            }
+
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
             if (fromActivity.mVisible) {
@@ -4633,6 +4644,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 fromActivity.startingMoved = true;
                 tStartingWindow.mToken = this;
                 tStartingWindow.mActivityRecord = this;
+
+                if (mStartingData.mRemoveAfterTransaction == AFTER_TRANSACTION_REMOVE_DIRECTLY) {
+                    // The removal of starting window should wait for window drawn of current
+                    // activity.
+                    final WindowState mainWin = findMainWindow(false /* includeStartingApp */);
+                    if (mainWin == null || !mainWin.isDrawn()) {
+                        mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_IDLE;
+                        mStartingData.mPrepareRemoveAnimation = false;
+                    }
+                }
 
                 ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                         "Removing starting %s from %s", tStartingWindow, fromActivity);
