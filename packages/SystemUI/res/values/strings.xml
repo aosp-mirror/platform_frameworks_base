@@ -1342,6 +1342,8 @@
     <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add the \"Widgets\" shortcut, make sure \"Show widgets on lock screen\" is enabled in settings.</string>
     <!-- Label for a button used to open Settings in order to enable showing widgets on the lock screen. [CHAR LIMIT=NONE] -->
     <string name="glanceable_hub_lockscreen_affordance_action_button_label">Settings</string>
+    <!-- Content description for a "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_glanceable_hub_to_dream_button">Show screensaver button</string>
 
     <!-- Related to user switcher --><skip/>
 
