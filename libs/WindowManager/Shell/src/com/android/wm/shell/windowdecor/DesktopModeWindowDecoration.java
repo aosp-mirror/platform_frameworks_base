@@ -128,7 +128,6 @@ import java.util.function.Supplier;
  */
 public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private static final String TAG = "DesktopModeWindowDecoration";
-    private static final int CAPTURED_LINK_TIMEOUT_MS = 7000;
 
     @VisibleForTesting
     static final long CLOSE_MAXIMIZE_MENU_DELAY_MS = 150L;
@@ -203,7 +202,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     // being hovered. There's a small delay after stopping the hover, to allow a quick reentry
     // to cancel the close.
     private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
-    private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopUserRepositories mDesktopUserRepositories;
@@ -625,22 +623,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return;
         }
         mCapturedLink = new CapturedLink(capturedLink, timeStamp);
-        mHandler.postDelayed(mCapturedLinkExpiredRunnable, CAPTURED_LINK_TIMEOUT_MS);
-    }
-
-    private void onCapturedLinkExpired() {
-        mHandler.removeCallbacks(mCapturedLinkExpiredRunnable);
-        if (mCapturedLink != null) {
-            mCapturedLink.setExpired();
-        }
     }
 
     @Nullable
     private Intent getBrowserLink() {
         final Uri browserLink;
-        // If the captured link is available and has not expired, return the captured link.
-        // Otherwise, return the generic link which is set to null if a generic link is unavailable.
-        if (mCapturedLink != null && !mCapturedLink.mExpired) {
+        if (isCapturedLinkAvailable()) {
             browserLink = mCapturedLink.mUri;
         } else if (mWebUri != null) {
             browserLink = mWebUri;
@@ -752,7 +740,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private boolean isCapturedLinkAvailable() {
-        return mCapturedLink != null && !mCapturedLink.mExpired;
+        return mCapturedLink != null && !mCapturedLink.mUsed;
+    }
+
+    private void onCapturedLinkUsed() {
+        if (mCapturedLink != null) {
+            mCapturedLink.setUsed();
+        }
     }
 
     private void notifyNoCaptionHandle() {
@@ -1434,7 +1428,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onAspectRatioSettingsClickListener= */ mOnChangeAspectRatioClickListener,
                 /* openInBrowserClickListener= */ (intent) -> {
                     mOpenInBrowserClickListener.accept(intent);
-                    onCapturedLinkExpired();
+                    onCapturedLinkUsed();
                     if (Flags.enableDesktopWindowingAppToWebEducationIntegration()) {
                         mWindowDecorCaptionHandleRepository.onAppToWebUsage();
                     }
@@ -1866,16 +1860,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     static class CapturedLink {
         private final long mTimeStamp;
         private final Uri mUri;
-        private boolean mExpired;
+        private boolean mUsed;
 
         CapturedLink(@NonNull Uri uri, long timeStamp) {
             mUri = uri;
             mTimeStamp = timeStamp;
-            mExpired = false;
         }
 
-        void setExpired() {
-            mExpired = true;
+        private void setUsed() {
+            mUsed = true;
         }
     }
 
