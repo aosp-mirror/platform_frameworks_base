@@ -467,7 +467,6 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
-                .setFlag(FLAG_CAN_COLORIZE, true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isTrue();
     }
@@ -481,7 +480,6 @@ public class NotificationTest {
                 .setContentTitle("TITLE")
                 .setColor(Color.WHITE)
                 .setColorized(true)
-                .setFlag(FLAG_CAN_COLORIZE, true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -505,7 +503,20 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle())
                 .setColor(Color.WHITE)
                 .setColorized(true)
-                .setFlag(FLAG_CAN_COLORIZE, true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_groupSummary() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setGroup("someGroup")
+                .setGroupSummary(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
