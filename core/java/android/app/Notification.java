@@ -14779,12 +14779,23 @@ public class Notification implements Parcelable
                 } else {
                     mBackgroundColor = rawColor;
                 }
-                mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                        ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
-                        mBackgroundColor, 4.5);
-                mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                        ContrastColorUtil.resolveSecondaryColor(ctx, mBackgroundColor, nightMode),
-                        mBackgroundColor, 4.5);
+                if (Flags.uiRichOngoing()) {
+                    boolean isBgDark = Notification.Builder.isColorDark(mBackgroundColor);
+                    int onSurfaceColorExtreme = isBgDark ? Color.WHITE : Color.BLACK;
+                    mPrimaryTextColor = ContrastColorUtil.ensureContrast(
+                            ColorUtils.blendARGB(mBackgroundColor, onSurfaceColorExtreme, 0.9f),
+                            mBackgroundColor, isBgDark, 4.5);
+                    mSecondaryTextColor = ContrastColorUtil.ensureContrast(
+                            ColorUtils.blendARGB(mBackgroundColor, onSurfaceColorExtreme, 0.8f),
+                            mBackgroundColor, isBgDark, 4.5);
+                } else {
+                    mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                            ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
+                            mBackgroundColor, 4.5);
+                    mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                            ContrastColorUtil.resolveSecondaryColor(ctx,
+                                    mBackgroundColor, nightMode), mBackgroundColor, 4.5);
+                }
                 mContrastColor = mPrimaryTextColor;
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;
