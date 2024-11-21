@@ -2280,11 +2280,11 @@
     <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app on the right [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Use split screen with current app on the right</string>
+    <string name="system_multitasking_rhs">Use split screen with app on the right</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app on the left [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Use split screen with current app on the left</string>
+    <string name="system_multitasking_lhs">Use split screen with app on the left</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
-    <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
+    <string name="system_multitasking_full_screen">Switch to full screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_splitscreen_focus_rhs">Switch to app on right or below while using split screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on left or above while using split screen [CHAR LIMIT=70] -->
