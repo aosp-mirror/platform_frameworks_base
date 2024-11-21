@@ -62,7 +62,7 @@ import javax.inject.Provider;
  * of HeadsUpNotifications.
  */
 @SysUISingleton
-public final class StatusBarTouchableRegionManager implements Dumpable {
+public final class ShadeTouchableRegionManager implements Dumpable {
     private static final String TAG = "TouchableRegionManager";
 
     private final Context mContext;
@@ -90,7 +90,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener;
 
     @Inject
-    public StatusBarTouchableRegionManager(
+    public ShadeTouchableRegionManager(
             Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             ConfigurationController configurationController,
@@ -165,7 +165,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
-        pw.println("StatusBarTouchableRegionManager state:");
+        pw.println("ShadeTouchableRegionManager state:");
         pw.print("  mTouchableRegion=");
         pw.println(mTouchableRegion);
     }
