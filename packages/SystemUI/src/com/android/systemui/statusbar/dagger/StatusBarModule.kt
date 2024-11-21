@@ -27,6 +27,8 @@ import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.data.repository.LightBarControllerStore
+import com.android.systemui.statusbar.phone.AutoHideController
+import com.android.systemui.statusbar.phone.AutoHideControllerImpl
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
@@ -78,6 +80,8 @@ interface StatusBarModule {
     fun statusBarWindowControllerFactory(
         implFactory: StatusBarWindowControllerImpl.Factory
     ): StatusBarWindowController.Factory
+
+    @Binds @SysUISingleton fun autoHideController(impl: AutoHideControllerImpl): AutoHideController
 
     companion object {
 
