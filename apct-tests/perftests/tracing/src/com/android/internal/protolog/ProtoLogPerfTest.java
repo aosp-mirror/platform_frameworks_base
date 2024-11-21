@@ -19,6 +19,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.perftests.utils.Stats;
+import android.tracing.perfetto.DataSourceParams;
+import android.tracing.perfetto.InitArguments;
+import android.tracing.perfetto.Producer;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -70,6 +73,8 @@ public class ProtoLogPerfTest {
     }
 
     private IProtoLog mProcessedProtoLogger;
+    private static ProtoLogDataSource sTestDataSource;
+    private static final String TEST_PROTOLOG_DATASOURCE_NAME = "test.android.protolog";
     private static final String MOCK_TEST_FILE_PATH = "mock/file/path";
     private static final perfetto.protos.Protolog.ProtoLogViewerConfig VIEWER_CONFIG =
             perfetto.protos.Protolog.ProtoLogViewerConfig.newBuilder()
@@ -89,6 +94,17 @@ public class ProtoLogPerfTest {
 
     @BeforeClass
     public static void init() {
+        Producer.init(InitArguments.DEFAULTS);
+
+        sTestDataSource = new ProtoLogDataSource(TEST_PROTOLOG_DATASOURCE_NAME);
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                DataSourceParams
+                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
+                        .build();
+        sTestDataSource.register(params);
+
         ProtoLog.init(TestProtoLogGroup.values());
     }
 
@@ -98,9 +114,10 @@ public class ProtoLogPerfTest {
         TestProtoLogGroup.TEST_GROUP.setLogToLogcat(mLogToLogcat);
 
         mProcessedProtoLogger = new ProcessedPerfettoProtoLogImpl(
+                sTestDataSource,
                 MOCK_TEST_FILE_PATH,
                 () -> new AutoClosableProtoInputStream(VIEWER_CONFIG.toByteArray()),
-                () -> {},
+                (instance) -> {},
                 TestProtoLogGroup.values()
         );
     }

@@ -23,11 +23,13 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <ScrollView 
+    <ScrollView
+            android:id="@+id/scroll_view"
             android:padding="16dp"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_width="match_parent">
+            android:layout_width="match_parent"
+            android:clipToPadding="false" >
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_height="wrap_content"
@@ -82,8 +84,9 @@
           android:layout_width="match_parent" />
 
     <!-- button bar -->
-    <LinearLayout android:orientation="horizontal"
-                  style="?android:attr/buttonBarStyle"                 
+    <LinearLayout android:id="@+id/button_bar"
+                  android:orientation="horizontal"
+                  style="?android:attr/buttonBarStyle"
                   android:layout_height="wrap_content"
                   android:layout_width="match_parent"
                   android:layout_gravity="bottom">

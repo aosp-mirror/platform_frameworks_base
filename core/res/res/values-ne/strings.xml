@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"यो एपलाई नजिकै रहेका अल्ट्रा-वाइडब्यान्ड चल्ने डिभाइसहरूबिचको तुलनात्मक स्थान पत्ता लगाउन दिनुहोस्"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Wi-Fi चल्ने नजिकै रहेका डिभाइसहरूमा चलाउन दिन्छ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"यसले एपलाई Wi-Fi चल्ने नजिकै रहेका डिभाइसहरूमा विज्ञापन गर्न, कनेक्ट गर्न र सापेक्ष स्थिति निर्धारण गर्न दिन्छ"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"नजिकै रहेका डिभाइसहरूबिचको तुलनात्मक स्थान पत्ता लगाउने"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"यो एपलाई नजिकै रहेका डिभाइसहरूबिचको तुलनात्मक स्थान पत्ता लगाउन दिनुहोस्"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC भुक्तानी सेवासम्बन्धी रुचाइएको जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"यसले एपलाई दर्ता गरिएका सहायता तथा मार्गको गन्तव्य जस्ता रुचाइएका NFC भुक्तानी सेवासम्बन्धी जानकारी प्राप्त गर्न दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
@@ -2173,8 +2171,8 @@
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g> अडियो"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"भिडियो"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g> भिडियो"</string>
-    <string name="mime_type_image" msgid="2134307276151645257">"छवि"</string>
-    <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g> छवि"</string>
+    <string name="mime_type_image" msgid="2134307276151645257">"फोटो"</string>
+    <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g> फोटो"</string>
     <string name="mime_type_compressed" msgid="8737300936080662063">"अभिलेख"</string>
     <string name="mime_type_compressed_ext" msgid="4775627287994475737">"<xliff:g id="EXTENSION">%1$s</xliff:g> अभिलेख"</string>
     <string name="mime_type_document" msgid="3737256839487088554">"कागजात"</string>
@@ -2211,7 +2209,7 @@
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad को बिचको बटन"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
-    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"छवि पठाइयो"</string>
+    <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"फोटो पठाइयो"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"वार्तालाप"</string>
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"सामूहिक वार्तालाप"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
@@ -2409,7 +2407,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"किबोर्ड लेआउट <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> भाषामा सेट गरिएको छ… बदल्न ट्याप गर्नुहोस्।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"भौतिक किबोर्डहरू कन्फिगर गरिएका छन्"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"किबोर्डहरू हेर्न ट्याप गर्नुहोस्"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"निजी"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"निजी स्पेस"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"क्लोन"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"कार्य"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"कार्य प्रोफाइल २"</string>

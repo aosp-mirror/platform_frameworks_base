@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Thiết bị đầu vào"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Thiết bị trợ thính"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Đang bật…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Không điều chỉnh được độ sáng vì độ sáng đang được\n ứng dụng trên cùng điều khiển"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Tự động xoay"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Tự động xoay màn hình"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Vị trí"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Nhấp để ghép nối thiết bị mới"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Không cập nhật được giá trị đặt trước"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Chế độ đặt sẵn"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Đã chọn"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Công cụ"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Phụ đề trực tiếp"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Ghi chú"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn camera của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
@@ -593,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Bắt đầu ngay"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Không có thông báo nào"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Không có thông báo mới"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"Chế độ Giảm dần âm lượng thông báo đang bật"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Khi bạn nhận quá nhiều thông báo cùng lúc, âm lượng và cảnh báo tự động giảm trong tối đa 2 phút."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Tắt"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Mở khoá để xem thông báo cũ"</string>
@@ -872,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Chuyển sang ứng dụng bên phải hoặc ở dưới khi đang chia đôi màn hình"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Chuyển sang ứng dụng bên trái hoặc ở trên khi đang chia đôi màn hình"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Trong chế độ chia đôi màn hình: thay một ứng dụng bằng ứng dụng khác"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Di chuyển cửa sổ đang hoạt động giữa các màn hình"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Đầu vào"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Chuyển sang ngôn ngữ tiếp theo"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Chuyển về ngôn ngữ trước"</string>
@@ -1222,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Hãy dùng ít hơn <xliff:g id="LENGTH">%1$d</xliff:g> ký tự"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào bảng nhớ tạm."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Tiện ích trò chuyện"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Nhấn vào một cuộc trò chuyện để thêm cuộc trò chuyện đó vào Màn hình chính"</string>
@@ -1357,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Để có độ phân giải cao hơn, hãy lật điện thoại"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Thiết bị có thể gập lại đang được mở ra"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Thiết bị có thể gập lại đang được lật ngược"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"gập"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"mở"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1416,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hỗ trợ tiếp cận"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Phím tắt"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tuỳ chỉnh phím tắt"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Nhấn phím để chỉ định phím tắt"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Tìm lối tắt"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Không có kết quả tìm kiếm nào"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Biểu tượng phím Meta (phím hành động)"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Biểu tượng dấu cộng"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Tuỳ chỉnh"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Xong"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Nút kéo"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Cài đặt bàn phím"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Đặt phím tắt"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Huỷ"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Nhấn phím"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Tổ hợp phím đã được sử dụng. Hãy thử một phím khác."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Di chuyển bằng bàn phím"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Tìm hiểu về phím tắt"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Di chuyển bằng bàn di chuột"</string>

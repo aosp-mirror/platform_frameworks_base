@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"로컬 터미널"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"로컬 셸 액세스를 제공하는 터미널 앱 사용"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 개발 환경"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android에서 Linux 터미널 실행"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(실험용) Android에서 Linux 터미널 실행"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"사용 중지하면 Linux 터미널 데이터가 삭제됩니다."</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 확인"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP 확인 동작 설정"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"디버깅"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"외부 기기"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"연결된 기기"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"아날로그"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"이 기기에서 재생할 수 없음"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"계정을 업그레이드하여 전환하기"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"여기서 다운로드한 콘텐츠를 재생할 수 없습니다."</string>

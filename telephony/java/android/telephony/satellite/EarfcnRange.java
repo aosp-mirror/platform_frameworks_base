@@ -24,6 +24,8 @@ import android.os.Parcelable;
 
 import com.android.internal.telephony.flags.Flags;
 
+import java.util.Objects;
+
 /**
  * EARFCN (E-UTRA Absolute Radio Frequency Channel Number):  A number that identifies a
  * specific frequency channel in LTE/5G NR, used to define the carrier frequency.
@@ -73,10 +75,10 @@ public final class EarfcnRange implements Parcelable {
      * @param startEarfcn The starting earfcn value.
      * @param endEarfcn   The ending earfcn value.
      */
-    public EarfcnRange(@IntRange(from = 0, to = 65535) int endEarfcn,
-            @IntRange(from = 0, to = 65535) int startEarfcn) {
-        mEndEarfcn = endEarfcn;
+    public EarfcnRange(@IntRange(from = 0, to = 65535) int startEarfcn,
+            @IntRange(from = 0, to = 65535) int endEarfcn) {
         mStartEarfcn = startEarfcn;
+        mEndEarfcn = endEarfcn;
     }
 
     @Override
@@ -85,6 +87,7 @@ public final class EarfcnRange implements Parcelable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "startEarfcn: " + mStartEarfcn + ", " + "endEarfcn: " + mEndEarfcn;
     }
@@ -120,5 +123,18 @@ public final class EarfcnRange implements Parcelable {
      */
     public @IntRange(from = 0, to = 65535) int getEndEarfcn() {
         return mEndEarfcn;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EarfcnRange that)) return false;
+
+        return (that.mStartEarfcn == mStartEarfcn) && (that.mEndEarfcn == mEndEarfcn);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mStartEarfcn, mEndEarfcn);
     }
 }

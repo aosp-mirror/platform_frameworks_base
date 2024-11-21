@@ -79,12 +79,34 @@ public class MediaQualityContract {
     }
 
     /**
-     * @hide
+     * Parameters for sound quality.
      */
-    public static final class SoundQuality implements BaseParameters {
+    public static final class SoundQuality {
+        /**
+         * The audio volume balance.
+         *
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_BALANCE = "balance";
+
+        /**
+         * The bass.
+         *
+         * <p>Bass setting adjust the low sound frequencies.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_BASS = "bass";
+
+        /**
+         * The treble.
+         *
+         * <p>Treble setting adjust the high sound frequencies.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_TREBLE = "treble";
+
+        private SoundQuality() {
+        }
     }
 
     private MediaQualityContract() {

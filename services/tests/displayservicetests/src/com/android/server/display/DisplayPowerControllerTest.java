@@ -2119,7 +2119,8 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testManualBrightness_stateOnPolicyDozeUseNormalBrightnessForDozeFalse_brightnessDoze() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled(
+                mContext)).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -2154,7 +2155,8 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testManualBrightness_stateOnPolicyDozeUseNormalBrightnessForDozeTrue_brightnessNormal() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled(
+                mContext)).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -2188,7 +2190,8 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testManualBrightness_stateDozePolicyOnUseNormalBrightnessForDozeTrue_brightnessDoze() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled(
+                mContext)).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,

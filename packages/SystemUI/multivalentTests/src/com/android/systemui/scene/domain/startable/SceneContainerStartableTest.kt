@@ -81,6 +81,9 @@ import com.android.systemui.keyguard.domain.interactor.scenetransition.lockscree
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -101,6 +104,8 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
@@ -2671,6 +2676,25 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(Scenes.Shade)
             assertThat(backStack?.asIterable()?.first()).isEqualTo(Scenes.Gone)
             assertThat(isAlternateBouncerVisible).isFalse()
+        }
+
+    @Test
+    fun handleDisableFlags() =
+        kosmos.runTest {
+            underTest.start()
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            sceneInteractor.changeScene(Scenes.Shade, "reason")
+            sceneInteractor.showOverlay(Overlays.NotificationsShade, "reason")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+            assertThat(currentOverlays).contains(Overlays.NotificationsShade)
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(disable2 = StatusBarManager.DISABLE2_NOTIFICATION_SHADE)
+            runCurrent()
+
+            assertThat(currentScene).isNotEqualTo(Scenes.Shade)
+            assertThat(currentOverlays).isEmpty()
         }
 
     private fun TestScope.emulateSceneTransition(

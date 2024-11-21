@@ -109,6 +109,8 @@ public class DisplayBrightnessStrategySelector {
 
     private final int mDisplayId;
 
+    private final Context mContext;
+
     /**
      * The constructor of DozeBrightnessStrategy.
      */
@@ -117,6 +119,7 @@ public class DisplayBrightnessStrategySelector {
         if (injector == null) {
             injector = new Injector();
         }
+        mContext = context;
         mDisplayManagerFlags = flags;
         mDisplayId = displayId;
         mDozeBrightnessStrategy = injector.getDozeBrightnessStrategy();
@@ -348,7 +351,7 @@ public class DisplayBrightnessStrategySelector {
         // a user can define a different display state(displayPowerRequest.dozeScreenState) too
         // in the request with the Doze policy and user might request an override to force certain
         // brightness.
-        return (!mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()
+        return (!mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)
                 || !displayPowerRequest.useNormalBrightnessForDoze)
                 && displayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE
                 && !mAllowAutoBrightnessWhileDozing

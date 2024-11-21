@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"အနီးတစ်ဝိုက်ရှိ စက်များကြား ဆက်စပ်နေရာသတ်မှတ်ခြင်း"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"အနီးတစ်ဝိုက်ရှိ စက်များကြား ဆက်စပ်နေရာသတ်မှတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
@@ -2446,7 +2444,7 @@
     <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satellite SOS ကို စနစ်ထည့်သွင်းမထားပါ"</string>
     <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ရန် Google Messages ကို သင်၏ မက်ဆေ့ဂျ်ပို့ရန် မူရင်းအက်ပ်အဖြစ် သတ်မှတ်ပါ"</string>
     <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satellite SOS မရနိုင်ပါ"</string>
-    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"satellite SOS ကို ဤနိုင်ငံ (သို့) ဒေသတွင် ရနိုင်ခြင်းရှိ၊ မရှိ စစ်ဆေးရန် တည်နေရာပြ ဆက်တင်များကို ဖွင့်ပါ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Satellite SOS ကို ဤနိုင်ငံ (သို့) ဒေသတွင် ရနိုင်ခြင်းရှိ၊ မရှိ စစ်ဆေးရန် တည်နေရာပြ ဆက်တင်များကို ဖွင့်ပါ"</string>
     <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်း ရနိုင်သည်"</string>
     <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက် မရှိသည့်အခါ ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့နိုင်သည်။ Google Messages သည် သင်၏ မူရင်းမက်ဆေ့ဂျ်ပို့ရန်အက်ပ် ဖြစ်ရမည်။"</string>
     <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို ပံ့ပိုးမထားပါ"</string>

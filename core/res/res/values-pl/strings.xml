@@ -614,10 +614,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Zezwól na określanie przez aplikację względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcje z urządzeniami Wi-Fi w pobliżu"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Zezwala aplikacji na przesyłanie informacji o sobie, łączenie się z urządzeniami Wi‑Fi w pobliżu i określanie ich względnego położenia"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"określanie względnego położenia urządzeń w pobliżu"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Zezwól na określanie przez aplikację względnego położenia urządzeń w pobliżu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacje o preferowanych usługach płatniczych NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pozwala aplikacji uzyskiwać informacje o preferowanych usługach płatniczych NFC, np. zarejestrowanych pomocach i miejscach docelowych tras."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolowanie łączności Near Field Communication"</string>

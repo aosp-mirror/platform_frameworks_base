@@ -16,6 +16,8 @@
 
 package android.media;
 
+
+import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NUM_INPUT_SLOTS;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
@@ -262,6 +264,11 @@ public final class MediaFormat {
      * MIME type for the IEC61937 audio stream encapsulation. This type isn't defined by IANA.
      */
     public static final String MIMETYPE_AUDIO_IEC61937 = "audio/x-iec61937";
+    /**
+     * MIME type for IAMF audio stream
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final String MIMETYPE_AUDIO_IAMF = "audio/iamf";
 
     /**
      * MIME type for HEIF still image data encoded in HEVC.

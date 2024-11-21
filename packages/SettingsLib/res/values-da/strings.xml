@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivér terminalappen, der giver lokal shell-adgang"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-udviklingsmiljø"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Kør Linux-terminal i Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimentelt) Kør Linux-terminal i Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Hvis du deaktiverer Linux-terminaldata, ryddes dataene."</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrol"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Angiv HDCP-kontroladfærd"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Fejlretning"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ekstern enhed"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Forbundet enhed"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefon"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan ikke afspilles på denne enhed"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Opgrader kontoen for at skifte"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Downloads kan ikke afspilles her"</string>

@@ -76,6 +76,7 @@ class HandleMenu(
     private val shouldShowNewWindowButton: Boolean,
     private val shouldShowManageWindowsButton: Boolean,
     private val shouldShowChangeAspectRatioButton: Boolean,
+    private val shouldShowDesktopModeButton: Boolean,
     private val isBrowserApp: Boolean,
     private val openInAppOrBrowserIntent: Intent?,
     private val captionWidth: Int,
@@ -186,6 +187,7 @@ class HandleMenu(
             shouldShowNewWindowButton = shouldShowNewWindowButton,
             shouldShowManageWindowsButton = shouldShowManageWindowsButton,
             shouldShowChangeAspectRatioButton = shouldShowChangeAspectRatioButton,
+            shouldShowDesktopModeButton = shouldShowDesktopModeButton,
             isBrowserApp = isBrowserApp
         ).apply {
             bind(taskInfo, appIconBitmap, appName, shouldShowMoreActionsPill)
@@ -464,6 +466,7 @@ class HandleMenu(
         private val shouldShowNewWindowButton: Boolean,
         private val shouldShowManageWindowsButton: Boolean,
         private val shouldShowChangeAspectRatioButton: Boolean,
+        private val shouldShowDesktopModeButton: Boolean,
         private val isBrowserApp: Boolean
     ) {
         val rootView = LayoutInflater.from(context)
@@ -660,6 +663,7 @@ class HandleMenu(
             floatingBtn.isSelected = taskInfo.isPinned
             floatingBtn.isEnabled = !taskInfo.isPinned
             floatingBtn.imageTintList = style.windowingButtonColor
+            desktopBtn.isGone = !shouldShowDesktopModeButton
             desktopBtn.isSelected = taskInfo.isFreeform
             desktopBtn.isEnabled = !taskInfo.isFreeform
             desktopBtn.imageTintList = style.windowingButtonColor
@@ -741,6 +745,7 @@ interface HandleMenuFactory {
         shouldShowNewWindowButton: Boolean,
         shouldShowManageWindowsButton: Boolean,
         shouldShowChangeAspectRatioButton: Boolean,
+        shouldShowDesktopModeButton: Boolean,
         isBrowserApp: Boolean,
         openInAppOrBrowserIntent: Intent?,
         captionWidth: Int,
@@ -763,6 +768,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         shouldShowNewWindowButton: Boolean,
         shouldShowManageWindowsButton: Boolean,
         shouldShowChangeAspectRatioButton: Boolean,
+        shouldShowDesktopModeButton: Boolean,
         isBrowserApp: Boolean,
         openInAppOrBrowserIntent: Intent?,
         captionWidth: Int,
@@ -781,6 +787,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             shouldShowNewWindowButton,
             shouldShowManageWindowsButton,
             shouldShowChangeAspectRatioButton,
+            shouldShowDesktopModeButton,
             isBrowserApp,
             openInAppOrBrowserIntent,
             captionWidth,

@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ॲपला जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"जवळपासच्या वाय-फाय डिव्हाइसशी संवाद साधा"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ॲपला जाहिरात करण्याची, कनेक्ट करण्याची आणि जवळपासच्या वाय-फाय डिव्हाइसचे संबंधित स्थान निर्धारित करण्याची परवानगी देते"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"जवळपासच्या डिव्हाइसदरम्यान संबंधित स्थान निश्चित करा"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ॲपला जवळच्या डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"प्राधान्यकृत NFC पेमेंट सेवा माहिती"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"नोंदणीकृत एड्स आणि मार्ग गंतव्यस्थान सारखी प्राधान्यकृत एनएफसी पेमेंट सेवेची माहिती मिळवण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>

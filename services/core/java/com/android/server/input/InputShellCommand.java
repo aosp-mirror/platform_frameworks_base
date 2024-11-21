@@ -475,6 +475,7 @@ public class InputShellCommand extends ShellCommand {
                 }
             }
         }
+        event = KeyEvent.changeTimeRepeat(event, SystemClock.uptimeMillis(), 0);
         injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP), async);
     }
 

@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"本地终端"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"启用终端应用，以便在本地访问 Shell"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 开发环境"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"在 Android 上运行 Linux 终端"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"（实验性）在 Android 上运行 Linux 终端"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"如果您停用它，Linux 终端数据会被清除"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 检查"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"设置 HDCP 检查行为"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"调试"</string>
@@ -490,7 +491,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"根据您的使用情况，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"可以用到 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"可用到 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"电池电量可能在<xliff:g id="TIME">%1$s</xliff:g> 前耗尽"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"这部手机"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"模拟"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"辅助"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"无法在此设备上播放"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"升级账号后才能切换"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"无法在此设备上播放下载的内容"</string>

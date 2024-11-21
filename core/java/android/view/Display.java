@@ -1279,8 +1279,19 @@ public final class Display {
         }
     }
 
+    /**
+     * Represents the {@link FrameRateCategory} for the Normal frame rate
+     *
+     * @see FrameRateCategory
+     */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
+
+    /**
+     * Represents the {@link FrameRateCategory} for the High frame rate
+     *
+     * @see FrameRateCategory
+     */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_HIGH = 1;
 

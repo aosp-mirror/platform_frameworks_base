@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Unos"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Slušna pomagala"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Uključivanje…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Svjetlina se ne može prilagoditi jer njome\n upravlja aplikacija pri vrhu"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatsko zakretanje"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatsko zakretanje zaslona"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokacija"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknite da biste uparili novi uređaj"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ažuriranje unaprijed definiranih postavki nije uspjelo"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Unaprijed definirana postavka"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Odabrano"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Alati"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Automatski titlovi"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Napomena"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Želite li deblokirati mikrofon uređaja?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Želite li deblokirati kameru uređaja?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Želite li deblokirati kameru i mikrofon uređaja?"</string>
@@ -871,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Prelazak na aplikaciju zdesna ili ispod uz podijeljeni zaslon"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Prelazak na aplikaciju slijeva ili iznad uz podijeljeni zaslon"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Tijekom podijeljenog zaslona: zamijeni aplikaciju drugom"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Premještanje aktivnog prozora između zaslona"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Unos"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Prelazak na sljedeći jezik"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Prelazak na prethodni jezik"</string>
@@ -1221,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Upotrijebite manje od ovoliko znakova: <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj međuverzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj međuverzije kopiran je u međuspremnik."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Otvoreni razgovor"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgeti razgovora"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dodirnite razgovor da biste ga dodali na početni zaslon"</string>
@@ -1356,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Za višu razlučivost okrenite telefon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rasklopljen sklopivi uređaj"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Okretanje sklopivog uređaja sa svih strana"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"zatvoreno"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"otvoreno"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1415,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Pristupačnost"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tipkovni prečaci"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Prilagodba tipkovnih prečaca"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Pritisnite tipku da biste dodijelili prečac"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Prečaci za pretraživanje"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nema rezultata pretraživanja"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona za sažimanje"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikona tipke za radnju odnosno meta tipka"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ikona plusa"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Prilagodi"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Gotovo"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona za proširivanje"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ili"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Marker za povlačenje"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Postavke tipkovnice"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Postavite prečac"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Odustani"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pritisnite tipku"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Kombinacija tipki već se upotrebljava. Pokušajte s drugom tipkom."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Krećite se pomoću tipkovnice"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Saznajte više o tipkovnim prečacima"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Krećite se pomoću dodirne podloge"</string>
@@ -1451,25 +1447,25 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Natrag"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Prijeđite ulijevo ili udesno trima prstima na dodirnoj podlozi"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Odlično!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Izvršili ste pokret za povratak."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Napravili ste pokret za povratak."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Na početnu stranicu"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Prijeđite prema gore trima prstima na dodirnoj podlozi"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Sjajno!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Izvršili ste pokret za otvaranje početnog zaslona"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Napravili ste pokret za otvaranje početnog zaslona"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Pregled nedavnih aplikacija"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Prijeđite prema gore trima prstima na dodirnoj podlozi i zadržite pritisak"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Sjajno!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Izvršili ste pokret za prikaz nedavno korištenih aplikacija."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Napravili ste pokret za prikaz nedavno korištenih aplikacija."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Prikaži sve aplikacije"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipku za radnju na tipkovnici"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Izvrsno!"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Izvršili ste pokret za prikaz svih aplikacija"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Napravili ste pokret za prikaz svih aplikacija"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Razina %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Upravljanje uređajima"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo upravljajte uređajima putem čuvara zaslona"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Poništi"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Za povratak prijeđite ulijevo ili udesno trima prstima na dodirnoj podlozi"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Za povratak trima prstima prijeđite ulijevo ili udesno na dodirnoj podlozi"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Da biste se vratili na početni zaslon, prijeđite prema gore trima prstima na dodirnoj podlozi."</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Za prikaz nedavnih aplikacija prijeđite prema gore trima prstima i zadržite pritisak na dodirnoj podlozi"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Za prikaz svojih svih aplikacija pritisnite tipku za radnju na tipkovnici"</string>

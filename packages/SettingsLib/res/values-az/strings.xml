@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Yerli terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Yerli örtük girişini təklif edən terminal tətbiqi aktiv edin"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux inkişaf mühiti"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android-də Linux terminalını işə salın"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Təcrübi) Android-də Linux terminalını işlədin"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Deaktiv etsəniz, Linux terminal datası silinəcək"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP yoxlanışı"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP yoxlanışı qaydası ayalansın"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Sazlama"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Xarici cihaz"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Qoşulmuş cihaz"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Bu telefon"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analoq"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Bu cihazda oxutmaq olmur"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Keçirmək üçün hesabı güncəllə"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Burada endirmələri oxutmaq olmur"</string>

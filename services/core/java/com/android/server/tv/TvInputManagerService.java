@@ -21,6 +21,7 @@ import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 import static android.media.tv.flags.Flags.tifUnbindInactiveTis;
 import static android.media.tv.flags.Flags.kidsModeTvdbSharing;
+import static android.media.tv.flags.Flags.hdmiControlEnhancedBehavior;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,8 +45,10 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
+import android.hardware.hdmi.HdmiClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.HdmiTvClient;
 import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
@@ -138,6 +141,8 @@ public final class TvInputManagerService extends SystemService {
     private static final String PERMISSION_ACCESS_WATCHED_PROGRAMS =
             "com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS";
     private static final long UPDATE_HARDWARE_TIS_BINDING_DELAY_IN_MILLIS = 10 * 1000; // 10 seconds
+    private static final long SET_TV_AS_ACTIVE_SOURCE_IF_NO_REQUEST_DELAY_IN_MILLIS
+            = 10 * 1000; // 10 seconds
 
     // There are two different formats of DVB frontend devices. One is /dev/dvb%d.frontend%d,
     // another one is /dev/dvb/adapter%d/frontend%d. Followings are the patterns for selecting the
@@ -185,6 +190,8 @@ public final class TvInputManagerService extends SystemService {
     private final HashSet<String> mExternalInputLoggingDeviceOnScreenDisplayNames =
             new HashSet<String>();
     private final List<String> mExternalInputLoggingDeviceBrandNames = new ArrayList<String>();
+    private HdmiControlManager mHdmiControlManager = null;
+    private HdmiTvClient mHdmiTvClient = null;
 
     public TvInputManagerService(Context context) {
         super(context);
@@ -197,7 +204,12 @@ public final class TvInputManagerService extends SystemService {
         mActivityManager =
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
-
+        mHdmiControlManager = mContext.getSystemService(HdmiControlManager.class);
+        if (mHdmiControlManager == null) {
+            Slog.w(TAG, "HdmiControlManager is null!");
+        } else {
+            mHdmiTvClient = mHdmiControlManager.getTvClient();
+        }
         synchronized (mLock) {
             getOrCreateUserStateLocked(mCurrentUserId);
         }
@@ -208,6 +220,42 @@ public final class TvInputManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.TV_INPUT_SERVICE, new BinderService());
+
+        if (!hdmiControlEnhancedBehavior()) {
+           return;
+        }
+
+        // To ensure the TV claims CEC active source status correctly, a receiver is registered to
+        // monitor wake-up and sleep intents. Upon wake-up, this receiver sends a delayed message
+        // triggering a TIF call into a CEC API to claim TV as the active source.
+        // However, the API call is cancelled if the TV switches inputs or goes to sleep.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                switch (action) {
+                    case Intent.ACTION_SCREEN_ON:
+                        Slog.w(TAG, "The TV woke up.");
+                        mMessageHandler.removeMessages(
+                                MessageHandler.MSG_CHECK_TV_AS_ACTIVE_SOURCE);
+                        Message msg = mMessageHandler
+                                .obtainMessage(MessageHandler.MSG_CHECK_TV_AS_ACTIVE_SOURCE);
+                        mMessageHandler.sendMessageDelayed(msg,
+                                SET_TV_AS_ACTIVE_SOURCE_IF_NO_REQUEST_DELAY_IN_MILLIS);
+                        break;
+                    case Intent.ACTION_SCREEN_OFF:
+                        Slog.w(TAG, "The TV turned off.");
+                        mMessageHandler.removeMessages(
+                                MessageHandler.MSG_CHECK_TV_AS_ACTIVE_SOURCE);
+                        break;
+                    default:
+                        return;
+                }
+            }
+        }, filter);
     }
 
     @Override
@@ -4503,6 +4551,7 @@ public final class TvInputManagerService extends SystemService {
         static final int MSG_LOG_WATCH_END = 2;
         static final int MSG_SWITCH_CONTENT_RESOLVER = 3;
         static final int MSG_UPDATE_HARDWARE_TIS_BINDING = 4;
+        static final int MSG_CHECK_TV_AS_ACTIVE_SOURCE = 5;
 
         private ContentResolver mContentResolver;
 
@@ -4575,8 +4624,27 @@ public final class TvInputManagerService extends SystemService {
                         args.recycle();
                     }
                     break;
+                case MSG_CHECK_TV_AS_ACTIVE_SOURCE:
+                    synchronized (mLock) {
+                        if (mOnScreenInputId == null) {
+                            assertTvAsCecActiveSourceLocked();
+                            break;
+                        }
+                        // TV that switched to a different input, but not an HDMI input
+                        // (e.g. composite) can also assert active source.
+                        UserState userState = getOrCreateUserStateLocked(mCurrentUserId);
+                        TvInputState inputState = userState.inputMap.get(mOnScreenInputId);
+                        if (inputState == null) {
+                            Slog.w(TAG, "Unexpected null TvInputState.");
+                            break;
+                        }
+                        if (inputState.info.getType() != TvInputInfo.TYPE_HDMI) {
+                            assertTvAsCecActiveSourceLocked();
+                        }
+                    }
+                    break;
                 default: {
-                    Slog.w(TAG, "unhandled message code: " + msg.what);
+                    Slog.w(TAG, "Unhandled message code: " + msg.what);
                     break;
                 }
             }
@@ -4820,6 +4888,30 @@ public final class TvInputManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private void assertTvAsCecActiveSourceLocked() {
+        if (mHdmiTvClient == null) {
+            Slog.w(TAG, "HdmiTvClient is null!");
+            return;
+        }
+        mHdmiTvClient.selectDevice(HdmiDeviceInfo.DEVICE_TV,
+                mContext.getMainExecutor(),
+                new HdmiClient.OnDeviceSelectedListener() {
+                    @Override
+                    public void onDeviceSelected(int result,
+                            int logicalAddress) {
+                        if (result == HdmiControlManager.RESULT_SUCCESS) {
+                            Slog.w(TAG,
+                                    "Setting TV as the active CEC device was successful.");
+                        } else {
+                            Slog.w(TAG,
+                                    "Setting TV as the active CEC device failed with result "
+                                            + result);
+                        }
+                    }
+                });
     }
 
     private static class SessionNotFoundException extends IllegalArgumentException {

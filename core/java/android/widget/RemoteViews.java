@@ -1564,6 +1564,16 @@ public class RemoteViews implements Parcelable, Filter {
             final Context context = ActivityThread.currentApplication();
 
             final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
+            String contextPackageName = context.getPackageName();
+            ComponentName intentComponent = intent.getComponent();
+            if (contextPackageName != null
+                    && intentComponent != null
+                    && (!contextPackageName.equals(intentComponent.getPackageName()))) {
+                // We shouldn't allow for connections to other packages
+                result.complete(new RemoteCollectionItems.Builder().build());
+                return result;
+            }
+
             context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
                     result.defaultExecutor(), new ServiceConnection() {
                         @Override
@@ -8473,8 +8483,11 @@ public class RemoteViews implements Parcelable, Filter {
             }
             try {
                 LoadedApk.checkAndUpdateApkPaths(mApplication);
-                return context.createApplicationContext(mApplication,
+                Context applicationContext = context.createApplicationContext(mApplication,
                         Context.CONTEXT_RESTRICTED);
+                // Get the correct apk paths while maintaining the current context's configuration.
+                return applicationContext.createConfigurationContext(
+                        context.getResources().getConfiguration());
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + mApplication.packageName + " not found");
             }

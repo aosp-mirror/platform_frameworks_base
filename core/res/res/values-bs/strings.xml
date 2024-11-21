@@ -613,10 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Dozvolite aplikaciji da odredi relativni položaj između uređaja ultra širokog opsega u blizini"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"stupanje u interakciju s WiFi uređajima u blizini"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Dozvoljava aplikaciji da se oglašava, povezuje i određuje relativni položaj WiFi uređaja u blizini"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"određivanje relativnog položaja uređaja u blizini"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Dozvolite aplikaciji da odredi relativni položaj između uređaja u blizini"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacije o preferiranoj usluzi plaćanja putem NFC-a"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Dozvoljava aplikaciji da dobije informacije o preferiranoj usluzi plaćanja putem NFC-a kao što su registrirana pomagala i odredište rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"upravljanje NFC-om"</string>

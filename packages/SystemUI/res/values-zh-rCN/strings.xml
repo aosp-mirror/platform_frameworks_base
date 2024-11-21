@@ -311,7 +311,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"断开连接"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"启用"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"明天自动开启"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"快速分享、查找我的设备等功能会使用蓝牙"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"“快速分享”“查找我的设备”等功能会使用蓝牙"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"蓝牙将在明天早上开启"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"分享音频"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"正在分享音频"</string>
@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"输入"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"助听器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"正在开启…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"亮度无法调整，因为它正在被\n顶层应用控制"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动屏幕旋转"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"自动旋转屏幕"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"点击即可与新设备配对"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"无法更新预设"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"预设"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"已选择"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"工具"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"实时字幕"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"记事"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"要解锁设备麦克风吗？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"要解锁设备摄像头吗？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"要解锁设备摄像头和麦克风吗？"</string>
@@ -449,7 +449,7 @@
     <string name="zen_modes_dialog_title" msgid="8854640808100096934">"模式"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"完成"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"设置"</string>
-    <string name="zen_mode_on" msgid="9085304934016242591">"开启"</string>
+    <string name="zen_mode_on" msgid="9085304934016242591">"已开启"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"已开启 • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"已关闭"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"未设置"</string>
@@ -871,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"使用分屏模式时，切换到右侧或下方的应用"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"使用分屏模式时，切换到左侧或上方的应用"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"在分屏期间：将一个应用替换为另一个应用"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"在各个显示屏之间移动活动窗口"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"输入"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"切换到下一种语言"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"切换到上一种语言"</string>
@@ -1221,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"必须少于 <xliff:g id="LENGTH">%1$d</xliff:g> 个字符"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build 号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将 Build 号复制到剪贴板。"</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>
@@ -1356,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"若要获得更高的分辨率，请翻转手机"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展开可折叠设备"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻转可折叠设备"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"折叠状态"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"展开状态"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1415,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"无障碍功能"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"键盘快捷键"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自定义键盘快捷键"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"按下按键即可指定快捷键"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"搜索快捷键"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"无搜索结果"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收起图标"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"操作键或元键图标"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"加号图标"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"自定义"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完成"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展开图标"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"拖动手柄"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"键盘设置"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"设置快捷键"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"取消"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"按下按键"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"按键组合已被使用，请尝试使用其他按键。"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用键盘导航"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"了解键盘快捷键"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"使用触控板导航"</string>

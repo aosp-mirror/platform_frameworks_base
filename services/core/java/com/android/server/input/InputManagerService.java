@@ -3038,6 +3038,14 @@ public class InputManagerService extends IInputManager.Stub
         mNative.resetLockedModifierState();
     }
 
+    private void onUserSwitching(@NonNull SystemService.TargetUser from,
+            @NonNull SystemService.TargetUser to) {
+        if (DEBUG) {
+            Slog.d(TAG, "onUserSwitching from=" + from + " to=" + to);
+        }
+        mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, to.getUserIdentifier()).sendToTarget();
+    }
+
     private void handleCurrentUserChanged(@UserIdInt int userId) {
         mCurrentUserId = userId;
         mKeyGestureController.setCurrentUserId(userId);
@@ -3422,6 +3430,11 @@ public class InputManagerService extends IInputManager.Stub
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mService.systemRunning();
             }
+        }
+
+        @Override
+        public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+            mService.onUserSwitching(from, to);
         }
 
         public InputManagerService getService() {

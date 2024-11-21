@@ -2514,11 +2514,15 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public void notifyInsetsAnimationRunningStateChanged(boolean running) {
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
-            mInsetsAnimationRunning = running;
             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                 Trace.instant(Trace.TRACE_TAG_VIEW,
                         TextUtils.formatSimple("notifyInsetsAnimationRunningStateChanged(%s)",
                         Boolean.toString(running)));
+            }
+            mInsetsAnimationRunning = running;
+            try {
+                mWindowSession.notifyInsetsAnimationRunningStateChanged(mWindow, running);
+            } catch (RemoteException e) {
             }
         }
     }
@@ -8872,11 +8876,6 @@ public final class ViewRootImpl implements ViewParent,
 
         SyntheticTouchNavigationHandler() {
             super(true);
-            int gestureDetectorVelocityStrategy =
-                    android.companion.virtual.flags.Flags
-                            .impulseVelocityStrategyForTouchNavigation()
-                    ? VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE
-                    : VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT;
             mGestureDetector = new GestureDetector(mContext,
                     new GestureDetector.OnGestureListener() {
                         @Override
@@ -8916,7 +8915,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     },
                     /* handler= */ null,
-                    gestureDetectorVelocityStrategy);
+                    VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE);
         }
 
         public void process(MotionEvent event) {
