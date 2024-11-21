@@ -137,12 +137,13 @@ public final class TradeInModeService extends SystemService {
                 Slog.i(TAG, "Not starting trade-in mode, device is setup.");
                 return false;
             }
-            if (SystemProperties.getInt("ro.debuggable", 0) == 1) {
-                // We don't want to force adbd into TIM on debug builds.
-                Slog.e(TAG, "Not starting trade-in mode, device is debuggable.");
-                return false;
-            }
-            if (isAdbEnabled()) {
+            if (isDebuggable()) {
+                if (!isForceEnabledForTesting()) {
+                    // We don't want to force adbd into TIM on debug builds.
+                    Slog.e(TAG, "Not starting trade-in mode, device is debuggable.");
+                    return false;
+                }
+            } else if (isAdbEnabled()) {
                 Slog.e(TAG, "Not starting trade-in mode, adb is already enabled.");
                 return false;
             }
@@ -232,6 +233,10 @@ public final class TradeInModeService extends SystemService {
 
     private boolean isDebuggable() {
         return SystemProperties.getInt("ro.debuggable", 0) == 1;
+    }
+
+    private boolean isForceEnabledForTesting() {
+        return SystemProperties.getInt("persist.adb.test_tradeinmode", 0) == 1;
     }
 
     private boolean isAdbEnabled() {
