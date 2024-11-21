@@ -72,7 +72,7 @@ public class MediaQualityService extends SystemService {
     private final class BinderService extends IMediaQualityManager.Stub {
 
         @Override
-        public PictureProfile createPictureProfile(PictureProfile pp) {
+        public PictureProfile createPictureProfile(PictureProfile pp, int userId) {
             SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
@@ -88,17 +88,17 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public void updatePictureProfile(String id, PictureProfile pp) {
+        public void updatePictureProfile(String id, PictureProfile pp, int userId) {
             // TODO: implement
         }
 
         @Override
-        public void removePictureProfile(String id) {
+        public void removePictureProfile(String id, int userId) {
             // TODO: implement
         }
 
         @Override
-        public PictureProfile getPictureProfile(int type, String name) {
+        public PictureProfile getPictureProfile(int type, String name, int userId) {
             SQLiteDatabase db = mMediaQualityDbHelper.getReadableDatabase();
 
             String selection = BaseParameters.PARAMETER_TYPE + " = ? AND "
@@ -205,7 +205,7 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfile> getPictureProfilesByPackage(String packageName) {
+        public List<PictureProfile> getPictureProfilesByPackage(String packageName, int userId) {
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
             return getPictureProfilesBasedOnConditions(getAllPictureProfileColumns(), selection,
@@ -213,12 +213,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfile> getAvailablePictureProfiles() {
+        public List<PictureProfile> getAvailablePictureProfiles(int userId) {
             return new ArrayList<>();
         }
 
         @Override
-        public List<String> getPictureProfilePackageNames() {
+        public List<String> getPictureProfilePackageNames(int userId) {
             String [] column = {BaseParameters.PARAMETER_NAME};
             List<PictureProfile> pictureProfiles = getPictureProfilesBasedOnConditions(column,
                     null, null);
@@ -250,12 +250,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public PictureProfileHandle getPictureProfileHandle(String id) {
+        public PictureProfileHandle getPictureProfileHandle(String id, int userId) {
             return null;
         }
 
         @Override
-        public SoundProfile createSoundProfile(SoundProfile sp) {
+        public SoundProfile createSoundProfile(SoundProfile sp, int userId) {
             SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
@@ -269,12 +269,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public void updateSoundProfile(String id, SoundProfile sp) {
+        public void updateSoundProfile(String id, SoundProfile pp, int userId) {
             // TODO: implement
         }
 
         @Override
-        public void removeSoundProfile(String id) {
+        public void removeSoundProfile(String id, int userId) {
             SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
             String selection = BaseParameters.PARAMETER_ID + " = ?";
             String[] selectionArgs = {id};
@@ -282,7 +282,7 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public SoundProfile getSoundProfile(int type, String id) {
+        public SoundProfile getSoundProfile(int type, String id, int userId) {
             SQLiteDatabase db = mMediaQualityDbHelper.getReadableDatabase();
 
             String selection = BaseParameters.PARAMETER_ID + " = ?";
@@ -314,7 +314,7 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
+        public List<SoundProfile> getSoundProfilesByPackage(String packageName, int userId) {
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
             return getSoundProfilesBasedOnConditions(getAllSoundProfileColumns(), selection,
@@ -322,12 +322,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<SoundProfile> getAvailableSoundProfiles() {
+        public List<SoundProfile> getAvailableSoundProfiles(int userId) {
             return new ArrayList<>();
         }
 
         @Override
-        public List<String> getSoundProfilePackageNames() {
+        public List<String> getSoundProfilePackageNames(int userId) {
             String [] column = {BaseParameters.PARAMETER_NAME};
             List<SoundProfile> soundProfiles = getSoundProfilesBasedOnConditions(column,
                     null, null);
@@ -397,70 +397,70 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public void setAmbientBacklightSettings(AmbientBacklightSettings settings) {
+        public void setAmbientBacklightSettings(AmbientBacklightSettings settings, int userId) {
         }
 
         @Override
-        public void setAmbientBacklightEnabled(boolean enabled) {
+        public void setAmbientBacklightEnabled(boolean enabled, int userId) {
         }
 
         @Override
-        public List<ParamCapability> getParamCapabilities(List<String> names) {
+        public List<ParamCapability> getParamCapabilities(List<String> names, int userId) {
             return new ArrayList<>();
         }
 
         @Override
-        public List<String> getPictureProfileAllowList() {
+        public List<String> getPictureProfileAllowList(int userId) {
             return new ArrayList<>();
         }
 
         @Override
-        public void setPictureProfileAllowList(List<String> packages) {
+        public void setPictureProfileAllowList(List<String> packages, int userId) {
         }
 
         @Override
-        public List<String> getSoundProfileAllowList() {
+        public List<String> getSoundProfileAllowList(int userId) {
             return new ArrayList<>();
         }
 
         @Override
-        public void setSoundProfileAllowList(List<String> packages) {
+        public void setSoundProfileAllowList(List<String> packages, int userId) {
         }
 
         @Override
-        public boolean isSupported() {
+        public boolean isSupported(int userId) {
             return false;
         }
 
         @Override
-        public void setAutoPictureQualityEnabled(boolean enabled) {
+        public void setAutoPictureQualityEnabled(boolean enabled, int userId) {
         }
 
         @Override
-        public boolean isAutoPictureQualityEnabled() {
+        public boolean isAutoPictureQualityEnabled(int userId) {
             return false;
         }
 
         @Override
-        public void setSuperResolutionEnabled(boolean enabled) {
+        public void setSuperResolutionEnabled(boolean enabled, int userId) {
         }
 
         @Override
-        public boolean isSuperResolutionEnabled() {
+        public boolean isSuperResolutionEnabled(int userId) {
             return false;
         }
 
         @Override
-        public void setAutoSoundQualityEnabled(boolean enabled) {
+        public void setAutoSoundQualityEnabled(boolean enabled, int userId) {
         }
 
         @Override
-        public boolean isAutoSoundQualityEnabled() {
+        public boolean isAutoSoundQualityEnabled(int userId) {
             return false;
         }
 
         @Override
-        public boolean isAmbientBacklightEnabled() {
+        public boolean isAmbientBacklightEnabled(int userId) {
             return false;
         }
     }
