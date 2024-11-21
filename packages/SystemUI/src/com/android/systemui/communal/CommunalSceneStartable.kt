@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -216,6 +217,9 @@ constructor(
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub timeout",
+                            transitionKey =
+                                if (communalHubOnMobile()) CommunalTransitionKeys.SimpleFade
+                                else null,
                         )
                         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)
                     }
