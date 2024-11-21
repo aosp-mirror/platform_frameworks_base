@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.os.SystemProperties
+import android.os.UserHandle
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.window.TransitionInfo
@@ -108,7 +109,10 @@ sealed class DragToDesktopTransitionHandler(
      * Note that the transition handler for this transition doesn't call the finish callback until
      * after one of the "end" or "cancel" transitions is merged into this transition.
      */
-    fun startDragToDesktopTransition(taskId: Int, dragToDesktopAnimator: MoveToDesktopAnimator) {
+    fun startDragToDesktopTransition(
+        taskInfo: RunningTaskInfo,
+        dragToDesktopAnimator: MoveToDesktopAnimator,
+    ) {
         if (inProgress) {
             ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
@@ -124,13 +128,15 @@ sealed class DragToDesktopTransitionHandler(
                 pendingIntentCreatorBackgroundActivityStartMode =
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
             }
+        val taskUser = UserHandle.of(taskInfo.userId)
         val pendingIntent =
-            PendingIntent.getActivity(
-                context,
+            PendingIntent.getActivityAsUser(
+                context.createContextAsUser(taskUser, /* flags= */ 0),
                 0 /* requestCode */,
                 launchHomeIntent,
                 FLAG_MUTABLE or FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or FILL_IN_COMPONENT,
                 options.toBundle(),
+                taskUser,
             )
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, Bundle())
@@ -138,19 +144,19 @@ sealed class DragToDesktopTransitionHandler(
             transitions.startTransition(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP, wct, this)
 
         transitionState =
-            if (isSplitTask(taskId)) {
+            if (isSplitTask(taskInfo.taskId)) {
                 val otherTask =
-                    getOtherSplitTask(taskId)
+                    getOtherSplitTask(taskInfo.taskId)
                         ?: throw IllegalStateException("Expected split task to have a counterpart.")
                 TransitionState.FromSplit(
-                    draggedTaskId = taskId,
+                    draggedTaskId = taskInfo.taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken,
                     otherSplitTask = otherTask,
                 )
             } else {
                 TransitionState.FromFullscreen(
-                    draggedTaskId = taskId,
+                    draggedTaskId = taskInfo.taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken,
                 )
