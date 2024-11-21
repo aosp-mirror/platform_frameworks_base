@@ -9319,6 +9319,46 @@ public final class ActiveServices {
             Slog.e(TAG, "stopForegroundServiceDelegateLocked delegate does not exist");
         }
     }
+    /**
+     * Handles notifications from MediaSessionService about active media service.
+     * This method evaluates the provided information and transitions corresponding service to
+     * foreground state.
+     *
+     * @param packageName The package name of the app running the service.
+     * @param userId The user ID associated with the service.
+     * @param notificationId The ID of the media notification associated with the service.
+     */
+    void notifyActiveMediaForegroundServiceLocked(@NonNull String packageName,
+            @UserIdInt int userId, int notificationId) {
+        if (!enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+
+        final ServiceMap smap = mServiceMap.get(userId);
+        if (smap == null) {
+            return;
+        }
+        final int serviceSize = smap.mServicesByInstanceName.size();
+        for (int i = 0; i < serviceSize; i++) {
+            final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+            if (sr.appInfo.packageName.equals(packageName) && !sr.isForeground) {
+                // foregroundServiceType is cleared when media session is user-disengaged
+                // and calls notifyInactiveMediaForegroundService->setServiceForegroundInnerLocked.
+                if (sr.foregroundServiceType
+                        == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
+                        && sr.foregroundId == notificationId) {
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.d(TAG, "Moving media service to foreground for package "
+                                + packageName);
+                    }
+                    setServiceForegroundInnerLocked(sr, sr.foregroundId,
+                             sr.foregroundNoti, /* flags */ 0,
+                             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+                             /* callingUidStart */ 0);
+                }
+            }
+        }
+    }
 
     /**
      * Handles notifications from MediaSessionService about inactive media foreground services.
