@@ -53,6 +53,8 @@ interface INfcCardEmulation
     void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);
     void recoverRoutingTable(int userHandle);
     boolean isEuiccSupported();
+    int getDefaultNfcSubscriptionId(in String pkg);
+    int setDefaultNfcSubscriptionId(int subscriptionId, in String pkg);
     void setAutoChangeStatus(boolean state);
     boolean isAutoChangeEnabled();
     List<String> getRoutingStatus();
