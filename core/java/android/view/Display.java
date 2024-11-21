@@ -19,6 +19,7 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES;
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
@@ -58,6 +59,7 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1044,6 +1046,19 @@ public final class Display {
         synchronized (mLock) {
             updateDisplayInfoLocked();
             return Math.max(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        }
+    }
+
+    /**
+     * Returns the smallest size of the display in dp
+     * @hide
+     */
+    public float getMinSizeDimensionDp() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            mDisplayInfo.getAppMetrics(mTempMetrics);
+            return TypedValue.deriveDimension(COMPLEX_UNIT_DIP,
+                    Math.min(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight), mTempMetrics);
         }
     }
 

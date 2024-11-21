@@ -26,6 +26,7 @@ filegroup {
     name: "wm_shell-shared-utils",
     srcs: [
         "src/com/android/wm/shell/shared/TransitionUtil.java",
+        "src/com/android/wm/shell/shared/Utils.java",
     ],
 }
 
@@ -71,6 +72,7 @@ java_library {
     srcs: [
         "**/desktopmode/*.java",
         "**/desktopmode/*.kt",
+        ":wm_shell-shared-utils",
     ],
     static_libs: [
         "com.android.window.flags.window-aconfig-java",
