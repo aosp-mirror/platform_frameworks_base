@@ -120,7 +120,7 @@ constructor(
         tileState = tileMapper.map(config, model)
         state?.apply {
             this.state = tileState.activationState.legacyState
-            icon = tileState.icon?.asQSTileIcon() ?: ResourceIcon.get(ICON_RES_ID)
+            icon = tileState.icon?.asQSTileIcon() ?: maybeLoadResourceIcon(ICON_RES_ID)
             label = tileLabel
             secondaryLabel = tileState.secondaryLabel
             contentDescription = tileState.contentDescription

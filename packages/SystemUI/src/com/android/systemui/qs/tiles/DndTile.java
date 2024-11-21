@@ -229,7 +229,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.dualTarget = true;
         state.value = newValue;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? R.drawable.qs_dnd_icon_on
                 : R.drawable.qs_dnd_icon_off);
         state.label = getTileLabel();

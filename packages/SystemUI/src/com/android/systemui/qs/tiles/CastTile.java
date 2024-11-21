@@ -290,8 +290,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (connecting && !state.value) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_connecting);
         }
-        state.icon = ResourceIcon.get(state.value ? R.drawable.ic_cast_connected
-                : R.drawable.ic_cast);
+        state.icon = maybeLoadResourceIcon(state.value
+                ? R.drawable.ic_cast_connected : R.drawable.ic_cast);
         if (canCastToNetwork() || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
             if (!state.value) {

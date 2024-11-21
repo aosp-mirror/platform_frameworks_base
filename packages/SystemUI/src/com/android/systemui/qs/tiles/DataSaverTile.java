@@ -147,7 +147,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.data_saver);
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(state.value ? R.drawable.qs_data_saver_icon_on
+        state.icon = maybeLoadResourceIcon(state.value ? R.drawable.qs_data_saver_icon_on
                 : R.drawable.qs_data_saver_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();
     }

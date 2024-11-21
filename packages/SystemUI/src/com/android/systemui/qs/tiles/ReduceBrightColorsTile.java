@@ -141,7 +141,7 @@ public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
         state.label = mContext.getString(R.string.reduce_bright_colors_feature_name);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? drawable.qs_extra_dim_icon_on
                 : drawable.qs_extra_dim_icon_off);
     }

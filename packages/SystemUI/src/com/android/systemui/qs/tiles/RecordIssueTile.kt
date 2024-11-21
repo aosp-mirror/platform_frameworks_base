@@ -221,13 +221,13 @@ constructor(
                 state = Tile.STATE_ACTIVE
                 forceExpandIcon = false
                 secondaryLabel = mContext.getString(R.string.qs_record_issue_stop)
-                icon = ResourceIcon.get(R.drawable.qs_record_issue_icon_on)
+                icon = maybeLoadResourceIcon(R.drawable.qs_record_issue_icon_on)
             } else {
                 value = false
                 state = Tile.STATE_INACTIVE
                 forceExpandIcon = true
                 secondaryLabel = mContext.getString(R.string.qs_record_issue_start)
-                icon = ResourceIcon.get(R.drawable.qs_record_issue_icon_off)
+                icon = maybeLoadResourceIcon(R.drawable.qs_record_issue_icon_off)
             }
             label = tileLabel
             contentDescription =
