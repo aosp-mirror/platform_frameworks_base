@@ -362,7 +362,7 @@ public class BrightnessClamperController {
                         listener, data));
             }
 
-            modifiers.add(new DisplayDimModifier(context));
+            modifiers.add(new DisplayDimModifier(data.mDisplayId, context));
             modifiers.add(new BrightnessLowPowerModeModifier());
             if (flags.isEvenDimmerEnabled() && data.mDisplayDeviceConfig.isEvenDimmerAvailable()) {
                 modifiers.add(new BrightnessLowLuxModifier(handler, listener, context,
