@@ -26,6 +26,7 @@ import static android.app.PropertyInvalidatedCache.NonceStore.INVALID_NONCE_INDE
 import static com.android.internal.os.Flags.FLAG_APPLICATION_SHARED_MEMORY_ENABLED;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -34,6 +35,8 @@ import static org.junit.Assert.fail;
 
 import android.annotation.SuppressLint;
 import android.app.PropertyInvalidatedCache.Args;
+import android.app.PropertyInvalidatedCache.NonceWatcher;
+import android.app.PropertyInvalidatedCache.NonceStore;
 import android.os.Binder;
 import com.android.internal.os.ApplicationSharedMemory;
 
@@ -45,10 +48,14 @@ import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.os.ApplicationSharedMemory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test for verifying the behavior of {@link PropertyInvalidatedCache}.  This test does
@@ -490,6 +497,62 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
+    // Verify that NonceWatcher change reporting works properly
+    @Test
+    public void testNonceWatcherChanged() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(MODULE_SYSTEM, "watcher1");
+        sysCache.testPropertyName();
+
+        try (NonceWatcher watcher1 = sysCache.getNonceWatcher()) {
+
+            // The property has never been invalidated so it is still unset.
+            assertFalse(watcher1.isChanged());
+
+            // Invalidate the cache.  The first call to isChanged will return true but the second
+            // call will return false;
+            sysCache.invalidateCache();
+            assertTrue(watcher1.isChanged());
+            assertFalse(watcher1.isChanged());
+
+            // Invalidate the cache.  The first call to isChanged will return true but the second
+            // call will return false;
+            sysCache.invalidateCache();
+            sysCache.invalidateCache();
+            assertTrue(watcher1.isChanged());
+            assertFalse(watcher1.isChanged());
+
+            NonceWatcher watcher2 = sysCache.getNonceWatcher();
+            // This watcher return isChanged() immediately because the nonce is not UNSET.
+            assertTrue(watcher2.isChanged());
+        }
+    }
+
+    // Verify that NonceWatcher wait-for-change works properly
+    @Test
+    public void testNonceWatcherWait() throws Exception {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(MODULE_TEST, "watcher1");
+
+        // Use the watcher outside a try-with-resources block.
+        NonceWatcher watcher1 = sysCache.getNonceWatcher();
+
+        // Invalidate the cache and then "wait".
+        sysCache.invalidateCache();
+        assertEquals(watcher1.waitForChange(), 1);
+
+        // Invalidate the cache three times and then "wait".
+        sysCache.invalidateCache();
+        sysCache.invalidateCache();
+        sysCache.invalidateCache();
+        assertEquals(watcher1.waitForChange(), 3);
+
+        // Wait for a change.  It won't happen, but the code will time out after 10ms.
+        assertEquals(watcher1.waitForChange(10, TimeUnit.MILLISECONDS), 0);
+
+        watcher1.close();
+    }
+
     // Verify the behavior of shared memory nonce storage.  This does not directly test the cache
     // storing nonces in shared memory.
     @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
@@ -502,10 +565,8 @@ public class PropertyInvalidatedCacheTests {
 
         // Create a server-side store and a client-side store.  The server's store is mutable and
         // the client's store is not mutable.
-        PropertyInvalidatedCache.NonceStore server =
-                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), true);
-        PropertyInvalidatedCache.NonceStore client =
-                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), false);
+        NonceStore server = new NonceStore(shmem.getSystemNonceBlock(), true);
+        NonceStore client = new NonceStore(shmem.getSystemNonceBlock(), false);
 
         final String name1 = "name1";
         assertEquals(server.getHandleForName(name1), INVALID_NONCE_INDEX);
