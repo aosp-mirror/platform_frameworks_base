@@ -106,6 +106,20 @@ interface StatusBarModule {
 
         @Provides
         @SysUISingleton
+        @IntoMap
+        @ClassKey(MultiDisplayStatusBarWindowControllerStore::class)
+        fun multiDisplayControllerStoreAsCoreStartable(
+            storeLazy: Lazy<MultiDisplayStatusBarWindowControllerStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                storeLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+
+        @Provides
+        @SysUISingleton
         @OngoingCallLog
         fun provideOngoingCallLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("OngoingCall", 75)

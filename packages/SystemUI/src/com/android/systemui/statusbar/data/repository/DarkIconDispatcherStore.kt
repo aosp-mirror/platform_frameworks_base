@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.data.repository
 
 import android.content.Context
 import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
@@ -33,6 +34,8 @@ import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
@@ -119,6 +122,20 @@ interface DarkIconDispatcherStoreModule {
                 multiDisplayLazy.get()
             } else {
                 singleDisplayLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(DarkIconDispatcherStore::class)
+        fun storeAsCoreStartable(
+            multiDisplayLazy: Lazy<MultiDisplayDarkIconDispatcherStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                CoreStartable.NOP
             }
         }
     }

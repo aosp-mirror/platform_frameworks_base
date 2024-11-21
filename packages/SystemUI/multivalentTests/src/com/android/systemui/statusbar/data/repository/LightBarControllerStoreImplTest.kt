@@ -41,6 +41,11 @@ class LightBarControllerStoreImplTest : SysuiTestCase() {
 
     private val underTest = kosmos.lightBarControllerStoreImpl
 
+    @Before
+    fun start() {
+        underTest.start()
+    }
+
     @Before fun addDisplays() = runBlocking { fakeDisplayRepository.addDisplay(DEFAULT_DISPLAY) }
 
     @Test

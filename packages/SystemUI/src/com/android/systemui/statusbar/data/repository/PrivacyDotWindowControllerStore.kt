@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.data.repository
 import android.view.Display
 import android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
@@ -28,7 +29,11 @@ import com.android.systemui.display.data.repository.PerDisplayStoreImpl
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.events.PrivacyDotWindowController
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
@@ -75,4 +80,20 @@ constructor(
 interface PrivacyDotWindowControllerStoreModule {
 
     @Binds fun store(impl: PrivacyDotWindowControllerStoreImpl): PrivacyDotWindowControllerStore
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(PrivacyDotWindowControllerStore::class)
+        fun storeAsCoreStartable(
+            storeLazy: Lazy<PrivacyDotWindowControllerStoreImpl>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                storeLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+    }
 }
