@@ -60,7 +60,7 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
         if (!bindService()) {
             return false;
         }
-        AndroidFuture<Integer> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Boolean> resultFuture = new AndroidFuture<>();
         try {
             mService.initialize(resultFuture);
         } catch (RemoteException e) {
@@ -68,8 +68,8 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
             unbindService();
             return false;
         }
-        Integer result = getFutureResult(resultFuture);
-        if (result != null && result == 0) {
+        Boolean result = getFutureResult(resultFuture);
+        if (result != null && result == true) {
             return true;
         } else {
             unbindService();
@@ -83,22 +83,22 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
      * @return Whether the data is added to the binder service.
      */
     public boolean addData(List<IntrusionDetectionEvent> data) {
-        AndroidFuture<Integer> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Boolean> resultFuture = new AndroidFuture<>();
         try {
             mService.addData(data, resultFuture);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote Exception", e);
             return false;
         }
-        Integer result = getFutureResult(resultFuture);
-        return result != null && result == 0;
+        Boolean result = getFutureResult(resultFuture);
+        return result != null && result == true;
     }
 
     /**
      * Release the BackupTransport binder service.
      */
     public void release() {
-        AndroidFuture<Integer> resultFuture = new AndroidFuture<>();
+        AndroidFuture<Boolean> resultFuture = new AndroidFuture<>();
         try {
             mService.release(resultFuture);
         } catch (RemoteException e) {

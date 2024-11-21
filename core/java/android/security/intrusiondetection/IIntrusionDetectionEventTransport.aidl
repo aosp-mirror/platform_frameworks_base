@@ -15,6 +15,7 @@
  */
 
 package android.security.intrusiondetection;
+
 import android.security.intrusiondetection.IntrusionDetectionEvent;
 
 import com.android.internal.infra.AndroidFuture;
@@ -24,18 +25,20 @@ oneway interface IIntrusionDetectionEventTransport {
     /**
      * Initialize the server side.
      */
-    void initialize(in AndroidFuture<int> resultFuture);
+    void initialize(in AndroidFuture<boolean> resultFuture);
 
     /**
-     * Send intrusiondetection logging data to the backup destination.
+     * Send intrusiondetection logging data to the transport destination.
      * The data is a list of IntrusionDetectionEvent.
      * The IntrusionDetectionEvent is an abstract class that represents
-     * different type of events.
+     * different types of events.
      */
-    void addData(in List<IntrusionDetectionEvent> events, in AndroidFuture<int> resultFuture);
+    void addData(
+        in List<IntrusionDetectionEvent> events,
+        in AndroidFuture<boolean> resultFuture);
 
     /**
      * Release the binder to the server.
      */
-    void release(in AndroidFuture<int> resultFuture);
+    void release(in AndroidFuture<boolean> resultFuture);
 }
