@@ -21,7 +21,6 @@ import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.plugins.clocks.ClockPreviewConfig
-import com.android.systemui.plugins.clocks.DefaultClockFaceLayout.Companion.getSmallClockTopPadding
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -74,14 +73,13 @@ constructor(
      * SmallClockTopPadding decides the top position of smartspace
      */
     fun getSmallClockSmartspaceTopPadding(config: ClockPreviewConfig): Int {
-        return getSmallClockTopPadding(config, systemBarUtils.getStatusBarHeaderHeightKeyguard()) +
-            config.previewContext.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
+        return config.getSmallClockTopPadding(systemBarUtils.getStatusBarHeaderHeightKeyguard()) +
+            config.context.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
     }
 
     fun getLargeClockSmartspaceTopPadding(clockPreviewConfig: ClockPreviewConfig): Int {
-        return getSmallClockTopPadding(
-            clockPreviewConfig,
-            systemBarUtils.getStatusBarHeaderHeightKeyguard(),
+        return clockPreviewConfig.getSmallClockTopPadding(
+            systemBarUtils.getStatusBarHeaderHeightKeyguard()
         )
     }
 }
