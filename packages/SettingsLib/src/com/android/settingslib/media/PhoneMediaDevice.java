@@ -29,6 +29,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
 import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
 import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
+
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.Manifest;
@@ -40,6 +41,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -72,7 +74,7 @@ public class PhoneMediaDevice extends MediaDevice {
     /** Returns this device name for media transfer. */
     public static @NonNull String getMediaTransferThisDeviceName(@NonNull Context context) {
         if (isTv(context)) {
-            return context.getString(R.string.media_transfer_this_device_name_tv);
+            return Build.MODEL;
         } else if (isTablet()) {
             return context.getString(R.string.media_transfer_this_device_name_tablet);
         } else if (inputRoutingEnabledAndIsDesktop(context)) {
@@ -110,7 +112,7 @@ public class PhoneMediaDevice extends MediaDevice {
                 name = getMediaTransferThisDeviceName(context);
                 break;
             case TYPE_HDMI:
-                name = context.getString(isTv ? R.string.tv_media_transfer_default :
+                name = context.getString(isTv ? R.string.tv_media_transfer_hdmi_title :
                         R.string.media_transfer_external_device_name);
                 break;
             case TYPE_HDMI_ARC:
@@ -223,8 +225,6 @@ public class PhoneMediaDevice extends MediaDevice {
         switch (mRouteInfo.getType()) {
             case TYPE_BUILTIN_SPEAKER:
                 return mContext.getString(R.string.tv_media_transfer_internal_speakers);
-            case TYPE_HDMI:
-                return mContext.getString(R.string.tv_media_transfer_hdmi);
             case TYPE_HDMI_ARC:
                 if (getHdmiOutDeviceName(mContext) == null) {
                     // Connection type is already part of the title.
