@@ -3519,4 +3519,15 @@ interface ITelephony {
     * @hide
     */
     void setNtnSmsSupported(boolean ntnSmsSupported);
+
+    /**
+     * Returns carrier id maps to the passing {@link CarrierIdentifier}.
+     *
+     * @param {@link CarrierIdentifier}.
+     *
+     * @return carrier id from passing {@link CarrierIdentifier} or {@link #UNKNOWN_CARRIER_ID}
+     * if the carrier cannot be identified
+     * @hide
+     */
+    int getCarrierIdFromIdentifier(in CarrierIdentifier carrierIdentifier);
 }
