@@ -152,6 +152,13 @@ private class ActiveNotificationsStoreBuilder(
             } else {
                 null
             }
+        val promotedContent =
+            if (PromotedNotificationContentModel.featureFlagEnabled()) {
+                promotedNotificationContentModel
+            } else {
+                null
+            }
+
         return existingModels.createOrReuse(
             key = key,
             groupKey = sbn.groupKey,
@@ -174,7 +181,7 @@ private class ActiveNotificationsStoreBuilder(
             isGroupSummary = sbn.notification.isGroupSummary,
             bucket = bucket,
             callType = sbn.toCallType(),
-            promotedContent = promotedNotificationContentModel,
+            promotedContent = promotedContent,
         )
     }
 }

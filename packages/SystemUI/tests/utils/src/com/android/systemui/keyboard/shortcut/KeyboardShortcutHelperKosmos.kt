@@ -24,6 +24,7 @@ import android.view.windowManager
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.keyboard.shortcut.data.repository.CustomShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.DefaultShortcutCategoriesRepository
+import com.android.systemui.keyboard.shortcut.data.repository.InputGestureMaps
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategoriesUtils
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
@@ -101,6 +102,11 @@ val Kosmos.defaultShortcutCategoriesRepository by
         )
     }
 
+val Kosmos.inputGestureMaps by
+        Kosmos.Fixture {
+            InputGestureMaps(applicationContext)
+        }
+
 val Kosmos.customShortcutCategoriesRepository by
     Kosmos.Fixture {
         CustomShortcutCategoriesRepository(
@@ -110,6 +116,7 @@ val Kosmos.customShortcutCategoriesRepository by
             testDispatcher,
             shortcutCategoriesUtils,
             applicationContext,
+            inputGestureMaps
         )
     }
 
@@ -173,7 +180,10 @@ val Kosmos.shortcutCustomizationViewModelFactory by
     Kosmos.Fixture {
         object : ShortcutCustomizationViewModel.Factory {
             override fun create(): ShortcutCustomizationViewModel {
-                return ShortcutCustomizationViewModel(shortcutCustomizationInteractor)
+                return ShortcutCustomizationViewModel(
+                    applicationContext,
+                    shortcutCustomizationInteractor,
+                )
             }
         }
     }

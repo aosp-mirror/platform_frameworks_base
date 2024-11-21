@@ -18,13 +18,13 @@
 <resources>
     <!--  Button Styles  -->
     <!-- Material Button - Filled  -->
-    <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button">
+    <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button.WearMaterial3">
         <item name="android:background">@drawable/btn_background_material_filled</item>
         <item name="textAppearance">@style/TextAppearance.Widget.Button.Material.Filled</item>
     </style>
 
     <!-- Material Button - Filled Tonal(Override system default button styles) -->
-    <style name="Widget.DeviceDefault.Button">
+    <style name="Widget.DeviceDefault.Button.WearMaterial3">
         <item name="background">@drawable/btn_background_material_filled_tonal</item>
         <item name="textAppearance">@style/TextAppearance.Widget.Button.Material</item>
         <item name="minHeight">@dimen/btn_material_height</item>

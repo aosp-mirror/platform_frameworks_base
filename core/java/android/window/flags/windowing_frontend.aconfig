@@ -441,3 +441,11 @@ flag {
     description: "Enable Predictive Back Animation for 3-button-nav"
     bug: "373544911"
 }
+
+flag {
+    name: "predictive_back_default_enable_sdk_36"
+    namespace: "systemui"
+    description: "Enable Predictive Back by default with targetSdk>=36"
+    is_fixed_read_only: true
+    bug: "376407910"
+}

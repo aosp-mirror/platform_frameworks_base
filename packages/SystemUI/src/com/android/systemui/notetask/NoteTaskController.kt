@@ -43,6 +43,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.log.DebugLogger.debugLog
+import com.android.systemui.notetask.NoteTaskEntryPoint.KEYBOARD_SHORTCUT
 import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
@@ -117,7 +118,6 @@ constructor(
             } else {
                 getUserForHandlingNotesTaking(entryPoint)
             }
-
         activityContext.startActivityAsUser(createNotesRoleHolderSettingsIntent(), user)
     }
 
@@ -206,9 +206,17 @@ constructor(
         try {
             // TODO(b/266686199): We should handle when app not available. For now, we log.
             debugLog { "onShowNoteTask - start: $info on user#${user.identifier}" }
+            val useStylusMode =
+                when {
+                    info.entryPoint == TAIL_BUTTON -> true
+                    info.entryPoint == KEYBOARD_SHORTCUT -> false
+                    else ->
+                        context.resources.getInteger(R.integer.config_preferredNotesMode) ==
+                            PREFERRED_NOTES_MODE_STYLUS
+                }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
-                    val intent = createNoteTaskIntent(info)
+                    val intent = createNoteTaskIntent(info, useStylusMode)
                     val icon =
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
                     noteTaskBubblesController.showOrHideAppBubble(
@@ -229,7 +237,7 @@ constructor(
                         eventLogger.logNoteTaskClosed(info)
                         debugLog { "onShowNoteTask - closed as activity: $info" }
                     } else {
-                        val intent = createNoteTaskIntent(info)
+                        val intent = createNoteTaskIntent(info, useStylusMode)
                         context.startActivityAsUser(intent, user)
                         eventLogger.logNoteTaskOpened(info)
                         debugLog { "onShowNoteTask - opened as activity: $info" }
@@ -393,6 +401,8 @@ constructor(
          */
         const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE = "extra_shortcut_badge_override_package"
 
+        const val PREFERRED_NOTES_MODE_STYLUS = 1
+
         /** Returns notes role holder settings intent. */
         fun createNotesRoleHolderSettingsIntent() =
             Intent(Intent.ACTION_MANAGE_DEFAULT_APP).putExtra(Intent.EXTRA_ROLE_NAME, ROLE_NOTES)
@@ -400,13 +410,12 @@ constructor(
 }
 
 /** Creates an [Intent] for [ROLE_NOTES]. */
-private fun createNoteTaskIntent(info: NoteTaskInfo): Intent =
+private fun createNoteTaskIntent(info: NoteTaskInfo, useStylusMode: Boolean): Intent =
     Intent(Intent.ACTION_CREATE_NOTE).apply {
         setPackage(info.packageName)
 
         // EXTRA_USE_STYLUS_MODE does not mean a stylus is in-use, but a stylus entrypoint
         // was used to start the note task.
-        val useStylusMode = info.entryPoint != NoteTaskEntryPoint.KEYBOARD_SHORTCUT
         putExtra(Intent.EXTRA_USE_STYLUS_MODE, useStylusMode)
 
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

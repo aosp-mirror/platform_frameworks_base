@@ -8876,11 +8876,6 @@ public final class ViewRootImpl implements ViewParent,
 
         SyntheticTouchNavigationHandler() {
             super(true);
-            int gestureDetectorVelocityStrategy =
-                    android.companion.virtual.flags.Flags
-                            .impulseVelocityStrategyForTouchNavigation()
-                    ? VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE
-                    : VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT;
             mGestureDetector = new GestureDetector(mContext,
                     new GestureDetector.OnGestureListener() {
                         @Override
@@ -8920,7 +8915,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     },
                     /* handler= */ null,
-                    gestureDetectorVelocityStrategy);
+                    VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE);
         }
 
         public void process(MotionEvent event) {

@@ -28,6 +28,7 @@ import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 
 internal fun createSwipeAnimation(
     layoutState: MutableSceneTransitionLayoutStateImpl,
@@ -317,11 +318,11 @@ internal class SwipeAnimation<T : ContentKey>(
      *
      * @return the velocity consumed
      */
-    fun animateOffset(
+    suspend fun animateOffset(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
-    ): SuspendedValue<Float> {
+    ): Float {
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
         val initialProgress = progress
@@ -379,7 +380,7 @@ internal class SwipeAnimation<T : ContentKey>(
         if (skipAnimation) {
             // Unblock the job.
             offsetAnimationRunnable.complete(null)
-            return { 0f }
+            return 0f
         }
 
         val isTargetGreater = targetOffset > animatable.value
@@ -440,7 +441,7 @@ internal class SwipeAnimation<T : ContentKey>(
             }
         }
 
-        return { velocityConsumed.await() }
+        return velocityConsumed.await()
     }
 
     /** An exception thrown during the animation to stop it immediately. */
@@ -469,7 +470,9 @@ internal class SwipeAnimation<T : ContentKey>(
     fun freezeAndAnimateToCurrentState() {
         if (isAnimatingOffset()) return
 
-        animateOffset(initialVelocity = 0f, targetContent = currentContent)
+        contentTransition.coroutineScope.launch {
+            animateOffset(initialVelocity = 0f, targetContent = currentContent)
+        }
     }
 }
 

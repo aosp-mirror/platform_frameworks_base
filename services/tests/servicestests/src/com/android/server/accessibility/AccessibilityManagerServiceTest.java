@@ -1136,7 +1136,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_HARDWARE_SHORTCUT_DISABLES_WARNING)
     public void enableHardwareShortcutsForTargets_shortcutDialogSetting_isShown() {
         // TODO(b/111889696): Remove the user 0 assumption once we support multi-user
         assumeTrue("The test is setup to run as a user 0",

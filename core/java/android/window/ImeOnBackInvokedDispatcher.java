@@ -392,6 +392,11 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             // no-op
         }
 
+        @Override
+        public void setHandoffHandler(IBackAnimationHandoffHandler handoffHandler) {
+            // no-op
+        }
+
         private void maybeRunOnAnimationCallback(Consumer<OnBackAnimationCallback> block) {
             if (mCallback instanceof OnBackAnimationCallback) {
                 mHandler.post(() -> block.accept((OnBackAnimationCallback) mCallback));

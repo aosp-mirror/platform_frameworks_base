@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyboard.shortcut.data.repository
 
+import android.content.Context
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_BACK
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
@@ -45,8 +46,11 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
 import com.android.systemui.res.R
+import javax.inject.Inject
 
-object InputGestures {
+class InputGestureMaps
+@Inject
+constructor(private val context: Context) {
     val gestureToShortcutCategoryTypeMap =
         mapOf(
             // System Category
@@ -174,4 +178,11 @@ object InputGestures {
             KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to
                 R.string.keyboard_shortcut_group_applications_sms,
         )
+
+    val shortcutLabelToKeyGestureTypeMap: Map<String, Int>
+        get() = gestureToInternalKeyboardShortcutInfoLabelResIdMap.entries.associateBy({
+            context.getString(it.value)
+        }) {
+            it.key
+        }
 }

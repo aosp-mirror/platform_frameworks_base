@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_PROPERTY_MIGRATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 import static android.view.Display.FLAG_REAR;
@@ -77,6 +78,9 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayInfo;
@@ -144,6 +148,9 @@ public class LogicalDisplayMapperTest {
 
     @Rule
     public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
@@ -691,6 +698,7 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_DEVICE_STATE_PROPERTY_MIGRATION)
     public void testDeviceShouldNotBeWokenWhenExitingEmulatedState() {
         assertFalse(mLogicalDisplayMapper.shouldDeviceBeWoken(DEVICE_STATE_OPEN,
                 DEVICE_STATE_EMULATED,

@@ -44,6 +44,16 @@ flag {
 }
 
 flag {
+  name: "test_flag"
+  namespace: "autofill"
+  description: "Test flag "
+  bug: "377868687"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "add_session_id_to_client_state"
   namespace: "autofill"
   description: "Include the session id into the FillEventHistory events as part of ClientState"

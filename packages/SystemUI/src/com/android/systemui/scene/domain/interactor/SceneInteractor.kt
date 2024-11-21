@@ -21,6 +21,8 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
@@ -64,6 +66,7 @@ constructor(
     private val sceneFamilyResolvers: Lazy<Map<SceneKey, @JvmSuppressWildcards SceneResolver>>,
     private val deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
     private val keyguardEnabledInteractor: Lazy<KeyguardEnabledInteractor>,
+    private val disabledContentInteractor: DisabledContentInteractor,
 ) {
 
     interface OnSceneAboutToChangeListener {
@@ -465,6 +468,10 @@ constructor(
             return false
         }
 
+        if (disabledContentInteractor.isDisabled(to)) {
+            return false
+        }
+
         val inMidTransitionFromGone =
             (transitionState.value as? ObservableTransitionState.Transition)?.fromContent ==
                 Scenes.Gone
@@ -503,6 +510,10 @@ constructor(
                 " Logging reason for overlay change was: $loggingReason"
         }
 
+        if (to != null && disabledContentInteractor.isDisabled(to)) {
+            return false
+        }
+
         val isFromValid = (from == null) || (from in currentOverlays.value)
         val isToValid =
             (to == null) || (to !in currentOverlays.value && to in repository.allContentKeys)
@@ -517,4 +528,14 @@ constructor(
     /** Returns `true` if [scene] can be resolved from [family]. */
     fun isSceneInFamily(scene: SceneKey, family: SceneKey): Boolean =
         sceneFamilyResolvers.get()[family]?.includesScene(scene) == true
+
+    /**
+     * Returns a filtered version of [unfiltered], without action-result entries that would navigate
+     * to disabled scenes.
+     */
+    fun filteredUserActions(
+        unfiltered: Flow<Map<UserAction, UserActionResult>>
+    ): Flow<Map<UserAction, UserActionResult>> {
+        return disabledContentInteractor.filteredUserActions(unfiltered)
+    }
 }
