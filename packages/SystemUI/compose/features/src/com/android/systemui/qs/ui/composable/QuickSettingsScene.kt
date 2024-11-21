@@ -74,6 +74,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
@@ -379,7 +380,11 @@ private fun SceneScope.QuickSettingsScene(
                             mediaHost = mediaHost,
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .layoutId(QSMediaMeasurePolicy.LayoutId.Media),
+                                    .layoutId(QSMediaMeasurePolicy.LayoutId.Media)
+                                    .padding(
+                                        horizontal =
+                                            dimensionResource(id = R.dimen.qs_horizontal_margin)
+                                    ),
                             carouselController = mediaCarouselController,
                         )
                     }
