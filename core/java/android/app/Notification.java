@@ -817,10 +817,10 @@ public class Notification implements Parcelable
                      R.layout.notification_2025_template_expanded_base,
                      R.layout.notification_2025_template_heads_up_base,
                      R.layout.notification_2025_template_header,
+                     R.layout.notification_2025_template_collapsed_messaging,
                      R.layout.notification_template_material_big_picture,
                      R.layout.notification_template_material_big_text,
                      R.layout.notification_template_material_inbox,
-                     R.layout.notification_template_material_messaging,
                      R.layout.notification_template_material_big_messaging,
                      R.layout.notification_template_material_conversation,
                      R.layout.notification_template_material_media,
@@ -7573,7 +7573,11 @@ public class Notification implements Parcelable
         }
 
         private int getCollapsedMessagingLayoutResource() {
-            return R.layout.notification_template_material_messaging;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_messaging;
+            } else {
+                return R.layout.notification_template_material_messaging;
+            }
         }
 
         private int getExpandedMessagingLayoutResource() {
