@@ -71,32 +71,34 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
   suspend fun windowingEducationProto(): WindowingEducationProto = dataStoreFlow.first()
 
   /**
-   * Updates [WindowingEducationProto.educationViewedTimestampMillis_] field in datastore with
-   * current timestamp if [isViewed] is true, if not then clears the field.
+   * Updates [WindowingEducationProto.appHandleHintViewedTimestampMillis_] field
+   * in datastore with current timestamp if [isViewed] is true, if not then
+   * clears the field.
    */
-  suspend fun updateEducationViewedTimestampMillis(isViewed: Boolean) {
+  suspend fun updateAppHandleHintViewedTimestampMillis(isViewed: Boolean) {
     dataStore.updateData { preferences ->
       if (isViewed) {
         preferences
             .toBuilder()
-            .setEducationViewedTimestampMillis(System.currentTimeMillis())
+            .setAppHandleHintViewedTimestampMillis(System.currentTimeMillis())
             .build()
       } else {
-        preferences.toBuilder().clearEducationViewedTimestampMillis().build()
+        preferences.toBuilder().clearAppHandleHintViewedTimestampMillis().build()
       }
     }
   }
 
   /**
-   * Updates [WindowingEducationProto.featureUsedTimestampMillis_] field in datastore with current
-   * timestamp if [isViewed] is true, if not then clears the field.
+   * Updates [WindowingEducationProto.appHandleHintUsedTimestampMillis_] field
+   * in datastore with current timestamp if [isViewed] is true, if not then
+   * clears the field.
    */
-  suspend fun updateFeatureUsedTimestampMillis(isViewed: Boolean) {
+  suspend fun updateAppHandleHintUsedTimestampMillis(isViewed: Boolean) {
     dataStore.updateData { preferences ->
       if (isViewed) {
-        preferences.toBuilder().setFeatureUsedTimestampMillis(System.currentTimeMillis()).build()
+        preferences.toBuilder().setAppHandleHintUsedTimestampMillis(System.currentTimeMillis()).build()
       } else {
-        preferences.toBuilder().clearFeatureUsedTimestampMillis().build()
+        preferences.toBuilder().clearAppHandleHintUsedTimestampMillis().build()
       }
     }
   }
