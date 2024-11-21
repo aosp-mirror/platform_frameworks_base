@@ -12896,6 +12896,30 @@ package android.security.authenticationpolicy {
 
 package android.security.intrusiondetection {
 
+  @FlaggedApi("android.security.afl_api") public final class IntrusionDetectionEvent implements android.os.Parcelable {
+    ctor public IntrusionDetectionEvent(@NonNull android.app.admin.SecurityLog.SecurityEvent);
+    ctor public IntrusionDetectionEvent(@NonNull android.app.admin.DnsEvent);
+    ctor public IntrusionDetectionEvent(@NonNull android.app.admin.ConnectEvent);
+    method @FlaggedApi("android.security.afl_api") public int describeContents();
+    method @NonNull public android.app.admin.ConnectEvent getConnectEvent();
+    method @NonNull public android.app.admin.DnsEvent getDnsEvent();
+    method @NonNull public android.app.admin.SecurityLog.SecurityEvent getSecurityEvent();
+    method @NonNull public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.intrusiondetection.IntrusionDetectionEvent> CREATOR;
+    field public static final int NETWORK_EVENT_CONNECT = 2; // 0x2
+    field public static final int NETWORK_EVENT_DNS = 1; // 0x1
+    field public static final int SECURITY_EVENT = 0; // 0x0
+  }
+
+  @FlaggedApi("android.security.afl_api") public class IntrusionDetectionEventTransport {
+    ctor public IntrusionDetectionEventTransport();
+    method public boolean addData(@NonNull java.util.List<android.security.intrusiondetection.IntrusionDetectionEvent>);
+    method @NonNull public android.os.IBinder getBinder();
+    method public boolean initialize();
+    method public boolean release();
+  }
+
   @FlaggedApi("android.security.afl_api") public class IntrusionDetectionManager {
     method @RequiresPermission(android.Manifest.permission.READ_INTRUSION_DETECTION_STATE) public void addStateCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE) public void disable(@NonNull java.util.concurrent.Executor, @NonNull android.security.intrusiondetection.IntrusionDetectionManager.CommandCallback);
