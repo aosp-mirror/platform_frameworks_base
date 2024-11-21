@@ -171,9 +171,16 @@ constructor(
             }
         ALL_ISSUE_TYPES.keys.forEach {
             popupMenu.menu.add(it).apply {
+                // Set this for every item in the list to ensure equal spacing. Set it to
+                // transparent for non-selected items so icon is only visible for selected element.
                 setIcon(R.drawable.arrow_pointing_down)
                 if (it != state.issueTypeRes) {
                     iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                } else {
+                    contentDescription =
+                        context.getString(com.android.internal.R.string.selected) +
+                            " " +
+                            context.getString(it)
                 }
                 intent = Intent().putExtra(EXTRA_ISSUE_TYPE_RES, it)
 

@@ -3436,7 +3436,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mAttrs.type != TYPE_PRIVATE_PRESENTATION
                 && !(mAttrs.type == TYPE_PRESENTATION && isOnVirtualDisplay())
         ) {
-            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
+            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid,
+                    mAttrs.type, shown);
         }
     }
 

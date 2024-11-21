@@ -18,16 +18,22 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
+import android.hardware.input.InputGestureData
+import android.hardware.input.InputGestureData.createKeyTrigger
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.KEYCODE_SLASH
 import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CAPS_LOCK_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_FUNCTION_ON
+import android.view.KeyEvent.META_META_LEFT_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyEvent.META_SHIFT_ON
+import android.view.KeyEvent.META_SHIFT_RIGHT_ON
 import android.view.KeyEvent.META_SYM_ON
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -40,6 +46,8 @@ import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allCusto
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.customizableInputGestureWithUnknownKeyGestureType
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedShortcutCategoriesWithSimpleShortcutCombination
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testScope
@@ -188,6 +196,69 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun shortcutBeingCustomized_updatedOnCustomizationRequested() {
+        testScope.runTest {
+            repo.onCustomizationRequested(standardCustomizationRequestInfo)
+
+            val shortcutBeingCustomized = repo.getShortcutBeingCustomized()
+
+            assertThat(shortcutBeingCustomized).isEqualTo(standardCustomizationRequestInfo)
+        }
+    }
+
+    @Test
+    fun buildInputGestureDataForShortcutBeingCustomized_noShortcutBeingCustomized_returnsNull() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.updateUserKeyCombination(standardKeyCombination)
+
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            assertThat(inputGestureData).isNull()
+        }
+    }
+
+    @Test
+    fun buildInputGestureDataForShortcutBeingCustomized_noKeyCombinationSelected_returnsNull() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(standardCustomizationRequestInfo)
+
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            assertThat(inputGestureData).isNull()
+        }
+    }
+
+    @Test
+    fun buildInputGestureDataForShortcutBeingCustomized_successfullyBuildInputGestureData() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(standardCustomizationRequestInfo)
+            repo.updateUserKeyCombination(standardKeyCombination)
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            // using toString as we're testing for only structural equality not referential.
+            // inputGestureData is a java class and isEqual Tests for referential equality
+            // as well which would cause this assert to fail
+            assertThat(inputGestureData.toString()).isEqualTo(standardInputGestureData.toString())
+        }
+    }
+
+    private val standardCustomizationRequestInfo =
+        ShortcutCustomizationRequestInfo.Add(
+            label = "Open apps list",
+            categoryType = ShortcutCategoryType.System,
+            subCategoryLabel = "System controls",
+        )
+
+    private val standardKeyCombination =
+        KeyCombination(
+            modifiers = META_META_ON or META_SHIFT_ON or META_META_LEFT_ON or META_SHIFT_RIGHT_ON,
+            keyCode = KEYCODE_A,
+        )
+
     private val allSupportedModifiers =
         META_META_ON or
             META_CTRL_ON or
@@ -195,4 +266,15 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
             META_SHIFT_ON or
             META_ALT_ON or
             META_SYM_ON
+
+    private val standardInputGestureData =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_ALL_APPS)
+            .setTrigger(
+                createKeyTrigger(
+                    /* keycode = */ standardKeyCombination.keyCode!!,
+                    /* modifierState = */ standardKeyCombination.modifiers and allSupportedModifiers,
+                )
+            )
+            .build()
 }

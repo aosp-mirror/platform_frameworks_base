@@ -18,6 +18,10 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.fakeInputManager
 import android.os.SystemClock
 import android.view.KeyEvent.ACTION_DOWN
@@ -46,6 +50,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -90,13 +95,37 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun uiState_correctlyUpdatedWhenDeleteShortcutCustomizationIsRequested() {
+        testScope.runTest {
+            viewModel.onShortcutCustomizationRequested(standardDeleteShortcutRequest)
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+
+            assertThat(uiState).isEqualTo(expectedStandardDeleteShortcutUiState)
+        }
+    }
+
+    @Test
     fun uiState_consumedOnAddDialogShown() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            viewModel.onAddShortcutDialogShown()
+            viewModel.onDialogShown()
 
             assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).isDialogShowing)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun uiState_consumedOnDeleteDialogShown() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(standardDeleteShortcutRequest)
+            viewModel.onDialogShown()
+
+            assertThat(
+                    (uiState as ShortcutCustomizationUiState.DeleteShortcutDialog).isDialogShowing
+                )
                 .isTrue()
         }
     }
@@ -106,7 +135,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            viewModel.onAddShortcutDialogShown()
+            viewModel.onDialogShown()
             viewModel.onDialogDismissed()
             assertThat(uiState).isEqualTo(ShortcutCustomizationUiState.Inactive)
         }
@@ -119,6 +148,81 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
             assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).pressedKeys)
                 .isEmpty()
+        }
+    }
+
+    @Test
+    fun uiState_becomeInactiveAfterSuccessfullySettingShortcut() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            whenever(inputManager.addCustomInputGesture(any()))
+                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_SUCCESS)
+
+            openAddShortcutDialogAndSetShortcut()
+
+            assertThat(uiState).isEqualTo(ShortcutCustomizationUiState.Inactive)
+        }
+    }
+
+    @Test
+    fun uiState_errorMessage_isEmptyByDefault() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            viewModel.onShortcutCustomizationRequested(allAppsShortcutCustomizationRequest)
+            viewModel.onDialogShown()
+
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).errorMessage)
+                .isEmpty()
+        }
+    }
+
+    @Test
+    fun uiState_errorMessage_isKeyCombinationInUse_whenKeyCombinationAlreadyExists() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            whenever(inputManager.addCustomInputGesture(any()))
+                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS)
+
+            openAddShortcutDialogAndSetShortcut()
+
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).errorMessage)
+                .isEqualTo(
+                    context.getString(
+                        R.string.shortcut_customizer_key_combination_in_use_error_message
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun uiState_errorMessage_isKeyCombinationInUse_whenKeyCombinationIsReserved() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            whenever(inputManager.addCustomInputGesture(any()))
+                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE)
+
+            openAddShortcutDialogAndSetShortcut()
+
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).errorMessage)
+                .isEqualTo(
+                    context.getString(
+                        R.string.shortcut_customizer_key_combination_in_use_error_message
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun uiState_errorMessage_isGenericError_whenErrorIsUnknown() {
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
+            whenever(inputManager.addCustomInputGesture(any()))
+                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER)
+
+            openAddShortcutDialogAndSetShortcut()
+
+            assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).errorMessage)
+                .isEqualTo(context.getString(R.string.shortcut_customizer_generic_error_message))
         }
     }
 
@@ -176,6 +280,16 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         }
     }
 
+    private suspend fun openAddShortcutDialogAndSetShortcut() {
+        viewModel.onShortcutCustomizationRequested(allAppsShortcutCustomizationRequest)
+        viewModel.onDialogShown()
+
+        viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
+        viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
+
+        viewModel.onSetShortcut()
+    }
+
     private val keyDownEventWithoutActionKeyPressed =
         KeyEvent(
             android.view.KeyEvent(
@@ -219,12 +333,28 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             subCategoryLabel = "Standard subcategory",
         )
 
+    private val standardDeleteShortcutRequest =
+        ShortcutCustomizationRequestInfo.Delete(
+            label = "Standard shortcut",
+            categoryType = ShortcutCategoryType.System,
+            subCategoryLabel = "Standard subcategory",
+        )
+
+    private val allAppsShortcutCustomizationRequest =
+        ShortcutCustomizationRequestInfo.Add(
+            label = "Open apps list",
+            categoryType = ShortcutCategoryType.System,
+            subCategoryLabel = "System controls",
+        )
+
     private val expectedStandardAddShortcutUiState =
         ShortcutCustomizationUiState.AddShortcutDialog(
             shortcutLabel = "Standard shortcut",
-            shouldShowErrorMessage = false,
             defaultCustomShortcutModifierKey =
                 ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
             isDialogShowing = false,
         )
+
+    private val expectedStandardDeleteShortcutUiState =
+        ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)
 }

@@ -24,7 +24,9 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.telephony.flags.Flags;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * SatelliteAccessConfiguration is used to store satellite access configuration
@@ -44,25 +46,25 @@ public final class SatelliteAccessConfiguration implements Parcelable {
      * The list of tag IDs associated with the current location
      */
     @NonNull
-    private int[] mTagIds;
+    private List<Integer> mTagIdList;
 
     /**
      * Constructor for {@link SatelliteAccessConfiguration}.
      *
      * @param satelliteInfos The list of {@link SatelliteInfo} objects representing the satellites
      *                       accessible with this configuration.
-     * @param tagIds         The list of tag IDs associated with this configuration.
+     * @param tagIdList      The list of tag IDs associated with this configuration.
      */
     public SatelliteAccessConfiguration(@NonNull List<SatelliteInfo> satelliteInfos,
-            @NonNull int[] tagIds) {
+            @NonNull List<Integer> tagIdList) {
         mSatelliteInfoList = satelliteInfos;
-        mTagIds = tagIds;
+        mTagIdList = tagIdList;
     }
 
     public SatelliteAccessConfiguration(Parcel in) {
         mSatelliteInfoList = in.createTypedArrayList(SatelliteInfo.CREATOR);
-        mTagIds = new int[in.readInt()];
-        in.readIntArray(mTagIds);
+        mTagIdList = new ArrayList<>();
+        in.readList(mTagIdList, Integer.class.getClassLoader(), Integer.class);
     }
 
     public static final Creator<SatelliteAccessConfiguration> CREATOR =
@@ -91,12 +93,7 @@ public final class SatelliteAccessConfiguration implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedList(mSatelliteInfoList);
-        if (mTagIds != null && mTagIds.length > 0) {
-            dest.writeInt(mTagIds.length);
-            dest.writeIntArray(mTagIds);
-        } else {
-            dest.writeInt(0);
-        }
+        dest.writeList(mTagIdList);
     }
 
     /**
@@ -116,7 +113,34 @@ public final class SatelliteAccessConfiguration implements Parcelable {
      * @return The list of tag IDs.
      */
     @NonNull
-    public int[] getTagIds() {
-        return mTagIds;
+    public List<Integer> getTagIds() {
+        return mTagIdList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SatelliteAccessConfiguration that)) return false;
+
+        return mSatelliteInfoList.equals(that.mSatelliteInfoList)
+                && Objects.equals(mTagIdList, that.mTagIdList);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(mSatelliteInfoList);
+        result = 31 * result + Objects.hashCode(mTagIdList);
+        return result;
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SatelliteAccessConfiguration{");
+        sb.append("mSatelliteInfoList=").append(mSatelliteInfoList);
+        sb.append(", mTagIds=").append(mTagIdList);
+        sb.append('}');
+        return sb.toString();
     }
 }

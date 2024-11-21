@@ -68,11 +68,17 @@ public final class NotificationProgressBar extends ProgressBar {
 
     @Nullable
     private Drawable mTracker = null;
+
+    /** @see R.styleable#NotificationProgressBar_trackerHeight */
     private final int mTrackerHeight;
     private int mTrackerWidth;
     private int mTrackerPos;
     private final Matrix mMatrix = new Matrix();
     private Matrix mTrackerDrawMatrix = null;
+
+    private float mScale = 0;
+    /** Indicates whether mTrackerPos needs to be recalculated before the tracker is drawn. */
+    private boolean mTrackerPosIsDirty = false;
 
     public NotificationProgressBar(Context context) {
         this(context, null);
@@ -107,8 +113,8 @@ public final class NotificationProgressBar extends ProgressBar {
         final Drawable tracker = a.getDrawable(R.styleable.NotificationProgressBar_tracker);
         setTracker(tracker);
 
-        // If this is configured to be non-zero, will scale the tracker drawable and ensure its
-        // aspect ration is between 2:1 to 1:2.
+        // If this is configured to be a non-zero size, will scale and crop the tracker drawable to
+        // ensure its aspect ratio is between 2:1 to 1:2.
         mTrackerHeight = a.getDimensionPixelSize(R.styleable.NotificationProgressBar_trackerHeight,
                 0);
     }
@@ -200,8 +206,9 @@ public final class NotificationProgressBar extends ProgressBar {
     }
 
     private void setTracker(@Nullable Drawable tracker) {
-        final boolean needUpdate = mTracker != null && tracker != mTracker;
-        if (needUpdate) {
+        if (tracker == mTracker) return;
+
+        if (mTracker != null) {
             mTracker.setCallback(null);
         }
 
@@ -214,13 +221,9 @@ public final class NotificationProgressBar extends ProgressBar {
             if (canResolveLayoutDirection()) {
                 tracker.setLayoutDirection(getLayoutDirection());
             }
-
-            // If we're updating get the new states
-            if (needUpdate && (tracker.getIntrinsicWidth() != mTracker.getIntrinsicWidth()
-                    || tracker.getIntrinsicHeight() != mTracker.getIntrinsicHeight())) {
-                requestLayout();
-            }
         }
+
+        final boolean trackerSizeChanged = trackerSizeChanged(tracker, mTracker);
 
         mTracker = tracker;
         if (mNotificationProgressDrawable != null) {
@@ -228,17 +231,29 @@ public final class NotificationProgressBar extends ProgressBar {
         }
 
         configureTrackerBounds();
+        updateTrackerAndBarPos(getWidth(), getHeight());
+
+        // Change in tracker size may lead to change in measured view size.
+        // @see #onMeasure.
+        if (trackerSizeChanged) requestLayout();
 
         invalidate();
 
-        if (needUpdate) {
-            updateTrackerAndBarPos(getWidth(), getHeight());
-            if (tracker != null && tracker.isStateful()) {
-                // Note that if the states are different this won't work.
-                // For now, let's consider that an app bug.
-                tracker.setState(getDrawableState());
-            }
+        if (tracker != null && tracker.isStateful()) {
+            // Note that if the states are different this won't work.
+            // For now, let's consider that an app bug.
+            tracker.setState(getDrawableState());
         }
+    }
+
+    private static boolean trackerSizeChanged(@Nullable Drawable newTracker,
+            @Nullable Drawable oldTracker) {
+        if (newTracker == null && oldTracker == null) return false;
+        if (newTracker == null && oldTracker != null) return true;
+        if (newTracker != null && oldTracker == null) return true;
+
+        return newTracker.getIntrinsicWidth() != oldTracker.getIntrinsicWidth()
+                || newTracker.getIntrinsicHeight() != oldTracker.getIntrinsicHeight();
     }
 
     private void configureTrackerBounds() {
@@ -276,6 +291,44 @@ public final class NotificationProgressBar extends ProgressBar {
 
         mTrackerDrawMatrix.setScale(scale, scale);
         mTrackerDrawMatrix.postTranslate(Math.round(dx), Math.round(dy));
+    }
+
+    @Override
+    public synchronized void setProgress(int progress) {
+        super.setProgress(progress);
+
+        onMaybeVisualProgressChanged();
+    }
+
+    @Override
+    public void setProgress(int progress, boolean animate) {
+        // Animation isn't supported by NotificationProgressBar.
+        super.setProgress(progress, false);
+
+        onMaybeVisualProgressChanged();
+    }
+
+    @Override
+    public synchronized void setMin(int min) {
+        super.setMin(min);
+
+        onMaybeVisualProgressChanged();
+    }
+
+    @Override
+    public synchronized void setMax(int max) {
+        super.setMax(max);
+
+        onMaybeVisualProgressChanged();
+    }
+
+    private void onMaybeVisualProgressChanged() {
+        float scale = getScale();
+        if (mScale == scale) return;
+
+        mScale = scale;
+        mTrackerPosIsDirty = true;
+        invalidate();
     }
 
     @Override
@@ -328,7 +381,7 @@ public final class NotificationProgressBar extends ProgressBar {
         // parameter does.
         final int barHeight = Math.min(getMaxHeight(), paddedHeight);
         final int trackerHeight = tracker == null ? 0
-                : ((mTrackerHeight == 0) ? tracker.getIntrinsicHeight() : mTrackerHeight);
+                : ((mTrackerHeight <= 0) ? tracker.getIntrinsicHeight() : mTrackerHeight);
 
         // Apply offset to whichever item is taller.
         final int barOffsetY;
@@ -349,7 +402,7 @@ public final class NotificationProgressBar extends ProgressBar {
         }
 
         if (tracker != null) {
-            setTrackerPos(w, tracker, getScale(), trackerOffsetY);
+            setTrackerPos(w, tracker, mScale, trackerOffsetY);
         }
     }
 
@@ -373,7 +426,7 @@ public final class NotificationProgressBar extends ProgressBar {
         int available = w - mPaddingLeft - mPaddingRight;
         final int trackerWidth = tracker.getIntrinsicWidth();
         final int trackerHeight = tracker.getIntrinsicHeight();
-        available -= ((mTrackerHeight == 0) ? trackerWidth : mTrackerWidth);
+        available -= ((mTrackerHeight <= 0) ? trackerWidth : mTrackerWidth);
 
         final int trackerPos = (int) (scale * available + 0.5f);
 
@@ -401,6 +454,8 @@ public final class NotificationProgressBar extends ProgressBar {
 
         // Canvas will be translated, so 0,0 is where we start drawing
         tracker.setBounds(left, top, right, bottom);
+
+        mTrackerPosIsDirty = false;
     }
 
     @Override
@@ -424,18 +479,26 @@ public final class NotificationProgressBar extends ProgressBar {
      * Draw the tracker.
      */
     private void drawTracker(Canvas canvas) {
-        if (mTracker != null) {
-            final int saveCount = canvas.save();
-            // Translate the canvas origin to tracker position to make the draw matrix and the RtL
-            // transformations work.
-            canvas.translate(mPaddingLeft + mTrackerPos, mPaddingTop);
-            canvas.clipRect(0, 0, mTrackerWidth, mTrackerHeight);
-            if (mTrackerDrawMatrix != null) {
-                canvas.concat(mTrackerDrawMatrix);
-            }
-            mTracker.draw(canvas);
-            canvas.restoreToCount(saveCount);
+        if (mTracker == null) return;
+
+        if (mTrackerPosIsDirty) {
+            setTrackerPos(getWidth(), mTracker, mScale, Integer.MIN_VALUE);
         }
+
+        final int saveCount = canvas.save();
+        // Translate the canvas origin to tracker position to make the draw matrix and the RtL
+        // transformations work.
+        canvas.translate(mPaddingLeft + mTrackerPos, mPaddingTop);
+
+        if (mTrackerHeight > 0) {
+            canvas.clipRect(0, 0, mTrackerWidth, mTrackerHeight);
+        }
+
+        if (mTrackerDrawMatrix != null) {
+            canvas.concat(mTrackerDrawMatrix);
+        }
+        mTracker.draw(canvas);
+        canvas.restoreToCount(saveCount);
     }
 
     @Override
@@ -468,7 +531,7 @@ public final class NotificationProgressBar extends ProgressBar {
 
         final Drawable tracker = mTracker;
         if (tracker != null) {
-            setTrackerPos(getWidth(), tracker, getScale(), Integer.MIN_VALUE);
+            setTrackerPos(getWidth(), tracker, mScale, Integer.MIN_VALUE);
 
             // Since we draw translated, the drawable's bounds that it signals
             // for invalidation won't be the actual bounds we want invalidated,

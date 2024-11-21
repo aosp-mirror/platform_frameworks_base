@@ -193,6 +193,7 @@ package android {
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
+    field @FlaggedApi("android.security.aapm_api") public static final String MANAGE_ADVANCED_PROTECTION_MODE = "android.permission.MANAGE_ADVANCED_PROTECTION_MODE";
     field public static final String MANAGE_APP_HIBERNATION = "android.permission.MANAGE_APP_HIBERNATION";
     field public static final String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
     field public static final String MANAGE_APP_PREDICTIONS = "android.permission.MANAGE_APP_PREDICTIONS";
@@ -375,7 +376,6 @@ package android {
     field public static final String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field @FlaggedApi("android.security.fsverity_api") public static final String SETUP_FSVERITY = "android.permission.SETUP_FSVERITY";
     field public static final String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
-    field @FlaggedApi("android.security.aapm_api") public static final String SET_ADVANCED_PROTECTION_MODE = "android.permission.SET_ADVANCED_PROTECTION_MODE";
     field public static final String SET_CLIP_SOURCE = "android.permission.SET_CLIP_SOURCE";
     field public static final String SET_DEFAULT_ACCOUNT_FOR_CONTACTS = "android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS";
     field public static final String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
@@ -3435,14 +3435,14 @@ package android.app.wearable {
   public class WearableSensingManager {
     method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public int getAvailableConnectionCount();
     method @Nullable public static android.app.wearable.WearableSensingDataRequest getDataRequestFromIntent(@NonNull android.content.Intent);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideConnection(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @Deprecated @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideConnection(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideConnection(@NonNull android.app.wearable.WearableConnection, @NonNull java.util.concurrent.Executor);
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideData(@NonNull android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideDataStream(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_provide_read_only_pfd") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void provideReadOnlyParcelFileDescriptor(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.PersistableBundle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void registerDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void removeAllConnections();
-    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public boolean removeConnection(@NonNull android.app.wearable.WearableConnection);
+    method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void removeConnection(@NonNull android.app.wearable.WearableConnection);
     method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void startHotwordRecognition(@Nullable android.content.ComponentName, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void stopHotwordRecognition(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE) public void unregisterDataRequestObserver(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
@@ -8110,8 +8110,13 @@ package android.media.quality {
     method @NonNull public java.util.List<java.lang.String> getPictureProfileAllowList();
     method @NonNull public java.util.List<java.lang.String> getPictureProfilePackageNames();
     method @NonNull public java.util.List<android.media.quality.PictureProfile> getPictureProfilesByPackage(@NonNull String);
+    method @NonNull public java.util.List<java.lang.String> getSoundProfileAllowList();
+    method @NonNull public java.util.List<java.lang.String> getSoundProfilePackageNames();
+    method @NonNull public java.util.List<android.media.quality.SoundProfile> getSoundProfilesByPackage(@NonNull String);
     method public void setAutoPictureQualityEnabled(boolean);
+    method public void setAutoSoundQualityEnabled(boolean);
     method public void setPictureProfileAllowList(@NonNull java.util.List<java.lang.String>);
+    method public void setSoundProfileAllowList(@NonNull java.util.List<java.lang.String>);
     method public void setSuperResolutionEnabled(boolean);
   }
 
@@ -8127,6 +8132,12 @@ package android.media.quality {
     method @FlaggedApi("android.media.tv.flags.apply_picture_profiles") public void writeToParcel(@NonNull android.os.Parcel, int);
     field @FlaggedApi("android.media.tv.flags.apply_picture_profiles") @NonNull public static final android.os.Parcelable.Creator<android.media.quality.PictureProfileHandle> CREATOR;
     field @NonNull public static final android.media.quality.PictureProfileHandle NONE;
+  }
+
+  public static final class SoundProfile.Builder {
+    method @NonNull public android.media.quality.SoundProfile.Builder setInputId(@NonNull String);
+    method @NonNull public android.media.quality.SoundProfile.Builder setPackageName(@NonNull String);
+    method @NonNull public android.media.quality.SoundProfile.Builder setProfileType(int);
   }
 
 }
@@ -12806,8 +12817,8 @@ package android.security.advancedprotection {
 
   @FlaggedApi("android.security.aapm_api") public final class AdvancedProtectionManager {
     method @NonNull public android.content.Intent createSupportIntent(@NonNull String, @Nullable String);
-    method @NonNull @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public java.util.List<android.security.advancedprotection.AdvancedProtectionFeature> getAdvancedProtectionFeatures();
-    method @RequiresPermission(android.Manifest.permission.SET_ADVANCED_PROTECTION_MODE) public void setAdvancedProtectionEnabled(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE) public java.util.List<android.security.advancedprotection.AdvancedProtectionFeature> getAdvancedProtectionFeatures();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE) public void setAdvancedProtectionEnabled(boolean);
     field @FlaggedApi("android.security.aapm_api") public static final String ACTION_SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG = "android.security.advancedprotection.action.SHOW_ADVANCED_PROTECTION_SUPPORT_DIALOG";
     field public static final String EXTRA_SUPPORT_DIALOG_FEATURE = "android.security.advancedprotection.extra.SUPPORT_DIALOG_FEATURE";
     field public static final String EXTRA_SUPPORT_DIALOG_TYPE = "android.security.advancedprotection.extra.SUPPORT_DIALOG_TYPE";
@@ -14540,7 +14551,7 @@ package android.service.wearable {
     method @BinderThread public abstract void onDataStreamProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onQueryServiceStatus(@NonNull java.util.Set<java.lang.Integer>, @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>);
     method @FlaggedApi("android.app.wearable.enable_provide_read_only_pfd") @BinderThread public void onReadOnlyParcelFileDescriptorProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.PersistableBundle, @NonNull java.util.function.Consumer<java.lang.Integer>);
-    method @BinderThread public void onSecureConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @Deprecated @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @BinderThread public void onSecureConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @FlaggedApi("android.app.wearable.enable_concurrent_wearable_connections") @BinderThread public void onSecureConnectionProvided(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.PersistableBundle, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @BinderThread public abstract void onStartDetection(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionResult>);
     method @FlaggedApi("android.app.wearable.enable_hotword_wearable_sensing_api") @BinderThread public void onStartHotwordRecognition(@NonNull java.util.function.Consumer<android.service.voice.HotwordAudioStream>, @NonNull java.util.function.Consumer<java.lang.Integer>);

@@ -59,6 +59,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -432,7 +433,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             eq(decor.mTaskInfo),
             eq(SnapPosition.LEFT),
             eq(ResizeTrigger.SNAP_LEFT_MENU),
-            eq(null),
+            eq(InputMethod.UNKNOWN_INPUT_METHOD),
             eq(decor)
         )
     }
@@ -468,7 +469,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             eq(decor.mTaskInfo),
             eq(SnapPosition.LEFT),
             eq(ResizeTrigger.SNAP_LEFT_MENU),
-            eq(null),
+            eq(InputMethod.UNKNOWN_INPUT_METHOD),
             eq(decor),
         )
     }
@@ -489,7 +490,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         verify(mockDesktopTasksController, never())
             .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT),
                 eq(ResizeTrigger.MAXIMIZE_BUTTON),
-                eq(null),
+                eq(InputMethod.UNKNOWN_INPUT_METHOD),
                 eq(decor),
             )
     }
@@ -509,7 +510,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             eq(decor.mTaskInfo),
             eq(SnapPosition.RIGHT),
             eq(ResizeTrigger.SNAP_RIGHT_MENU),
-            eq(null),
+            eq(InputMethod.UNKNOWN_INPUT_METHOD),
             eq(decor),
         )
     }
@@ -545,7 +546,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             eq(decor.mTaskInfo),
             eq(SnapPosition.RIGHT),
             eq(ResizeTrigger.SNAP_RIGHT_MENU),
-            eq(null),
+            eq(InputMethod.UNKNOWN_INPUT_METHOD),
             eq(decor),
         )
     }
@@ -566,7 +567,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         verify(mockDesktopTasksController, never())
             .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT),
                 eq(ResizeTrigger.MAXIMIZE_BUTTON),
-                eq(null),
+                eq(InputMethod.UNKNOWN_INPUT_METHOD),
                 eq(decor),
         )
     }

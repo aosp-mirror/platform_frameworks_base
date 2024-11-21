@@ -17,6 +17,7 @@
 package com.android.wm.shell.dagger;
 
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 import static android.window.DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS;
 
@@ -28,6 +29,7 @@ import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.UserManager;
@@ -82,6 +84,7 @@ import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeKeyGestureHandler;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -94,6 +97,7 @@ import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
+import com.android.wm.shell.desktopmode.compatui.SystemModalsTransitionHandler;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
@@ -890,7 +894,8 @@ public abstract class WMShellModule {
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             FocusTransitionObserver focusTransitionObserver,
-            DesktopModeEventLogger desktopModeEventLogger
+            DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeUiEventLogger desktopModeUiEventLogger
     ) {
         if (!DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.empty();
@@ -903,7 +908,27 @@ public abstract class WMShellModule {
                 assistContentRequester, multiInstanceHelper, desktopTasksLimiter,
                 appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
-                focusTransitionObserver, desktopModeEventLogger));
+                focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger));
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<SystemModalsTransitionHandler> provideSystemModalsTransitionHandler(
+            Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellAnimationThread ShellExecutor animExecutor,
+            ShellInit shellInit,
+            Transitions transitions,
+            @DynamicOverride DesktopRepository desktopRepository) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                || !ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
+                || !Flags.enableDesktopSystemDialogsTransitions()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new SystemModalsTransitionHandler(
+                        context, mainExecutor, animExecutor, shellInit, transitions,
+                        desktopRepository));
     }
 
     @WMSingleton
@@ -1208,6 +1233,15 @@ public abstract class WMShellModule {
                 mainScope);
     }
 
+    @WMSingleton
+    @Provides
+    static DesktopModeUiEventLogger provideDesktopUiEventLogger(
+            UiEventLogger uiEventLogger,
+            PackageManager packageManager
+    ) {
+        return new DesktopModeUiEventLogger(uiEventLogger, packageManager);
+    }
+
     //
     // Drag and drop
     //
@@ -1262,7 +1296,8 @@ public abstract class WMShellModule {
             @NonNull LetterboxCommandHandler letterboxCommandHandler,
             Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
             Optional<DesktopDisplayEventHandler> desktopDisplayEventHandler,
-            Optional<DesktopModeKeyGestureHandler> desktopModeKeyGestureHandler) {
+            Optional<DesktopModeKeyGestureHandler> desktopModeKeyGestureHandler,
+            Optional<SystemModalsTransitionHandler> systemModalsTransitionHandler) {
         return new Object();
     }
 

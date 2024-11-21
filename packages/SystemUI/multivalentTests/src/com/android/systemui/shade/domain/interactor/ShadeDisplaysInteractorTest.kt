@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import android.content.Context
+import android.content.MutableContextWrapper
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.view.Display
@@ -66,11 +67,12 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         ShadeDisplaysInteractor(
             shadeRootview,
             positionRepository,
-            defaultContext,
+            MutableContextWrapper(defaultContext),
+            resources,
             contextStore,
-            testScope,
+            testScope.backgroundScope,
             configurationForwarder,
-            testScope.coroutineContext,
+            testScope.backgroundScope.coroutineContext,
         )
 
     @Before
@@ -78,7 +80,6 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(shadeRootview.display).thenReturn(display)
         whenever(display.displayId).thenReturn(0)
 
-        whenever(resources.configuration).thenReturn(configuration)
         whenever(resources.configuration).thenReturn(configuration)
 
         whenever(defaultContext.displayId).thenReturn(0)
@@ -124,7 +125,6 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(display.displayId).thenReturn(0)
         positionRepository.setDisplayId(1)
         interactor.start()
-        testScope.advanceUntilIdle()
 
         verify(defaultWm).removeView(eq(shadeRootview))
         verify(secondaryWm).addView(eq(shadeRootview), any())
@@ -135,10 +135,8 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(display.displayId).thenReturn(0)
         positionRepository.setDisplayId(0)
         interactor.start()
-        testScope.advanceUntilIdle()
 
         positionRepository.setDisplayId(1)
-        testScope.advanceUntilIdle()
 
         verify(defaultWm).removeView(eq(shadeRootview))
         verify(secondaryWm).addView(eq(shadeRootview), any())
@@ -149,10 +147,8 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(display.displayId).thenReturn(0)
         positionRepository.setDisplayId(0)
         interactor.start()
-        testScope.advanceUntilIdle()
 
         positionRepository.setDisplayId(1)
-        testScope.advanceUntilIdle()
 
         verify(configurationForwarder).onConfigurationChanged(eq(configuration))
     }

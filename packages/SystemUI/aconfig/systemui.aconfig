@@ -1829,3 +1829,10 @@ flag {
     description: "Adds a shortcut button to lockscreen to show glanceable hub."
     bug: "378173531"
 }
+
+flag {
+    name: "spatial_model_launcher_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on Launcher when users pull down shade."
+    bug: "370562309"
+}

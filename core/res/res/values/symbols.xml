@@ -2666,6 +2666,7 @@
   <java-symbol type="string" name="zen_mode_trigger_summary_divider_text" />
   <java-symbol type="string" name="zen_mode_trigger_summary_range_symbol_combination" />
   <java-symbol type="string" name="zen_mode_trigger_summary_range_words" />
+  <java-symbol type="string" name="zen_mode_trigger_summary_combined" />
   <java-symbol type="string" name="zen_mode_trigger_event_calendar_any" />
 
   <java-symbol type="string" name="display_rotation_camera_compat_toast_after_rotation" />
@@ -5692,6 +5693,7 @@
 
   <!-- DisplayManager configs. -->
   <java-symbol type="bool" name="config_evenDimmerEnabled" />
+  <java-symbol type="string" name="config_pluginsProviderJarPath" />
 
   <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
   <java-symbol type="string" name="config_defaultContextualSearchPackageName" />
@@ -5796,4 +5798,9 @@
 
   <!-- Fingerprint screen off unlock config -->
   <java-symbol type="bool" name="config_screen_off_udfps_enabled" />
+
+  <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
+
+  <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
 </resources>

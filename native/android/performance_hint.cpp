@@ -881,6 +881,8 @@ void APerformanceHintSession::traceModes(const std::vector<hal::SessionMode>& mo
             case hal::SessionMode::GRAPHICS_PIPELINE:
                 traceGraphicsPipeline(isEnabled);
                 break;
+            default:
+                break;
         }
     }
 }
