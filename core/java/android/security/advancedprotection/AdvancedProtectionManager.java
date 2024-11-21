@@ -281,7 +281,7 @@ public final class AdvancedProtectionManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    @RequiresPermission(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE)
     public void setAdvancedProtectionEnabled(boolean enabled) {
         try {
             mService.setAdvancedProtectionEnabled(enabled);
@@ -297,7 +297,7 @@ public final class AdvancedProtectionManager {
      */
     @SystemApi
     @NonNull
-    @RequiresPermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    @RequiresPermission(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE)
     public List<AdvancedProtectionFeature> getAdvancedProtectionFeatures() {
         try {
             return mService.getAdvancedProtectionFeatures();

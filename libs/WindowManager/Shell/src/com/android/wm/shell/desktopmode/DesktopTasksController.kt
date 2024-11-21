@@ -128,6 +128,7 @@ import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.Companion.DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
@@ -820,14 +821,19 @@ class DesktopTasksController(
         resizeTrigger: ResizeTrigger,
         motionEvent: MotionEvent?,
     ) {
+        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
-            resizeTrigger, motionEvent, taskInfo, displayController
+            resizeTrigger,
+            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            taskInfo,
+            currentTaskBounds.width(),
+            currentTaskBounds.height(),
+            displayController
         )
 
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
 
         val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
-        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         val destinationBounds = Rect()
 
         val isMaximized = isTaskMaximized(taskInfo, stableBounds)
@@ -871,8 +877,9 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger, motionEvent, taskInfo, destinationBounds.height(),
-            destinationBounds.width(), displayController
+            resizeTrigger, DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            taskInfo, destinationBounds.width(),
+            destinationBounds.height(), displayController
         )
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
     }
@@ -993,11 +1000,26 @@ class DesktopTasksController(
         currentDragBounds: Rect,
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         desktopWindowDecoration: DesktopModeWindowDecoration,
     ) {
         desktopModeEventLogger.logTaskResizingStarted(
-            resizeTrigger, motionEvent, taskInfo, displayController
+            resizeTrigger,
+            inputMethod,
+            taskInfo,
+            currentDragBounds.width(),
+            currentDragBounds.height(),
+            displayController
+        )
+
+        val destinationBounds = getSnapBounds(taskInfo, position)
+        desktopModeEventLogger.logTaskResizingEnded(
+            resizeTrigger,
+            inputMethod,
+            taskInfo,
+            destinationBounds.width(),
+            destinationBounds.height(),
+            displayController,
         )
 
         if (DesktopModeFlags.ENABLE_TILE_RESIZING.isTrue()) {
@@ -1012,15 +1034,7 @@ class DesktopTasksController(
             }
             return
         }
-        val destinationBounds = getSnapBounds(taskInfo, position)
-        desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger,
-            motionEvent,
-            taskInfo,
-            destinationBounds.height(),
-            destinationBounds.width(),
-            displayController,
-        )
+
         if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) {
             // Handle the case where we attempt to snap resize when already snap resized: the task
             // position won't need to change but we want to animate the surface going back to the
@@ -1050,7 +1064,7 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
         position: SnapPosition,
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent? = null,
+        inputMethod: InputMethod,
         desktopModeWindowDecoration: DesktopModeWindowDecoration,
     ) {
         if (!isSnapResizingAllowed(taskInfo)) {
@@ -1068,7 +1082,7 @@ class DesktopTasksController(
             taskInfo.configuration.windowConfiguration.bounds,
             position,
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             desktopModeWindowDecoration
         )
     }
@@ -1119,7 +1133,7 @@ class DesktopTasksController(
                 currentDragBounds,
                 position,
                 resizeTrigger,
-                motionEvent,
+                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
                 desktopModeWindowDecoration,
             )
         }
@@ -1689,8 +1703,11 @@ class DesktopTasksController(
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)
                 // In some launches home task is moved behind new task being launched. Make sure
-                // that's not the case for launches in desktop.
-                if (task.baseIntent.flags.and(Intent.FLAG_ACTIVITY_TASK_ON_HOME) != 0) {
+                // that's not the case for launches in desktop. Also, if this launch is the first
+                // one to trigger the desktop mode (e.g., when [forceEnterDesktop()]), activate the
+                // desktop mode here.
+                if (task.baseIntent.flags.and(Intent.FLAG_ACTIVITY_TASK_ON_HOME) != 0
+                    || !isDesktopModeShowing(task.displayId)) {
                     bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
                     wct.reorder(task.token, true)
                 }

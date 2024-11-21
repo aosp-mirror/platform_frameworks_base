@@ -36,9 +36,9 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.withContext
 
 class ShortcutCategoriesUtils
 @Inject
@@ -47,6 +47,11 @@ constructor(
     @Background private val backgroundCoroutineContext: CoroutineContext,
     private val inputManager: InputManager,
 ) {
+
+    fun removeUnsupportedModifiers(modifierMask: Int): Int {
+        return SUPPORTED_MODIFIERS.reduce { acc, modifier -> acc or modifier } and modifierMask
+    }
+
     fun fetchShortcutCategory(
         type: ShortcutCategoryType?,
         groups: List<InternalKeyboardShortcutGroup>,

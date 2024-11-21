@@ -4201,18 +4201,19 @@
                 android:protectionLevel="signature|installer" />
     <uses-permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES" />
 
-    <!-- Allows an application to toggle the device's advanced protection mode status.
-        @FlaggedApi("android.security.aapm_api")
+    <!-- Allows an application to modify the device's advanced protection mode status, and query
+         the list of enabled features
+        @FlaggedApi(android.security.Flags.FLAG_AAPM_API)
         @SystemApi
         @hide -->
-    <permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+    <permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE"
         android:protectionLevel="signature|privileged"
         android:featureFlag="android.security.aapm_api"/>
-    <uses-permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+    <uses-permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
 
     <!-- Allows an application to query the device's advanced protection mode status.
-        @FlaggedApi("android.security.aapm_api") -->
+        @FlaggedApi(android.security.Flags.FLAG_AAPM_API) -->
     <permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
         android:protectionLevel="normal"
         android:featureFlag="android.security.aapm_api"/>

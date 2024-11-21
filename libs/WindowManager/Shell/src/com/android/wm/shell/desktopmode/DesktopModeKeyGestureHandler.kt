@@ -66,15 +66,13 @@ class DesktopModeKeyGestureHandler(
                 }
                 return true
             }
-            // TODO(b/375356876): Modify function to pass in keyboard shortcut as the input
-            // method for logging task resize
             KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW -> {
                 logV("Key gesture SNAP_LEFT_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
                     desktopModeWindowDecorViewModel.get().onSnapResize(
                         it.taskId,
                         true,
-                        null
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
                     )
                 }
                 return true
@@ -85,7 +83,7 @@ class DesktopModeKeyGestureHandler(
                     desktopModeWindowDecorViewModel.get().onSnapResize(
                         it.taskId,
                         false,
-                        null
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
                     )
                 }
                 return true

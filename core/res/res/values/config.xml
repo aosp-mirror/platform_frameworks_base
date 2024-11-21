@@ -7237,4 +7237,10 @@
 
     <!-- The name of the system package that will hold the dependency installer role. -->
     <string name="config_systemDependencyInstaller" translatable="false" />
+
+    <!-- Whether allow normal brightness when doze policy can be requested. When this is false,
+        brightness follows the display state i.e. ON means bright, DOZE means dim. If true,
+        POLICY_DOZE can also dim the screen unless parameter useNormalBrightnessForDoze of
+        DreamService#setDozeScreenState requests an exception. -->
+    <bool name="config_allowNormalBrightnessForDozePolicy">false</bool>
 </resources>

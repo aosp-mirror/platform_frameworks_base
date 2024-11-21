@@ -4954,6 +4954,15 @@ public class AudioService extends IAudioService.Stub
         }
 
         final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
+
+        final Set<Integer> a2dpDevices = AudioSystem.intersectionAudioDeviceTypes(
+                AudioSystem.DEVICE_OUT_ALL_A2DP_SET, deviceTypes);
+        if (!a2dpDevices.isEmpty()) {
+            int index = getStreamVolume(streamType,
+                    a2dpDevices.toArray(new Integer[0])[0].intValue());
+            mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index);
+        }
+
         final Set<Integer> absVolumeMultiModeCaseDevices =
                 AudioSystem.intersectionAudioDeviceTypes(
                         mAbsVolumeMultiModeCaseDevices, deviceTypes);
@@ -11423,6 +11432,10 @@ public class AudioService extends IAudioService.Stub
         Objects.requireNonNull(attributes);
         Objects.requireNonNull(format);
         return mSpatializerHelper.canBeSpatialized(attributes, format);
+    }
+
+    public @NonNull List<Integer> getSpatializedChannelMasks() {
+        return mSpatializerHelper.getSpatializedChannelMasks();
     }
 
     /** @see Spatializer.SpatializerInfoDispatcherStub */

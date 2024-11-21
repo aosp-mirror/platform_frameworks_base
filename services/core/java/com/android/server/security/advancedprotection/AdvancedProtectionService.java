@@ -141,7 +141,7 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    @EnforcePermission(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE)
     public void setAdvancedProtectionEnabled(boolean enabled) {
         setAdvancedProtectionEnabled_enforcePermission();
         final long identity = Binder.clearCallingIdentity();
@@ -159,7 +159,7 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     }
 
     @Override
-    @EnforcePermission(Manifest.permission.SET_ADVANCED_PROTECTION_MODE)
+    @EnforcePermission(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE)
     public List<AdvancedProtectionFeature> getAdvancedProtectionFeatures() {
         getAdvancedProtectionFeatures_enforcePermission();
         List<AdvancedProtectionFeature> features = new ArrayList<>();

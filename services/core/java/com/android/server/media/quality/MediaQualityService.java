@@ -358,5 +358,10 @@ public class MediaQualityService extends SystemService {
         public boolean isAutoSoundQualityEnabled() {
             return false;
         }
+
+        @Override
+        public boolean isAmbientBacklightEnabled() {
+            return false;
+        }
     }
 }

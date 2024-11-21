@@ -3878,7 +3878,11 @@ public class UserManager {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS,
             Manifest.permission.QUERY_USERS})
+    @CachedProperty(api = "user_manager_user_data")
     public UserInfo getUserInfo(@UserIdInt int userId) {
+        if (android.multiuser.Flags.cacheUserInfoReadOnly()) {
+            return UserManagerCache.getUserInfo(mService::getUserInfo, userId);
+        }
         try {
             return mService.getUserInfo(userId);
         } catch (RemoteException re) {

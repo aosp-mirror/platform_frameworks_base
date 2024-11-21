@@ -1014,7 +1014,7 @@ public class CrashRecoveryTest {
             triggerFailureCount = 1;
         }
         for (int i = 0; i < triggerFailureCount; i++) {
-            watchdog.onPackageFailure(packages, failureReason);
+            watchdog.notifyPackageFailure(packages, failureReason);
         }
         mTestLooper.dispatchAll();
         if (Flags.recoverabilityDetection()) {

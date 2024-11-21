@@ -3614,7 +3614,7 @@ public class PackageInstaller {
          *                                      dependencies aren't already installed.
          */
         @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
-        public void setEnableAutoInstallDependencies(boolean enableAutoInstallDependencies) {
+        public void setAutoInstallDependenciesEnabled(boolean enableAutoInstallDependencies) {
             isAutoInstallDependenciesEnabled = enableAutoInstallDependencies;
         }
 

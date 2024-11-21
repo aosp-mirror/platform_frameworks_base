@@ -16,6 +16,7 @@
 
 package com.android.server.display.feature;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -461,8 +462,9 @@ public class DisplayManagerFlags {
     /**
      * @return Whether the useDozeBrightness parameter should be used
      */
-    public boolean isNormalBrightnessForDozeParameterEnabled() {
-        return mNormalBrightnessForDozeParameter.isEnabled();
+    public boolean isNormalBrightnessForDozeParameterEnabled(Context context) {
+        return mNormalBrightnessForDozeParameter.isEnabled() && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowNormalBrightnessForDozePolicy);
     }
 
      /**

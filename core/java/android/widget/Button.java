@@ -16,17 +16,22 @@
 
 package android.widget;
 
-import static android.view.flags.Flags.enableArrowIconOnHoverWhenClickable;
 import static android.view.flags.Flags.FLAG_ENABLE_ARROW_ICON_ON_HOVER_WHEN_CLICKABLE;
+import static android.view.flags.Flags.enableArrowIconOnHoverWhenClickable;
 
 import android.annotation.FlaggedApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.util.AttributeSet;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.widget.RemoteViews.RemoteView;
+import android.widget.flags.Flags;
 
 /**
  * A user interface element the user can tap or click to perform an action.
@@ -88,6 +93,12 @@ import android.widget.RemoteViews.RemoteView;
 @RemoteView
 public class Button extends TextView {
 
+    @ChangeId
+    @EnabledSince(targetSdkVersion = 36)
+    private static final long WEAR_MATERIAL3_BUTTON = 376561342L;
+
+    private static Boolean sUseWearMaterial3Style;
+
     /**
      * Simple constructor to use when creating a button from code.
      *
@@ -118,7 +129,18 @@ public class Button extends TextView {
      * @see android.view.View#View(Context, AttributeSet)
      */
     public Button(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.buttonStyle);
+        // Starting sdk 36+, wear devices will use a specific material3
+        // design. The new design will be applied when all of following conditions are met:
+        // 1. app target sdk is 36 or above.
+        // 2. feature flag rolled-out.
+        // 3. device is a watch.
+        // getButtonDefaultStyleAttr and getButtonDefaultStyleRes works together to alter the UI
+        // while considering the conditions above.
+        // Their results are mutual exclusive. i.e. when conditions above are all true,
+        // getButtonDefaultStyleRes returns non-zero value(new wear material3), abd
+        // getButtonDefaultStyleAttr returns 0. Otherwise, getButtonDefaultStyleAttr returns system
+        // attr com.android.internal.R.attr.buttonStyle and getButtonDefaultStyleRes returns 0.
+        this(context, attrs, getButtonDefaultStyleAttr(context), getButtonDefaultStyleRes());
     }
 
     /**
@@ -188,5 +210,25 @@ public class Button extends TextView {
             return PointerIcon.getSystemIcon(getContext(), PointerIcon.TYPE_HAND);
         }
         return super.onResolvePointerIcon(event, pointerIndex);
+    }
+
+    private static int getButtonDefaultStyleAttr(Context context) {
+        sUseWearMaterial3Style = useWearMaterial3Style(context);
+        if (sUseWearMaterial3Style) {
+            return 0;
+        }
+        return com.android.internal.R.attr.buttonStyle;
+    }
+
+    private static int getButtonDefaultStyleRes() {
+        if (sUseWearMaterial3Style != null && sUseWearMaterial3Style) {
+            return com.android.internal.R.style.Widget_DeviceDefault_Button_WearMaterial3;
+        }
+        return 0;
+    }
+
+    private static boolean useWearMaterial3Style(Context context) {
+        return Flags.useWearMaterial3Ui() && CompatChanges.isChangeEnabled(WEAR_MATERIAL3_BUTTON)
+                && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 }

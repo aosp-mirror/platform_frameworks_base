@@ -3601,7 +3601,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--disable-auto-install-dependencies":
                     if (Flags.sdkDependencyInstaller()) {
-                        sessionParams.setEnableAutoInstallDependencies(false);
+                        sessionParams.setAutoInstallDependenciesEnabled(false);
                     } else {
                         throw new IllegalArgumentException("Unknown option " + opt);
                     }

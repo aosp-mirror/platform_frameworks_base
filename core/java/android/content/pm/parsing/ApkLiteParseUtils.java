@@ -44,6 +44,7 @@ import android.util.Slog;
 
 import com.android.internal.pm.pkg.component.flags.Flags;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 import libcore.util.HexEncoding;
@@ -543,8 +544,13 @@ public class ApkLiteParseUtils {
                             }
                             String usesSdkLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
-                            long usesSdkLibVersionMajor = parser.getAttributeIntValue(
-                                    ANDROID_RES_NAMESPACE, "versionMajor", -1);
+                            // TODO(b/379219371): Due to a bug in bundletool, some apps can use
+                            //  versionMajor as string. Until it is resolved, we are adding a
+                            //  workaround here.
+                            String usesSdkLibVersionMajorString = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "versionMajor");
+                            long usesSdkLibVersionMajor = XmlUtils.convertValueToInt(
+                                    usesSdkLibVersionMajorString, -1);
                             String usesSdkCertDigest = parser.getAttributeValue(
                                      ANDROID_RES_NAMESPACE, "certDigest");
 

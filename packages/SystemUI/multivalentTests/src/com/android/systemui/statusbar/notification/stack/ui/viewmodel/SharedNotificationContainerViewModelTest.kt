@@ -838,27 +838,26 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         testScope.runTest {
             var notificationCount = 10
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
-            val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            val config by collectLastValue(underTest.getLockscreenDisplayConfig(calculateSpace))
             advanceTimeBy(50L)
             showLockscreen()
 
             shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
 
-            assertThat(maxNotifications).isEqualTo(10)
+            assertThat(config?.maxNotifications).isEqualTo(10)
 
             // Also updates when directly requested (as it would from NotificationStackScrollLayout)
             notificationCount = 25
             sharedNotificationContainerInteractor.notificationStackChanged()
             advanceTimeBy(50L)
-            assertThat(maxNotifications).isEqualTo(25)
+            assertThat(config?.maxNotifications).isEqualTo(25)
 
             // Also ensure another collection starts with the same value. As an example, folding
             // then unfolding will restart the coroutine and it must get the last value immediately.
-            val newMaxNotifications by
-                collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            val newConfig by collectLastValue(underTest.getLockscreenDisplayConfig(calculateSpace))
             advanceTimeBy(50L)
-            assertThat(newMaxNotifications).isEqualTo(25)
+            assertThat(newConfig?.maxNotifications).isEqualTo(25)
         }
 
     @Test
@@ -866,18 +865,18 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         testScope.runTest {
             var notificationCount = 10
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
-            val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            val config by collectLastValue(underTest.getLockscreenDisplayConfig(calculateSpace))
             advanceTimeBy(50L)
             showLockscreen()
 
             shadeTestUtil.setSplitShade(false)
             configurationRepository.onAnyConfigurationChange()
 
-            assertThat(maxNotifications).isEqualTo(10)
+            assertThat(config?.maxNotifications).isEqualTo(10)
 
             // Shade expanding... still 10
             shadeTestUtil.setLockscreenShadeExpansion(0.5f)
-            assertThat(maxNotifications).isEqualTo(10)
+            assertThat(config?.maxNotifications).isEqualTo(10)
 
             notificationCount = 25
 
@@ -885,20 +884,20 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             shadeTestUtil.setLockscreenShadeTracking(true)
 
             // Should still be 10, since the user is interacting
-            assertThat(maxNotifications).isEqualTo(10)
+            assertThat(config?.maxNotifications).isEqualTo(10)
 
             shadeTestUtil.setLockscreenShadeTracking(false)
             shadeTestUtil.setLockscreenShadeExpansion(0f)
 
             // Stopped tracking, show 25
-            assertThat(maxNotifications).isEqualTo(25)
+            assertThat(config?.maxNotifications).isEqualTo(25)
         }
 
     @Test
     fun maxNotificationsOnShade() =
         testScope.runTest {
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> 10 }
-            val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            val config by collectLastValue(underTest.getLockscreenDisplayConfig(calculateSpace))
             advanceTimeBy(50L)
 
             // Show lockscreen with shade expanded
@@ -908,7 +907,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             configurationRepository.onAnyConfigurationChange()
 
             // -1 means No Limit
-            assertThat(maxNotifications).isEqualTo(-1)
+            assertThat(config?.maxNotifications).isEqualTo(-1)
         }
 
     @Test

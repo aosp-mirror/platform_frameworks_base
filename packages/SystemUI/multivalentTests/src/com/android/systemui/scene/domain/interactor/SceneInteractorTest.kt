@@ -18,6 +18,7 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import android.app.StatusBarManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -30,6 +31,8 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
@@ -43,6 +46,8 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -522,5 +527,52 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.changeScene(Scenes.Gone, "")
 
             assertThat(currentScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun showOverlay_overlayDisabled_doesNothing() =
+        kosmos.runTest {
+            val currentOverlays by collectLastValue(underTest.currentOverlays)
+            val disabledOverlay = Overlays.QuickSettingsShade
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(disable2 = StatusBarManager.DISABLE2_QUICK_SETTINGS)
+            assertThat(disabledContentInteractor.isDisabled(disabledOverlay)).isTrue()
+            assertThat(currentOverlays).doesNotContain(disabledOverlay)
+
+            underTest.showOverlay(disabledOverlay, "reason")
+
+            assertThat(currentOverlays).doesNotContain(disabledOverlay)
+        }
+
+    @Test
+    fun replaceOverlay_withDisabledOverlay_doesNothing() =
+        kosmos.runTest {
+            val currentOverlays by collectLastValue(underTest.currentOverlays)
+            val showingOverlay = Overlays.NotificationsShade
+            underTest.showOverlay(showingOverlay, "reason")
+            assertThat(currentOverlays).isEqualTo(setOf(showingOverlay))
+            val disabledOverlay = Overlays.QuickSettingsShade
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(disable2 = StatusBarManager.DISABLE2_QUICK_SETTINGS)
+            assertThat(disabledContentInteractor.isDisabled(disabledOverlay)).isTrue()
+
+            underTest.replaceOverlay(showingOverlay, disabledOverlay, "reason")
+
+            assertThat(currentOverlays).isEqualTo(setOf(showingOverlay))
+        }
+
+    @Test
+    fun changeScene_toDisabledScene_doesNothing() =
+        kosmos.runTest {
+            val currentScene by collectLastValue(underTest.currentScene)
+            val disabledScene = Scenes.Shade
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(disable2 = StatusBarManager.DISABLE2_NOTIFICATION_SHADE)
+            assertThat(disabledContentInteractor.isDisabled(disabledScene)).isTrue()
+            assertThat(currentScene).isNotEqualTo(disabledScene)
+
+            underTest.changeScene(disabledScene, "reason")
+
+            assertThat(currentScene).isNotEqualTo(disabledScene)
         }
 }
