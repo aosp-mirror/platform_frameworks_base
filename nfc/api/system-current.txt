@@ -57,7 +57,7 @@ package android.nfc {
   @FlaggedApi("android.nfc.nfc_oem_extension") public final class NfcOemExtension {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearPreference();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public int forceRoutingTableCommit();
-    method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public java.util.List<java.lang.String> getActiveNfceeList();
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public java.util.Map<java.lang.String,java.lang.Integer> getActiveNfceeList();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.nfc.RoutingStatus getRoutingStatus();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public java.util.List<android.nfc.NfcRoutingTableEntry> getRoutingTable();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public android.nfc.T4tNdefNfcee getT4tNdefNfcee();
