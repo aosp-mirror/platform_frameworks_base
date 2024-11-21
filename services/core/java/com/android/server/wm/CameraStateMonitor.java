@@ -67,6 +67,10 @@ class CameraStateMonitor {
     // when camera connection is closed and we need to clean up our records.
     private final CameraIdPackageNameBiMapping mCameraIdPackageBiMapping =
             new CameraIdPackageNameBiMapping();
+    // TODO(b/380840084): Consider making this a set of CameraId/PackageName pairs. This is to
+    // keep track of camera-closed signals when apps are switching camera access, so that the policy
+    // can restore app configuration when an app closes camera (e.g. loses camera access due to
+    // another app).
     private final Set<String> mScheduledToBeRemovedCameraIdSet = new ArraySet<>();
 
     // TODO(b/336474959): should/can this go in the compat listeners?
@@ -163,15 +167,14 @@ class CameraStateMonitor {
             if (cameraActivity == null || cameraActivity.getTask() == null) {
                 return;
             }
-            notifyListenersCameraOpened(cameraActivity, cameraId);
+            notifyListenersCameraOpened(cameraActivity);
         }
     }
 
-    private void notifyListenersCameraOpened(@NonNull ActivityRecord cameraActivity,
-            @NonNull String cameraId) {
+    private void notifyListenersCameraOpened(@NonNull ActivityRecord cameraActivity) {
         for (int i = 0; i < mCameraStateListeners.size(); i++) {
             CameraCompatStateListener listener = mCameraStateListeners.get(i);
-            listener.onCameraOpened(cameraActivity, cameraId);
+            listener.onCameraOpened(cameraActivity);
         }
     }
 
@@ -224,11 +227,11 @@ class CameraStateMonitor {
                 // Already reconnected to this camera, no need to clean up.
                 return;
             }
-
-            final boolean closeSuccessfulForAllListeners = notifyListenersCameraClosed(cameraId);
-            if (closeSuccessfulForAllListeners) {
+            final boolean canClose = checkCanCloseForAllListeners(cameraId);
+            if (canClose) {
                 // Finish cleaning up.
                 mCameraIdPackageBiMapping.removeCameraId(cameraId);
+                notifyListenersCameraClosed();
             } else {
                 // Not ready to process closure yet - the camera activity might be refreshing.
                 // Try again later.
@@ -238,15 +241,21 @@ class CameraStateMonitor {
     }
 
     /**
-     * @return {@code false} if any listeners have reported issues processing the close.
+     * @return {@code false} if any listener has reported that they cannot process camera close now.
      */
-    private boolean notifyListenersCameraClosed(@NonNull String cameraId) {
-        boolean closeSuccessfulForAllListeners = true;
+    private boolean checkCanCloseForAllListeners(@NonNull String cameraId) {
         for (int i = 0; i < mCameraStateListeners.size(); i++) {
-            closeSuccessfulForAllListeners &= mCameraStateListeners.get(i).onCameraClosed(cameraId);
+            if (!mCameraStateListeners.get(i).canCameraBeClosed(cameraId)) {
+                return false;
+            }
         }
+        return true;
+    }
 
-        return closeSuccessfulForAllListeners;
+    private void notifyListenersCameraClosed() {
+        for (int i = 0; i < mCameraStateListeners.size(); i++) {
+            mCameraStateListeners.get(i).onCameraClosed();
+        }
     }
 
     // TODO(b/335165310): verify that this works in multi instance and permission dialogs.
@@ -297,14 +306,18 @@ class CameraStateMonitor {
         /**
          * Notifies the compat listener that an activity has opened camera.
          */
-        // TODO(b/336474959): try to decouple `cameraId` from the listeners.
-        void onCameraOpened(@NonNull ActivityRecord cameraActivity, @NonNull String cameraId);
+        void onCameraOpened(@NonNull ActivityRecord cameraActivity);
         /**
-         * Notifies the compat listener that camera is closed.
+         * Checks whether a listener is ready to do a cleanup when camera is closed.
          *
-         * @return true if cleanup has been successful - the notifier might try again if false.
+         * <p>The notifier might try again if false is returned.
          */
         // TODO(b/336474959): try to decouple `cameraId` from the listeners.
-        boolean onCameraClosed(@NonNull String cameraId);
+        boolean canCameraBeClosed(@NonNull String cameraId);
+
+        /**
+         * Notifies the compat listener that camera is closed.
+         */
+        void onCameraClosed();
     }
 }
