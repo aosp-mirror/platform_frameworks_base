@@ -76,6 +76,16 @@ class AppCompatController {
         mAppCompatSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(mActivityRecord,
                 mAppCompatOverrides);
         mAllowRestrictedResizability = AppCompatUtils.asLazy(() -> {
+            // Application level.
+            try {
+                if (packageManager.getProperty(PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
+                        mActivityRecord.packageName).getBoolean()) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // Fall through.
+            }
+            // Activity level.
             try {
                 return packageManager.getPropertyAsUser(
                         PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
