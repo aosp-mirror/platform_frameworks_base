@@ -246,6 +246,25 @@ public final class CardEmulation {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SetServiceEnabledStatusCode {}
 
+    /**
+     * Property name used to indicate that an application wants to allow associated services
+     * to share the same AID routing priority when this application is the role holder.
+     * <p>
+     * Example:
+     * <pre>
+     *     {@code
+     *     <application>
+     *       ...
+     *       <property android:name="android.nfc.cardemulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY"
+     *         android:value="true"/>
+     *     </application>
+     *     }
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES)
+    public static final String PROPERTY_ALLOW_SHARED_ROLE_PRIORITY =
+            "android.nfc.cardemulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY";
+
     static boolean sIsInitialized = false;
     static HashMap<Context, CardEmulation> sCardEmus = new HashMap<Context, CardEmulation>();
     static INfcCardEmulation sService;
