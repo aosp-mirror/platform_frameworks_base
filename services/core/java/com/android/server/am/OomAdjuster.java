@@ -1376,9 +1376,11 @@ public class OomAdjuster {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
             if (!app.isKilledByAm() && app.getThread() != null) {
-                // We don't need to apply the update for the process which didn't get computed
-                if (state.getCompletedAdjSeq() == mAdjSeq) {
-                    applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason, true);
+                if (!Flags.fixApplyOomadjOrder()) {
+                    // We don't need to apply the update for the process which didn't get computed
+                    if (state.getCompletedAdjSeq() == mAdjSeq) {
+                        applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason, true);
+                    }
                 }
 
                 if (app.isPendingFinishAttach()) {
@@ -1476,6 +1478,19 @@ public class OomAdjuster {
                 if (state.getCurProcState() >= ActivityManager.PROCESS_STATE_HOME
                         && !app.isKilledByAm()) {
                     numTrimming++;
+                }
+            }
+        }
+
+        if (Flags.fixApplyOomadjOrder()) {
+            // We need to apply the update starting from the least recently used.
+            // Otherwise, they won't be in the correct LRU order in LMKD.
+            for (int i = 0; i < numLru; i++) {
+                ProcessRecord app = lruList.get(i);
+                // We don't need to apply the update for the process which didn't get computed
+                if (!app.isKilledByAm() && app.getThread() != null
+                        && app.mState.getCompletedAdjSeq() == mAdjSeq) {
+                    applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason, true);
                 }
             }
         }
