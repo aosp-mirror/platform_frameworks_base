@@ -34,6 +34,7 @@ package android {
     field public static final String ACCESS_VIBRATOR_STATE = "android.permission.ACCESS_VIBRATOR_STATE";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADD_ALWAYS_UNLOCKED_DISPLAY = "android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY";
+    field @FlaggedApi("android.companion.virtualdevice.flags.enable_limited_vdm_role") public static final String ADD_MIRROR_DISPLAY = "android.permission.ADD_MIRROR_DISPLAY";
     field public static final String ADD_TRUSTED_DISPLAY = "android.permission.ADD_TRUSTED_DISPLAY";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
@@ -4249,6 +4250,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
+    field @FlaggedApi("android.content.pm.sdk_dependency_installer") public static final String ACTION_INSTALL_DEPENDENCY = "android.content.pm.action.INSTALL_DEPENDENCY";
     field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
     field public static final int DATA_LOADER_TYPE_NONE = 0; // 0x0
     field public static final int DATA_LOADER_TYPE_STREAMING = 1; // 0x1
@@ -5273,9 +5275,8 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public final class HubServiceInfo implements android.os.Parcelable {
-    ctor public HubServiceInfo(@NonNull String, int, int, int, @NonNull android.os.ParcelableHolder);
+    ctor public HubServiceInfo(@NonNull String, int, int, int);
     method public int describeContents();
-    method @NonNull public android.os.ParcelableHolder getExtendedInfo();
     method public int getFormat();
     method public int getMajorVersion();
     method public int getMinorVersion();
@@ -5290,7 +5291,6 @@ package android.hardware.contexthub {
   public static final class HubServiceInfo.Builder {
     ctor public HubServiceInfo.Builder(@NonNull String, int, int, int);
     method @NonNull public android.hardware.contexthub.HubServiceInfo build();
-    method @NonNull public android.hardware.contexthub.HubServiceInfo.Builder setExtendedInfo(@Nullable android.os.Parcelable);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {

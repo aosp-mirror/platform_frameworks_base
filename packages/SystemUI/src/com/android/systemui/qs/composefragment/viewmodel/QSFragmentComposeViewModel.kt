@@ -31,6 +31,8 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.ShadeInterpolation
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -39,6 +41,7 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QQS
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
@@ -48,6 +51,7 @@ import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeLog
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
@@ -100,7 +104,9 @@ constructor(
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
+    private val falsingInteractor: FalsingInteractor,
     private val inFirstPageViewModel: InFirstPageViewModel,
+    @QSFragmentComposeLog private val tableLogBuffer: TableLogBuffer,
     mediaInRowInLandscapeViewModelFactory: MediaInRowInLandscapeViewModel.Factory,
     @Named(QUICK_QS_PANEL) val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) val qsMediaHost: MediaHost,
@@ -112,7 +118,7 @@ constructor(
     private val qqsMediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QQS)
     private val qsMediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QS)
 
-    private val hydrator = Hydrator("QSFragmentComposeViewModel.hydrator")
+    private val hydrator = Hydrator("QSFragmentComposeViewModel.hydrator", tableLogBuffer)
 
     val footerActionsViewModel =
         footerActionsViewModelFactory.create(lifecycleScope).also {
@@ -432,6 +438,10 @@ constructor(
                 bottom.toInt(),
             )
         }
+    }
+
+    fun emitMotionEventForFalsingSwipeNested() {
+        falsingInteractor.isFalseTouch(Classifier.QS_SWIPE_NESTED)
     }
 
     override suspend fun onActivated(): Nothing {

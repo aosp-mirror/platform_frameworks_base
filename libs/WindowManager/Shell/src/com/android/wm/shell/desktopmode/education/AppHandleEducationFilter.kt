@@ -54,8 +54,8 @@ class AppHandleEducationFilter(
     return isFocusAppInAllowlist(focusAppPackageName) &&
         !isOtherEducationShowing() &&
         hasSufficientTimeSinceSetup() &&
-        !isEducationViewedBefore(windowingEducationProto) &&
-        !isFeatureUsedBefore(windowingEducationProto) &&
+        !isAppHandleHintViewedBefore(windowingEducationProto) &&
+        !isAppHandleHintUsedBefore(windowingEducationProto) &&
         hasMinAppUsage(windowingEducationProto, focusAppPackageName)
   }
 
@@ -76,11 +76,11 @@ class AppHandleEducationFilter(
           convertIntegerResourceToDuration(
               R.integer.desktop_windowing_education_required_time_since_setup_seconds)
 
-  private fun isEducationViewedBefore(windowingEducationProto: WindowingEducationProto): Boolean =
-      windowingEducationProto.hasEducationViewedTimestampMillis()
+  private fun isAppHandleHintViewedBefore(windowingEducationProto: WindowingEducationProto): Boolean =
+      windowingEducationProto.hasAppHandleHintViewedTimestampMillis()
 
-  private fun isFeatureUsedBefore(windowingEducationProto: WindowingEducationProto): Boolean =
-      windowingEducationProto.hasFeatureUsedTimestampMillis()
+  private fun isAppHandleHintUsedBefore(windowingEducationProto: WindowingEducationProto): Boolean =
+      windowingEducationProto.hasAppHandleHintUsedTimestampMillis()
 
   private suspend fun hasMinAppUsage(
       windowingEducationProto: WindowingEducationProto,

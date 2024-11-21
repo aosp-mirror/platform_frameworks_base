@@ -584,7 +584,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 decoration.mTaskSurface, mContext, mMainHandler,
                 Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo, resizeTrigger,
-                motionEvent);
+                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent));
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
@@ -1575,7 +1575,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, taskPositioner);
-        InputMethod inputMethod = DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(
+        InputMethod inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(
                 touchEventListener.mMotionEvent);
         windowDecoration.setOnMaximizeOrRestoreClickListener(() -> {
             onMaximizeOrRestore(taskInfo.taskId, "maximize_menu", ResizeTrigger.MAXIMIZE_MENU,

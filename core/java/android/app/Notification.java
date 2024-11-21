@@ -3263,6 +3263,7 @@ public class Notification implements Parcelable
     public boolean hasPromotableCharacteristics() {
         return isColorizedRequested()
                 && hasTitle()
+                && !isGroupSummary()
                 && !containsCustomViews()
                 && hasPromotableStyle();
     }

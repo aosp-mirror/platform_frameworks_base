@@ -73,6 +73,7 @@ public class ApkLiteParseUtilsTest {
     private static final String TEST_APP_USING_SDK1_AND_SDK1 = "HelloWorldUsingSdk1AndSdk1.apk";
     private static final String TEST_APP_USING_SDK_MALFORMED_VERSION =
             "HelloWorldUsingSdkMalformedNegativeVersion.apk";
+    private static final String TEST_STATIC_LIB_APP = "CtsStaticSharedLibProviderApp1.apk";
     private static final String TEST_APP_USING_STATIC_LIB = "CtsStaticSharedLibConsumerApp1.apk";
     private static final String TEST_APP_USING_STATIC_LIB_TWO_CERTS =
             "CtsStaticSharedLibConsumerApp3.apk";
@@ -205,6 +206,17 @@ public class ApkLiteParseUtilsTest {
         AndroidPackage pkg = mPackageParser2.parsePackage(apkFile, 0, true).hideAsFinal();
         String[][] pkgCerts = pkg.getUsesStaticLibrariesCertDigests();
         assertThat(liteCerts).isEqualTo(pkgCerts);
+    }
+
+    @Test
+    public void testParseApkLite_isIsStaticLibrary() throws Exception {
+        File apkFile = copyApkToTmpDir(TEST_STATIC_LIB_APP);
+        ParseResult<ApkLite> result = ApkLiteParseUtils
+                .parseApkLite(ParseTypeImpl.forDefaultParsing().reset(), apkFile, 0);
+        assertThat(result.isError()).isFalse();
+        ApkLite baseApk = result.getResult();
+
+        assertThat(baseApk.isIsStaticLibrary()).isTrue();
     }
 
     @SuppressLint("CheckResult")

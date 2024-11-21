@@ -471,14 +471,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         int userId = UserHandle.USER_CURRENT;
         final String cmd = getNextArgRequired();
-        if ("inactive".equals(cmd)) {
+        if ("inactive".equals(cmd) || "active".equals(cmd)) {
             String opt;
             while ((opt = getNextOption()) != null) {
                 if (opt.equals("--user")) {
                     userId = UserHandle.parseUserArg(getNextArgRequired());
                     if (userId == UserHandle.USER_ALL) {
                         err.println(
-                                "Error: Can't set media fgs inactive with user 'all'");
+                                "Error: Can't set media fgs with user 'all'");
                         return -1;
                     }
                 } else {
@@ -492,8 +492,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 err.println("Error: notification id cannot be zero");
                 return -1;
             }
-            mInternal.mInternal.notifyInactiveMediaForegroundService(pkgName,
-                    userId, notificationId);
+            if ("inactive".equals(cmd)) {
+                mInternal.mInternal.notifyInactiveMediaForegroundService(pkgName,
+                        userId, notificationId);
+            } else {
+                mInternal.mInternal.notifyActiveMediaForegroundService(pkgName,
+                        userId, notificationId);
+            }
             return 0;
         }
         err.println("Error: Unknown set-media-foreground-service command: " + cmd);
@@ -4683,9 +4688,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         --protobuf: format output using protobuffer");
             pw.println("  set-app-zygote-preload-timeout <TIMEOUT_IN_MS>");
             pw.println("         Set the timeout for preloading code in the app-zygote");
-            pw.println("  set-media-foreground-service inactive [--user USER_ID]"
-                    + " <PACKAGE> <NOTIFICATION_ID>");
-            pw.println("         Set an app's media foreground service inactive.");
+            pw.println("  set-media-foreground-service inactive|active [--user USER_ID] <PACKAGE>"
+                            + " <NOTIFICATION_ID>");
+            pw.println("         Set an app's media service inactive or active.");
             Intent.printIntentArgsHelp(pw, "");
         }
     }
