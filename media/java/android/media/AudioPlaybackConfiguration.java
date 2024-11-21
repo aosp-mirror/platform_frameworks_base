@@ -311,12 +311,18 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int MUTED_BY_PORT_VOLUME = (1 << 6);
 
+    /**
+     * @hide
+     * Flag used when playback is muted by AppOpsManager#OP_CONTROL_AUDIO.
+     */
+    public static final int MUTED_BY_OP_CONTROL_AUDIO = (1 << 7);
+
     /** @hide */
     @IntDef(
             flag = true,
             value = {MUTED_BY_MASTER, MUTED_BY_STREAM_VOLUME, MUTED_BY_STREAM_MUTED,
                     MUTED_BY_APP_OPS, MUTED_BY_CLIENT_VOLUME, MUTED_BY_VOLUME_SHAPER,
-                    MUTED_BY_PORT_VOLUME})
+                    MUTED_BY_PORT_VOLUME, MUTED_BY_OP_CONTROL_AUDIO})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerMuteEvent {
     }
@@ -913,6 +919,9 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 }
                 if ((mMutedState & MUTED_BY_PORT_VOLUME) != 0) {
                     apcToString.append("portVolume ");
+                }
+                if ((mMutedState & MUTED_BY_OP_CONTROL_AUDIO) != 0) {
+                    apcToString.append("opControlAudio ");
                 }
             }
             apcToString.append(" ").append(mFormatInfo);
