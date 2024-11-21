@@ -130,6 +130,7 @@ import java.util.concurrent.Executor
 import java.util.function.Consumer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.DesktopUiEventEnum
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.Companion.DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION
@@ -166,6 +167,7 @@ class DesktopTasksController(
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val desktopModeUiEventLogger: DesktopModeUiEventLogger,
     private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
 ) :
     RemoteCallable<DesktopTasksController>,
@@ -2188,16 +2190,32 @@ class DesktopTasksController(
                 // Start a new jank interaction for the drag release to desktop window animation.
                 interactionJankMonitor.begin(taskSurface, context, handler,
                     CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_DESKTOP_MODE
+                )
                 finalizeDragToDesktop(taskInfo)
             }
             IndicatorType.NO_INDICATOR,
             IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_FULL_SCREEN
+                )
                 cancelDragToDesktop(taskInfo)
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN
+                )
                 requestSplit(taskInfo, leftOrTop = true)
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN
+                )
                 requestSplit(taskInfo, leftOrTop = false)
             }
         }
