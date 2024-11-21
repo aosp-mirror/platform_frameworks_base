@@ -9333,7 +9333,11 @@ public class RemoteViews implements Parcelable, Filter {
         Set<Integer> bitmapIdSet = getBitmapIdsUsedByActions(new HashSet<>());
         int result = 0;
         for (int bitmapId: bitmapIdSet) {
-            result += mBitmapCache.getBitmapForId(bitmapId).getAllocationByteCount();
+            Bitmap currentBitmap = mBitmapCache.getBitmapForId(bitmapId);
+            if (currentBitmap == null) {
+                continue;
+            }
+            result += currentBitmap.getAllocationByteCount();
         }
 
         return result;
