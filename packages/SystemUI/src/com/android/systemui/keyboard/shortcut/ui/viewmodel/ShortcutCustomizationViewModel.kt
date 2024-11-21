@@ -29,8 +29,6 @@ import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomiz
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.AddShortcutDialog
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.DeleteShortcutDialog
 import com.android.systemui.res.R
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -57,7 +55,7 @@ constructor(
                 }
             }
             .combine(_shortcutCustomizationUiState) { keys, uiState ->
-                if (uiState is AddShortcutDialog) {
+                if (uiState is ShortcutCustomizationUiState.AddShortcutDialog) {
                     uiState.copy(pressedKeys = keys)
                 } else {
                     uiState
@@ -68,7 +66,7 @@ constructor(
         when (requestInfo) {
             is ShortcutCustomizationRequestInfo.Add -> {
                 _shortcutCustomizationUiState.value =
-                    AddShortcutDialog(
+                    ShortcutCustomizationUiState.AddShortcutDialog(
                         shortcutLabel = requestInfo.label,
                         defaultCustomShortcutModifierKey =
                             shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
@@ -77,20 +75,14 @@ constructor(
                     )
                 shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
-
-            is ShortcutCustomizationRequestInfo.Delete -> {
-                _shortcutCustomizationUiState.value =
-                    DeleteShortcutDialog(isDialogShowing = false)
-                shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
-            }
         }
     }
 
-    fun onDialogShown() {
+    fun onAddShortcutDialogShown() {
         _shortcutCustomizationUiState.update { uiState ->
-            (uiState as? AddShortcutDialog)?.copy(isDialogShowing = true)
-                ?: (uiState as? DeleteShortcutDialog)?.copy(isDialogShowing = true)
-                ?: uiState
+            (uiState as? ShortcutCustomizationUiState.AddShortcutDialog)?.copy(
+                isDialogShowing = true
+            ) ?: uiState
         }
     }
 
@@ -123,7 +115,6 @@ constructor(
                             ),
                     )
                 }
-
                 ShortcutCustomizationRequestResult.ERROR_OTHER ->
                     getUiStateWithErrorMessage(
                         uiState = uiState,
@@ -134,15 +125,11 @@ constructor(
         }
     }
 
-    fun onDeleteShortcut() {
-        // TODO(b/373631984) not yet implemented
-    }
-
     private fun getUiStateWithErrorMessage(
         uiState: ShortcutCustomizationUiState,
         errorMessage: String,
     ): ShortcutCustomizationUiState {
-        return (uiState as? AddShortcutDialog)?.copy(
+        return (uiState as? ShortcutCustomizationUiState.AddShortcutDialog)?.copy(
             errorMessage = errorMessage
         ) ?: uiState
     }

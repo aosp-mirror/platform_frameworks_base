@@ -27,7 +27,5 @@ sealed interface ShortcutCustomizationUiState {
         val pressedKeys: List<ShortcutKey> = emptyList(),
     ) : ShortcutCustomizationUiState
 
-    data class DeleteShortcutDialog(val isDialogShowing: Boolean) : ShortcutCustomizationUiState
-
     data object Inactive : ShortcutCustomizationUiState
 }
