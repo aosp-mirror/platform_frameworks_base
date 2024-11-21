@@ -31,6 +31,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ApproachLayoutModifierNode
 import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LookaheadScope
@@ -49,10 +52,8 @@ import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.Overlay
 import com.android.compose.animation.scene.content.Scene
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.effect.GestureEffect
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /** The type for the content of movable elements. */
 internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
@@ -75,6 +76,7 @@ internal class SceneTransitionLayoutImpl(
     internal var density: Density,
     internal var layoutDirection: LayoutDirection,
     internal var swipeSourceDetector: SwipeSourceDetector,
+    internal var swipeDetector: SwipeDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
 
@@ -149,18 +151,6 @@ internal class SceneTransitionLayoutImpl(
                     _movableContents = it
                 }
 
-    internal var horizontalOverscrollableContent =
-        OverscrollableContent(
-            animationScope = animationScope,
-            overscrollEffect = { content(it).scope.horizontalOverscrollGestureEffect },
-        )
-
-    internal var verticalOverscrollableContent =
-        OverscrollableContent(
-            animationScope = animationScope,
-            overscrollEffect = { content(it).scope.verticalOverscrollGestureEffect },
-        )
-
     /**
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
      * contents it is associated to.
@@ -175,8 +165,8 @@ internal class SceneTransitionLayoutImpl(
                 }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
-    internal val horizontalDraggableHandler: DraggableHandlerImpl
-    internal val verticalDraggableHandler: DraggableHandlerImpl
+    internal val horizontalDraggableHandler: DraggableHandler
+    internal val verticalDraggableHandler: DraggableHandler
 
     internal val elementStateScope = ElementStateScopeImpl(this)
     internal val propertyTransformationScope = PropertyTransformationScopeImpl(this)
@@ -190,16 +180,33 @@ internal class SceneTransitionLayoutImpl(
 
     internal var lastSize: IntSize = IntSize.Zero
 
+    /**
+     * An empty [NestedScrollDispatcher] and [NestedScrollConnection]. These are composed above our
+     * [SwipeToSceneElement] modifiers, so that the dispatcher will be used by the nested draggables
+     * to launch fling events, making sure that they are not cancelled unless this whole layout is
+     * removed from composition.
+     */
+    private val nestedScrollDispatcher = NestedScrollDispatcher()
+    private val nestedScrollConnection = object : NestedScrollConnection {}
+
     init {
         updateContents(builder, layoutDirection)
 
         // DraggableHandlerImpl must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
         horizontalDraggableHandler =
-            DraggableHandlerImpl(layoutImpl = this, orientation = Orientation.Horizontal)
+            DraggableHandler(
+                layoutImpl = this,
+                orientation = Orientation.Horizontal,
+                gestureEffectProvider = { content(it).scope.horizontalOverscrollGestureEffect },
+            )
 
         verticalDraggableHandler =
-            DraggableHandlerImpl(layoutImpl = this, orientation = Orientation.Vertical)
+            DraggableHandler(
+                layoutImpl = this,
+                orientation = Orientation.Vertical,
+                gestureEffectProvider = { content(it).scope.verticalOverscrollGestureEffect },
+            )
 
         // Make sure that the state is created on the same thread (most probably the main thread)
         // than this STLImpl.
@@ -379,14 +386,15 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    internal fun Content(modifier: Modifier, swipeDetector: SwipeDetector) {
+    internal fun Content(modifier: Modifier) {
         Box(
             modifier
+                .nestedScroll(nestedScrollConnection, nestedScrollDispatcher)
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(horizontalDraggableHandler, swipeDetector)
-                .swipeToScene(verticalDraggableHandler, swipeDetector)
+                .swipeToScene(horizontalDraggableHandler)
+                .swipeToScene(verticalDraggableHandler)
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
@@ -578,25 +586,5 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
         }
 
         return layout(width, height) { placeable.place(0, 0) }
-    }
-}
-
-internal class OverscrollableContent(
-    private val animationScope: CoroutineScope,
-    private val overscrollEffect: (ContentKey) -> GestureEffect,
-) {
-    private var currentContent: ContentKey? = null
-    var currentOverscrollEffect: GestureEffect? = null
-
-    fun applyOverscrollEffectOn(contentKey: ContentKey): GestureEffect {
-        if (currentContent == contentKey) return currentOverscrollEffect!!
-
-        currentOverscrollEffect?.apply { animationScope.launch { ensureApplyToFlingIsCalled() } }
-
-        // We are wrapping the overscroll effect.
-        val overscrollEffect = overscrollEffect(contentKey)
-        currentContent = contentKey
-        currentOverscrollEffect = overscrollEffect
-        return overscrollEffect
     }
 }

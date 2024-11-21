@@ -373,15 +373,6 @@ sealed interface TransitionState {
             }
         }
 
-        /**
-         * Checks if the given [progress] value is within the valid range for this transition.
-         *
-         * The valid range is between 0f and 1f, inclusive.
-         */
-        internal fun isWithinProgressRange(progress: Float): Boolean {
-            return progress >= 0f && progress <= 1f
-        }
-
         internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
             if (replacedTransition != null) {
                 return replacedTransition.interruptionProgress(layoutImpl)
