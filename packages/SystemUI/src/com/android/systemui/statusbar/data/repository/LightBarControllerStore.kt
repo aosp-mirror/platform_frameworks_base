@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.data.repository
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
@@ -26,6 +27,8 @@ import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.LightBarControllerImpl
 import dagger.Binds
 import dagger.Module
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
@@ -68,4 +71,9 @@ constructor(
 interface LightBarControllerStoreModule {
 
     @Binds fun store(impl: LightBarControllerStoreImpl): LightBarControllerStore
+
+    @Binds
+    @IntoMap
+    @ClassKey(LightBarControllerStore::class)
+    fun storeAsCoreStartable(impl: LightBarControllerStoreImpl): CoreStartable
 }

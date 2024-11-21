@@ -46,6 +46,11 @@ class SystemEventChipAnimationControllerStoreImplTest : SysuiTestCase() {
     // Lazy so that @EnableFlags has time to run before underTest is instantiated.
     private val underTest by lazy { kosmos.systemEventChipAnimationControllerStoreImpl }
 
+    @Before
+    fun start() {
+        underTest.start()
+    }
+
     @Before fun addDisplays() = runBlocking { fakeDisplayRepository.addDisplay(DEFAULT_DISPLAY) }
 
     @Test

@@ -162,6 +162,20 @@ interface StatusBarPhoneModule {
 
         @Provides
         @SysUISingleton
+        @IntoMap
+        @ClassKey(StatusBarInitializerStore::class)
+        fun initializerStoreAsCoreStartable(
+            multiDisplayStoreLazy: Lazy<MultiDisplayStatusBarInitializerStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayStoreLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+
+        @Provides
+        @SysUISingleton
         fun initializerStore(
             singleDisplayStoreLazy: Lazy<SingleDisplayStatusBarInitializerStore>,
             multiDisplayStoreLazy: Lazy<MultiDisplayStatusBarInitializerStore>,

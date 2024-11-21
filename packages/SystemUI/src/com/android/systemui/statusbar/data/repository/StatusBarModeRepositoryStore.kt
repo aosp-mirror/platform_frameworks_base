@@ -30,6 +30,8 @@ import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import dagger.multibindings.IntoSet
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -102,6 +104,20 @@ abstract class StatusBarModeRepositoryModule {
     ): StatusBarInitializer.OnStatusBarViewInitializedListener
 
     companion object {
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(StatusBarModeRepositoryStore::class)
+        fun storeAsCoreStartable(
+            singleDisplayLazy: Lazy<StatusBarModeRepositoryImpl>,
+            multiDisplayLazy: Lazy<MultiDisplayStatusBarModeRepositoryStore>,
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                singleDisplayLazy.get()
+            }
+        }
 
         @Provides
         @SysUISingleton
