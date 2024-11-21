@@ -21,8 +21,8 @@ import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.CallSuper;
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -74,7 +74,7 @@ import java.util.function.Consumer;
 
 /**
  * Abstract base class for performing inference in a isolated process. This service exposes its
- * methods via {@link android.app.ondeviceintelligence.OnDeviceIntelligenceManager}.
+ * methods via {@link OnDeviceIntelligenceManager}.
  *
  * <p> A service that provides methods to perform on-device inference both in streaming and
  * non-streaming fashion. Also, provides a way to register a storage service that will be used to
