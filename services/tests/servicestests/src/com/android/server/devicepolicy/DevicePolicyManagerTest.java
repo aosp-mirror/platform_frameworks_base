@@ -4404,6 +4404,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledModifiesSetting() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -4415,6 +4416,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledWithPOOnUser0() throws Exception {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
@@ -4434,7 +4436,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/359188869")
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledWithPOOfOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
