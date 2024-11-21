@@ -16,20 +16,26 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.classifier.domain.interactor.falsingInteractor
-import com.android.systemui.development.ui.viewmodel.buildNumberViewModelFactory
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.paginatedGridInteractor
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.plugins.FalsingManager
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-val Kosmos.paginatedGridViewModel by
-    Kosmos.Fixture {
-        PaginatedGridViewModel(
-            iconTilesViewModel,
-            qsColumnsViewModelFactory,
-            paginatedGridInteractor,
-            inFirstPageViewModel,
-            buildNumberViewModelFactory,
-            editModeButtonViewModelFactory,
-            falsingInteractor,
-        )
+class EditModeButtonViewModel
+@AssistedInject
+constructor(
+    private val editModeViewModel: EditModeViewModel,
+    private val falsingInteractor: FalsingInteractor,
+) {
+
+    fun onButtonClick() {
+        if (!falsingInteractor.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            editModeViewModel.startEditing()
+        }
     }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): EditModeButtonViewModel
+    }
+}

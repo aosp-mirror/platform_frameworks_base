@@ -16,12 +16,14 @@
 
 package com.android.systemui.brightness.ui.viewmodel
 
-import androidx.compose.runtime.getValue
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.compose.runtime.getValue
 import com.android.systemui.brightness.domain.interactor.BrightnessPolicyEnforcementInteractor
 import com.android.systemui.brightness.domain.interactor.ScreenBrightnessInteractor
 import com.android.systemui.brightness.shared.model.GammaBrightness
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -52,6 +54,7 @@ constructor(
     private val brightnessPolicyEnforcementInteractor: BrightnessPolicyEnforcementInteractor,
     val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
     private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
+    private val falsingInteractor: FalsingInteractor,
     @Assisted private val supportsMirroring: Boolean,
     private val brightnessWarningToast: BrightnessWarningToast,
 ) : ExclusiveActivatable() {
@@ -85,6 +88,10 @@ constructor(
             return
         }
         brightnessWarningToast.show(viewContext, resId)
+    }
+
+    fun emitBrightnessTouchForFalsing() {
+        falsingInteractor.isFalseTouch(Classifier.BRIGHTNESS_SLIDER)
     }
 
     /**
