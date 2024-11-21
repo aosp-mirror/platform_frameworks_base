@@ -1354,12 +1354,13 @@ class TransitionController {
         }
     }
 
-    void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
+    void dispatchLegacyAppTransitionStarting(DisplayContent[] participantDisplays,
+            long statusBarTransitionDelay) {
         final long now = SystemClock.uptimeMillis();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
-            for (int j = 0; j < info.getRootCount(); ++j) {
-                final int displayId = info.getRoot(j).getDisplayId();
+            for (int j = 0; j < participantDisplays.length; ++j) {
+                final int displayId = participantDisplays[j].mDisplayId;
                 if (shouldDispatchLegacyListener(listener, displayId)) {
                     listener.onAppTransitionStartingLocked(
                             now + statusBarTransitionDelay,

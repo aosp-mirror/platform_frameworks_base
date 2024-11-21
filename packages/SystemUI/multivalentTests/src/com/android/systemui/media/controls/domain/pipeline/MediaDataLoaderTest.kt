@@ -408,6 +408,40 @@ class MediaDataLoaderTest : SysuiTestCase() {
             verify(mockImageLoader, times(1)).loadBitmap(any(), anyInt(), anyInt(), anyInt())
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testLoadMediaDataInBg_fromResumeToActive_doesNotCancelResumeToActiveTask() =
+        testScope.runTest {
+            val mockImageLoader = mock<ImageLoader>()
+            val mediaDataLoader =
+                MediaDataLoader(
+                    context,
+                    testDispatcher,
+                    testScope,
+                    mediaControllerFactory,
+                    mediaFlags,
+                    mockImageLoader,
+                    statusBarManager,
+                )
+            metadataBuilder.putString(
+                MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+                "content://album_art_uri",
+            )
+
+            testScope.launch {
+                mediaDataLoader.loadMediaData(
+                    KEY,
+                    createMediaNotification(),
+                    isConvertingToActive = true,
+                )
+            }
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.launch { mediaDataLoader.loadMediaData(KEY, createMediaNotification()) }
+            testScope.advanceUntilIdle()
+
+            verify(mockImageLoader, times(2)).loadBitmap(any(), anyInt(), anyInt(), anyInt())
+        }
+
     private fun createMediaNotification(
         mediaSession: MediaSession? = session,
         applicationInfo: ApplicationInfo? = null,

@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"스피커 및 디스플레이"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"추천 기기"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"입력"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"출력"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"미디어를 다른 기기로 이동하려면 공유 세션을 중지하세요."</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"중지"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"브로드캐스팅 작동 원리"</string>
@@ -1293,8 +1291,7 @@
     <string name="add" msgid="81036585205287996">"추가"</string>
     <string name="manage_users" msgid="1823875311934643849">"사용자 관리"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"드래그하여 화면을 분할하는 기능이 지원되지 않는 알림입니다."</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"활성 상태인 위치"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi를 이용할 수 없습니다."</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"우선순위 모드입니다."</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"알람이 설정되었습니다."</string>
@@ -1351,8 +1348,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"잠금 화면 맞춤 설정"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"잠금 화면 맞춤설정을 위해 잠금 해제"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi를 사용할 수 없음"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"활성 상태인 위치"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"카메라 차단됨"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"카메라 및 마이크 차단됨"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"마이크 차단됨"</string>
@@ -1400,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"접기 아이콘"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"확장 아이콘"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"또는"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"드래그 핸들"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"키보드를 사용하여 이동"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"단축키 알아보기"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"터치패드를 사용하여 이동"</string>
@@ -1408,8 +1405,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"터치패드 동작, 단축키 등 알아보기"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"뒤로 동작"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"홈 동작"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"최근 앱 보기"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"완료"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"뒤로"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"돌아가려면 세 손가락을 사용해 터치패드의 아무 곳이나 왼쪽 또는 오른쪽으로 스와이프합니다.\n\n키보드 단축키 Action + ESC를 사용할 수도 있습니다."</string>
@@ -1419,14 +1415,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"언제든지 홈 화면으로 이동하려면 세 손가락으로 화면 하단에서 위로 스와이프하세요."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"좋습니다"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"홈으로 이동 동작을 완료했습니다."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"최근 앱 보기"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"터치패드에서 세 손가락을 사용해 위로 스와이프한 후 잠시 기다리세요."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"아주 좋습니다"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"최근 앱 보기 동작을 완료했습니다."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"작업 키"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"앱에 액세스하려면 키보드의 작업 키를 누르세요."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"축하합니다"</string>
@@ -1450,14 +1442,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"세 손가락을 사용해 위로 스와이프한 다음 잠시 기다리세요. 더 많은 동작을 알아보려면 탭하세요."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"키보드를 사용하여 모든 앱 보기"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"언제든지 작업 키를 누릅니다. 더 많은 동작을 알아보려면 탭하세요."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"이제 \'더 어둡게\' 기능이 밝기 슬라이더에 추가되었습니다"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"이제 밝기 수준을 더 낮춰 화면을 더 어둡게 만들 수 있습니다.\n\n이 기능은 이제 밝기 슬라이더에 포함되므로 \'더 어둡게\' 단축키가 삭제됩니다."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"\'더 어둡게\' 단축키 삭제"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"\'더 어둡게\' 단축키가 삭제되었습니다."</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"연결"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"접근성"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"유틸리티"</string>

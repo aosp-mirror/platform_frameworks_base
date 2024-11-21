@@ -173,10 +173,6 @@ public class SharedConnectivityManager {
                 }
             }
         }
-
-        Executor getExecutor() {
-            return mExecutor;
-        }
     }
 
     private ISharedConnectivityService mService;
@@ -192,7 +188,7 @@ public class SharedConnectivityManager {
     private final String mServicePackageName;
     private final String mIntentAction;
     private ServiceConnection mServiceConnection;
-    private final UserManager mUserManager;
+    private UserManager mUserManager;
 
     /**
      * Creates a new instance of {@link SharedConnectivityManager}.
@@ -320,19 +316,15 @@ public class SharedConnectivityManager {
 
     private void registerCallbackInternal(SharedConnectivityClientCallback callback,
             SharedConnectivityCallbackProxy proxy) {
-        proxy.getExecutor().execute(
-                () -> {
-                    try {
-                        mService.registerCallback(proxy);
-                        synchronized (mProxyDataLock) {
-                            mProxyMap.put(callback, proxy);
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Exception in registerCallback", e);
-                        callback.onRegisterCallbackFailed(e);
-                    }
-                }
-        );
+        try {
+            mService.registerCallback(proxy);
+            synchronized (mProxyDataLock) {
+                mProxyMap.put(callback, proxy);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in registerCallback", e);
+            callback.onRegisterCallbackFailed(e);
+        }
     }
 
     /**

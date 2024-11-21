@@ -34,8 +34,8 @@
     <string name="dock_forced_resizable" msgid="7429086980048964687">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಆ್ಯಪ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ಈ ಆ್ಯಪ್ ಅನ್ನು 1 ವಿಂಡೋದಲ್ಲಿ ಮಾತ್ರ ತೆರೆಯಬಹುದು"</string>
-    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
-    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವಿಕೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಆ್ಯಪ್ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
+    <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವಿಕೆಯನ್ನು ಆ್ಯಪ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್ ಡಿವೈಡರ್"</string>
     <string name="divider_title" msgid="1963391955593749442">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್ ಡಿವೈಡರ್"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ಎಡ ಫುಲ್ ಸ್ಕ್ರೀನ್"</string>
@@ -126,8 +126,11 @@
     <string name="manage_windows_text" msgid="5567366688493093920">"ವಿಂಡೋಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="close_text" msgid="4986518933445178928">"ಮುಚ್ಚಿ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ಮೆನು ಮುಚ್ಚಿ"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"ಮೆನು ತೆರೆಯಿರಿ"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ಮೆನು ತೆರೆಯಿರಿ"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಮ್ಯಾಕ್ಸಿಮೈಸ್ ಮಾಡಿ"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ಸ್ನ್ಯಾಪ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"ಮ್ಯಾಕ್ಸಿಮೈಸ್ ಮಾಡಿ"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ಎಡಕ್ಕೆ ಸ್ನ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"ಬಲಕ್ಕೆ ಸ್ನ್ಯಾಪ್ ಮಾಡಿ"</string>
 </resources>

@@ -2394,12 +2394,12 @@
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilitza un altre cable i torna-ho a provar"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"El dispositiu està massa calent i no pot duplicar a la pantalla fins que es refredi"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La pantalla dual està activada"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Pantalla dual està activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> està utilitzant les dues pantalles per mostrar contingut"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositiu està massa calent"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La pantalla dual no està disponible perquè el telèfon està massa calent"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen no està disponible"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen no està disponible perquè la funció Estalvi de bateria està activada. Pots desactivar aquesta opció a Configuració."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Pantalla dual no està disponible perquè el telèfon està massa calent"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Pantalla dual no està disponible"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Pantalla dual no està disponible perquè la funció Estalvi de bateria està activada. Pots desactivar aquesta opció a Configuració."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ves a Configuració"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactiva"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> configurat"</string>

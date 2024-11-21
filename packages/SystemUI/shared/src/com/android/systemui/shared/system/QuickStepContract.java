@@ -347,7 +347,12 @@ public class QuickStepContract {
         }
         // Disable back gesture on the hub, but not when the shade is showing.
         if ((sysuiStateFlags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
-            return (sysuiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) == 0;
+            // Use QS expanded signal as the notification panel is always considered visible
+            // expanded when on the lock screen and when opening hub over lock screen. This does
+            // mean that back gesture is disabled when opening shade over hub while in portrait
+            // mode, since QS is not expanded.
+            // TODO(b/370108274): allow back gesture on shade over hub in portrait
+            return (sysuiStateFlags & SYSUI_STATE_QUICK_SETTINGS_EXPANDED) == 0;
         }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;

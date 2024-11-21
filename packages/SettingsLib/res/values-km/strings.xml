@@ -388,7 +388,7 @@
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ទិដ្ឋភាព​បញ្ចេញពន្លឺភ្លឹបភ្លែត​នៅក្នុង​វិនដូនៅ​ពេលគូរ"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"បង្ហាញ​​បច្ចុប្បន្នភាព​ស្រទាប់​ហាតវែរ"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"ស្រទាប់​ហាតវែរ​បញ្ចេញ​ពន្លឺ​បៃ​តង​នៅពេលធ្វើ​បច្ចុប្បន្នភាព"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"ជួសជុល​ការគូរលើស GPU"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"ជួសជុលការដាក់បង្ហាញពីលើច្រើនជ្រុលរបស់ GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"បិទ​ការ​ត្រួត HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"ប្រើ GPU ជា​និច្ច​សម្រាប់​​ផ្សំ​អេក្រង់"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"ត្រាប់តាមគំរូពណ៌"</string>
@@ -417,8 +417,8 @@
     <string name="verbose_vendor_logging_preference_summary_will_disable" msgid="6175431593394522553">"បិទក្រោយពេលមួយថ្ងៃ"</string>
     <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"បានបើកដោយគ្មានពេលកំណត់"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ចលនាបែបផែនឆ្លង"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​ចលនា"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ត្រាប់ជាអេក្រង់​ទី​ពីរ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"កម្មវិធី"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"កុំ​រក្សា​ទុកសកម្មភាព"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ថេប្លេតនេះ"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"កុំព្យូទ័រនេះ (ខាងក្នុង)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"មីក្រូហ្វូន (ខាងក្នុង)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"បានបិទ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ដើម្បីឱ្យ​ការផ្លាស់ប្ដូរ​នេះ​មានប្រសិទ្ធភាព។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"កាស​មានខ្សែ"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"កាស"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"ឧបករណ៍បំពងសំឡេង USB"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ឌុយ​មីក្រូហ្វូន"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"មីក្រូហ្វូន USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"បើក"</string>

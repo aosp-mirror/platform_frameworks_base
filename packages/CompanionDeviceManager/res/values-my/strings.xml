@@ -61,7 +61,7 @@
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"ဖုန်းခေါ်ဆိုမှတ်တမ်းကို ဖတ်နိုင်၊ ရေးနိုင်သည်"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"SMS မက်ဆေ့ဂျ်များ ပို့နိုင်၊ ကြည့်နိုင်သည်"</string>
     <string name="permission_contacts_summary" msgid="2840800622763086808">"သင့်အဆက်အသွယ်များကို ဝင်ကြည့်နိုင်သည်"</string>
-    <string name="permission_calendar_summary" msgid="8430353935747336165">"သင့်ပြက္ခဒိန်ကို ဝင်ကြည့်နိုင်သည်"</string>
+    <string name="permission_calendar_summary" msgid="8430353935747336165">"သင့်ပြက္ခဒိန်အား ဝင်သုံးနိုင်သည်"</string>
     <string name="permission_microphone_summary" msgid="4862628553869973259">"အသံသွင်းနိုင်သည်"</string>
     <string name="permission_nearby_devices_summary" msgid="1306752848196464817">"အနီးတစ်ဝိုက်ရှိ စက်များ၏ ဆက်စပ်နေရာကို ရှာခြင်း၊ ချိတ်ဆက်ခြင်းနှင့် သတ်မှတ်ခြင်းတို့ လုပ်နိုင်သည်"</string>
     <string name="permission_notification_listener_access_summary" msgid="7856071768185367749">"အဆက်အသွယ်၊ မက်ဆေ့ဂျ်နှင့် ဓာတ်ပုံများကဲ့သို့ အချက်အလက်များအပါအဝင် အကြောင်းကြားချက်အားလုံးကို ဖတ်နိုင်သည်"</string>

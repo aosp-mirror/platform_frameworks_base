@@ -100,6 +100,7 @@ import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -182,7 +183,7 @@ class ActivityStarter {
      * Feature flag for go/activity-security rules
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @Disabled
     static final long ASM_RESTRICTIONS = 230590090L;
 
     private final ActivityTaskManagerService mService;

@@ -75,6 +75,9 @@ import javax.inject.Named;
  * touches are consumed.
  */
 public class TouchMonitor {
+    // An incrementing id used to identify the touch monitor instance.
+    private static int sNextInstanceId = 0;
+
     private final Logger mLogger;
     // This executor is used to protect {@code mActiveTouchSessions} from being modified
     // concurrently. Any operation that adds or removes values should use this executor.
@@ -138,7 +141,7 @@ public class TouchMonitor {
                     completer.set(predecessor);
                 }
 
-                if (mActiveTouchSessions.isEmpty()) {
+                if (mActiveTouchSessions.isEmpty() && mInitialized) {
                     if (mStopMonitoringPending) {
                         stopMonitoring(false);
                     } else {
@@ -271,7 +274,7 @@ public class TouchMonitor {
 
         @Override
         public void onDestroy(LifecycleOwner owner) {
-            stopMonitoring(true);
+            destroy();
         }
     };
 
@@ -279,6 +282,11 @@ public class TouchMonitor {
      * When invoked, instantiates a new {@link InputSession} to monitor touch events.
      */
     private void startMonitoring() {
+        if (!mInitialized) {
+            mLogger.w("attempting to startMonitoring when not initialized");
+            return;
+        }
+
         mLogger.i("startMonitoring(): monitoring started");
         stopMonitoring(true);
 
@@ -587,7 +595,7 @@ public class TouchMonitor {
         mDisplayHelper = displayHelper;
         mWindowManagerService = windowManagerService;
         mConfigurationInteractor = configurationInteractor;
-        mLoggingName = loggingName + ":TouchMonitor";
+        mLoggingName = loggingName + ":TouchMonitor[" + sNextInstanceId++ + "]";
         mLogger = new Logger(logBuffer, mLoggingName);
     }
 
@@ -613,7 +621,8 @@ public class TouchMonitor {
      */
     public void destroy() {
         if (!mInitialized) {
-            throw new IllegalStateException("TouchMonitor not initialized");
+            // In the case that we've already been destroyed, this is a no-op
+            return;
         }
 
         stopMonitoring(true);
