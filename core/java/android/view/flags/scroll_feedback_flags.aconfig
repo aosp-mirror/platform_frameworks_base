@@ -28,5 +28,5 @@ flag {
     namespace: "wear_frameworks"
     name: "dynamic_view_rotary_haptics_configuration"
     description: "Whether ScrollFeedbackProvider dynamically disables View-based rotary haptics."
-    bug: "377998870 "
+    bug: "377998870"
 }

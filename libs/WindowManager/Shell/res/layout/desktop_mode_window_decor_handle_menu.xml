@@ -23,7 +23,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:paddingBottom="@dimen/desktop_mode_handle_menu_pill_elevation"
-    android:paddingRight="@dimen/desktop_mode_handle_menu_pill_elevation"
+    android:paddingEnd="@dimen/desktop_mode_handle_menu_pill_elevation"
     android:orientation="vertical">
 
     <LinearLayout

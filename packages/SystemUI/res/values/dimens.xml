@@ -368,6 +368,9 @@
     <!-- The vertical space between items in the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
 
+    <!-- Extra space for guts bundle feedback button -->
+    <dimen name="notification_guts_bundle_feedback_size">48dp</dimen>
+
     <dimen name="notification_importance_toggle_size">48dp</dimen>
     <dimen name="notification_importance_button_separation">8dp</dimen>
     <dimen name="notification_importance_drawable_padding">8dp</dimen>
@@ -788,6 +791,18 @@
     <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_avatar_size">24dp</dimen>
 
+    <!-- Size of the face pile shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_size">16dp</dimen>
+
+    <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation
+         notifications (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_avatar_size">11dp</dimen>
+
+    <!-- Size of an avatar shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_avatar_size">16dp</dimen>
+
     <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
 
@@ -936,7 +951,6 @@
     <dimen name="keyguard_translate_distance_on_swipe_up">-200dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
-    <dimen name="lock_icon_margin_bottom">74dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>
 
 
@@ -1749,6 +1763,7 @@
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
     <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
     <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
+    <dimen name="ongoing_activity_chip_text_fading_edge_length">12dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
@@ -1955,8 +1970,6 @@
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
-    <dimen name="status_view_margin_horizontal">0dp</dimen>
-
     <!-- Media output broadcast dialog QR code picture size -->
     <dimen name="media_output_qrcode_size">216dp</dimen>
     <dimen name="media_output_broadcast_info">21dp</dimen>
@@ -2046,6 +2059,9 @@
     <!-- UDFPS view attributes -->
     <!-- UDFPS icon size in microns/um -->
     <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Limits the updates to at most one update per debounce duration to avoid too many
+         updates due to quick changes to padding.   -->
+    <integer name="udfps_padding_debounce_duration">100</integer>
     <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
          relies on this value will not be sized correctly. -->
     <item name="pixel_pitch" format="float" type="dimen">-1</item>
@@ -2060,26 +2076,29 @@
     <dimen name="contextual_edu_dialog_elevation">2dp</dimen>
 
     <!-- Volume start -->
-    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
     <dimen name="volume_dialog_width">60dp</dimen>
-    <dimen name="volume_dialog_vertical_padding">10dp</dimen>
+
+    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
+    <dimen name="volume_dialog_background_vertical_margin">-10dp</dimen>
+
     <dimen name="volume_dialog_components_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_vertical_padding_negative">-10dp</dimen>
     <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
-    <dimen name="volume_dialog_spacing">4dp</dimen>
     <dimen name="volume_dialog_button_size">48dp</dimen>
-    <dimen name="volume_dialog_floating_sliders_bottom_padding">48dp</dimen>
     <dimen name="volume_dialog_slider_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">254dp</dimen>
 
-    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
-    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+    <fraction name="volume_dialog_half_opened_bias">0.2</fraction>
 
-    <dimen name="volume_dialog_ringer_horizontal_padding">10dp</dimen>
+    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
+
     <dimen name="volume_dialog_ringer_drawer_button_size">40dp</dimen>
     <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
-    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
     <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
+
+    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
+    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
     <!-- Volume end -->
 </resources>

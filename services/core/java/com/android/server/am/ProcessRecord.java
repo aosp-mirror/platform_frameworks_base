@@ -351,7 +351,8 @@ class ProcessRecord implements WindowProcessListener {
     private String[] mIsolatedEntryPointArgs;
 
     /**
-     * Process is currently hosting a backup agent for backup or restore.
+     * Process is currently hosting a backup agent for backup or restore. Note that this is only set
+     * when the process is put into restricted backup mode.
      */
     @GuardedBy("mService")
     private boolean mInFullBackup;

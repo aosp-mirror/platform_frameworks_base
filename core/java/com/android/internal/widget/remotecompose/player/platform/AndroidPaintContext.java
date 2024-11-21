@@ -15,6 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.player.platform;
 
+import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
@@ -247,7 +248,7 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void getTextBounds(int textId, int start, int end, int flags, float[] bounds) {
+    public void getTextBounds(int textId, int start, int end, int flags, @NonNull float[] bounds) {
         String str = getText(textId);
         if (end == -1) {
             end = str.length();
@@ -420,7 +421,7 @@ public class AndroidPaintContext extends PaintContext {
      * @param paintData the list change to the paint
      */
     @Override
-    public void applyPaint(PaintBundle paintData) {
+    public void applyPaint(@NonNull PaintBundle paintData) {
         paintData.applyPaintChange(
                 (PaintContext) this,
                 new PaintChanges() {
@@ -576,8 +577,8 @@ public class AndroidPaintContext extends PaintContext {
 
                     @Override
                     public void setLinearGradient(
-                            int[] colors,
-                            float[] stops,
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
                             float startX,
                             float startY,
                             float endX,
@@ -596,8 +597,8 @@ public class AndroidPaintContext extends PaintContext {
 
                     @Override
                     public void setRadialGradient(
-                            int[] colors,
-                            float[] stops,
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
                             float centerX,
                             float centerY,
                             float radius,
@@ -614,7 +615,10 @@ public class AndroidPaintContext extends PaintContext {
 
                     @Override
                     public void setSweepGradient(
-                            int[] colors, float[] stops, float centerX, float centerY) {
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
+                            float centerX,
+                            float centerY) {
                         mPaint.setShader(new SweepGradient(centerX, centerY, colors, stops));
                     }
 

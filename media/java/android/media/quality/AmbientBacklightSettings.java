@@ -30,8 +30,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Settings for ambient backlight.
- * @hide
+ * Settings to configure ambient backlight hardware.
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightSettings implements Parcelable {
@@ -60,16 +59,6 @@ public final class AmbientBacklightSettings implements Parcelable {
      */
     public static final int SOURCE_AUDIO_VIDEO = 3;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({COLOR_FORMAT_RGB888})
-    public @interface ColorFormat {}
-
-    /**
-     * The color format is RGB888.
-     * @hide
-     */
-    public static final int COLOR_FORMAT_RGB888 = 1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -124,8 +113,13 @@ public final class AmbientBacklightSettings implements Parcelable {
     /**
      * Constructs AmbientBacklightSettings.
      */
-    public AmbientBacklightSettings(int source, int maxFps, int colorFormat,
-            int horizontalZonesNumber, int verticalZonesNumber, boolean isLetterboxOmitted,
+    public AmbientBacklightSettings(
+            @Source int source,
+            int maxFps,
+            @PixelFormat.Format int colorFormat,
+            int horizontalZonesNumber,
+            int verticalZonesNumber,
+            boolean isLetterboxOmitted,
             int threshold) {
         mSource = source;
         mMaxFps = maxFps;
@@ -171,7 +165,9 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
-     * Gets the number of lights in each horizontal zone.
+     * Gets the number of horizontal color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
     public int getHorizontalZonesNumber() {
@@ -179,7 +175,9 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
-     * Gets the number of lights in each vertical zone.
+     * Gets the number of vertical color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
     public int getVerticalZonesNumber() {
@@ -187,15 +185,21 @@ public final class AmbientBacklightSettings implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if letter box is omitted; {@code false} otherwise.
-     * @hide
+     * Returns {@code true} if the black portion of the screen in letter box mode is omitted;
+     * {@code false} otherwise.
+     *
+     * <p>Letter-box is a technique to keep the original aspect ratio when displayed on a screen
+     * with different aspect ratio. Black bars are added to the top and bottom.
      */
     public boolean isLetterboxOmitted() {
         return mIsLetterboxOmitted;
     }
 
     /**
-     * @hide
+     * Gets the detection threshold of the ambient light.
+     *
+     * <p>If the color of a color zone is changed but the difference is smaller than the threshold,
+     * the change is ignored.
      */
     public int getThreshold() {
         return mThreshold;

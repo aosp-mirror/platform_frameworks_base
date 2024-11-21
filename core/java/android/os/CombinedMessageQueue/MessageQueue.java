@@ -19,6 +19,8 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
+import android.app.Instrumentation;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
 import android.os.UserHandle;
@@ -31,7 +33,6 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import dalvik.annotation.optimization.NeverCompile;
-import dalvik.system.VMDebug;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -111,9 +112,37 @@ public final class MessageQueue {
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
-        mUseConcurrent = UserHandle.isCore(Process.myUid()) && !VMDebug.isDebuggingEnabled();
+        // Concurrent mode modifies behavior that is observable via reflection and is commonly used
+        // by tests.
+        // For now, we limit it to system processes to avoid breaking apps and their tests.
+        mUseConcurrent = UserHandle.isCore(Process.myUid());
+        // Even then, we don't use it if instrumentation is loaded as it breaks some
+        // platform tests.
+        final Instrumentation instrumentation = getInstrumentation();
+        mUseConcurrent &= instrumentation == null || !instrumentation.isInstrumenting();
+        // We can lift this restriction in the future after we've made it possible for test authors
+        // to test Looper and MessageQueue without resorting to reflection.
+
+        // Holdback study.
+        if (mUseConcurrent && Flags.messageQueueForceLegacy()) {
+            mUseConcurrent = false;
+        }
+
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace(blockedBy = ActivityThread.class)
+    private static Instrumentation getInstrumentation() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread != null) {
+            return activityThread.getInstrumentation();
+        }
+        return null;
+    }
+
+    private static Instrumentation getInstrumentation$ravenwood() {
+        return null; // Instrumentation not supported on Ravenwood yet.
     }
 
     @Override

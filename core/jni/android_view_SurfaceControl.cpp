@@ -55,6 +55,7 @@
 #include <ui/FrameStats.h>
 #include <ui/GraphicTypes.h>
 #include <ui/HdrCapabilities.h>
+#include <ui/PictureProfileHandle.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
 #include <ui/StaticDisplayInfo.h>
@@ -820,6 +821,21 @@ static void nativeSetLuts(JNIEnv* env, jclass clazz, jlong transactionObj, jlong
     transaction->setLuts(ctrl, base::unique_fd(fd), offsets, dimensions, sizes, samplingKeys);
 }
 
+static void nativeSetPictureProfileId(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                      jlong surfaceControlObj, jlong pictureProfileId) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(surfaceControlObj);
+    PictureProfileHandle handle(pictureProfileId);
+    transaction->setPictureProfileHandle(surfaceControl, handle);
+}
+
+static void nativeSetContentPriority(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                     jlong surfaceControlObj, jint priority) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(surfaceControlObj);
+    transaction->setContentPriority(surfaceControl, priority);
+}
+
 static void nativeSetCachingHint(JNIEnv* env, jclass clazz, jlong transactionObj,
                                  jlong nativeObject, jint cachingHint) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -1342,8 +1358,9 @@ static void nativeSetDisplaySize(JNIEnv* env, jclass clazz,
     }
 }
 
-static jobject convertDeviceProductInfoToJavaObject(
-        JNIEnv* env, const std::optional<DeviceProductInfo>& info) {
+static jobject convertDeviceProductInfoToJavaObject(JNIEnv* env,
+                                                    const std::optional<DeviceProductInfo>& info,
+                                                    bool isInternal) {
     using ModelYear = android::DeviceProductInfo::ModelYear;
     using ManufactureYear = android::DeviceProductInfo::ManufactureYear;
     using ManufactureWeekAndYear = android::DeviceProductInfo::ManufactureWeekAndYear;
@@ -1378,7 +1395,8 @@ static jobject convertDeviceProductInfoToJavaObject(
     // Section 8.7 - Physical Address of HDMI Specification Version 1.3a
     using android::hardware::display::IDeviceProductInfoConstants;
     if (info->relativeAddress.size() != 4) {
-        connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_UNKNOWN;
+        connectionToSinkType = isInternal ? IDeviceProductInfoConstants::CONNECTION_TO_SINK_BUILT_IN
+                                          : IDeviceProductInfoConstants::CONNECTION_TO_SINK_UNKNOWN;
     } else if (info->relativeAddress[0] == 0) {
         connectionToSinkType = IDeviceProductInfoConstants::CONNECTION_TO_SINK_BUILT_IN;
     } else if (info->relativeAddress[1] == 0) {
@@ -1400,12 +1418,14 @@ static jobject nativeGetStaticDisplayInfo(JNIEnv* env, jclass clazz, jlong id) {
 
     jobject object =
             env->NewObject(gStaticDisplayInfoClassInfo.clazz, gStaticDisplayInfoClassInfo.ctor);
-    env->SetBooleanField(object, gStaticDisplayInfoClassInfo.isInternal,
-                         info.connectionType == ui::DisplayConnectionType::Internal);
+
+    const bool isInternal = info.connectionType == ui::DisplayConnectionType::Internal;
+    env->SetBooleanField(object, gStaticDisplayInfoClassInfo.isInternal, isInternal);
     env->SetFloatField(object, gStaticDisplayInfoClassInfo.density, info.density);
     env->SetBooleanField(object, gStaticDisplayInfoClassInfo.secure, info.secure);
     env->SetObjectField(object, gStaticDisplayInfoClassInfo.deviceProductInfo,
-                        convertDeviceProductInfoToJavaObject(env, info.deviceProductInfo));
+                        convertDeviceProductInfoToJavaObject(env, info.deviceProductInfo,
+                                                             isInternal));
     env->SetIntField(object, gStaticDisplayInfoClassInfo.installOrientation,
                      static_cast<uint32_t>(info.installOrientation));
     return object;
@@ -2197,29 +2217,9 @@ public:
             return false;
         }
 
-        // Compute the count of data items we'll actually forward to Java.
-        size_t count = 0;
-        if (mRemovedVsyncId <= 0) {
-            count = jankData.size();
-        } else {
-            for (const gui::JankData& frame : jankData) {
-                if (frame.frameVsyncId <= mRemovedVsyncId) {
-                    count++;
-                }
-            }
-        }
-
-        if (count == 0) {
-            return false;
-        }
-
-        jobjectArray jJankDataArray = env->NewObjectArray(count, gJankDataClassInfo.clazz, nullptr);
-        for (size_t i = 0, j = 0; i < jankData.size() && j < count; i++) {
-            // Filter any data for frames past our removal vsync.
-            if (mRemovedVsyncId > 0 && jankData[i].frameVsyncId > mRemovedVsyncId) {
-                continue;
-            }
-
+        jobjectArray jJankDataArray =
+                env->NewObjectArray(jankData.size(), gJankDataClassInfo.clazz, nullptr);
+        for (size_t i = 0; i < jankData.size(); i++) {
             // The exposed constants in SurfaceControl are simplified, so we need to translate the
             // jank type we get from SF to what is exposed in Java.
             int sfJankType = jankData[i].jankType;
@@ -2246,7 +2246,7 @@ public:
                                    jankData[i].frameVsyncId, javaJankType,
                                    jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
                                    jankData[i].actualAppFrameTimeNs);
-            env->SetObjectArrayElement(jJankDataArray, j++, jJankData);
+            env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
 
@@ -2365,6 +2365,20 @@ static jobject nativeGetDefaultApplyToken(JNIEnv* env, jclass clazz) {
 static jboolean nativeBootFinished(JNIEnv* env, jclass clazz) {
     status_t error = SurfaceComposerClient::bootFinished();
     return error == OK ? JNI_TRUE : JNI_FALSE;
+}
+
+static jint nativeGetMaxPictureProfiles(JNIEnv* env, jclass clazz) {
+    const auto displayIds = SurfaceComposerClient::SurfaceComposerClient::getPhysicalDisplayIds();
+    int largestMaxProfiles = 0;
+    for (auto displayId : displayIds) {
+        sp<IBinder> token = SurfaceComposerClient::getPhysicalDisplayToken(displayId);
+        int32_t maxProfiles = 0;
+        SurfaceComposerClient::getMaxLayerPictureProfiles(token, &maxProfiles);
+        if (maxProfiles > largestMaxProfiles) {
+            largestMaxProfiles = maxProfiles;
+        }
+    }
+    return largestMaxProfiles;
 }
 
 jlong nativeCreateTpc(JNIEnv* env, jclass clazz, jobject trustedPresentationCallback) {
@@ -2688,6 +2702,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
                 (void*)nativeGetDefaultApplyToken },
     {"nativeBootFinished", "()Z",
             (void*)nativeBootFinished },
+    {"nativeGetMaxPictureProfiles", "()I",
+            (void*)nativeGetMaxPictureProfiles },
     {"nativeCreateTpc", "(Landroid/view/SurfaceControl$TrustedPresentationCallback;)J",
             (void*)nativeCreateTpc},
     {"getNativeTrustedPresentationCallbackFinalizer", "()J", (void*)getNativeTrustedPresentationCallbackFinalizer },
@@ -2699,6 +2715,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeNotifyShutdown },
     {"nativeSetLuts", "(JJ[F[I[I[I[I)V", (void*)nativeSetLuts },
     {"nativeEnableDebugLogCallPoints", "(J)V", (void*)nativeEnableDebugLogCallPoints },
+    {"nativeSetPictureProfileId", "(JJJ)V", (void*)nativeSetPictureProfileId },
+    {"nativeSetContentPriority", "(JJI)V", (void*)nativeSetContentPriority },
         // clang-format on
 };
 

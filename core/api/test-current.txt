@@ -1805,6 +1805,7 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void remapModifierKey(int, int);
     method @FlaggedApi("com.android.input.flags.device_associations") @RequiresPermission("android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY") public void removeUniqueIdAssociationByDescriptor(@NonNull String);
     method @RequiresPermission("android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY") public void removeUniqueIdAssociationByPort(@NonNull String);
+    method public void resetLockedModifierState();
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
   }
 
@@ -2318,7 +2319,7 @@ package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
     method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
-    method @FlaggedApi("com.android.wifi.flags.shared_connectivity_broadcast_receiver_test_api") @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
+    method @NonNull public android.content.BroadcastReceiver getBroadcastReceiver();
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
   }
@@ -2492,6 +2493,7 @@ package android.os {
     method public boolean areAutoPowerSaveModesEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
     method @FlaggedApi("android.os.battery_saver_supported_check_api") public boolean isBatterySaverSupported();
+    method public boolean isInteractive(int);
     field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
     field @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public static final int SYSTEM_WAKELOCK = -2147483648; // 0x80000000
   }
@@ -2780,6 +2782,17 @@ package android.os.storage {
 }
 
 package android.os.vibrator {
+
+  @FlaggedApi("android.os.vibrator.normalized_pwle_effects") public final class BasicPwleSegment extends android.os.vibrator.VibrationEffectSegment {
+    method public int describeContents();
+    method public long getDuration();
+    method public float getEndIntensity();
+    method public float getEndSharpness();
+    method public float getStartIntensity();
+    method public float getStartSharpness();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.BasicPwleSegment> CREATOR;
+  }
 
   public final class PrebakedSegment extends android.os.vibrator.VibrationEffectSegment {
     method public int describeContents();
@@ -3240,6 +3253,7 @@ package android.service.quickaccesswallet {
     method @Nullable public android.content.Intent createWalletIntent();
     method @Nullable public android.content.Intent createWalletSettingsIntent();
     method public void disconnect();
+    method @FlaggedApi("android.service.quickaccesswallet.launch_wallet_option_on_power_double_tap") public void getGestureTargetActivityPendingIntent(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.GesturePendingIntentCallback);
     method public void getWalletCards(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
     method public void getWalletCards(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
     method public void getWalletPendingIntent(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletPendingIntentCallback);
@@ -3249,6 +3263,10 @@ package android.service.quickaccesswallet {
     method public void notifyWalletDismissed();
     method public void removeWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
     method public void selectWalletCard(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
+  }
+
+  @FlaggedApi("android.service.quickaccesswallet.launch_wallet_option_on_power_double_tap") public static interface QuickAccessWalletClient.GesturePendingIntentCallback {
+    method @FlaggedApi("android.service.quickaccesswallet.launch_wallet_option_on_power_double_tap") public void onGesturePendingIntentRetrieved(@Nullable android.app.PendingIntent);
   }
 
   public static interface QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
@@ -3277,7 +3295,7 @@ package android.service.quicksettings {
 package android.service.settings.preferences {
 
   @FlaggedApi("com.android.settingslib.flags.settings_catalyst") public class SettingsPreferenceServiceClient implements java.lang.AutoCloseable {
-    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @Nullable android.content.ServiceConnection);
+    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.service.settings.preferences.SettingsPreferenceServiceClient,java.lang.Exception>);
   }
 
 }
@@ -3393,6 +3411,10 @@ package android.telephony {
     ctor public BarringInfo.BarringServiceInfo(int, boolean, int, int);
   }
 
+  @FlaggedApi("com.android.internal.telephony.flags.cellular_identifier_disclosure_indications") public final class CellularIdentifierDisclosure implements android.os.Parcelable {
+    ctor public CellularIdentifierDisclosure(int, int, @NonNull String, boolean);
+  }
+
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
     field public static final String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA = "mbms-download-service-override";
   }
@@ -3418,6 +3440,10 @@ package android.telephony {
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     ctor @Deprecated public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.security_algorithms_update_indications") public final class SecurityAlgorithmUpdate implements android.os.Parcelable {
+    ctor public SecurityAlgorithmUpdate(int, int, int, boolean);
   }
 
   public class ServiceState implements android.os.Parcelable {

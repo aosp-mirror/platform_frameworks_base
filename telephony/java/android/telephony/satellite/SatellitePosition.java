@@ -23,6 +23,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.telephony.flags.Flags;
 
+import java.util.Objects;
+
 /**
  * The position of a satellite in Earth orbit.
  *
@@ -110,5 +112,25 @@ public class SatellitePosition implements Parcelable {
      */
     public double getAltitudeKm() {
         return mAltitudeKm;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SatellitePosition that)) return false;
+
+        return Double.compare(that.mLongitudeDegree, mLongitudeDegree) == 0
+                && Double.compare(that.mAltitudeKm, mAltitudeKm) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mLongitudeDegree, mAltitudeKm);
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return "mLongitudeDegree: " + mLongitudeDegree + ", " + "mAltitudeKm: " + mAltitudeKm;
     }
 }

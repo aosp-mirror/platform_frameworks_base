@@ -67,6 +67,8 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
                 new SplitSegmentsAdapter(),
                 // Clip amplitudes and frequencies of final segments based on device bandwidth curve
                 new ClippingAmplitudeAndFrequencyAdapter(),
+                // Convert BasicPwleSegments to PwleSegments based on device capabilities
+                new BasicToPwleSegmentAdapter(),
                 // Split Pwle segments based on their duration and device supported limits
                 new SplitPwleSegmentsAdapter()
         );

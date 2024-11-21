@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.graphics.Insets
 import android.graphics.Rect
@@ -74,13 +75,28 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .waitForAndVerify()
     }
 
+    /** Launch an app and ensure it's moved to Desktop if it has not. */
+    fun enterDesktopMode(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH),
+    ) {
+        innerHelper.launchViaIntent(wmHelper)
+        if (!isInDesktopWindowingMode(wmHelper)) {
+            enterDesktopModeWithDrag(
+                wmHelper = wmHelper,
+                device = device,
+                motionEventHelper = motionEventHelper
+            )
+        }
+    }
+
     /** Move an app to Desktop by dragging the app handle at the top. */
-    fun enterDesktopWithDrag(
+    private fun enterDesktopModeWithDrag(
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH)
     ) {
-        innerHelper.launchViaIntent(wmHelper)
         dragToDesktop(
             wmHelper = wmHelper,
             device = device,
@@ -139,14 +155,35 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             ?: error("Unable to find resource $MINIMIZE_BUTTON_VIEW\n")
     }
 
-    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice, isPip: Boolean = false) {
         val caption = getCaptionForTheApp(wmHelper, device)
         val minimizeButton = getMinimizeButtonForTheApp(caption)
         minimizeButton.click()
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()
-            .withWindowSurfaceDisappeared(innerHelper)
+            .apply {
+                if (isPip) withPipShown() else withWindowSurfaceDisappeared(innerHelper)
+            }
+            .waitForAndVerify()
+    }
+
+    private fun getHeaderEmptyView(caption: UiObject2?): UiObject2 {
+        return caption
+            ?.children
+            ?.find { it.resourceName.endsWith(HEADER_EMPTY_VIEW) }
+            ?: error("Unable to find resource $HEADER_EMPTY_VIEW\n")
+    }
+
+    /** Click on an existing window's header to bring it to the front. */
+    fun bringToFront(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+        val caption = getCaptionForTheApp(wmHelper, device)
+        val openHeaderView = getHeaderEmptyView(caption)
+        openHeaderView.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withTopVisibleApp(innerHelper)
             .waitForAndVerify()
     }
 
@@ -415,6 +452,10 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         return metricInsets.getInsetsIgnoringVisibility(typeMask)
     }
 
+    // Requirement of DesktopWindowingMode is having a minimum of 1 app in WINDOWING_MODE_FREEFORM.
+    private fun isInDesktopWindowingMode(wmHelper: WindowManagerStateHelper) =
+        wmHelper.getWindow(innerHelper)?.windowingMode == WINDOWING_MODE_FREEFORM
+
     private companion object {
         val TIMEOUT: Duration = Duration.ofSeconds(3)
         const val SNAP_RESIZE_DRAG_INSET: Int = 5 // inset to avoid dragging to display edge
@@ -427,6 +468,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         const val SNAP_LEFT_BUTTON: String = "maximize_menu_snap_left_button"
         const val SNAP_RIGHT_BUTTON: String = "maximize_menu_snap_right_button"
         const val MINIMIZE_BUTTON_VIEW: String = "minimize_window"
+        const val HEADER_EMPTY_VIEW: String = "caption_handle"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
     }

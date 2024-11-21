@@ -30,7 +30,6 @@ import java.util.Objects;
 
 /**
  * Ambient backlight event
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightEvent implements Parcelable {
@@ -40,7 +39,7 @@ public final class AmbientBacklightEvent implements Parcelable {
     @IntDef({AMBIENT_BACKLIGHT_EVENT_ENABLED, AMBIENT_BACKLIGHT_EVENT_DISABLED,
             AMBIENT_BACKLIGHT_EVENT_METADATA,
             AMBIENT_BACKLIGHT_EVENT_INTERRUPTED})
-    public @interface AmbientBacklightEventTypes {}
+    public @interface Type {}
 
     /**
      * Event type for ambient backlight events. The ambient backlight is enabled.
@@ -69,9 +68,9 @@ public final class AmbientBacklightEvent implements Parcelable {
     private final AmbientBacklightMetadata mMetadata;
 
     /**
-     * Constructor of AmbientBacklightEvent.
+     * Constructs AmbientBacklightEvent.
      */
-    public AmbientBacklightEvent(int eventType,
+    public AmbientBacklightEvent(@Type int eventType,
             @Nullable AmbientBacklightMetadata metadata) {
         mEventType = eventType;
         mMetadata = metadata;
@@ -85,6 +84,7 @@ public final class AmbientBacklightEvent implements Parcelable {
     /**
      * Gets event type.
      */
+    @Type
     public int getEventType() {
         return mEventType;
     }

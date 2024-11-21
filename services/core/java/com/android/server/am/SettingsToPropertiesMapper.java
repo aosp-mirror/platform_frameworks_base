@@ -257,6 +257,7 @@ public class SettingsToPropertiesMapper {
         "wear_systems",
         "wear_sysui",
         "wear_system_managed_surfaces",
+        "wear_watchfaces",
         "window_surfaces",
         "windowing_frontend",
         "xr",

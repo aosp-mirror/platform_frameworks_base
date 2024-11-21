@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"xác định vị trí tương đối giữa các thiết bị ở gần"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Cho phép ứng dụng xác định vị trí tương đối giữa các thiết bị ở gần"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Bật"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Quay lại"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Đang chờ xử lý..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Tính năng Liên lạc khẩn cấp qua vệ tinh đang hoạt động"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Bạn có thể nhắn tin cho dịch vụ khẩn cấp khi không có mạng di động hay mạng Wi-Fi. Google Tin nhắn phải là ứng dụng nhắn tin mặc định của bạn."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Chưa hỗ trợ tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Thiết bị này chưa hỗ trợ tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Chưa thiết lập tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Hãy kiểm tra để chắc chắn rằng bạn đã kết nối Internet, rồi thử thiết lập lại"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Tính năng Liên lạc khẩn cấp qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Tính năng Liên lạc khẩn cấp qua vệ tinh chưa hoạt động ở quốc gia hoặc khu vực này"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Chưa thiết lập tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Để nhắn tin qua vệ tinh, hãy đặt Google Tin nhắn làm ứng dụng nhắn tin mặc định của bạn"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Tính năng Liên lạc khẩn cấp qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Để kiểm tra xem tính năng Liên lạc khẩn cấp qua vệ tinh có hoạt động ở quốc gia hoặc khu vực này không, hãy bật chế độ cài đặt vị trí"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Tính năng nhắn tin qua vệ tinh đang hoạt động"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Bạn có thể nhắn tin qua vệ tinh khi không có mạng di động hay mạng Wi-Fi. Google Tin nhắn phải là ứng dụng nhắn tin mặc định của bạn."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Chưa hỗ trợ tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Thiết bị này chưa hỗ trợ tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Chưa thiết lập tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Hãy kiểm tra để chắc chắn rằng bạn đã kết nối Internet, rồi thử thiết lập lại"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Tính năng nhắn tin qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Tính năng nhắn tin qua vệ tinh chưa hoạt động ở quốc gia hoặc khu vực này"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Chưa thiết lập tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Để nhắn tin qua vệ tinh, hãy đặt Google Tin nhắn làm ứng dụng nhắn tin mặc định của bạn"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Tính năng nhắn tin qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Để kiểm tra xem tính năng nhắn tin qua vệ tinh có hoạt động ở quốc gia hoặc khu vực này không, hãy bật chế độ cài đặt vị trí"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Không nhận dạng được <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nữa."</string>

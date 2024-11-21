@@ -72,6 +72,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -90,15 +91,18 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -107,7 +111,6 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
-import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
@@ -118,6 +121,7 @@ import com.android.systemui.keyboard.shortcut.ui.model.IconSource
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -377,15 +381,19 @@ private fun ShortcutHelperTwoPane(
 
     Column(modifier = modifier.fillMaxSize().padding(horizontal = 24.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.padding(start = 202.dp).width(412.dp)) {
-                TitleBar(isCustomizing)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            if (isShortcutCustomizerFlagEnabled) {
-                if (isCustomizing) {
-                    DoneButton(onClick = { isCustomizing = false })
+            // Keep title centered whether customize button is visible or not.
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    TitleBar(isCustomizing)
+                }
+                if (isShortcutCustomizerFlagEnabled) {
+                    if (isCustomizing) {
+                        DoneButton(onClick = { isCustomizing = false })
+                    } else {
+                        CustomizeButton(onClick = { isCustomizing = true })
+                    }
                 } else {
-                    CustomizeButton(onClick = { isCustomizing = true })
+                    Spacer(modifier = Modifier.width(if (isCustomizing) 69.dp else 133.dp))
                 }
             }
         }
@@ -393,7 +401,7 @@ private fun ShortcutHelperTwoPane(
         Row(Modifier.fillMaxWidth()) {
             StartSidePanel(
                 onSearchQueryChanged = onSearchQueryChanged,
-                modifier = Modifier.width(240.dp),
+                modifier = Modifier.width(240.dp).semantics { isTraversalGroup = true },
                 categories = categories,
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
                 selectedCategory = selectedCategoryType,
@@ -402,7 +410,7 @@ private fun ShortcutHelperTwoPane(
             Spacer(modifier = Modifier.width(24.dp))
             EndSidePanel(
                 searchQuery,
-                Modifier.fillMaxSize().padding(top = 8.dp),
+                Modifier.fillMaxSize().padding(top = 8.dp).semantics { isTraversalGroup = true },
                 selectedCategory,
                 isCustomizing = isCustomizing,
                 onCustomizationRequested = onCustomizationRequested,
@@ -454,14 +462,18 @@ private fun EndSidePanel(
                 searchQuery = searchQuery,
                 subCategory = subcategory,
                 isCustomizing = isCustomizing,
-                onCustomizationRequested = { label, subCategoryLabel ->
-                    onCustomizationRequested(
-                        ShortcutCustomizationRequestInfo.Add(
-                            label = label,
-                            subCategoryLabel = subCategoryLabel,
-                            categoryType = category.type,
-                        )
-                    )
+                onCustomizationRequested = { requestInfo ->
+                    when (requestInfo) {
+                        is ShortcutCustomizationRequestInfo.Add ->
+                            onCustomizationRequested(
+                                requestInfo.copy(categoryType = category.type)
+                            )
+
+                        is ShortcutCustomizationRequestInfo.Delete ->
+                            onCustomizationRequested(
+                                requestInfo.copy(categoryType = category.type)
+                            )
+                    }
                 },
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -492,7 +504,7 @@ private fun SubCategoryContainerDualPane(
     searchQuery: String,
     subCategory: ShortcutSubCategory,
     isCustomizing: Boolean,
-    onCustomizationRequested: (String, String) -> Unit = { _: String, _: String -> },
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -514,7 +526,19 @@ private fun SubCategoryContainerDualPane(
                     searchQuery = searchQuery,
                     shortcut = shortcut,
                     isCustomizing = isCustomizing,
-                    onCustomizationRequested = { onCustomizationRequested(it, subCategory.label) },
+                    onCustomizationRequested = { requestInfo ->
+                        when (requestInfo) {
+                            is ShortcutCustomizationRequestInfo.Add ->
+                                onCustomizationRequested(
+                                    requestInfo.copy(subCategoryLabel = subCategory.label)
+                                )
+
+                            is ShortcutCustomizationRequestInfo.Delete ->
+                                onCustomizationRequested(
+                                    requestInfo.copy(subCategoryLabel = subCategory.label)
+                                )
+                        }
+                    },
                 )
             }
         }
@@ -536,7 +560,7 @@ private fun Shortcut(
     searchQuery: String,
     shortcut: ShortcutModel,
     isCustomizing: Boolean = false,
-    onCustomizationRequested: (String) -> Unit = {},
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -550,7 +574,7 @@ private fun Shortcut(
             .padding(8.dp)
     ) {
         Row(
-            modifier = Modifier.width(128.dp).align(Alignment.CenterVertically),
+            modifier = Modifier.width(128.dp).align(Alignment.CenterVertically).weight(0.333f),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -561,10 +585,19 @@ private fun Shortcut(
         }
         Spacer(modifier = Modifier.width(24.dp))
         ShortcutKeyCombinations(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(.666f),
             shortcut = shortcut,
             isCustomizing = isCustomizing,
-            onAddShortcutRequested = { onCustomizationRequested(shortcut.label) },
+            onAddShortcutRequested = {
+                onCustomizationRequested(
+                    ShortcutCustomizationRequestInfo.Add(label = shortcut.label)
+                )
+            },
+            onDeleteShortcutRequested = {
+                onCustomizationRequested(
+                    ShortcutCustomizationRequestInfo.Delete(label = shortcut.label)
+                )
+            },
         )
     }
 }
@@ -791,16 +824,25 @@ private fun StartSidePanel(
     selectedCategory: ShortcutCategoryType?,
     onCategoryClicked: (ShortcutCategoryUi) -> Unit,
 ) {
-    Column(modifier) {
-        ShortcutsSearchBar(onSearchQueryChanged)
-        Spacer(modifier = Modifier.heightIn(8.dp))
-        CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
-        Spacer(modifier = Modifier.weight(1f))
-        KeyboardSettings(
-            horizontalPadding = 24.dp,
-            verticalPadding = 24.dp,
-            onKeyboardSettingsClicked,
-        )
+    CompositionLocalProvider(
+        // Restrict system font scale increases up to a max so categories display correctly.
+        LocalDensity provides
+            Density(
+                density = LocalDensity.current.density,
+                fontScale = LocalDensity.current.fontScale.coerceIn(1f, 1.5f),
+            )
+    ) {
+        Column(modifier) {
+            ShortcutsSearchBar(onSearchQueryChanged)
+            Spacer(modifier = Modifier.heightIn(8.dp))
+            CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
+            Spacer(modifier = Modifier.weight(1f))
+            KeyboardSettings(
+                horizontalPadding = 24.dp,
+                verticalPadding = 24.dp,
+                onKeyboardSettingsClicked,
+            )
+        }
     }
 }
 

@@ -31,6 +31,10 @@ data class NoteTaskInfo(
         if (isKeyguardLocked || entryPoint == WIDGET_PICKER_SHORTCUT_IN_MULTI_WINDOW_MODE) {
             NoteTaskLaunchMode.Activity
         } else {
-            NoteTaskLaunchMode.AppBubble
+            if (entryPoint == NoteTaskEntryPoint.QS_NOTES_TILE) {
+                NoteTaskLaunchMode.AppBubble(NoteTaskBubbleExpandBehavior.KEEP_IF_EXPANDED)
+            } else {
+                NoteTaskLaunchMode.AppBubble(NoteTaskBubbleExpandBehavior.DEFAULT)
+            }
         }
 }

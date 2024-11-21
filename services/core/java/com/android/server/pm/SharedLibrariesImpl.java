@@ -1017,10 +1017,11 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     boolean isSdkOrStatic = libraryType.equals(LIBRARY_TYPE_SDK)
                             || libraryType.equals(LIBRARY_TYPE_STATIC);
                     if (isSdkOrStatic && outMissingSharedLibraryInfos != null) {
-                        // TODO(b/372862145): Pass the CertDigest too
                         // If Dependency Installation is supported, try that instead of failing.
+                        final List<String> libCertDigests = Arrays.asList(requiredCertDigests[i]);
                         SharedLibraryInfo missingLibrary = new SharedLibraryInfo(
-                                libName, libVersion, SharedLibraryInfo.TYPE_SDK_PACKAGE
+                                libName, libVersion, SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                                libCertDigests
                         );
                         outMissingSharedLibraryInfos.add(missingLibrary);
                     } else {

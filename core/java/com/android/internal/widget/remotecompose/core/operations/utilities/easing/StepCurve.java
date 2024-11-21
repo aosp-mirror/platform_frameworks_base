@@ -24,14 +24,14 @@ import android.annotation.NonNull;
  */
 public class StepCurve extends Easing {
     //    private static final boolean DEBUG = false;
-    MonotonicCurveFit mCurveFit;
+    @NonNull private final MonotonicCurveFit mCurveFit;
 
-    public StepCurve(float[] params, int offset, int len) {
+    public StepCurve(@NonNull float[] params, int offset, int len) {
         mCurveFit = genSpline(params, offset, len);
     }
 
     @NonNull
-    private static MonotonicCurveFit genSpline(float[] values, int off, int arrayLen) {
+    private static MonotonicCurveFit genSpline(@NonNull float[] values, int off, int arrayLen) {
         int length = arrayLen * 3 - 2;
         int len = arrayLen - 1;
         double gap = 1.0 / len;

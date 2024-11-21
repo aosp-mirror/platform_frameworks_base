@@ -17,4 +17,5 @@
 <resources>
     <!-- For portrait direction in unfold foldable device, we don't need keyguard_smartspace_top_offset-->
     <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
+    <dimen name="status_view_margin_horizontal">62dp</dimen>
 </resources>

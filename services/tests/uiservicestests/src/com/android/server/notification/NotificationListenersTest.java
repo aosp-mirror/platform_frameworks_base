@@ -907,10 +907,18 @@ public class NotificationListenersTest extends UiServiceTestCase {
         ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(mNm.mHandler, times(1)).post(runnableCaptor.capture());
         runnableCaptor.getValue().run();
-        ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
-                ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
-        verify(sysuiListener, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
-        StatusBarNotification sbnResult = sbnCaptor.getValue().get();
+        StatusBarNotification sbnResult = null;
+        if (android.app.Flags.noSbnholder()) {
+            ArgumentCaptor<StatusBarNotification> sbnCaptor =
+                    ArgumentCaptor.forClass(StatusBarNotification.class);
+            verify(sysuiListener, times(1)).onNotificationPostedFull(sbnCaptor.capture(), any());
+            sbnResult = sbnCaptor.getValue();
+        } else {
+            ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
+                    ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
+            verify(sysuiListener, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
+            sbnResult = sbnCaptor.getValue().get();
+        }
         assertThat(sbnResult.getNotification()
                 .extras.getCharSequence(Notification.EXTRA_TITLE).toString())
                 .isEqualTo("new title");
@@ -920,7 +928,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testListenerPostLifeimteExtension_postsToAppropriateListeners() throws Exception {
+    public void testListenerPostLifetimeExtension_postsToAppropriateListeners() throws Exception {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
 
         // Create original notification, with FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY.
@@ -998,16 +1006,29 @@ public class NotificationListenersTest extends UiServiceTestCase {
             r.run();
         }
 
-        ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
-                ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
-        verify(sysuiListener, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
-        StatusBarNotification sbnResult = sbnCaptor.getValue().get();
+        StatusBarNotification sbnResult = null;
+        if (android.app.Flags.noSbnholder()) {
+            ArgumentCaptor<StatusBarNotification> sbnCaptor =
+                    ArgumentCaptor.forClass(StatusBarNotification.class);
+            verify(sysuiListener, times(1)).onNotificationPostedFull(sbnCaptor.capture(), any());
+            sbnResult = sbnCaptor.getValue();
+        } else {
+            ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
+                    ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
+            verify(sysuiListener, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
+            sbnResult = sbnCaptor.getValue().get();
+        }
         assertThat(sbnResult.getNotification()
                 .extras.getCharSequence(Notification.EXTRA_TITLE).toString())
                 .isEqualTo("new title");
 
-        verify(otherListener1, times(1)).onNotificationPosted(any(), any());
-        verify(otherListener2, times(1)).onNotificationPosted(any(), any());
+        if (android.app.Flags.noSbnholder()) {
+            verify(otherListener1, times(1)).onNotificationPostedFull(any(), any());
+            verify(otherListener2, times(1)).onNotificationPostedFull(any(), any());
+        } else {
+            verify(otherListener1, times(1)).onNotificationPosted(any(), any());
+            verify(otherListener2, times(1)).onNotificationPosted(any(), any());
+        }
     }
 
     @Test
@@ -1083,16 +1104,29 @@ public class NotificationListenersTest extends UiServiceTestCase {
             r.run();
         }
 
-        ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
-                ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
-        verify(sysuiListener, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
-        StatusBarNotification sbnResult = sbnCaptor.getValue().get();
+        StatusBarNotification sbnResult = null;
+        if (android.app.Flags.noSbnholder()) {
+            ArgumentCaptor<StatusBarNotification> sbnCaptor =
+                    ArgumentCaptor.forClass(StatusBarNotification.class);
+            verify(sysuiListener, times(1)).onNotificationPostedFull(sbnCaptor.capture(), any());
+            sbnResult = sbnCaptor.getValue();
+        } else {
+            ArgumentCaptor<IStatusBarNotificationHolder> sbnCaptor =
+                    ArgumentCaptor.forClass(IStatusBarNotificationHolder.class);
+            verify(sysuiListener, times(1)).onNotificationPosted(sbnCaptor.capture(), any());
+            sbnResult = sbnCaptor.getValue().get();
+        }
         assertThat(sbnResult.getNotification()
                 .extras.getCharSequence(Notification.EXTRA_TITLE).toString())
                 .isEqualTo("new title");
 
-        verify(otherListener1, times(1)).onNotificationPosted(any(), any());
-        verify(otherListener2, times(1)).onNotificationPosted(any(), any());
+        if (android.app.Flags.noSbnholder()) {
+            verify(otherListener1, times(1)).onNotificationPostedFull(any(), any());
+            verify(otherListener2, times(1)).onNotificationPostedFull(any(), any());
+        } else {
+            verify(otherListener1, times(1)).onNotificationPosted(any(), any());
+            verify(otherListener2, times(1)).onNotificationPosted(any(), any());
+        }
     }
 
     /**

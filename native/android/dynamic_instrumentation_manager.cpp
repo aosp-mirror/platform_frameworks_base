@@ -65,7 +65,7 @@ ADynamicInstrumentationManager_TargetProcess* ADynamicInstrumentationManager_Tar
 }
 
 void ADynamicInstrumentationManager_TargetProcess_destroy(
-        ADynamicInstrumentationManager_TargetProcess* instance) {
+        const ADynamicInstrumentationManager_TargetProcess* instance) {
     delete instance;
 }
 
@@ -96,7 +96,7 @@ ADynamicInstrumentationManager_MethodDescriptor_create(const char* fullyQualifie
 }
 
 void ADynamicInstrumentationManager_MethodDescriptor_destroy(
-        ADynamicInstrumentationManager_MethodDescriptor* instance) {
+        const ADynamicInstrumentationManager_MethodDescriptor* instance) {
     delete instance;
 }
 
@@ -112,29 +112,29 @@ ADynamicInstrumentationManager_ExecutableMethodFileOffsets_create() {
 }
 
 const char* ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerPath(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
     return instance->containerPath.c_str();
 }
 
 uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerOffset(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
     return instance->containerOffset;
 }
 
 uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOffset(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
     return instance->methodOffset;
 }
 
 void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
     delete instance;
 }
 
 int32_t ADynamicInstrumentationManager_getExecutableMethodFileOffsets(
         const ADynamicInstrumentationManager_TargetProcess* targetProcess,
         const ADynamicInstrumentationManager_MethodDescriptor* methodDescriptor,
-        ADynamicInstrumentationManager_ExecutableMethodFileOffsets** out) {
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets** out) {
     android::os::instrumentation::TargetProcess targetProcessParcel;
     targetProcessParcel.uid = targetProcess->uid;
     targetProcessParcel.pid = targetProcess->pid;

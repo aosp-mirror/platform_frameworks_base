@@ -18,7 +18,6 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -92,11 +91,11 @@ public class PaddingModifierOperation implements ModifierOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 

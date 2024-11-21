@@ -49,67 +49,55 @@ import java.util.concurrent.Executor;
  * available services, a caller may query {@link android.content.pm.PackageManager} for applications
  * that provide the intent action {@link SettingsPreferenceService#ACTION_PREFERENCE_SERVICE} that
  * are also system applications ({@link android.content.pm.ApplicationInfo#FLAG_SYSTEM}).
+ * <p>
+ * Note: Each instance of this client will open a binding to an application. This can be resource
+ * intensive and affect the health of the system. It is essential that each client instance is
+ * only used when needed and the number of calls made are minimal.
  */
 @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
 public class SettingsPreferenceServiceClient implements AutoCloseable {
 
+    @NonNull
     private final Context mContext;
+    @NonNull
     private final Intent mServiceIntent;
+    @NonNull
     private final ServiceConnection mServiceConnection;
-    private final boolean mSystemOnly;
+    @Nullable
     private ISettingsPreferenceService mRemoteService;
 
     /**
      * Construct a client for binding to a {@link SettingsPreferenceService} provided by the
      * application corresponding to the provided package name.
-     * @param packageName - package name for which this client will initiate a service binding
+     * @param context Application context
+     * @param packageName package name for which this client will initiate a service binding
+     * @param callbackExecutor executor on which to invoke clientReadyCallback
+     * @param clientReadyCallback callback invoked once the client is ready, error otherwise
      */
-    public SettingsPreferenceServiceClient(@NonNull Context context,
-                                           @NonNull String packageName) {
-        this(context, packageName, true, null);
+    public SettingsPreferenceServiceClient(
+            @NonNull Context context,
+            @NonNull String packageName,
+            @CallbackExecutor @NonNull Executor callbackExecutor,
+            @NonNull
+            OutcomeReceiver<SettingsPreferenceServiceClient, Exception> clientReadyCallback) {
+        this(context, packageName, true, callbackExecutor, clientReadyCallback);
     }
 
     /**
      * @hide Only to be called directly by test
      */
     @TestApi
-    public SettingsPreferenceServiceClient(@NonNull Context context,
-                                           @NonNull String packageName,
-                                           boolean systemOnly,
-                                           @Nullable ServiceConnection connectionListener) {
+    public SettingsPreferenceServiceClient(
+            @NonNull Context context,
+            @NonNull String packageName,
+            boolean systemOnly,
+            @CallbackExecutor @NonNull Executor callbackExecutor,
+            @NonNull
+            OutcomeReceiver<SettingsPreferenceServiceClient, Exception> clientReadyCallback) {
         mContext = context.getApplicationContext();
         mServiceIntent = new Intent(ACTION_PREFERENCE_SERVICE).setPackage(packageName);
-        mSystemOnly = systemOnly;
-        mServiceConnection = createServiceConnection(connectionListener);
-    }
-
-    /**
-     * Initiate binding to service.
-     * <p>If no service exists for the package provided or the package is not for a system
-     * application, no binding will occur.
-     */
-    public void start() {
-        PackageManager pm = mContext.getPackageManager();
-        PackageManager.ResolveInfoFlags flags;
-        if (mSystemOnly) {
-            flags = PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY);
-        } else {
-            flags = PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL);
-        }
-        List<ResolveInfo> infos = pm.queryIntentServices(mServiceIntent, flags);
-        if (infos.size() == 1) {
-            mContext.bindService(mServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
-        }
-    }
-
-    /**
-     * If there is an active service binding, unbind from that service.
-     */
-    public void stop() {
-        if (mRemoteService != null) {
-            mRemoteService = null;
-            mContext.unbindService(mServiceConnection);
-        }
+        mServiceConnection = createServiceConnection(callbackExecutor, clientReadyCallback);
+        connect(systemOnly, callbackExecutor, clientReadyCallback);
     }
 
     /**
@@ -209,32 +197,6 @@ public class SettingsPreferenceServiceClient implements AutoCloseable {
         }
     }
 
-    @NonNull
-    private ServiceConnection createServiceConnection(@Nullable ServiceConnection listener) {
-        return new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mRemoteService = getPreferenceServiceInterface(service);
-                if (listener != null) {
-                    listener.onServiceConnected(name, service);
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mRemoteService = null;
-                if (listener != null) {
-                    listener.onServiceDisconnected(name);
-                }
-            }
-        };
-    }
-
-    @NonNull
-    private ISettingsPreferenceService getPreferenceServiceInterface(@NonNull IBinder service) {
-        return ISettingsPreferenceService.Stub.asInterface(service);
-    }
-
     /**
      * This client handles a resource, thus is it important to appropriately close that resource
      * when it is no longer needed.
@@ -243,6 +205,65 @@ public class SettingsPreferenceServiceClient implements AutoCloseable {
      */
     @Override
     public void close() {
-        stop();
+        if (mRemoteService != null) {
+            mRemoteService = null;
+            mContext.unbindService(mServiceConnection);
+        }
+    }
+
+    /*
+     * Initiate binding to service.
+     * <p>If no service exists for the package provided or the package is not for a system
+     * application, no binding will occur.
+     */
+    private void connect(
+            boolean matchSystemOnly,
+            @NonNull Executor callbackExecutor,
+            @NonNull OutcomeReceiver<SettingsPreferenceServiceClient, Exception> clientCallback) {
+        PackageManager pm = mContext.getPackageManager();
+        PackageManager.ResolveInfoFlags flags;
+        if (matchSystemOnly) {
+            flags = PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY);
+        } else {
+            flags = PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL);
+        }
+        List<ResolveInfo> infos = pm.queryIntentServices(mServiceIntent, flags);
+        if (infos.size() != 1
+                || !mContext.bindService(mServiceIntent, mServiceConnection,
+                Context.BIND_AUTO_CREATE)) {
+            callbackExecutor.execute(() ->
+                    clientCallback.onError(new IllegalStateException("Unable to bind service")));
+        }
+    }
+
+    @NonNull
+    private ServiceConnection createServiceConnection(
+            @NonNull Executor callbackExecutor,
+            @NonNull OutcomeReceiver<SettingsPreferenceServiceClient, Exception> clientCallback) {
+        return new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mRemoteService = ISettingsPreferenceService.Stub.asInterface(service);
+                callbackExecutor.execute(() ->
+                        clientCallback.onResult(SettingsPreferenceServiceClient.this));
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mRemoteService = null;
+            }
+
+            @Override
+            public void onBindingDied(ComponentName name) {
+                close();
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                callbackExecutor.execute(() -> clientCallback.onError(
+                        new IllegalStateException("Unable to connect client")));
+                close();
+            }
+        };
     }
 }

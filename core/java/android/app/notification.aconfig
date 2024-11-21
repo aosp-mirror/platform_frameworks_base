@@ -13,6 +13,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_templates"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update notification templates"
+  bug: "378660052"
+}
+
+flag {
   name: "modes_api"
   is_exported: true
   namespace: "systemui"
@@ -267,6 +274,13 @@ flag {
   namespace: "systemui"
   description: "Adds UI for NAS classification of notifications"
   bug: "367996732"
+}
+
+flag {
+  name: "nm_binder_perf_permission_check"
+  namespace: "systemui"
+  description: "Use PermissionManager for areNotificationsEnabled() instead of NMS"
+  bug: "362981561"
 }
 
 flag {

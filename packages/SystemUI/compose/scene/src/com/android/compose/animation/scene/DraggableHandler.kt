@@ -30,8 +30,7 @@ import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController
 import kotlin.math.absoluteValue
-
-internal typealias SuspendedValue<T> = suspend () -> T
+import kotlinx.coroutines.launch
 
 internal interface DraggableHandler {
     /**
@@ -50,6 +49,7 @@ internal interface DragController {
     /**
      * Drag the current scene by [delta] pixels.
      *
+     * @param delta The distance to drag the scene in pixels.
      * @return the consumed [delta]
      */
     fun onDrag(delta: Float): Float
@@ -57,9 +57,18 @@ internal interface DragController {
     /**
      * Stop the current drag with the given [velocity].
      *
+     * @param velocity The velocity of the drag when it stopped.
+     * @param canChangeContent Whether the content can be changed as a result of this drag.
      * @return the consumed [velocity] when the animation complete
      */
-    fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float>
+    suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float
+
+    /**
+     * Cancels the current drag.
+     *
+     * @param canChangeContent Whether the content can be changed as a result of this drag.
+     */
+    fun onCancel(canChangeContent: Boolean)
 }
 
 internal class DraggableHandlerImpl(
@@ -350,7 +359,7 @@ private class DragControllerImpl(
         val result = swipes.findUserActionResult(directionOffset = newOffset)
 
         if (result == null) {
-            onStop(velocity = delta, canChangeContent = true)
+            onCancel(canChangeContent = true)
             return 0f
         }
 
@@ -379,11 +388,11 @@ private class DragControllerImpl(
         return consumedDelta
     }
 
-    override fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float> {
+    override suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float {
         return onStop(velocity, canChangeContent, swipeAnimation)
     }
 
-    private fun <T : ContentKey> onStop(
+    private suspend fun <T : ContentKey> onStop(
         velocity: Float,
         canChangeContent: Boolean,
 
@@ -392,24 +401,23 @@ private class DragControllerImpl(
         // callbacks (like onAnimationCompleted()) might incorrectly finish a new transition that
         // replaced this one.
         swipeAnimation: SwipeAnimation<T>,
-    ): SuspendedValue<Float> {
+    ): Float {
         // The state was changed since the drag started; don't do anything.
         if (!isDrivingTransition || swipeAnimation.isAnimatingOffset()) {
-            return { 0f }
+            return 0f
         }
 
         val fromContent = swipeAnimation.fromContent
-        val consumedVelocity: SuspendedValue<Float>
-        if (canChangeContent) {
-            // If we are halfway between two contents, we check what the target will be based on the
-            // velocity and offset of the transition, then we launch the animation.
+        val targetContent =
+            if (canChangeContent) {
+                // If we are halfway between two contents, we check what the target will be based on
+                // the velocity and offset of the transition, then we launch the animation.
 
-            val toContent = swipeAnimation.toContent
+                val toContent = swipeAnimation.toContent
 
-            // Compute the destination content (and therefore offset) to settle in.
-            val offset = swipeAnimation.dragOffset
-            val distance = swipeAnimation.distance()
-            val targetContent =
+                // Compute the destination content (and therefore offset) to settle in.
+                val offset = swipeAnimation.dragOffset
+                val distance = swipeAnimation.distance()
                 if (
                     distance != DistanceUnspecified &&
                         shouldCommitSwipe(
@@ -424,16 +432,15 @@ private class DragControllerImpl(
                 } else {
                     fromContent
                 }
-            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = targetContent)
-        } else {
-            // We are doing an overscroll preview animation between scenes.
-            check(fromContent == swipeAnimation.currentContent) {
-                "canChangeContent is false but currentContent != fromContent"
+            } else {
+                // We are doing an overscroll preview animation between scenes.
+                check(fromContent == swipeAnimation.currentContent) {
+                    "canChangeContent is false but currentContent != fromContent"
+                }
+                fromContent
             }
-            consumedVelocity = swipeAnimation.animateOffset(velocity, targetContent = fromContent)
-        }
 
-        return consumedVelocity
+        return swipeAnimation.animateOffset(velocity, targetContent)
     }
 
     /**
@@ -476,6 +483,12 @@ private class DragControllerImpl(
             velocity >= velocityThreshold ||
                 (offset >= positionalThreshold && !wasCommitted) ||
                 isCloserToTarget()
+        }
+    }
+
+    override fun onCancel(canChangeContent: Boolean) {
+        swipeAnimation.contentTransition.coroutineScope.launch {
+            onStop(velocity = 0f, canChangeContent = canChangeContent)
         }
     }
 }
@@ -701,13 +714,14 @@ private fun scrollController(
         }
 
         override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
-            return dragController
-                .onStop(velocity = initialVelocity, canChangeContent = canChangeScene)
-                .invoke()
+            return dragController.onStop(
+                velocity = initialVelocity,
+                canChangeContent = canChangeScene,
+            )
         }
 
         override fun onCancel() {
-            dragController.onStop(velocity = 0f, canChangeContent = canChangeScene)
+            dragController.onCancel(canChangeScene)
         }
 
         /**
@@ -731,5 +745,9 @@ internal const val OffsetVisibilityThreshold = 0.5f
 private object NoOpDragController : DragController {
     override fun onDrag(delta: Float) = 0f
 
-    override fun onStop(velocity: Float, canChangeContent: Boolean) = suspend { 0f }
+    override suspend fun onStop(velocity: Float, canChangeContent: Boolean) = 0f
+
+    override fun onCancel(canChangeContent: Boolean) {
+        /* do nothing */
+    }
 }

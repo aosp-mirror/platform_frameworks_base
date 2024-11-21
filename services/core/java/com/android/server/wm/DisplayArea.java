@@ -101,8 +101,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
-        // TODO(display-area): move this up to ConfigurationContainer
-        setOverrideOrientation(SCREEN_ORIENTATION_UNSET);
         mType = type;
         mName = name;
         mFeatureId = featureId;

@@ -636,7 +636,7 @@ public abstract class WMShellBaseModule {
     static Optional<FreeformComponents> provideFreeformComponents(
             @DynamicOverride Optional<FreeformComponents> freeformComponents,
             Context context) {
-        if (FreeformComponents.isFreeformEnabled(context)) {
+        if (FreeformComponents.requiresFreeformComponents(context)) {
             return freeformComponents;
         }
         return Optional.empty();
@@ -795,13 +795,14 @@ public abstract class WMShellBaseModule {
     static KeyguardTransitionHandler provideKeyguardTransitionHandler(
             ShellInit shellInit,
             ShellController shellController,
+            DisplayController displayController,
             Transitions transitions,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new KeyguardTransitionHandler(
-                shellInit, shellController, transitions, taskStackListener, mainHandler,
-                mainExecutor);
+                shellInit, shellController, displayController, transitions, taskStackListener,
+                mainHandler, mainExecutor);
     }
 
     @WMSingleton
@@ -991,7 +992,7 @@ public abstract class WMShellBaseModule {
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
         return desktopTasksController.flatMap((lazy) -> {
-            if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
                 return Optional.of(lazy.get());
             }
             return Optional.empty();
@@ -1024,10 +1025,13 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskStackTransitionObserver provideTaskStackTransitionObserver(
-            Lazy<Transitions> transitions,
-            ShellInit shellInit
+            ShellInit shellInit,
+            Lazy<ShellTaskOrganizer> shellTaskOrganizer,
+            ShellCommandHandler shellCommandHandler,
+            Lazy<Transitions> transitions
     ) {
-        return new TaskStackTransitionObserver(transitions, shellInit);
+        return new TaskStackTransitionObserver(shellInit, shellTaskOrganizer, shellCommandHandler,
+                transitions);
     }
 
     //

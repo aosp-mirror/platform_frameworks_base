@@ -29,6 +29,7 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <style name="Animation.ForcedResizable" parent="@android:style/Animation">

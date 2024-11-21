@@ -30,6 +30,7 @@ import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopModeOrShowAppHandle;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge;
@@ -81,7 +82,6 @@ import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
 import com.android.window.flags.Flags;
@@ -207,7 +207,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopRepository mDesktopRepository;
 
-    DesktopModeWindowDecoration(
+    public DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
@@ -1008,8 +1008,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mWindowDecorConfig = windowDecorConfig;
 
         if (DesktopModeStatus.useRoundedCorners()) {
-            relayoutParams.mCornerRadius =
-                    (int) ScreenDecorationsUtils.getWindowCornerRadius(context);
+            relayoutParams.mCornerRadius = taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    ? loadDimensionPixelSize(context.getResources(),
+                    R.dimen.desktop_windowing_freeform_rounded_corner_radius)
+                    : INVALID_CORNER_RADIUS;
         }
     }
 
@@ -1396,10 +1398,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mAppIconBitmap,
                 mAppName,
                 mSplitScreenController,
-                canEnterDesktopMode(mContext),
+                canEnterDesktopModeOrShowAppHandle(mContext),
                 supportsMultiInstance,
                 shouldShowManageWindowsButton,
                 shouldShowChangeAspectRatioButton,
+                canEnterDesktopMode(mContext),
                 isBrowserApp,
                 isBrowserApp ? getAppLink() : getBrowserLink(),
                 mResult.mCaptionWidth,

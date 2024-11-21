@@ -23,7 +23,6 @@ import android.media.tv.flags.Flags;
 /**
  * The contract between the media quality service and applications. Contains definitions for the
  * commonly used parameter names.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public class MediaQualityContract {
@@ -42,9 +41,8 @@ public class MediaQualityContract {
 
     /**
      * Parameters picture quality.
-     * @hide
      */
-    public static final class PictureQuality implements BaseParameters {
+    public static final class PictureQuality {
         /**
          * The brightness.
          *
@@ -81,12 +79,34 @@ public class MediaQualityContract {
     }
 
     /**
-     * @hide
+     * Parameters for sound quality.
      */
-    public static final class SoundQuality implements BaseParameters {
+    public static final class SoundQuality {
+        /**
+         * The audio volume balance.
+         *
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_BALANCE = "balance";
+
+        /**
+         * The bass.
+         *
+         * <p>Bass setting adjust the low sound frequencies.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_BASS = "bass";
+
+        /**
+         * The treble.
+         *
+         * <p>Treble setting adjust the high sound frequencies.
+         * <p>Type: INTEGER
+         */
         public static final String PARAMETER_TREBLE = "treble";
+
+        private SoundQuality() {
+        }
     }
 
     private MediaQualityContract() {

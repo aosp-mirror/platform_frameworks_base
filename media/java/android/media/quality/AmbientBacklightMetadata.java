@@ -29,7 +29,9 @@ import java.util.Arrays;
 
 /**
  * Metadata of ambient backlight.
- * @hide
+ *
+ * <p>A metadata instance is sent from ambient backlight hardware in a {@link AmbientBacklightEvent}
+ * with {@link AmbientBacklightEvent#AMBIENT_BACKLIGHT_EVENT_METADATA}.
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightMetadata implements Parcelable {
@@ -44,10 +46,15 @@ public final class AmbientBacklightMetadata implements Parcelable {
     private final int[] mZonesColors;
 
     /**
-     * Constructor of AmbientBacklightMetadata.
+     * Constructs AmbientBacklightMetadata.
      */
-    public AmbientBacklightMetadata(@NonNull String packageName, int compressAlgorithm,
-            int source, int colorFormat, int horizontalZonesNumber, int verticalZonesNumber,
+    public AmbientBacklightMetadata(
+            @NonNull String packageName,
+            @AmbientBacklightSettings.CompressAlgorithm int compressAlgorithm,
+            @AmbientBacklightSettings.Source int source,
+            @PixelFormat.Format int colorFormat,
+            int horizontalZonesNumber,
+            int verticalZonesNumber,
             @NonNull int[] zonesColors) {
         mPackageName = packageName;
         mCompressAlgorithm = compressAlgorithm;
@@ -69,8 +76,7 @@ public final class AmbientBacklightMetadata implements Parcelable {
     }
 
     /**
-     * Gets package name.
-     * @hide
+     * Gets package name of the metadata.
      */
     @NonNull
     public String getPackageName() {
@@ -102,7 +108,9 @@ public final class AmbientBacklightMetadata implements Parcelable {
     }
 
     /**
-     * Gets the number of lights in each horizontal zone.
+     * Gets the number of horizontal color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
     public int getHorizontalZonesNumber() {
@@ -110,7 +118,9 @@ public final class AmbientBacklightMetadata implements Parcelable {
     }
 
     /**
-     * Gets the number of lights in each vertical zone.
+     * Gets the number of vertical color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
      */
     @IntRange(from = 0)
     public int getVerticalZonesNumber() {
@@ -118,7 +128,15 @@ public final class AmbientBacklightMetadata implements Parcelable {
     }
 
     /**
-     * @hide
+     * Gets color data of all available color zones.
+     *
+     * <p>The format of the color data can be found at {@link #getColorFormat()}.
+     *
+     * @return an array of color data, in row by row (left-to-right then top-to-bottom) order of the
+     * color zones.
+     *
+     * @see #getHorizontalZonesNumber()
+     * @see #getVerticalZonesNumber()
      */
     @NonNull
     public int[] getZonesColors() {

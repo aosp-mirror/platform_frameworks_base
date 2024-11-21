@@ -202,30 +202,6 @@ constructor(
                 .distinctUntilChanged()
         }
 
-    /**
-     * Scenes that are part of the keyguard and are shown when the device is locked or when the
-     * keyguard still needs to be dismissed.
-     */
-    private val keyguardScenes = setOf(Scenes.Lockscreen, Scenes.Bouncer, Scenes.Communal)
-
-    /**
-     * Scenes that don't belong in the keyguard family and cannot show when the device is locked or
-     * when the keyguard still needs to be dismissed.
-     */
-    private val nonKeyguardScenes = setOf(Scenes.Gone)
-
-    /**
-     * Scenes that can show regardless of device lock or keyguard dismissal states. Other sources of
-     * state need to be consulted to know whether the device has been entered or not.
-     */
-    private val keyguardAgnosticScenes =
-        setOf(
-            Scenes.Shade,
-            Scenes.QuickSettings,
-            Overlays.NotificationsShade,
-            Overlays.QuickSettingsShade,
-        )
-
     private val lockscreenVisibilityWithScenes =
         combine(
                 sceneInteractor.get().transitionState.flatMapLatestConflated {
@@ -355,4 +331,30 @@ constructor(
                     !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
+
+    companion object {
+        /**
+         * Scenes that are part of the keyguard and are shown when the device is locked or when the
+         * keyguard still needs to be dismissed.
+         */
+        val keyguardScenes = setOf(Scenes.Lockscreen, Scenes.Bouncer, Scenes.Communal, Scenes.Dream)
+
+        /**
+         * Scenes that don't belong in the keyguard family and cannot show when the device is locked
+         * or when the keyguard still needs to be dismissed.
+         */
+        private val nonKeyguardScenes = setOf(Scenes.Gone)
+
+        /**
+         * Scenes that can show regardless of device lock or keyguard dismissal states. Other
+         * sources of state need to be consulted to know whether the device has been entered or not.
+         */
+        private val keyguardAgnosticScenes =
+            setOf(
+                Scenes.Shade,
+                Scenes.QuickSettings,
+                Overlays.NotificationsShade,
+                Overlays.QuickSettingsShade,
+            )
+    }
 }

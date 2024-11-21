@@ -38,6 +38,7 @@ import android.window.DesktopModeFlags
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import com.android.internal.policy.SystemBarUtils
+import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.animation.Interpolators
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
@@ -114,7 +115,7 @@ internal class AppHandleViewHolder(
         // If handle is not in status bar region(i.e., bottom stage in vertical split),
         // do not create an input layer
         if (position.y >= SystemBarUtils.getStatusBarHeight(context)) return
-        if (!isCaptionVisible && statusBarInputLayerExists) {
+        if (!isCaptionVisible) {
             disposeStatusBarInputLayer()
             return
         }
@@ -143,7 +144,8 @@ internal class AppHandleViewHolder(
         if (!DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) return
         statusBarInputLayer = AdditionalSystemViewContainer(context, windowManagerWrapper,
             taskInfo.taskId, handlePosition.x, handlePosition.y, handleWidth, handleHeight,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            ignoreCutouts = Flags.showAppHandleLargeScreens()
         )
         val view = statusBarInputLayer?.view ?: error("Unable to find statusBarInputLayer View")
         val lp = statusBarInputLayer?.lp ?: error("Unable to find statusBarInputLayer " +
@@ -227,6 +229,7 @@ internal class AppHandleViewHolder(
      * is not visible.
      */
     fun disposeStatusBarInputLayer() {
+        if (!statusBarInputLayerExists) return
         statusBarInputLayerExists = false
         handler.post {
             statusBarInputLayer?.releaseView()

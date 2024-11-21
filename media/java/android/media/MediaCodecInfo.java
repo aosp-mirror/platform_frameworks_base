@@ -16,14 +16,15 @@
 
 package android.media;
 
-import static android.media.Utils.intersectSortedDistinctRanges;
-import static android.media.Utils.sortDistinctRanges;
+import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
 import static android.media.codec.Flags.FLAG_DYNAMIC_COLOR_ASPECTS;
 import static android.media.codec.Flags.FLAG_HLG_EDITING;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
 import static android.media.codec.Flags.FLAG_NULL_OUTPUT_SURFACE;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 import static android.media.codec.Flags.FLAG_APV_SUPPORT;
+import static android.media.Utils.intersectSortedDistinctRanges;
+import static android.media.Utils.sortDistinctRanges;
 import static android.media.MediaCodec.GetFlag;
 
 import android.annotation.FlaggedApi;
@@ -1876,6 +1877,8 @@ public final class MediaCodecInfo {
      * Codecs with this security model is not included in
      * {@link MediaCodecList#REGULAR_CODECS}, but included in
      * {@link MediaCodecList#ALL_CODECS}.
+     *
+     * @hide
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final int SECURITY_MODEL_TRUSTED_CONTENT_ONLY = 2;
@@ -4755,6 +4758,139 @@ public final class MediaCodecInfo {
         @SuppressLint("AllUpper")
         @FlaggedApi(FLAG_APV_SUPPORT)
         public static final int APVLevel71Band3 = 0x200008;
+
+        // IAMF profiles are defined as the combination of the (listed from LSB to MSB):
+        //  - audio codec (2 bytes)
+        //  - profile (1 byte, offset 16)
+        //  - specification version (1 byte, offset 24)
+        private static final int IAMF_CODEC_OPUS = 0x1;
+        private static final int IAMF_CODEC_AAC  = 0x1 << 1;
+        private static final int IAMF_CODEC_FLAC = 0x1 << 2;
+        private static final int IAMF_CODEC_PCM  = 0x1 << 3;
+        private static final int IAMF_PROFILE_SIMPLE        = 0x1 << 16;
+        private static final int IAMF_PROFILE_BASE          = 0x1 << 17;
+        private static final int IAMF_PROFILE_BASE_ENHANCED = 0x1 << 18;
+        private static final int IAMF_v1 = 0x1 << 24;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in OPUS.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimpleOpus =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_OPUS;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in AAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimpleAac =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_AAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in FLAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimpleFlac =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_FLAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in PCM.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileSimplePcm =
+                IAMF_v1 + IAMF_PROFILE_SIMPLE + IAMF_CODEC_PCM;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in OPUS.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseOpus =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_OPUS;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in AAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseAac =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_AAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in FLAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseFlac =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_FLAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in PCM.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBasePcm =
+                IAMF_v1 + IAMF_PROFILE_BASE + IAMF_CODEC_PCM;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in OPUS.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedOpus =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_OPUS;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in AAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedAac =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_AAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in FLAC.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedFlac =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_FLAC;
+        /**
+         * IAMF profile using the
+         * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+         * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+         * in PCM.
+         */
+        @SuppressLint("AllUpper")
+        @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+        public static final int IAMFProfileBaseEnhancedPcm =
+                IAMF_v1 + IAMF_PROFILE_BASE_ENHANCED + IAMF_CODEC_PCM;
 
         /**
          * The profile of the media content. Depending on the type of media this can be

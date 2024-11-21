@@ -496,24 +496,6 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testAppendOrganizedChildTaskInfo() {
-        final Task root = createTaskBuilder(".CreatedByOrganizerRoot").build();
-        root.mCreatedByOrganizer = true;
-        // Add organized and non-organized child.
-        final Task child1 = createTaskBuilder(".Task1").setParentTask(root).build();
-        final Task child2 = createTaskBuilder(".Task2").setParentTask(root).build();
-        doReturn(true).when(child1).isOrganized();
-        doReturn(false).when(child2).isOrganized();
-        mRecentTasks.add(root);
-
-        // Make sure only organized child will be appended.
-        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
-        final List<RecentTaskInfo> childrenTaskInfos = infos.get(0).childrenTaskInfos;
-        assertEquals(childrenTaskInfos.size(), 1);
-        assertEquals(childrenTaskInfos.get(0).taskId, child1.mTaskId);
-    }
-
-    @Test
     public void testAddTasksHomeClearUntrackedTasks_expectFinish() {
         // There may be multiple tasks with the same base intent by flags (FLAG_ACTIVITY_NEW_TASK |
         // FLAG_ACTIVITY_MULTIPLE_TASK). If the previous task is still active, it should be removed
@@ -1417,46 +1399,6 @@ public class RecentTasksTest extends WindowTestsBase {
             final Bundle extras = infos.get(i).baseIntent.getExtras();
             assertTrue(extras == null || extras.isEmpty());
         }
-    }
-
-    @Test
-    public void testLastSnapshotData_snapshotSaved() {
-        final TaskSnapshot snapshot = createSnapshot(new Point(100, 100), new Point(80, 80));
-        final Task task1 = createTaskBuilder(".Task").build();
-        task1.onSnapshotChanged(snapshot);
-
-        mRecentTasks.add(task1);
-        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
-        final RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
-                infos.get(0).lastSnapshotData;
-        assertTrue(lastSnapshotData.taskSize.equals(100, 100));
-        assertTrue(lastSnapshotData.bufferSize.equals(80, 80));
-    }
-
-    @Test
-    public void testLastSnapshotData_noBuffer() {
-        final Task task1 = createTaskBuilder(".Task").build();
-        final TaskSnapshot snapshot = createSnapshot(new Point(100, 100), null);
-        task1.onSnapshotChanged(snapshot);
-
-        mRecentTasks.add(task1);
-        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
-        final RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
-                infos.get(0).lastSnapshotData;
-        assertTrue(lastSnapshotData.taskSize.equals(100, 100));
-        assertNull(lastSnapshotData.bufferSize);
-    }
-
-    @Test
-    public void testLastSnapshotData_notSet() {
-        final Task task1 = createTaskBuilder(".Task").build();
-
-        mRecentTasks.add(task1);
-        final List<RecentTaskInfo> infos = getRecentTasks(0 /* flags */);
-        final RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
-                infos.get(0).lastSnapshotData;
-        assertNull(lastSnapshotData.taskSize);
-        assertNull(lastSnapshotData.bufferSize);
     }
 
     @Test

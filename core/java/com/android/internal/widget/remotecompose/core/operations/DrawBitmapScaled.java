@@ -46,6 +46,7 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
     int mContentDescId;
     float mScaleFactor, mOutScaleFactor;
     int mScaleType;
+    int mMode;
 
     @NonNull ImageScaling mScaling = new ImageScaling();
     public static final int SCALE_NONE = ImageScaling.SCALE_NONE;
@@ -79,7 +80,8 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         mOutDstTop = mDstTop = dstTop;
         mOutDstRight = mDstRight = dstRight;
         mOutDstBottom = mDstBottom = dstBottom;
-        mScaleType = type;
+        mScaleType = type & 0xFF;
+        mMode = type >> 8;
         mOutScaleFactor = mScaleFactor = scale;
         this.mContentDescId = cdId;
     }
@@ -308,8 +310,14 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
                 mOutScaleFactor);
         context.save();
         context.clipRect(mOutDstLeft, mOutDstTop, mOutDstRight, mOutDstBottom);
+
+        int imageId = mImageId;
+        if ((mMode & 0x1) != 0) {
+            imageId = context.getContext().getInteger(imageId);
+        }
+
         context.drawBitmap(
-                mImageId,
+                imageId,
                 (int) mOutSrcLeft,
                 (int) mOutSrcTop,
                 (int) mOutSrcRight,

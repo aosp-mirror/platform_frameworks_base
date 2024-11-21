@@ -18,8 +18,14 @@ package com.android.systemui.keyboard.shortcut.shared.model
 
 sealed interface ShortcutCustomizationRequestInfo {
     data class Add(
-        val label: String,
-        val categoryType: ShortcutCategoryType,
-        val subCategoryLabel: String,
+        val label: String = "",
+        val categoryType: ShortcutCategoryType = ShortcutCategoryType.System,
+        val subCategoryLabel: String = "",
+    ) : ShortcutCustomizationRequestInfo
+
+    data class Delete(
+        val label: String = "",
+        val categoryType: ShortcutCategoryType = ShortcutCategoryType.System,
+        val subCategoryLabel: String = "",
     ) : ShortcutCustomizationRequestInfo
 }

@@ -17,8 +17,8 @@
 package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
@@ -228,9 +228,8 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
     @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
-    public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
+    public void testShouldApplyCameraCompatFreeformTreatment_notEnabledByOverride_returnsFalse() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponentInNewTask();
 
@@ -239,19 +238,9 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
     @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
-    public void testShouldApplyCameraCompatFreeformTreatment_disabledByOverride_returnsFalse() {
-        runTestScenario((robot) -> {
-            robot.activity().createActivityWithComponentInNewTask();
-
-            robot.checkShouldApplyFreeformTreatmentForCameraCompat(false);
-        });
-    }
-
-    @Test
-    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
-    public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue() {
+    public void testShouldApplyCameraCompatFreeformTreatment_overrideAndFlagEnabled_returnsTrue() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponentInNewTask();
 
@@ -261,8 +250,9 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
 
     @Test
     @EnableCompatChanges({OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA,
-            OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
-    public void testShouldRecomputeConfigurationForCameraCompat() {
+            OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA,
+            OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testShouldRecomputeConfigurationForFreeformTreatment() {
         runTestScenario((robot) -> {
             robot.conf().enableCameraCompatSplitScreenAspectRatio(true);
             robot.applyOnActivity((a) -> {

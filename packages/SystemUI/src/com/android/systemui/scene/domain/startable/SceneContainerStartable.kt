@@ -19,7 +19,6 @@
 package com.android.systemui.scene.domain.startable
 
 import android.app.StatusBarManager
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
@@ -46,6 +45,7 @@ import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.keyguardScenes
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
@@ -55,6 +55,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.scene.data.model.asIterable
 import com.android.systemui.scene.data.model.sceneStackOf
+import com.android.systemui.scene.domain.interactor.DisabledContentInteractor
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -102,6 +103,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
@@ -143,6 +145,7 @@ constructor(
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val vibratorHelper: VibratorHelper,
     private val msdlPlayer: MSDLPlayer,
+    private val disabledContentInteractor: DisabledContentInteractor,
 ) : CoreStartable {
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
@@ -280,6 +283,7 @@ constructor(
         handlePowerState()
         handleDreamState()
         handleShadeTouchability()
+        handleDisableFlags()
     }
 
     private fun handleBouncerImeVisibility() {
@@ -352,14 +356,13 @@ constructor(
                     val isAlternateBouncerVisible = alternateBouncerInteractor.isVisibleState()
                     val isOnPrimaryBouncer = renderedScenes.contains(Scenes.Bouncer)
                     if (!deviceUnlockStatus.isUnlocked) {
-                        return@mapNotNull if (isOnLockscreen || isOnPrimaryBouncer) {
-                            // Already on lockscreen or bouncer, no need to change scenes.
+                        return@mapNotNull if (renderedScenes.any { it in keyguardScenes }) {
+                            // Already on a keyguard scene, no need to change scenes.
                             null
                         } else {
-                            // The device locked while on a scene that's not Lockscreen or Bouncer,
-                            // go to Lockscreen.
-                            Scenes.Lockscreen to
-                                "device locked in non-Lockscreen and non-Bouncer scene"
+                            // The device locked while on a scene that's not a keyguard scene, go
+                            // to Lockscreen.
+                            Scenes.Lockscreen to "device locked in a non-keyguard scene"
                         }
                     }
 
@@ -430,8 +433,13 @@ constructor(
                                             "mechanism: ${deviceUnlockStatus.deviceUnlockSource}"
                                 else -> null
                             }
-                        // Not on lockscreen or bouncer, so remain in the current scene.
-                        else -> null
+                        // Not on lockscreen or bouncer, so remain in the current scene but since
+                        // unlocked, replace the Lockscreen scene from the bottom of the navigation
+                        // back stack with the Gone scene.
+                        else -> {
+                            replaceLockscreenSceneOnBackStack()
+                            null
+                        }
                     }
                 }
                 .collect { (targetSceneKey, loggingReason) ->
@@ -440,17 +448,19 @@ constructor(
         }
     }
 
-    /** If the [Scenes.Lockscreen] is on the backstack, replaces it with [Scenes.Gone]. */
+    /**
+     * If the [Scenes.Lockscreen] is on the bottom of the navigation backstack, replaces it with
+     * [Scenes.Gone].
+     */
     private fun replaceLockscreenSceneOnBackStack() {
         sceneBackInteractor.updateBackStack { stack ->
             val list = stack.asIterable().toMutableList()
-            check(list.last() == Scenes.Lockscreen) {
-                "The bottommost/last SceneKey of the back stack isn't" +
-                    " the Lockscreen scene like expected. The back" +
-                    " stack is $stack."
+            if (list.lastOrNull() == Scenes.Lockscreen) {
+                list[list.size - 1] = Scenes.Gone
+                sceneStackOf(*list.toTypedArray())
+            } else {
+                stack
             }
-            list[list.size - 1] = Scenes.Gone
-            sceneStackOf(*list.toTypedArray())
         }
     }
 
@@ -555,6 +565,38 @@ constructor(
                         loggingReason = "device became non-interactive",
                     )
                 }
+        }
+    }
+
+    private fun handleDisableFlags() {
+        applicationScope.launch {
+            launch {
+                sceneInteractor.currentScene.collectLatest { currentScene ->
+                    disabledContentInteractor.repeatWhenDisabled(currentScene) {
+                        switchToScene(
+                            targetSceneKey = SceneFamilies.Home,
+                            loggingReason =
+                                "Current scene ${currentScene.debugName} became" + " disabled",
+                        )
+                    }
+                }
+            }
+
+            launch {
+                sceneInteractor.currentOverlays.collectLatest { overlays ->
+                    overlays.forEach { overlay ->
+                        launch {
+                            disabledContentInteractor.repeatWhenDisabled(overlay) {
+                                sceneInteractor.hideOverlay(
+                                    overlay = overlay,
+                                    loggingReason =
+                                        "Overlay ${overlay.debugName} became" + " disabled",
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

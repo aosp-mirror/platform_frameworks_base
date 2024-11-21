@@ -177,6 +177,7 @@ import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.display.notifications.DisplayNotificationManager;
+import com.android.server.display.plugin.PluginManager;
 import com.android.server.display.utils.DebugUtils;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.input.InputManagerInternal;
@@ -583,6 +584,7 @@ public final class DisplayManagerService extends SystemService {
 
     private final DisplayNotificationManager mDisplayNotificationManager;
     private final ExternalDisplayStatsService mExternalDisplayStatsService;
+    private final PluginManager mPluginManager;
 
     // Manages the relative placement of extended displays
     @Nullable
@@ -669,6 +671,7 @@ public final class DisplayManagerService extends SystemService {
         } else {
             mDisplayTopologyCoordinator = null;
         }
+        mPluginManager = new PluginManager(mContext, mFlags);
     }
 
     public void setupSchedulerPolicies() {
@@ -739,6 +742,7 @@ public final class DisplayManagerService extends SystemService {
             mLogicalDisplayMapper.onBootCompleted();
             mDisplayNotificationManager.onBootCompleted();
             mExternalDisplayPolicy.onBootCompleted();
+            mPluginManager.onBootCompleted();
         }
     }
 
@@ -3552,6 +3556,9 @@ public final class DisplayManagerService extends SystemService {
         SparseArray<DisplayPowerController> displayPowerControllersLocal = new SparseArray<>();
         int displayPowerControllerCount;
 
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
+        ipw.increaseIndent();
+
         synchronized (mSyncRoot) {
             brightnessTrackerLocal = mBrightnessTracker;
 
@@ -3598,9 +3605,6 @@ public final class DisplayManagerService extends SystemService {
                 pw.println("  Display Brightness=" + brightnessPair.brightness);
                 pw.println("  Display SdrBrightness=" + brightnessPair.sdrBrightness);
             }
-
-            IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
-            ipw.increaseIndent();
 
             pw.println();
             pw.println("Display Adapters: size=" + mDisplayAdapters.size());
@@ -3664,6 +3668,8 @@ public final class DisplayManagerService extends SystemService {
             pw.println();
             mDisplayTopologyCoordinator.dump(pw);
         }
+        pw.println();
+        mPluginManager.dump(ipw);
 
         pw.println();
         mFlags.dump(pw);
@@ -5280,6 +5286,23 @@ public final class DisplayManagerService extends SystemService {
                 DisplayWindowPolicyController dwpc, String packageName) {
             return createVirtualDisplayInternal(config, callback, null, virtualDevice, dwpc,
                     packageName);
+        }
+
+        @Override
+        public void setScreenBrightnessOverrideFromWindowManager(
+                SparseArray<DisplayBrightnessOverrideRequest> brightnessOverrides) {
+            SparseArray<DisplayPowerController> dpcs = new SparseArray<>();
+            synchronized (mSyncRoot) {
+                for (int i = 0; i < mDisplayPowerControllers.size(); i++) {
+                    dpcs.put(mDisplayPowerControllers.keyAt(i),
+                            mDisplayPowerControllers.valueAt(i));
+                }
+            }
+            for (int i = 0; i < dpcs.size(); ++i) {
+                final int displayId = dpcs.keyAt(i);
+                final DisplayPowerController dpc = dpcs.valueAt(i);
+                dpc.setBrightnessOverrideRequest(brightnessOverrides.get(displayId));
+            }
         }
 
         @Override

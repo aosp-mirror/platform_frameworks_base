@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -50,10 +52,11 @@ public class DataMapLookup implements Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mDataMapId, mStringId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DataMapLookup[" + mId + "] = " + Utils.idString(mDataMapId) + " " + mStringId;
@@ -64,6 +67,7 @@ public class DataMapLookup implements Operation {
      *
      * @return the name of the class
      */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -85,7 +89,7 @@ public class DataMapLookup implements Operation {
      * @param dataMapId the map to extract from
      * @param keyStringId the map to extract from
      */
-    public static void apply(WireBuffer buffer, int id, int dataMapId, int keyStringId) {
+    public static void apply(@NonNull WireBuffer buffer, int id, int dataMapId, int keyStringId) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(dataMapId);
@@ -98,14 +102,14 @@ public class DataMapLookup implements Operation {
      * @param buffer buffer
      * @param operations the created command is added to the list
      */
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int mapId = buffer.readInt();
         int stringId = buffer.readInt();
         operations.add(new DataMapLookup(id, mapId, stringId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A float and its associated id")
                 .field(INT, "id", "id of float")
@@ -114,7 +118,7 @@ public class DataMapLookup implements Operation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         String str = context.getText(mStringId);
         DataMap data = context.getDataMap(mDataMapId);
         int pos = data.getPos(str);
@@ -141,8 +145,9 @@ public class DataMapLookup implements Operation {
         }
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

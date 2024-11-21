@@ -16,6 +16,7 @@
 package com.android.internal.widget.remotecompose.core.documentation;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -34,13 +35,13 @@ public class DocumentedOperation {
     public static final int FLOAT_ARRAY = 10;
     public static final int INT_ARRAY = 11;
 
-    String mCategory;
+    @NonNull final String mCategory;
     int mId;
-    String mName;
-    String mDescription;
+    @NonNull final String mName;
+    @NonNull String mDescription = "";
 
     boolean mWIP;
-    String mTextExamples;
+    @Nullable String mTextExamples;
 
     @NonNull ArrayList<StringPair> mExamples = new ArrayList<>();
     @NonNull ArrayList<OperationField> mFields = new ArrayList<>();
@@ -77,14 +78,15 @@ public class DocumentedOperation {
         return "UNKNOWN";
     }
 
-    public DocumentedOperation(String category, int id, String name, boolean wip) {
+    public DocumentedOperation(
+            @NonNull String category, int id, @NonNull String name, boolean wip) {
         mCategory = category;
         mId = id;
         mName = name;
         mWIP = wip;
     }
 
-    public DocumentedOperation(String category, int id, String name) {
+    public DocumentedOperation(@NonNull String category, int id, @NonNull String name) {
         this(category, id, name, false);
     }
 
@@ -93,7 +95,7 @@ public class DocumentedOperation {
         return mFields;
     }
 
-    public String getCategory() {
+    public @NonNull String getCategory() {
         return mCategory;
     }
 
@@ -101,6 +103,7 @@ public class DocumentedOperation {
         return mId;
     }
 
+    @NonNull
     public String getName() {
         return mName;
     }
@@ -126,10 +129,12 @@ public class DocumentedOperation {
         return size;
     }
 
+    @Nullable
     public String getDescription() {
         return mDescription;
     }
 
+    @Nullable
     public String getTextExamples() {
         return mTextExamples;
     }
@@ -148,19 +153,20 @@ public class DocumentedOperation {
     }
 
     @NonNull
-    public DocumentedOperation field(int type, String name, String description) {
+    public DocumentedOperation field(int type, @NonNull String name, @NonNull String description) {
         mFields.add(new OperationField(type, name, description));
         return this;
     }
 
     @NonNull
-    public DocumentedOperation field(int type, String name, String varSize, String description) {
+    public DocumentedOperation field(
+            int type, @NonNull String name, @NonNull String varSize, @NonNull String description) {
         mFields.add(new OperationField(type, name, varSize, description));
         return this;
     }
 
     @NonNull
-    public DocumentedOperation possibleValues(String name, int value) {
+    public DocumentedOperation possibleValues(@NonNull String name, int value) {
         if (!mFields.isEmpty()) {
             mFields.get(mFields.size() - 1).possibleValue(name, "" + value);
         }
@@ -168,19 +174,19 @@ public class DocumentedOperation {
     }
 
     @NonNull
-    public DocumentedOperation description(String description) {
+    public DocumentedOperation description(@NonNull String description) {
         mDescription = description;
         return this;
     }
 
     @NonNull
-    public DocumentedOperation examples(String examples) {
+    public DocumentedOperation examples(@NonNull String examples) {
         mTextExamples = examples;
         return this;
     }
 
     @NonNull
-    public DocumentedOperation exampleImage(String name, String imagePath) {
+    public DocumentedOperation exampleImage(@NonNull String name, @NonNull String imagePath) {
         mExamples.add(new StringPair(name, imagePath));
         return this;
     }

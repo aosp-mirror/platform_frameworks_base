@@ -66,7 +66,7 @@ abstract class MaximiseAppWithCornerResize(
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
         ChangeDisplayOrientationRule.setRotation(rotation)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
         testApp.cornerResize(
             wmHelper,
             device,

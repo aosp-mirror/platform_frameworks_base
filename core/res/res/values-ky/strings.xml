@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Колдонмо кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктай алат"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Жакын жердеги Wi‑Fi түзмөктөрүнө байланышуу"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Колдонмо жакын жердеги Wi-Fi түзмөктөргө туташып, алардын жайгашкан жерин аныктап, ар кандай нерселерди өткөрө алат."</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"жакын жердеги түзмөктөр арасындагы салыштырмалуу абалды аныктоо"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Колдонмого жакын жердеги түзмөктөр ортосундагы салыштырмалуу абалды аныктоого уруксат берүү"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Тандалган NFC төлөм кызматы жөнүндө маалымат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Колдонмого катталган жардам же көздөлгөн жерге маршрут сыяктуу тандалган nfc төлөм кызматы жөнүндө маалыматты алууга уруксат берүү."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication көзөмөлү"</string>
@@ -2409,7 +2407,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Баскычтопко төмөнкү калып коюлду: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Өзгөртүү үчүн басыңыз."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физикалык баскычтоптор конфигурацияланды"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Баскычтопторду көрүү үчүн басыңыз"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Купуя"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Жеке"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клон"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Жумуш"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Жумуш 2"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Күйгүзүү"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Артка кайтуу"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Кезекте турат..."</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Спутник SOS эми жеткиликтүү"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Мобилдик Интернет же Wi-Fi тармагы жок болсо, кырсыктаганда жардамга келчү кызматтарга билдирүү жөнөтө аласыз. Google Messages демейки жазышуу колдонмоңуз болушу керек."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Спутник SOS колдоого алынбайт"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Бул түзмөктө спутник SOS колдоого алынбайт"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Спутник SOS туураланган жок"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Интернет байланышыңызды текшерип, кайра тууралап көрүңүз"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Спутник SOS жеткиликсиз"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Спутник SOS бул өлкөдө же аймакта жеткиликсиз"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Спутник SOS туураланган жок"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Спутник аркылуу жазышуу үчүн Google Messages кызматын демейки жазышуу колдонмосу катары тандаңыз"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Спутник SOS жеткиликсиз"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Бул өлкөдө же аймакта спутник SOS функциясынын жеткиликтүүлүгүн текшерүү үчүн жайгашкан жерди аныктоо параметрлерин күйгүзүңүз"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Спутник аркылуу байланышуу жеткиликтүү"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Мобилдик же Wi-Fi тармагы жок болсо, спутник аркылуу жазыша аласыз. Google Messages демейки жазышуу колдонмоңуз болушу керек."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Спутник аркылуу байланышуу колдоого алынбайт"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Бул түзмөктө спутник аркылуу байланышуу колдоого алынбайт"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Спутник аркылуу байланышуу туураланган жок"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Интернет байланышыңызды текшерип, кайра тууралап көрүңүз"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Спутник аркылуу байланышуу жеткиликсиз"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Бул өлкөдө же аймакта спутник аркылуу байланышуу жеткиликсиз"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Спутник аркылуу байланышуу туураланган жок"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Спутник аркылуу жазышуу үчүн Google Messages кызматын демейки жазышуу колдонмосу катары тандаңыз"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Спутник аркылуу байланышуу жеткиликсиз"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Бул өлкөдө же аймакта спутник аркылуу байланышуу функциясынын жеткиликтүүлүгүн текшерүү үчүн жайгашкан жерди аныктоо параметрлерин күйгүзүңүз"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Манжа изи менен ачуу функциясын кайра тууралаңыз"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> мындан ары таанылбайт."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> жана <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> мындан ары таанылбайт."</string>

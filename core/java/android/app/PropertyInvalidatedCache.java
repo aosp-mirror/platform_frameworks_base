@@ -314,6 +314,14 @@ public class PropertyInvalidatedCache<Query, Result> {
     @GuardedBy("mLock")
     private long mMisses = 0;
 
+    // This counter tracks the number of times {@link #recompute} returned a null value.  Null
+    // results are cached, or not, depending on instantiation arguments.  Caching nulls when they
+    // should not be cached is a functional error. Failing to cache nulls that can be cached is a
+    // performance error.  A non-zero value here means the cache should be examined to be sure
+    // that nulls are correctly cached, or not.
+    @GuardedBy("mLock")
+    private long mNulls = 0;
+
     @GuardedBy("mLock")
     private long[] mSkips = new long[MAX_RESERVED_NONCE + 1];
 
@@ -372,6 +380,11 @@ public class PropertyInvalidatedCache<Query, Result> {
      * the property name.
      */
     private final String mCacheName;
+
+    /**
+     * True if nulls are valid returns from recompute().
+     */
+    private final boolean mCacheNullResults;
 
     /**
      * The function that computes a Result, given a Query.  This function is called on a
@@ -505,6 +518,19 @@ public class PropertyInvalidatedCache<Query, Result> {
                 return map.get(query);
             } else {
                 return null;
+            }
+        }
+
+        /**
+         * Return true if the entry is in the cache.
+         */
+        boolean containsKey(Query query) {
+            final int uid = callerUid();
+            var map = mCache.get(uid);
+            if (map != null) {
+                return map.containsKey(query);
+            } else {
+                return false;
             }
         }
 
@@ -1101,7 +1127,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     public static record Args(@NonNull String mModule, @Nullable String mApi,
-            int mMaxEntries, boolean mIsolateUids, boolean mTestMode) {
+            int mMaxEntries, boolean mIsolateUids, boolean mTestMode, boolean mCacheNulls) {
 
         // Validation: the module must be one of the known module strings and the maxEntries must
         // be positive.
@@ -1119,24 +1145,29 @@ public class PropertyInvalidatedCache<Query, Result> {
                     null,       // api
                     32,         // maxEntries
                     true,       // isolateUids
-                    false       // testMode
+                    false,      // testMode
+                    true        // allowNulls
                  );
         }
 
         public Args api(@NonNull String api) {
-            return new Args(mModule, api, mMaxEntries, mIsolateUids, mTestMode);
+            return new Args(mModule, api, mMaxEntries, mIsolateUids, mTestMode, mCacheNulls);
         }
 
         public Args maxEntries(int val) {
-            return new Args(mModule, mApi, val, mIsolateUids, mTestMode);
+            return new Args(mModule, mApi, val, mIsolateUids, mTestMode, mCacheNulls);
         }
 
         public Args isolateUids(boolean val) {
-            return new Args(mModule, mApi, mMaxEntries, val, mTestMode);
+            return new Args(mModule, mApi, mMaxEntries, val, mTestMode, mCacheNulls);
         }
 
         public Args testMode(boolean val) {
-            return new Args(mModule, mApi, mMaxEntries, mIsolateUids, val);
+            return new Args(mModule, mApi, mMaxEntries, mIsolateUids, val, mCacheNulls);
+        }
+
+        public Args cacheNulls(boolean val) {
+            return new Args(mModule, mApi, mMaxEntries, mIsolateUids, mTestMode, val);
         }
     }
 
@@ -1153,6 +1184,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             @Nullable QueryHandler<Query, Result> computer) {
         mPropertyName = createPropertyName(args.mModule, args.mApi);
         mCacheName = cacheName;
+        mCacheNullResults = args.mCacheNulls && Flags.picCacheNulls();
         mNonce = getNonceHandler(mPropertyName);
         mMaxEntries = args.mMaxEntries;
         mCache = new CacheMap<>(args.mIsolateUids, args.mTestMode);
@@ -1491,12 +1523,24 @@ public class PropertyInvalidatedCache<Query, Result> {
                 }
                 return recompute(query);
             }
+
+            final boolean cacheHit;
             final Result cachedResult;
             synchronized (mLock) {
                 if (currentNonce == mLastSeenNonce) {
                     cachedResult = mCache.get(query);
-
-                    if (cachedResult != null) mHits++;
+                    if (cachedResult == null) {
+                        if (mCacheNullResults) {
+                            cacheHit = mCache.containsKey(query);
+                        } else {
+                            cacheHit = false;
+                        }
+                    } else {
+                        cacheHit = true;
+                    }
+                    if (cacheHit) {
+                        mHits++;
+                    }
                 } else {
                     if (DEBUG) {
                         Log.d(TAG, formatSimple(
@@ -1506,16 +1550,18 @@ public class PropertyInvalidatedCache<Query, Result> {
                     }
                     clear();
                     mLastSeenNonce = currentNonce;
+                    cacheHit = false;
                     cachedResult = null;
                 }
             }
+
             // Cache hit --- but we're not quite done yet.  A value in the cache might need to
             // be augmented in a "refresh" operation.  The refresh operation can combine the
             // old and the new nonce values.  In order to make sure the new parts of the value
             // are consistent with the old, possibly-reused parts, we check the property value
             // again after the refresh and do the whole fetch again if the property invalidated
             // us while we were refreshing.
-            if (cachedResult != null) {
+            if (cacheHit) {
                 final Result refreshedResult = refresh(cachedResult, query);
                 if (refreshedResult != cachedResult) {
                     if (DEBUG) {
@@ -1550,6 +1596,7 @@ public class PropertyInvalidatedCache<Query, Result> {
                 }
                 return maybeCheckConsistency(query, cachedResult);
             }
+
             // Cache miss: make the value from scratch.
             if (DEBUG) {
                 Log.d(TAG, "cache miss for " + cacheName() + " " + queryToString(query));
@@ -1558,8 +1605,13 @@ public class PropertyInvalidatedCache<Query, Result> {
             synchronized (mLock) {
                 // If someone else invalidated the cache while we did the recomputation, don't
                 // update the cache with a potentially stale result.
-                if (mLastSeenNonce == currentNonce && result != null) {
-                    mCache.put(query, result);
+                if (mLastSeenNonce == currentNonce) {
+                    if (result != null || mCacheNullResults) {
+                        mCache.put(query, result);
+                    }
+                    if (result == null) {
+                        mNulls++;
+                    }
                 }
                 mMisses++;
             }
@@ -1947,10 +1999,12 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     // Return true if this cache has had any activity.  If the hits, misses, and skips are all
-    // zero then the client never tried to use the cache.
-    private boolean isActive() {
+    // zero then the client never tried to use the cache.  If invalidations and corks are also
+    // zero then the server never tried to use the cache.
+    private boolean isActive(NonceHandler.Stats stats) {
         synchronized (mLock) {
-            return mHits + mMisses + getSkipsLocked() > 0;
+            return mHits + mMisses + getSkipsLocked()
+                    + stats.invalidated + stats.corkedInvalidates > 0;
         }
     }
 
@@ -1968,15 +2022,15 @@ public class PropertyInvalidatedCache<Query, Result> {
         NonceHandler.Stats stats = mNonce.getStats();
 
         synchronized (mLock) {
-            if (brief && !isActive()) {
+            if (brief && !isActive(stats)) {
                 return;
             }
 
             pw.println(formatSimple("  Cache Name: %s", cacheName()));
             pw.println(formatSimple("    Property: %s", mPropertyName));
             pw.println(formatSimple(
-                "    Hits: %d, Misses: %d, Skips: %d, Clears: %d, Uids: %d",
-                mHits, mMisses, getSkipsLocked(), mClears, mCache.size()));
+                "    Hits: %d, Misses: %d, Skips: %d, Clears: %d, Nulls: %d",
+                mHits, mMisses, getSkipsLocked(), mClears, mNulls));
 
             // Print all the skip reasons.
             pw.format("    Skip-%s: %d", sNonceName[0], mSkips[0]);
@@ -1986,7 +2040,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             pw.println();
 
             pw.println(formatSimple(
-                "    Nonce: 0x%016x, Invalidates: %d, CorkedInvalidates: %d",
+                "    Nonce: 0x%016x, Invalidates: %d, Corked: %d",
                 mLastSeenNonce, stats.invalidated, stats.corkedInvalidates));
             pw.println(formatSimple(
                 "    Current Size: %d, Max Size: %d, HW Mark: %d, Overflows: %d",

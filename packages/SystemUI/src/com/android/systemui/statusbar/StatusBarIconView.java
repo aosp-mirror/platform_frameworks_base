@@ -177,8 +177,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private float[] mMatrix;
     private ColorMatrixColorFilter mMatrixColorFilter;
     private Runnable mLayoutRunnable;
-    private boolean mDismissed;
-    private Runnable mOnDismissListener;
     private boolean mIncreasedSize;
     private boolean mShowsConversation;
     private float mDozeAmount;
@@ -954,21 +952,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     public void executeOnLayout(Runnable runnable) {
         mLayoutRunnable = runnable;
-    }
-
-    public void setDismissed() {
-        mDismissed = true;
-        if (mOnDismissListener != null) {
-            mOnDismissListener.run();
-        }
-    }
-
-    public boolean isDismissed() {
-        return mDismissed;
-    }
-
-    public void setOnDismissListener(Runnable onDismissListener) {
-        mOnDismissListener = onDismissListener;
     }
 
     @Override

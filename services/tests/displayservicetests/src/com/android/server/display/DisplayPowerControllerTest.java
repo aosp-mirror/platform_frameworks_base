@@ -121,8 +121,8 @@ public final class DisplayPowerControllerTest {
     private static final float PROX_SENSOR_MAX_RANGE = 5;
     private static final float DOZE_SCALE_FACTOR = 0.34f;
     private static final float DEFAULT_DOZE_BRIGHTNESS = 0.121f;
+    private static final float OVERRIDE_BRIGHTNESS = 0.567f;
 
-    private static final float BRIGHTNESS_RAMP_RATE_MINIMUM = 0.0f;
     private static final float BRIGHTNESS_RAMP_RATE_FAST_DECREASE = 0.3f;
     private static final float BRIGHTNESS_RAMP_RATE_FAST_INCREASE = 0.4f;
     private static final float BRIGHTNESS_RAMP_RATE_SLOW_DECREASE = 0.1f;
@@ -2119,7 +2119,8 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testManualBrightness_stateOnPolicyDozeUseNormalBrightnessForDozeFalse_brightnessDoze() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled(
+                mContext)).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -2154,7 +2155,8 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testManualBrightness_stateOnPolicyDozeUseNormalBrightnessForDozeTrue_brightnessNormal() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled(
+                mContext)).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -2188,7 +2190,8 @@ public final class DisplayPowerControllerTest {
     @Test
     public void testManualBrightness_stateDozePolicyOnUseNormalBrightnessForDozeTrue_brightnessDoze() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
-        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled(
+                mContext)).thenReturn(true);
         mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -2436,6 +2439,36 @@ public final class DisplayPowerControllerTest {
         // asserting against that is non-trivial
         verify(mHolder.automaticBrightnessController).getAutomaticScreenBrightness(
                 any(BrightnessEvent.class));
+    }
+
+    @Test
+    public void brightnessOverrideInPowerRequest_enablesOverrideBrightnessStrategy() {
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.screenBrightnessOverride = OVERRIDE_BRIGHTNESS;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);  // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(OVERRIDE_BRIGHTNESS), anyFloat(), anyFloat(),
+                eq(false));
+    }
+
+    @Test
+    public void brightnessOverrideRequest_enablesOverrideBrightnessStrategy() {
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);  // Run updatePowerState
+
+        var dbor = new DisplayManagerInternal.DisplayBrightnessOverrideRequest();
+        dbor.brightness = OVERRIDE_BRIGHTNESS;
+        mHolder.dpc.setBrightnessOverrideRequest(dbor);
+        advanceTime(1);  // Process the WM brightness override request
+
+        verify(mHolder.animator).animateTo(eq(OVERRIDE_BRIGHTNESS), anyFloat(), anyFloat(),
+                eq(false));
     }
 
     /**

@@ -31,7 +31,7 @@ import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
-import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiKeyGestures;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
@@ -522,8 +522,11 @@ public class InputSettings {
      * @hide
      */
     public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
-        // TODO(b/365063048): determine whether to enable the shortcut based on the settings.
-        return isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+        int customizedShortcut = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
+                KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED, UserHandle.USER_CURRENT);
+        return customizedShortcut != KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED
+                && isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
     }
 
     /**
@@ -1155,6 +1158,6 @@ public class InputSettings {
      * @hide
      */
     public static boolean doesKeyGestureEventHandlerSupportMultiKeyGestures() {
-        return useKeyGestureEventHandler() && useKeyGestureEventHandlerMultiPressGestures();
+        return useKeyGestureEventHandler() && useKeyGestureEventHandlerMultiKeyGestures();
     }
 }

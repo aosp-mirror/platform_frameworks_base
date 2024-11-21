@@ -23,22 +23,22 @@ import android.provider.Settings;
 
 import com.android.systemui.util.settings.SettingsSingleThreadBackground;
 
-import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 import javax.inject.Inject;
 
 class SystemSettingsImpl implements SystemSettings {
     private final ContentResolver mContentResolver;
     private final CurrentUserIdProvider mCurrentUserProvider;
-    private final CoroutineDispatcher mBgCoroutineDispatcher;
+    private final CoroutineScope mSettingsScope;
 
     @Inject
     SystemSettingsImpl(ContentResolver contentResolver,
             CurrentUserIdProvider currentUserProvider,
-            @SettingsSingleThreadBackground CoroutineDispatcher bgDispatcher) {
+            @SettingsSingleThreadBackground CoroutineScope settingsScope) {
         mContentResolver = contentResolver;
         mCurrentUserProvider = currentUserProvider;
-        mBgCoroutineDispatcher = bgDispatcher;
+        mSettingsScope = settingsScope;
     }
 
     @NonNull
@@ -61,8 +61,8 @@ class SystemSettingsImpl implements SystemSettings {
 
     @NonNull
     @Override
-    public CoroutineDispatcher getBackgroundDispatcher() {
-        return mBgCoroutineDispatcher;
+    public CoroutineScope getSettingsScope() {
+        return mSettingsScope;
     }
 
     @Override

@@ -77,4 +77,9 @@ public class AnimatableValue {
 
         return mValue;
     }
+
+    @Override
+    public String toString() {
+        return "AnimatableValue{mId=" + mId + "}";
+    }
 }

@@ -31,6 +31,7 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
 
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -119,6 +120,8 @@ public class PipTransition extends PipTransitionController implements
 
     @Nullable
     private Transitions.TransitionFinishCallback mFinishCallback;
+
+    private ValueAnimator mTransitionAnimator;
 
     public PipTransition(
             Context context,
@@ -209,7 +212,12 @@ public class PipTransition extends PipTransitionController implements
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
-            @NonNull Transitions.TransitionFinishCallback finishCallback) {}
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        // Just jump-cut the current animation if any, but do not merge.
+        if (info.getType() == TRANSIT_EXIT_PIP) {
+            end();
+        }
+    }
 
     @Override
     public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
@@ -241,7 +249,7 @@ public class PipTransition extends PipTransitionController implements
             extra.putParcelable(PIP_TASK_LEASH, pipChange.getLeash());
             mPipTransitionState.setState(PipTransitionState.ENTERING_PIP, extra);
 
-            if (mPipTransitionState.isInSwipePipToHomeTransition()) {
+            if (isInSwipePipToHomeTransition()) {
                 // If this is the second transition as a part of swipe PiP to home cuj,
                 // handle this transition as a special case with no-op animation.
                 return handleSwipePipToHomeTransition(info, startTransaction, finishTransaction,
@@ -269,6 +277,14 @@ public class PipTransition extends PipTransitionController implements
         }
         mFinishCallback = null;
         return false;
+    }
+
+    @Override
+    public void end() {
+        if (mTransitionAnimator != null && mTransitionAnimator.isRunning()) {
+            mTransitionAnimator.end();
+            mTransitionAnimator = null;
+        }
     }
 
     //
@@ -355,7 +371,9 @@ public class PipTransition extends PipTransitionController implements
 
         // Update the src-rect-hint in params in place, to set up initial animator transform.
         Rect sourceRectHint = getAdjustedSourceRectHint(info, pipChange, pipActivityChange);
-        pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint().set(sourceRectHint);
+        final PictureInPictureParams params = getPipParams(pipChange);
+        params.copyOnlySet(
+                new PictureInPictureParams.Builder().setSourceRectHint(sourceRectHint).build());
 
         // Config-at-end transitions need to have their activities transformed before starting
         // the animation; this makes the buffer seem like it's been updated to final size.
@@ -400,7 +418,7 @@ public class PipTransition extends PipTransitionController implements
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect startBounds = pipChange.getStartAbsBounds();
         final Rect endBounds = pipChange.getEndAbsBounds();
-        final PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
+        final PictureInPictureParams params = getPipParams(pipChange);
         final Rect adjustedSourceRectHint = getAdjustedSourceRectHint(info, pipChange,
                 pipActivityChange);
 
@@ -436,7 +454,7 @@ public class PipTransition extends PipTransitionController implements
             }
             finishTransition();
         });
-        animator.start();
+        cacheAndStartTransitionAnimator(animator);
         return true;
     }
 
@@ -536,7 +554,7 @@ public class PipTransition extends PipTransitionController implements
                 PipAlphaAnimator.FADE_IN);
         // This should update the pip transition state accordingly after we stop playing.
         animator.setAnimationEndCallback(this::finishTransition);
-        animator.start();
+        cacheAndStartTransitionAnimator(animator);
         return true;
     }
 
@@ -580,10 +598,10 @@ public class PipTransition extends PipTransitionController implements
         PictureInPictureParams params = null;
         if (pipChange.getTaskInfo() != null) {
             // single activity
-            params = pipChange.getTaskInfo().pictureInPictureParams;
+            params = getPipParams(pipChange);
         } else if (parentBeforePip != null && parentBeforePip.getTaskInfo() != null) {
             // multi activity
-            params = parentBeforePip.getTaskInfo().pictureInPictureParams;
+            params = getPipParams(parentBeforePip);
         }
         final Rect sourceRectHint = PipBoundsAlgorithm.getValidSourceHintRect(params, endBounds,
                 startBounds);
@@ -606,7 +624,7 @@ public class PipTransition extends PipTransitionController implements
             }
             finishTransition();
         });
-        animator.start();
+        cacheAndStartTransitionAnimator(animator);
         return true;
     }
 
@@ -702,6 +720,13 @@ public class PipTransition extends PipTransitionController implements
             @NonNull TransitionInfo.Change pipChange) {
         TransitionInfo.Change fixedRotationChange = findFixedRotationChange(info);
         int startRotation = pipChange.getStartRotation();
+        if (pipChange.getEndRotation() != ROTATION_UNDEFINED
+                && startRotation != pipChange.getEndRotation()) {
+            // If PiP change was collected along with the display change and the orientation change
+            // happened in sync with the PiP change, then do not treat this as fixed-rotation case.
+            return ROTATION_0;
+        }
+
         int endRotation = fixedRotationChange != null
                 ? fixedRotationChange.getEndFixedRotation() : mPipDisplayLayoutState.getRotation();
         int delta = endRotation == ROTATION_UNDEFINED ? ROTATION_0
@@ -817,9 +842,20 @@ public class PipTransition extends PipTransitionController implements
                     initActivityPos.y);
         }
     }
+    void cacheAndStartTransitionAnimator(@NonNull ValueAnimator animator) {
+        mTransitionAnimator = animator;
+        mTransitionAnimator.start();
+    }
 
     @NonNull
-    private SurfaceControl getLeash(TransitionInfo.Change change) {
+    private static PictureInPictureParams getPipParams(@NonNull TransitionInfo.Change pipChange) {
+        return pipChange.getTaskInfo().pictureInPictureParams != null
+                ? pipChange.getTaskInfo().pictureInPictureParams
+                : new PictureInPictureParams.Builder().build();
+    }
+
+    @NonNull
+    private static SurfaceControl getLeash(TransitionInfo.Change change) {
         SurfaceControl leash = change.getLeash();
         Preconditions.checkNotNull(leash, "Leash is null for change=" + change);
         return leash;
@@ -831,11 +867,6 @@ public class PipTransition extends PipTransitionController implements
 
     @Override
     public void finishTransition() {
-        if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(null /* finishWct */);
-            mFinishCallback = null;
-        }
-
         final int currentState = mPipTransitionState.getState();
         int nextState = PipTransitionState.UNDEFINED;
         switch (currentState) {
@@ -850,6 +881,14 @@ public class PipTransition extends PipTransitionController implements
                 break;
         }
         mPipTransitionState.setState(nextState);
+
+        if (mFinishCallback != null) {
+            // Need to unset mFinishCallback first because onTransitionFinished can re-enter this
+            // handler if there is a pending PiP animation.
+            final Transitions.TransitionFinishCallback finishCallback = mFinishCallback;
+            mFinishCallback = null;
+            finishCallback.onTransitionFinished(null /* finishWct */);
+        }
     }
 
     @Override

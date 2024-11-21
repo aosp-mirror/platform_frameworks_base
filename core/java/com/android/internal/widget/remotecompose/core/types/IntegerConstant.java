@@ -50,7 +50,7 @@ public class IntegerConstant implements Operation {
 
     @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return toString();
     }
 

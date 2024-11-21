@@ -478,7 +478,6 @@ import com.android.server.wm.WindowProcessController;
 
 import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.VMRuntime;
-
 import libcore.util.EmptyArray;
 
 import java.io.File;
@@ -4493,16 +4492,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "Unattached app died before backup, skipping");
                 final int userId = app.userId;
                 final String packageName = app.info.packageName;
-                mHandler.post(new Runnable() {
-                @Override
-                    public void run() {
-                        try {
-                            IBackupManager bm = IBackupManager.Stub.asInterface(
-                                    ServiceManager.getService(Context.BACKUP_SERVICE));
-                            bm.agentDisconnectedForUser(userId, packageName);
-                        } catch (RemoteException e) {
-                            // Can't happen; the backup manager is local
-                        }
+                mHandler.post(() -> {
+                    try {
+                        getBackupManager().agentDisconnectedForUser(userId, packageName);
+                    } catch (RemoteException e) {
+                        // Can't happen; the backup manager is local
                     }
                 });
             }
@@ -4673,7 +4667,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (backupTarget != null && backupTarget.appInfo.packageName.equals(processName)) {
                 isRestrictedBackupMode = backupTarget.appInfo.uid >= FIRST_APPLICATION_UID
                         && ((backupTarget.backupMode == BackupRecord.RESTORE_FULL)
-                                || (backupTarget.backupMode == BackupRecord.BACKUP_FULL));
+                        || (backupTarget.backupMode == BackupRecord.BACKUP_FULL))
+                        && backupTarget.useRestrictedMode;
             }
 
             final ActiveInstrumentation instr = app.getActiveInstrumentation();
@@ -13499,16 +13494,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (backupTarget != null && pid == backupTarget.app.getPid()) {
             if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG_CLEANUP, "App "
                     + backupTarget.appInfo + " died during backup");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        IBackupManager bm = IBackupManager.Stub.asInterface(
-                                ServiceManager.getService(Context.BACKUP_SERVICE));
-                        bm.agentDisconnectedForUser(app.userId, app.info.packageName);
-                    } catch (RemoteException e) {
-                        // can't happen; backup manager is local
-                    }
+            mHandler.post(() -> {
+                try {
+                    getBackupManager().agentDisconnectedForUser(app.userId, app.info.packageName);
+                } catch (RemoteException e) {
+                    // can't happen; backup manager is local
                 }
             });
         }
@@ -14011,7 +14001,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
-            @BackupDestination int backupDestination) {
+            @BackupDestination int backupDestination, boolean useRestrictedMode) {
         long startTimeNs = SystemClock.uptimeNanos();
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
@@ -14096,7 +14086,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination,
+                    useRestrictedMode);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
                             || backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE)
@@ -14122,8 +14113,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // process, etc, then mark it as being in full backup so that certain calls to the
             // process can be blocked. This is not reset to false anywhere because we kill the
             // process after the full backup is done and the ProcessRecord will vaporize anyway.
-            if (UserHandle.isApp(app.uid) &&
-                    backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL) {
+            if (UserHandle.isApp(app.uid)
+                    && backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                    && r.useRestrictedMode) {
                 proc.setInFullBackup(true);
             }
             r.app = proc;
@@ -14221,9 +14213,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long oldIdent = Binder.clearCallingIdentity();
         try {
-            IBackupManager bm = IBackupManager.Stub.asInterface(
-                    ServiceManager.getService(Context.BACKUP_SERVICE));
-            bm.agentConnectedForUser(userId, agentPackageName, agent);
+            getBackupManager().agentConnectedForUser(userId, agentPackageName, agent);
         } catch (RemoteException e) {
             // can't happen; the backup manager service is local
         } catch (Exception e) {
@@ -17933,6 +17923,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void notifyInactiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyInactiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
         public ArraySet<String> getClientPackages(String servicePackageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.getClientPackagesLocked(servicePackageName);
@@ -18013,14 +18012,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
                 int userId) {
-            // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
-            if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
-                throw new IllegalArgumentException("Unsupported userId");
-            }
-
-            mUserController.handleIncomingUser(pid, uid, userId, true,
-                    ALLOW_NON_FULL, "addStartInfoTimestampSystem", null);
-
             addStartInfoTimestampInternal(key, timestampNs, userId, uid);
         }
 
@@ -19088,8 +19079,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean enableFgsNotificationRateLimit(boolean enable) {
-        enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
-                "enableFgsNotificationRateLimit");
+        if (android.security.Flags.protectDeviceConfigFlags()) {
+            enforceCallingHasAtLeastOnePermission("enableFgsNotificationRateLimit",
+                    permission.WRITE_DEVICE_CONFIG, permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
+        } else {
+            enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
+                    "enableFgsNotificationRateLimit");
+        }
         synchronized (this) {
             return mServices.enableFgsNotificationRateLimitLocked(enable);
         }
@@ -19352,5 +19348,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         return token;
+    }
+
+    private IBackupManager getBackupManager() {
+        return IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
     }
 }

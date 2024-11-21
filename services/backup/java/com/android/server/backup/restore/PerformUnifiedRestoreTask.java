@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -482,6 +483,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 return;
             }
 
+            // We ask the transport which packages should not be put in restricted mode and cache
+            // the result in UBMS to be used later when the apps are started for restore.
+            setNoRestrictedModePackages(transport, packages);
+
             RestoreDescription desc = transport.nextRestorePackage();
             if (desc == null) {
                 Slog.e(TAG, "No restore metadata available; halting");
@@ -809,7 +814,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         // Good to go!  Set up and bind the agent...
         mAgent =
-                backupManagerService.bindToAgentSynchronous(
+                backupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
                         mCurrentPackage.applicationInfo,
                         ApplicationThreadConstants.BACKUP_MODE_RESTORE,
                         mBackupEligibilityRules.getBackupDestination());
@@ -1358,6 +1363,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // Clear any ongoing session timeout.
         backupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
+        // Clear this to avoid using the memory until reboot.
+        backupManagerService.getBackupAgentConnectionManager().clearNoRestrictedModePackages();
+
         // If we have a PM token, we must under all circumstances be sure to
         // handshake when we've finished.
         if (mPmToken > 0) {
@@ -1818,5 +1826,22 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         packageInfo.packageName = packageName;
 
         return packageInfo;
+    }
+
+    @VisibleForTesting
+    void setNoRestrictedModePackages(BackupTransportClient transport,
+            PackageInfo[] packages) {
+        try {
+            Set<String> packageNames = new ArraySet<>();
+            for (int i = 0; i < packages.length; i++) {
+                packageNames.add(packages[i].packageName);
+            }
+            packageNames = transport.getPackagesThatShouldNotUseRestrictedMode(packageNames,
+                    RESTORE);
+            backupManagerService.getBackupAgentConnectionManager().setNoRestrictedModePackages(
+                    packageNames, RESTORE);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "Failed to retrieve restricted mode packages from transport");
+        }
     }
 }

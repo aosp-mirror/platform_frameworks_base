@@ -25,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.model.UiModeNightTileModel
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.LocationController
@@ -38,7 +39,7 @@ import kotlinx.coroutines.flow.flowOf
 class UiModeNightTileDataInteractor
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val configurationController: ConfigurationController,
     private val uiModeManager: UiModeManager,
     private val batteryController: BatteryController,

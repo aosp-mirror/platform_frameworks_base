@@ -30,6 +30,7 @@ import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlTransaction;
 import static com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.CLOSE_MAXIMIZE_MENU_DELAY_MS;
+import static com.android.wm.shell.windowdecor.WindowDecoration.INVALID_CORNER_RADIUS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -219,7 +220,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Captor
     private ArgumentCaptor<Runnable> mCloseMaxMenuRunnable;
 
-    private final InsetsState mInsetsState = new InsetsState();
+    private final InsetsState mInsetsState = createInsetsState(statusBars(), /* visible= */true);
     private SurfaceControl.Transaction mMockTransaction;
     private StaticMockitoSession mMockitoSession;
     private TestableContext mTestableContext;
@@ -264,8 +265,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
         when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), any(),
-                anyInt(), anyInt(), anyInt(), anyInt()))
+                anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
+                any(), anyInt(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
@@ -312,8 +313,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersAreEnabled() {
+    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersSetForFreeform() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         fillRoundedCornersResources(/* fillValue= */ 30);
         RelayoutParams relayoutParams = new RelayoutParams();
 
@@ -331,6 +333,29 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mExclusionRegion);
 
         assertThat(relayoutParams.mCornerRadius).isGreaterThan(0);
+    }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersNotSetForFullscreen() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        fillRoundedCornersResources(/* fillValue= */ 30);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ false,
+                new InsetsState(),
+                /* hasGlobalFocus= */ true,
+                mExclusionRegion);
+
+        assertThat(relayoutParams.mCornerRadius).isEqualTo(INVALID_CORNER_RADIUS);
     }
 
     @Test
@@ -1408,8 +1433,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void notifyCaptionStateChanged_flagDisabled_doNoNotify() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
 
@@ -1423,8 +1446,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void notifyCaptionStateChanged_inFullscreenMode_notifiesAppHandleVisible() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
@@ -1444,8 +1465,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void notifyCaptionStateChanged_inWindowingMode_notifiesAppHeaderVisible() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
         when(mMockAppHeaderViewHolder.getAppChipLocationInWindow()).thenReturn(
                 new Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3));
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -1473,8 +1492,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void notifyCaptionStateChanged_taskNotVisible_notifiesNoCaptionVisible() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ false);
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
@@ -1493,8 +1510,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void notifyCaptionStateChanged_captionHandleExpanded_notifiesHandleMenuExpanded() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
@@ -1518,8 +1533,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void notifyCaptionStateChanged_captionHandleClosed_notifiesHandleMenuClosed() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
@@ -1564,7 +1577,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
-                argThat(intent -> (uri == null && intent == null) || intent.getData().equals(uri)),
+                anyBoolean(), argThat(intent ->
+                        (uri == null && intent == null) || intent.getData().equals(uri)),
                 anyInt(), anyInt(), anyInt(), anyInt());
     }
 

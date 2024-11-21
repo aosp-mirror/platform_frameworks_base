@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.provider.flags.Flags.stageFlagsForBuild;
 import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
@@ -163,6 +164,7 @@ import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
+import android.net.ConnectivityFrameworkInitializerBaklava;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.INetworkPolicyManager;
 import android.net.IPacProxyManager;
@@ -173,7 +175,6 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.vcn.VcnFrameworkInitializer;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
@@ -216,6 +217,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.os.flagging.ConfigInfrastructureFrameworkInitializer;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
@@ -239,6 +241,10 @@ import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.authenticationpolicy.AuthenticationPolicyManager;
+import android.security.authenticationpolicy.IAuthenticationPolicyService;
+import android.security.intrusiondetection.IIntrusionDetectionService;
+import android.security.intrusiondetection.IntrusionDetectionManager;
 import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
@@ -1021,6 +1027,25 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.AUTHENTICATION_POLICY_SERVICE,
+                AuthenticationPolicyManager.class,
+                new CachedServiceFetcher<AuthenticationPolicyManager>() {
+                    @Override
+                    public AuthenticationPolicyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.secureLockdown()) {
+                            throw new ServiceNotFoundException(
+                                    Context.AUTHENTICATION_POLICY_SERVICE);
+                        }
+
+                        final IBinder binder = ServiceManager.getServiceOrThrow(
+                                Context.AUTHENTICATION_POLICY_SERVICE);
+                        final IAuthenticationPolicyService service =
+                                IAuthenticationPolicyService.Stub.asInterface(binder);
+                        return new AuthenticationPolicyManager(ctx.getOuterContext(), service);
+                    }
+                });
+
         registerService(Context.TV_INTERACTIVE_APP_SERVICE, TvInteractiveAppManager.class,
                 new CachedServiceFetcher<TvInteractiveAppManager>() {
             @Override
@@ -1793,6 +1818,23 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.INTRUSION_DETECTION_SERVICE, IntrusionDetectionManager.class,
+                new CachedServiceFetcher<IntrusionDetectionManager>() {
+                    @Override
+                    public IntrusionDetectionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.aflApi()) {
+                            throw new ServiceNotFoundException(
+                                    "Intrusion Detection is not supported");
+                        }
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.INTRUSION_DETECTION_SERVICE);
+                        IIntrusionDetectionService service =
+                                IIntrusionDetectionService.Stub.asInterface(b);
+                        return new IntrusionDetectionManager(service);
+                    }
+                });
+
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
@@ -1821,7 +1863,11 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
-            VcnFrameworkInitializer.registerServiceWrappers();
+            ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();
+
+            if (stageFlagsForBuild()) {
+                ConfigInfrastructureFrameworkInitializer.registerServiceWrappers();
+            }
 
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();

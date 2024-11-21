@@ -144,7 +144,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = clockRegistry.createCurrentClock(),
+                initialValue = null,
             )
 
     override val previewClock: Flow<ClockController> =

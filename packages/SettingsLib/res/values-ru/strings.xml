@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Разрешить терминальный доступ к локальной оболочке"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Среда разработки Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Запустить терминал Linux в Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"Запустить терминал Linux в Android (экспериментальная функция)"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Если отключить эту функцию, данные терминала Linux будут удалены"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Порядок проверки HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отладка"</string>
@@ -584,19 +585,16 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Этот смартфон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Этот планшет"</string>
-    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Встроенный динамик компьютера"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Встроенное"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Колонка с док-станцией"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Внешнее устройство"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Подключенное устройство"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Аналоговый выход"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Невозможно воспроизвести на этом устройстве."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Для переключения требуется премиум-аккаунт"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Не удается воспроизвести скачанные файлы"</string>

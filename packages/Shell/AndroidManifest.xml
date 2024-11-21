@@ -179,6 +179,7 @@
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGE_UPDATES" />
+    <uses-permission android:name="android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES" />
     <uses-permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP" />
     <uses-permission android:name="android.permission.INSTALL_DPC_PACKAGES" />
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
@@ -242,6 +243,8 @@
     <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL" />
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.COPY_ACCOUNTS" />
+    <uses-permission android:name="android.permission.REMOVE_ACCOUNTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN" />
     <uses-permission android:name="android.permission.FRAME_STATS" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
@@ -368,6 +371,9 @@
 
     <!-- Permission needed for CTS test - UnsupportedErrorDialogTests -->
     <uses-permission android:name="android.permission.RESET_APP_ERRORS" />
+
+    <!-- Permission needed tests -->
+    <uses-permission android:name="android.permission.OBSERVE_PICTURE_PROFILES" />
 
     <!-- Permission needed for CTS test - CtsSystemUiTestCases:PipNotificationTests -->
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
@@ -743,6 +749,9 @@
     <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
     <uses-permission android:name="android.permission.LOCK_DEVICE" />
 
+    <!-- Permission required for AuthenticationPolicyManagerTest -->
+    <uses-permission android:name="android.permission.MANAGE_SECURE_LOCK_DEVICE" />
+
     <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->
     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
     <uses-permission android:name="android.permission.READ_SAFETY_CENTER_STATUS" />
@@ -929,7 +938,6 @@
 
     <!-- Permission required for CTS test - CtsPackageManagerTestCases-->
     <uses-permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT" />
-    <uses-permission android:name="android.permission.VERIFICATION_AGENT" />
 
     <!-- Permission required for Cts test - CtsInputTestCases -->
     <uses-permission
@@ -948,10 +956,17 @@
     <!-- Permission required for CTS test - CtsNfcTestCases -->
     <uses-permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
     <!-- Permission required for CTS test - AdvancedProtectionManagerTest -->
-    <uses-permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+    <uses-permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
+
+    <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
+    <uses-permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE"
+        android:featureFlag="android.security.afl_api"/>
+    <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
+        android:featureFlag="android.security.afl_api"/>
+
 
     <!-- Permission required for CTS test - CtsAppTestCases -->
     <uses-permission android:name="android.permission.KILL_UID" />
@@ -959,7 +974,7 @@
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
 
-    <!-- Permission required for ExecutableMethodFileOffsetsTest -->
+    <!-- Permission required for CTS test - CtsDynamicInstrumentationManagerTest -->
     <uses-permission android:name="android.permission.DYNAMIC_INSTRUMENTATION" />
 
     <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->

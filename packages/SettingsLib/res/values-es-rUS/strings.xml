@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Habilitar aplicac. de terminal que ofrece acceso al shell local"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Entorno de desarrollo de Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Ejecuta la terminal de Linux en Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Ejecuta la terminal de Linux en Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Si lo inhabilitas, se borrarán los datos de la terminal de Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Comprobación HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Configurar comportamiento de la comprobación HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuración"</string>
@@ -490,7 +491,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta la(s) <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Es posible que la batería se agote para las <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analógico"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No se puede reproducir en este dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualiza la cuenta para cambiar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"No se pueden reproducir las descargas aquí"</string>

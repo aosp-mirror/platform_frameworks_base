@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
+import com.android.systemui.statusbar.notification.logging.dagger.NotificationsLogModule;
 import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactory;
 import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactoryLooperImpl;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -116,6 +117,7 @@ import javax.inject.Provider;
         ActivatableNotificationViewModelModule.class,
         NotificationMemoryModule.class,
         NotificationStatsLoggerModule.class,
+        NotificationsLogModule.class,
 })
 public interface NotificationsModule {
     @Binds

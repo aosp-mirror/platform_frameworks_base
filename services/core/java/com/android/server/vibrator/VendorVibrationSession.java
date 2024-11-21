@@ -37,8 +37,11 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
@@ -60,6 +63,9 @@ final class VendorVibrationSession extends IVibrationSession.Stub
          * used for another vibration.
          */
         void onSessionReleased(long sessionId);
+
+        /** Request the manager to trigger a vibration within this session. */
+        void vibrate(long sessionId, CallerInfo callerInfo, CombinedVibration vibration);
     }
 
     private final Object mLock = new Object();
@@ -71,7 +77,9 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     private final IVibrationSessionCallback mCallback;
     private final CallerInfo mCallerInfo;
     private final VibratorManagerHooks mManagerHooks;
+    private final DeviceAdapter mDeviceAdapter;
     private final Handler mHandler;
+    private final List<DebugInfo> mVibrations = new ArrayList<>();
 
     @GuardedBy("mLock")
     private Status mStatus = Status.RUNNING;
@@ -83,24 +91,28 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     private long mEndUptime;
     @GuardedBy("mLock")
     private long mEndTime; // for debugging
+    @GuardedBy("mLock")
+    private VibrationStepConductor mConductor;
 
     VendorVibrationSession(@NonNull CallerInfo callerInfo, @NonNull Handler handler,
-            @NonNull VibratorManagerHooks managerHooks, @NonNull int[] vibratorIds,
+            @NonNull VibratorManagerHooks managerHooks, @NonNull DeviceAdapter deviceAdapter,
             @NonNull IVibrationSessionCallback callback) {
         mCreateUptime = SystemClock.uptimeMillis();
         mCreateTime = System.currentTimeMillis();
-        mVibratorIds = vibratorIds;
+        mVibratorIds = deviceAdapter.getAvailableVibratorIds();
         mHandler = handler;
         mCallback = callback;
         mCallerInfo = callerInfo;
         mManagerHooks = managerHooks;
+        mDeviceAdapter = deviceAdapter;
         CancellationSignal.fromTransport(mCancellationSignal).setOnCancelListener(this);
     }
 
     @Override
     public void vibrate(CombinedVibration vibration, String reason) {
-        // TODO(b/345414356): implement vibration support
-        throw new UnsupportedOperationException("Vendor session vibrations not yet implemented");
+        CallerInfo vibrationCallerInfo = new CallerInfo(mCallerInfo.attrs, mCallerInfo.uid,
+                mCallerInfo.deviceId, mCallerInfo.opPkg, reason);
+        mManagerHooks.vibrate(mSessionId, vibrationCallerInfo, vibration);
     }
 
     @Override
@@ -146,7 +158,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     public DebugInfo getDebugInfo() {
         synchronized (mLock) {
             return new DebugInfoImpl(mStatus, mCallerInfo, mCreateUptime, mCreateTime, mStartTime,
-                    mEndUptime, mEndTime);
+                    mEndUptime, mEndTime, mVibrations);
         }
     }
 
@@ -200,12 +212,12 @@ final class VendorVibrationSession extends IVibrationSession.Stub
 
     @Override
     public void notifyVibratorCallback(int vibratorId, long vibrationId) {
-        // TODO(b/345414356): implement vibration support
+        // Ignore it, the session vibration playback doesn't depend on HAL timings
     }
 
     @Override
     public void notifySyncedVibratorsCallback(long vibrationId) {
-        // TODO(b/345414356): implement vibration support
+        // Ignore it, the session vibration playback doesn't depend on HAL timings
     }
 
     @Override
@@ -214,8 +226,9 @@ final class VendorVibrationSession extends IVibrationSession.Stub
             // If end was not requested then the HAL has cancelled the session.
             maybeSetEndRequestLocked(Status.CANCELLED_BY_UNKNOWN_REASON);
             maybeSetStatusToRequestedLocked();
+            clearVibrationConductor();
         }
-        mManagerHooks.onSessionReleased(mSessionId);
+        mHandler.post(() -> mManagerHooks.onSessionReleased(mSessionId));
     }
 
     @Override
@@ -228,7 +241,8 @@ final class VendorVibrationSession extends IVibrationSession.Stub
                     /* includeDate= */ true))
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
                     + ", callerInfo: " + mCallerInfo
-                    + ", vibratorIds: " + Arrays.toString(mVibratorIds);
+                    + ", vibratorIds: " + Arrays.toString(mVibratorIds)
+                    + ", vibrations: " + mVibrations;
         }
     }
 
@@ -252,6 +266,13 @@ final class VendorVibrationSession extends IVibrationSession.Stub
 
     public int[] getVibratorIds() {
         return mVibratorIds;
+    }
+
+    @VisibleForTesting
+    public List<DebugInfo> getVibrations() {
+        synchronized (mLock) {
+            return new ArrayList<>(mVibrations);
+        }
     }
 
     public ICancellationSignal getCancellationSignal() {
@@ -278,7 +299,39 @@ final class VendorVibrationSession extends IVibrationSession.Stub
         }
         if (isAlreadyEnded) {
             // Session already ended, make sure we end it in the HAL.
-            mManagerHooks.endSession(mSessionId, /* shouldAbort= */ true);
+            mHandler.post(() -> mManagerHooks.endSession(mSessionId, /* shouldAbort= */ true));
+        }
+    }
+
+    public void notifyVibrationAttempt(DebugInfo vibrationDebugInfo) {
+        mVibrations.add(vibrationDebugInfo);
+    }
+
+    @Nullable
+    public VibrationStepConductor clearVibrationConductor() {
+        synchronized (mLock) {
+            VibrationStepConductor conductor = mConductor;
+            if (conductor != null) {
+                mVibrations.add(conductor.getVibration().getDebugInfo());
+            }
+            mConductor = null;
+            return conductor;
+        }
+    }
+
+    public DeviceAdapter getDeviceAdapter() {
+        return mDeviceAdapter;
+    }
+
+    public boolean maybeSetVibrationConductor(VibrationStepConductor conductor) {
+        synchronized (mLock) {
+            if (mConductor != null) {
+                Slog.d(TAG, "Vibration session still dispatching previous vibration,"
+                        + " new vibration ignored");
+                return false;
+            }
+            mConductor = conductor;
+            return true;
         }
     }
 
@@ -296,7 +349,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
             }
         }
         if (shouldTriggerSessionHook) {
-            mManagerHooks.endSession(mSessionId, shouldAbort);
+            mHandler.post(() ->  mManagerHooks.endSession(mSessionId, shouldAbort));
         }
     }
 
@@ -309,6 +362,11 @@ final class VendorVibrationSession extends IVibrationSession.Stub
         mEndStatusRequest = status;
         mEndTime = System.currentTimeMillis();
         mEndUptime = SystemClock.uptimeMillis();
+        if (mConductor != null) {
+            // Vibration is being dispatched when session end was requested, cancel it.
+            mConductor.notifyCancelled(new Vibration.EndInfo(status),
+                    /* immediate= */ status != Status.FINISHED);
+        }
         if (isStarted()) {
             // Only trigger "finishing" callback if session started.
             // Run client callback in separate thread.
@@ -377,6 +435,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     static final class DebugInfoImpl implements VibrationSession.DebugInfo {
         private final Status mStatus;
         private final CallerInfo mCallerInfo;
+        private final List<DebugInfo> mVibrations;
 
         private final long mCreateUptime;
         private final long mCreateTime;
@@ -385,7 +444,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
         private final long mDurationMs;
 
         DebugInfoImpl(Status status, CallerInfo callerInfo, long createUptime, long createTime,
-                long startTime, long endUptime, long endTime) {
+                long startTime, long endUptime, long endTime, List<DebugInfo> vibrations) {
             mStatus = status;
             mCallerInfo = callerInfo;
             mCreateUptime = createUptime;
@@ -393,6 +452,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
             mStartTime = startTime;
             mEndTime = endTime;
             mDurationMs = endUptime > 0 ? endUptime - createUptime : -1;
+            mVibrations = vibrations == null ? new ArrayList<>() : new ArrayList<>(vibrations);
         }
 
         @Override
@@ -418,6 +478,9 @@ final class VendorVibrationSession extends IVibrationSession.Stub
 
         @Override
         public void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
+            for (DebugInfo vibration : mVibrations) {
+                vibration.logMetrics(statsLogger);
+            }
         }
 
         @Override
@@ -448,6 +511,14 @@ final class VendorVibrationSession extends IVibrationSession.Stub
             pw.println("endTime = " + (mEndTime == 0 ? null
                     : formatTime(mEndTime, /*includeDate=*/ true)));
             pw.println("callerInfo = " + mCallerInfo);
+
+            pw.println("vibrations:");
+            pw.increaseIndent();
+            for (DebugInfo vibration : mVibrations) {
+                vibration.dump(pw);
+            }
+            pw.decreaseIndent();
+
             pw.decreaseIndent();
         }
 
@@ -477,6 +548,12 @@ final class VendorVibrationSession extends IVibrationSession.Stub
                     " | %s (uid=%d, deviceId=%d) | reason: %s",
                     mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.deviceId, mCallerInfo.reason);
             pw.println(timingsStr + paramStr + audioUsageStr + callerStr);
+
+            pw.increaseIndent();
+            for (DebugInfo vibration : mVibrations) {
+                vibration.dumpCompact(pw);
+            }
+            pw.decreaseIndent();
         }
 
         @Override
@@ -487,7 +564,8 @@ final class VendorVibrationSession extends IVibrationSession.Stub
                     /* includeDate= */ true))
                     + ", durationMs: " + mDurationMs
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
-                    + ", callerInfo: " + mCallerInfo;
+                    + ", callerInfo: " + mCallerInfo
+                    + ", vibrations: " + mVibrations;
         }
     }
 }

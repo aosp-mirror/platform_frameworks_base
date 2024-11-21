@@ -42,6 +42,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
@@ -54,6 +55,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -80,6 +82,8 @@ public class KeyguardTransitionHandler
 
     private final Transitions mTransitions;
     private final ShellController mShellController;
+
+    private final DisplayController mDisplayController;
     private final Handler mMainHandler;
     private final ShellExecutor mMainExecutor;
 
@@ -121,12 +125,14 @@ public class KeyguardTransitionHandler
     public KeyguardTransitionHandler(
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
+            @NonNull DisplayController displayController,
             @NonNull Transitions transitions,
             @NonNull TaskStackListenerImpl taskStackListener,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor mainExecutor) {
         mTransitions = transitions;
         mShellController = shellController;
+        mDisplayController = displayController;
         mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
         mTaskStackListener = taskStackListener;
@@ -165,6 +171,10 @@ public class KeyguardTransitionHandler
 
     public boolean isKeyguardShowing() {
         return mKeyguardShowing;
+    }
+
+    public boolean isKeyguardAnimating() {
+        return !mStartedTransitions.isEmpty();
     }
 
     @Override
@@ -429,10 +439,10 @@ public class KeyguardTransitionHandler
         @Override
         public void startKeyguardTransition(boolean keyguardShowing, boolean aodShowing) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            final KeyguardState keyguardState =
-                    new KeyguardState.Builder(android.view.Display.DEFAULT_DISPLAY)
-                            .setKeyguardShowing(keyguardShowing).setAodShowing(aodShowing).build();
-            wct.addKeyguardState(keyguardState);
+            for (Display display : mDisplayController.getDisplays()) {
+                wct.addKeyguardState(new KeyguardState.Builder(display.getDisplayId())
+                        .setKeyguardShowing(keyguardShowing).setAodShowing(aodShowing).build());
+            }
             mMainExecutor.execute(() -> {
                 mTransitions.startTransition(keyguardShowing ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK,
                         wct, KeyguardTransitionHandler.this);

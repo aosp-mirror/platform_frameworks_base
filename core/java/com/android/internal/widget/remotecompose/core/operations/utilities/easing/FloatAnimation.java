@@ -57,13 +57,17 @@ public class FloatAnimation extends Easing {
         mEasingCurve = new CubicEasing(mType);
     }
 
-    public FloatAnimation(float... description) {
+    public FloatAnimation(@NonNull float... description) {
         mType = CUBIC_STANDARD;
         setAnimationDescription(description);
     }
 
     public FloatAnimation(
-            int type, float duration, float[] description, float initialValue, float wrap) {
+            int type,
+            float duration,
+            @Nullable float[] description,
+            float initialValue,
+            float wrap) {
         mType = CUBIC_STANDARD;
         setAnimationDescription(packToFloatArray(duration, type, description, initialValue, wrap));
     }
@@ -77,7 +81,7 @@ public class FloatAnimation extends Easing {
      * @param initialValue
      * @return
      */
-    public static float[] packToFloatArray(
+    public static @NonNull float[] packToFloatArray(
             float duration, int type, @Nullable float[] spec, float initialValue, float wrap) {
         int count = 0;
 
@@ -221,7 +225,7 @@ public class FloatAnimation extends Easing {
      *
      * @param description
      */
-    public void setAnimationDescription(float[] description) {
+    public void setAnimationDescription(@NonNull float[] description) {
         mSpec = description;
         mDuration = (mSpec.length == 0) ? 1 : mSpec[0];
         int len = 0;
@@ -242,7 +246,7 @@ public class FloatAnimation extends Easing {
         create(mType, description, 2, len);
     }
 
-    private void create(int type, float[] params, int offset, int len) {
+    private void create(int type, @Nullable float[] params, int offset, int len) {
         switch (type) {
             case CUBIC_STANDARD:
             case CUBIC_ACCELERATE:

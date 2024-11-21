@@ -19,6 +19,7 @@ package com.android.server.input;
 import static android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
 import static android.content.PermissionChecker.PERMISSION_GRANTED;
 import static android.content.PermissionChecker.PID_UNKNOWN;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -136,6 +137,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
@@ -193,7 +195,6 @@ public class InputManagerService extends IInputManager.Stub
     private DisplayManagerInternal mDisplayManagerInternal;
 
     private WindowManagerInternal mWindowManagerInternal;
-    private PackageManagerInternal mPackageManagerInternal;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -573,7 +574,6 @@ public class InputManagerService extends IInputManager.Stub
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mSettingsObserver.registerAndUpdate();
 
@@ -2937,10 +2937,11 @@ public class InputManagerService extends IInputManager.Stub
     private void enforceManageKeyGesturePermission() {
         // TODO(b/361567988): Use @EnforcePermission to enforce permission once flag guarding the
         //  permission is rolled out
-        if (mSystemReady) {
-            String systemUIPackage = mContext.getString(R.string.config_systemUi);
-            int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
-                    .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
+        String systemUIPackage = mContext.getString(R.string.config_systemUi);
+        PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        if (pm != null) {
+            int systemUIAppId = UserHandle.getAppId(
+                    pm.getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
                             UserHandle.USER_SYSTEM));
             if (UserHandle.getCallingAppId() == systemUIAppId) {
                 return;
@@ -3030,6 +3031,19 @@ public class InputManagerService extends IInputManager.Stub
     @Override
     public AidlInputGestureData[] getAppLaunchBookmarks() {
         return mKeyGestureController.getAppLaunchBookmarks();
+    }
+
+    @Override
+    public void resetLockedModifierState() {
+        mNative.resetLockedModifierState();
+    }
+
+    private void onUserSwitching(@NonNull SystemService.TargetUser from,
+            @NonNull SystemService.TargetUser to) {
+        if (DEBUG) {
+            Slog.d(TAG, "onUserSwitching from=" + from + " to=" + to);
+        }
+        mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, to.getUserIdentifier()).sendToTarget();
     }
 
     private void handleCurrentUserChanged(@UserIdInt int userId) {
@@ -3389,6 +3403,42 @@ public class InputManagerService extends IInputManager.Stub
                 Slog.d(TAG, "Vibrator token died.");
             }
             onVibratorTokenDied(this);
+        }
+    }
+
+    /**
+     * {@link SystemService} used to publish and manage the lifecycle of {@link InputManagerService}
+     */
+    public static final class Lifecycle extends SystemService {
+
+        private final InputManagerService mService;
+
+        public Lifecycle(@NonNull Context context) {
+            super(context);
+            mService = new InputManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.INPUT_SERVICE, mService,
+                    /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            // Called on ActivityManager thread.
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mService.systemRunning();
+            }
+        }
+
+        @Override
+        public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+            mService.onUserSwitching(from, to);
+        }
+
+        public InputManagerService getService() {
+            return mService;
         }
     }
 

@@ -785,8 +785,16 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private void handleFlingTransition(SurfaceControl.Transaction startTx,
             SurfaceControl.Transaction finishTx, Rect destinationBounds) {
-        startTx.setPosition(mPipTransitionState.getPinnedTaskLeash(),
-                destinationBounds.left, destinationBounds.top);
+        SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
+        int cornerRadius = mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        int shadowRadius = mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius);
+
+        // merge transactions so everything is done on startTx
+        startTx.merge(finishTx);
+
+        startTx.setPosition(pipLeash, destinationBounds.left, destinationBounds.top)
+                .setCornerRadius(pipLeash, cornerRadius)
+                .setShadowRadius(pipLeash, shadowRadius);
         startTx.apply();
 
         // All motion operations have actually finished, so make bounds cache updates.

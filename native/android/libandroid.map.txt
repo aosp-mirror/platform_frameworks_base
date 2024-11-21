@@ -355,20 +355,29 @@ LIBANDROID {
     APerformanceHint_getManager; # introduced=Tiramisu
     APerformanceHint_createSession; # introduced=Tiramisu
     APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
+    APerformanceHint_getMaxGraphicsPipelineThreadsCount; # introduced=36
     APerformanceHint_updateTargetWorkDuration; # introduced=Tiramisu
     APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
     APerformanceHint_closeSession; # introduced=Tiramisu
     APerformanceHint_setThreads; # introduced=UpsideDownCake
     APerformanceHint_setPreferPowerEfficiency; # introduced=VanillaIceCream
     APerformanceHint_reportActualWorkDuration2; # introduced=VanillaIceCream
+    APerformanceHint_createSessionUsingConfig; # introduced=36
     APerformanceHint_notifyWorkloadIncrease; # introduced=36
     APerformanceHint_notifyWorkloadReset; # introduced=36
+    APerformanceHint_borrowSessionFromJava; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
     AWorkDuration_setActualTotalDurationNanos; # introduced=VanillaIceCream
     AWorkDuration_setActualCpuDurationNanos; # introduced=VanillaIceCream
     AWorkDuration_setActualGpuDurationNanos; # introduced=VanillaIceCream
+    ASessionCreationConfig_create; # introduced=36
+    ASessionCreationConfig_release; # introduced=36
+    ASessionCreationConfig_setTids; # introduced=36
+    ASessionCreationConfig_setTargetWorkDurationNanos; # introduced=36
+    ASessionCreationConfig_setPreferPowerEfficiency; # introduced=36
+    ASessionCreationConfig_setGraphicsPipeline; # introduced=36
   local:
     *;
 };
@@ -378,11 +387,15 @@ LIBANDROID_PLATFORM {
     AThermal_setIThermalServiceForTesting;
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
+    APerformanceHint_setUseGraphicsPipelineForTesting;
     APerformanceHint_getThreadIds;
     APerformanceHint_createSessionInternal;
+    APerformanceHint_createSessionUsingConfigInternal;
     APerformanceHint_setUseFMQForTesting;
     APerformanceHint_getRateLimiterPropertiesForTesting;
     APerformanceHint_setUseNewLoadHintBehaviorForTesting;
+    APerformanceHint_closeSessionFromJava;
+    APerformanceHint_createSessionFromJava;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

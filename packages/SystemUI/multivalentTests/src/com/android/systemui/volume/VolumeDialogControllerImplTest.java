@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,14 +40,13 @@ import android.media.IAudioService;
 import android.media.session.MediaSession;
 import android.os.Handler;
 import android.os.Process;
-import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.settingslib.flags.Flags;
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -64,6 +64,10 @@ import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor;
+import com.android.systemui.volume.domain.interactor.FakeAudioSharingInteractor;
+import com.android.systemui.volume.shared.VolumeLogger;
+
+import kotlinx.coroutines.test.TestScope;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,6 +98,9 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     private RingerModeLiveData mRingerModeInternalLiveData;
     private final FakeThreadFactory mThreadFactory = new FakeThreadFactory(
             new FakeExecutor(new FakeSystemClock()));
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope);
+    private FakeAudioSharingInteractor mFakeAudioSharingInteractor;
     @Mock
     private AudioManager mAudioManager;
     @Mock
@@ -117,9 +124,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Mock
     private DumpManager mDumpManager;
     @Mock
-    private AudioSharingInteractor mAudioSharingInteractor;
-    @Mock
-    private JavaAdapter mJavaAdapter;
+    private VolumeLogger mVolumeLogger;
 
 
     @Before
@@ -136,6 +141,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mThreadFactory.setLooper(TestableLooper.get(this).getLooper());
+        mFakeAudioSharingInteractor = spy(new FakeAudioSharingInteractor());
+        mFakeAudioSharingInteractor.setAudioSharingVolumeBarAvailable(true);
         mVolumeController =
                 new TestableVolumeDialogControllerImpl(
                         mContext,
@@ -155,8 +162,9 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                         mUserTracker,
                         mDumpManager,
                         mCallback,
-                        mAudioSharingInteractor,
-                        mJavaAdapter);
+                        mFakeAudioSharingInteractor,
+                        mJavaAdapter,
+                        mVolumeLogger);
         mVolumeController.setEnableDialogs(true, true);
     }
 
@@ -305,13 +313,13 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_VOLUME_DIALOG_AUDIO_SHARING_FIX)
     public void testSetStreamVolume_setSecondaryDeviceVolume() {
         mVolumeController.setStreamVolume(
                 VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST, /* level= */ 100);
         Objects.requireNonNull(TestableLooper.get(this)).processAllMessages();
+        mTestScope.getTestScheduler().advanceUntilIdle();
 
-        verify(mAudioSharingInteractor).setStreamVolume(100);
+        verify(mFakeAudioSharingInteractor).setStreamVolume(100);
     }
 
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
@@ -336,7 +344,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 DumpManager dumpManager,
                 C callback,
                 AudioSharingInteractor audioSharingInteractor,
-                JavaAdapter javaAdapter) {
+                JavaAdapter javaAdapter,
+                VolumeLogger volumeLogger) {
             super(
                     context,
                     broadcastDispatcher,
@@ -355,7 +364,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                     userTracker,
                     dumpManager,
                     audioSharingInteractor,
-                    javaAdapter);
+                    javaAdapter,
+                    volumeLogger);
             mCallbacks = callback;
 
             ArgumentCaptor<WakefulnessLifecycle.Observer> observerCaptor =

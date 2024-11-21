@@ -110,7 +110,6 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_B
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
-import static android.view.accessibility.Flags.fixMergedContentChangeEventV2;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
 import static android.view.flags.Flags.addSchandleToVriSurface;
@@ -2515,7 +2514,16 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public void notifyInsetsAnimationRunningStateChanged(boolean running) {
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.instant(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("notifyInsetsAnimationRunningStateChanged(%s)",
+                        Boolean.toString(running)));
+            }
             mInsetsAnimationRunning = running;
+            try {
+                mWindowSession.notifyInsetsAnimationRunningStateChanged(mWindow, running);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -8868,11 +8876,6 @@ public final class ViewRootImpl implements ViewParent,
 
         SyntheticTouchNavigationHandler() {
             super(true);
-            int gestureDetectorVelocityStrategy =
-                    android.companion.virtual.flags.Flags
-                            .impulseVelocityStrategyForTouchNavigation()
-                    ? VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE
-                    : VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT;
             mGestureDetector = new GestureDetector(mContext,
                     new GestureDetector.OnGestureListener() {
                         @Override
@@ -8912,7 +8915,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     },
                     /* handler= */ null,
-                    gestureDetectorVelocityStrategy);
+                    VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE);
         }
 
         public void process(MotionEvent event) {
@@ -12285,31 +12288,20 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSource != null) {
-                if (fixMergedContentChangeEventV2()) {
-                    View newSource = getCommonPredecessor(mSource, source);
-                    if (newSource != null) {
-                        newSource = newSource.getSelfOrParentImportantForA11y();
-                    }
-                    if (newSource == null) {
-                        // If there is no common predecessor, then mSource points to
-                        // a removed view, hence in this case always prefer the source.
-                        newSource = source;
-                    }
-
-                    mChangeTypes |= changeType;
-                    if (mSource != newSource) {
-                        mChangeTypes |= AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
-                        mSource = newSource;
-                    }
-                } else {
+                View newSource = getCommonPredecessor(mSource, source);
+                if (newSource != null) {
+                    newSource = newSource.getSelfOrParentImportantForA11y();
+                }
+                if (newSource == null) {
                     // If there is no common predecessor, then mSource points to
                     // a removed view, hence in this case always prefer the source.
-                    View predecessor = getCommonPredecessor(mSource, source);
-                    if (predecessor != null) {
-                        predecessor = predecessor.getSelfOrParentImportantForA11y();
-                    }
-                    mSource = (predecessor != null) ? predecessor : source;
-                    mChangeTypes |= changeType;
+                    newSource = source;
+                }
+
+                mChangeTypes |= changeType;
+                if (mSource != newSource) {
+                    mChangeTypes |= AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
+                    mSource = newSource;
                 }
 
                 final int performingAction = mAccessibilityManager.getPerformingAction();

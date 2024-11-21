@@ -281,6 +281,14 @@ public final class SatelliteManager {
             "satellite_access_configuration";
 
     /**
+     * Bundle key to get the response from
+     * {@link #requestSelectedNbIotSatelliteSubscriptionId(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SELECTED_NB_IOT_SATELLITE_SUBSCRIPTION_ID =
+            "selected_nb_iot_satellite_subscription_id";
+
+    /**
      * The request was successfully processed.
      * @hide
      */
@@ -531,6 +539,12 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_ENABLE_IN_PROGRESS = 29;
 
+    /**
+     * There is no valid satellite subscription selected.
+     * @hide
+     */
+    public static final int SATELLITE_RESULT_NO_VALID_SATELLITE_SUBSCRIPTION = 30;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_RESULT_"}, value = {
             SATELLITE_RESULT_SUCCESS,
@@ -562,7 +576,8 @@ public final class SatelliteManager {
             SATELLITE_RESULT_LOCATION_NOT_AVAILABLE,
             SATELLITE_RESULT_EMERGENCY_CALL_IN_PROGRESS,
             SATELLITE_RESULT_DISABLE_IN_PROGRESS,
-            SATELLITE_RESULT_ENABLE_IN_PROGRESS
+            SATELLITE_RESULT_ENABLE_IN_PROGRESS,
+            SATELLITE_RESULT_NO_VALID_SATELLITE_SUBSCRIPTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteResult {}
@@ -2458,6 +2473,68 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestTimeForNextSatelliteVisibility() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Request to get the currently selected satellite subscription id as an {@link Integer}.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return the time after which the satellite will be visible.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestSelectedNbIotSatelliteSubscriptionId(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Integer, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData
+                                    .containsKey(KEY_SELECTED_NB_IOT_SATELLITE_SUBSCRIPTION_ID)) {
+                                int selectedSatelliteSubscriptionId =
+                                        resultData
+                                            .getInt(KEY_SELECTED_NB_IOT_SATELLITE_SUBSCRIPTION_ID);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(selectedSatelliteSubscriptionId)));
+                            } else {
+                                loge(
+                                    "KEY_SELECTED_NB_IOT_SATELLITE_SUBSCRIPTION_ID does not exist."
+                                    );
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestSelectedNbIotSatelliteSubscriptionId(receiver);
+            } else {
+                loge("requestSelectedNbIotSatelliteSubscriptionId() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestSelectedNbIotSatelliteSubscriptionId() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }

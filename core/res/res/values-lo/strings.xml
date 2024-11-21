@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ອະນຸຍາດໃຫ້ແອັບກຳນົດຕຳແໜ່ງທີ່ສຳພັນກັນລະຫວ່າງອຸປະກອນ Ultra-Wideband ທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ໂຕ້ຕອບກັບອຸປະກອນ Wi‑Fi ທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ອະນຸຍາດໃຫ້ແອັບໂຄສະນາ, ເຊື່ອມຕໍ່ ແລະ ກຳນົດຕຳແໜ່ງສຳພັນຂອງອຸປະກອນ Wi-Fi ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"ກຳນົດຕຳແໜ່ງທີ່ກ່ຽວຂ້ອງກັນລະຫວ່າງອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ອະນຸຍາດໃຫ້ແອັບກຳນົດຕຳແໜ່ງທີ່ກ່ຽວຂ້ອງກັນລະຫວ່າງອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ຄວບຄຸມ Near Field Communication"</string>

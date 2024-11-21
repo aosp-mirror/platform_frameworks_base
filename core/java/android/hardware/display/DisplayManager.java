@@ -61,6 +61,7 @@ import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.display.feature.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -102,6 +103,7 @@ public final class DisplayManager {
     private final WeakDisplayCache mDisplayCache = new WeakDisplayCache();
 
     private int mDisplayIdToMirror = INVALID_DISPLAY;
+    private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
 
     /**
      * Broadcast receiver that indicates when the Wifi display status changes.
@@ -1613,6 +1615,17 @@ public final class DisplayManager {
     }
 
     /**
+     * Returns whether this device supports Always On Display.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_IS_ALWAYS_ON_AVAILABLE_API)
+    public boolean isAlwaysOnDisplayCurrentlyAvailable() {
+        return getAmbientDisplayConfiguration().alwaysOnAvailableForUser(mContext.getUserId());
+    }
+
+    /**
      * Returns whether device supports seamless refresh rate switching.
      *
      * Match content frame rate setting has three options: seamless, non-seamless and never.
@@ -1672,6 +1685,15 @@ public final class DisplayManager {
                 Slog.e(TAG, switchingType + " is not a valid value of switching type.");
                 return MATCH_CONTENT_FRAMERATE_UNKNOWN;
         }
+    }
+
+    private AmbientDisplayConfiguration getAmbientDisplayConfiguration() {
+        synchronized (this) {
+            if (mAmbientDisplayConfiguration == null) {
+                mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+            }
+        }
+        return mAmbientDisplayConfiguration;
     }
 
     /**

@@ -1280,7 +1280,7 @@ public class AutomaticBrightnessController {
 
     private boolean shouldApplyDozeScaleFactor() {
         // We don't apply the doze scale factor if we have a designated brightness curve for doze.
-        return (mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()
+        return (mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)
                 ? (!mUseNormalBrightnessForDoze && mDisplayPolicy == POLICY_DOZE)
                         || Display.isDozeState(mDisplayState) : Display.isDozeState(mDisplayState))
                 && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;

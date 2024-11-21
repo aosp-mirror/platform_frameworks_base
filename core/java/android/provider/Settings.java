@@ -6271,6 +6271,14 @@ public final class Settings {
         public static final String TOUCHPAD_TAP_DRAGGING = "touchpad_tap_dragging";
 
         /**
+         * Whether to enable three finger tap customization on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION =
+                "touchpad_three_finger_tap_customization";
+
+        /**
          * Whether to enable a right-click zone on touchpads.
          *
          * When set to 1, pressing to click in a section on the right-hand side of the touchpad will
@@ -6394,27 +6402,6 @@ public final class Settings {
          */
         public static final String SCREEN_FLASH_NOTIFICATION_COLOR =
                 "screen_flash_notification_color_global";
-
-
-        /**
-         * A semi-colon separated list of Bluetooth hearing devices' local ambient volume.
-         * Each entry is encoded as a key=value list, separated by commas. Ex:
-         *
-         * "addr=XX:XX:XX:00:11,ambient=20,group_ambient=30;addr=XX:XX:XX:00:22,ambient=50"
-         *
-         * The following keys are supported:
-         * <pre>
-         * addr                 (String)
-         * ambient              (int)
-         * group_ambient        (int)
-         * control_expanded     (boolean)
-         * </pre>
-         *
-         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
-         * @hide
-         */
-        public static final String HEARING_DEVICE_LOCAL_AMBIENT_VOLUME =
-                "hearing_device_local_ambient_volume";
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -6560,7 +6547,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
-            PRIVATE_SETTINGS.add(HEARING_DEVICE_LOCAL_AMBIENT_VOLUME);
         }
 
         /**
@@ -18138,6 +18124,44 @@ public final class Settings {
         public static final String ONE_HANDED_KEYGUARD_SIDE = "one_handed_keyguard_side";
 
         /**
+         * A semi-colon separated list of Bluetooth hearing devices' local ambient volume data.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,ambient=20,group_ambient=30;addr=XX:XX:XX:00:22,ambient=50"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * ambient              (int)
+         * group_ambient        (int)
+         * control_expanded     (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_AMBIENT_VOLUME =
+                "hearing_device_local_ambient_volume";
+
+        /**
+         * A semi-colon separated list of Bluetooth hearing devices' notification data.
+         * Each entry is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "addr=XX:XX:XX:00:11,input_changes=1"
+         *
+         * The following keys are supported:
+         * <pre>
+         * addr                 (String)
+         * input_changes        (boolean)
+         * </pre>
+         *
+         * Each entry must contains "addr" attribute, otherwise it'll be ignored.
+         * @hide
+         */
+        public static final String HEARING_DEVICE_LOCAL_NOTIFICATION =
+                "hearing_device_local_notification";
+
+        /**
          * Global settings that shouldn't be persisted.
          *
          * @hide
@@ -20438,6 +20462,29 @@ public final class Settings {
              * @hide
              */
             public static final String AUTO_BEDTIME_MODE = "auto_bedtime_mode";
+
+            /**
+             * Indicates that all elements of the system status tray on wear should be rendered
+             * by default wear system.
+             *
+             * @hide
+             */
+            public static final int STATUS_TRAY_CONFIGURATION_DEFAULT = 0;
+
+            /**
+             * Indicates that all elements of the system status tray on wear should be hidden.
+             *
+             * @hide
+             */
+            public static final int STATUS_TRAY_CONFIGURATION_SYSTEM_HIDDEN = 1;
+
+            /**
+             * Configuration of system status tray in wear.
+             *
+             * @hide
+             */
+            public static final String WEAR_SYSTEM_STATUS_TRAY_CONFIGURATION =
+                    "wear_system_status_tray_configuration";
         }
     }
 

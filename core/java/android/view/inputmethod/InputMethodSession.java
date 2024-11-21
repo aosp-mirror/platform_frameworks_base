@@ -126,9 +126,21 @@ public interface InputMethodSession {
     public void dispatchKeyEvent(int seq, KeyEvent event, EventCallback callback);
 
     /**
+     * Received by the IME before dispatch to {@link InputMethodService#onKeyDown(int, KeyEvent)}
+     * to let the system know if the {@link KeyEvent} needs to be verified that it originated from
+     * the system. {@link KeyEvent}s may originate from outside of the system and any sensitive keys
+     * should be marked for verification. One example of this could be using key shortcuts for
+     * switching to another IME.
+     *
+     * @param event the event that may need verification.
+     * @return {@code true} if {@link KeyEvent} should have its HMAC verified before dispatch,
+     * {@code false} otherwise.
+     *
      * @hide
      */
-    boolean onShouldVerifyKeyEvent(@NonNull KeyEvent event);
+    default boolean onShouldVerifyKeyEvent(@NonNull KeyEvent event) {
+        return false;
+    }
 
     /**
      * This method is called when there is a track ball event.

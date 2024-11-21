@@ -20,7 +20,6 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -59,9 +58,6 @@ constructor(
                                 val bouncerOrGone =
                                     if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer
                                 add(Swipe.Up to bouncerOrGone)
-
-                                // "Home" is either Dream, Lockscreen, or Gone.
-                                add(Swipe.End to SceneFamilies.Home)
 
                                 addAll(
                                     when (shadeMode) {

@@ -26,6 +26,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderComponent
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSlidersViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.launchIn
@@ -38,9 +39,10 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
 
     fun bind(view: View) {
         with(view) {
-            val volumeDialog: View = requireViewById(R.id.volume_dialog)
             val floatingSlidersContainer: ViewGroup =
                 requireViewById(R.id.volume_dialog_floating_sliders_container)
+            val mainSliderContainer: View =
+                requireViewById(R.id.volume_dialog_main_slider_container)
             repeatWhenAttached {
                 viewModel(
                     traceName = "VolumeDialogSlidersViewBinder",
@@ -49,7 +51,7 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
                 ) { viewModel ->
                     viewModel.sliders
                         .onEach { uiModel ->
-                            uiModel.sliderComponent.sliderViewBinder().bind(volumeDialog)
+                            uiModel.sliderComponent.bindSlider(mainSliderContainer)
 
                             val floatingSliderViewBinders = uiModel.floatingSliderComponent
                             floatingSlidersContainer.ensureChildCount(
@@ -57,15 +59,20 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
                                 count = floatingSliderViewBinders.size,
                             )
                             floatingSliderViewBinders.fastForEachIndexed { index, sliderComponent ->
-                                sliderComponent
-                                    .sliderViewBinder()
-                                    .bind(floatingSlidersContainer.getChildAt(index))
+                                sliderComponent.bindSlider(
+                                    floatingSlidersContainer.getChildAt(index)
+                                )
                             }
                         }
                         .launchIn(this)
                 }
             }
         }
+    }
+
+    private fun VolumeDialogSliderComponent.bindSlider(sliderContainer: View) {
+        sliderViewBinder().bind(sliderContainer)
+        sliderTouchesViewBinder().bind(sliderContainer)
     }
 }
 
