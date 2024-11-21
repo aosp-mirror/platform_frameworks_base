@@ -242,13 +242,6 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_windowing_app_handle_education_integration"
-    namespace: "lse_desktop_experience"
-    description: "Enables desktop windowing app handle education and integrates new APIs"
-    bug: "380272815"
-}
-
-flag {
     name: "enable_desktop_windowing_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing transition & motion polish changes"
@@ -301,6 +294,13 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app-to-web education"
     bug: "348205896"
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education_integration"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing App-to-Web education and integrates new APIs"
+    bug: "380272815"
 }
 
 flag {
