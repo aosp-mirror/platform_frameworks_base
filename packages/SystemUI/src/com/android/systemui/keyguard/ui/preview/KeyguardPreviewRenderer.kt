@@ -680,6 +680,7 @@ constructor(
         }
         // In clock preview, we should have a seed color for clock
         // before setting clock to clockEventController to avoid updateColor with seedColor == null
+        // So in update colors, it should already have the correct theme in clockFaceController
         if (MigrateClocksToBlueprint.isEnabled) {
             clockController.clock = clock
         }
