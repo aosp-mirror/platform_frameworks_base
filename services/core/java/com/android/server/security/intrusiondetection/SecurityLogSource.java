@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.Context;
 import android.security.intrusiondetection.IntrusionDetectionEvent;
+import android.util.Slog;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -33,7 +34,7 @@ public class SecurityLogSource implements DataSource {
 
     private static final String TAG = "IntrusionDetection SecurityLogSource";
 
-    private SecurityEventCallback mEventCallback = new SecurityEventCallback();
+    private SecurityEventCallback mEventCallback;
     private DevicePolicyManager mDpm;
     private Executor mExecutor;
     private DataAggregator mDataAggregator;
@@ -42,8 +43,25 @@ public class SecurityLogSource implements DataSource {
         mDataAggregator = dataAggregator;
         mDpm = context.getSystemService(DevicePolicyManager.class);
         mExecutor = Executors.newSingleThreadExecutor();
-        mEventCallback = new SecurityEventCallback();
     }
+
+    @Override
+    public boolean initialize() {
+        // Confirm caller is system and the device is managed. Otherwise logs will
+        // be redacted.
+        try {
+            if (!mDpm.isDeviceManaged()) {
+                Slog.e(TAG, "Caller does not have device owner permissions");
+                return false;
+            }
+        } catch (SecurityException e) {
+            Slog.e(TAG, "Security exception in initialize: ", e);
+            return false;
+        }
+        mEventCallback = new SecurityEventCallback();
+        return true;
+    }
+
 
     @Override
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
@@ -72,12 +90,8 @@ public class SecurityLogSource implements DataSource {
         }
     }
 
-    /**
-     * Check if security audit logging is enabled for the caller.
-     *
-     * @return Whether security audit logging is enabled.
-     */
-    public boolean isAuditLogEnabled() {
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    private boolean isAuditLogEnabled() {
         return mDpm.isAuditLogEnabled();
     }
 
