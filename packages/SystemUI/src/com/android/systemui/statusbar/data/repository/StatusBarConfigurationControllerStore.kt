@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.data.repository
 
 import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR
+import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -31,6 +32,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
@@ -95,6 +98,20 @@ object StatusBarConfigurationControllerModule {
             multiDisplayLazy.get()
         } else {
             singleDisplayLazy.get()
+        }
+    }
+
+    @Provides
+    @SysUISingleton
+    @IntoMap
+    @ClassKey(StatusBarConfigurationControllerStore::class)
+    fun storeAsCoreStartable(
+        multiDisplayLazy: Lazy<MultiDisplayStatusBarConfigurationControllerStore>
+    ): CoreStartable {
+        return if (StatusBarConnectedDisplays.isEnabled) {
+            multiDisplayLazy.get()
+        } else {
+            CoreStartable.NOP
         }
     }
 }

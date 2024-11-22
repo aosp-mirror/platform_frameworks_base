@@ -5036,14 +5036,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void testSetSecondaryLockscreenEnabled() throws Exception {
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-
         verifySetSecondaryLockscreenEnabled(false);
         verifySetSecondaryLockscreenEnabled(true);
     }
 
     private void verifySetSecondaryLockscreenEnabled(boolean enabled) throws Exception {
         reset(getServices().supervisionManagerInternal);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        doReturn(DpmMockContext.CALLER_UID).when(getServices().packageManagerInternal)
+                .getPackageUid(any(), anyLong(), anyInt());
 
         dpm.setSecondaryLockscreenEnabled(admin1, enabled);
         verify(getServices().supervisionManagerInternal).setSupervisionLockscreenEnabledForUser(

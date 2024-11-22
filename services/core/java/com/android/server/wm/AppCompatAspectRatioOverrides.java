@@ -135,6 +135,12 @@ class AppCompatAspectRatioOverrides {
                 && aspectRatio != USER_MIN_ASPECT_RATIO_FULLSCREEN;
     }
 
+    boolean userPreferenceCompatibleWithNonResizability() {
+        final int aspectRatio = getUserMinAspectRatioOverrideCode();
+        return aspectRatio == USER_MIN_ASPECT_RATIO_UNSET
+                || aspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN;
+    }
+
     boolean shouldApplyUserFullscreenOverride() {
         if (isUserFullscreenOverrideEnabled()) {
             final int aspectRatio = getUserMinAspectRatioOverrideCode();

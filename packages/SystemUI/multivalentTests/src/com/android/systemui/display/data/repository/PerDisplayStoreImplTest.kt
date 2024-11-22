@@ -43,6 +43,11 @@ class PerDisplayStoreImplTest : SysuiTestCase() {
     private val store = kosmos.fakePerDisplayStore
 
     @Before
+    fun start() {
+        store.start()
+    }
+
+    @Before
     fun addDisplays() = runBlocking {
         fakeDisplayRepository.addDisplay(createDisplay(DEFAULT_DISPLAY_ID))
         fakeDisplayRepository.addDisplay(createDisplay(NON_DEFAULT_DISPLAY_ID))

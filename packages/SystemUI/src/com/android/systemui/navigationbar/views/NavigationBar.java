@@ -149,7 +149,6 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.data.repository.LightBarControllerStore;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -259,7 +258,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private boolean mTransientShownFromGestureOnSystemBar;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
-    private final LightBarControllerStore mLightBarControllerStore;
+    private final LightBarController mMainLightBarController;
+    private final LightBarController.Factory mLightBarControllerFactory;
     private AutoHideController mAutoHideController;
     private final AutoHideController mMainAutoHideController;
     private final AutoHideController.Factory mAutoHideControllerFactory;
@@ -580,7 +580,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             @Background Executor bgExecutor,
             UiEventLogger uiEventLogger,
             NavBarHelper navBarHelper,
-            LightBarControllerStore lightBarControllerStore,
+            LightBarController mainLightBarController,
+            LightBarController.Factory lightBarControllerFactory,
             AutoHideController mainAutoHideController,
             AutoHideController.Factory autoHideControllerFactory,
             Optional<TelecomManager> telecomManagerOptional,
@@ -627,7 +628,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mUiEventLogger = uiEventLogger;
         mNavBarHelper = navBarHelper;
         mNotificationShadeDepthController = notificationShadeDepthController;
-        mLightBarControllerStore = lightBarControllerStore;
+        mMainLightBarController = mainLightBarController;
+        mLightBarControllerFactory = lightBarControllerFactory;
         mMainAutoHideController = mainAutoHideController;
         mAutoHideControllerFactory = autoHideControllerFactory;
         mTelecomManagerOptional = telecomManagerOptional;
@@ -840,7 +842,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         // Unfortunately, we still need it because status bar needs LightBarController
         // before notifications creation. We cannot directly use getLightBarController()
         // from NavigationBarFragment directly.
-        LightBarController lightBarController = mLightBarControllerStore.forDisplay(mDisplayId);
+        LightBarController lightBarController = mIsOnDefaultDisplay
+                ? mMainLightBarController : mLightBarControllerFactory.create(mContext);
         setLightBarController(lightBarController);
 
         // TODO(b/118592525): to support multi-display, we start to add something which is

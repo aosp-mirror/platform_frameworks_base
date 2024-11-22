@@ -48,6 +48,11 @@ class MultiDisplayAutoHideControllerStoreTest : SysuiTestCase() {
 
     @Before fun addDisplays() = runBlocking { fakeDisplayRepository.addDisplay(DEFAULT_DISPLAY) }
 
+    @Before
+    fun start() {
+        underTest.start()
+    }
+
     @Test
     fun beforeDisplayRemoved_doesNotStopInstances() =
         testScope.runTest {

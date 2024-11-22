@@ -34,6 +34,7 @@ import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
+import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
@@ -791,6 +792,31 @@ public class ContextHubService extends IContextHubService.Stub {
         super.registerEndpoint_enforcePermission();
         // TODO(b/375487784): Implement this
         return null;
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void registerEndpointDiscoveryCallbackId(
+            long endpointId, IContextHubEndpointDiscoveryCallback callback) throws RemoteException {
+        super.registerEndpointDiscoveryCallbackId_enforcePermission();
+        // TODO(b/375487784): Implement this
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void registerEndpointDiscoveryCallbackDescriptor(
+            String serviceDescriptor, IContextHubEndpointDiscoveryCallback callback)
+            throws RemoteException {
+        super.registerEndpointDiscoveryCallbackDescriptor_enforcePermission();
+        // TODO(b/375487784): Implement this
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void unregisterEndpointDiscoveryCallback(IContextHubEndpointDiscoveryCallback callback)
+            throws RemoteException {
+        super.unregisterEndpointDiscoveryCallback_enforcePermission();
+        // TODO(b/375487784): Implement this
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.data.repository
 
 import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
@@ -28,7 +29,11 @@ import com.android.systemui.statusbar.events.SystemEventChipAnimationController
 import com.android.systemui.statusbar.events.SystemEventChipAnimationControllerImpl
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
@@ -80,4 +85,20 @@ interface SystemEventChipAnimationControllerStoreModule {
     fun store(
         impl: SystemEventChipAnimationControllerStoreImpl
     ): SystemEventChipAnimationControllerStore
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(SystemEventChipAnimationControllerStore::class)
+        fun storeAsCoreStartable(
+            implLazy: Lazy<SystemEventChipAnimationControllerStoreImpl>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                implLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+    }
 }

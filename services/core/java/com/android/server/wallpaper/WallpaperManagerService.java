@@ -3181,7 +3181,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     throw new IllegalArgumentException("Invalid crop rect supplied: " + crop);
                 }
                 int orientation = screenOrientations[i];
-                if (orientation == ORIENTATION_UNKNOWN && cropMap.size() > 1) {
+                if (orientation == ORIENTATION_UNKNOWN && crops.size() > 1) {
                     throw new IllegalArgumentException("Invalid crops supplied: the UNKNOWN"
                             + "screen orientation should only be used in a singleton map");
                 }

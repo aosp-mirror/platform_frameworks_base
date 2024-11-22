@@ -22,6 +22,7 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkerParameters
 import com.android.statementservice.utils.AndroidUtils
+import com.android.statementservice.utils.StatementUtils
 import kotlinx.coroutines.coroutineScope
 import java.util.UUID
 
@@ -59,9 +60,13 @@ class SingleV2RequestWorker(appContext: Context, params: WorkerParameters) :
         val packageName = params.inputData.getString(PACKAGE_NAME_KEY)!!
         val host = params.inputData.getString(HOST_KEY)!!
 
-        val (result, status) = verifier.verifyHost(host, packageName, params.network)
+        val (result, status, statement) = verifier.verifyHost(host, packageName, params.network)
 
         verificationManager.setDomainVerificationStatus(domainSetId, setOf(host), status.value)
+        val groups = statement?.dynamicAppLinkComponents.orEmpty().map {
+            StatementUtils.createUriRelativeFilterGroup(it)
+        }
+        updateUriRelativeFilterGroups(packageName, mapOf(host to groups))
 
         result
     }

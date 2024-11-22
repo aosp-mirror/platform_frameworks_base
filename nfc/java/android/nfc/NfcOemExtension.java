@@ -748,15 +748,16 @@ public final class NfcOemExtension {
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
      * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely.
-     * Use {@link #resumePolling() to resume the polling.
-     * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
+     * Use {@link #resumePolling()} to resume the polling.
+     * Use {@link #getMaxPausePollingTimeoutMs()} to check the max timeout value.
+     * @param timeoutInMs the pause polling duration in millisecond.
      * @return status of the operation
      * @throws IllegalArgumentException if timeoutInMs value is invalid
      *         (0 < timeoutInMs < max).
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong int timeoutInMs) {
+    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong long timeoutInMs) {
         return NfcAdapter.callServiceReturn(() ->
                 NfcAdapter.sService.pausePolling(timeoutInMs),
                 POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
@@ -773,6 +774,18 @@ public final class NfcOemExtension {
         return NfcAdapter.callServiceReturn(() ->
                 NfcAdapter.sService.resumePolling(),
                 POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
+    }
+
+    /**
+     * Gets the max pause polling timeout value in millisecond.
+     * @return long integer representing the max timeout
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @DurationMillisLong
+    public long getMaxPausePollingTimeoutMills() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.getMaxPausePollingTimeoutMs(), 0L);
     }
 
     /**

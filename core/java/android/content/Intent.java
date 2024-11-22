@@ -7720,7 +7720,6 @@ public class Intent implements Parcelable, Cloneable {
     @IntDef(flag = true, prefix = { "EXTENDED_FLAG_" }, value = {
             EXTENDED_FLAG_FILTER_MISMATCH,
             EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN,
-            EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ExtendedFlags {}
@@ -7740,13 +7739,6 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN = 1 << 1;
-
-    /**
-     * This flag indicates this intent called {@link #collectExtraIntentKeys()}.
-     *
-     * @hide
-     */
-    public static final int EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED = 1 << 2;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -12336,8 +12328,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     private void collectNestedIntentKeysRecur(Set<Intent> visited) {
-        addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
-        if (mExtras != null && !mExtras.isEmpty()) {
+        if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
                 Object value = mExtras.get(key);
 

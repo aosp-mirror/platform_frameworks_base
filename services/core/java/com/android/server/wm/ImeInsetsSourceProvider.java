@@ -346,12 +346,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
                 controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
+                // not all virtual displays have an ImeInsetsSourceProvider, so it is not
+                // guaranteed that the IME will be started when the control target reports its
+                // requested visibility back. Thus, invoking the listener here.
+                invokeOnImeRequestedChangedListener(imeInsetsTarget, statsToken);
             } else {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
             }
         }
-        invokeOnImeRequestedChangedListener(imeInsetsTarget, statsToken);
     }
 
     // TODO(b/353463205) check callers to see if we can make statsToken @NonNull

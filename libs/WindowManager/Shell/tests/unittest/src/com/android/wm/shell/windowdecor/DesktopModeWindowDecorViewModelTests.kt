@@ -59,6 +59,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
@@ -1000,7 +1001,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun testMaximizeButtonClick_requestingImmersive_togglesDesktopImmersiveState() {
+    fun testImmersiveButtonClick_entersImmersiveMode() {
         val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
                 as ArgumentCaptor<View.OnClickListener>
         val decor = createOpenTaskDecoration(
@@ -1010,11 +1011,35 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         )
         val view = mock(View::class.java)
         whenever(view.id).thenReturn(R.id.maximize_window)
+        whenever(mockDesktopRepository.isTaskInFullImmersiveState(decor.mTaskInfo.taskId))
+            .thenReturn(false)
 
         onClickListenerCaptor.value.onClick(view)
 
-        verify(mockDesktopTasksController)
-            .toggleDesktopTaskFullImmersiveState(decor.mTaskInfo)
+        verify(mockDesktopImmersiveController).moveTaskToImmersive(decor.mTaskInfo)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testImmersiveRestoreButtonClick_exitsImmersiveMode() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor,
+            requestingImmersive = true,
+        )
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.maximize_window)
+        whenever(mockDesktopRepository.isTaskInFullImmersiveState(decor.mTaskInfo.taskId))
+            .thenReturn(true)
+
+        onClickListenerCaptor.value.onClick(view)
+
+        verify(mockDesktopImmersiveController).moveTaskToNonImmersive(
+            decor.mTaskInfo,
+            DesktopImmersiveController.ExitReason.USER_INTERACTION
+        )
     }
 
     @Test
@@ -1042,18 +1067,19 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun testImmersiveClick_togglesImmersiveState() {
+    fun testImmersiveMenuOptionClick_entersImmersiveMode() {
         val onImmersiveClickCaptor = argumentCaptor<() -> Unit>()
         val decor = createOpenTaskDecoration(
             windowingMode = WINDOWING_MODE_FREEFORM,
             onImmersiveOrRestoreListenerCaptor = onImmersiveClickCaptor,
             requestingImmersive = true,
         )
+        whenever(mockDesktopRepository.isTaskInFullImmersiveState(decor.mTaskInfo.taskId))
+            .thenReturn(false)
 
         onImmersiveClickCaptor.firstValue()
 
-        verify(mockDesktopTasksController)
-            .toggleDesktopTaskFullImmersiveState(decor.mTaskInfo)
+        verify(mockDesktopImmersiveController).moveTaskToImmersive(decor.mTaskInfo)
     }
 
     @Test

@@ -40,7 +40,6 @@ abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     @Rule
     val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
-    protected val pipApp = PipAppHelper(instrumentation)
     protected val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
 
@@ -62,6 +61,11 @@ abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
             @JvmStatic val ORIENTATION_PORTRAIT = 1
         }
     }
+
+    /**
+     * Defines the test app to run PIP flicker test.
+     */
+    protected open val pipApp = PipAppHelper(instrumentation)
 
     /** Defines the transition used to run the test */
     protected open val thisTransition: FlickerBuilder.() -> Unit = {}

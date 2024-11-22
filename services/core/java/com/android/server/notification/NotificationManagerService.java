@@ -6597,6 +6597,14 @@ public class NotificationManagerService extends SystemService {
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
                         "setNotificationListenerAccessGrantedForUser for user " + userId);
             }
+            if (mUmInternal.isVisibleBackgroundFullUser(userId)) {
+                // The main use case for visible background users is the Automotive multi-display
+                // configuration where a passenger can use a secondary display while the driver is
+                // using the main display. NotificationListeners is designed only for the current
+                // user and work profile. We added a condition to prevent visible background users
+                // from updating the data managed within the NotificationListeners object.
+                return;
+            }
             checkNotificationListenerAccess();
             if (granted && listener.flattenToString().length()
                     > NotificationManager.MAX_SERVICE_COMPONENT_NAME_LENGTH) {
@@ -12743,6 +12751,20 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        @Override
+        public void onUserUnlocked(int user) {
+            if (mUmInternal.isVisibleBackgroundFullUser(user)) {
+                // The main use case for visible background users is the Automotive
+                // multi-display configuration where a passenger can use a secondary
+                // display while the driver is using the main display.
+                // NotificationListeners is designed only for the current user and work
+                // profile. We added a condition to prevent visible background users from
+                // updating the data managed within the NotificationListeners object.
+                return;
+            }
+            super.onUserUnlocked(user);
         }
 
         @Override

@@ -910,6 +910,11 @@ public class PipTransition extends PipTransitionController implements
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
+                // Save the PiP bounds in case, we re-enter the PiP with the same component.
+                float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                        mPipBoundsState.getBounds());
+                mPipBoundsState.saveReentryState(snapFraction);
+
                 mPipTransitionState.setPipTaskToken(null);
                 mPipTransitionState.setPinnedTaskLeash(null);
                 break;

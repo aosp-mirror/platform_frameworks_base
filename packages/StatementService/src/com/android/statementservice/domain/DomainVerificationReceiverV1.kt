@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import com.android.statementservice.domain.worker.CollectV1Worker
+import com.android.statementservice.domain.worker.GroupUpdateV1Worker
 import com.android.statementservice.domain.worker.SingleV1RequestWorker
 
 /**
@@ -67,7 +68,7 @@ class DomainVerificationReceiverV1 : BaseDomainVerificationReceiver() {
             }
         }
 
-        //clear sp before enqueue unique work since policy is REPLACE
+        // clear sp before enqueue unique work since policy is REPLACE
         val deContext = context.createDeviceProtectedStorageContext()
         val editor = deContext?.getSharedPreferences(packageName, Context.MODE_PRIVATE)?.edit()
         editor?.clear()?.apply()
@@ -78,6 +79,7 @@ class DomainVerificationReceiverV1 : BaseDomainVerificationReceiver() {
                 workRequests
             )
             .then(CollectV1Worker.buildRequest(verificationId, packageName))
+            .then(GroupUpdateV1Worker.buildRequest(packageName))
             .enqueue()
     }
 }

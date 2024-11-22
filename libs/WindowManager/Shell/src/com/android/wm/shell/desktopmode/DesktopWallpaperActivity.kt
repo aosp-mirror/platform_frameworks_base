@@ -17,12 +17,10 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.Activity
-import android.app.ActivityManager
+import android.app.TaskInfo
 import android.content.ComponentName
 import android.os.Bundle
 import android.view.WindowManager
-import com.android.internal.protolog.ProtoLog
-import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 
 /**
  * A transparent activity used in the desktop mode to show the wallpaper under the freeform windows.
@@ -42,11 +40,12 @@ class DesktopWallpaperActivity : Activity() {
 
     companion object {
         private const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
-        private val wallpaperActivityComponent =
+        @JvmStatic
+        val wallpaperActivityComponent =
             ComponentName(SYSTEM_UI_PACKAGE_NAME, DesktopWallpaperActivity::class.java.name)
 
         @JvmStatic
-        fun isWallpaperTask(taskInfo: ActivityManager.RunningTaskInfo) =
+        fun isWallpaperTask(taskInfo: TaskInfo) =
             taskInfo.baseIntent.component?.let(::isWallpaperComponent) ?: false
 
         @JvmStatic

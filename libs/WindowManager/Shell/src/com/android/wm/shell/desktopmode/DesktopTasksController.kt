@@ -788,31 +788,6 @@ class DesktopTasksController(
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
     }
 
-    /** Moves a task in/out of full immersive state within the desktop. */
-    fun toggleDesktopTaskFullImmersiveState(taskInfo: RunningTaskInfo) {
-        if (taskRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
-            exitDesktopTaskFromFullImmersive(
-                taskInfo,
-                DesktopImmersiveController.ExitReason.USER_INTERACTION,
-            )
-        } else {
-            moveDesktopTaskToFullImmersive(taskInfo)
-        }
-    }
-
-    private fun moveDesktopTaskToFullImmersive(taskInfo: RunningTaskInfo) {
-        check(taskInfo.isFreeform) { "Task must already be in freeform" }
-        desktopImmersiveController.moveTaskToImmersive(taskInfo)
-    }
-
-    private fun exitDesktopTaskFromFullImmersive(
-        taskInfo: RunningTaskInfo,
-        reason: DesktopImmersiveController.ExitReason,
-    ) {
-        check(taskInfo.isFreeform) { "Task must already be in freeform" }
-        desktopImmersiveController.moveTaskToNonImmersive(taskInfo, reason)
-    }
-
     /**
      * Quick-resizes a desktop task, toggling between a fullscreen state (represented by the stable
      * bounds) and a free floating state (either the last saved bounds if available or the default
@@ -2375,7 +2350,7 @@ class DesktopTasksController(
         if (inImmersive && !requestingImmersive
             && !RecentsTransitionStateListener.isRunning(recentsTransitionState)) {
             // Exit immersive if the app is no longer requesting it.
-            exitDesktopTaskFromFullImmersive(
+            desktopImmersiveController.moveTaskToNonImmersive(
                 taskInfo,
                 DesktopImmersiveController.ExitReason.APP_NOT_IMMERSIVE
             )

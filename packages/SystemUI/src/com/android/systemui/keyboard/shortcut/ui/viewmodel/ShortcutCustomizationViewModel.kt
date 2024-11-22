@@ -79,8 +79,7 @@ constructor(
             }
 
             is ShortcutCustomizationRequestInfo.Delete -> {
-                _shortcutCustomizationUiState.value =
-                    DeleteShortcutDialog(isDialogShowing = false)
+                _shortcutCustomizationUiState.value = DeleteShortcutDialog(isDialogShowing = false)
                 shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
         }
@@ -134,17 +133,23 @@ constructor(
         }
     }
 
-    fun onDeleteShortcut() {
-        // TODO(b/373631984) not yet implemented
+    suspend fun deleteShortcutCurrentlyBeingCustomized() {
+        val result =
+            shortcutCustomizationInteractor.deleteShortcutCurrentlyBeingCustomized()
+
+        _shortcutCustomizationUiState.update { uiState ->
+            when (result) {
+                ShortcutCustomizationRequestResult.SUCCESS -> ShortcutCustomizationUiState.Inactive
+                else -> uiState
+            }
+        }
     }
 
     private fun getUiStateWithErrorMessage(
         uiState: ShortcutCustomizationUiState,
         errorMessage: String,
     ): ShortcutCustomizationUiState {
-        return (uiState as? AddShortcutDialog)?.copy(
-            errorMessage = errorMessage
-        ) ?: uiState
+        return (uiState as? AddShortcutDialog)?.copy(errorMessage = errorMessage) ?: uiState
     }
 
     private fun updatePressedKeys(keyEvent: KeyEvent) {

@@ -1066,6 +1066,7 @@ public final class CameraExtensionCharacteristics {
                     case ImageFormat.YUV_420_888:
                     case ImageFormat.JPEG:
                     case ImageFormat.JPEG_R:
+                    case ImageFormat.DEPTH_JPEG:
                     case ImageFormat.YCBCR_P010:
                         break;
                     default:
@@ -1096,9 +1097,10 @@ public final class CameraExtensionCharacteristics {
                     // processed YUV_420 buffers.
                     return getSupportedSizes(
                             extenders.second.getSupportedPostviewResolutions(sz), format);
-                }  else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
-                    // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the basic
-                    // extension case
+                }  else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010 ||
+                        (Flags.depthJpegExtensions() && (format == ImageFormat.DEPTH_JPEG))) {
+                    // DepthJpeg/Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the
+                    // basic extension case
                     return new ArrayList<>();
                 } else {
                     throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1194,8 +1196,8 @@ public final class CameraExtensionCharacteristics {
      *
      * <p>Device-specific extensions currently support at most three
      * multi-frame capture surface formats. ImageFormat.JPEG will be supported by all
-     * extensions while ImageFormat.YUV_420_888, ImageFormat.JPEG_R, or ImageFormat.YCBCR_P010
-     * may or may not be supported.</p>
+     * extensions while ImageFormat.YUV_420_888, ImageFormat.JPEG_R, ImageFormat.YCBCR_P010 or
+     * ImageFormat.DEPTH_JPEG may or may not be supported.</p>
      *
      * @param extension the extension type
      * @param format    device-specific extension output format
@@ -1203,7 +1205,8 @@ public final class CameraExtensionCharacteristics {
      * supported.
      * @throws IllegalArgumentException in case of format different from ImageFormat.JPEG,
      *                                  ImageFormat.YUV_420_888, ImageFormat.JPEG_R,
-     *                                  ImageFormat.YCBCR_P010; or unsupported extension.
+     *                                  ImageFormat.DEPTH_JPEG, ImageFormat.YCBCR_P010; or
+     *                                  unsupported extension.
      */
     public @NonNull
     List<Size> getExtensionSupportedSizes(@Extension int extension, int format) {
@@ -1227,6 +1230,7 @@ public final class CameraExtensionCharacteristics {
                         case ImageFormat.YUV_420_888:
                         case ImageFormat.JPEG:
                         case ImageFormat.JPEG_R:
+                        case ImageFormat.DEPTH_JPEG:
                         case ImageFormat.YCBCR_P010:
                             break;
                         default:
@@ -1260,8 +1264,9 @@ public final class CameraExtensionCharacteristics {
                         } else {
                             return generateSupportedSizes(null, format, streamMap);
                         }
-                    } else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
-                        // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the
+                    } else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010 ||
+                            (Flags.depthJpegExtensions() && (format == ImageFormat.DEPTH_JPEG))) {
+                        // DepthJpeg/Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the
                         // basic extension case
                         return new ArrayList<>();
                     } else {
@@ -1292,7 +1297,8 @@ public final class CameraExtensionCharacteristics {
      * or null if no capture latency info can be provided
      * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG},
      *                                  {@link ImageFormat#YUV_420_888}, {@link ImageFormat#JPEG_R}
-     *                                  {@link ImageFormat#YCBCR_P010};
+     *                                  {@link ImageFormat#YCBCR_P010},
+     *                                  {@link ImageFormat#DEPTH_JPEG};
      *                                  or unsupported extension.
      */
     public @Nullable Range<Long> getEstimatedCaptureLatencyRangeMillis(@Extension int extension,
@@ -1301,6 +1307,7 @@ public final class CameraExtensionCharacteristics {
             case ImageFormat.YUV_420_888:
             case ImageFormat.JPEG:
             case ImageFormat.JPEG_R:
+            case ImageFormat.DEPTH_JPEG:
             case ImageFormat.YCBCR_P010:
                 //No op
                 break;
@@ -1349,8 +1356,9 @@ public final class CameraExtensionCharacteristics {
                     // specific and cannot be estimated accurately enough.
                     return  null;
                 }
-                if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
-                    // JpegR/UltraHDR + YCBCR_P010 is not supported for basic extensions
+                if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010 ||
+                        (Flags.depthJpegExtensions() && (format == ImageFormat.DEPTH_JPEG))) {
+                    // DepthJpeg/JpegR/UltraHDR + YCBCR_P010 is not supported for basic extensions
                     return null;
                 }
 

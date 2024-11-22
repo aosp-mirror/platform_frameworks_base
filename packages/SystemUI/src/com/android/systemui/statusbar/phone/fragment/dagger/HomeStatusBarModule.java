@@ -28,11 +28,9 @@ import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore;
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore;
-import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
-import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -174,15 +172,6 @@ public interface HomeStatusBarModule {
     @DisplaySpecific
     static DarkIconDispatcher darkIconDispatcher(
             @DisplaySpecific int displayId, DarkIconDispatcherStore store) {
-        return store.forDisplay(displayId);
-    }
-
-    /** */
-    @Provides
-    @HomeStatusBarScope
-    @DisplaySpecific
-    static StatusBarContentInsetsProvider contentInsetsProvider(
-            @DisplaySpecific int displayId, StatusBarContentInsetsProviderStore store) {
         return store.forDisplay(displayId);
     }
 }

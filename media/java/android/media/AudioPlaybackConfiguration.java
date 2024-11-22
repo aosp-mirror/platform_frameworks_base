@@ -315,6 +315,9 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @hide
      * Flag used when playback is muted by AppOpsManager#OP_CONTROL_AUDIO.
      */
+    @SystemApi
+    @FlaggedApi(FLAG_MUTED_BY_PORT_VOLUME_API)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int MUTED_BY_OP_CONTROL_AUDIO = (1 << 7);
 
     /** @hide */
