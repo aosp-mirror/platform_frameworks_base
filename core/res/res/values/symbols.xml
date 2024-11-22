@@ -5803,4 +5803,31 @@
   <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
 
   <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
+
+  <!-- Material motion spec config tokens -->
+  <java-symbol type="integer" name="config_motionStandardFastSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardFastEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardDefaultSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardDefaultEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardSlowSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardSlowEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveFastSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveFastEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveDefaultSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveDefaultEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveSlowSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveSlowEffectStiffness"/>
+  <java-symbol type="dimen" name="config_motionStandardFastSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardFastEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardDefaultSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardDefaultEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardSlowSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardSlowEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveFastSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveFastEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveDefaultSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveDefaultEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveSlowSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveSlowEffectDamping"/>
+
 </resources>
