@@ -31,7 +31,6 @@ import android.app.PictureInPictureUiState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -93,8 +92,7 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                         mPipOrganizer.fadeOutAndRemoveOverlay(mPipOrganizer.mPipOverlay,
                                 null /* callback */, true /* withStartDelay*/);
                     }
-                    onFinishResize(taskInfo, animator.getDestinationBounds(),
-                            animator.getLeashOffset(), direction, tx);
+                    onFinishResize(taskInfo, animator.getDestinationBounds(), direction, tx);
                     sendOnPipTransitionFinished(direction);
                 }
 
@@ -114,9 +112,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
      * Called when transition is about to finish. This is usually for performing tasks such as
      * applying WindowContainerTransaction to finalize the PiP bounds and send to the framework.
      */
-    public void onFinishResize(@NonNull TaskInfo taskInfo, @NonNull Rect destinationBounds,
-            @NonNull Point leashOffset, @PipAnimationController.TransitionDirection int direction,
-            @NonNull SurfaceControl.Transaction tx) {
+    public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds,
+            @PipAnimationController.TransitionDirection int direction,
+            SurfaceControl.Transaction tx) {
     }
 
     /**
