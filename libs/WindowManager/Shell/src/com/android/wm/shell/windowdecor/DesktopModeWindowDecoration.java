@@ -104,7 +104,7 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
