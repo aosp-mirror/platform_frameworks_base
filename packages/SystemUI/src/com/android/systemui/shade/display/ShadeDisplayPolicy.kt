@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.data.repository
+package com.android.systemui.shade.display
 
-import android.view.Display
-import kotlinx.coroutines.flow.MutableStateFlow
+import dagger.Binds
+import dagger.Module
+import dagger.multibindings.IntoSet
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeShadeDisplayRepository : ShadeDisplaysRepository {
-    private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
+/** Describes the display the shade should be shown in. */
+interface ShadeDisplayPolicy {
+    val name: String
 
-    fun setDisplayId(displayId: Int) {
-        _displayId.value = displayId
-    }
+    /** The display id the shade should be at, according to this policy. */
+    val displayId: StateFlow<Int>
+}
 
-    override val displayId: StateFlow<Int>
-        get() = _displayId
+@Module
+interface ShadeDisplayPolicyModule {
+    @IntoSet
+    @Binds
+    fun provideDefaultPolicyToSet(impl: DefaultShadeDisplayPolicy): ShadeDisplayPolicy
 
-    fun resetDisplayId() {
-        _displayId.value = Display.DEFAULT_DISPLAY
-    }
+    @Binds fun provideDefaultPolicy(impl: DefaultShadeDisplayPolicy): ShadeDisplayPolicy
 }

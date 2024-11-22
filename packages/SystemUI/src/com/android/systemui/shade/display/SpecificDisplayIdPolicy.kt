@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.data.repository
+package com.android.systemui.shade.display
 
 import android.view.Display
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeShadeDisplayRepository : ShadeDisplaysRepository {
-    private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
+/** Policy to specify a display id explicitly. */
+open class SpecificDisplayIdPolicy(displayId: Int) : ShadeDisplayPolicy {
+    override val name: String
+        get() = "display_${displayId}_policy"
 
-    fun setDisplayId(displayId: Int) {
-        _displayId.value = displayId
-    }
-
-    override val displayId: StateFlow<Int>
-        get() = _displayId
-
-    fun resetDisplayId() {
-        _displayId.value = Display.DEFAULT_DISPLAY
-    }
+    override val displayId: StateFlow<Int> = MutableStateFlow(displayId)
 }
+
+class DefaultShadeDisplayPolicy @Inject constructor() :
+    SpecificDisplayIdPolicy(Display.DEFAULT_DISPLAY)
