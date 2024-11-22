@@ -702,6 +702,8 @@ constructor(
             object : Controller by controller {
                 override val isLaunching: Boolean = false
             }
+        // Cross-task close transitions should not use this animation, so we only register it for
+        // when the opening window is Launcher.
         val returnFilter =
             TransitionFilter().apply {
                 mRequirements =
@@ -710,7 +712,11 @@ constructor(
                             mActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
                             mModes = intArrayOf(TRANSIT_CLOSE, TRANSIT_TO_BACK)
                             mTopActivity = component
-                        }
+                        },
+                        TransitionFilter.Requirement().apply {
+                            mActivityType = WindowConfiguration.ACTIVITY_TYPE_HOME
+                            mModes = intArrayOf(TRANSIT_OPEN, TRANSIT_TO_FRONT)
+                        },
                     )
             }
         val returnRemoteTransition =
