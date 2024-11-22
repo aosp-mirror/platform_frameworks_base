@@ -206,7 +206,10 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
 
         assertThat(result).isTrue()
         verify(desktopModeWindowDecorViewModel).onSnapResize(
-            task.taskId, true, DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+            task.taskId,
+            true,
+            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+            /* fromMenu= */ false
         )
     }
 
@@ -235,7 +238,10 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
 
         assertThat(result).isTrue()
         verify(desktopModeWindowDecorViewModel).onSnapResize(
-            task.taskId, false, DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+            task.taskId,
+            false,
+            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+            /* fromMenu= */ false
         )
     }
 

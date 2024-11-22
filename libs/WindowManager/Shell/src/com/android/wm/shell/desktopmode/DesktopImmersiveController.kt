@@ -99,6 +99,7 @@ class DesktopImmersiveController(
 
     /** Starts a transition to enter full immersive state inside the desktop. */
     fun moveTaskToImmersive(taskInfo: RunningTaskInfo) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
         if (inProgress) {
             logV(
                 "Cannot start entry because transition(s) already in progress: %s",
@@ -121,6 +122,7 @@ class DesktopImmersiveController(
 
     /** Starts a transition to move an immersive task out of immersive. */
     fun moveTaskToNonImmersive(taskInfo: RunningTaskInfo, reason: ExitReason) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
         if (inProgress) {
             logV(
                 "Cannot start exit because transition(s) already in progress: %s",

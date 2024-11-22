@@ -155,6 +155,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnNewWindowClickListener;
     private Function0<Unit> mOnManageWindowsClickListener;
     private Function0<Unit> mOnChangeAspectRatioClickListener;
+    private Function0<Unit> mOnMaximizeHoverListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private Runnable mCurrentViewHostRunnable = null;
@@ -368,6 +369,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Registers a listener to be called when the aspect ratio action is triggered. */
     void setOnChangeAspectRatioClickListener(Function0<Unit> listener) {
         mOnChangeAspectRatioClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the maximize header button is hovered. */
+    void setOnMaximizeHoverListener(Function0<Unit> listener) {
+        mOnMaximizeHoverListener = listener;
     }
 
     void setCaptionListeners(
@@ -841,12 +847,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mOnCaptionGenericMotionListener,
                     mAppName,
                     mAppIconBitmap,
-                    () -> {
-                        if (!isMaximizeMenuActive()) {
-                            createMaximizeMenu();
-                        }
-                        return Unit.INSTANCE;
-                    });
+                    mOnMaximizeHoverListener);
         }
         throw new IllegalArgumentException("Unexpected layout resource id");
     }

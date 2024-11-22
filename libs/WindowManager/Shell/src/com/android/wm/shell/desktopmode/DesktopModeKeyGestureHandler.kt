@@ -72,7 +72,8 @@ class DesktopModeKeyGestureHandler(
                     desktopModeWindowDecorViewModel.get().onSnapResize(
                         it.taskId,
                         true,
-                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                        /* fromMenu= */ false
                     )
                 }
                 return true
@@ -83,7 +84,8 @@ class DesktopModeKeyGestureHandler(
                     desktopModeWindowDecorViewModel.get().onSnapResize(
                         it.taskId,
                         false,
-                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                        /* fromMenu= */ false
                     )
                 }
                 return true
