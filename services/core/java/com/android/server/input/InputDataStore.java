@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import android.hardware.input.AppLaunchData;
 import android.hardware.input.InputGestureData;
 import android.os.Environment;
 import android.util.AtomicFile;
@@ -55,11 +56,16 @@ public final class InputDataStore {
     private static final String TAG_INPUT_GESTURE = "input_gesture";
     private static final String TAG_KEY_TRIGGER = "key_trigger";
     private static final String TAG_TOUCHPAD_TRIGGER = "touchpad_trigger";
+    private static final String TAG_APP_LAUNCH_DATA = "app_launch_data";
 
     private static final String ATTR_KEY_TRIGGER_KEYCODE = "keycode";
     private static final String ATTR_KEY_TRIGGER_MODIFIER_STATE = "modifiers";
     private static final String ATTR_KEY_GESTURE_TYPE = "key_gesture_type";
     private static final String ATTR_TOUCHPAD_TRIGGER_GESTURE_TYPE = "touchpad_gesture_type";
+    private static final String ATTR_APP_LAUNCH_DATA_CATEGORY = "category";
+    private static final String ATTR_APP_LAUNCH_DATA_ROLE = "role";
+    private static final String ATTR_APP_LAUNCH_DATA_PACKAGE_NAME = "package_name";
+    private static final String ATTR_APP_LAUNCH_DATA_CLASS_NAME = "class_name";
 
     private final FileInjector mInputGestureFileInjector;
 
@@ -167,15 +173,31 @@ public final class InputDataStore {
                 break;
             }
 
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+
             final String tag = parser.getName();
-            if (type == XmlPullParser.START_TAG && TAG_KEY_TRIGGER.equals(tag)) {
+            if (TAG_KEY_TRIGGER.equals(tag)) {
                 builder.setTrigger(InputGestureData.createKeyTrigger(
                         parser.getAttributeInt(null, ATTR_KEY_TRIGGER_KEYCODE),
                         parser.getAttributeInt(null, ATTR_KEY_TRIGGER_MODIFIER_STATE)));
-            } else if (type == XmlPullParser.START_TAG && TAG_TOUCHPAD_TRIGGER.equals(tag)) {
-                builder.setTrigger(
-                        InputGestureData.createTouchpadTrigger(parser.getAttributeInt(null,
-                                ATTR_TOUCHPAD_TRIGGER_GESTURE_TYPE)));
+            } else if (TAG_TOUCHPAD_TRIGGER.equals(tag)) {
+                builder.setTrigger(InputGestureData.createTouchpadTrigger(
+                        parser.getAttributeInt(null, ATTR_TOUCHPAD_TRIGGER_GESTURE_TYPE)));
+            } else if (TAG_APP_LAUNCH_DATA.equals(tag)) {
+                final String roleValue = parser.getAttributeValue(null, ATTR_APP_LAUNCH_DATA_ROLE);
+                final String categoryValue = parser.getAttributeValue(null,
+                        ATTR_APP_LAUNCH_DATA_CATEGORY);
+                final String classNameValue = parser.getAttributeValue(null,
+                        ATTR_APP_LAUNCH_DATA_CLASS_NAME);
+                final String packageNameValue = parser.getAttributeValue(null,
+                        ATTR_APP_LAUNCH_DATA_PACKAGE_NAME);
+                final AppLaunchData appLaunchData = AppLaunchData.createLaunchData(categoryValue,
+                        roleValue, packageNameValue, classNameValue);
+                if (appLaunchData != null) {
+                    builder.setAppLaunchData(appLaunchData);
+                }
             }
         }
         return builder.build();
@@ -237,11 +259,6 @@ public final class InputDataStore {
 
     private void writeInputGestureToXml(TypedXmlSerializer serializer,
             InputGestureData inputGestureData) throws IOException {
-        // TODO(b/365064144): Implement storage of AppLaunch data.
-        if (inputGestureData.getAction().appLaunchData() != null) {
-            return;
-        }
-
         serializer.startTag(null, TAG_INPUT_GESTURE);
         serializer.attributeInt(null, ATTR_KEY_GESTURE_TYPE,
                 inputGestureData.getAction().keyGestureType());
@@ -258,6 +275,24 @@ public final class InputDataStore {
             serializer.attributeInt(null, ATTR_TOUCHPAD_TRIGGER_GESTURE_TYPE,
                     touchpadTrigger.getTouchpadGestureType());
             serializer.endTag(null, TAG_TOUCHPAD_TRIGGER);
+        }
+
+        if (inputGestureData.getAction().appLaunchData() != null) {
+            serializer.startTag(null, TAG_APP_LAUNCH_DATA);
+            final AppLaunchData appLaunchData = inputGestureData.getAction().appLaunchData();
+            if (appLaunchData instanceof AppLaunchData.RoleData roleData) {
+                serializer.attribute(null, ATTR_APP_LAUNCH_DATA_ROLE, roleData.getRole());
+            } else if (appLaunchData
+                    instanceof AppLaunchData.CategoryData categoryData) {
+                serializer.attribute(null, ATTR_APP_LAUNCH_DATA_CATEGORY,
+                        categoryData.getCategory());
+            } else if (appLaunchData instanceof AppLaunchData.ComponentData componentData) {
+                serializer.attribute(null, ATTR_APP_LAUNCH_DATA_PACKAGE_NAME,
+                        componentData.getPackageName());
+                serializer.attribute(null, ATTR_APP_LAUNCH_DATA_CLASS_NAME,
+                        componentData.getClassName());
+            }
+            serializer.endTag(null, TAG_APP_LAUNCH_DATA);
         }
 
         serializer.endTag(null, TAG_INPUT_GESTURE);

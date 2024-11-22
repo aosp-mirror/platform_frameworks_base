@@ -16,8 +16,11 @@
 
 package com.android.server.input
 
+import android.app.role.RoleManager
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
+import android.hardware.input.AppLaunchData
 import android.hardware.input.InputGestureData
 import android.hardware.input.KeyGestureEvent
 import android.platform.test.annotations.Presubmit
@@ -149,7 +152,54 @@ class InputDataStoreTests {
     }
 
     @Test
-    fun saveToDiskCombineGestures() {
+    fun saveToDiskAppLaunchGestures() {
+        val inputGestures = listOf(
+            InputGestureData.Builder()
+                .setTrigger(
+                    InputGestureData.createTouchpadTrigger(
+                        InputGestureData.TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP
+                    )
+                )
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                .setAppLaunchData(AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER))
+                .build(),
+            InputGestureData.Builder()
+                .setTrigger(
+                    InputGestureData.createKeyTrigger(
+                        KeyEvent.KEYCODE_2,
+                        KeyEvent.META_META_ON
+                    )
+                )
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                .setAppLaunchData(AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS))
+                .build(),
+            InputGestureData.Builder()
+                .setTrigger(
+                    InputGestureData.createKeyTrigger(
+                        KeyEvent.KEYCODE_1,
+                        KeyEvent.META_META_ON
+                    )
+                )
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                .setAppLaunchData(
+                    AppLaunchData.createLaunchDataForComponent(
+                        "com.test",
+                        "com.test.BookmarkTest"
+                    )
+                )
+                .build()
+        )
+
+        inputDataStore.saveInputGestures(USER_ID, inputGestures)
+        assertEquals(
+            inputGestures,
+            inputDataStore.loadInputGestures(USER_ID),
+            getPrintableXml(inputGestures)
+        )
+    }
+
+    @Test
+    fun saveToDiskCombinedGestures() {
         val inputGestures = listOf(
             InputGestureData.Builder()
                 .setTrigger(
@@ -176,7 +226,17 @@ class InputDataStoreTests {
                     )
                 )
                 .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
-                .build()
+                .build(),
+            InputGestureData.Builder()
+                .setTrigger(
+                    InputGestureData.createKeyTrigger(
+                        KeyEvent.KEYCODE_9,
+                        KeyEvent.META_META_ON
+                    )
+                )
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+                .setAppLaunchData(AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS))
+                .build(),
         )
 
         inputDataStore.saveInputGestures(USER_ID, inputGestures)

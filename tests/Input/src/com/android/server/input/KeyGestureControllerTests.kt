@@ -1460,11 +1460,6 @@ class KeyGestureControllerTests {
     @Test
     @Parameters(method = "customInputGesturesTestArguments")
     fun testCustomKeyGesturesSavedAndLoadedByController(test: TestData) {
-        // TODO(b/365064144): Implement storage of AppLaunch data.
-        if (test.expectedAppLaunchData != null) {
-            return
-        }
-
         val userId = 10
         setupKeyGestureController()
         val builder = InputGestureData.Builder()
@@ -1475,6 +1470,9 @@ class KeyGestureControllerTests {
                     test.expectedModifierState
                 )
             )
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
         val inputGestureData = builder.build()
 
         keyGestureController.setCurrentUserId(userId)
@@ -1579,16 +1577,14 @@ class KeyGestureControllerTests {
     @Test
     @Parameters(method = "customTouchpadGesturesTestArguments")
     fun testCustomTouchpadGesturesSavedAndLoadedByController(test: TouchpadTestData) {
-        // TODO(b/365064144): Implement storage of AppLaunch data.
-        if (test.expectedAppLaunchData != null) {
-            return
-        }
-
         val userId = 10
         setupKeyGestureController()
         val builder = InputGestureData.Builder()
             .setKeyGestureType(test.expectedKeyGestureType)
             .setTrigger(InputGestureData.createTouchpadTrigger(test.touchpadGestureType))
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
         val inputGestureData = builder.build()
         keyGestureController.setCurrentUserId(userId)
         testLooper.dispatchAll()
