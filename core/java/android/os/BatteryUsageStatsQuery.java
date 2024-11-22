@@ -65,12 +65,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      */
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY = 0x0002;
 
-    /**
-     * Indicates that identifiers of power models used for computations of power
-     * consumption should be included in the BatteryUsageStats.
-     */
-    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS = 0x0004;
-
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA = 0x0008;
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS = 0x0010;
@@ -311,7 +305,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * power monitoring data is available.
          *
          * Should only be used for testing and debugging.
+         *
+         * @deprecated PowerModel is no longer supported
          */
+        @Deprecated
         public Builder powerProfileModeledOnly() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL;
             return this;
@@ -322,9 +319,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * of power consumption.
          *
          * Should only be used for testing and debugging.
+         * @deprecated PowerModel is no longer supported
          */
+        @Deprecated
         public Builder includePowerModels() {
-            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS;
             return this;
         }
 

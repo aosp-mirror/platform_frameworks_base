@@ -319,7 +319,7 @@ public class BatteryUsageStatsProvider {
 
         if (accumulatedStats.builder == null) {
             accumulatedStats.builder = new BatteryUsageStats.Builder(
-                    stats.getCustomEnergyConsumerNames(), false, true, true, true, 0);
+                    stats.getCustomEnergyConsumerNames(), true, true, true, 0);
             accumulatedStats.startWallClockTime = stats.getStartClockTime();
             accumulatedStats.builder.setStatsStartTimestamp(accumulatedStats.startWallClockTime);
         }
@@ -338,8 +338,6 @@ public class BatteryUsageStatsProvider {
     private BatteryUsageStats.Builder computeBatteryUsageStats(BatteryStatsImpl stats,
             BatteryUsageStatsQuery query, long monotonicStartTime, long monotonicEndTime,
             long currentTimeMs) {
-        final boolean includePowerModels = (query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
         final boolean includeProcessStateData = ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
                 && stats.isProcessStateDataAvailable();
@@ -353,8 +351,7 @@ public class BatteryUsageStatsProvider {
         }
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
-                customEnergyConsumerNames, includePowerModels,
-                includeProcessStateData, query.isScreenStateDataNeeded(),
+                customEnergyConsumerNames, includeProcessStateData, query.isScreenStateDataNeeded(),
                 query.isPowerStateDataNeeded(), minConsumedPowerThreshold);
 
         synchronized (stats) {
@@ -444,8 +441,6 @@ public class BatteryUsageStatsProvider {
 
     private BatteryUsageStats getAggregatedBatteryUsageStats(BatteryStatsImpl stats,
             BatteryUsageStatsQuery query) {
-        final boolean includePowerModels = (query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
         final boolean includeProcessStateData = ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0)
                 && stats.isProcessStateDataAvailable();
@@ -453,7 +448,7 @@ public class BatteryUsageStatsProvider {
 
         final String[] customEnergyConsumerNames = stats.getCustomEnergyConsumerNames();
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customEnergyConsumerNames, includePowerModels, includeProcessStateData,
+                customEnergyConsumerNames, includeProcessStateData,
                 query.isScreenStateDataNeeded(), query.isPowerStateDataNeeded(),
                 minConsumedPowerThreshold);
         if (mPowerStatsStore == null) {
