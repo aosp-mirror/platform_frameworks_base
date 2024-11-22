@@ -304,6 +304,11 @@ final class AppCompatConfiguration {
     // See RefreshCallbackItem for context.
     private boolean mIsCameraCompatRefreshCycleThroughStopEnabled = true;
 
+    // Whether camera compat freeform treatment should be enabled for all eligible activities.
+    // This has the same effect as enabling the per-app override
+    // ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT for every app.
+    private boolean mIsCameraCompatFreeformWindowingTreatmentEnabled = false;
+
     // Whether should ignore app requested orientation in response to an app
     // calling Activity#setRequestedOrientation. See
     // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
@@ -1348,6 +1353,30 @@ final class AppCompatConfiguration {
     void resetCameraCompatAspectRatio() {
         mCameraCompatAspectRatio = mContext.getResources().getFloat(R.dimen
                 .config_windowManagerCameraCompatAspectRatio);
+    }
+
+    /**
+     * Sets whether the camera compatibility treatment in freeform windowing mode is enabled for
+     * all fixed-orientation apps when using camera.
+     */
+    void setIsCameraCompatFreeformWindowingTreatmentEnabled(boolean enabled) {
+        mIsCameraCompatFreeformWindowingTreatmentEnabled = enabled;
+    }
+
+    /**
+     * Whether the camera compatibility treatment in freeform windowing mode is enabled for all
+     * fixed-orientation apps when using camera.
+     */
+    boolean isCameraCompatFreeformWindowingTreatmentEnabled() {
+        return mIsCameraCompatFreeformWindowingTreatmentEnabled;
+    }
+
+    /**
+     * Resets whether the camera compatibility treatment in freeform windowing mode is enabled for
+     * all fixed-orientation apps when using camera.
+     */
+    void resetIsCameraCompatFreeformWindowingTreatmentEnabled() {
+        mIsCameraCompatFreeformWindowingTreatmentEnabled = false;
     }
 
     /**
