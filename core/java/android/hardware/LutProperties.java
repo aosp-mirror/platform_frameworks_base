@@ -44,7 +44,8 @@ public final class LutProperties {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"SAMPLING_KEY_"}, value = {
         SAMPLING_KEY_RGB,
-        SAMPLING_KEY_MAX_RGB
+        SAMPLING_KEY_MAX_RGB,
+        SAMPLING_KEY_CIE_Y
     })
     public @interface SamplingKey {
     }
@@ -56,6 +57,10 @@ public final class LutProperties {
     /** use max of r,g,b channel as the gain value of a Lut */
     @FlaggedApi(Flags.FLAG_LUTS_API)
     public static final int SAMPLING_KEY_MAX_RGB = 1;
+
+    /** use y of CIE XYZ as the gain value of a lut */
+    @FlaggedApi(Flags.FLAG_LUTS_API)
+    public static final int SAMPLING_KEY_CIE_Y = 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

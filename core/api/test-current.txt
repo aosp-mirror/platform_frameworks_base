@@ -3730,6 +3730,7 @@ package android.view {
     method @NonNull public android.view.Display.Mode getDefaultMode();
     method public int getRemoveMode();
     method @NonNull public int[] getReportedHdrTypes();
+    method @NonNull public float[] getSupportedRefreshRatesLegacy();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
     method public int getType();
@@ -3752,6 +3753,7 @@ package android.view {
 
   public static final class Display.Mode implements android.os.Parcelable {
     ctor public Display.Mode(int, int, float);
+    method public float getVsyncRate();
     method public boolean isSynthetic();
     method public boolean matches(int, int, float);
   }

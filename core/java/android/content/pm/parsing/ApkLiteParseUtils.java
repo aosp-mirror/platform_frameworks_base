@@ -595,9 +595,6 @@ public class ApkLiteParseUtils {
                                     /*allowDuplicates=*/ true);
                             break;
                         case TAG_USES_STATIC_LIBRARY:
-                            if (!android.content.pm.Flags.sdkDependencyInstaller()) {
-                                break;
-                            }
                             String usesStaticLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
                             long usesStaticLibVersion = parser.getAttributeIntValue(
@@ -666,7 +663,7 @@ public class ApkLiteParseUtils {
                                     SharedLibraryInfo.TYPE_SDK_PACKAGE));
                             break;
                         case TAG_STATIC_LIBRARY:
-                            isSdkLibrary = true;
+                            isStaticLibrary = true;
                             // Mirrors ParsingPackageUtils#parseStaticLibrary until lite and full
                             // parsing are combined
                             String staticLibName = parser.getAttributeValue(

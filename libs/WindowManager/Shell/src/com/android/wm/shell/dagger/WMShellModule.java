@@ -703,6 +703,7 @@ public abstract class WMShellModule {
             InputManager inputManager,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
+            DesktopModeUiEventLogger desktopModeUiEventLogger,
             DesktopTilingDecorViewModel desktopTilingDecorViewModel) {
         return new DesktopTasksController(
                 context,
@@ -733,6 +734,7 @@ public abstract class WMShellModule {
                 interactionJankMonitor,
                 mainHandler,
                 desktopModeEventLogger,
+                desktopModeUiEventLogger,
                 desktopTilingDecorViewModel);
     }
 

@@ -105,6 +105,7 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
@@ -3260,6 +3261,24 @@ public class MockingOomAdjusterTests {
                 "cch-empty");
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_FIX_APPLY_OOMADJ_ORDER)
+    public void testUpdateOomAdj_ApplyOomAdjInCorrectOrder() {
+        final int numberOfApps = 5;
+        final ProcessRecord[] apps = new ProcessRecord[numberOfApps];
+        for (int i = 0; i < numberOfApps; i++) {
+            apps[i] = spy(makeDefaultProcessRecord(MOCKAPP_PID + i, MOCKAPP_UID + i,
+                    MOCKAPP_PROCESSNAME + i, MOCKAPP_PACKAGENAME + i, true));
+        }
+        updateOomAdj(apps);
+        for (int i = 1; i < numberOfApps; i++) {
+            final int pre = mInjector.mSetOomAdjAppliedAt.get(apps[i - 1].mPid);
+            final int cur = mInjector.mSetOomAdjAppliedAt.get(apps[i].mPid);
+            assertTrue("setOomAdj is called in wrong order", pre < cur);
+        }
+    }
+
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
             String packageName, boolean hasShownUi) {
         return new ProcessRecordBuilder(pid, uid, processName, packageName).setHasShownUi(
@@ -3589,9 +3608,16 @@ public class MockingOomAdjusterTests {
         long mTimeOffsetMillis = 0;
         private SparseIntArray mLastSetOomAdj = new SparseIntArray();
 
+        // A sequence number that increases every time setOomAdj is called
+        int mLastAppliedAt = 0;
+        // Holds the last sequence number setOomAdj is called for a pid
+        private SparseIntArray mSetOomAdjAppliedAt = new SparseIntArray();
+
         void reset() {
             mTimeOffsetMillis = 0;
             mLastSetOomAdj.clear();
+            mLastAppliedAt = 0;
+            mSetOomAdjAppliedAt.clear();
         }
 
         void jumpUptimeAheadTo(long uptimeMillis) {
@@ -3616,6 +3642,7 @@ public class MockingOomAdjusterTests {
                 final int pid = proc.getPid();
                 if (pid <= 0) continue;
                 mLastSetOomAdj.put(pid, proc.mState.getCurAdj());
+                mSetOomAdjAppliedAt.put(pid, mLastAppliedAt++);
             }
         }
 
@@ -3623,6 +3650,7 @@ public class MockingOomAdjusterTests {
         void setOomAdj(int pid, int uid, int adj) {
             if (pid <= 0) return;
             mLastSetOomAdj.put(pid, adj);
+            mSetOomAdjAppliedAt.put(pid, mLastAppliedAt++);
         }
 
         @Override

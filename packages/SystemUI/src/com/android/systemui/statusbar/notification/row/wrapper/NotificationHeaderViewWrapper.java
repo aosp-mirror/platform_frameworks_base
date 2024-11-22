@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
 import android.app.Notification;
@@ -48,6 +51,7 @@ import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationAddXOnHoverToDismiss;
 
 import java.util.Stack;
 
@@ -115,6 +119,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         resolveHeaderViews();
         addFeedbackOnClickListener(row);
         addCloseButtonOnClickListener(row);
+
+        if (NotificationAddXOnHoverToDismiss.isEnabled()) {
+            mRow.addDismissButtonTargetStateListener(mHoverListener);
+        }
     }
 
     @Override
@@ -166,13 +174,34 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         }
     }
 
+    private ExpandableNotificationRow.DismissButtonTargetVisibilityListener mHoverListener = new
+            ExpandableNotificationRow.DismissButtonTargetVisibilityListener() {
+                @Override
+                public void onTargetVisibilityChanged(boolean targetVisible) {
+                    NotificationAddXOnHoverToDismiss.isUnexpectedlyInLegacyMode();
+
+                    if (mCloseButton != null) {
+                        mCloseButton.setVisibility(targetVisible ? VISIBLE : GONE);
+                    }
+                }
+            };
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+
+        if (NotificationAddXOnHoverToDismiss.isEnabled()) {
+            mRow.removeDismissButtonTargetStateListener(mHoverListener);
+        }
+    }
+
     /**
      * Shows the given feedback icon, or hides the icon if null.
      */
     @Override
     public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
         if (mFeedbackIcon != null) {
-            mFeedbackIcon.setVisibility(icon != null ? View.VISIBLE : View.GONE);
+            mFeedbackIcon.setVisibility(icon != null ? VISIBLE : GONE);
             if (icon != null) {
                 if (mFeedbackIcon instanceof ImageButton) {
                     ((ImageButton) mFeedbackIcon).setImageResource(icon.getIconRes());
@@ -266,7 +295,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
             boolean expandable,
             View.OnClickListener onClickListener,
             boolean requestLayout) {
-        mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
+        mExpandButton.setVisibility(expandable ? VISIBLE : GONE);
         mExpandButton.setOnClickListener(expandable ? onClickListener : null);
         if (mAltExpandTarget != null) {
             mAltExpandTarget.setOnClickListener(expandable ? onClickListener : null);
@@ -294,7 +323,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
     @Override
     public void setRecentlyAudiblyAlerted(boolean audiblyAlerted) {
         if (mAudiblyAlertedIcon != null) {
-            mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? View.VISIBLE : View.GONE);
+            mAudiblyAlertedIcon.setVisibility(audiblyAlerted ? VISIBLE : GONE);
         }
     }
 
@@ -371,6 +400,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
             ((DateTimeView) timeView).setTime(whenMillis);
         }
     }
+
     protected void addTransformedViews(View... views) {
         for (View view : views) {
             if (view != null) {

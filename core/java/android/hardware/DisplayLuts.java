@@ -177,6 +177,8 @@ public final class DisplayLuts {
                     return "SAMPLING_KEY_RGB";
                 case LutProperties.SAMPLING_KEY_MAX_RGB:
                     return "SAMPLING_KEY_MAX_RGB";
+                case LutProperties.SAMPLING_KEY_CIE_Y:
+                    return "SAMPLING_KEY_CIE_Y";
                 default:
                     return "";
             }

@@ -29,7 +29,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -56,60 +56,63 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun affordance_setsUpRegistrationAndDeliversInitialModel() = runBlockingTest {
-        whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+    fun affordance_setsUpRegistrationAndDeliversInitialModel() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
+            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
 
-        val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
-        verify(controller).addCallback(callbackCaptor.capture())
-        verify(controller)
-            .registerQRCodeScannerChangeObservers(
-                QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
-                QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE
-            )
-        assertVisibleState(latest)
+            val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
+            verify(controller).addCallback(callbackCaptor.capture())
+            verify(controller)
+                .registerQRCodeScannerChangeObservers(
+                    QRCodeScannerController.DEFAULT_QR_CODE_SCANNER_CHANGE,
+                    QRCodeScannerController.QR_CODE_SCANNER_PREFERENCE_CHANGE,
+                )
+            assertVisibleState(latest)
 
-        job.cancel()
-        verify(controller).removeCallback(callbackCaptor.value)
-    }
-
-    @Test
-    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() = runBlockingTest {
-        whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
-        val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
-        verify(controller).addCallback(callbackCaptor.capture())
-
-        whenever(controller.intent).thenReturn(INTENT_2)
-        callbackCaptor.value.onQRCodeScannerActivityChanged()
-
-        assertVisibleState(latest)
-
-        job.cancel()
-        verify(controller).removeCallback(callbackCaptor.value)
-    }
+            job.cancel()
+            verify(controller).removeCallback(callbackCaptor.value)
+        }
 
     @Test
-    fun affordance_scannerPreferenceChanged_deliversVisibleModel() = runBlockingTest {
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
-        val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
-        verify(controller).addCallback(callbackCaptor.capture())
+    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
+            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+            val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
+            verify(controller).addCallback(callbackCaptor.capture())
 
-        whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
-        callbackCaptor.value.onQRCodeScannerPreferenceChanged()
+            whenever(controller.intent).thenReturn(INTENT_2)
+            callbackCaptor.value.onQRCodeScannerActivityChanged()
 
-        assertVisibleState(latest)
+            assertVisibleState(latest)
 
-        job.cancel()
-        verify(controller).removeCallback(callbackCaptor.value)
-    }
+            job.cancel()
+            verify(controller).removeCallback(callbackCaptor.value)
+        }
 
     @Test
-    fun affordance_scannerPreferenceChanged_deliversNone() = runBlockingTest {
+    fun affordance_scannerPreferenceChanged_deliversVisibleModel() =
+        runTest(UnconfinedTestDispatcher()) {
+            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+            val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
+            verify(controller).addCallback(callbackCaptor.capture())
+
+            whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
+            callbackCaptor.value.onQRCodeScannerPreferenceChanged()
+
+            assertVisibleState(latest)
+
+            job.cancel()
+            verify(controller).removeCallback(callbackCaptor.value)
+        }
+
+    @Test
+    fun affordance_scannerPreferenceChanged_deliversNone() = runTest(UnconfinedTestDispatcher()) {
         var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
         val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
         val callbackCaptor = argumentCaptor<QRCodeScannerController.Callback>()
@@ -128,30 +131,29 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     fun onQuickAffordanceTriggered() {
         assertThat(underTest.onTriggered(mock()))
             .isEqualTo(
-                OnTriggeredResult.StartActivity(
-                    intent = INTENT_1,
-                    canShowWhileLocked = true,
-                )
+                OnTriggeredResult.StartActivity(intent = INTENT_1, canShowWhileLocked = true)
             )
     }
 
     @Test
-    fun getPickerScreenState_enabledIfConfiguredOnDevice_isEnabledForPickerState() = runTest {
-        whenever(controller.isAllowedOnLockScreen).thenReturn(true)
-        whenever(controller.isAbleToLaunchScannerActivity).thenReturn(true)
+    fun getPickerScreenState_enabledIfConfiguredOnDevice_isEnabledForPickerState() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(controller.isAllowedOnLockScreen).thenReturn(true)
+            whenever(controller.isAbleToLaunchScannerActivity).thenReturn(true)
 
-        assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
-    }
+            assertThat(underTest.getPickerScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
+        }
 
     @Test
-    fun getPickerScreenState_disabledIfConfiguredOnDevice_isDisabledForPickerState() = runTest {
-        whenever(controller.isAllowedOnLockScreen).thenReturn(true)
-        whenever(controller.isAbleToLaunchScannerActivity).thenReturn(false)
+    fun getPickerScreenState_disabledIfConfiguredOnDevice_isDisabledForPickerState() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(controller.isAllowedOnLockScreen).thenReturn(true)
+            whenever(controller.isAbleToLaunchScannerActivity).thenReturn(false)
 
-        assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
-    }
+            assertThat(underTest.getPickerScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
+        }
 
     private fun assertVisibleState(latest: KeyguardQuickAffordanceConfig.LockScreenState?) {
         assertThat(latest)

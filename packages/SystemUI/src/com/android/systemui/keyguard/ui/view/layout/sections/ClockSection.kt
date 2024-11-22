@@ -235,9 +235,7 @@ constructor(
 
             val smallClockBottom =
                 keyguardClockViewModel.getSmallClockTopMargin() +
-                    context.resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.small_clock_height
-                    )
+                    context.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
             val dateWeatherSmartspaceHeight = getDimen(context, DATE_WEATHER_VIEW_HEIGHT).toFloat()
             val marginBetweenSmartspaceAndNotification =
                 context.resources.getDimensionPixelSize(

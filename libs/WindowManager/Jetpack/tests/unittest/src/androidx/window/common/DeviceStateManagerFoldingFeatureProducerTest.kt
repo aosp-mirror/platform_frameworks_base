@@ -20,9 +20,6 @@ import android.content.Context
 import android.content.res.Resources
 import android.hardware.devicestate.DeviceState
 import android.hardware.devicestate.DeviceStateManager
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
-import android.platform.test.flag.junit.SetFlagsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.common.layout.CommonFoldingFeature
 import androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_FLAT
@@ -34,15 +31,11 @@ import androidx.window.common.layout.DisplayFoldFeatureCommon
 import androidx.window.common.layout.DisplayFoldFeatureCommon.DISPLAY_FOLD_FEATURE_PROPERTY_SUPPORTS_HALF_OPENED
 import androidx.window.common.layout.DisplayFoldFeatureCommon.DISPLAY_FOLD_FEATURE_TYPE_SCREEN_FOLD_IN
 import com.android.internal.R
-import com.android.window.flags.Flags
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import java.util.concurrent.Executor
 import java.util.function.Consumer
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -60,9 +53,6 @@ import org.mockito.kotlin.verify
  */
 @RunWith(AndroidJUnit4::class)
 class DeviceStateManagerFoldingFeatureProducerTest {
-    @get:Rule
-    val setFlagsRule: SetFlagsRule = SetFlagsRule()
-
     private val mMockDeviceStateManager = mock<DeviceStateManager>()
     private val mMockResources = mock<Resources> {
         on { getStringArray(R.array.config_device_state_postures) } doReturn DEVICE_STATE_POSTURES
@@ -79,8 +69,7 @@ class DeviceStateManagerFoldingFeatureProducerTest {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_WLINFO_ONCREATE)
-    fun testRegisterCallback_whenWlinfoOncreateIsDisabled_usesMainExecutor() {
+    fun testRegisterCallback_usesMainExecutor() {
         DeviceStateManagerFoldingFeatureProducer(
             mMockContext,
             mRawFoldSupplier,
@@ -88,23 +77,6 @@ class DeviceStateManagerFoldingFeatureProducerTest {
         )
 
         verify(mMockDeviceStateManager).registerCallback(eq(mMockContext.mainExecutor), any())
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_WLINFO_ONCREATE)
-    fun testRegisterCallback_whenWlinfoOncreateIsEnabled_usesRunnableRun() {
-        val executorCaptor = ArgumentCaptor.forClass(Executor::class.java)
-        val runnable = mock<Runnable>()
-
-        DeviceStateManagerFoldingFeatureProducer(
-            mMockContext,
-            mRawFoldSupplier,
-            mMockDeviceStateManager,
-        )
-
-        verify(mMockDeviceStateManager).registerCallback(executorCaptor.capture(), any())
-        executorCaptor.value.execute(runnable)
-        verify(runnable).run()
     }
 
     @Test

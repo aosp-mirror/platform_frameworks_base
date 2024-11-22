@@ -249,6 +249,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveColorMode;
         private boolean mHasArrSupport;
         private FrameRateCategoryRate mFrameRateCategoryRate;
+        private float[] mSupportedRefreshRates = new float[0];
         private Display.HdrCapabilities mHdrCapabilities;
         private boolean mAllmSupported;
         private boolean mGameContentTypeSupported;
@@ -316,6 +317,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             changed |= updateGameContentTypeSupport(dynamicInfo.gameContentTypeSupported);
             changed |= updateHasArrSupportLocked(dynamicInfo.hasArrSupport);
             changed |= updateFrameRateCategoryRatesLocked(dynamicInfo.frameRateCategoryRate);
+            changed |= updateSupportedRefreshatesLocked(dynamicInfo.supportedRefreshRates);
 
             if (changed) {
                 mHavePendingChanges = true;
@@ -624,6 +626,20 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
+        private boolean updateSupportedRefreshatesLocked(float[] supportedRefreshRates) {
+            if (!getFeatureFlags().enableGetSupportedRefreshRates()) {
+                return false;
+            }
+            if (supportedRefreshRates == null) {
+                return false;
+            }
+            if (Arrays.equals(mSupportedRefreshRates, supportedRefreshRates)) {
+                return false;
+            }
+            mSupportedRefreshRates = supportedRefreshRates;
+            return true;
+        }
+
         private boolean updateAllmSupport(boolean supported) {
             if (mAllmSupported == supported) {
                 return false;
@@ -708,6 +724,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.hdrCapabilities = mHdrCapabilities;
                 mInfo.hasArrSupport = mHasArrSupport;
                 mInfo.frameRateCategoryRate = mFrameRateCategoryRate;
+                mInfo.supportedRefreshRates = mSupportedRefreshRates;
                 mInfo.appVsyncOffsetNanos = mActiveSfDisplayMode.appVsyncOffsetNanos;
                 mInfo.presentationDeadlineNanos = mActiveSfDisplayMode.presentationDeadlineNanos;
                 mInfo.state = mState;
@@ -1299,6 +1316,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mDefaultModeId=" + mDefaultModeId);
             pw.println("mUserPreferredModeId=" + mUserPreferredModeId);
             pw.println("mHasArrSupport=" + mHasArrSupport);
+            pw.println("mSupportedRefreshRates=" + Arrays.toString(mSupportedRefreshRates));
             pw.println("mState=" + Display.stateToString(mState));
             pw.println("mCommittedState=" + Display.stateToString(mCommittedState));
             pw.println("mBrightnessState=" + mBrightnessState);

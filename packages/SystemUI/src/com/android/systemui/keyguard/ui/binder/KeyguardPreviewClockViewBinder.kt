@@ -17,7 +17,7 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.content.Context
+import android.content.res.Resources
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -34,8 +34,8 @@ import com.android.systemui.keyguard.ui.view.layout.sections.setVisibility
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
 import com.android.systemui.shared.clocks.ClockRegistry
-import kotlin.reflect.KSuspendFunction1
 
 /** Binder for the small clock view, large clock view. */
 object KeyguardPreviewClockViewBinder {
@@ -66,11 +66,11 @@ object KeyguardPreviewClockViewBinder {
 
     @JvmStatic
     fun bind(
-        context: Context,
         rootView: ConstraintLayout,
         viewModel: KeyguardPreviewClockViewModel,
         clockRegistry: ClockRegistry,
-        updateClockAppearance: KSuspendFunction1<ClockController, Unit>,
+        updateClockAppearance: suspend (ClockController, Resources) -> Unit,
+        clockPreviewConfig: ClockPreviewConfig,
     ) {
         rootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -82,7 +82,10 @@ object KeyguardPreviewClockViewBinder {
                                     .forEach { rootView.removeView(it) }
                             }
                             lastClock = currentClock
-                            updateClockAppearance(currentClock)
+                            updateClockAppearance(
+                                currentClock,
+                                clockPreviewConfig.previewContext.resources,
+                            )
 
                             if (viewModel.shouldHighlightSelectedAffordance) {
                                 (currentClock.largeClock.layout.views +
@@ -98,7 +101,12 @@ object KeyguardPreviewClockViewBinder {
                                 (it.parent as? ViewGroup)?.removeView(it)
                                 rootView.addView(it)
                             }
-                            applyPreviewConstraints(context, rootView, currentClock, viewModel)
+                            applyPreviewConstraints(
+                                clockPreviewConfig,
+                                rootView,
+                                currentClock,
+                                viewModel,
+                            )
                         }
                     }
                     .invokeOnCompletion {
@@ -121,14 +129,14 @@ object KeyguardPreviewClockViewBinder {
     }
 
     private fun applyPreviewConstraints(
-        context: Context,
+        clockPreviewConfig: ClockPreviewConfig,
         rootView: ConstraintLayout,
         previewClock: ClockController,
         viewModel: KeyguardPreviewClockViewModel,
     ) {
         val cs = ConstraintSet().apply { clone(rootView) }
-        previewClock.largeClock.layout.applyPreviewConstraints(context, cs)
-        previewClock.smallClock.layout.applyPreviewConstraints(context, cs)
+        previewClock.largeClock.layout.applyPreviewConstraints(clockPreviewConfig, cs)
+        previewClock.smallClock.layout.applyPreviewConstraints(clockPreviewConfig, cs)
 
         // When selectedClockSize is the initial value, make both clocks invisible to avoid
         // flickering

@@ -39,6 +39,11 @@ object StatementParser {
 
     private const val FIELD_NOT_STRING_FORMAT_STRING = "Expected %s to be string."
     private const val FIELD_NOT_ARRAY_FORMAT_STRING = "Expected %s to be array."
+    private const val COMMENTS_NAME = "comments"
+    private const val EXCLUDE_NAME = "exclude"
+    private const val FRAGMENT_NAME = "#"
+    private const val QUERY_NAME = "?"
+    private const val PATH_NAME = "/"
 
     /**
      * Parses a JSON array of statements.
@@ -99,9 +104,7 @@ object StatementParser {
                 FIELD_NOT_ARRAY_FORMAT_STRING.format(StatementUtils.ASSET_DESCRIPTOR_FIELD_RELATION)
             )
         val target = AssetFactory.create(targetObject)
-        val dynamicAppLinkComponents = parseDynamicAppLinkComponents(
-            statement.optJSONObject(StatementUtils.ASSET_DESCRIPTOR_FIELD_RELATION_EXTENSIONS)
-        )
+        val dynamicAppLinkComponents = parseDynamicAppLinkComponents(statement)
 
         val statements = (0 until relations.length())
             .map { relations.getString(it) }
@@ -129,13 +132,13 @@ object StatementParser {
     }
 
     private fun parseComponent(component: JSONObject): DynamicAppLinkComponent {
-        val query = component.optJSONObject("?")
+        val query = component.optJSONObject(QUERY_NAME)
         return DynamicAppLinkComponent.create(
-            component.optBoolean("exclude", false),
-            component.optString("#"),
-            component.optString("/"),
+            component.optBoolean(EXCLUDE_NAME, false),
+            if (component.has(FRAGMENT_NAME)) component.getString(FRAGMENT_NAME) else null,
+            if (component.has(PATH_NAME)) component.getString(PATH_NAME) else null,
             query?.keys()?.asSequence()?.associateWith { query.getString(it) },
-            component.optString("comments")
+            component.optString(COMMENTS_NAME)
         )
     }
 

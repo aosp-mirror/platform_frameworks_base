@@ -25,6 +25,7 @@ import com.android.systemui.brightness.domain.interactor.brightnessPolicyEnforce
 import com.android.systemui.brightness.domain.interactor.screenBrightnessInteractor
 import com.android.systemui.brightness.shared.model.GammaBrightness
 import com.android.systemui.brightness.shared.model.LinearBrightness
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -61,6 +62,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                 brightnessPolicyEnforcementInteractor,
                 sliderHapticsViewModelFactory,
                 brightnessMirrorShowingInteractor,
+                falsingInteractor,
                 supportsMirroring = true,
                 brightnessWarningToast,
             )

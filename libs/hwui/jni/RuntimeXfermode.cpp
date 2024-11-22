@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ColorFilter.h"
 #include "GraphicsJNI.h"
 #include "RuntimeEffectUtils.h"
 #include "SkBlender.h"
@@ -93,6 +94,19 @@ static void RuntimeXfermode_updateChild(JNIEnv* env, jobject, jlong builderPtr, 
     }
 }
 
+static void RuntimeXfermode_updateColorFilter(JNIEnv* env, jobject, jlong builderPtr,
+                                              jstring childName, jlong colorFilterPtr) {
+    auto* builder = reinterpret_cast<SkRuntimeEffectBuilder*>(builderPtr);
+    ScopedUtfChars name(env, childName);
+    auto* child = reinterpret_cast<ColorFilter*>(colorFilterPtr);
+    if (child) {
+        auto childInput = child->getInstance();
+        if (childInput) {
+            UpdateChild(env, builder, name.c_str(), childInput.release());
+        }
+    }
+}
+
 static const JNINativeMethod gRuntimeXfermodeMethods[] = {
         {"nativeGetFinalizer", "()J", (void*)RuntimeXfermode_getNativeFinalizer},
         {"nativeCreateBlenderBuilder", "(Ljava/lang/String;)J",
@@ -107,6 +121,8 @@ static const JNINativeMethod gRuntimeXfermodeMethods[] = {
         {"nativeUpdateUniforms", "(JLjava/lang/String;IIIII)V",
          (void*)RuntimeXfermode_updateIntUniforms},
         {"nativeUpdateChild", "(JLjava/lang/String;J)V", (void*)RuntimeXfermode_updateChild},
+        {"nativeUpdateColorFilter", "(JLjava/lang/String;J)V",
+         (void*)RuntimeXfermode_updateColorFilter},
 };
 
 int register_android_graphics_RuntimeXfermode(JNIEnv* env) {

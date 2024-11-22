@@ -814,9 +814,9 @@ public class Notification implements Parcelable
         if (Flags.notificationsRedesignTemplates()) {
             return switch (layoutId) {
                 case R.layout.notification_2025_template_collapsed_base,
+                     R.layout.notification_2025_template_expanded_base,
                      R.layout.notification_2025_template_heads_up_base,
                      R.layout.notification_2025_template_header,
-                     R.layout.notification_template_material_big_base,
                      R.layout.notification_template_material_big_picture,
                      R.layout.notification_template_material_big_text,
                      R.layout.notification_template_material_inbox,
@@ -3263,6 +3263,7 @@ public class Notification implements Parcelable
     public boolean hasPromotableCharacteristics() {
         return isColorizedRequested()
                 && hasTitle()
+                && !isGroupSummary()
                 && !containsCustomViews()
                 && hasPromotableStyle();
     }
@@ -7545,7 +7546,11 @@ public class Notification implements Parcelable
         }
 
         private int getBigBaseLayoutResource() {
-            return R.layout.notification_template_material_big_base;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_base;
+            } else {
+                return R.layout.notification_template_material_big_base;
+            }
         }
 
         private int getBigPictureLayoutResource() {

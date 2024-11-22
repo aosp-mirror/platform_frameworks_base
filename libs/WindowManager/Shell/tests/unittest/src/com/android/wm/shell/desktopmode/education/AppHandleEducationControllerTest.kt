@@ -175,13 +175,13 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-  fun init_educationViewedAlready_shouldNotCallShowEducationTooltip() =
+  fun init_appHandleHintViewedAlready_shouldNotCallShowEducationTooltip() =
       testScope.runTest {
-        // App handle is visible but education has been viewed before. Should not show education
-        // tooltip.
-        // Mark education viewed.
+        // App handle is visible but app handle hint has been viewed before,
+        // should not show education tooltip.
+        // Mark app handle hint viewed.
         testDataStoreFlow.value =
-            createWindowingEducationProto(educationViewedTimestampMillis = 123L)
+            createWindowingEducationProto(appHandleHintViewedTimestampMillis = 123L)
         setShouldShowAppHandleEducation(true)
 
         // Simulate app handle visible.
@@ -194,13 +194,14 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-  fun overridePrerequisite_educationViewedAlready_shouldCallShowEducationTooltip() =
+  fun overridePrerequisite_appHandleHintViewedAlready_shouldCallShowEducationTooltip() =
       testScope.runTest {
-        // App handle is visible but education has been viewed before. But as we are overriding
-        // prerequisite conditions, we should show education tooltip.
-        // Mark education viewed.
+        // App handle is visible but app handle hint has been viewed before.
+        // But as we are overriding prerequisite conditions, we should show app
+        // handle tooltip.
+        // Mark app handle hint viewed.
         testDataStoreFlow.value =
-            createWindowingEducationProto(educationViewedTimestampMillis = 123L)
+            createWindowingEducationProto(appHandleHintViewedTimestampMillis = 123L)
         val systemPropertiesKey =
             "persist.desktop_windowing_app_handle_education_override_conditions"
         whenever(SystemProperties.getBoolean(eq(systemPropertiesKey), anyBoolean()))
@@ -217,7 +218,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-  fun init_appHandleExpanded_shouldMarkFeatureViewed() =
+  fun init_appHandleExpanded_shouldMarkAppHandleHintUsed() =
       testScope.runTest {
         setShouldShowAppHandleEducation(false)
 
@@ -226,12 +227,12 @@ class AppHandleEducationControllerTest : ShellTestCase() {
         // Wait for some time before verifying
         waitForBufferDelay()
 
-        verify(mockDataStoreRepository, times(1)).updateFeatureUsedTimestampMillis(eq(true))
+        verify(mockDataStoreRepository, times(1)).updateAppHandleHintUsedTimestampMillis(eq(true))
       }
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
-  fun init_showFirstTooltip_shouldMarkEducationViewed() =
+  fun init_showFirstTooltip_shouldMarkAppHandleHintViewed() =
       testScope.runTest {
         // App handle is visible. Should show education tooltip.
         setShouldShowAppHandleEducation(true)
@@ -241,7 +242,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
         // Wait for first tooltip to showup.
         waitForBufferDelay()
 
-        verify(mockDataStoreRepository, times(1)).updateEducationViewedTimestampMillis(eq(true))
+        verify(mockDataStoreRepository, times(1)).updateAppHandleHintViewedTimestampMillis(eq(true))
       }
 
   @Test

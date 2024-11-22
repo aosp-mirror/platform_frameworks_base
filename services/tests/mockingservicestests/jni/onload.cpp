@@ -26,8 +26,8 @@
 namespace android {
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_Freezer(JNIEnv* env);
-int register_android_server_app_GameManagerService(JNIEnv* env);
 int register_android_server_am_OomConnection(JNIEnv* env);
+int register_android_server_utils_LazyJniRegistrar(JNIEnv* env);
 };
 
 using namespace android;
@@ -44,7 +44,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     ALOG_ASSERT(env, "Could not retrieve the env!");
     register_android_server_am_CachedAppOptimizer(env);
     register_android_server_am_Freezer(env);
-    register_android_server_app_GameManagerService(env);
     register_android_server_am_OomConnection(env);
+    register_android_server_utils_LazyJniRegistrar(env);
     return JNI_VERSION_1_4;
 }

@@ -38,6 +38,8 @@ import com.android.systemui.shade.ShadeWindowLayoutParams
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
+import com.android.systemui.util.kotlin.getOrNull
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +50,7 @@ import kotlinx.coroutines.withContext
 class ShadeDisplaysInteractor
 @Inject
 constructor(
-    private val shadeRootView: WindowRootView,
+    optionalShadeRootView: Optional<WindowRootView>,
     private val shadePositionRepository: ShadeDisplaysRepository,
     @ShadeDisplayAware private val shadeContext: Context,
     @ShadeDisplayAware private val shadeResources: Resources,
@@ -58,6 +60,15 @@ constructor(
     @Main private val mainThreadContext: CoroutineContext,
 ) : CoreStartable {
 
+    private val shadeRootView =
+        optionalShadeRootView.getOrNull()
+            ?: error(
+                """
+            ShadeRootView must be provided for this ShadeDisplayInteractor to work.
+            If it is not, it means this is being instantiated in a SystemUI variant that shouldn't.
+            """
+                    .trimIndent()
+            )
     // TODO: b/362719719 - Get rid of this callback as the root view should automatically get the
     //  correct configuration once it's moved to another window.
     private var unregisterConfigChangedCallbacks: (() -> Unit)? = null

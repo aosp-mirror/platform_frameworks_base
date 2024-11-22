@@ -29,16 +29,20 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImp
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
+import com.android.systemui.shade.domain.interactor.ShadeDisplaysInteractor
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import com.android.systemui.statusbar.policy.ConfigurationController
+import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import javax.inject.Provider
 
 /**
  * Module responsible for managing display-specific components and resources for the notification
@@ -52,7 +56,7 @@ import dagger.multibindings.IntoMap
  * By using this dedicated module, we ensure the notification shade window always utilizes the
  * correct display context and resources, regardless of the display it's on.
  */
-@Module
+@Module(includes = [OptionalShadeDisplayAwareBindings::class])
 object ShadeDisplayAwareModule {
 
     /** Creates a new context for the shade window. */
@@ -169,4 +173,20 @@ object ShadeDisplayAwareModule {
             CoreStartable.NOP
         }
     }
+
+    @Provides
+    @IntoMap
+    @ClassKey(ShadeDisplaysInteractor::class)
+    fun provideShadeDisplaysInteractor(impl: Provider<ShadeDisplaysInteractor>): CoreStartable {
+        return if (ShadeWindowGoesAround.isEnabled) {
+            impl.get()
+        } else {
+            CoreStartable.NOP
+        }
+    }
+}
+
+@Module
+internal interface OptionalShadeDisplayAwareBindings {
+    @BindsOptionalOf fun bindOptionalOfWindowRootView(): WindowRootView
 }

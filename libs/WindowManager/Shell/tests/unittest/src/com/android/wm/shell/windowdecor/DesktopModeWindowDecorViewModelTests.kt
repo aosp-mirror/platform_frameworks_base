@@ -399,7 +399,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         verify(mockDesktopTasksController).toggleDesktopTaskSize(
             decor.mTaskInfo,
             ResizeTrigger.MAXIMIZE_MENU,
-            null
+            InputMethod.UNKNOWN_INPUT_METHOD
         )
     }
 
@@ -1033,7 +1033,11 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         onClickListenerCaptor.value.onClick(view)
 
         verify(mockDesktopTasksController)
-            .toggleDesktopTaskSize(decor.mTaskInfo, ResizeTrigger.MAXIMIZE_BUTTON, null)
+            .toggleDesktopTaskSize(
+                decor.mTaskInfo,
+                ResizeTrigger.MAXIMIZE_BUTTON,
+                InputMethod.UNKNOWN_INPUT_METHOD
+            )
     }
 
     @Test

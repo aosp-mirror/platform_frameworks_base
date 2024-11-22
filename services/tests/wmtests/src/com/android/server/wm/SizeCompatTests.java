@@ -4928,6 +4928,7 @@ public class SizeCompatTests extends WindowTestsBase {
         spyOn(pm);
         final PackageManager.Property property = new PackageManager.Property("propertyName",
                 true /* value */, name.getPackageName(), name.getClassName());
+        // Activity level.
         try {
             doReturn(property).when(pm).getPropertyAsUser(
                     WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
@@ -4938,6 +4939,19 @@ public class SizeCompatTests extends WindowTestsBase {
         final ActivityRecord optOutActivity = new ActivityBuilder(mAtm)
                 .setComponent(name).setTask(mTask).build();
         assertFalse(optOutActivity.isUniversalResizeable());
+
+        // Application level.
+        try {
+            doReturn(property).when(pm).getProperty(
+                    WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
+                    name.getPackageName());
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        final ActivityRecord optOutAppActivity = new ActivityBuilder(mAtm)
+                .setComponent(getUniqueComponentName(mContext.getPackageName()))
+                .setTask(mTask).build();
+        assertFalse(optOutAppActivity.isUniversalResizeable());
     }
 
 

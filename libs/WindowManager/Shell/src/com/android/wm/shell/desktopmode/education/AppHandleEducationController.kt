@@ -82,9 +82,9 @@ class AppHandleEducationController(
     runIfEducationFeatureEnabled {
       applicationCoroutineScope.launch {
         // Central block handling the app handle's educational flow end-to-end.
-        isEducationViewedFlow()
-            .flatMapLatest { isEducationViewed ->
-              if (isEducationViewed) {
+        isAppHandleHintViewedFlow()
+            .flatMapLatest { isAppHandleHintViewed ->
+              if (isAppHandleHintViewed) {
                 // If the education is viewed then return emptyFlow() that completes immediately.
                 // This will help us to not listen to [captionHandleStateFlow] after the education
                 // has been viewed already.
@@ -106,12 +106,12 @@ class AppHandleEducationController(
 
               showEducation(captionState, tooltipColorScheme)
               // After showing first tooltip, mark education as viewed
-              appHandleEducationDatastoreRepository.updateEducationViewedTimestampMillis(true)
+              appHandleEducationDatastoreRepository.updateAppHandleHintViewedTimestampMillis(true)
             }
       }
 
       applicationCoroutineScope.launch {
-        if (isFeatureUsed()) return@launch
+        if (isAppHandleHintUsed()) return@launch
         windowDecorCaptionHandleRepository.captionStateFlow
             .filter { captionState ->
               captionState is CaptionState.AppHandle && captionState.isHandleMenuExpanded
@@ -119,8 +119,8 @@ class AppHandleEducationController(
             .take(1)
             .flowOn(backgroundDispatcher)
             .collect {
-              // If user expands app handle, mark user has used the feature
-              appHandleEducationDatastoreRepository.updateFeatureUsedTimestampMillis(true)
+              // If user expands app handle, mark user has used the app handle hint
+              appHandleEducationDatastoreRepository.updateAppHandleHintUsedTimestampMillis(true)
             }
       }
     }
@@ -323,25 +323,25 @@ class AppHandleEducationController(
       }
 
   /**
-   * Listens to the changes to [WindowingEducationProto#hasEducationViewedTimestampMillis()] in
+   * Listens to the changes to [WindowingEducationProto#hasAppHandleHintViewedTimestampMillis()] in
    * datastore proto object.
    *
    * If [SHOULD_OVERRIDE_EDUCATION_CONDITIONS] is true, this flow will always emit false. That means
-   * it will emit education has not been viewed yet always.
+   * it will always emit app handle hint has not been viewed yet.
    */
-  private fun isEducationViewedFlow(): Flow<Boolean> =
+  private fun isAppHandleHintViewedFlow(): Flow<Boolean> =
       appHandleEducationDatastoreRepository.dataStoreFlow
           .map { preferences ->
-            preferences.hasEducationViewedTimestampMillis() && !SHOULD_OVERRIDE_EDUCATION_CONDITIONS
+            preferences.hasAppHandleHintViewedTimestampMillis() && !SHOULD_OVERRIDE_EDUCATION_CONDITIONS
           }
           .distinctUntilChanged()
 
   /**
-   * Listens to the changes to [WindowingEducationProto#hasFeatureUsedTimestampMillis()] in
+   * Listens to the changes to [WindowingEducationProto#hasAppHandleHintUsedTimestampMillis()] in
    * datastore proto object.
    */
-  private suspend fun isFeatureUsed(): Boolean =
-      appHandleEducationDatastoreRepository.dataStoreFlow.first().hasFeatureUsedTimestampMillis()
+  private suspend fun isAppHandleHintUsed(): Boolean =
+      appHandleEducationDatastoreRepository.dataStoreFlow.first().hasAppHandleHintUsedTimestampMillis()
 
   private fun getSize(@DimenRes resourceId: Int): Int {
     if (resourceId == Resources.ID_NULL) return 0

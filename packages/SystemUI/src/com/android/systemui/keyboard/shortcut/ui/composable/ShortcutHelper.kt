@@ -786,7 +786,7 @@ private fun ShortcutDescriptionText(
     Text(
         modifier = modifier,
         text = textWithHighlightedSearchQuery(shortcut.label, searchQuery),
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.onSurface,
     )
 }
@@ -904,7 +904,7 @@ private fun CategoryItemTwoPane(
                 Text(
                     fontSize = 18.sp,
                     color = colors.textColor(selected).value,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleSmall,
                     text = label,
                 )
             }
@@ -1000,9 +1000,11 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                stringResource(id = R.string.shortcut_helper_keyboard_settings_buttons_label),
+                text =
+                    stringResource(id = R.string.shortcut_helper_keyboard_settings_buttons_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
+                style = MaterialTheme.typography.titleSmall,
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(

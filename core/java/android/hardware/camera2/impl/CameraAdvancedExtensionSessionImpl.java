@@ -186,12 +186,12 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
         HashMap<Integer, List<Size>> supportedCaptureSizes = new HashMap<>();
 
-        IntArray supportedCaptureOutputFormats =
-                new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
-        supportedCaptureOutputFormats.addAll(
-                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
-        supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
-        for (int format : supportedCaptureOutputFormats.toArray()) {
+        Integer[] supportedCaptureOutputFormats =
+                new Integer[CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.size()];
+        supportedCaptureOutputFormats =
+                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.toArray(
+                        supportedCaptureOutputFormats);
+        for (int format : supportedCaptureOutputFormats) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
             if (supportedSizes != null) {
@@ -230,7 +230,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             Size burstCaptureSurfaceSize =
                     new Size(burstCaptureSurfaceInfo.mWidth, burstCaptureSurfaceInfo.mHeight);
             HashMap<Integer, List<Size>> supportedPostviewSizes = new HashMap<>();
-            for (int format : supportedCaptureOutputFormats.toArray()) {
+            for (int format : supportedCaptureOutputFormats) {
                 List<Size> supportedSizesPostview = extensionChars.getPostviewSupportedSizes(
                         config.getExtension(), burstCaptureSurfaceSize, format);
                 if (supportedSizesPostview != null) {

@@ -327,7 +327,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 context, mInstallThread.getLooper(), new AppStateHelper(context));
         mPackageArchiver = new PackageArchiver(mContext, mPm);
         mInstallDependencyHelper = new InstallDependencyHelper(mContext,
-                mPm.mInjector.getSharedLibrariesImpl());
+                mPm.mInjector.getSharedLibrariesImpl(), this);
 
         LocalServices.getService(SystemServiceManager.class).startService(
                 new Lifecycle(context, this));
@@ -335,6 +335,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     StagingManager getStagingManager() {
         return mStagingManager;
+    }
+
+    InstallDependencyHelper getInstallDependencyHelper() {
+        return mInstallDependencyHelper;
     }
 
     boolean okToSendBroadcasts()  {
