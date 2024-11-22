@@ -81,7 +81,7 @@ import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor;
+import com.android.systemui.statusbar.notification.promoted.FakePromotedNotificationContentExtractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -201,7 +201,7 @@ public class NotificationTestHelper {
                                 new MockSmartReplyInflater(),
                                 mock(NotifLayoutInflaterFactory.Provider.class),
                                 mock(HeadsUpStyleProvider.class),
-                                mock(PromotedNotificationContentExtractor.class),
+                                new FakePromotedNotificationContentExtractor(),
                                 mock(NotificationRowContentBinderLogger.class))
                         : new NotificationContentInflater(
                                 mock(NotifRemoteViewCache.class),
@@ -212,7 +212,7 @@ public class NotificationTestHelper {
                                 new MockSmartReplyInflater(),
                                 mock(NotifLayoutInflaterFactory.Provider.class),
                                 mock(HeadsUpStyleProvider.class),
-                                mock(PromotedNotificationContentExtractor.class),
+                                new FakePromotedNotificationContentExtractor(),
                                 mock(NotificationRowContentBinderLogger.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,

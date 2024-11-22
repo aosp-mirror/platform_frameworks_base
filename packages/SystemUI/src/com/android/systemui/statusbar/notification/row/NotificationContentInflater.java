@@ -921,7 +921,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         logger.logAsyncTaskProgress(entry, "finishing");
 
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
-            entry.setPromotedNotificationContentModel(result.mExtractedPromotedNotificationContent);
+            entry.setPromotedNotificationContentModel(result.mPromotedContent);
         }
 
         boolean setRepliesAndActions = true;
@@ -1292,10 +1292,13 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
             if (PromotedNotificationContentModel.featureFlagEnabled()) {
                 mLogger.logAsyncTaskProgress(mEntry, "extracting promoted notification content");
-                result.mExtractedPromotedNotificationContent = mPromotedNotificationContentExtractor
-                        .extractContent(mEntry, recoveredBuilder);
+                final PromotedNotificationContentModel promotedContent =
+                        mPromotedNotificationContentExtractor.extractContent(mEntry,
+                                recoveredBuilder);
                 mLogger.logAsyncTaskProgress(mEntry, "extracted promoted notification content: "
-                        + result.mExtractedPromotedNotificationContent);
+                        + promotedContent);
+
+                result.mPromotedContent = promotedContent;
             }
 
             mLogger.logAsyncTaskProgress(mEntry,
@@ -1399,7 +1402,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
     @VisibleForTesting
     static class InflationProgress {
-        PromotedNotificationContentModel mExtractedPromotedNotificationContent;
+        PromotedNotificationContentModel mPromotedContent;
 
         private RemoteViews newContentView;
         private RemoteViews newHeadsUpView;

@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.notification.data.NotificationDataLayerMod
 import com.android.systemui.statusbar.notification.domain.NotificationDomainLayerModule;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -78,8 +79,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationPanelLogg
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.logging.dagger.NotificationsLogModule;
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor;
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger;
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProvider;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractorImpl;
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactory;
 import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactoryLooperImpl;
@@ -92,7 +92,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModesCleanupStartable;
 
 import dagger.Binds;
@@ -104,8 +103,6 @@ import dagger.multibindings.IntoMap;
 import kotlin.coroutines.CoroutineContext;
 
 import kotlinx.coroutines.CoroutineScope;
-
-import java.util.Optional;
 
 import javax.inject.Provider;
 
@@ -315,21 +312,17 @@ public interface NotificationsModule {
     @ClassKey(ZenModesCleanupStartable.class)
     CoreStartable bindsZenModesCleanup(ZenModesCleanupStartable zenModesCleanup);
 
-    /**
-     * Provides {@link
-     * com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor} if
-     * one of the relevant feature flags is enabled.
-     */
+    /** Provides the default implementation of {@link PromotedNotificationContentExtractor} if at
+     * least one of the relevant feature flags is enabled, or an implementation that always returns
+     * null if none are enabled. */
     @Provides
     @SysUISingleton
-    static Optional<PromotedNotificationContentExtractor>
-            providePromotedNotificationContentExtractor(
-                    PromotedNotificationsProvider provider, Context context,
-                    PromotedNotificationLogger logger) {
+    static PromotedNotificationContentExtractor providesPromotedNotificationContentExtractor(
+            Provider<PromotedNotificationContentExtractorImpl> implProvider) {
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
-            return Optional.of(new PromotedNotificationContentExtractor(provider, context, logger));
+            return implProvider.get();
         } else {
-            return Optional.empty();
+            return (entry, recoveredBuilder) -> null;
         }
     }
 }
