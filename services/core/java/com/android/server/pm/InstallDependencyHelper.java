@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LI
 import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.NonNull;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.os.Handler;
 import android.os.OutcomeReceiver;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -52,6 +54,8 @@ import java.util.concurrent.TimeUnit;
 public class InstallDependencyHelper {
     private static final String TAG = InstallDependencyHelper.class.getSimpleName();
     private static final boolean DEBUG = true;
+    private static final String ROLE_SYSTEM_DEPENDENCY_INSTALLER =
+            "android.app.role.SYSTEM_DEPENDENCY_INSTALLER";
     // The maximum amount of time to wait before the system unbinds from the verifier.
     private static final long UNBIND_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(6);
     private static final long REQUEST_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(1);
@@ -154,8 +158,20 @@ public class InstallDependencyHelper {
             }
         }
 
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        if (roleManager == null) {
+            Slog.w(TAG, "Cannot find RoleManager system service");
+            return false;
+        }
+        List<String> holders = roleManager.getRoleHoldersAsUser(
+                ROLE_SYSTEM_DEPENDENCY_INSTALLER, UserHandle.of(userId));
+        if (holders.isEmpty()) {
+            Slog.w(TAG, "No holders of ROLE_SYSTEM_DEPENDENCY_INSTALLER found");
+            return false;
+        }
+
         Intent serviceIntent = new Intent(ACTION_INSTALL_DEPENDENCY);
-        // TODO(b/372862145): Use RoleManager to find the package name
+        serviceIntent.setPackage(holders.getFirst());
         List<ResolveInfo> resolvedIntents = snapshot.queryIntentServicesInternal(
                 serviceIntent, /*resolvedType=*/ null, /*flags=*/0,
                 userId, SYSTEM_UID, Process.INVALID_PID,
@@ -164,7 +180,6 @@ public class InstallDependencyHelper {
         if (resolvedIntents.isEmpty()) {
             return false;
         }
-
 
         ResolveInfo resolveInfo = resolvedIntents.getFirst();
         ComponentName componentName = resolveInfo.getComponentInfo().getComponentName();
