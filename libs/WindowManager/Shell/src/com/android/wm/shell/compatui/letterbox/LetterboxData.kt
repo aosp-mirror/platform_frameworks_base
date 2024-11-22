@@ -16,10 +16,5 @@
 
 package com.android.wm.shell.compatui.letterbox
 
-import android.view.SurfaceControl
-
 // The key to use for identify the letterbox sessions.
 data class LetterboxKey(val displayId: Int, val taskId: Int)
-
-// Encapsulate the objects for the specific letterbox session.
-data class LetterboxItem(val fullWindowSurface: SurfaceControl?)

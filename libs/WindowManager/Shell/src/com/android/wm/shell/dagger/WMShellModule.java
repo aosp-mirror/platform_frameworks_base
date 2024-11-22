@@ -71,6 +71,7 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
 import com.android.wm.shell.compatui.letterbox.LetterboxController;
 import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
+import com.android.wm.shell.compatui.letterbox.SingleSurfaceLetterboxController;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
@@ -1318,4 +1319,9 @@ public abstract class WMShellModule {
     ) {
         return new LetterboxTransitionObserver(shellInit, transitions, letterboxController);
     }
+
+    @WMSingleton
+    @Binds
+    abstract LetterboxController bindsLetterboxController(
+            SingleSurfaceLetterboxController letterboxController);
 }
