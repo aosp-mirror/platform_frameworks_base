@@ -22,6 +22,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.Display;
@@ -34,12 +35,15 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.data.model.StatusBarAppearance;
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore;
 import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.kotlin.JavaAdapterKt;
@@ -55,6 +59,8 @@ import kotlinx.coroutines.CoroutineScope;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * Controls how light status bar flag applies to the icons.
  */
@@ -67,6 +73,7 @@ public class LightBarControllerImpl implements
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
+    private final int mDisplayId;
     private final CoroutineScope mCoroutineScope;
     private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
@@ -140,6 +147,7 @@ public class LightBarControllerImpl implements
             DumpManager dumpManager,
             @Main CoroutineContext mainContext,
             BiometricUnlockController biometricUnlockController) {
+        mDisplayId = displayId;
         mCoroutineScope = coroutineScope;
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
@@ -155,7 +163,12 @@ public class LightBarControllerImpl implements
 
     @Override
     public void start() {
-        mDumpManager.registerCriticalDumpable(mDumpableName, this);
+        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+            // Can only register on default display, because NavigationBar creates its own instance
+            // as well as PerDisplayStore.
+            // TODO: b/380394368 - make sure there is only one instance per display.
+            mDumpManager.registerCriticalDumpable(mDumpableName, this);
+        }
         mBatteryController.addCallback(this);
         mNavigationMode = mNavModeController.addListener(mNavigationModeListener);
         JavaAdapterKt.collectFlow(
@@ -489,5 +502,37 @@ public class LightBarControllerImpl implements
                 CoroutineScope coroutineScope,
                 DarkIconDispatcher darkIconDispatcher,
                 StatusBarModePerDisplayRepository statusBarModePerDisplayRepository);
+    }
+
+    public static class LegacyFactory implements LightBarController.Factory {
+
+        private final Factory mFactory;
+        private final CoroutineScope mApplicationScope;
+        private final DarkIconDispatcherStore mDarkIconDispatcherStore;
+        private final StatusBarModeRepositoryStore mStatusBarModeRepositoryStore;
+
+        @Inject
+        public LegacyFactory(
+                LightBarControllerImpl.Factory factory,
+                @Application CoroutineScope applicationScope,
+                DarkIconDispatcherStore darkIconDispatcherStore,
+                StatusBarModeRepositoryStore statusBarModeRepositoryStore) {
+            mFactory = factory;
+            mApplicationScope = applicationScope;
+            mDarkIconDispatcherStore = darkIconDispatcherStore;
+            mStatusBarModeRepositoryStore = statusBarModeRepositoryStore;
+        }
+
+        @NonNull
+        @Override
+        public LightBarController create(@NonNull Context context) {
+            // TODO: b/380394368 - Make sure correct per display instances are used.
+            return mFactory.create(
+                    context.getDisplayId(),
+                    mApplicationScope,
+                    mDarkIconDispatcherStore.getDefaultDisplay(),
+                    mStatusBarModeRepositoryStore.getDefaultDisplay()
+            );
+        }
     }
 }
