@@ -6550,8 +6550,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
                 // Only continue setting up the packages if the service has been initialized.
                 // See: b/340927041
-                if (Flags.skipPackageChangeBeforeUserSwitch()
-                        && !mManagerService.isServiceInitializedLocked()) {
+                if (!mManagerService.isServiceInitializedLocked()) {
                     Slog.w(LOG_TAG,
                             "onSomePackagesChanged: service not initialized, skip the callback.");
                     return;
