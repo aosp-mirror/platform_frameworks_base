@@ -26,6 +26,7 @@ import com.android.systemui.qs.ui.adapter.qsSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
 val Kosmos.shadeSceneContentViewModel: ShadeSceneContentViewModel by Fixture {
@@ -35,6 +36,7 @@ val Kosmos.shadeSceneContentViewModel: ShadeSceneContentViewModel by Fixture {
         brightnessMirrorViewModelFactory = brightnessMirrorViewModelFactory,
         mediaCarouselInteractor = mediaCarouselInteractor,
         shadeInteractor = shadeInteractor,
+        disableFlagsInteractor = disableFlagsInteractor,
         footerActionsViewModelFactory = footerActionsViewModelFactory,
         footerActionsController = footerActionsController,
         unfoldTransitionInteractor = unfoldTransitionInteractor,
