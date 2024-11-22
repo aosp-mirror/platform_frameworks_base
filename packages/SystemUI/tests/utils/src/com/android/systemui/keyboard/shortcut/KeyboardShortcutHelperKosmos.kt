@@ -58,7 +58,7 @@ var Kosmos.shortcutHelperSystemShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { SystemShortcutsSource(mainResources) }
 
 var Kosmos.shortcutHelperMultiTaskingShortcutsSource: KeyboardShortcutGroupsSource by
-    Kosmos.Fixture { MultitaskingShortcutsSource(mainResources) }
+    Kosmos.Fixture { MultitaskingShortcutsSource(mainResources, applicationContext) }
 
 val Kosmos.shortcutHelperStateRepository by
     Kosmos.Fixture {
