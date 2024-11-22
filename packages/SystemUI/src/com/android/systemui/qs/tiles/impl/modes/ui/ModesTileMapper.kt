@@ -45,7 +45,11 @@ constructor(@Main private val resources: Resources, val theme: Resources.Theme) 
             secondaryLabel = getModesStatus(data, resources)
             contentDescription = "$label. $secondaryLabel"
             supportedActions =
-                setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                setOf(
+                    QSTileState.UserAction.CLICK,
+                    QSTileState.UserAction.LONG_CLICK,
+                    QSTileState.UserAction.TOGGLE_CLICK,
+                )
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             expandedAccessibilityClass = Button::class
         }

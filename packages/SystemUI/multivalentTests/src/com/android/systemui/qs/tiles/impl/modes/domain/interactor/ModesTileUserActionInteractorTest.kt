@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.graphics.drawable.TestStubDrawable
@@ -21,16 +23,23 @@ import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.asIcon
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
 import com.android.systemui.qs.tiles.base.actions.qsTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,14 +52,14 @@ import org.mockito.kotlin.verify
 @EnableFlags(android.app.Flags.FLAG_MODES_UI)
 class ModesTileUserActionInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private val inputHandler = kosmos.qsTileIntentUserInputHandler
     private val mockDialogDelegate = kosmos.mockModesDialogDelegate
+    private val zenModeRepository = kosmos.zenModeRepository
+    private val zenModeInteractor = kosmos.zenModeInteractor
 
     private val underTest =
-        ModesTileUserActionInteractor(
-            inputHandler,
-            mockDialogDelegate,
-        )
+        ModesTileUserActionInteractor(inputHandler, mockDialogDelegate, zenModeInteractor)
 
     @Test
     fun handleClick_active() = runTest {
@@ -71,6 +80,38 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
 
         verify(mockDialogDelegate).showDialog(eq(expandable))
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT)
+    fun handleToggleClick_dndActive() =
+        testScope.runTest {
+            val dndMode by collectLastValue(zenModeInteractor.dndMode)
+
+            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            assertThat(dndMode?.isActive).isTrue()
+
+            underTest.handleInput(
+                QSTileInputTestKtx.toggleClick(data = modelOf(true, listOf("DND")))
+            )
+
+            assertThat(dndMode?.isActive).isFalse()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT)
+    fun handleToggleClick_dndInactive() =
+        testScope.runTest {
+            val dndMode by collectLastValue(zenModeInteractor.dndMode)
+
+            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
+            assertThat(dndMode?.isActive).isFalse()
+
+            underTest.handleInput(
+                QSTileInputTestKtx.toggleClick(data = modelOf(true, listOf("DND")))
+            )
+
+            assertThat(dndMode?.isActive).isTrue()
+        }
 
     @Test
     fun handleLongClick_active() = runTest {
