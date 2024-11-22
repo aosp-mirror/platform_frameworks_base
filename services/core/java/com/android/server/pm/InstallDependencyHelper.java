@@ -97,7 +97,7 @@ public class InstallDependencyHelper {
 
         if (missing.isEmpty()) {
             if (DEBUG) {
-                Slog.i(TAG, "No missing dependency for " + pkg);
+                Slog.d(TAG, "No missing dependency for " + pkg);
             }
             // No need for dependency resolution. Move to installation directly.
             callback.onResult(null);
@@ -125,7 +125,7 @@ public class InstallDependencyHelper {
 
     void notifySessionComplete(int sessionId, boolean success) {
         if (DEBUG) {
-            Slog.i(TAG, "Session complete for " + sessionId + " result: " + success);
+            Slog.d(TAG, "Session complete for " + sessionId + " result: " + success);
         }
         synchronized (mTrackers) {
             List<DependencyInstallTracker> completedTrackers = new ArrayList<>();
@@ -451,7 +451,6 @@ public class InstallDependencyHelper {
                 if (!success) {
                     // If one of the dependency fails, the orig session would fail too.
                     onError(mCallback, "Failed to install all dependencies");
-                    // TODO(b/372862145): Abandon the rest of the pending sessions.
                     return false; // No point in tracking anymore
                 }
 
