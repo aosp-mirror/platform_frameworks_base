@@ -363,12 +363,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMotionHelper.synchronizePinnedStackBounds();
         reloadResources();
 
-        /*
-        if (mPipTaskOrganizer.isInPip()) {
+        if (mPipTransitionState.isInPip()) {
             // Recreate the dismiss target for the new orientation.
             mPipDismissTargetHandler.createOrUpdateDismissTarget();
         }
-         */
     }
 
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
