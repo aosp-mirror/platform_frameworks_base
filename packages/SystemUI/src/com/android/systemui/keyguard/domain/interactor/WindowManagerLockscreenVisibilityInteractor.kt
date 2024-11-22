@@ -112,8 +112,10 @@ constructor(
             }
             .distinctUntilChanged()
 
-    private val isDeviceEntered by lazy { deviceEntryInteractor.get().isDeviceEntered }
-    private val isDeviceNotEntered by lazy { isDeviceEntered.map { !it } }
+    private val isDeviceEnteredDirectly by lazy {
+        deviceEntryInteractor.get().isDeviceEnteredDirectly
+    }
+    private val isDeviceNotEnteredDirectly by lazy { isDeviceEnteredDirectly.map { !it } }
 
     /**
      * Surface visibility, which is either determined by the default visibility when not
@@ -126,7 +128,7 @@ constructor(
                 sceneInteractor.get().transitionState.flatMapLatestConflated { state ->
                     when {
                         state.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Gone) ->
-                            isDeviceEntered
+                            isDeviceEnteredDirectly
                         state.isTransitioning(from = Scenes.Bouncer, to = Scenes.Gone) ->
                             (state as Transition).progress.map { progress ->
                                 progress >
@@ -210,7 +212,7 @@ constructor(
                             when (it.currentScene) {
                                 in keyguardScenes -> flowOf(true)
                                 in nonKeyguardScenes -> flowOf(false)
-                                in keyguardAgnosticScenes -> isDeviceNotEntered
+                                in keyguardAgnosticScenes -> isDeviceNotEnteredDirectly
                                 else ->
                                     throw IllegalStateException("Unknown scene: ${it.currentScene}")
                             }
@@ -220,7 +222,7 @@ constructor(
                                 it.isTransitioningSets(from = keyguardScenes) -> flowOf(true)
                                 it.isTransitioningSets(from = nonKeyguardScenes) -> flowOf(false)
                                 it.isTransitioningSets(from = keyguardAgnosticScenes) ->
-                                    isDeviceNotEntered
+                                    isDeviceNotEnteredDirectly
                                 else ->
                                     throw IllegalStateException("Unknown scene: ${it.fromContent}")
                             }

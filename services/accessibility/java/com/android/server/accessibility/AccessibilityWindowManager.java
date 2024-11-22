@@ -433,22 +433,10 @@ public class AccessibilityWindowManager {
             return Collections.emptyList();
         }
 
-        /**
-         * Callbacks from window manager when there's an accessibility change in windows.
-         *
-         * @param forceSend Send the windows for accessibility even if they haven't changed.
-         * @param topFocusedDisplayId The display Id which has the top focused window.
-         * @param topFocusedWindowToken The window token of top focused window.
-         * @param windows The windows for accessibility.
-         */
-        @Override
-        public void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
+        private void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
                 IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows) {
+            // TODO(b/322444245): no longer need to get a lock.
             synchronized (mLock) {
-                if (!Flags.computeWindowChangesOnA11yV2()) {
-                    // If the flag is enabled, it's already done in #createWindowInfoListLocked.
-                    updateWindowsByWindowAttributesLocked(windows);
-                }
                 if (DEBUG) {
                     Slogf.i(LOG_TAG, "mDisplayId=%d, topFocusedDisplayId=%d, currentUserId=%d, "
                                     + "visibleBgUsers=%s", mDisplayId, topFocusedDisplayId,
@@ -490,9 +478,7 @@ public class AccessibilityWindowManager {
         }
 
         /**
-         * Called when the windows for accessibility changed. This is called if
-         * {@link com.android.server.accessibility.Flags.FLAG_COMPUTE_WINDOW_CHANGES_ON_A11Y_V2} is
-         * true.
+         * Called when the windows for accessibility changed.
          *
          * @param forceSend             Send the windows for accessibility even if they haven't
          *                              changed.
@@ -653,16 +639,6 @@ public class AccessibilityWindowManager {
                 return false;
             }
             return true;
-        }
-
-        private void updateWindowsByWindowAttributesLocked(List<WindowInfo> windows) {
-            for (int i = windows.size() - 1; i >= 0; i--) {
-                final WindowInfo windowInfo = windows.get(i);
-                final IBinder token = windowInfo.token;
-                final int windowId = findWindowIdLocked(
-                        mAccessibilityUserManager.getCurrentUserIdLocked(), token);
-                updateWindowWithWindowAttributes(windowInfo, mWindowAttributes.get(windowId));
-            }
         }
 
         private void updateWindowWithWindowAttributes(@NonNull WindowInfo windowInfo,
@@ -990,19 +966,6 @@ public class AccessibilityWindowManager {
         private AccessibilityWindowInfo populateReportedWindowLocked(int userId,
                 WindowInfo window, SparseArray<AccessibilityWindowInfo> oldWindowsById) {
             final int windowId = findWindowIdLocked(userId, window.token);
-
-            // With the flag enabled, createWindowInfoListLocked() already removes invalid windows.
-            if (!Flags.computeWindowChangesOnA11yV2()) {
-                if (windowId < 0) {
-                    return null;
-                }
-
-                // Don't need to add the embedded hierarchy windows into the a11y windows list.
-                if (isEmbeddedHierarchyWindowsLocked(windowId)) {
-                    return null;
-                }
-            }
-
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
 
             reportedWindow.setId(windowId);

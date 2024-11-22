@@ -160,7 +160,10 @@ interface ClockFaceLayout {
 
     @ProtectedReturn("return constraints;")
     /** Custom constraints to apply to preview ConstraintLayout. */
-    fun applyPreviewConstraints(context: Context, constraints: ConstraintSet): ConstraintSet
+    fun applyPreviewConstraints(
+        clockPreviewConfig: ClockPreviewConfig,
+        constraints: ConstraintSet,
+    ): ConstraintSet
 
     fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel)
 }
@@ -181,10 +184,10 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
     }
 
     override fun applyPreviewConstraints(
-        context: Context,
+        clockPreviewConfig: ClockPreviewConfig,
         constraints: ConstraintSet,
     ): ConstraintSet {
-        return applyDefaultPreviewConstraints(context, constraints)
+        return applyDefaultPreviewConstraints(clockPreviewConfig, constraints)
     }
 
     override fun applyAodBurnIn(aodBurnInModel: AodClockBurnInModel) {
@@ -193,10 +196,11 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 
     companion object {
         fun applyDefaultPreviewConstraints(
-            context: Context,
+            clockPreviewConfig: ClockPreviewConfig,
             constraints: ConstraintSet,
         ): ConstraintSet {
             constraints.apply {
+                val context = clockPreviewConfig.previewContext
                 val lockscreenClockViewLargeId = getId(context, "lockscreen_clock_view_large")
                 constrainWidth(lockscreenClockViewLargeId, WRAP_CONTENT)
                 constrainHeight(lockscreenClockViewLargeId, WRAP_CONTENT)
@@ -237,8 +241,10 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
                         getDimen(context, "status_view_margin_horizontal"),
                 )
                 val smallClockTopMargin =
-                    getDimen(context, "keyguard_clock_top_margin") +
-                        SystemBarUtils.getStatusBarHeight(context)
+                    getSmallClockTopPadding(
+                        clockPreviewConfig = clockPreviewConfig,
+                        SystemBarUtils.getStatusBarHeight(context),
+                    )
                 connect(smallClockViewId, TOP, PARENT_ID, TOP, smallClockTopMargin)
             }
             return constraints
@@ -253,9 +259,22 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
 
         fun getDimen(context: Context, name: String): Int {
             val packageName = context.packageName
-            val res = context.packageManager.getResourcesForApplication(packageName)
+            val res = context.resources
             val id = res.getIdentifier(name, "dimen", packageName)
             return if (id == 0) 0 else res.getDimensionPixelSize(id)
+        }
+
+        fun getSmallClockTopPadding(
+            clockPreviewConfig: ClockPreviewConfig,
+            statusBarHeight: Int,
+        ): Int {
+            return if (clockPreviewConfig.isShadeLayoutWide) {
+                getDimen(clockPreviewConfig.previewContext, "keyguard_split_shade_top_margin") -
+                    if (clockPreviewConfig.isSceneContainerFlagEnabled) statusBarHeight else 0
+            } else {
+                getDimen(clockPreviewConfig.previewContext, "keyguard_clock_top_margin") +
+                    if (!clockPreviewConfig.isSceneContainerFlagEnabled) statusBarHeight else 0
+            }
         }
     }
 }

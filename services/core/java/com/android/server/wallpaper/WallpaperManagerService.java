@@ -1513,11 +1513,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             if (wallpaper.getComponent() != null
                     && isPackageModified(wallpaper.getComponent().getPackageName())) {
+                ServiceInfo serviceInfo = null;
                 try {
-                    mContext.getPackageManager().getServiceInfo(wallpaper.getComponent(),
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-                } catch (NameNotFoundException e) {
+                    serviceInfo = mIPackageManager.getServiceInfo(
+                            wallpaper.getComponent(), PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, wallpaper.userId);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to call IPackageManager.getServiceInfo", e);
+                }
+                if (serviceInfo == null) {
                     Slog.e(TAG, "Wallpaper component gone, removing: "
                             + wallpaper.getComponent());
                     clearWallpaperLocked(wallpaper.mWhich, wallpaper.userId, false, null);
@@ -3177,7 +3181,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     throw new IllegalArgumentException("Invalid crop rect supplied: " + crop);
                 }
                 int orientation = screenOrientations[i];
-                if (orientation == ORIENTATION_UNKNOWN && cropMap.size() > 1) {
+                if (orientation == ORIENTATION_UNKNOWN && crops.size() > 1) {
                     throw new IllegalArgumentException("Invalid crops supplied: the UNKNOWN"
                             + "screen orientation should only be used in a singleton map");
                 }

@@ -133,9 +133,13 @@
     <public name="alternateLauncherLabels"/>
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
     <public name="pageSizeCompat" />
+    <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
+    <public name="shareRolePriority"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
+    <!-- @FlaggedApi(android.appwidget.flags.Flags.FLAG_ENGAGEMENT_METRICS) -->
+    <public name="remoteViewsMetricsId"/>
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01b50000">

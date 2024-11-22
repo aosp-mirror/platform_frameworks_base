@@ -404,7 +404,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     @Test
     fun creatingRunnerWithLazyInitializationThrows_whenTheFlagsAreDisabled() {
         assertThrows(IllegalStateException::class.java) {
-            activityTransitionAnimator.createRunner(controller, initializeLazily = true)
+            activityTransitionAnimator.createRunner(controller, longLived = true)
         }
     }
 
@@ -414,7 +414,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     )
     @Test
     fun runnerCreatesDelegateLazily_whenPostingTimeouts() {
-        val runner = activityTransitionAnimator.createRunner(controller, initializeLazily = true)
+        val runner = activityTransitionAnimator.createRunner(controller, longLived = true)
         assertNull(runner.delegate)
         runner.postTimeouts()
         assertNotNull(runner.delegate)
@@ -426,7 +426,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     )
     @Test
     fun runnerCreatesDelegateLazily_onAnimationStart() {
-        val runner = activityTransitionAnimator.createRunner(controller, initializeLazily = true)
+        val runner = activityTransitionAnimator.createRunner(controller, longLived = true)
         assertNull(runner.delegate)
 
         // The delegate is cleaned up after execution (which happens in another thread), so what we
@@ -458,7 +458,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     )
     @Test
     fun runnerCreatesDelegateLazily_onAnimationTakeover() {
-        val runner = activityTransitionAnimator.createRunner(controller, initializeLazily = true)
+        val runner = activityTransitionAnimator.createRunner(controller, longLived = true)
         assertNull(runner.delegate)
 
         // The delegate is cleaned up after execution (which happens in another thread), so what we
@@ -489,7 +489,7 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     )
     @Test
     fun animationTakeoverThrows_whenTheFlagsAreDisabled() {
-        val runner = activityTransitionAnimator.createRunner(controller, initializeLazily = false)
+        val runner = activityTransitionAnimator.createRunner(controller, longLived = false)
         assertThrows(IllegalStateException::class.java) {
             runner.takeOverAnimation(
                 arrayOf(fakeWindow()),

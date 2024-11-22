@@ -317,7 +317,7 @@ public final class MediaProjection {
     public void stop() {
         try {
             Log.d(TAG, "Content Recording: stopping projection");
-            mImpl.stop();
+            mImpl.stop(StopReason.STOP_HOST_APP);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to stop projection", e);
         }

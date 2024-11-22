@@ -434,6 +434,7 @@ public class RecentTasksTest extends WindowTestsBase {
     @Test
     public void testAddTaskCompatibleWindowingMode_withFreeformAndFullscreen_expectRemove() {
         Task task1 = createTaskBuilder(".Task1")
+                .setTaskId(1)
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .build();
         doReturn(WINDOWING_MODE_FREEFORM).when(task1).getWindowingMode();
@@ -452,6 +453,10 @@ public class RecentTasksTest extends WindowTestsBase {
         assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
         assertThat(mCallbacksRecorder.mRemoved).hasSize(1);
         assertThat(mCallbacksRecorder.mRemoved).contains(task1);
+
+        TaskChangeNotificationController controller =
+                mAtm.getTaskChangeNotificationController();
+        verify(controller, times(1)).notifyRecentTaskRemovedForAddTask(task1.mTaskId);
     }
 
     @Test

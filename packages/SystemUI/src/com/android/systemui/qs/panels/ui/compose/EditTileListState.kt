@@ -68,29 +68,16 @@ class EditTileListState(
         return _tiles.indexOfFirst { it is TileGridCell && it.tile.tileSpec == tileSpec }
     }
 
-    /**
-     * Whether the tile with this [TileSpec] is currently an icon in the [EditTileListState]
-     *
-     * @return true if the tile is an icon, false if it's large, null if the tile isn't in the list
-     */
-    fun isIcon(tileSpec: TileSpec): Boolean? {
-        val index = indexOf(tileSpec)
-        return if (index != -1) {
-            val cell = _tiles[index]
-            cell as TileGridCell
-            return cell.isIcon
-        } else {
-            null
-        }
-    }
-
-    /** Toggle the size of the tile corresponding to the [TileSpec] */
-    fun toggleSize(tileSpec: TileSpec) {
+    /** Resize the tile corresponding to the [TileSpec] to [toIcon] */
+    fun resizeTile(tileSpec: TileSpec, toIcon: Boolean) {
         val fromIndex = indexOf(tileSpec)
         if (fromIndex != -1) {
-            val cell = _tiles.removeAt(fromIndex)
-            cell as TileGridCell
-            _tiles.add(fromIndex, cell.copy(width = if (cell.isIcon) largeTilesSpan else 1))
+            val cell = _tiles[fromIndex] as TileGridCell
+
+            if (cell.isIcon == toIcon) return
+
+            _tiles.removeAt(fromIndex)
+            _tiles.add(fromIndex, cell.copy(width = if (toIcon) 1 else largeTilesSpan))
             regenerateGrid(fromIndex)
         }
     }

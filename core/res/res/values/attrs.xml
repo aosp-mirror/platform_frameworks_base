@@ -4808,6 +4808,12 @@
         <!-- Whether the device should default to observe mode when this service is
              default or in the foreground. -->
         <attr name="shouldDefaultToObserveMode" format="boolean"/>
+        <!-- Whether this service should share the same AID routing priority as the role
+             owner. This package and the role owner must have the same signature, and the
+             role owner must opt into this behavior by using the property named by
+             {@link android.nfc.cardemulation.CardEmulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY }
+             in the <code>&lt;application&rt;</code> tag. -->
+        <attr name="shareRolePriority" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -4835,6 +4841,7 @@
         <!-- Whether the device should default to observe mode when this service is
              default or in the foreground. -->
         <attr name="shouldDefaultToObserveMode"/>
+        <attr name="shareRolePriority"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a

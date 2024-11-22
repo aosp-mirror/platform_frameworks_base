@@ -22,7 +22,6 @@ import static android.os.Build.IS_USER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 
@@ -1784,22 +1783,13 @@ final class AccessibilityController {
                 mA11yWindowsPopulator.populateVisibleWindowsOnScreenLocked(
                         mDisplayId, visibleWindows);
 
-                if (!com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()) {
-                    windows = buildWindowInfoListLocked(visibleWindows, screenSize);
-                }
-
                 // Gets the top focused display Id and window token for supporting multi-display.
                 topFocusedDisplayId = mService.mRoot.getTopFocusedDisplayContent().getDisplayId();
                 topFocusedWindowToken = topFocusedWindowState.mClient.asBinder();
             }
 
-            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()) {
-                mCallback.onAccessibilityWindowsChanged(forceSend, topFocusedDisplayId,
-                        topFocusedWindowToken, screenSize, visibleWindows);
-            } else {
-                mCallback.onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
-                        topFocusedWindowToken, windows);
-            }
+            mCallback.onAccessibilityWindowsChanged(forceSend, topFocusedDisplayId,
+                    topFocusedWindowToken, screenSize, visibleWindows);
 
             // Recycle the windows as we do not need them.
             for (final AccessibilityWindowsPopulator.AccessibilityWindow window : visibleWindows) {
@@ -1807,166 +1797,6 @@ final class AccessibilityController {
             }
             mInitialized = true;
         }
-
-        // Here are old code paths, called when computeWindowChangesOnA11yV2 flag is disabled.
-        // LINT.IfChange
-
-        /**
-         * From a list of windows, decides windows to be exposed to accessibility based on touchable
-         * region in the screen.
-         */
-        private List<WindowInfo> buildWindowInfoListLocked(List<AccessibilityWindow> visibleWindows,
-                Point screenSize) {
-            final List<WindowInfo> windows = new ArrayList<>();
-            final Set<IBinder> addedWindows = mTempBinderSet;
-            addedWindows.clear();
-
-            boolean focusedWindowAdded = false;
-
-            final int visibleWindowCount = visibleWindows.size();
-
-            Region unaccountedSpace = mTempRegion;
-            unaccountedSpace.set(0, 0, screenSize.x, screenSize.y);
-
-            // Iterate until we figure out what is touchable for the entire screen.
-            for (int i = 0; i < visibleWindowCount; i++) {
-                final AccessibilityWindow a11yWindow = visibleWindows.get(i);
-                final Region regionInWindow = new Region();
-                a11yWindow.getTouchableRegionInWindow(regionInWindow);
-                if (windowMattersToAccessibility(a11yWindow, regionInWindow, unaccountedSpace)) {
-                    addPopulatedWindowInfo(a11yWindow, regionInWindow, windows, addedWindows);
-                    if (windowMattersToUnaccountedSpaceComputation(a11yWindow)) {
-                        updateUnaccountedSpace(a11yWindow, unaccountedSpace);
-                    }
-                    focusedWindowAdded |= a11yWindow.isFocused();
-                } else if (a11yWindow.isUntouchableNavigationBar()) {
-                    // If this widow is navigation bar without touchable region, accounting the
-                    // region of navigation bar inset because all touch events from this region
-                    // would be received by launcher, i.e. this region is a un-touchable one
-                    // for the application.
-                    unaccountedSpace.op(
-                            getSystemBarInsetsFrame(
-                                    mService.mWindowMap.get(a11yWindow.getWindowInfo().token)),
-                            unaccountedSpace,
-                            Region.Op.REVERSE_DIFFERENCE);
-                }
-
-                if (unaccountedSpace.isEmpty() && focusedWindowAdded) {
-                    break;
-                }
-            }
-
-            // Remove child/parent references to windows that were not added.
-            final int windowCount = windows.size();
-            for (int i = 0; i < windowCount; i++) {
-                WindowInfo window = windows.get(i);
-                if (!addedWindows.contains(window.parentToken)) {
-                    window.parentToken = null;
-                }
-                if (window.childTokens != null) {
-                    final int childTokenCount = window.childTokens.size();
-                    for (int j = childTokenCount - 1; j >= 0; j--) {
-                        if (!addedWindows.contains(window.childTokens.get(j))) {
-                            window.childTokens.remove(j);
-                        }
-                    }
-                    // Leave the child token list if empty.
-                }
-            }
-
-            addedWindows.clear();
-
-            return windows;
-        }
-
-        // Some windows should be excluded from unaccounted space computation, though they still
-        // should be reported
-        private boolean windowMattersToUnaccountedSpaceComputation(AccessibilityWindow a11yWindow) {
-            // Do not account space of trusted non-touchable windows, except the split-screen
-            // divider.
-            // If it's not trusted, touch events are not sent to the windows behind it.
-            if (!a11yWindow.isTouchable()
-                    && (a11yWindow.getType() != TYPE_DOCK_DIVIDER)
-                    && a11yWindow.isTrustedOverlay()) {
-                return false;
-            }
-
-            if (a11yWindow.getType() == WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
-                return false;
-            }
-            return true;
-        }
-
-        private boolean windowMattersToAccessibility(AccessibilityWindow a11yWindow,
-                Region regionInScreen, Region unaccountedSpace) {
-            if (a11yWindow.isFocused()) {
-                return true;
-            }
-
-            // Ignore non-touchable windows, except the split-screen divider, which is
-            // occasionally non-touchable but still useful for identifying split-screen
-            // mode and the PIP menu.
-            if (!a11yWindow.isTouchable()
-                    && (a11yWindow.getType() != TYPE_DOCK_DIVIDER
-                    && !a11yWindow.isPIPMenu())) {
-                return false;
-            }
-
-            // If the window is completely covered by other windows - ignore.
-            if (unaccountedSpace.quickReject(regionInScreen)) {
-                return false;
-            }
-
-            // Add windows of certain types not covered by modal windows.
-            if (isReportedWindowType(a11yWindow.getType())) {
-                return true;
-            }
-
-            return false;
-        }
-
-        private void updateUnaccountedSpace(AccessibilityWindow a11yWindow,
-                Region unaccountedSpace) {
-            if (a11yWindow.getType()
-                    != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
-                // Account for the space this window takes if the window
-                // is not an accessibility overlay which does not change
-                // the reported windows.
-                final Region touchableRegion = mTempRegion2;
-                a11yWindow.getTouchableRegionInScreen(touchableRegion);
-                unaccountedSpace.op(touchableRegion, unaccountedSpace,
-                        Region.Op.REVERSE_DIFFERENCE);
-            }
-        }
-
-        private static void addPopulatedWindowInfo(AccessibilityWindow a11yWindow,
-                Region regionInScreen, List<WindowInfo> out, Set<IBinder> tokenOut) {
-            final WindowInfo window = a11yWindow.getWindowInfo();
-            if (window.token == null) {
-                // The window was used in calculating visible windows but does not have an
-                // associated IWindow token, so exclude it from the list returned to accessibility.
-                return;
-            }
-            window.regionInScreen.set(regionInScreen);
-            window.layer = tokenOut.size();
-            out.add(window);
-            tokenOut.add(window.token);
-        }
-
-        private static boolean isReportedWindowType(int windowType) {
-            return (windowType != WindowManager.LayoutParams.TYPE_WALLPAPER
-                    && windowType != WindowManager.LayoutParams.TYPE_BOOT_PROGRESS
-                    && windowType != WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY
-                    && windowType != WindowManager.LayoutParams.TYPE_DRAG
-                    && windowType != WindowManager.LayoutParams.TYPE_INPUT_CONSUMER
-                    && windowType != WindowManager.LayoutParams.TYPE_POINTER
-                    && windowType != TYPE_MAGNIFICATION_OVERLAY
-                    && windowType != WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY
-                    && windowType != WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY
-                    && windowType != WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION);
-        }
-
-        // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/AccessibilityWindowManager.java)
 
         private WindowState getTopFocusWindow() {
             return mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus;

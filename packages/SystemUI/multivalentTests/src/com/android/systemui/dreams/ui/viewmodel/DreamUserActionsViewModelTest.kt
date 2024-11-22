@@ -27,6 +27,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
@@ -72,8 +73,10 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(DualShade.FLAG_NAME)
-    fun actions_singleShade() =
+    fun actions_communalNotAvailable_singleShade() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(false)
+
             val actions by collectLastValue(underTest.actions)
 
             setUpState(
@@ -85,6 +88,8 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isNull()
+            assertThat(actions?.get(Swipe.End)).isNull()
 
             setUpState(
                 isShadeTouchable = false,
@@ -102,12 +107,16 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isNull()
+            assertThat(actions?.get(Swipe.End)).isNull()
         }
 
     @Test
     @DisableFlags(DualShade.FLAG_NAME)
-    fun actions_splitShade() =
+    fun actions_communalNotAvailable_splitShade() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(false)
+
             val actions by collectLastValue(underTest.actions)
 
             setUpState(
@@ -119,6 +128,8 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isNull()
+            assertThat(actions?.get(Swipe.End)).isNull()
 
             setUpState(
                 isShadeTouchable = false,
@@ -136,12 +147,16 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
                 .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isNull()
+            assertThat(actions?.get(Swipe.End)).isNull()
         }
 
     @Test
     @EnableFlags(DualShade.FLAG_NAME)
-    fun actions_dualShade() =
+    fun actions_communalNotAvailable_dualShade() =
         testScope.runTest {
+            kosmos.setCommunalAvailable(false)
+
             val actions by collectLastValue(underTest.actions)
 
             setUpState(
@@ -155,6 +170,8 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
                 )
+            assertThat(actions?.get(Swipe.Start)).isNull()
+            assertThat(actions?.get(Swipe.End)).isNull()
 
             setUpState(
                 isShadeTouchable = false,
@@ -170,6 +187,128 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
                 .isEqualTo(
                     UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
                 )
+            assertThat(actions?.get(Swipe.Start)).isNull()
+            assertThat(actions?.get(Swipe.End)).isNull()
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun actions_communalAvailable_singleShade() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+
+            val actions by collectLastValue(underTest.actions)
+
+            setUpState(
+                isShadeTouchable = true,
+                isDeviceUnlocked = false,
+                shadeMode = ShadeMode.Single,
+            )
+            assertThat(actions).isNotEmpty()
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
+            assertThat(actions?.get(Swipe.Down))
+                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
+            assertThat(actions?.get(Swipe.End)).isNull()
+
+            setUpState(
+                isShadeTouchable = false,
+                isDeviceUnlocked = false,
+                shadeMode = ShadeMode.Single,
+            )
+            assertThat(actions).isEmpty()
+
+            setUpState(
+                isShadeTouchable = true,
+                isDeviceUnlocked = true,
+                shadeMode = ShadeMode.Single,
+            )
+            assertThat(actions).isNotEmpty()
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
+            assertThat(actions?.get(Swipe.Down))
+                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
+            assertThat(actions?.get(Swipe.End)).isNull()
+        }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun actions_communalAvailable_splitShade() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+
+            val actions by collectLastValue(underTest.actions)
+
+            setUpState(
+                isShadeTouchable = true,
+                isDeviceUnlocked = false,
+                shadeMode = ShadeMode.Split,
+            )
+            assertThat(actions).isNotEmpty()
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
+            assertThat(actions?.get(Swipe.Down))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
+            assertThat(actions?.get(Swipe.End)).isNull()
+
+            setUpState(
+                isShadeTouchable = false,
+                isDeviceUnlocked = false,
+                shadeMode = ShadeMode.Split,
+            )
+            assertThat(actions).isEmpty()
+
+            setUpState(
+                isShadeTouchable = true,
+                isDeviceUnlocked = true,
+                shadeMode = ShadeMode.Split,
+            )
+            assertThat(actions).isNotEmpty()
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
+            assertThat(actions?.get(Swipe.Down))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
+            assertThat(actions?.get(Swipe.End)).isNull()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun actions_communalAvailable_dualShade() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+
+            val actions by collectLastValue(underTest.actions)
+
+            setUpState(
+                isShadeTouchable = true,
+                isDeviceUnlocked = false,
+                shadeMode = ShadeMode.Dual,
+            )
+            assertThat(actions).isNotEmpty()
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
+            assertThat(actions?.get(Swipe.Down))
+                .isEqualTo(
+                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
+                )
+            assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
+            assertThat(actions?.get(Swipe.End)).isNull()
+
+            setUpState(
+                isShadeTouchable = false,
+                isDeviceUnlocked = false,
+                shadeMode = ShadeMode.Dual,
+            )
+            assertThat(actions).isEmpty()
+
+            setUpState(isShadeTouchable = true, isDeviceUnlocked = true, shadeMode = ShadeMode.Dual)
+            assertThat(actions).isNotEmpty()
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
+            assertThat(actions?.get(Swipe.Down))
+                .isEqualTo(
+                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
+                )
+            assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
+            assertThat(actions?.get(Swipe.End)).isNull()
         }
 
     private fun TestScope.setUpState(

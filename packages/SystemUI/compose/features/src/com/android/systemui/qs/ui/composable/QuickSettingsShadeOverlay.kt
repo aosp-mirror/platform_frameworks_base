@@ -168,7 +168,6 @@ fun SceneScope.QuickSettingsLayout(
                 modifier =
                     Modifier.fillMaxWidth()
                         .heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
-                viewModel.editModeViewModel::startEditing,
             )
         }
     }

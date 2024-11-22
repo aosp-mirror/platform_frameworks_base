@@ -31,6 +31,7 @@ import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.data.repository.FakeShadeDisplayRepository
 import com.android.systemui.statusbar.phone.ConfigurationForwarder
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -65,7 +66,7 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
     private val interactor =
         ShadeDisplaysInteractor(
-            shadeRootview,
+            Optional.of(shadeRootview),
             positionRepository,
             MutableContextWrapper(defaultContext),
             resources,
