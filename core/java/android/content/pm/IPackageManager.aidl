@@ -854,4 +854,6 @@ interface IPackageManager {
     boolean isPageSizeCompatEnabled(in String packageName);
 
     String getPageSizeCompatWarningMessage(in String packageName);
+
+    List<String> getAllApexDirectories();
 }
