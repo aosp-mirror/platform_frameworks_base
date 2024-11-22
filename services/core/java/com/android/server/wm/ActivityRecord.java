@@ -3667,16 +3667,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             pauseKeyDispatchingLocked();
 
-            // We are finishing the top focused activity and its task has nothing to be focused so
-            // the next focusable task should be focused.
-            if (mayAdjustTop && task.topRunningActivity(true /* focusableOnly */)
-                    == null) {
-                task.adjustFocusToNextFocusableTask("finish-top", false /* allowFocusSelf */,
-                            shouldAdjustGlobalFocus);
-            }
-
-            finishActivityResults(resultCode, resultData, resultGrants);
-
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
             final WindowContainer<?> trigger = endTask ? task : this;
@@ -3687,6 +3677,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (transition != null) {
                 transition.collectClose(trigger);
             }
+            // We are finishing the top focused activity and its task has nothing to be focused so
+            // the next focusable task should be focused.
+            if (mayAdjustTop && task.topRunningActivity(true /* focusableOnly */)
+                    == null) {
+                task.adjustFocusToNextFocusableTask("finish-top", false /* allowFocusSelf */,
+                            shouldAdjustGlobalFocus);
+            }
+
+            finishActivityResults(resultCode, resultData, resultGrants);
+
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
