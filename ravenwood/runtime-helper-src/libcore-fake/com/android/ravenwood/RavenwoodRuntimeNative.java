@@ -58,6 +58,8 @@ public class RavenwoodRuntimeNative {
 
     public static native void clearSystemProperties();
 
+    public static native int getpid();
+
     public static native int gettid();
 
     public static long lseek(FileDescriptor fd, long offset, int whence) throws ErrnoException {

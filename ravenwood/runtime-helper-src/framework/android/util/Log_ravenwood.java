@@ -18,9 +18,13 @@ package android.util;
 import android.util.Log.Level;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Ravenwood "native substitution" class for {@link android.util.Log}.
@@ -29,7 +33,10 @@ import java.io.PrintStream;
  * In order to switch to this Java implementation, uncomment the @RavenwoodNativeSubstitutionClass
  * annotation on {@link android.util.Log}.
  */
-public class Log_host {
+public class Log_ravenwood {
+
+    public static final SimpleDateFormat sTimestampFormat =
+            new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US);
 
     public static boolean isLoggable(String tag, @Level int level) {
         return true;
@@ -38,15 +45,6 @@ public class Log_host {
     public static int println_native(int bufID, int priority, String tag, String msg) {
         if (priority < Log.INFO && !RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING) {
             return msg.length(); // No verbose logging.
-        }
-        final String buffer;
-        switch (bufID) {
-            case Log.LOG_ID_MAIN: buffer = "main"; break;
-            case Log.LOG_ID_RADIO: buffer = "radio"; break;
-            case Log.LOG_ID_EVENTS: buffer = "event"; break;
-            case Log.LOG_ID_SYSTEM: buffer = "system"; break;
-            case Log.LOG_ID_CRASH: buffer = "crash"; break;
-            default: buffer = "buf:" + bufID; break;
         }
 
         final String prio;
@@ -60,8 +58,12 @@ public class Log_host {
             default: prio = "prio:" + priority; break;
         }
 
+        String leading =  sTimestampFormat.format(new Date())
+                + " %-6d %-6d %s %-8s: ".formatted(getPid(), getTid(), prio, tag);
+        var out = getRealOut();
         for (String s : msg.split("\\n")) {
-            getRealOut().println(String.format("logd: [%s] %s %s: %s", buffer, prio, tag, s));
+            out.print(leading);
+            out.println(s);
         }
         return msg.length();
     }
@@ -80,5 +82,35 @@ public class Log_host {
         } else {
             return System.out;
         }
+    }
+
+    /**
+     * PID. We need to use a JNI method to get it, but JNI isn't initially ready.
+     * Call {@link #onRavenwoodRuntimeNativeReady} to signal when JNI is ready, at which point
+     * we set this field.
+     * (We don't want to call native methods that may not be fully initialized even with a
+     * try-catch, because partially initialized JNI methods could crash the process.)
+     */
+    private static volatile int sPid = 0;
+
+    private static ThreadLocal<Integer> sTid =
+            ThreadLocal.withInitial(RavenwoodRuntimeNative::gettid);
+
+    /**
+     * Call it when {@link RavenwoodRuntimeNative} is usable.
+     */
+    public static void onRavenwoodRuntimeNativeReady() {
+        sPid = RavenwoodRuntimeNative.getpid();
+    }
+
+    private static int getPid() {
+        return sPid;
+    }
+
+    private static int getTid() {
+        if (sPid == 0) {
+            return 0; // Native methods not ready yet.
+        }
+        return sTid.get();
     }
 }
