@@ -24191,6 +24191,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String supervisionBackupId = "36.2.supervision-support";
         boolean supervisionMigrated = maybeMigrateResetPasswordTokenLocked(supervisionBackupId);
         supervisionMigrated |= maybeMigrateSuspendedPackagesLocked(supervisionBackupId);
+        supervisionMigrated |= maybeMigrateSetKeyguardDisabledFeatures(supervisionBackupId);
         if (supervisionMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + supervisionBackupId);
         }
@@ -24202,6 +24203,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         // Additional migration steps should repeat the pattern above with a new backupId.
+    }
+
+    @GuardedBy("getLockObject()")
+    private boolean maybeMigrateSetKeyguardDisabledFeatures(String backupId) {
+        Slog.i(LOG_TAG, "Migrating set keyguard disabled features to policy engine");
+        if (!Flags.setKeyguardDisabledFeaturesCoexistence()) {
+            return false;
+        }
+        if (mOwners.isSetKeyguardDisabledFeaturesMigrated()) {
+            return false;
+        }
+        // Create backup if none exists
+        mDevicePolicyEngine.createBackup(backupId);
+        try {
+            iterateThroughDpcAdminsLocked((admin, enforcingAdmin) -> {
+                if (admin.disabledKeyguardFeatures == 0) {
+                    return;
+                }
+                int userId = enforcingAdmin.getUserId();
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
+                        enforcingAdmin,
+                        new IntegerPolicyValue(admin.disabledKeyguardFeatures),
+                        userId);
+            });
+        } catch (Exception e) {
+            Slog.wtf(LOG_TAG, "Failed to migrate set keyguard disabled to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking set keyguard disabled features migration complete");
+        mOwners.markSetKeyguardDisabledFeaturesMigrated();
+        return true;
     }
 
     private void migratePermissionGrantStatePolicies() {
