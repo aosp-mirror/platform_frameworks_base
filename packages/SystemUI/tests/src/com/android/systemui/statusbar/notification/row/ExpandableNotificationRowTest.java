@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
@@ -394,7 +395,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
         AboveShelfChangedListener listener = mock(AboveShelfChangedListener.class);
         row.setAboveShelfChangedListener(listener);
-        row.setPinned(true);
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem);
         verify(listener).onAboveShelfStateChanged(true);
     }
 

@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 
@@ -91,7 +92,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
         ExpandableNotificationRowDragController controller = createSpyController();
         mRow.setDragController(controller);
         mRow.setHeadsUp(true);
-        mRow.setPinned(true);
+        mRow.setPinnedStatus(PinnedStatus.PinnedBySystem);
 
         mRow.doLongClickCallback(0, 0);
         mRow.doDragCallback(0, 0);

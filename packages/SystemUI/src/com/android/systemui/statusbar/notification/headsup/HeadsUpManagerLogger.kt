@@ -272,16 +272,16 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         )
     }
 
-    fun logSetEntryPinned(entry: NotificationEntry, isPinned: Boolean, reason: String) {
+    fun logSetEntryPinned(entry: NotificationEntry, pinnedStatus: PinnedStatus, reason: String) {
         buffer.log(
             TAG,
             VERBOSE,
             {
                 str1 = entry.logKey
-                bool1 = isPinned
                 str2 = reason
+                str3 = pinnedStatus.name
             },
-            { "$str2 => set entry pinned $str1 pinned: $bool1" },
+            { "$str2 => set entry pinned $str1 pinned: $str3" },
         )
     }
 

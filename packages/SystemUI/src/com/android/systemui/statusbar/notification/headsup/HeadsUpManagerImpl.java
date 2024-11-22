@@ -405,9 +405,11 @@ public class HeadsUpManagerImpl
         }
         if (shouldHeadsUpAgain) {
             headsUpEntry.updateEntry(true /* updatePostTime */, "updateNotification");
+            PinnedStatus pinnedStatus = shouldHeadsUpBecomePinned(headsUpEntry.mEntry)
+                    ? PinnedStatus.PinnedBySystem
+                    : PinnedStatus.NotPinned;
             if (headsUpEntry != null) {
-                setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUpEntry.mEntry),
-                        "updateNotificationInternal");
+                setEntryPinned(headsUpEntry, pinnedStatus, "updateNotificationInternal");
             }
         }
     }
@@ -562,15 +564,16 @@ public class HeadsUpManagerImpl
     }
 
     protected void setEntryPinned(
-            @NonNull HeadsUpManagerImpl.HeadsUpEntry headsUpEntry, boolean isPinned,
+            @NonNull HeadsUpManagerImpl.HeadsUpEntry headsUpEntry, PinnedStatus pinnedStatus,
             String reason) {
-        mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned, reason);
+        mLogger.logSetEntryPinned(headsUpEntry.mEntry, pinnedStatus, reason);
         NotificationEntry entry = headsUpEntry.mEntry;
+        boolean isPinned = pinnedStatus.isPinned();
         if (!isPinned) {
             headsUpEntry.mWasUnpinned = true;
         }
-        if (headsUpEntry.isRowPinned() != isPinned) {
-            headsUpEntry.setRowPinned(isPinned);
+        if (headsUpEntry.getPinnedStatus().getValue() != pinnedStatus) {
+            headsUpEntry.setRowPinnedStatus(pinnedStatus);
             updatePinnedMode();
             if (isPinned && entry.getSbn() != null) {
                mUiEventLogger.logWithInstanceId(
@@ -596,8 +599,10 @@ public class HeadsUpManagerImpl
         NotificationEntry entry = headsUpEntry.mEntry;
         entry.setHeadsUp(true);
 
-        final boolean shouldPin = shouldHeadsUpBecomePinned(entry);
-        setEntryPinned(headsUpEntry, shouldPin, "onEntryAdded");
+        final PinnedStatus pinnedStatus = shouldHeadsUpBecomePinned(entry)
+                ? PinnedStatus.PinnedBySystem
+                : PinnedStatus.NotPinned;
+        setEntryPinned(headsUpEntry, pinnedStatus, "onEntryAdded");
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, true);
@@ -655,7 +660,7 @@ public class HeadsUpManagerImpl
     protected void onEntryRemoved(HeadsUpEntry headsUpEntry, String reason) {
         NotificationEntry entry = headsUpEntry.mEntry;
         entry.setHeadsUp(false);
-        setEntryPinned(headsUpEntry, false /* isPinned */, "onEntryRemoved");
+        setEntryPinned(headsUpEntry, PinnedStatus.NotPinned, "onEntryRemoved");
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
         mLogger.logNotificationActuallyRemoved(entry);
         for (OnHeadsUpChangedListener listener : mListeners) {
@@ -964,7 +969,7 @@ public class HeadsUpManagerImpl
             Runnable runnable = () -> {
                 mLogger.logUnpinEntry(key);
 
-                setEntryPinned(headsUpEntry, false /* isPinned */, "unpinAll");
+                setEntryPinned(headsUpEntry, PinnedStatus.NotPinned, "unpinAll");
                 // maybe it got un sticky
                 headsUpEntry.updateEntry(false /* updatePostTime */, "unpinAll");
 
@@ -1235,7 +1240,8 @@ public class HeadsUpManagerImpl
         @Nullable private Runnable mCancelRemoveRunnable;
 
         private boolean mGutsShownPinned;
-        private final MutableStateFlow<Boolean> mIsPinned = StateFlowKt.MutableStateFlow(false);
+        private final MutableStateFlow<PinnedStatus> mPinnedStatus =
+                StateFlowKt.MutableStateFlow(PinnedStatus.NotPinned);
 
         /**
          * If the time this entry has been on was extended
@@ -1271,8 +1277,8 @@ public class HeadsUpManagerImpl
 
         @Override
         @NonNull
-        public StateFlow<Boolean> isPinned() {
-            return mIsPinned;
+        public StateFlow<PinnedStatus> getPinnedStatus() {
+            return mPinnedStatus;
         }
 
         /** Attach a NotificationEntry. */
@@ -1302,9 +1308,9 @@ public class HeadsUpManagerImpl
             return mEntry != null && mEntry.isRowPinned();
         }
 
-        protected void setRowPinned(boolean pinned) {
-            if (mEntry != null) mEntry.setRowPinned(pinned);
-            mIsPinned.setValue(pinned);
+        protected void setRowPinnedStatus(PinnedStatus pinnedStatus) {
+            if (mEntry != null) mEntry.setRowPinnedStatus(pinnedStatus);
+            mPinnedStatus.setValue(pinnedStatus);
         }
 
         /**

@@ -72,6 +72,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import kotlinx.coroutines.flow.StateFlowKt;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -318,6 +319,8 @@ public class HeadsUpManagerImplTest extends SysuiTestCase {
                 mContext);
         final HeadsUpManagerImpl.HeadsUpEntry headsUpEntry = mock(
                 HeadsUpManagerImpl.HeadsUpEntry.class);
+        when(headsUpEntry.getPinnedStatus())
+                .thenReturn(StateFlowKt.MutableStateFlow(PinnedStatus.NotPinned));
         headsUpEntry.mEntry = notifEntry;
 
         hum.onEntryRemoved(headsUpEntry, "test");
