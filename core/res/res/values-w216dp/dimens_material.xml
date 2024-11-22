@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<!-- Copyright (C) 2024 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
      limitations under the License.
 -->
 <resources>
-    <dimen name="screen_percentage_0416">8.85dp</dimen>
-    <dimen name="screen_percentage_05">10.65dp</dimen>
-    <dimen name="screen_percentage_052">11.07dp</dimen>
-    <dimen name="screen_percentage_10">21.3dp</dimen>
-    <dimen name="screen_percentage_12">25.56dp</dimen>
-    <dimen name="screen_percentage_15">31.95dp</dimen>
-    <dimen name="screen_percentage_3646">77.66dp</dimen>
+    <dimen name="screen_percentage_0416">8.99dp</dimen>
+    <dimen name="screen_percentage_05">10.8dp</dimen>
+    <dimen name="screen_percentage_052">11.23dp</dimen>
+    <dimen name="screen_percentage_10">21.6dp</dimen>
+    <dimen name="screen_percentage_12">25.92dp</dimen>
+    <dimen name="screen_percentage_15">32.4dp</dimen>
+    <dimen name="screen_percentage_3646">78.77dp</dimen>
 </resources>
