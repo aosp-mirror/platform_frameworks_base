@@ -6516,7 +6516,7 @@
      @hide -->
     <permission android:name="android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION"
         android:featureFlag="android.media.audio.concurrent_audio_record_bypass_permission"
-        android:protectionLevel="signature|privileged|role" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to capture audio for hotword detection.
          <p>Not for use by third-party applications.</p>
