@@ -103,6 +103,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.dreams.IDreamManager;
@@ -200,8 +201,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
     private static final int TEST_CARRIER_ID = 1;
     private static final String TEST_GROUP_UUID = "59b5c870-fc4c-47a4-a99e-9db826b48b24";
-    private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(1, "", 0,
-            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
+    private static final int TEST_SLOT_ID = 3;
+    private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(1, "",
+            TEST_SLOT_ID, TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
     private static final SubscriptionInfo TEST_SUBSCRIPTION_2 = new SubscriptionInfo(2, "", 0,
@@ -483,7 +485,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSimStateInitialized() {
+    @DisableFlags(Flags.FLAG_SIM_PIN_USE_SLOT_ID)
+    public void testSimStateInitialized_flagDisabled() {
         cleanupKeyguardUpdateMonitor();
         final int subId = 3;
         final int state = TelephonyManager.SIM_STATE_ABSENT;
@@ -497,6 +500,24 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertThat(testKUM.getSimState(subId)).isEqualTo(state);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SIM_PIN_USE_SLOT_ID)
+    public void testSimStateInitialized_flagEnabled() {
+        cleanupKeyguardUpdateMonitor();
+        final int state = TelephonyManager.SIM_STATE_ABSENT;
+        final int slotId = 0;
+        final int subId = 3;
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(1);
+        when(mTelephonyManager.getSimState(anyInt())).thenReturn(state);
+        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(new int[]{subId});
+
+        KeyguardUpdateMonitor testKUM = new TestableKeyguardUpdateMonitor(mContext);
+
+        mTestableLooper.processAllMessages();
+
+        assertThat(testKUM.getSimStateForSlotId(slotId)).isEqualTo(state);
     }
 
     @Test
@@ -1240,7 +1261,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testActiveSubscriptionBecomesInactive() {
+    @DisableFlags(Flags.FLAG_SIM_PIN_USE_SLOT_ID)
+    public void testActiveSubscriptionBecomesInactive_flagDisabled() {
         List<SubscriptionInfo> list = new ArrayList<>();
         list.add(TEST_SUBSCRIPTION);
         when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
@@ -1260,6 +1282,28 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .isNull();
         assertThat(mKeyguardUpdateMonitor.mSimDatas.get(
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID)).isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SIM_PIN_USE_SLOT_ID)
+    public void testActiveSubscriptionBecomesInactive_flagEnabled() {
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
+        mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
+                TEST_SUBSCRIPTION.getSubscriptionId());
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mSimDatasBySlotId.get(TEST_SLOT_ID))
+                .isNotNull();
+
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList())
+                .thenReturn(new ArrayList<>());
+        mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.mSimDatasBySlotId.get(TEST_SLOT_ID))
+                .isNull();
     }
 
     @Test
