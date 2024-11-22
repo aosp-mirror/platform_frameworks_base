@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -47,11 +48,15 @@ constructor(
             visibility = View.GONE
         }
     }
+
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
-
+        if (emptyView.parent != null) {
+            // As emptyView is lazy, it might be already attached.
+            (emptyView.parent as? ViewGroup)?.removeView(emptyView)
+        }
         constraintLayout.addView(emptyView)
         burnInLayer =
             AodBurnInLayer(context).apply {

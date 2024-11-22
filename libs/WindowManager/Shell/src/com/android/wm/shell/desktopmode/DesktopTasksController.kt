@@ -130,6 +130,7 @@ import java.util.concurrent.Executor
 import java.util.function.Consumer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
+import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.DesktopUiEventEnum
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.Companion.DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION
@@ -166,6 +167,7 @@ class DesktopTasksController(
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val desktopModeUiEventLogger: DesktopModeUiEventLogger,
     private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
 ) :
     RemoteCallable<DesktopTasksController>,
@@ -819,12 +821,12 @@ class DesktopTasksController(
     fun toggleDesktopTaskSize(
         taskInfo: RunningTaskInfo,
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
     ) {
         val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
             resizeTrigger,
-            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            inputMethod,
             taskInfo,
             currentTaskBounds.width(),
             currentTaskBounds.height(),
@@ -877,7 +879,7 @@ class DesktopTasksController(
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
         desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger, DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            resizeTrigger, inputMethod,
             taskInfo, destinationBounds.width(),
             destinationBounds.height(), displayController
         )
@@ -909,7 +911,11 @@ class DesktopTasksController(
             return
         }
 
-        toggleDesktopTaskSize(taskInfo, ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER, motionEvent)
+        toggleDesktopTaskSize(
+            taskInfo,
+            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
+            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
+        )
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -2083,6 +2089,10 @@ class DesktopTasksController(
                 if (DesktopModeStatus.shouldMaximizeWhenDragToTopEdge(context)) {
                     dragToMaximizeDesktopTask(taskInfo, taskSurface, currentDragBounds, motionEvent)
                 } else {
+                    desktopModeUiEventLogger.log(
+                        taskInfo,
+                        DesktopUiEventEnum.DESKTOP_WINDOW_APP_HEADER_DRAG_TO_FULL_SCREEN
+                    )
                     moveToFullscreenWithAnimation(
                         taskInfo,
                         position,
@@ -2091,6 +2101,10 @@ class DesktopTasksController(
                 }
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_LEFT
+                )
                 handleSnapResizingTaskOnDrag(
                     taskInfo,
                     SnapPosition.LEFT,
@@ -2102,6 +2116,10 @@ class DesktopTasksController(
                 )
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_RIGHT
+                )
                 handleSnapResizingTaskOnDrag(
                     taskInfo,
                     SnapPosition.RIGHT,
@@ -2188,16 +2206,32 @@ class DesktopTasksController(
                 // Start a new jank interaction for the drag release to desktop window animation.
                 interactionJankMonitor.begin(taskSurface, context, handler,
                     CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_DESKTOP_MODE
+                )
                 finalizeDragToDesktop(taskInfo)
             }
             IndicatorType.NO_INDICATOR,
             IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_FULL_SCREEN
+                )
                 cancelDragToDesktop(taskInfo)
             }
             IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN
+                )
                 requestSplit(taskInfo, leftOrTop = true)
             }
             IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+                desktopModeUiEventLogger.log(
+                    taskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_DRAG_TO_SPLIT_SCREEN
+                )
                 requestSplit(taskInfo, leftOrTop = false)
             }
         }

@@ -584,7 +584,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 decoration.mTaskSurface, mContext, mMainHandler,
                 Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo, resizeTrigger,
-                motionEvent);
+                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent));
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
@@ -644,6 +644,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         decoration.addCaptionInset(wct);
         mDesktopTasksController.moveTaskToDesktop(taskId, wct, source);
         decoration.closeHandleMenu();
+
+        if (source == DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON) {
+            mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                    DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_DESKTOP_MODE);
+        }
     }
 
     private void onToFullscreen(int taskId) {
@@ -659,6 +664,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             mDesktopTasksController.moveToFullscreen(taskId,
                     DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON);
         }
+        mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_FULL_SCREEN);
     }
 
     private void onToSplitScreen(int taskId) {
@@ -671,6 +678,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         // we shouldn't receive input for it any longer.
         decoration.disposeStatusBarInputLayer();
         mDesktopTasksController.requestSplit(decoration.mTaskInfo, false /* leftOrTop */);
+        mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
+                DesktopUiEventEnum.DESKTOP_WINDOW_APP_HANDLE_MENU_TAP_TO_SPLIT_SCREEN);
     }
 
     private void onNewWindow(int taskId) {
@@ -1566,7 +1575,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, taskPositioner);
-        InputMethod inputMethod = DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(
+        InputMethod inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(
                 touchEventListener.mMotionEvent);
         windowDecoration.setOnMaximizeOrRestoreClickListener(() -> {
             onMaximizeOrRestore(taskInfo.taskId, "maximize_menu", ResizeTrigger.MAXIMIZE_MENU,

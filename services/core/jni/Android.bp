@@ -38,7 +38,6 @@ cc_library_static {
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
-        "com_android_server_ConsumerIrService.cpp",
         "com_android_server_companion_virtual_InputController.cpp",
         "com_android_server_companion_virtual_VirtualDeviceImpl.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
@@ -63,7 +62,6 @@ cc_library_static {
         "com_android_server_SystemServer.cpp",
         "com_android_server_tv_TvUinputBridge.cpp",
         "com_android_server_tv_TvInputHal.cpp",
-        "com_android_server_vr_VrManagerService.cpp",
         "com_android_server_UsbAlsaJackDetector.cpp",
         "com_android_server_UsbAlsaMidiDevice.cpp",
         "com_android_server_UsbDeviceManager.cpp",
@@ -75,14 +73,13 @@ cc_library_static {
         "com_android_server_am_LowMemDetector.cpp",
         "com_android_server_pm_PackageManagerShellCommandDataLoader.cpp",
         "com_android_server_sensor_SensorService.cpp",
-        "com_android_server_utils_LazyJniRegistrar.cpp",
         "com_android_server_wm_TaskFpsCallbackController.cpp",
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
         ":lib_freezer_native",
-        ":lib_gameManagerService_native",
         ":lib_oomConnection_native",
         ":lib_anrTimer_native",
+        ":lib_lazilyRegisteredServices_native",
     ],
 
     include_dirs: [
@@ -248,13 +245,6 @@ filegroup {
 }
 
 filegroup {
-    name: "lib_gameManagerService_native",
-    srcs: [
-        "com_android_server_app_GameManagerService.cpp",
-    ],
-}
-
-filegroup {
     name: "lib_oomConnection_native",
     srcs: ["com_android_server_am_OomConnection.cpp"],
 }
@@ -263,5 +253,15 @@ filegroup {
     name: "lib_anrTimer_native",
     srcs: [
         "com_android_server_utils_AnrTimer.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_lazilyRegisteredServices_native",
+    srcs: [
+        "com_android_server_ConsumerIrService.cpp",
+        "com_android_server_app_GameManagerService.cpp",
+        "com_android_server_utils_LazyJniRegistrar.cpp",
+        "com_android_server_vr_VrManagerService.cpp",
     ],
 }

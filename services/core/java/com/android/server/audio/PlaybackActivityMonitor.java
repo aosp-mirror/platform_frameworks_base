@@ -24,6 +24,7 @@ import static android.media.AudioPlaybackConfiguration.MUTED_BY_PORT_VOLUME;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_STREAM_MUTED;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_STREAM_VOLUME;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_VOLUME_SHAPER;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_OP_CONTROL_AUDIO;
 import static android.media.AudioPlaybackConfiguration.PLAYER_PIID_INVALID;
 import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_MUTED;
 
@@ -1388,6 +1389,10 @@ public final class PlaybackActivityMonitor
                         if ((eventValue & MUTED_BY_PORT_VOLUME) != 0) {
                             builder.append("portVolume ");
                         }
+                        if ((eventValue & MUTED_BY_OP_CONTROL_AUDIO) != 0) {
+                            builder.append("opControlAudio ");
+                        }
+
                     }
                     return builder.toString();
                 default:

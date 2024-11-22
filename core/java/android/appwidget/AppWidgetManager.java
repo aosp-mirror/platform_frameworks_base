@@ -31,6 +31,7 @@ import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
+import android.app.usage.UsageStatsManager;
 import android.appwidget.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -41,12 +42,14 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -484,6 +487,67 @@ public class AppWidgetManager {
     @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_APPWIDGET_HOST_RESTORED
             = "android.appwidget.action.APPWIDGET_HOST_RESTORED";
+
+    /**
+     * This is the value of {@link UsageStatsManager.EXTRA_EVENT_ACTION} in the event bundle for
+     * widget user interaction events.
+     *
+     * A single widget interaction event describes what user interactions happened during a single
+     * impression of the widget.
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    public static final String EVENT_TYPE_WIDGET_INTERACTION = "widget_interaction";
+
+    /**
+     * This is the value of {@link UsageStatsManager.EXTRA_EVENT_CATEGORY} in the event bundle for
+     * widget user interaction events.
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    public static final String EVENT_CATEGORY_APPWIDGET = "android.appwidget";
+
+    /**
+     * This bundle extra describes which views have been clicked during a single impression of the
+     * widget. It is an integer array of view IDs of the clicked views.
+     *
+     * Widget providers may set a different ID for event purposes by setting the
+     * {@link android.R.id.remoteViewsMetricsId} int tag on the view.
+     *
+     * @see android.views.RemoteViews.setIntTag
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    public static final String EXTRA_EVENT_CLICKED_VIEWS =
+            "android.appwidget.extra.EVENT_CLICKED_VIEWS";
+
+    /**
+     * This bundle extra describes which views have been scrolled during a single impression of the
+     * widget. It is an integer array of view IDs of the scrolled views.
+     *
+     * Widget providers may set a different ID for event purposes by setting the
+     * {@link android.R.id.remoteViewsMetricsId} int tag on the view.
+     *
+     * @see android.views.RemoteViews.setIntTag
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    public static final String EXTRA_EVENT_SCROLLED_VIEWS =
+            "android.appwidget.extra.EVENT_SCROLLED_VIEWS";
+
+    /**
+     * This bundle extra contains a long that represents the duration of time in milliseconds
+     * during which the widget was visible.
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    public static final String EXTRA_EVENT_DURATION_MS =
+            "android.appwidget.extra.EVENT_DURATION_MS";
+
+    /**
+     * This bundle extra contains an integer array with 4 elements that describe the left, top,
+     * right, and bottom coordinates of the widget at the end of the interaction event.
+     *
+     * This Rect indicates the current position and size of the widget.
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    public static final String EXTRA_EVENT_POSITION_RECT =
+            "android.appwidget.extra.EVENT_POSITION_RECT";
 
     private static final String TAG = "AppWidgetManager";
 
@@ -1514,6 +1578,39 @@ public class AppWidgetManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Create a {@link PersistableBundle} that represents a single widget interaction event.
+     *
+     * @param appWidgetId App Widget ID of the widget.
+     * @param durationMs Duration of the impression in milliseconds
+     * @param position Current position of the widget.
+     * @param clickedIds IDs of views clicked during this event.
+     * @param scrolledIds IDs of views scrolled during this event.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENGAGEMENT_METRICS)
+    @NonNull
+    public static PersistableBundle createWidgetInteractionEvent(int appWidgetId, long durationMs,
+            @Nullable Rect position, @Nullable int[] clickedIds, @Nullable int[] scrolledIds) {
+        PersistableBundle extras = new PersistableBundle();
+        extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, EVENT_TYPE_WIDGET_INTERACTION);
+        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, EVENT_CATEGORY_APPWIDGET);
+        extras.putInt(EXTRA_APPWIDGET_ID, appWidgetId);
+        extras.putLong(EXTRA_EVENT_DURATION_MS, durationMs);
+        if (position != null) {
+            extras.putIntArray(EXTRA_EVENT_POSITION_RECT,
+                    new int[]{position.left, position.top, position.right, position.bottom});
+        }
+        if (clickedIds != null && clickedIds.length > 0) {
+            extras.putIntArray(EXTRA_EVENT_CLICKED_VIEWS, clickedIds);
+        }
+        if (scrolledIds != null && scrolledIds.length > 0) {
+            extras.putIntArray(EXTRA_EVENT_SCROLLED_VIEWS, scrolledIds);
+        }
+        return extras;
     }
 
 

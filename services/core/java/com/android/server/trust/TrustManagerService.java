@@ -2528,24 +2528,22 @@ public class TrustManagerService extends SystemService {
     }
 
     private void notifyDeviceLockedListenersForUser(int userId, boolean locked) {
-        synchronized (mDeviceLockedStateListeners) {
-            int numListeners = mDeviceLockedStateListeners.beginBroadcast();
-            try {
-                IntStream.range(0, numListeners).forEach(i -> {
-                    try {
-                        Integer uid = (Integer) mDeviceLockedStateListeners.getBroadcastCookie(i);
-                        if (userId == uid.intValue()) {
-                            mDeviceLockedStateListeners.getBroadcastItem(i)
-                                    .onDeviceLockedStateChanged(locked);
-                        }
-                    } catch (RemoteException re) {
-                        Log.i(TAG, "Service died", re);
+        int numListeners = mDeviceLockedStateListeners.beginBroadcast();
+        try {
+            IntStream.range(0, numListeners).forEach(i -> {
+                try {
+                    Integer uid = (Integer) mDeviceLockedStateListeners.getBroadcastCookie(i);
+                    if (userId == uid.intValue()) {
+                        mDeviceLockedStateListeners.getBroadcastItem(i)
+                                .onDeviceLockedStateChanged(locked);
                     }
-                });
+                } catch (RemoteException re) {
+                    Log.i(TAG, "Service died", re);
+                }
+            });
 
-            } finally {
-                mDeviceLockedStateListeners.finishBroadcast();
-            }
+        } finally {
+            mDeviceLockedStateListeners.finishBroadcast();
         }
     }
 }

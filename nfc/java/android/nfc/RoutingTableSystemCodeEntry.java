@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
 /**
- * Represents a system code entry in current routing table.
+ * Represents a system code entry in current routing table, where system codes are two-byte values
+ * used in NFC-F technology (a type of NFC communication) to identify specific
+ * device configurations.
  * @hide
  */
 @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
@@ -30,7 +32,7 @@ public class RoutingTableSystemCodeEntry extends NfcRoutingTableEntry {
 
     /** @hide */
     public RoutingTableSystemCodeEntry(int nfceeId, byte[] value) {
-        super(nfceeId);
+        super(nfceeId, TYPE_SYSTEM_CODE);
         this.mValue = value;
     }
 

@@ -31,6 +31,7 @@ import android.nfc.INfcCardEmulation;
 import android.nfc.INfcFCardEmulation;
 import android.nfc.INfcOemExtensionCallback;
 import android.nfc.INfcUnlockHandler;
+import android.nfc.IT4tNdefNfcee;
 import android.nfc.ITagRemovedCallback;
 import android.nfc.INfcDta;
 import android.nfc.INfcWlcStateListener;
@@ -52,8 +53,8 @@ interface INfcAdapter
     int getState();
     boolean disable(boolean saveState, in String pkg);
     boolean enable(in String pkg);
-    void pausePolling(int timeoutInMs);
-    void resumePolling();
+    int pausePolling(long timeoutInMs);
+    int resumePolling();
 
     void setForegroundDispatch(in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
@@ -114,7 +115,7 @@ interface INfcAdapter
     void clearPreference();
     void setScreenState();
     void checkFirmware();
-    List<String> fetchActiveNfceeList();
+    Map fetchActiveNfceeList();
     void triggerInitialization();
     boolean getSettingStatus();
     boolean isTagPresent();
@@ -122,4 +123,6 @@ interface INfcAdapter
     void indicateDataMigration(boolean inProgress, String pkg);
     int commitRouting();
     boolean isTagIntentAllowed(in String pkg, in int Userid);
+    IT4tNdefNfcee getT4tNdefNfceeInterface();
+    long getMaxPausePollingTimeoutMs();
 }

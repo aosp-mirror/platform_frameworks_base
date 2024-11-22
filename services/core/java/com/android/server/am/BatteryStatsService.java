@@ -1262,6 +1262,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mFrameworkStatsLogger = frameworkStatsLogger;
         }
 
+        private static float clampPowerMah(double powerMah, String consumer) {
+            float resultPowerMah = 0;
+            if (powerMah <= Float.MAX_VALUE && powerMah >= Float.MIN_VALUE) {
+                resultPowerMah = (float) powerMah;
+            } else {
+                // Handle overflow appropriately
+                Slog.wtfStack(TAG, consumer + " reported powerMah float overflow: " + powerMah);
+            }
+            return resultPowerMah;
+        }
+
         /**
          * Generates StatsEvents for the supplied battery usage stats and adds them to
          * the supplied list.
@@ -1282,7 +1293,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     bus.getAggregateBatteryConsumer(
                             BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
 
-            final float totalDeviceConsumedPowerMah = (float) deviceConsumer.getConsumedPower();
+            final float totalDeviceConsumedPowerMah =
+                    clampPowerMah(deviceConsumer.getConsumedPower(), "AggregateBatteryConsumer");
 
             for (@BatteryConsumer.PowerComponentId int powerComponentId :
                     deviceConsumer.getPowerComponentIds()) {
@@ -1314,7 +1326,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             // Log single atom for BatteryUsageStats per uid/process_state/component/etc.
             for (UidBatteryConsumer uidConsumer : uidConsumers) {
                 final int uid = uidConsumer.getUid();
-                final float totalConsumedPowerMah = (float) uidConsumer.getConsumedPower();
+
+                final float totalConsumedPowerMah =
+                        clampPowerMah(uidConsumer.getConsumedPower(), "uidConsumer-" + uid);
 
                 for (@BatteryConsumer.PowerComponentId int powerComponentId :
                         uidConsumer.getPowerComponentIds()) {
@@ -1358,7 +1372,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
 
             final String powerComponentName = batteryConsumer.getPowerComponentName(componentId);
-            final float powerMah = (float) batteryConsumer.getConsumedPower(key);
+            final double consumedPowerMah = batteryConsumer.getConsumedPower(key);
+            float powerMah =
+                    clampPowerMah(
+                            consumedPowerMah, "uidConsumer-" + uid + "-" + powerComponentName);
             final long powerComponentDurationMillis = batteryConsumer.getUsageDurationMillis(key);
 
             if (powerMah == 0 && powerComponentDurationMillis == 0) {

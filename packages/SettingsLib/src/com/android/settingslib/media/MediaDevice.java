@@ -390,6 +390,16 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     }
 
     /**
+     * Get the {@link MediaRoute2Info.Type} of the device.
+     */
+    public int getRouteType() {
+        if (mRouteInfo == null) {
+            return TYPE_UNKNOWN;
+        }
+        return mRouteInfo.getType();
+    }
+
+    /**
      * Checks if route's volume is fixed, if true, we should disable volume control for the device.
      *
      * @return route for this device is fixed.

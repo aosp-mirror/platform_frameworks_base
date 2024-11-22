@@ -21,8 +21,10 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.provider.DeviceConfig
 import android.util.AttributeSet
+import android.util.Size
 import android.view.MotionEvent
 import android.view.PointerIcon
+import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.FrameLayout
@@ -42,6 +44,7 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
     private lateinit var callback: DividerMoveCallback
     private lateinit var handle: DividerHandleView
     private lateinit var corners: DividerRoundedCorner
+    private var cornersRadius: Int = 0
     private var touchElevation = 0
 
     private var moving = false
@@ -49,8 +52,7 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
     var handleRegionWidth: Int = 0
     private var handleRegionHeight = 0
     private var lastAcceptedPos = 0
-    @VisibleForTesting var handleStartY = 0
-    @VisibleForTesting var handleEndY = 0
+    @VisibleForTesting var handleY: IntRange = 0..0
     private var canResize = false
     private var resized = false
     /**
@@ -79,16 +81,19 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
     /** Sets up essential dependencies of the divider bar. */
-    fun setup(dividerMoveCallback: DividerMoveCallback, dividerBounds: Rect) {
+    fun setup(
+        dividerMoveCallback: DividerMoveCallback,
+        dividerBounds: Rect,
+        handleRegionSize: Size,
+    ) {
         callback = dividerMoveCallback
         this.dividerBounds.set(dividerBounds)
         handle.setIsLeftRightSplit(true)
         corners.setIsLeftRightSplit(true)
-        handleRegionHeight =
-            resources.getDimensionPixelSize(R.dimen.split_divider_handle_region_width)
-
-        handleRegionWidth =
-            resources.getDimensionPixelSize(R.dimen.split_divider_handle_region_height)
+        handleRegionHeight = handleRegionSize.height
+        handleRegionWidth = handleRegionSize.width
+        cornersRadius =
+            context.display.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)?.radius ?: 0
         initHandleYCoordinates()
         dragDetector =
             DragDetector(
@@ -241,17 +246,17 @@ class TilingDividerView : FrameLayout, View.OnTouchListener, DragDetector.Motion
         return true
     }
 
-    private fun isWithinHandleRegion(touchYPos: Int): Boolean {
-        return touchYPos in handleStartY..handleEndY
-    }
+    private fun isWithinHandleRegion(touchYPos: Int): Boolean = touchYPos in handleY
 
     private fun initHandleYCoordinates() {
-        handleStartY = (dividerBounds.height() - handleRegionHeight) / 2
-        handleEndY = handleStartY + handleRegionHeight
+        val handleStartY = (dividerBounds.height() - handleRegionHeight) / 2
+        val handleEndY = handleStartY + handleRegionHeight
+        handleY = handleStartY..handleEndY
     }
 
     companion object {
         const val TOUCH_ANIMATION_DURATION: Long = 150
         const val TOUCH_RELEASE_ANIMATION_DURATION: Long = 200
+        private val TAG = TilingDividerView::class.java.simpleName
     }
 }

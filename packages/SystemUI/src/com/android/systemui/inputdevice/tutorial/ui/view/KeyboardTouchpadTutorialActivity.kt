@@ -56,10 +56,13 @@ constructor(
 ) : ComponentActivity() {
 
     companion object {
-        const val INTENT_TUTORIAL_TYPE_KEY = "tutorial_type"
-        const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
-        const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
-        const val INTENT_TUTORIAL_TYPE_BOTH = "both"
+        const val INTENT_TUTORIAL_SCOPE_KEY = "tutorial_scope"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD = "touchpad"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK = "touchpad_back"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME = "touchpad_home"
+        const val INTENT_TUTORIAL_SCOPE_KEYBOARD = "keyboard"
+        const val INTENT_TUTORIAL_SCOPE_ALL = "all"
+
         const val INTENT_TUTORIAL_ENTRY_POINT_KEY = "entry_point"
         const val INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER = "scheduler"
         const val INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU = "contextual_edu"
@@ -94,7 +97,7 @@ constructor(
         if (savedInstanceState == null) {
             metricsLogger.logPeripheralTutorialLaunched(
                 intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY),
-                intent.getStringExtra(INTENT_TUTORIAL_TYPE_KEY),
+                intent.getStringExtra(INTENT_TUTORIAL_SCOPE_KEY),
             )
             logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
         }

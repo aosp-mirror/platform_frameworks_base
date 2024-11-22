@@ -218,6 +218,17 @@ public class PackageInstaller {
             "android.content.pm.action.CONFIRM_PRE_APPROVAL";
 
     /**
+     * Intent action to be sent to the implementer of
+     * {@link android.content.pm.dependencyinstaller.DependencyInstallerService}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+    @SystemApi
+    public static final String ACTION_INSTALL_DEPENDENCY =
+            "android.content.pm.action.INSTALL_DEPENDENCY";
+
+    /**
      * An integer session ID that an operation is working with.
      *
      * @see Intent#getIntExtra(String, int)

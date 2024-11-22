@@ -94,7 +94,7 @@ class DesktopModeKeyGestureHandler(
                     desktopTasksController.get().toggleDesktopTaskSize(
                         it,
                         ResizeTrigger.MAXIMIZE_MENU,
-                        null,
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
                     )
                 }
                 return true

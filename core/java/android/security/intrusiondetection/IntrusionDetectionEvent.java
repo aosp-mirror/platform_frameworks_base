@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.app.admin.ConnectEvent;
 import android.app.admin.DnsEvent;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.security.Flags;
@@ -31,14 +32,36 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class that represents a intrusiondetection event.
+ *
  * @hide
  */
+@SystemApi
 @FlaggedApi(Flags.FLAG_AFL_API)
 public final class IntrusionDetectionEvent implements Parcelable {
     private static final String TAG = "IntrusionDetectionEvent";
 
+    /**
+     * Event type representing a security-related event.
+     * This type is associated with a {@link SecurityEvent} object.
+     *
+     * @see SecurityEvent
+     */
     public static final int SECURITY_EVENT = 0;
+
+    /**
+     * Event type representing a network DNS event.
+     * This type is associated with a {@link DnsEvent} object.
+     *
+     * @see DnsEvent
+     */
     public static final int NETWORK_EVENT_DNS = 1;
+
+    /**
+     * Event type representing a network connection event.
+     * This type is associated with a {@link ConnectEvent} object.
+     *
+     * @see ConnectEvent
+     */
     public static final int NETWORK_EVENT_CONNECT = 2;
 
     /** @hide */
@@ -67,6 +90,12 @@ public final class IntrusionDetectionEvent implements Parcelable {
                 }
             };
 
+    /**
+     * Creates an IntrusionDetectionEvent object with a
+     * {@link SecurityEvent} object as the event source.
+     *
+     * @param securityEvent The SecurityEvent object.
+     */
     public IntrusionDetectionEvent(@NonNull SecurityEvent securityEvent) {
         mType = SECURITY_EVENT;
         mSecurityEvent = securityEvent;
@@ -74,6 +103,12 @@ public final class IntrusionDetectionEvent implements Parcelable {
         mNetworkEventConnect = null;
     }
 
+    /**
+     * Creates an IntrusionDetectionEvent object with a
+     * {@link DnsEvent} object as the event source.
+     *
+     * @param dnsEvent The DnsEvent object.
+     */
     public IntrusionDetectionEvent(@NonNull DnsEvent dnsEvent) {
         mType = NETWORK_EVENT_DNS;
         mNetworkEventDns = dnsEvent;
@@ -81,6 +116,12 @@ public final class IntrusionDetectionEvent implements Parcelable {
         mNetworkEventConnect = null;
     }
 
+    /**
+     * Creates an IntrusionDetectionEvent object with a
+     * {@link ConnectEvent} object as the event source.
+     *
+     * @param connectEvent The ConnectEvent object.
+     */
     public IntrusionDetectionEvent(@NonNull ConnectEvent connectEvent) {
         mType = NETWORK_EVENT_CONNECT;
         mNetworkEventConnect = connectEvent;

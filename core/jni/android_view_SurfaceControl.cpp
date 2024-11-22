@@ -119,6 +119,7 @@ static struct {
     jfieldID renderFrameRate;
     jfieldID hasArrSupport;
     jfieldID frameRateCategoryRate;
+    jfieldID supportedRefreshRates;
     jfieldID supportedColorModes;
     jfieldID activeColorMode;
     jfieldID hdrCapabilities;
@@ -1508,6 +1509,21 @@ static jobject nativeGetDynamicDisplayInfo(JNIEnv* env, jclass clazz, jlong disp
     env->SetBooleanField(object, gDynamicDisplayInfoClassInfo.hasArrSupport, info.hasArrSupport);
     env->SetObjectField(object, gDynamicDisplayInfoClassInfo.frameRateCategoryRate,
                         convertFrameRateCategoryRateToJavaObject(env, info.frameRateCategoryRate));
+
+    jfloatArray supportedRefreshRatesArray = env->NewFloatArray(info.supportedRefreshRates.size());
+    if (supportedRefreshRatesArray == NULL) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return NULL;
+    }
+    jfloat* supportedRefreshRatesArrayValues =
+            env->GetFloatArrayElements(supportedRefreshRatesArray, 0);
+    for (size_t i = 0; i < info.supportedRefreshRates.size(); i++) {
+        supportedRefreshRatesArrayValues[i] = static_cast<jfloat>(info.supportedRefreshRates[i]);
+    }
+    env->ReleaseFloatArrayElements(supportedRefreshRatesArray, supportedRefreshRatesArrayValues, 0);
+    env->SetObjectField(object, gDynamicDisplayInfoClassInfo.supportedRefreshRates,
+                        supportedRefreshRatesArray);
+
     jintArray colorModesArray = env->NewIntArray(info.supportedColorModes.size());
     if (colorModesArray == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
@@ -2766,6 +2782,8 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gFrameRateCategoryRateClassInfo.ctor =
             GetMethodIDOrDie(env, frameRateCategoryRateClazz, "<init>", "(FF)V");
 
+    gDynamicDisplayInfoClassInfo.supportedRefreshRates =
+            GetFieldIDOrDie(env, dynamicInfoClazz, "supportedRefreshRates", "[F");
     gDynamicDisplayInfoClassInfo.supportedColorModes =
             GetFieldIDOrDie(env, dynamicInfoClazz, "supportedColorModes", "[I");
     gDynamicDisplayInfoClassInfo.activeColorMode =

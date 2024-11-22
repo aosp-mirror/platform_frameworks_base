@@ -243,6 +243,11 @@ public class DisplayManagerFlags {
             Flags::autoBrightnessModeBedtimeWear
     );
 
+    private final FlagState mGetSupportedRefreshRatesFlagState = new FlagState(
+            Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES,
+            Flags::enableGetSupportedRefreshRates
+    );
+
     private final FlagState mEnablePluginManagerFlagState = new FlagState(
             Flags.FLAG_ENABLE_PLUGIN_MANAGER,
             Flags::enablePluginManager
@@ -528,6 +533,13 @@ public class DisplayManagerFlags {
         return mAutoBrightnessModeBedtimeWearFlagState.isEnabled();
     }
 
+    /**
+     * @return {@code true} if supported refresh rate api is enabled.
+     */
+    public boolean enableGetSupportedRefreshRates() {
+        return mGetSupportedRefreshRatesFlagState.isEnabled();
+    }
+
     public boolean isPluginManagerEnabled() {
         return mEnablePluginManagerFlagState.isEnabled();
     }
@@ -590,6 +602,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
         pw.println(" " + mHasArrSupport);
         pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
+        pw.println(" " + mGetSupportedRefreshRatesFlagState);
         pw.println(" " + mEnablePluginManagerFlagState);
         pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
     }

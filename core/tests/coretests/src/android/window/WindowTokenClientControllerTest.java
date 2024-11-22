@@ -162,6 +162,22 @@ public class WindowTokenClientControllerTest {
     }
 
     @Test
+    public void testAttachToDisplayContent_keepTrackWithoutWMS() {
+        // WMS is not initialized
+        doReturn(null).when(mController).getWindowManagerService();
+
+        assertFalse(mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY));
+
+        // Can report config change
+        mController.onWindowContextInfoChanged(mWindowTokenClient, mWindowContextInfo);
+
+        verify(mWindowTokenClient).onConfigurationChanged(mConfiguration, DEFAULT_DISPLAY);
+
+        // No crash to detach even if WMS is not initialized.
+        mController.detachIfNeeded(mWindowTokenClient);
+    }
+
+    @Test
     public void testAttachToWindowToken() throws RemoteException {
         doReturn(null).when(mWindowManagerService).attachWindowContextToWindowToken(
                 any(), any(), any());

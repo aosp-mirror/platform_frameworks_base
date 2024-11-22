@@ -434,21 +434,12 @@ public class BiometricService extends SystemService {
 
         public boolean getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(int userId) {
             if (!mMandatoryBiometricsEnabled.containsKey(userId)) {
-                Slog.d(TAG, "update mb toggle for user " + userId);
                 updateMandatoryBiometricsForAllProfiles(userId);
             }
             if (!mMandatoryBiometricsRequirementsSatisfied.containsKey(userId)) {
-                Slog.d(TAG, "update mb reqs for user " + userId);
                 updateMandatoryBiometricsRequirementsForAllProfiles(userId);
             }
 
-            Slog.d(TAG, mMandatoryBiometricsEnabled.getOrDefault(userId,
-                    DEFAULT_MANDATORY_BIOMETRICS_STATUS)
-                    + " " + mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,
-                    DEFAULT_MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED_STATUS)
-                    + " " + getEnabledForApps(userId)
-                    + " " + (mFingerprintEnrolledForUser.getOrDefault(userId, false /* default */)
-                    || mFaceEnrolledForUser.getOrDefault(userId, false /* default */)));
             return mMandatoryBiometricsEnabled.getOrDefault(userId,
                     DEFAULT_MANDATORY_BIOMETRICS_STATUS)
                     && mMandatoryBiometricsRequirementsSatisfied.getOrDefault(userId,

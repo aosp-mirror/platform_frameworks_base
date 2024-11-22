@@ -5502,12 +5502,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // Attach the SystemUiContext to this DisplayContent the get latest configuration.
             // Note that the SystemUiContext will be removed automatically if this DisplayContent
             // is detached.
-            final WindowProcessController wpc = mAtmService.getProcessController(
-                    getDisplayUiContext().getIApplicationThread());
-            mWmService.mWindowContextListenerController.registerWindowContainerListener(
-                    wpc, getDisplayUiContext().getWindowContextToken(), this,
-                    INVALID_WINDOW_TYPE, null /* options */);
+            registerSystemUiContext();
         }
+    }
+
+    private void registerSystemUiContext() {
+        final WindowProcessController wpc = mAtmService.getProcessController(
+                getDisplayUiContext().getIApplicationThread());
+        mWmService.mWindowContextListenerController.registerWindowContainerListener(
+                wpc, getDisplayUiContext().getWindowContextToken(), this,
+                INVALID_WINDOW_TYPE, null /* options */);
     }
 
     @Override
