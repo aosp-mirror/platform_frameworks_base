@@ -28,6 +28,7 @@ import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_TASK;
 import static android.media.projection.ReviewGrantedConsentResult.UNKNOWN;
+import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -73,6 +74,7 @@ import android.os.PermissionEnforcer;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.ContentRecordingSession;
@@ -195,6 +197,15 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant == null || mProjectionGrant.packageName == null) {
                 return false;
             }
+            boolean disableScreenShareProtections = Settings.Global.getInt(
+                    getContext().getContentResolver(),
+                    DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0) != 0;
+            if (disableScreenShareProtections) {
+                Slog.v(TAG,
+                        "Allowing keyguard capture as screenshare protections are disabled.");
+                return true;
+            }
+
             if (mPackageManager.checkPermission(RECORD_SENSITIVE_CONTENT,
                     mProjectionGrant.packageName)
                     == PackageManager.PERMISSION_GRANTED) {
@@ -226,7 +237,8 @@ public final class MediaProjectionManagerService extends SystemService
     void onKeyguardLockedStateChanged(boolean isKeyguardLocked) {
         if (!isKeyguardLocked) return;
         synchronized (mLock) {
-            if (mProjectionGrant != null && !canCaptureKeyguard()) {
+            if (mProjectionGrant != null && !canCaptureKeyguard()
+                    && mProjectionGrant.mVirtualDisplayId != INVALID_DISPLAY) {
                 Slog.d(TAG, "Content Recording: Stopped MediaProjection"
                         + " due to keyguard lock");
                 mProjectionGrant.stop();

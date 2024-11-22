@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -123,19 +124,28 @@ constructor(
             .ifKeyguardOccludedByApp(/* elseFlow */ flowOf(null))
 
     init {
-        scope.launch {
-            // On fingerprint success when the screen is on and not dreaming, go to the home screen
-            fingerprintUnlockSuccessEvents
-                .sample(
-                    combine(powerInteractor.isInteractive, keyguardInteractor.isDreaming, ::Pair)
-                )
-                .collect { (interactive, dreaming) ->
-                    if (interactive && !dreaming) {
-                        goToHomeScreen()
+        // This seems undesirable in most cases, except when a video is playing and can PiP when
+        // unlocked. It was originally added for tablets, so allow it there
+        if (context.resources.getBoolean(R.bool.config_goToHomeFromOccludedApps)) {
+            scope.launch {
+                // On fingerprint success when the screen is on and not dreaming, go to the home
+                // screen
+                fingerprintUnlockSuccessEvents
+                    .sample(
+                        combine(
+                            powerInteractor.isInteractive,
+                            keyguardInteractor.isDreaming,
+                            ::Pair,
+                        )
+                    )
+                    .collect { (interactive, dreaming) ->
+                        if (interactive && !dreaming) {
+                            goToHomeScreen()
+                        }
+                        // don't go to the home screen if the authentication is from
+                        // AOD/dozing/off/dreaming
                     }
-                    // don't go to the home screen if the authentication is from
-                    // AOD/dozing/off/dreaming
-                }
+            }
         }
 
         scope.launch {

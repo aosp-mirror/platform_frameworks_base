@@ -25,6 +25,7 @@ import static android.media.projection.ReviewGrantedConsentResult.RECORD_CANCEL;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_DISPLAY;
 import static android.media.projection.ReviewGrantedConsentResult.RECORD_CONTENT_TASK;
 import static android.media.projection.ReviewGrantedConsentResult.UNKNOWN;
+import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 import static android.view.ContentRecordingSession.TARGET_UID_FULL_SCREEN;
 import static android.view.ContentRecordingSession.TARGET_UID_UNKNOWN;
 import static android.view.ContentRecordingSession.createDisplaySession;
@@ -80,6 +81,7 @@ import android.os.test.TestLooper;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
 import android.testing.TestableContext;
 import android.view.ContentRecordingSession;
 import android.view.ContentRecordingSession.RecordContent;
@@ -372,6 +374,50 @@ public class MediaProjectionManagerServiceTest {
         });
     }
 
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testCreateProjection_keyguardLocked_screenshareProtectionsDisabled()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        int value = Settings.Global.getInt(mContext.getContentResolver(),
+                DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 0);
+        try {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, 1);
+            doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+
+            doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                    RECORD_SENSITIVE_CONTENT, projection.packageName);
+
+            projection.start(mIMediaProjectionCallback);
+            projection.notifyVirtualDisplayCreated(10);
+
+            // The projection was started because it was allowed to capture the keyguard.
+            assertThat(mService.getActiveProjectionInfo()).isNotNull();
+        } finally {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS, value);
+        }
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags
+            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
+    @Test
+    public void testCreateProjection_keyguardLocked_noDisplayCreated()
+            throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, projection.packageName);
+
+        projection.start(mIMediaProjectionCallback);
+
+        // The projection was started because it was allowed to capture the keyguard.
+        assertThat(mService.getActiveProjectionInfo()).isNotNull();
+    }
+
     @Test
     public void testCreateProjection_attemptReuse_noPriorProjectionGrant()
             throws NameNotFoundException {
@@ -485,6 +531,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection =
                 startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
 
         assertThat(service.getActiveProjectionInfo()).isNotNull();
 
@@ -507,6 +554,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection =
                 startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
+        projection.notifyVirtualDisplayCreated(10);
 
         assertThat(service.getActiveProjectionInfo()).isNotNull();
 
