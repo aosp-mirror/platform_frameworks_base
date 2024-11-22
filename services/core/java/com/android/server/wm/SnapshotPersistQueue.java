@@ -103,12 +103,42 @@ class SnapshotPersistQueue {
     }
 
     /**
-     * Write out everything in the queue because of shutdown.
+     * Prepare to enqueue all visible task snapshots because of shutdown.
      */
-    void shutdown() {
+    void prepareShutdown() {
         synchronized (mLock) {
             mShutdown = true;
-            mLock.notifyAll();
+        }
+    }
+
+    private boolean isQueueEmpty() {
+        synchronized (mLock) {
+            return mWriteQueue.isEmpty() || mQueueIdling || mPaused;
+        }
+    }
+
+    void waitFlush(long timeout) {
+        if (timeout <= 0) {
+            return;
+        }
+        final long endTime = System.currentTimeMillis() + timeout;
+        while (true) {
+            if (!isQueueEmpty()) {
+                long timeRemaining = endTime - System.currentTimeMillis();
+                if (timeRemaining > 0) {
+                    synchronized (mLock) {
+                        try {
+                            mLock.wait(timeRemaining);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                } else {
+                    Slog.w(TAG, "Snapshot Persist Queue flush timed out");
+                    break;
+                }
+            } else {
+                break;
+            }
         }
     }
 
@@ -139,7 +169,9 @@ class SnapshotPersistQueue {
             mWriteQueue.addLast(item);
         }
         item.onQueuedLocked();
-        ensureStoreQueueDepthLocked();
+        if (!mShutdown) {
+            ensureStoreQueueDepthLocked();
+        }
         if (!mPaused) {
             mLock.notifyAll();
         }
@@ -212,6 +244,9 @@ class SnapshotPersistQueue {
                     final boolean writeQueueEmpty = mWriteQueue.isEmpty();
                     if (!writeQueueEmpty && !mPaused) {
                         continue;
+                    }
+                    if (mShutdown && writeQueueEmpty) {
+                        mLock.notifyAll();
                     }
                     try {
                         mQueueIdling = writeQueueEmpty;
