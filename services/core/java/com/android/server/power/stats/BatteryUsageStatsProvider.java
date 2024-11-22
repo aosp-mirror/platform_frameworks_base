@@ -26,6 +26,7 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.Handler;
 import android.os.Process;
 import android.util.Log;
+import android.util.LogWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -34,6 +35,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +46,8 @@ import java.util.List;
  */
 public class BatteryUsageStatsProvider {
     private static final String TAG = "BatteryUsageStatsProv";
+    private static final boolean DEBUG = false;
+
     private final Context mContext;
     private final PowerAttributor mPowerAttributor;
     private final PowerStatsStore mPowerStatsStore;
@@ -262,17 +266,25 @@ public class BatteryUsageStatsProvider {
 
     private BatteryUsageStats getBatteryUsageStats(BatteryStatsImpl stats,
             BatteryUsageStatsQuery query, long currentTimeMs) {
+        BatteryUsageStats batteryUsageStats;
         if ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_ACCUMULATED) != 0) {
-            return getAccumulatedBatteryUsageStats(stats, query, currentTimeMs);
+            batteryUsageStats = getAccumulatedBatteryUsageStats(stats, query, currentTimeMs);
         } else if (query.getAggregatedToTimestamp() == 0) {
             BatteryUsageStats.Builder builder = computeBatteryUsageStats(stats, query,
                     query.getMonotonicStartTime(),
                     query.getMonotonicEndTime(), currentTimeMs);
-            return builder.build();
+            batteryUsageStats = builder.build();
         } else {
-            return getAggregatedBatteryUsageStats(stats, query);
+            batteryUsageStats = getAggregatedBatteryUsageStats(stats, query);
         }
+        if (DEBUG) {
+            Slog.d(TAG, "query = " + query);
+            PrintWriter pw = new PrintWriter(new LogWriter(Log.DEBUG, TAG));
+            batteryUsageStats.dump(pw, "");
+            pw.flush();
+        }
+        return batteryUsageStats;
     }
 
     private BatteryUsageStats getAccumulatedBatteryUsageStats(BatteryStatsImpl stats,
