@@ -981,6 +981,14 @@
     <uses-permission android:name="android.permission.READ_SYSTEM_PREFERENCES" />
     <uses-permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES" />
 
+    <!-- Permissions required for CTS test - ActivityManagerForegroundServiceTypeTest -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"
+        android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION"
+        android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+    <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
+        android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

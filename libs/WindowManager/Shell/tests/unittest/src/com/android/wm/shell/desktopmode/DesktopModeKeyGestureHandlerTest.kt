@@ -38,7 +38,7 @@ import com.android.wm.shell.MockToken
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.transition.FocusTransitionObserver
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -266,7 +266,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         verify(desktopTasksController).toggleDesktopTaskSize(
             task,
             ResizeTrigger.MAXIMIZE_MENU,
-            null
+            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
         )
     }
 

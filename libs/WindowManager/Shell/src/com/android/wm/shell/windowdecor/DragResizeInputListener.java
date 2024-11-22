@@ -460,7 +460,7 @@ class DragResizeInputListener implements AutoCloseable {
                                 || ctrlType == CTRL_TYPE_RIGHT || ctrlType == CTRL_TYPE_LEFT)
                                 ? ResizeTrigger.EDGE : ResizeTrigger.CORNER;
                         mDesktopModeEventLogger.logTaskResizingStarted(mResizeTrigger,
-                                DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(e),
+                                DesktopModeEventLogger.getInputMethodFromMotionEvent(e),
                                 mTaskInfo, mDragStartTaskBounds.width(),
                                 mDragStartTaskBounds.height(), /* displayController= */ null,
                                 /* displayLayoutSize= */ mDisplayLayoutSizeSupplier.get());
@@ -514,7 +514,7 @@ class DragResizeInputListener implements AutoCloseable {
                         }
 
                         mDesktopModeEventLogger.logTaskResizingEnded(mResizeTrigger,
-                                DesktopModeEventLogger.Companion.getInputMethodFromMotionEvent(
+                                DesktopModeEventLogger.getInputMethodFromMotionEvent(
                                         mLastMotionEventOnDown), mTaskInfo, taskBounds.width(),
                                 taskBounds.height(),
                                 /* displayController= */ null,

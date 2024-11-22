@@ -1426,8 +1426,9 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE";
 
     /**
-     * Activity-level {@link android.content.pm.PackageManager.Property PackageManager.Property}
-     * that specifies whether this activity can declare or request
+     * Application or Activity level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * that specifies whether this package or activity can declare or request
      * {@link android.R.attr#screenOrientation fixed orientation},
      * {@link android.R.attr#minAspectRatio max aspect ratio},
      * {@link android.R.attr#maxAspectRatio min aspect ratio}
@@ -1438,6 +1439,13 @@ public interface WindowManager extends ViewManager {
      *
      * <p><b>Syntax:</b>
      * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>or
+     * <pre>
      * &lt;activity&gt;
      *   &lt;property
      *     android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
@@ -1446,7 +1454,7 @@ public interface WindowManager extends ViewManager {
      * </pre>
      * @hide
      */
-    // TODO(b/357141415): Make this public API.
+    // TODO(b/357141415): Remove this from sdk 37
     String PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY =
             "android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY";
 

@@ -898,7 +898,10 @@ public class BubbleData {
             Bubble oldest = mOverflowBubbles.get(mOverflowBubbles.size() - 1);
             ProtoLog.d(WM_SHELL_BUBBLES, "overflow full, remove=%s", oldest.getKey());
             mStateChange.bubbleRemoved(oldest, Bubbles.DISMISS_OVERFLOW_MAX_REACHED);
-            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
+            if (!mPositioner.isShowingInBubbleBar()) {
+                // Only logged for bubbles in stack view
+                mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
+            }
             mOverflowBubbles.remove(oldest);
             mStateChange.removedOverflowBubble = oldest;
         }

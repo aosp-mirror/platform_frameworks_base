@@ -242,6 +242,13 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_app_handle_education_integration"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing app handle education and integrates new APIs"
+    bug: "380272815"
+}
+
+flag {
     name: "enable_desktop_windowing_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing transition & motion polish changes"
@@ -256,10 +263,30 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_windowing_enter_transition_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables enter desktop windowing transition & motion polish changes"
+    bug: "380224875"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_desktop_windowing_exit_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables exit desktop windowing transition & motion polish changes"
     bug: "353650462"
+}
+
+flag {
+    name: "enable_desktop_windowing_exit_transitions_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables exit desktop windowing transition & motion polish changes"
+    bug: "380224768"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -346,10 +373,30 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_app_launch_alttab_transitions_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
+    bug: "380225486"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_desktop_app_launch_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables custom transitions for app launches in Desktop Mode."
     bug: "375992828"
+}
+
+flag {
+    name: "enable_desktop_app_launch_transitions_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for app launches in Desktop Mode."
+    bug: "380224832"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

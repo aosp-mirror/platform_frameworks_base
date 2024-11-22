@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
 import android.content.pm.PackageManager
+import android.media.projection.StopReason
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
@@ -105,7 +106,7 @@ constructor(
 
     /** Stops the currently active projection. */
     fun stopProjecting() {
-        scope.launch { mediaProjectionRepository.stopProjecting() }
+        scope.launch { mediaProjectionRepository.stopProjecting(StopReason.STOP_PRIVACY_CHIP) }
     }
 
     companion object {

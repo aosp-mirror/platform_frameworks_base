@@ -105,3 +105,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "engagement_metrics"
+  namespace: "app_widgets"
+  description: "Enable collection of widget engagement metrics"
+  bug: "364655296"
+}

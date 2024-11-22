@@ -55,11 +55,7 @@ constructor(
 ) : PaginatableGridLayout {
 
     @Composable
-    override fun SceneScope.TileGrid(
-        tiles: List<TileViewModel>,
-        modifier: Modifier,
-        editModeStart: () -> Unit,
-    ) {
+    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }

@@ -250,18 +250,13 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             wmHelper,
             launchedAppComponentMatcherOverride,
             action,
-            stringExtras,
-            waitConditionsBuilder =
-                wmHelper
-                    .StateSyncBuilder()
-                    .add(ConditionsFactory.isWMStateComplete())
-                    .withAppTransitionIdle()
-                    .add(ConditionsFactory.hasPipWindow())
+            stringExtras
         )
 
         wmHelper
             .StateSyncBuilder()
             .withWindowSurfaceAppeared(this)
+            .add(ConditionsFactory.isWMStateComplete())
             .withPipShown()
             .waitForAndVerify()
     }

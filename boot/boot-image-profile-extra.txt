@@ -23,4 +23,25 @@ HSPLandroid/graphics/Color;->luminance()F
 # For now, compile all methods in MessageQueue to avoid performance cliffs for
 # flagged/evolving hot code paths. See: b/338098106
 HSPLandroid/os/MessageQueue;->*
-HSPLandroid/os/MessageQueue$*;->*
+HSPLandroid/os/MessageQueue$FileDescriptorRecord;->*
+HSPLandroid/os/MessageQueue$IdleHandler;->*
+HSPLandroid/os/MessageQueue$MessageCompare;->*
+HSPLandroid/os/MessageQueue$MatchAllFutureMessages;->*
+HSPLandroid/os/MessageQueue$MatchAllMessages;->*
+HSPLandroid/os/MessageQueue$MatchBarrierToken;->*
+HSPLandroid/os/MessageQueue$MatchDeliverableMessages;->*
+HSPLandroid/os/MessageQueue$MatchHandler;->*
+HSPLandroid/os/MessageQueue$MatchHandlerAndObject;->*
+HSPLandroid/os/MessageQueue$MatchHandlerAndObjectEquals;->*
+HSPLandroid/os/MessageQueue$MatchHandlerRunnableAndObject;->*
+HSPLandroid/os/MessageQueue$MatchHandlerRunnableAndObjectEquals;->*
+HSPLandroid/os/MessageQueue$MatchHandlerWhatAndObject;->*
+HSPLandroid/os/MessageQueue$MatchHandlerWhatAndObjectEquals;->*
+HSPLandroid/os/MessageQueue$MessageCounts;->*
+HSPLandroid/os/MessageQueue$StackNode;->*
+HSPLandroid/os/MessageQueue$MessageNode;->*
+HSPLandroid/os/MessageQueue$OnFileDescriptorEventListener$Events;->*
+HSPLandroid/os/MessageQueue$OnFileDescriptorEventListener;->*
+HSPLandroid/os/MessageQueue$StackNodeType;->*
+HSPLandroid/os/MessageQueue$StateNode;->*
+HSPLandroid/os/MessageQueue$TimedParkStateNode;->*

@@ -36,6 +36,8 @@ using ::android::base::unique_fd;
 
 namespace android {
 
+static constexpr bool kLogWeakReachableDeletedAssets = false;
+
 static struct overlayableinfo_offsets_t {
   jclass classObject;
   jmethodID constructor;
@@ -97,7 +99,7 @@ static void DeleteGuardedApkAssets(Guarded<AssetManager2::ApkAssetsPtr>& apk_ass
       if (useCount > 1) {
         ALOGW("ApkAssets: Deleting an object '%s' with %d > 1 strong and %d weak references",
               (*assets)->GetDebugName().c_str(), int(useCount), int(weakCount));
-      } else if (weakCount > 0) {
+      } else if constexpr (kLogWeakReachableDeletedAssets) if (weakCount > 0) {
         ALOGW("ApkAssets: Deleting an ApkAssets object '%s' with %d weak references",
               (*assets)->GetDebugName().c_str(), int(weakCount));
       }

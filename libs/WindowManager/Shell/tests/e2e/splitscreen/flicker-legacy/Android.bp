@@ -49,6 +49,7 @@ java_library {
         "wm-flicker-common-assertions",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
+        "com_android_wm_shell_flags_lib",
     ],
 }
 

@@ -27,24 +27,28 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 
 /** Returns collection of [UserAction] to [UserActionResult] pairs for opening the single shade. */
 fun singleShadeActions(
-    requireTwoPointersForTopEdgeForQs: Boolean = false
+    isDownFromTopEdgeEnabled: Boolean = true,
+    requireTwoPointersForTopEdgeForQs: Boolean = false,
 ): Array<Pair<UserAction, UserActionResult>> {
     val shadeUserActionResult = UserActionResult(Scenes.Shade, isIrreversible = true)
     val qsSceneUserActionResult = UserActionResult(Scenes.QuickSettings, isIrreversible = true)
-    return arrayOf(
-        // Swiping down, not from the edge, always goes to shade.
-        Swipe.Down to shadeUserActionResult,
-        Swipe.Down(pointerCount = 2) to shadeUserActionResult,
-
-        // Swiping down from the top edge.
-        swipeDownFromTop(pointerCount = 1) to
-            if (requireTwoPointersForTopEdgeForQs) {
-                shadeUserActionResult
-            } else {
-                qsSceneUserActionResult
-            },
-        swipeDownFromTop(pointerCount = 2) to qsSceneUserActionResult,
-    )
+    return buildList {
+            // Swiping down, not from the edge, always goes to shade.
+            add(Swipe.Down to shadeUserActionResult)
+            add(Swipe.Down(pointerCount = 2) to shadeUserActionResult)
+            if (isDownFromTopEdgeEnabled) {
+                add(
+                    swipeDownFromTop(pointerCount = 1) to
+                        if (requireTwoPointersForTopEdgeForQs) {
+                            shadeUserActionResult
+                        } else {
+                            qsSceneUserActionResult
+                        }
+                )
+                add(swipeDownFromTop(pointerCount = 2) to qsSceneUserActionResult)
+            }
+        }
+        .toTypedArray()
 }
 
 /** Returns collection of [UserAction] to [UserActionResult] pairs for opening the split shade. */
