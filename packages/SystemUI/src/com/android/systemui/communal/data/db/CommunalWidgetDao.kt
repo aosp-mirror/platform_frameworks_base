@@ -27,7 +27,9 @@ import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.communal.nano.CommunalHubState
-import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.shared.model.SpanValue
+import com.android.systemui.communal.shared.model.toFixed
+import com.android.systemui.communal.shared.model.toResponsive
 import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetModule.Companion.DEFAULT_WIDGETS
 import com.android.systemui.dagger.SysUISingleton
@@ -101,6 +103,7 @@ constructor(
                                 componentName = name,
                                 rank = index,
                                 userSerialNumber = userSerialNumber,
+                                spanY = SpanValue.Fixed(3),
                             )
                     }
                 }
@@ -155,15 +158,16 @@ interface CommunalWidgetDao {
 
     @Query(
         "INSERT INTO communal_widget_table" +
-            "(widget_id, component_name, item_id, user_serial_number, span_y) " +
-            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber, :spanY)"
+            "(widget_id, component_name, item_id, user_serial_number, span_y, span_y_new) " +
+            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber, :spanY, :spanYNew)"
     )
     fun insertWidget(
         widgetId: Int,
         componentName: String,
         itemId: Long,
         userSerialNumber: Int,
-        spanY: Int = 3,
+        spanY: Int,
+        spanYNew: Int,
     ): Long
 
     @Query("INSERT INTO communal_item_rank_table(rank) VALUES(:rank)")
@@ -189,10 +193,12 @@ interface CommunalWidgetDao {
     }
 
     @Transaction
-    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+    fun resizeWidget(appWidgetId: Int, spanY: SpanValue, widgetIdToRankMap: Map<Int, Int>) {
         val widget = getWidgetByIdNow(appWidgetId)
         if (widget != null) {
-            updateWidget(widget.copy(spanY = spanY))
+            updateWidget(
+                widget.copy(spanY = spanY.toFixed().value, spanYNew = spanY.toResponsive().value)
+            )
         }
         updateWidgetOrder(widgetIdToRankMap)
     }
@@ -203,7 +209,7 @@ interface CommunalWidgetDao {
         provider: ComponentName,
         rank: Int? = null,
         userSerialNumber: Int,
-        spanY: Int = CommunalContentSize.HALF.span,
+        spanY: SpanValue,
     ): Long {
         return addWidget(
             widgetId = widgetId,
@@ -220,7 +226,7 @@ interface CommunalWidgetDao {
         componentName: String,
         rank: Int? = null,
         userSerialNumber: Int,
-        spanY: Int = 3,
+        spanY: SpanValue,
     ): Long {
         val widgets = getWidgetsNow()
 
@@ -241,7 +247,8 @@ interface CommunalWidgetDao {
             componentName = componentName,
             itemId = insertItemRank(newRank),
             userSerialNumber = userSerialNumber,
-            spanY = spanY,
+            spanY = spanY.toFixed().value,
+            spanYNew = spanY.toResponsive().value,
         )
     }
 
@@ -264,7 +271,11 @@ interface CommunalWidgetDao {
         clearCommunalItemRankTable()
 
         state.widgets.forEach {
-            val spanY = if (it.spanY != 0) it.spanY else CommunalContentSize.HALF.span
+            // Check if there is a new value to restore. If so, restore that new value.
+            val spanYResponsive = if (it.spanYNew != 0) SpanValue.Responsive(it.spanYNew) else null
+            // If no new value, restore any existing old values.
+            val spanY = spanYResponsive ?: SpanValue.Fixed(it.spanY.coerceIn(3, 6))
+
             addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber, spanY)
         }
     }

@@ -1204,6 +1204,13 @@ flag {
 }
 
 flag {
+  name: "communal_responsive_grid"
+  namespace: "systemui"
+  description: "Enables responsive grid on glanceable hub"
+  bug: "378171351"
+}
+
+flag {
   name: "communal_standalone_support"
   namespace: "systemui"
   description: "Support communal features without a dock"
