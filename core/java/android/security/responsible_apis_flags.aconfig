@@ -132,3 +132,9 @@ flag {
     description: "Android Advanced Protection Mode Feature: Memory Tagging Extension"
     bug: "378931989"
 }
+flag {
+    name: "aapm_feature_disable_cellular_2g"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Feature: Disable Cellular 2G"
+    bug: "377748286"
+}
