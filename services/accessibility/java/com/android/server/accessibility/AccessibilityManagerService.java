@@ -2269,8 +2269,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             mContext, shortcutType, userState.mUserId))
                     : userState.getShortcutTargetsLocked(shortcutType);
 
-            if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()
-                    && shortcutType == HARDWARE) {
+            if (shortcutType == HARDWARE) {
                 final String defaultService =
                         mContext.getString(R.string.config_defaultAccessibilityService);
                 final ComponentName defaultServiceComponent = TextUtils.isEmpty(defaultService)
