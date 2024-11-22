@@ -4917,7 +4917,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(minAspect, aspectRatioPolicy.getMinAspectRatio(), 0 /* delta */);
 
         // User override can still take effect.
-        doReturn(true).when(aspectRatioOverrides).shouldApplyUserMinAspectRatioOverride();
+        doReturn(USER_MIN_ASPECT_RATIO_3_2).when(aspectRatioOverrides)
+                .getUserMinAspectRatioOverrideCode();
         assertFalse(mActivity.isResizeable());
         assertEquals(maxAspect, aspectRatioPolicy.getMaxAspectRatio(), 0 /* delta */);
         assertNotEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOverrideOrientation());
