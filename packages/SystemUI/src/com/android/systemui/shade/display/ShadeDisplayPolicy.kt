@@ -35,5 +35,11 @@ interface ShadeDisplayPolicyModule {
     @Binds
     fun provideDefaultPolicyToSet(impl: DefaultShadeDisplayPolicy): ShadeDisplayPolicy
 
+    @IntoSet
+    @Binds
+    fun provideAnyExternalShadeDisplayPolicyToSet(
+        impl: AnyExternalShadeDisplayPolicy
+    ): ShadeDisplayPolicy
+
     @Binds fun provideDefaultPolicy(impl: DefaultShadeDisplayPolicy): ShadeDisplayPolicy
 }

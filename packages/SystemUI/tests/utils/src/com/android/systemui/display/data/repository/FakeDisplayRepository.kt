@@ -57,6 +57,10 @@ class FakeDisplayRepository @Inject constructor() : DisplayRepository {
         addDisplay(display(type, id = displayId))
     }
 
+    suspend fun addDisplays(vararg displays: Display) {
+        displays.forEach { addDisplay(it) }
+    }
+
     suspend fun addDisplay(display: Display) {
         flow.value += display
         displayAdditionEventFlow.emit(display)
