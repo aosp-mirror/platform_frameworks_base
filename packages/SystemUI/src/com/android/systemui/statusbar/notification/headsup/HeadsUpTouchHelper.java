@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.headsup;
 
 import android.content.Context;
 import android.os.RemoteException;
@@ -27,7 +27,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 /**
  * A helper class to handle touches on the heads-up views.

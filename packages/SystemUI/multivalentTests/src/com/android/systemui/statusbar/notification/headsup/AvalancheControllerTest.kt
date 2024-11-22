@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.policy
+package com.android.systemui.statusbar.notification.headsup
 
 import android.app.Notification
 import android.os.Handler
@@ -31,9 +31,11 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerTestUtil.createFullScreenIntentEntry
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.keyguardBypassController
-import com.android.systemui.statusbar.policy.HeadsUpManagerTestUtil.createFullScreenIntentEntry
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
+import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.kotlin.JavaAdapter
@@ -76,7 +78,7 @@ class AvalancheControllerTest : SysuiTestCase() {
     private val mGlobalSettings = FakeGlobalSettings()
     private val mSystemClock = FakeSystemClock()
     private val mExecutor = FakeExecutor(mSystemClock)
-    private lateinit var testableHeadsUpManager: BaseHeadsUpManager
+    private lateinit var testableHeadsUpManager: HeadsUpManagerImpl
 
     @Before
     fun setUp() {
@@ -114,7 +116,7 @@ class AvalancheControllerTest : SysuiTestCase() {
             )
     }
 
-    private fun createHeadsUpEntry(id: Int): BaseHeadsUpManager.HeadsUpEntry {
+    private fun createHeadsUpEntry(id: Int): HeadsUpManagerImpl.HeadsUpEntry {
         return testableHeadsUpManager.createHeadsUpEntry(
             NotificationEntryBuilder()
                 .setSbn(HeadsUpManagerTestUtil.createSbn(id, Notification.Builder(mContext, "")))
@@ -122,7 +124,7 @@ class AvalancheControllerTest : SysuiTestCase() {
         )
     }
 
-    private fun createFsiHeadsUpEntry(id: Int): BaseHeadsUpManager.HeadsUpEntry {
+    private fun createFsiHeadsUpEntry(id: Int): HeadsUpManagerImpl.HeadsUpEntry {
         return testableHeadsUpManager.createHeadsUpEntry(createFullScreenIntentEntry(id, mContext))
     }
 

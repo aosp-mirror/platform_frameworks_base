@@ -32,6 +32,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionSuppressor.EventLogData
@@ -41,7 +42,6 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings

@@ -16,11 +16,11 @@
 package com.android.systemui.statusbar.notification.data
 
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
-import com.android.systemui.statusbar.policy.BaseHeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl
 import dagger.Binds
 import dagger.Module
 
 @Module(includes = [NotificationSettingsRepositoryModule::class])
 interface NotificationDataLayerModule {
-    @Binds fun bindHeadsUpNotificationRepository(impl: BaseHeadsUpManager): HeadsUpRepository
+    @Binds fun bindHeadsUpNotificationRepository(impl: HeadsUpManagerImpl): HeadsUpRepository
 }

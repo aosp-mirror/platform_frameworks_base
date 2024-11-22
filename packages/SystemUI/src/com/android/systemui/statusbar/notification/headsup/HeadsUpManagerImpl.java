@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.notification.headsup;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +55,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -84,7 +86,7 @@ import kotlinx.coroutines.flow.StateFlowKt;
  * they simply peek from the top of the screen.
  */
 @SysUISingleton
-public class BaseHeadsUpManager
+public class HeadsUpManagerImpl
         implements HeadsUpManager, HeadsUpRepository, OnHeadsUpChangedListener {
     private static final String TAG = "BaseHeadsUpManager";
     private static final String SETTING_HEADS_UP_SNOOZE_LENGTH_MS = "heads_up_snooze_length_ms";
@@ -180,7 +182,7 @@ public class BaseHeadsUpManager
     }
 
     @Inject
-    public BaseHeadsUpManager(
+    public HeadsUpManagerImpl(
             @NonNull final Context context,
             HeadsUpManagerLogger logger,
             StatusBarStateController statusBarStateController,
@@ -417,7 +419,7 @@ public class BaseHeadsUpManager
 
     @Override
     public boolean shouldSwallowClick(@NonNull String key) {
-        BaseHeadsUpManager.HeadsUpEntry entry = getHeadsUpEntry(key);
+        HeadsUpManagerImpl.HeadsUpEntry entry = getHeadsUpEntry(key);
         return entry != null && mSystemClock.elapsedRealtime() < entry.mPostTime;
     }
 
@@ -560,7 +562,7 @@ public class BaseHeadsUpManager
     }
 
     protected void setEntryPinned(
-            @NonNull BaseHeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned,
+            @NonNull HeadsUpManagerImpl.HeadsUpEntry headsUpEntry, boolean isPinned,
             String reason) {
         mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned, reason);
         NotificationEntry entry = headsUpEntry.mEntry;

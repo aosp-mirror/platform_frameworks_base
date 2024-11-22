@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.notification.headsup;
 
 import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
@@ -33,12 +33,14 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
-class TestableHeadsUpManager extends BaseHeadsUpManager {
+class TestableHeadsUpManager extends HeadsUpManagerImpl {
 
     private HeadsUpEntry mLastCreatedEntry;
 
@@ -76,10 +78,10 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
                 shadeInteractor,
                 avalancheController);
 
-        mTouchAcceptanceDelay = BaseHeadsUpManagerTest.TEST_TOUCH_ACCEPTANCE_TIME;
-        mMinimumDisplayTime = BaseHeadsUpManagerTest.TEST_MINIMUM_DISPLAY_TIME;
-        mAutoDismissTime = BaseHeadsUpManagerTest.TEST_AUTO_DISMISS_TIME;
-        mStickyForSomeTimeAutoDismissTime = BaseHeadsUpManagerTest.TEST_STICKY_AUTO_DISMISS_TIME;
+        mTouchAcceptanceDelay = HeadsUpManagerImplTest.TEST_TOUCH_ACCEPTANCE_TIME;
+        mMinimumDisplayTime = HeadsUpManagerImplTest.TEST_MINIMUM_DISPLAY_TIME;
+        mAutoDismissTime = HeadsUpManagerImplTest.TEST_AUTO_DISMISS_TIME;
+        mStickyForSomeTimeAutoDismissTime = HeadsUpManagerImplTest.TEST_STICKY_AUTO_DISMISS_TIME;
     }
 
     @NonNull

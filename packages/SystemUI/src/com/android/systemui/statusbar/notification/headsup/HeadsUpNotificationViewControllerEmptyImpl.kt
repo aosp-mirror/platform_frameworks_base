@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification
+package com.android.systemui.statusbar.notification.headsup
 
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNotificationViewController
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper.HeadsUpNotificationViewController
 
 /** Empty impl of [HeadsUpNotificationViewController] for use with Scene Container */
 class HeadsUpNotificationViewControllerEmptyImpl : HeadsUpNotificationViewController {

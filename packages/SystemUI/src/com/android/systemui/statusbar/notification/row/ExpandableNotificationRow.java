@@ -120,7 +120,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;

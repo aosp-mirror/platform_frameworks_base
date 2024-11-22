@@ -54,7 +54,7 @@ import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
 import com.android.systemui.statusbar.gesture.GesturePointerEventListener
 import com.android.systemui.statusbar.notification.InstantAppNotifier
-import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
+import com.android.systemui.statusbar.notification.headsup.StatusBarHeadsUpChangeListener
 import com.android.systemui.statusbar.policy.BatteryControllerStartable
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator

@@ -57,7 +57,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 

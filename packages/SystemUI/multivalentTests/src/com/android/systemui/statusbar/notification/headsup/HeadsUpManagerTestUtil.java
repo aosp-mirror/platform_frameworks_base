@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.notification.headsup;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;

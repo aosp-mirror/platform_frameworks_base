@@ -41,13 +41,13 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.shared.GroupHunAnimationFix
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import java.util.function.Consumer

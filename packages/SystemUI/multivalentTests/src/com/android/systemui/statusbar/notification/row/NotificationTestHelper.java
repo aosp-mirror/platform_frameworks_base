@@ -88,7 +88,7 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.notification.headsup;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -26,14 +26,13 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import javax.inject.Inject;
 
 /**
- * Ties the status bar to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
+ * Ties the status bar to {@link HeadsUpManager}.
  */
 @SysUISingleton
 public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener, CoreStartable {
