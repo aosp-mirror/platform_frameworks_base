@@ -436,3 +436,12 @@ flag {
     description: "Use profile labels from UserManager for default app section titles to allow partner customization"
     bug: "358369931"
 }
+
+flag {
+    name: "wallet_role_cross_user_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "wallet_integration"
+    description: "Enable the Wallet role within profiles"
+    bug: "356107987"
+}
