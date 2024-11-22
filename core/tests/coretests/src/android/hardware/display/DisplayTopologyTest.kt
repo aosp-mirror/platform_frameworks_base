@@ -38,12 +38,7 @@ class DisplayTopologyTest {
         topology.addDisplay(displayId, width, height)
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId)
-
-        val display = topology.root!!
-        assertThat(display.displayId).isEqualTo(displayId)
-        assertThat(display.width).isEqualTo(width)
-        assertThat(display.height).isEqualTo(height)
-        assertThat(display.children).isEmpty()
+        verifyDisplay(topology.root!!, displayId, width, height, noOfChildren = 0)
     }
 
     @Test
@@ -62,18 +57,9 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
 
         val display1 = topology.root!!
-        assertThat(display1.displayId).isEqualTo(displayId1)
-        assertThat(display1.width).isEqualTo(width1)
-        assertThat(display1.height).isEqualTo(height1)
-        assertThat(display1.children).hasSize(1)
-
-        val display2 = display1.children[0]
-        assertThat(display2.displayId).isEqualTo(displayId2)
-        assertThat(display2.width).isEqualTo(width2)
-        assertThat(display2.height).isEqualTo(height2)
-        assertThat(display2.children).isEmpty()
-        assertThat(display2.position).isEqualTo(POSITION_TOP)
-        assertThat(display2.offset).isEqualTo(width1 / 2 - width2 / 2)
+        verifyDisplay(display1, displayId1, width1, height1, noOfChildren = 1)
+        verifyDisplay(display1.children[0], displayId2, width2, height2, POSITION_TOP,
+            offset = width1 / 2 - width2 / 2, noOfChildren = 0)
     }
 
     @Test
@@ -97,29 +83,18 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
 
         val display1 = topology.root!!
-        assertThat(display1.displayId).isEqualTo(displayId1)
-        assertThat(display1.width).isEqualTo(width1)
-        assertThat(display1.height).isEqualTo(height1)
-        assertThat(display1.children).hasSize(1)
+        verifyDisplay(display1, displayId1, width1, height1, noOfChildren = 1)
 
         val display2 = display1.children[0]
-        assertThat(display2.displayId).isEqualTo(displayId2)
-        assertThat(display2.width).isEqualTo(width2)
-        assertThat(display2.height).isEqualTo(height2)
-        assertThat(display2.children).hasSize(1)
-        assertThat(display2.position).isEqualTo(POSITION_TOP)
-        assertThat(display2.offset).isEqualTo(width1 / 2 - width2 / 2)
+        verifyDisplay(display1.children[0], displayId2, width2, height2, POSITION_TOP,
+            offset = width1 / 2 - width2 / 2, noOfChildren = 1)
 
         var display = display2
         for (i in 3..noOfDisplays) {
             display = display.children[0]
-            assertThat(display.displayId).isEqualTo(i)
-            assertThat(display.width).isEqualTo(width1)
-            assertThat(display.height).isEqualTo(height1)
             // The last display should have no children
-            assertThat(display.children).hasSize(if (i < noOfDisplays) 1 else 0)
-            assertThat(display.position).isEqualTo(POSITION_RIGHT)
-            assertThat(display.offset).isEqualTo(0)
+            verifyDisplay(display, id = i, width1, height1, POSITION_RIGHT, offset = 0f,
+                noOfChildren = if (i < noOfDisplays) 1 else 0)
         }
     }
 
@@ -147,18 +122,11 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
 
         var display1 = topology.root!!
-        assertThat(display1.displayId).isEqualTo(displayId1)
-        assertThat(display1.width).isEqualTo(width1)
-        assertThat(display1.height).isEqualTo(height1)
-        assertThat(display1.children).hasSize(1)
+        verifyDisplay(display1, displayId1, width1, height1, noOfChildren = 1)
 
         var display2 = display1.children[0]
-        assertThat(display2.displayId).isEqualTo(displayId2)
-        assertThat(display2.width).isEqualTo(width2)
-        assertThat(display2.height).isEqualTo(height2)
-        assertThat(display2.children).hasSize(1)
-        assertThat(display2.position).isEqualTo(POSITION_TOP)
-        assertThat(display2.offset).isEqualTo(width1 / 2 - width2 / 2)
+        verifyDisplay(display2, displayId2, width2, height2, POSITION_TOP,
+            offset = width1 / 2 - width2 / 2, noOfChildren = 1)
 
         var display = display2
         for (i in 3..noOfDisplays) {
@@ -166,13 +134,9 @@ class DisplayTopologyTest {
                 continue
             }
             display = display.children[0]
-            assertThat(display.displayId).isEqualTo(i)
-            assertThat(display.width).isEqualTo(width1)
-            assertThat(display.height).isEqualTo(height1)
             // The last display should have no children
-            assertThat(display.children).hasSize(if (i < noOfDisplays) 1 else 0)
-            assertThat(display.position).isEqualTo(POSITION_RIGHT)
-            assertThat(display.offset).isEqualTo(0)
+            verifyDisplay(display, id = i, width1, height1, POSITION_RIGHT, offset = 0f,
+                noOfChildren = if (i < noOfDisplays) 1 else 0)
         }
 
         topology.removeDisplay(22)
@@ -185,18 +149,11 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
 
         display1 = topology.root!!
-        assertThat(display1.displayId).isEqualTo(displayId1)
-        assertThat(display1.width).isEqualTo(width1)
-        assertThat(display1.height).isEqualTo(height1)
-        assertThat(display1.children).hasSize(1)
+        verifyDisplay(display1, displayId1, width1, height1, noOfChildren = 1)
 
         display2 = display1.children[0]
-        assertThat(display2.displayId).isEqualTo(displayId2)
-        assertThat(display2.width).isEqualTo(width2)
-        assertThat(display2.height).isEqualTo(height2)
-        assertThat(display2.children).hasSize(1)
-        assertThat(display2.position).isEqualTo(POSITION_TOP)
-        assertThat(display2.offset).isEqualTo(width1 / 2 - width2 / 2)
+        verifyDisplay(display2, displayId2, width2, height2, POSITION_TOP,
+            offset = width1 / 2 - width2 / 2, noOfChildren = 1)
 
         display = display2
         for (i in 3..noOfDisplays) {
@@ -204,13 +161,9 @@ class DisplayTopologyTest {
                 continue
             }
             display = display.children[0]
-            assertThat(display.displayId).isEqualTo(i)
-            assertThat(display.width).isEqualTo(width1)
-            assertThat(display.height).isEqualTo(height1)
             // The last display should have no children
-            assertThat(display.children).hasSize(if (i < noOfDisplays) 1 else 0)
-            assertThat(display.position).isEqualTo(POSITION_RIGHT)
-            assertThat(display.offset).isEqualTo(0)
+            verifyDisplay(display, id = i, width1, height1, POSITION_RIGHT, offset = 0f,
+                noOfChildren = if (i < noOfDisplays) 1 else 0)
         }
     }
 
@@ -237,12 +190,7 @@ class DisplayTopologyTest {
         topology.removeDisplay(3)
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId)
-
-        val display = topology.root!!
-        assertThat(display.displayId).isEqualTo(displayId)
-        assertThat(display.width).isEqualTo(width)
-        assertThat(display.height).isEqualTo(height)
-        assertThat(display.children).isEmpty()
+        verifyDisplay(topology.root!!, displayId, width, height, noOfChildren = 0)
     }
 
     @Test
@@ -258,11 +206,46 @@ class DisplayTopologyTest {
         topology.removeDisplay(displayId2)
 
         assertThat(topology.primaryDisplayId).isEqualTo(displayId1)
-        val display = topology.root!!
-        assertThat(display.displayId).isEqualTo(displayId1)
-        assertThat(display.width).isEqualTo(width)
-        assertThat(display.height).isEqualTo(height)
-        assertThat(display.children).isEmpty()
+        verifyDisplay(topology.root!!, displayId1, width, height, noOfChildren = 0)
+    }
+
+    @Test
+    fun normalization_clampsOffsets() {
+        val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 200f,
+            /* height= */ 600f, /* position= */ 0, /* offset= */ 0f)
+
+        val display2 = DisplayTopology.TreeNode(/* displayId= */ 2, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 800f)
+        display1.addChild(display2)
+
+        val primaryDisplayId = 3
+        val display3 = DisplayTopology.TreeNode(primaryDisplayId, /* width= */ 600f,
+            /* height= */ 200f, POSITION_LEFT, /* offset= */ -300f)
+        display1.addChild(display3)
+
+        val display4 = DisplayTopology.TreeNode(/* displayId= */ 4, /* width= */ 200f,
+            /* height= */ 600f, POSITION_TOP, /* offset= */ 1000f)
+        display2.addChild(display4)
+
+        topology = DisplayTopology(display1, primaryDisplayId)
+        topology.normalize()
+
+        assertThat(topology.primaryDisplayId).isEqualTo(primaryDisplayId)
+
+        val actualDisplay1 = topology.root!!
+        verifyDisplay(actualDisplay1, id = 1, width = 200f, height = 600f, noOfChildren = 2)
+
+        val actualDisplay2 = actualDisplay1.children[0]
+        verifyDisplay(actualDisplay2, id = 2, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 600f, noOfChildren = 1)
+
+        val actualDisplay3 = actualDisplay1.children[1]
+        verifyDisplay(actualDisplay3, id = 3, width = 600f, height = 200f, POSITION_LEFT,
+            offset = -200f, noOfChildren = 0)
+
+        val actualDisplay4 = actualDisplay2.children[0]
+        verifyDisplay(actualDisplay4, id = 4, width = 200f, height = 600f, POSITION_TOP,
+            offset = 600f, noOfChildren = 0)
     }
 
     @Test
@@ -289,34 +272,19 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(primaryDisplayId)
 
         val actualDisplay1 = topology.root!!
-        assertThat(actualDisplay1.displayId).isEqualTo(1)
-        assertThat(actualDisplay1.width).isEqualTo(200f)
-        assertThat(actualDisplay1.height).isEqualTo(600f)
-        assertThat(actualDisplay1.children).hasSize(2)
+        verifyDisplay(actualDisplay1, id = 1, width = 200f, height = 600f, noOfChildren = 2)
 
         val actualDisplay2 = actualDisplay1.children[0]
-        assertThat(actualDisplay2.displayId).isEqualTo(2)
-        assertThat(actualDisplay2.width).isEqualTo(600f)
-        assertThat(actualDisplay2.height).isEqualTo(200f)
-        assertThat(actualDisplay2.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay2.offset).isEqualTo(0f)
-        assertThat(actualDisplay2.children).hasSize(1)
+        verifyDisplay(actualDisplay2, id = 2, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 1)
 
         val actualDisplay3 = actualDisplay1.children[1]
-        assertThat(actualDisplay3.displayId).isEqualTo(3)
-        assertThat(actualDisplay3.width).isEqualTo(600f)
-        assertThat(actualDisplay3.height).isEqualTo(200f)
-        assertThat(actualDisplay3.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay3.offset).isEqualTo(400f)
-        assertThat(actualDisplay3.children).isEmpty()
+        verifyDisplay(actualDisplay3, id = 3, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 400f, noOfChildren = 0)
 
         val actualDisplay4 = actualDisplay2.children[0]
-        assertThat(actualDisplay4.displayId).isEqualTo(4)
-        assertThat(actualDisplay4.width).isEqualTo(200f)
-        assertThat(actualDisplay4.height).isEqualTo(600f)
-        assertThat(actualDisplay4.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay4.offset).isEqualTo(0f)
-        assertThat(actualDisplay4.children).isEmpty()
+        verifyDisplay(actualDisplay4, id = 4, width = 200f, height = 600f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 0)
     }
 
     @Test
@@ -344,34 +312,19 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(primaryDisplayId)
 
         val actualDisplay1 = topology.root!!
-        assertThat(actualDisplay1.displayId).isEqualTo(1)
-        assertThat(actualDisplay1.width).isEqualTo(200f)
-        assertThat(actualDisplay1.height).isEqualTo(600f)
-        assertThat(actualDisplay1.children).hasSize(1)
+        verifyDisplay(actualDisplay1, id = 1, width = 200f, height = 600f, noOfChildren = 1)
 
         val actualDisplay2 = actualDisplay1.children[0]
-        assertThat(actualDisplay2.displayId).isEqualTo(2)
-        assertThat(actualDisplay2.width).isEqualTo(200f)
-        assertThat(actualDisplay2.height).isEqualTo(600f)
-        assertThat(actualDisplay2.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay2.offset).isEqualTo(0f)
-        assertThat(actualDisplay2.children).hasSize(2)
+        verifyDisplay(actualDisplay2, id = 2, width = 200f, height = 600f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 2)
 
         val actualDisplay3 = actualDisplay2.children[1]
-        assertThat(actualDisplay3.displayId).isEqualTo(3)
-        assertThat(actualDisplay3.width).isEqualTo(600f)
-        assertThat(actualDisplay3.height).isEqualTo(200f)
-        assertThat(actualDisplay3.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay3.offset).isEqualTo(10f)
-        assertThat(actualDisplay3.children).isEmpty()
+        verifyDisplay(actualDisplay3, id = 3, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 10f, noOfChildren = 0)
 
         val actualDisplay4 = actualDisplay2.children[0]
-        assertThat(actualDisplay4.displayId).isEqualTo(4)
-        assertThat(actualDisplay4.width).isEqualTo(200f)
-        assertThat(actualDisplay4.height).isEqualTo(600f)
-        assertThat(actualDisplay4.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay4.offset).isEqualTo(210f)
-        assertThat(actualDisplay4.children).isEmpty()
+        verifyDisplay(actualDisplay4, id = 4, width = 200f, height = 600f, POSITION_RIGHT,
+            offset = 210f, noOfChildren = 0)
     }
 
     @Test
@@ -397,26 +350,15 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(primaryDisplayId)
 
         val actualDisplay1 = topology.root!!
-        assertThat(actualDisplay1.displayId).isEqualTo(1)
-        assertThat(actualDisplay1.width).isEqualTo(200f)
-        assertThat(actualDisplay1.height).isEqualTo(50f)
-        assertThat(actualDisplay1.children).hasSize(1)
+        verifyDisplay(actualDisplay1, id = 1, width = 200f, height = 50f, noOfChildren = 1)
 
         val actualDisplay2 = actualDisplay1.children[0]
-        assertThat(actualDisplay2.displayId).isEqualTo(2)
-        assertThat(actualDisplay2.width).isEqualTo(600f)
-        assertThat(actualDisplay2.height).isEqualTo(200f)
-        assertThat(actualDisplay2.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay2.offset).isEqualTo(0f)
-        assertThat(actualDisplay2.children).hasSize(1)
+        verifyDisplay(actualDisplay2, id = 2, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 1)
 
         val actualDisplay3 = actualDisplay2.children[0]
-        assertThat(actualDisplay3.displayId).isEqualTo(3)
-        assertThat(actualDisplay3.width).isEqualTo(600f)
-        assertThat(actualDisplay3.height).isEqualTo(200f)
-        assertThat(actualDisplay3.position).isEqualTo(POSITION_BOTTOM)
-        assertThat(actualDisplay3.offset).isEqualTo(0f)
-        assertThat(actualDisplay3.children).isEmpty()
+        verifyDisplay(actualDisplay3, id = 3, width = 600f, height = 200f, POSITION_BOTTOM,
+            offset = 0f, noOfChildren = 0)
     }
 
     @Test
@@ -443,34 +385,19 @@ class DisplayTopologyTest {
         assertThat(topology.primaryDisplayId).isEqualTo(primaryDisplayId)
 
         val actualDisplay1 = topology.root!!
-        assertThat(actualDisplay1.displayId).isEqualTo(1)
-        assertThat(actualDisplay1.width).isEqualTo(200f)
-        assertThat(actualDisplay1.height).isEqualTo(600f)
-        assertThat(actualDisplay1.children).hasSize(1)
+        verifyDisplay(actualDisplay1, id = 1, width = 200f, height = 600f, noOfChildren = 1)
 
         val actualDisplay2 = actualDisplay1.children[0]
-        assertThat(actualDisplay2.displayId).isEqualTo(2)
-        assertThat(actualDisplay2.width).isEqualTo(200f)
-        assertThat(actualDisplay2.height).isEqualTo(600f)
-        assertThat(actualDisplay2.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay2.offset).isEqualTo(0f)
-        assertThat(actualDisplay2.children).hasSize(1)
+        verifyDisplay(actualDisplay2, id = 2, width = 200f, height = 600f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 1)
 
         val actualDisplay3 = actualDisplay2.children[0]
-        assertThat(actualDisplay3.displayId).isEqualTo(3)
-        assertThat(actualDisplay3.width).isEqualTo(600f)
-        assertThat(actualDisplay3.height).isEqualTo(200f)
-        assertThat(actualDisplay3.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay3.offset).isEqualTo(400f)
-        assertThat(actualDisplay3.children).hasSize(1)
+        verifyDisplay(actualDisplay3, id = 3, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 400f, noOfChildren = 1)
 
         val actualDisplay4 = actualDisplay3.children[0]
-        assertThat(actualDisplay4.displayId).isEqualTo(4)
-        assertThat(actualDisplay4.width).isEqualTo(200f)
-        assertThat(actualDisplay4.height).isEqualTo(600f)
-        assertThat(actualDisplay4.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay4.offset).isEqualTo(-400f)
-        assertThat(actualDisplay4.children).isEmpty()
+        verifyDisplay(actualDisplay4, id = 4, width = 200f, height = 600f, POSITION_RIGHT,
+            offset = -400f, noOfChildren = 0)
     }
 
     @Test
@@ -635,7 +562,7 @@ class DisplayTopologyTest {
             nodes,
             // In the case of corner adjacency, we prefer a left/right attachment.
             Pair(POSITION_RIGHT, 10f),
-            Pair(POSITION_BOTTOM, 40.5f), // TODO: fix implementation to remove this gap
+            Pair(POSITION_BOTTOM, 30f),
         )
 
         assertThat(nodes[0].children).containsExactly(nodes[1])
@@ -667,34 +594,19 @@ class DisplayTopologyTest {
         assertThat(copy.primaryDisplayId).isEqualTo(primaryDisplayId)
 
         val actualDisplay1 = copy.root!!
-        assertThat(actualDisplay1.displayId).isEqualTo(1)
-        assertThat(actualDisplay1.width).isEqualTo(200f)
-        assertThat(actualDisplay1.height).isEqualTo(600f)
-        assertThat(actualDisplay1.children).hasSize(2)
+        verifyDisplay(actualDisplay1, id = 1, width = 200f, height = 600f, noOfChildren = 2)
 
         val actualDisplay2 = actualDisplay1.children[0]
-        assertThat(actualDisplay2.displayId).isEqualTo(2)
-        assertThat(actualDisplay2.width).isEqualTo(600f)
-        assertThat(actualDisplay2.height).isEqualTo(200f)
-        assertThat(actualDisplay2.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay2.offset).isEqualTo(0f)
-        assertThat(actualDisplay2.children).hasSize(1)
+        verifyDisplay(actualDisplay2, id = 2, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 1)
 
         val actualDisplay3 = actualDisplay1.children[1]
-        assertThat(actualDisplay3.displayId).isEqualTo(3)
-        assertThat(actualDisplay3.width).isEqualTo(600f)
-        assertThat(actualDisplay3.height).isEqualTo(200f)
-        assertThat(actualDisplay3.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay3.offset).isEqualTo(400f)
-        assertThat(actualDisplay3.children).isEmpty()
+        verifyDisplay(actualDisplay3, id = 3, width = 600f, height = 200f, POSITION_RIGHT,
+            offset = 400f, noOfChildren = 0)
 
         val actualDisplay4 = actualDisplay2.children[0]
-        assertThat(actualDisplay4.displayId).isEqualTo(4)
-        assertThat(actualDisplay4.width).isEqualTo(200f)
-        assertThat(actualDisplay4.height).isEqualTo(600f)
-        assertThat(actualDisplay4.position).isEqualTo(POSITION_RIGHT)
-        assertThat(actualDisplay4.offset).isEqualTo(0f)
-        assertThat(actualDisplay4.children).isEmpty()
+        verifyDisplay(actualDisplay4, id = 4, width = 200f, height = 600f, POSITION_RIGHT,
+            offset = 0f, noOfChildren = 0)
     }
 
     /**
@@ -722,9 +634,20 @@ class DisplayTopologyTest {
         return nodes
     }
 
+    private fun verifyDisplay(display: DisplayTopology.TreeNode, id: Int, width: Float,
+                              height: Float, @DisplayTopology.TreeNode.Position position: Int = 0,
+                              offset: Float = 0f, noOfChildren: Int) {
+        assertThat(display.displayId).isEqualTo(id)
+        assertThat(display.width).isEqualTo(width)
+        assertThat(display.height).isEqualTo(height)
+        assertThat(display.position).isEqualTo(position)
+        assertThat(display.offset).isEqualTo(offset)
+        assertThat(display.children).hasSize(noOfChildren)
+    }
+
     private fun assertPositioning(
             nodes: List<DisplayTopology.TreeNode>, vararg positions: Pair<Int, Float>) {
-        assertThat(nodes.drop(1).map { Pair(it.position, it.offset )})
+        assertThat(nodes.drop(1).map { Pair(it.position, it.offset) })
             .containsExactly(*positions)
             .inOrder()
     }
