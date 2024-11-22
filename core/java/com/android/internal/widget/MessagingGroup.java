@@ -81,7 +81,6 @@ public class MessagingGroup extends NotificationOptimizedLinearLayout implements
     private MessagingLinearLayout mMessageContainer;
     ImageFloatingTextView mSenderView;
     private ImageView mAvatarView;
-    private View mAvatarContainer;
     private String mAvatarSymbol = "";
     private int mLayoutColor;
     private CharSequence mAvatarName = "";
@@ -717,6 +716,11 @@ public class MessagingGroup extends NotificationOptimizedLinearLayout implements
      * @param isInConversation is this in a conversation
      */
     public void setIsInConversation(boolean isInConversation) {
+        if (Flags.notificationsRedesignTemplates()) {
+            // No alignment adjustments are necessary in the redesign, as the size of the icons
+            // in both conversations and old messaging notifications are the same.
+            return;
+        }
         if (mIsInConversation != isInConversation) {
             mIsInConversation = isInConversation;
             MarginLayoutParams layoutParams =
