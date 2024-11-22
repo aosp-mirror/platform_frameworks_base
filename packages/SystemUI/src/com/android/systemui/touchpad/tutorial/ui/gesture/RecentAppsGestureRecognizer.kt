@@ -28,10 +28,10 @@ import kotlin.math.abs
 class RecentAppsGestureRecognizer(
     private val gestureDistanceThresholdPx: Int,
     private val velocityThresholdPxPerMs: Float,
-    private val distanceTracker: DistanceTracker = DistanceTracker(),
-    private val velocityTracker: VerticalVelocityTracker = VerticalVelocityTracker(),
+    private val velocityTracker: VelocityTracker = VerticalVelocityTracker(),
 ) : GestureRecognizer {
 
+    private val distanceTracker = DistanceTracker()
     private var gestureStateChangedCallback: (GestureState) -> Unit = {}
 
     override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
