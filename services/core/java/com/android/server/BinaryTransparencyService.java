@@ -1580,10 +1580,20 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     private void registerBicCallback() {
+        if(!com.android.server.flags.Flags.optionalBackgroundInstallControl()) {
+            Slog.d(TAG, "BICS is disabled for this device, skipping registration.");
+            return;
+        }
         IBackgroundInstallControlService iBics =
                 IBackgroundInstallControlService.Stub.asInterface(
                         ServiceManager.getService(
                                 Context.BACKGROUND_INSTALL_CONTROL_SERVICE));
+        if(iBics == null) {
+            Slog.e(TAG, "Failed to register BackgroundInstallControl callback, either "
+                + "background install control service does not exist or disabled on this "
+                + "build.");
+            return;
+        }
         try {
             iBics.registerBackgroundInstallCallback(
                     new BicCallbackHandler(mServiceImpl));
