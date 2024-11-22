@@ -16,7 +16,12 @@
 
 package com.android.systemui.statusbar.notification.promoted
 
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 
-var Kosmos.promotedNotificationsProvider: PromotedNotificationsProvider by
-    Kosmos.Fixture { PromotedNotificationsProviderImpl() }
+class FakePromotedNotificationsProvider : PromotedNotificationsProvider {
+    val promotedEntries = mutableSetOf<NotificationEntry>()
+
+    override fun shouldPromote(entry: NotificationEntry): Boolean {
+        return promotedEntries.contains(entry)
+    }
+}

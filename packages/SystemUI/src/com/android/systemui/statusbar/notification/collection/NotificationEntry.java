@@ -1076,7 +1076,7 @@ public final class NotificationEntry extends ListEntry {
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
             return mPromotedNotificationContentModel;
         } else {
-            Log.wtf(TAG, "getting promoted content without feature flag enabled");
+            Log.wtf(TAG, "getting promoted content without feature flag enabled", new Throwable());
             return null;
         }
     }
@@ -1090,7 +1090,7 @@ public final class NotificationEntry extends ListEntry {
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
             this.mPromotedNotificationContentModel = promotedNotificationContentModel;
         } else {
-            Log.wtf(TAG, "setting promoted content without feature flag enabled");
+            Log.wtf(TAG, "setting promoted content without feature flag enabled", new Throwable());
         }
     }
 
