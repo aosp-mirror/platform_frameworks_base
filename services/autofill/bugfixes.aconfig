@@ -74,6 +74,16 @@ flag {
 }
 
 flag {
+  name: "multiple_fill_history"
+  namespace: "autofill"
+  description: "Allows tracking per Session FillEventHistory. As a bugfix flag to guard against DeviceConfig flag"
+  bug: "365630157"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "add_session_id_to_client_state"
   namespace: "autofill"
   description: "Include the session id into the FillEventHistory events as part of ClientState"
