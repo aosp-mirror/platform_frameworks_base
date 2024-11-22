@@ -35,10 +35,9 @@ import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.data.repository.fakePowerRepository
-import com.android.systemui.power.shared.model.WakeSleepReason
-import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setSceneTransition
@@ -222,28 +221,6 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun resetDismissAction() =
-        testScope.runTest {
-            kosmos.setSceneTransition(Idle(Scenes.Bouncer))
-            var wasOnCancelInvoked = false
-            startInteractor()
-            keyguardRepository.setDismissAction(
-                DismissAction.RunAfterKeyguardGone(
-                    dismissAction = {},
-                    onCancelAction = { wasOnCancelInvoked = true },
-                    message = "message",
-                    willAnimateOnLockscreen = true,
-                )
-            )
-            assertThat(wasOnCancelInvoked).isFalse()
-            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
-            runCurrent()
-
-            assertThat(wasOnCancelInvoked).isTrue()
-            assertThat(keyguardRepository.dismissAction.value).isEqualTo(DismissAction.None)
-        }
-
-    @Test
     fun doNotResetDismissActionOnUnlockedShade() =
         testScope.runTest {
             kosmos.setSceneTransition(Idle(Scenes.Bouncer))
@@ -269,37 +246,6 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
 
             assertThat(wasOnCancelInvoked).isFalse()
             assertThat(keyguardRepository.dismissAction.value).isEqualTo(dismissAction)
-        }
-
-    @Test
-    fun resetDismissAction_onBouncer_OnAsleep() =
-        testScope.runTest {
-            kosmos.setSceneTransition(Idle(Scenes.Bouncer))
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.None
-            )
-            var wasOnCancelInvoked = false
-            startInteractor()
-
-            keyguardRepository.setDismissAction(
-                DismissAction.RunAfterKeyguardGone(
-                    dismissAction = {},
-                    onCancelAction = { wasOnCancelInvoked = true },
-                    message = "message",
-                    willAnimateOnLockscreen = true,
-                )
-            )
-            assertThat(wasOnCancelInvoked).isFalse()
-            kosmos.fakePowerRepository.updateWakefulness(
-                rawState = WakefulnessState.ASLEEP,
-                lastWakeReason = WakeSleepReason.POWER_BUTTON,
-                lastSleepReason = WakeSleepReason.TIMEOUT,
-                powerButtonLaunchGestureTriggered = false,
-            )
-            runCurrent()
-
-            assertThat(wasOnCancelInvoked).isTrue()
-            assertThat(keyguardRepository.dismissAction.value).isEqualTo(DismissAction.None)
         }
 
     @Test
@@ -408,6 +354,25 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
 
             assertThat(wasDismissActionInvoked).isTrue()
             assertThat(wasCancelActionInvoked).isFalse()
+        }
+
+    @Test
+    fun clearDismissAction() =
+        kosmos.runTest {
+            val dismissAction by collectLastValue(fakeKeyguardRepository.dismissAction)
+            fakeKeyguardRepository.setDismissAction(
+                DismissAction.RunImmediately(
+                    onDismissAction = { KeyguardDone.IMMEDIATE },
+                    onCancelAction = {},
+                    message = "",
+                    willAnimateOnLockscreen = true,
+                )
+            )
+            assertThat(dismissAction).isNotEqualTo(DismissAction.None)
+
+            underTest.clearDismissAction()
+
+            assertThat(dismissAction).isEqualTo(DismissAction.None)
         }
 
     private fun TestScope.startInteractor() {
