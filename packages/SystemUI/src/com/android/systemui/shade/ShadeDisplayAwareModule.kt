@@ -32,8 +32,10 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorI
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
+import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
+import com.android.systemui.shade.display.ShadeDisplayPolicyModule
 import com.android.systemui.shade.domain.interactor.ShadeDisplaysInteractor
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
@@ -58,7 +60,7 @@ import javax.inject.Provider
  * By using this dedicated module, we ensure the notification shade window always utilizes the
  * correct display context and resources, regardless of the display it's on.
  */
-@Module(includes = [OptionalShadeDisplayAwareBindings::class])
+@Module(includes = [OptionalShadeDisplayAwareBindings::class, ShadeDisplayPolicyModule::class])
 object ShadeDisplayAwareModule {
 
     /** Creates a new context for the shade window. */
@@ -177,6 +179,15 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     @Provides
     fun provideShadePositionRepository(impl: ShadeDisplaysRepositoryImpl): ShadeDisplaysRepository {
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        return impl
+    }
+
+    @SysUISingleton
+    @Provides
+    fun provideMutableShadePositionRepository(
+        impl: ShadeDisplaysRepositoryImpl
+    ): MutableShadeDisplaysRepository {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         return impl
     }

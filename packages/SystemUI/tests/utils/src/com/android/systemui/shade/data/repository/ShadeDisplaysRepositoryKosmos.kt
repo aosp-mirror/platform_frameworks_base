@@ -17,20 +17,18 @@
 package com.android.systemui.shade.data.repository
 
 import android.view.Display
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.display.ShadeDisplayPolicy
+import com.android.systemui.shade.display.SpecificDisplayIdPolicy
 
-class FakeShadeDisplayRepository : ShadeDisplaysRepository {
-    private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
+val Kosmos.defaultShadeDisplayPolicy: ShadeDisplayPolicy by
+    Kosmos.Fixture { SpecificDisplayIdPolicy(Display.DEFAULT_DISPLAY) }
 
-    fun setDisplayId(displayId: Int) {
-        _displayId.value = displayId
+val Kosmos.shadeDisplaysRepository: MutableShadeDisplaysRepository by
+    Kosmos.Fixture {
+        ShadeDisplaysRepositoryImpl(
+            defaultPolicy = defaultShadeDisplayPolicy,
+            bgScope = testScope.backgroundScope,
+        )
     }
-
-    override val displayId: StateFlow<Int>
-        get() = _displayId
-
-    fun resetDisplayId() {
-        _displayId.value = Display.DEFAULT_DISPLAY
-    }
-}
