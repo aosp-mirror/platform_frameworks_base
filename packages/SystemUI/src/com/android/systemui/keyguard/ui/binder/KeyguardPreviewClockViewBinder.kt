@@ -123,6 +123,7 @@ object KeyguardPreviewClockViewBinder {
                                 )
                             }
                         }
+                        lastClock = null
                     }
             }
         }
