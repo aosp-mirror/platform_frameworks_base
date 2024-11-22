@@ -110,3 +110,10 @@ flag {
     description: "Android Advanced Protection Mode Feature: Disable Install Unknown Sources"
     bug: "369361373"
 }
+
+flag {
+    name: "aapm_feature_memory_tagging_extension"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Feature: Memory Tagging Extension"
+    bug: "378931989"
+}

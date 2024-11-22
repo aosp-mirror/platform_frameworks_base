@@ -47,6 +47,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionHook;
 import com.android.server.security.advancedprotection.features.AdvancedProtectionProvider;
 import com.android.server.security.advancedprotection.features.DisallowInstallUnknownSourcesAdvancedProtectionHook;
+import com.android.server.security.advancedprotection.features.MemoryTaggingExtensionHook;
 
 import java.io.FileDescriptor;
 import java.util.ArrayList;
@@ -79,6 +80,9 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     private void initFeatures(boolean enabled) {
         if (android.security.Flags.aapmFeatureDisableInstallUnknownSources()) {
             mHooks.add(new DisallowInstallUnknownSourcesAdvancedProtectionHook(mContext, enabled));
+        }
+        if (android.security.Flags.aapmFeatureMemoryTaggingExtension()) {
+            mHooks.add(new MemoryTaggingExtensionHook(mContext, enabled));
         }
     }
 
