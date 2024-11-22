@@ -1407,6 +1407,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             heapFile = "/data/local/tmp/heapdump-" + logNameTimeString + ".prof";
         }
 
+        String argAfterHeapFile = getNextArg();
+        if (argAfterHeapFile != null) {
+            err.println("Error: Arguments cannot be placed after the heap file");
+            return -1;
+        }
+
         // Writes an error message to stderr on failure
         ParcelFileDescriptor fd = openFileForSystem(heapFile, "w");
         if (fd == null) {
