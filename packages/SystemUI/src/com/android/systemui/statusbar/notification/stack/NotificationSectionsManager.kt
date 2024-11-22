@@ -21,7 +21,6 @@ import android.view.View
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.shade.ShadeDisplayAware
-import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.SourceType
 import com.android.systemui.statusbar.notification.collection.NotificationClassificationFlag
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
@@ -36,6 +35,7 @@ import com.android.systemui.statusbar.notification.dagger.SilentHeader
 import com.android.systemui.statusbar.notification.dagger.SocialHeader
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.stack.PriorityBucket
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.foldToSparseArray
@@ -51,7 +51,6 @@ class NotificationSectionsManager
 internal constructor(
     @ShadeDisplayAware private val configurationController: ConfigurationController,
     private val keyguardMediaController: KeyguardMediaController,
-    private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val mediaContainerController: MediaContainerController,
     private val notificationRoundnessManager: NotificationRoundnessManager,
     @IncomingHeader private val incomingHeaderController: SectionHeaderController,
@@ -120,8 +119,8 @@ internal constructor(
     }
 
     fun createSectionsForBuckets(): Array<NotificationSection> =
-        sectionsFeatureManager
-            .getNotificationBuckets()
+        PriorityBucket
+            .getAllInOrder()
             .map { NotificationSection(it) }
             .toTypedArray()
 
