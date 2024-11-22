@@ -103,8 +103,12 @@ class DesktopModeUiEventLogger(
         DESKTOP_WINDOW_CORNER_DRAG_RESIZE(1722),
         @UiEvent(doc = "Tap on the window header maximize button in desktop windowing mode")
         DESKTOP_WINDOW_MAXIMIZE_BUTTON_TAP(1723),
+        @UiEvent(doc = "Tap on the window header restore button in desktop windowing mode")
+        DESKTOP_WINDOW_RESTORE_BUTTON_TAP(2017),
         @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
         DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724),
+        @UiEvent(doc = "Double tap on window header to restore from maximize in desktop windowing")
+        DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_RESTORE(2018),
         @UiEvent(doc = "Tap on the window Handle to open the Handle Menu")
         DESKTOP_WINDOW_APP_HANDLE_TAP(1998),
         @UiEvent(doc = "Tap on the desktop mode option under app handle menu")

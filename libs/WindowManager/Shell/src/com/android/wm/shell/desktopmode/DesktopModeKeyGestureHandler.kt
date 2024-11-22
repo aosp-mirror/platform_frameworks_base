@@ -31,7 +31,8 @@ import android.content.Context
 import com.android.hardware.input.Flags.manageKeyGestures
 import com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts
 import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
+import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -48,7 +49,8 @@ class DesktopModeKeyGestureHandler(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val focusTransitionObserver: FocusTransitionObserver,
     @ShellMainThread private val mainExecutor: ShellExecutor,
-    ) : KeyGestureEventHandler {
+    private val displayController: DisplayController,
+) : KeyGestureEventHandler {
 
     init {
         inputManager.registerKeyGestureEventHandler(this)
@@ -99,12 +101,15 @@ class DesktopModeKeyGestureHandler(
             }
             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW -> {
                 logV("Key gesture TOGGLE_MAXIMIZE_FREEFORM_WINDOW is handled")
-                getGloballyFocusedFreeformTask()?.let {
+                getGloballyFocusedFreeformTask()?.let { taskInfo ->
                     mainExecutor.execute {
                         desktopTasksController.get().toggleDesktopTaskSize(
-                            it,
-                            ResizeTrigger.MAXIMIZE_MENU,
-                            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                            taskInfo,
+                            ToggleTaskSizeInteraction(
+                                isMaximized = isTaskMaximized(taskInfo, displayController),
+                                source = ToggleTaskSizeInteraction.Source.KEYBOARD_SHORTCUT,
+                                inputMethod = DesktopModeEventLogger.Companion.InputMethod.KEYBOARD
+                            )
                         )
                     }
                 }
