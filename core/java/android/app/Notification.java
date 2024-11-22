@@ -818,6 +818,8 @@ public class Notification implements Parcelable
                      R.layout.notification_2025_template_heads_up_base,
                      R.layout.notification_2025_template_header,
                      R.layout.notification_2025_template_conversation,
+                     R.layout.notification_2025_template_collapsed_call,
+                     R.layout.notification_2025_template_expanded_call,
                      R.layout.notification_2025_template_collapsed_messaging,
                      R.layout.notification_2025_template_collapsed_media,
                      R.layout.notification_template_material_big_picture,
@@ -825,8 +827,6 @@ public class Notification implements Parcelable
                      R.layout.notification_template_material_inbox,
                      R.layout.notification_template_material_big_messaging,
                      R.layout.notification_template_material_big_media,
-                     R.layout.notification_template_material_call,
-                     R.layout.notification_template_material_big_call,
                      R.layout.notification_template_header -> true;
                 case R.layout.notification_template_material_progress -> Flags.apiRichOngoing();
                 default -> false;
@@ -7600,6 +7600,22 @@ public class Notification implements Parcelable
             }
         }
 
+        private int getCollapsedCallLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_call;
+            } else {
+                return R.layout.notification_template_material_call;
+            }
+        }
+
+        private int getExpandedCallLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_call;
+            } else {
+                return R.layout.notification_template_material_big_call;
+            }
+        }
+
         private int getProgressLayoutResource() {
             return R.layout.notification_template_material_progress;
         }
@@ -10948,10 +10964,10 @@ public class Notification implements Parcelable
             final RemoteViews contentView;
             if (isCollapsed) {
                 contentView = mBuilder.applyStandardTemplate(
-                        R.layout.notification_template_material_call, p, null /* result */);
+                        mBuilder.getCollapsedCallLayoutResource(), p, null /* result */);
             } else {
                 contentView = mBuilder.applyStandardTemplateWithActions(
-                        R.layout.notification_template_material_big_call, p, null /* result */);
+                    mBuilder.getExpandedCallLayoutResource(), p, null /* result */);
             }
 
             // Bind some extra conversation-specific header fields.

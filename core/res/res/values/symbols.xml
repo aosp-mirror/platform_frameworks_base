@@ -3448,6 +3448,8 @@
   <!-- Notifications: CallStyle -->
   <java-symbol type="layout" name="notification_template_material_call" />
   <java-symbol type="layout" name="notification_template_material_big_call" />
+  <java-symbol type="layout" name="notification_2025_template_collapsed_call" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_call" />
   <java-symbol type="string" name="call_notification_answer_action" />
   <java-symbol type="string" name="call_notification_answer_video_action" />
   <java-symbol type="string" name="call_notification_decline_action" />
