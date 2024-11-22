@@ -17,7 +17,6 @@
 package com.android.server.hdmi;
 
 import static android.media.tv.flags.Flags.hdmiControlEnhancedBehavior;
-
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_DISABLED;
@@ -107,7 +106,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1218,9 +1216,6 @@ public class HdmiControlService extends SystemService {
                 audioSystem.terminateSystemAudioMode();
             }
             if (isArcEnabled) {
-                if (audioSystem.hasAction(ArcTerminationActionFromAvr.class)) {
-                    audioSystem.removeAction(ArcTerminationActionFromAvr.class);
-                }
                 audioSystem.addAndStartAction(new ArcTerminationActionFromAvr(audioSystem,
                         new IHdmiControlCallback.Stub() {
                             @Override
@@ -1228,7 +1223,7 @@ public class HdmiControlService extends SystemService {
                                 mAddressAllocated = false;
                                 initializeCecLocalDevices(INITIATED_BY_SOUNDBAR_MODE);
                             }
-                        }));
+                        }), true);
             }
         }
         if (!isArcEnabled) {

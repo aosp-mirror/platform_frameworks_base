@@ -887,6 +887,21 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 systemAudioModeRequest_fromAudioSystem);
     }
 
+    @Test
+    public void addAndStartAction_remove() throws Exception {
+        // utilize callback test to test if addAndStartAction(action, remove)
+        TestCallback callback = new TestCallback();
+
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
+                new ArcTerminationActionFromAvr(mHdmiCecLocalDeviceAudioSystem, callback),
+                true);
+
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(
+                ArcTerminationActionFromAvr.class).size()).isEqualTo(1);
+    }
+
     private static class TestCallback extends IHdmiControlCallback.Stub {
         private final ArrayList<Integer> mCallbackResult = new ArrayList<Integer>();
 
