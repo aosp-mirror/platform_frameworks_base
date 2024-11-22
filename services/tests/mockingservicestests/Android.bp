@@ -392,3 +392,10 @@ test_module_config {
     ],
     include_filters: ["com.android.server.StorageManagerServiceTest"],
 }
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_service_batteryServiceTest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.BatteryServiceTest"],
+}
