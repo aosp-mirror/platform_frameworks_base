@@ -165,7 +165,7 @@ class BubbleBarLayerViewTest {
                 }
 
         val viewInfo = FakeBubbleFactory.createViewInfo(bubbleBarExpandedView)
-        bubble = FakeBubbleFactory.createChatBubbleWithViewInfo(context, viewInfo = viewInfo)
+        bubble = FakeBubbleFactory.createChatBubble(context, viewInfo = viewInfo)
     }
 
     @After
