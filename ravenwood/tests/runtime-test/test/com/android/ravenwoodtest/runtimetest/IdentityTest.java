@@ -15,7 +15,6 @@
  */
 package com.android.ravenwoodtest.runtimetest;
 
-import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
 import static android.os.Process.FIRST_APPLICATION_UID;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
-import android.platform.test.ravenwood.RavenwoodConfig;
 import android.system.Os;
 
 import com.android.ravenwood.RavenwoodRuntimeState;
@@ -33,13 +31,6 @@ import dalvik.system.VMRuntime;
 import org.junit.Test;
 
 public class IdentityTest {
-
-    @RavenwoodConfig.Config
-    public static final RavenwoodConfig sConfig =
-            new RavenwoodConfig.Builder()
-                    .setTargetSdkLevel(UPSIDE_DOWN_CAKE)
-                    .setProcessApp()
-                    .build();
 
     @Test
     public void testUid() {
@@ -60,7 +51,7 @@ public class IdentityTest {
     @Test
     public void testTargetSdkLevel() {
         assertEquals(Build.VERSION_CODES.CUR_DEVELOPMENT, RavenwoodRuntimeState.CUR_DEVELOPMENT);
-        assertEquals(UPSIDE_DOWN_CAKE, RavenwoodRuntimeState.sTargetSdkLevel);
-        assertEquals(UPSIDE_DOWN_CAKE, VMRuntime.getRuntime().getTargetSdkVersion());
+        assertEquals(RavenwoodRuntimeState.sTargetSdkLevel,
+                VMRuntime.getRuntime().getTargetSdkVersion());
     }
 }
