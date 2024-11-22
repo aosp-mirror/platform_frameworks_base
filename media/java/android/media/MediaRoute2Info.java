@@ -23,6 +23,7 @@ import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AN
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES;
+import static com.android.media.flags.Flags.FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -569,6 +570,7 @@ public final class MediaRoute2Info implements Parcelable {
     private final String mProviderId;
     private final boolean mIsVisibilityRestricted;
     private final Set<String> mAllowedPackages;
+    private final Set<String> mRequiredPermissions;
     @SuitabilityStatus private final int mSuitabilityStatus;
 
     MediaRoute2Info(@NonNull Builder builder) {
@@ -592,6 +594,7 @@ public final class MediaRoute2Info implements Parcelable {
         mIsVisibilityRestricted = builder.mIsVisibilityRestricted;
         mAllowedPackages = builder.mAllowedPackages;
         mSuitabilityStatus = builder.mSuitabilityStatus;
+        mRequiredPermissions = Set.copyOf(builder.mRequiredPermissions);
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
@@ -615,6 +618,7 @@ public final class MediaRoute2Info implements Parcelable {
         mProviderId = in.readString();
         mIsVisibilityRestricted = in.readBoolean();
         mAllowedPackages = Set.of(in.createString8Array());
+        mRequiredPermissions = Set.of(in.createString8Array());
         mSuitabilityStatus = in.readInt();
     }
 
@@ -851,6 +855,15 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * @return the set of permissions which must be held to see this route
+     */
+    @NonNull
+    @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
+    public Set<String> getRequiredPermissions() {
+        return mRequiredPermissions;
+    }
+
+    /**
      * Returns whether this route's type can only be published by the system route provider.
      *
      * @see #isSystemRoute()
@@ -920,6 +933,7 @@ public final class MediaRoute2Info implements Parcelable {
         pw.println(indent + "mIsVisibilityRestricted=" + mIsVisibilityRestricted);
         pw.println(indent + "mAllowedPackages=" + mAllowedPackages);
         pw.println(indent + "mSuitabilityStatus=" + mSuitabilityStatus);
+        pw.println(indent + "mRequiredPermissions=" + mRequiredPermissions);
     }
 
     private void dumpVolume(@NonNull PrintWriter pw, @NonNull String prefix) {
@@ -955,6 +969,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mProviderId, other.mProviderId)
                 && (mIsVisibilityRestricted == other.mIsVisibilityRestricted)
                 && Objects.equals(mAllowedPackages, other.mAllowedPackages)
+                && Objects.equals(mRequiredPermissions, other.mRequiredPermissions)
                 && mSuitabilityStatus == other.mSuitabilityStatus;
     }
 
@@ -980,6 +995,7 @@ public final class MediaRoute2Info implements Parcelable {
                 mProviderId,
                 mIsVisibilityRestricted,
                 mAllowedPackages,
+                mRequiredPermissions,
                 mSuitabilityStatus);
     }
 
@@ -1018,6 +1034,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(mIsVisibilityRestricted)
                 .append(", allowedPackages=")
                 .append(String.join(",", mAllowedPackages))
+                .append(", mRequiredPermissions=")
+                .append(String.join(",", mRequiredPermissions))
                 .append(", suitabilityStatus=")
                 .append(mSuitabilityStatus)
                 .append(" }")
@@ -1050,6 +1068,7 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mProviderId);
         dest.writeBoolean(mIsVisibilityRestricted);
         dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
+        dest.writeString8Array(mRequiredPermissions.toArray(new String[0]));
         dest.writeInt(mSuitabilityStatus);
     }
 
@@ -1169,6 +1188,7 @@ public final class MediaRoute2Info implements Parcelable {
         private String mProviderId;
         private boolean mIsVisibilityRestricted;
         private Set<String> mAllowedPackages;
+        private Set<String> mRequiredPermissions;
         @SuitabilityStatus private int mSuitabilityStatus;
 
         /**
@@ -1194,6 +1214,7 @@ public final class MediaRoute2Info implements Parcelable {
             mDeduplicationIds = Set.of();
             mAllowedPackages = Set.of();
             mSuitabilityStatus = SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
+            mRequiredPermissions = Set.of();
         }
 
         /**
@@ -1242,6 +1263,7 @@ public final class MediaRoute2Info implements Parcelable {
             mIsVisibilityRestricted = routeInfo.mIsVisibilityRestricted;
             mAllowedPackages = routeInfo.mAllowedPackages;
             mSuitabilityStatus = routeInfo.mSuitabilityStatus;
+            mRequiredPermissions = routeInfo.mRequiredPermissions;
         }
 
         /**
@@ -1461,6 +1483,7 @@ public final class MediaRoute2Info implements Parcelable {
         public Builder setVisibilityPublic() {
             mIsVisibilityRestricted = false;
             mAllowedPackages = Set.of();
+            mRequiredPermissions = Set.of();
             return this;
         }
 
@@ -1481,6 +1504,19 @@ public final class MediaRoute2Info implements Parcelable {
         public Builder setVisibilityRestricted(@NonNull Set<String> allowedPackages) {
             mIsVisibilityRestricted = true;
             mAllowedPackages = Set.copyOf(allowedPackages);
+            return this;
+        }
+
+        /**
+         * Limits the visibility of this route to holders of a set of permissions.
+         *
+         * @param requiredPermissions the list of all permissions which must be held in order to
+         *                            see this route.
+         */
+        @NonNull
+        @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
+        public Builder setRequiredPermissions(@NonNull Set<String> requiredPermissions) {
+            mRequiredPermissions = Set.copyOf(requiredPermissions);
             return this;
         }
 

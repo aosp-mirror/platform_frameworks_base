@@ -1136,6 +1136,7 @@ class MediaRouter2ServiceImpl {
         UserRecord userRecord = getOrCreateUserRecordLocked(userId);
         RouterRecord routerRecord =
                 new RouterRecord(
+                        mContext,
                         userRecord,
                         router,
                         uid,
@@ -2055,6 +2056,7 @@ class MediaRouter2ServiceImpl {
     }
 
     final class RouterRecord implements IBinder.DeathRecipient {
+        public final Context mContext;
         public final UserRecord mUserRecord;
         public final String mPackageName;
         public final List<Integer> mSelectRouteSequenceNumbers;
@@ -2073,6 +2075,7 @@ class MediaRouter2ServiceImpl {
         @Nullable public RouteListingPreference mRouteListingPreference;
 
         RouterRecord(
+                Context context,
                 UserRecord userRecord,
                 IMediaRouter2 router,
                 int uid,
@@ -2082,6 +2085,7 @@ class MediaRouter2ServiceImpl {
                 boolean hasModifyAudioRoutingPermission,
                 boolean hasMediaContentControlPermission,
                 boolean hasMediaRoutingControl) {
+            mContext = context;
             mUserRecord = userRecord;
             mPackageName = packageName;
             mSelectRouteSequenceNumbers = new ArrayList<>();
@@ -2322,17 +2326,33 @@ class MediaRouter2ServiceImpl {
         }
 
         /**
-         * Returns a filtered copy of {@code routes} that contains only the routes that are {@link
-         * MediaRoute2Info#isVisibleTo visible} to the router corresponding to this record.
+         * Returns a filtered copy of {@code routes} that contains only the routes that are visible
+         * to this RouterRecord.
          */
         private List<MediaRoute2Info> getVisibleRoutes(@NonNull List<MediaRoute2Info> routes) {
             List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
             for (MediaRoute2Info route : routes) {
-                if (route.isVisibleTo(mPackageName)) {
+                if (route.isVisibleTo(mPackageName) && hasPermissionsToSeeRoute(route)) {
                     filteredRoutes.add(route);
                 }
             }
             return filteredRoutes;
+        }
+
+        /**
+         * @return whether this RouterRecord has the required permissions to see the given route.
+         */
+        private boolean hasPermissionsToSeeRoute(MediaRoute2Info route) {
+            if (!Flags.enableRouteVisibilityControlApi()) {
+                return true;
+            }
+            for (String permission : route.getRequiredPermissions()) {
+                if (mContext.checkPermission(permission, mPid, mUid)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
