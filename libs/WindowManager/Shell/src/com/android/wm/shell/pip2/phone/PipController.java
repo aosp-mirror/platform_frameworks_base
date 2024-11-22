@@ -254,6 +254,7 @@ public class PipController implements ConfigurationChangeListener,
     @Override
     public void onConfigurationChanged(Configuration newConfiguration) {
         mPipDisplayLayoutState.onConfigurationChanged();
+        mPipTouchHandler.onConfigurationChanged();
     }
 
     @Override
