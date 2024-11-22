@@ -13,6 +13,7 @@ java_library_host {
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
+        ":framework-metalava-annotations",
     ],
     static_libs: [
         "guava",
@@ -23,6 +24,12 @@ java_library_host {
 java_binary_host {
     name: "systemfeatures-gen-tool",
     main_class: "com.android.systemfeatures.SystemFeaturesGenerator",
+    static_libs: ["systemfeatures-gen-lib"],
+}
+
+java_plugin {
+    name: "systemfeatures-metadata-processor",
+    processor_class: "com.android.systemfeatures.SystemFeaturesMetadataProcessor",
     static_libs: ["systemfeatures-gen-lib"],
 }
 
@@ -61,6 +68,7 @@ java_test_host {
         "systemfeatures-gen-lib",
         "truth",
     ],
+    plugins: ["systemfeatures-metadata-processor"],
 }
 
 // Rename the goldens as they may be copied into the source tree, and we don't

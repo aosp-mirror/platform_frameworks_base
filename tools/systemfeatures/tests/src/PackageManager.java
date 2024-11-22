@@ -16,13 +16,32 @@
 
 package android.content.pm;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
+
 /** Stub for testing */
 public class PackageManager {
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_AUTO = "automotive";
+
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_PC = "pc";
+
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN = "vulkan";
+
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WATCH = "watch";
+
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI = "wifi";
+
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String FEATURE_INTENT_CATEGORY = "intent_category_with_feature_name_prefix";
+
+    public static final String FEATURE_NOT_ANNOTATED = "not_annotated";
+
+    public static final String NOT_FEATURE = "not_feature";
 
     /** @hide */
     public boolean hasSystemFeature(String featureName, int version) {
