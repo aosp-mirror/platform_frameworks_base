@@ -2395,6 +2395,12 @@
   <java-symbol type="layout" name="notification_2025_template_header" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_messaging" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_media" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_big_picture" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_inbox" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_media" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_big_text" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_messaging" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_progress" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_compact_heads_up_base" />
@@ -2406,6 +2412,8 @@
   <java-symbol type="layout" name="notification_template_material_big_media" />
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_material_progress" />
+  <java-symbol type="layout" name="notification_template_material_messaging" />
+  <java-symbol type="layout" name="notification_template_material_big_messaging" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
   <java-symbol type="color" name="notification_progress_background_color" />
@@ -3345,8 +3353,6 @@
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 
   <java-symbol type="layout" name="app_anr_dialog" />
-  <java-symbol type="layout" name="notification_template_material_messaging" />
-  <java-symbol type="layout" name="notification_template_material_big_messaging" />
 
   <java-symbol type="id" name="aerr_wait" />
 
