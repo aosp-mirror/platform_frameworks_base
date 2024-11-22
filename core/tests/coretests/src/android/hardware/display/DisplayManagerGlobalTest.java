@@ -55,9 +55,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-
 /**
  * Tests for {@link DisplayManagerGlobal}.
  *
@@ -82,13 +79,10 @@ public class DisplayManagerGlobalTest {
     private IDisplayManager mDisplayManager;
 
     @Mock
-    private DisplayManager.DisplayListener mDisplayListener;
+    private DisplayManager.DisplayListener mListener;
 
     @Mock
-    private DisplayManager.DisplayListener mDisplayListener2;
-
-    @Mock
-    private Consumer<DisplayTopology> mTopologyListener;
+    private DisplayManager.DisplayListener mListener2;
 
     @Captor
     private ArgumentCaptor<IDisplayManagerCallback> mCallbackCaptor;
@@ -96,7 +90,6 @@ public class DisplayManagerGlobalTest {
     private Context mContext;
     private DisplayManagerGlobal mDisplayManagerGlobal;
     private Handler mHandler;
-    private Executor mExecutor;
 
     @Before
     public void setUp() throws RemoteException {
@@ -104,14 +97,13 @@ public class DisplayManagerGlobalTest {
         Mockito.when(mDisplayManager.getPreferredWideGamutColorSpaceId()).thenReturn(0);
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         mHandler = mContext.getMainThreadHandler();
-        mExecutor = mContext.getMainExecutor();
         mDisplayManagerGlobal = new DisplayManagerGlobal(mDisplayManager);
     }
 
     @Test
     public void testDisplayListenerIsCalled_WhenDisplayEventOccurs() throws RemoteException {
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
-                ALL_DISPLAY_EVENTS, /* packageName= */ null);
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler, ALL_DISPLAY_EVENTS,
+                null);
         Mockito.verify(mDisplayManager)
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(), anyLong());
         IDisplayManagerCallback callback = mCallbackCaptor.getValue();
@@ -119,31 +111,31 @@ public class DisplayManagerGlobalTest {
         int displayId = 1;
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
         waitForHandler();
-        Mockito.verify(mDisplayListener).onDisplayAdded(eq(displayId));
-        Mockito.verifyNoMoreInteractions(mDisplayListener);
+        Mockito.verify(mListener).onDisplayAdded(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
 
-        Mockito.reset(mDisplayListener);
+        Mockito.reset(mListener);
         // Mock IDisplayManager to return a different display info to trigger display change.
         final DisplayInfo newDisplayInfo = new DisplayInfo();
         newDisplayInfo.rotation++;
         doReturn(newDisplayInfo).when(mDisplayManager).getDisplayInfo(displayId);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         waitForHandler();
-        Mockito.verify(mDisplayListener).onDisplayChanged(eq(displayId));
-        Mockito.verifyNoMoreInteractions(mDisplayListener);
+        Mockito.verify(mListener).onDisplayChanged(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
 
-        Mockito.reset(mDisplayListener);
+        Mockito.reset(mListener);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         waitForHandler();
-        Mockito.verify(mDisplayListener).onDisplayRemoved(eq(displayId));
-        Mockito.verifyNoMoreInteractions(mDisplayListener);
+        Mockito.verify(mListener).onDisplayRemoved(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
     }
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
     public void testDisplayListenerIsCalled_WhenDisplayPropertyChangeEventOccurs()
             throws RemoteException {
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
                 INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE
                         | INTERNAL_EVENT_FLAG_DISPLAY_STATE,
                 null);
@@ -153,50 +145,50 @@ public class DisplayManagerGlobalTest {
 
         int displayId = 1;
 
-        Mockito.reset(mDisplayListener);
+        Mockito.reset(mListener);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REFRESH_RATE_CHANGED);
         waitForHandler();
-        Mockito.verify(mDisplayListener).onDisplayChanged(eq(displayId));
-        Mockito.verifyNoMoreInteractions(mDisplayListener);
+        Mockito.verify(mListener).onDisplayChanged(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
 
-        Mockito.reset(mDisplayListener);
+        Mockito.reset(mListener);
         callback.onDisplayEvent(displayId, EVENT_DISPLAY_STATE_CHANGED);
         waitForHandler();
-        Mockito.verify(mDisplayListener).onDisplayChanged(eq(displayId));
-        Mockito.verifyNoMoreInteractions(mDisplayListener);
+        Mockito.verify(mListener).onDisplayChanged(eq(displayId));
+        Mockito.verifyNoMoreInteractions(mListener);
     }
 
     @Test
     public void testDisplayListenerIsNotCalled_WhenClientIsNotSubscribed() throws RemoteException {
         // First we subscribe to all events in order to test that the subsequent calls to
         // registerDisplayListener will update the event mask.
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
-                ALL_DISPLAY_EVENTS, /* packageName= */ null);
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler, ALL_DISPLAY_EVENTS,
+                null);
         Mockito.verify(mDisplayManager)
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(), anyLong());
         IDisplayManagerCallback callback = mCallbackCaptor.getValue();
 
         int displayId = 1;
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
                 ALL_DISPLAY_EVENTS
                         & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED, null);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_ADDED);
         waitForHandler();
-        Mockito.verifyZeroInteractions(mDisplayListener);
+        Mockito.verifyZeroInteractions(mListener);
 
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
                 ALL_DISPLAY_EVENTS
                         & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED, null);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
         waitForHandler();
-        Mockito.verifyZeroInteractions(mDisplayListener);
+        Mockito.verifyZeroInteractions(mListener);
 
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
                 ALL_DISPLAY_EVENTS
                         & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED, null);
         callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
         waitForHandler();
-        Mockito.verifyZeroInteractions(mDisplayListener);
+        Mockito.verifyZeroInteractions(mListener);
     }
 
     @Test
@@ -215,7 +207,7 @@ public class DisplayManagerGlobalTest {
     @Test
     public void testDisplayManagerGlobalRegistersWithDisplayManager_WhenThereAreListeners()
             throws RemoteException {
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
                 DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
                 null);
         InOrder inOrder = Mockito.inOrder(mDisplayManager);
@@ -236,7 +228,7 @@ public class DisplayManagerGlobalTest {
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(),
                         eq(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED));
 
-        mDisplayManagerGlobal.unregisterDisplayListener(mDisplayListener);
+        mDisplayManagerGlobal.unregisterDisplayListener(mListener);
         inOrder.verify(mDisplayManager)
                 .registerCallbackWithEventMask(mCallbackCaptor.capture(), eq(0L));
     }
@@ -252,49 +244,33 @@ public class DisplayManagerGlobalTest {
         mDisplayManagerGlobal.handleDisplayChangeFromWindowManager(123);
 
         // One listener listens on add/remove, and the other one listens on change.
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener, mHandler,
                 DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
                         | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
                 null /* packageName */);
-        mDisplayManagerGlobal.registerDisplayListener(mDisplayListener2, mHandler,
+        mDisplayManagerGlobal.registerDisplayListener(mListener2, mHandler,
                 DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
                 null /* packageName */);
 
         mDisplayManagerGlobal.handleDisplayChangeFromWindowManager(321);
         waitForHandler();
 
-        verify(mDisplayListener, never()).onDisplayChanged(anyInt());
-        verify(mDisplayListener2).onDisplayChanged(321);
+        verify(mListener, never()).onDisplayChanged(anyInt());
+        verify(mListener2).onDisplayChanged(321);
 
         // Trigger the callback again even if the display info is not changed.
-        clearInvocations(mDisplayListener2);
+        clearInvocations(mListener2);
         mDisplayManagerGlobal.handleDisplayChangeFromWindowManager(321);
         waitForHandler();
 
-        verify(mDisplayListener2).onDisplayChanged(321);
+        verify(mListener2).onDisplayChanged(321);
 
         // No callback for non-existing display (no display info returned from IDisplayManager).
-        clearInvocations(mDisplayListener2);
+        clearInvocations(mListener2);
         mDisplayManagerGlobal.handleDisplayChangeFromWindowManager(456);
         waitForHandler();
 
-        verify(mDisplayListener2, never()).onDisplayChanged(anyInt());
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DISPLAY_TOPOLOGY)
-    public void testTopologyListenerIsCalled_WhenTopologyUpdateOccurs() throws RemoteException {
-        mDisplayManagerGlobal.registerTopologyListener(mExecutor, mTopologyListener,
-                /* packageName= */ null);
-        Mockito.verify(mDisplayManager).registerCallbackWithEventMask(mCallbackCaptor.capture(),
-                eq(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED));
-        IDisplayManagerCallback callback = mCallbackCaptor.getValue();
-
-        DisplayTopology topology = new DisplayTopology();
-        callback.onTopologyChanged(topology);
-        waitForHandler();
-        Mockito.verify(mTopologyListener).accept(topology);
-        Mockito.verifyNoMoreInteractions(mTopologyListener);
+        verify(mListener2, never()).onDisplayChanged(anyInt());
     }
 
     @Test
