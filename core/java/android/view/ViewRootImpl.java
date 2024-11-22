@@ -1236,6 +1236,8 @@ public final class ViewRootImpl implements ViewParent,
     private @ActivityInfo.ColorMode int mCurrentColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
     private long mColorModeLastSetMillis = -1;
 
+    private final boolean mIsSubscribeGranularDisplayEventsEnabled;
+
     public ViewRootImpl(Context context, Display display) {
         this(context, display, WindowManagerGlobal.getWindowSession(), new WindowLayout());
     }
@@ -1333,6 +1335,8 @@ public final class ViewRootImpl implements ViewParent,
         // Disable DRAW_WAKE_LOCK starting U.
         mDisableDrawWakeLock =
                 CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock();
+        mIsSubscribeGranularDisplayEventsEnabled =
+                com.android.server.display.feature.flags.Flags.subscribeGranularDisplayEvents();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1810,14 +1814,22 @@ public final class ViewRootImpl implements ViewParent,
                 mAccessibilityInteractionConnectionManager, mHandler);
         mAccessibilityManager.addHighContrastTextStateChangeListener(
                 mExecutor, mHighContrastTextManager);
+
+
+        long eventsToBeRegistered =
+                (mIsSubscribeGranularDisplayEventsEnabled)
+                ? DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_STATE
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED
+                : DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         DisplayManagerGlobal
                 .getInstance()
                 .registerDisplayListener(
                         mDisplayListener,
                         mHandler,
-                        DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
+                        eventsToBeRegistered,
                         mBasePackageName);
 
         if (forceInvertColor()) {
