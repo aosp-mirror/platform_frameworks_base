@@ -24,21 +24,18 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import java.util.function.BooleanSupplier
 
 class DisplayTopologyCoordinatorTest {
     private lateinit var coordinator: DisplayTopologyCoordinator
     private val displayInfo = DisplayInfo()
-    private val topologyChangeExecutor = Runnable::run
 
     private val mockTopology = mock<DisplayTopology>()
-    private val mockTopologyCopy = mock<DisplayTopology>()
-    private val mockIsExtendedDisplayEnabled = mock<() -> Boolean>()
-    private val mockTopologyChangedCallback = mock<(DisplayTopology) -> Unit>()
+    private val mockIsExtendedDisplayEnabled = mock<BooleanSupplier>()
 
     @Before
     fun setUp() {
@@ -50,14 +47,13 @@ class DisplayTopologyCoordinatorTest {
         val injector = object : DisplayTopologyCoordinator.Injector() {
             override fun getTopology() = mockTopology
         }
-        whenever(mockIsExtendedDisplayEnabled()).thenReturn(true)
-        whenever(mockTopology.copy()).thenReturn(mockTopologyCopy)
-        coordinator = DisplayTopologyCoordinator(injector, mockIsExtendedDisplayEnabled,
-            mockTopologyChangedCallback, topologyChangeExecutor, DisplayManagerService.SyncRoot())
+        coordinator = DisplayTopologyCoordinator(injector, mockIsExtendedDisplayEnabled)
     }
 
     @Test
     fun addDisplay() {
+        whenever(mockIsExtendedDisplayEnabled.asBoolean).thenReturn(true)
+
         coordinator.onDisplayAdded(displayInfo)
 
         val widthDp = displayInfo.logicalWidth * (DisplayMetrics.DENSITY_DEFAULT.toFloat()
@@ -65,26 +61,24 @@ class DisplayTopologyCoordinatorTest {
         val heightDp = displayInfo.logicalHeight * (DisplayMetrics.DENSITY_DEFAULT.toFloat()
                 / displayInfo.logicalDensityDpi)
         verify(mockTopology).addDisplay(displayInfo.displayId, widthDp, heightDp)
-        verify(mockTopologyChangedCallback).invoke(mockTopologyCopy)
     }
 
     @Test
     fun addDisplay_extendedDisplaysDisabled() {
-        whenever(mockIsExtendedDisplayEnabled()).thenReturn(false)
+        whenever(mockIsExtendedDisplayEnabled.asBoolean).thenReturn(false)
 
         coordinator.onDisplayAdded(displayInfo)
 
         verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
-        verify(mockTopologyChangedCallback, never()).invoke(any())
     }
 
     @Test
     fun addDisplay_notInDefaultDisplayGroup() {
+        whenever(mockIsExtendedDisplayEnabled.asBoolean).thenReturn(true)
         displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1
 
         coordinator.onDisplayAdded(displayInfo)
 
         verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
-        verify(mockTopologyChangedCallback, never()).invoke(any())
     }
 }

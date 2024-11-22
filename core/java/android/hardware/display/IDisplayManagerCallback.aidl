@@ -16,10 +16,7 @@
 
 package android.hardware.display;
 
-import android.hardware.display.DisplayTopology;
-
 /** @hide */
 interface IDisplayManagerCallback {
     oneway void onDisplayEvent(int displayId, int event);
-    oneway void onTopologyChanged(in DisplayTopology topology);
 }
