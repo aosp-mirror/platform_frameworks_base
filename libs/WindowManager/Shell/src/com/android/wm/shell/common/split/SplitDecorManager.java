@@ -33,12 +33,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
+import android.os.Trace;
 import android.view.IWindow;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -50,10 +52,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ScreenshotUtils;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SurfaceUtils;
 
 import java.util.function.Consumer;
@@ -79,9 +83,19 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private static final String RESIZING_BACKGROUND_SURFACE_NAME = "ResizingBackground";
     private static final String GAP_BACKGROUND_SURFACE_NAME = "GapBackground";
 
+    // Indicates the loading state of mIcon
+    enum IconLoadState {
+        NOT_LOADED,
+        LOADING,
+        LOADED
+    }
+
     private final IconProvider mIconProvider;
+    private final ShellExecutor mMainExecutor;
+    private final ShellExecutor mBgExecutor;
 
     private Drawable mIcon;
+    private IconLoadState mIconLoadState = IconLoadState.NOT_LOADED;
     private ImageView mVeilIconView;
     private SurfaceControlViewHost mViewHost;
     /** The parent surface that this is attached to. Should be the stage root. */
@@ -109,9 +123,14 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private int mOffsetY;
     private int mRunningAnimationCount = 0;
 
-    public SplitDecorManager(Configuration configuration, IconProvider iconProvider) {
+    public SplitDecorManager(Configuration configuration,
+            IconProvider iconProvider,
+            ShellExecutor mainExecutor,
+            ShellExecutor bgExecutor) {
         super(configuration, null /* rootSurface */, null /* hostInputToken */);
         mIconProvider = iconProvider;
+        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
     }
 
     @Override
@@ -199,6 +218,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
         }
         mHostLeash = null;
         mIcon = null;
+        mIconLoadState = IconLoadState.NOT_LOADED;
         mVeilIconView = null;
         mIsCurrentlyChanging = false;
         mShown = false;
@@ -260,10 +280,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     .setWindowCrop(mGapBackgroundLeash, sideBounds.width(), sideBounds.height());
         }
 
-        if (mIcon == null && resizingTask.topActivityInfo != null) {
-            mIcon = mIconProvider.getIcon(resizingTask.topActivityInfo);
-            mVeilIconView.setImageDrawable(mIcon);
-            mVeilIconView.setVisibility(View.VISIBLE);
+        if (mIconLoadState == IconLoadState.NOT_LOADED && resizingTask.topActivityInfo != null) {
+            loadIconInBackground(resizingTask.topActivityInfo, () -> {
+                mVeilIconView.setImageDrawable(mIcon);
+                mVeilIconView.setVisibility(View.VISIBLE);
+            });
 
             WindowManager.LayoutParams lp =
                     (WindowManager.LayoutParams) mViewHost.getView().getLayoutParams();
@@ -417,10 +438,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
         }
 
         if (mIcon == null && resizingTask.topActivityInfo != null) {
-            // Initialize icon
-            mIcon = mIconProvider.getIcon(resizingTask.topActivityInfo);
-            mVeilIconView.setImageDrawable(mIcon);
-            mVeilIconView.setVisibility(View.VISIBLE);
+            loadIconInBackground(resizingTask.topActivityInfo, () -> {
+                mVeilIconView.setImageDrawable(mIcon);
+                mVeilIconView.setVisibility(View.VISIBLE);
+            });
 
             WindowManager.LayoutParams lp =
                     (WindowManager.LayoutParams) mViewHost.getView().getLayoutParams();
@@ -453,7 +474,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
             return;
         }
 
-        // Recenter icon
+        // Re-center icon
         t.setPosition(mIconLeash,
                 mInstantaneousBounds.width() / 2f - mIconSize / 2f,
                 mInstantaneousBounds.height() / 2f - mIconSize / 2f);
@@ -596,7 +617,36 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mVeilIconView.setImageDrawable(null);
             t.hide(mIconLeash);
             mIcon = null;
+            mIconLoadState = IconLoadState.NOT_LOADED;
         }
+    }
+
+    /**
+     * Loads the icon for the given {@param info}, calling {@param postLoadCb} on the main thread
+     * if provided.
+     */
+    private void loadIconInBackground(@NonNull ActivityInfo info, @Nullable Runnable postLoadCb) {
+        mIconLoadState = IconLoadState.LOADING;
+        mBgExecutor.setBoost();
+        mBgExecutor.execute(() -> {
+            Trace.beginSection("SplitDecorManager.loadIconInBackground("
+                    + info.applicationInfo.packageName + ")");
+            final Drawable icon = mIconProvider.getIcon(info);
+            Trace.endSection();
+            mMainExecutor.execute(() -> {
+                if (mIconLoadState != IconLoadState.LOADING) {
+                    // The request was canceled while loading in the background, just drop the
+                    // result
+                    return;
+                }
+                mIcon = icon;
+                mIconLoadState = IconLoadState.LOADED;
+                if (postLoadCb != null) {
+                    postLoadCb.run();
+                }
+            });
+            mBgExecutor.resetBoost();
+        });
     }
 
     private static float[] getResizingBackgroundColor(ActivityManager.RunningTaskInfo taskInfo) {
