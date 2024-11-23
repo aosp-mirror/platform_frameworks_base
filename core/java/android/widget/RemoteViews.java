@@ -1298,7 +1298,13 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mIntentId != -1 || mItems == null) {
+            if (mItems == null) {
+                // Null item indicates adapter conversion took place, so the URIs in cached items
+                // need to be validated.
+                RemoteCollectionItems cachedItems = mCollectionCache.getItemsForId(mIntentId);
+                if (cachedItems != null) {
+                    cachedItems.visitUris(visitor);
+                }
                 return;
             }
 

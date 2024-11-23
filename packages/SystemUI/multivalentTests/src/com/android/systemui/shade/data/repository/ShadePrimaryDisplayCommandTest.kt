@@ -23,12 +23,17 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.shade.ShadePrimaryDisplayCommand
+import com.android.systemui.shade.display.ShadeDisplayPolicy
 import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.testKosmos
+import com.google.common.truth.StringSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -37,15 +42,26 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val commandRegistry = kosmos.commandRegistry
     private val displayRepository = kosmos.displayRepository
-    private val shadeDisplaysRepository = ShadeDisplaysRepositoryImpl()
+    private val defaultPolicy = kosmos.defaultShadeDisplayPolicy
+    private val policy1 = makePolicy("policy_1")
+    private val shadeDisplaysRepository = kosmos.shadeDisplaysRepository
     private val pw = PrintWriter(StringWriter())
 
+    private val policies =
+        setOf(defaultPolicy, policy1, makePolicy("policy_2"), makePolicy("policy_3"))
+
     private val underTest =
-        ShadePrimaryDisplayCommand(commandRegistry, displayRepository, shadeDisplaysRepository)
+        ShadePrimaryDisplayCommand(
+            commandRegistry,
+            displayRepository,
+            shadeDisplaysRepository,
+            policies,
+            defaultPolicy,
+        )
 
     @Before
     fun setUp() {
@@ -96,4 +112,41 @@ class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
 
             assertThat(displayId).isEqualTo(newDisplayId)
         }
+
+    @Test
+    fun policies_listsAllPolicies() =
+        testScope.runTest {
+            val stringWriter = StringWriter()
+            commandRegistry.onShellCommand(
+                PrintWriter(stringWriter),
+                arrayOf("shade_display_override", "policies"),
+            )
+            val result = stringWriter.toString()
+
+            assertThat(result).containsAllIn(policies.map { it.name })
+        }
+
+    @Test
+    fun policies_setsSpecificPolicy() =
+        testScope.runTest {
+            val policy by collectLastValue(shadeDisplaysRepository.policy)
+
+            commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", policy1.name))
+
+            assertThat(policy!!.name).isEqualTo(policy1.name)
+        }
+
+    private fun makePolicy(policyName: String): ShadeDisplayPolicy {
+        return object : ShadeDisplayPolicy {
+            override val name: String
+                get() = policyName
+
+            override val displayId: StateFlow<Int>
+                get() = MutableStateFlow(0)
+        }
+    }
+}
+
+private fun StringSubject.containsAllIn(strings: List<String>) {
+    strings.forEach { contains(it) }
 }

@@ -104,7 +104,7 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
@@ -1459,10 +1459,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Function1<Integer, Unit> onIconClickListener
     ) {
         if (mTaskInfo.isFreeform()) {
+            // The menu uses display-wide coordinates for positioning, so make position the sum
+            // of task position and caption position.
+            final Rect taskBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
             mManageWindowsMenu = new DesktopHeaderManageWindowsMenu(
                     mTaskInfo,
-                    /* x= */ mResult.mCaptionX,
-                    /* y= */ mResult.mCaptionY + mResult.mCaptionTopPadding,
+                    /* x= */ taskBounds.left + mResult.mCaptionX,
+                    /* y= */ taskBounds.top + mResult.mCaptionY + mResult.mCaptionTopPadding,
                     mDisplayController,
                     mRootTaskDisplayAreaOrganizer,
                     mContext,

@@ -3940,6 +3940,7 @@ package android.content {
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
     field public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
+    field @FlaggedApi("android.net.wifi.flags.usd") public static final String WIFI_USD_SERVICE = "wifi_usd";
   }
 
   public final class ContextParams {
@@ -5209,6 +5210,11 @@ package android.hardware.contexthub {
     method @NonNull public java.util.Collection<android.hardware.contexthub.HubServiceInfo> getServiceInfoCollection();
     method @Nullable public String getTag();
     method public int getVersion();
+    field public static final int REASON_CLOSE_ENDPOINT_SESSION_REQUESTED = 4; // 0x4
+    field public static final int REASON_ENDPOINT_INVALID = 5; // 0x5
+    field public static final int REASON_ENDPOINT_STOPPED = 6; // 0x6
+    field public static final int REASON_FAILURE = 0; // 0x0
+    field public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3; // 0x3
   }
 
   public static final class HubEndpoint.Builder {
@@ -5295,16 +5301,13 @@ package android.hardware.contexthub {
 
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointDiscoveryCallback {
     method public void onEndpointsStarted(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>);
-    method public void onEndpointsStopped(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>);
+    method public void onEndpointsStopped(@NonNull java.util.List<android.hardware.contexthub.HubDiscoveryInfo>, int);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
     method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
     method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo, @Nullable android.hardware.contexthub.HubServiceInfo);
     method public void onSessionOpened(@NonNull android.hardware.contexthub.HubEndpointSession);
-    field public static final int REASON_CLOSE_ENDPOINT_SESSION_REQUESTED = 4; // 0x4
-    field public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3; // 0x3
-    field public static final int REASON_UNSPECIFIED = 0; // 0x0
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointMessageCallback {
@@ -7634,10 +7637,11 @@ package android.media {
     method public boolean isActive();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public boolean isMuted();
     method public boolean isSpatialized();
-    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_APP_OPS = 8; // 0x8
+    field @Deprecated @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_APP_OPS = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_CLIENT_VOLUME = 16; // 0x10
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_MASTER = 1; // 0x1
     field @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_OP_CONTROL_AUDIO = 128; // 0x80
+    field @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_OP_PLAY_AUDIO = 8; // 0x8
     field @FlaggedApi("android.media.audio.muted_by_port_volume_api") @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_PORT_VOLUME = 64; // 0x40
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_STREAM_MUTED = 4; // 0x4
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int MUTED_BY_STREAM_VOLUME = 2; // 0x2

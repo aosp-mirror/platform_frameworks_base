@@ -31,6 +31,7 @@ oneway interface IContextHubEndpointDiscoveryCallback {
     /**
      * Called when endpoint(s) stopped.
      * @param hubEndpointInfoList The list of endpoints that started.
+     * @param reason The reason why the endpoints stopped.
      */
-    void onEndpointsStopped(in HubEndpointInfo[] hubEndpointInfoList);
+    void onEndpointsStopped(in HubEndpointInfo[] hubEndpointInfoList, int reason);
 }

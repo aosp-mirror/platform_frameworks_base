@@ -17,7 +17,7 @@
 package com.android.server.audio;
 
 import static android.media.AudioPlaybackConfiguration.EXTRA_PLAYER_EVENT_MUTE;
-import static android.media.AudioPlaybackConfiguration.MUTED_BY_APP_OPS;
+import static android.media.AudioPlaybackConfiguration.MUTED_BY_OP_PLAY_AUDIO;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_CLIENT_VOLUME;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_MASTER;
 import static android.media.AudioPlaybackConfiguration.MUTED_BY_PORT_VOLUME;
@@ -1377,8 +1377,8 @@ public final class PlaybackActivityMonitor
                         if ((eventValue & MUTED_BY_STREAM_MUTED) != 0) {
                             builder.append("streamMute ");
                         }
-                        if ((eventValue & MUTED_BY_APP_OPS) != 0) {
-                            builder.append("appOps ");
+                        if ((eventValue & MUTED_BY_OP_PLAY_AUDIO) != 0) {
+                            builder.append("opPlayAudio ");
                         }
                         if ((eventValue & MUTED_BY_CLIENT_VOLUME) != 0) {
                             builder.append("clientVolume ");

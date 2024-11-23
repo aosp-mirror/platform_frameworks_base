@@ -73,6 +73,11 @@ class ResizingState(tileSpec: TileSpec, startsAsIcon: Boolean) {
         anchoredDraggableState.animateTo(if (isIcon) QSDragAnchor.Icon else QSDragAnchor.Large)
     }
 
+    suspend fun toggleCurrentValue() {
+        val isIcon = anchoredDraggableState.currentValue == QSDragAnchor.Icon
+        updateCurrentValue(!isIcon)
+    }
+
     fun progress(): Float = anchoredDraggableState.progress(QSDragAnchor.Icon, QSDragAnchor.Large)
 
     /**

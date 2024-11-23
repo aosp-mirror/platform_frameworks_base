@@ -26,6 +26,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.Overridable;
 import android.content.Intent;
@@ -87,6 +88,22 @@ public class SaferIntentUtils {
     @Overridable
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS = 229362273;
+
+    /**
+     * Intents sent from apps enabling this feature will stop resolving to components with
+     * non matching intent filters, even when explicitly setting a component name, unless the
+     * target components are in the same app as the calling app.
+     * <p>
+     * When an app registers an exported component in its manifest and adds &lt;intent-filter&gt;s,
+     * the component can be started by any intent - even those that do not match the intent filter.
+     * This has proven to be something that many developers find counterintuitive.
+     * Without checking the intent when the component is started, in some circumstances this can
+     * allow 3P apps to trigger internal-only functionality.
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     @Nullable
     private static ParsedMainComponent infoToComponent(
@@ -249,6 +266,20 @@ public class SaferIntentUtils {
      */
     public static void enforceIntentFilterMatching(
             IntentArgs args, List<ResolveInfo> resolveInfos) {
+        // Switch to the new intent matching logic if the feature flag is enabled.
+        // Otherwise, use the existing AppCompat based implementation.
+        if (Flags.enableIntentMatchingFlags()) {
+            enforceIntentFilterMatchingWithIntentMatchingFlags(args, resolveInfos);
+        } else {
+            enforceIntentFilterMatchingWithAppCompat(args, resolveInfos);
+        }
+    }
+
+    /**
+     * This version of the method is implemented in Android B and uses "IntentMatchingFlags"
+     */
+    private static void enforceIntentFilterMatchingWithIntentMatchingFlags(
+                IntentArgs args, List<ResolveInfo> resolveInfos) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
 
         // Do not enforce filter matching when the caller is system or root
@@ -334,6 +365,97 @@ public class SaferIntentUtils {
                     Slog.v(TAG, "-----------------------------");
                 }
                 resolveInfos.remove(i);
+            }
+        }
+    }
+
+    /**
+     * This version of the method is implemented in Android V and uses "AppCompat"
+     */
+    private static void enforceIntentFilterMatchingWithAppCompat(
+            IntentArgs args, List<ResolveInfo> resolveInfos) {
+        if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
+
+        // Do not enforce filter matching when the caller is system or root
+        if (ActivityManager.canAccessUnexportedComponents(args.callingUid)) return;
+
+        final Computer computer = (Computer) args.snapshot;
+        final ComponentResolverApi resolver = computer.getComponentResolver();
+
+        final Printer logPrinter = DEBUG_INTENT_MATCHING
+                ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
+                : null;
+
+        final boolean enforceMatch = Flags.enforceIntentFilterMatch()
+                && args.isChangeEnabled(ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS);
+        final boolean blockNullAction = Flags.blockNullActionIntents()
+                && args.isChangeEnabled(IntentFilter.BLOCK_NULL_ACTION_INTENTS);
+
+        for (int i = resolveInfos.size() - 1; i >= 0; --i) {
+            final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
+
+            // Skip filter matching when the caller is targeting the same app
+            if (UserHandle.isSameApp(args.callingUid, info.applicationInfo.uid)) {
+                continue;
+            }
+
+            final ParsedMainComponent comp = infoToComponent(info, resolver, args.isReceiver);
+
+            if (comp == null || comp.getIntents().isEmpty()) {
+                continue;
+            }
+
+            Boolean match = null;
+
+            if (args.intent.getAction() == null) {
+                args.reportEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
+                        enforceMatch && blockNullAction);
+                if (blockNullAction) {
+                    // Skip intent filter matching if blocking null action
+                    match = false;
+                }
+            }
+
+            if (match == null) {
+                // Check if any intent filter matches
+                for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
+                    IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
+                    if (IntentResolver.intentMatchesFilter(
+                            intentFilter, args.intent, args.resolvedType)) {
+                        match = true;
+                        break;
+                    }
+                }
+            }
+
+            // At this point, the value `match` has the following states:
+            // null : Intent does not match any intent filter
+            // false: Null action intent detected AND blockNullAction == true
+            // true : The intent matches at least one intent filter
+
+            if (match == null) {
+                args.reportEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
+                        enforceMatch);
+                match = false;
+            }
+
+            if (!match) {
+                // All non-matching intents has to be marked accordingly
+                if (Flags.enforceIntentFilterMatch()) {
+                    args.intent.addExtendedFlags(Intent.EXTENDED_FLAG_FILTER_MISMATCH);
+                }
+                if (enforceMatch) {
+                    Slog.w(TAG, "Intent does not match component's intent filter: " + args.intent);
+                    Slog.w(TAG, "Access blocked: " + comp.getComponentName());
+                    if (DEBUG_INTENT_MATCHING) {
+                        Slog.v(TAG, "Component intent filters:");
+                        comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
+                        Slog.v(TAG, "-----------------------------");
+                    }
+                    resolveInfos.remove(i);
+                }
             }
         }
     }

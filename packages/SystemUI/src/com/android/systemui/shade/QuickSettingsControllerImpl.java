@@ -98,7 +98,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
@@ -141,7 +141,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final NotificationShadeDepthController mDepthController;
     private final ShadeHeaderController mShadeHeaderController;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final ShadeTouchableRegionManager mShadeTouchableRegionManager;
     private final Provider<StatusBarLongPressGestureDetector> mStatusBarLongPressGestureDetector;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -317,7 +317,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             NotificationShadeDepthController notificationShadeDepthController,
             ShadeHeaderController shadeHeaderController,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ShadeTouchableRegionManager shadeTouchableRegionManager,
             Provider<StatusBarLongPressGestureDetector> statusBarLongPressGestureDetector,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController keyguardBypassController,
@@ -366,7 +366,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mDepthController = notificationShadeDepthController;
         mShadeHeaderController = shadeHeaderController;
-        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mShadeTouchableRegionManager = shadeTouchableRegionManager;
         mStatusBarLongPressGestureDetector = statusBarLongPressGestureDetector;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = keyguardBypassController;
@@ -695,7 +695,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
                 /* bottom= */ headerBottom + frameTop);
         // Also allow QS to intercept if the touch is near the notch.
-        mStatusBarTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
+        mShadeTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
         final boolean onHeader = mInterceptRegion.contains((int) x, (int) y);
 
         if (getExpanded()) {

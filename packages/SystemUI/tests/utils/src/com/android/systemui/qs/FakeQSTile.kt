@@ -19,10 +19,12 @@ package com.android.systemui.qs
 import com.android.internal.logging.InstanceId
 import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 
 class FakeQSTile(var user: Int, var available: Boolean = true) : QSTile {
     private var tileSpec: String? = null
     var destroyed = false
+    var hasDetailsViewModel: Boolean = true
     private var state = QSTile.State()
     val callbacks = mutableListOf<QSTile.Callback>()
 
@@ -89,6 +91,13 @@ class FakeQSTile(var user: Int, var available: Boolean = true) : QSTile {
 
     override fun isListening(): Boolean {
         return false
+    }
+
+    override fun getDetailsViewModel(): FakeTileDetailsViewModel? {
+        if (hasDetailsViewModel) {
+            return FakeTileDetailsViewModel(tileSpec)
+        }
+        return null
     }
 
     fun changeState(newState: QSTile.State) {

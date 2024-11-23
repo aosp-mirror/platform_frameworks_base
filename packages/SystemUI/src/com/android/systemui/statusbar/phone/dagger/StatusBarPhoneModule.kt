@@ -207,5 +207,19 @@ interface StatusBarPhoneModule {
                 singleDisplayLazy.get()
             }
         }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(AutoHideControllerStore::class)
+        fun storeAsCoreStartable(
+            multiDisplayLazy: Lazy<MultiDisplayAutoHideControllerStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
     }
 }

@@ -1509,6 +1509,16 @@ flag {
 }
 
 flag {
+   name: "sim_pin_use_slot_id"
+   namespace: "systemui"
+   description: "Reorient SIM data processing around slotId instead of subId"
+   bug: "376173142"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "use_transitions_for_keyguard_occluded"
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"

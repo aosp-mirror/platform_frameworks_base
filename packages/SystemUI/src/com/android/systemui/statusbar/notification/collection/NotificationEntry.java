@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -675,8 +676,8 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.isPinnedAndExpanded();
     }
 
-    public void setRowPinned(boolean pinned) {
-        if (row != null) row.setPinned(pinned);
+    public void setRowPinnedStatus(PinnedStatus pinnedStatus) {
+        if (row != null) row.setPinnedStatus(pinnedStatus);
     }
 
     public boolean isRowHeadsUp() {
@@ -1075,7 +1076,7 @@ public final class NotificationEntry extends ListEntry {
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
             return mPromotedNotificationContentModel;
         } else {
-            Log.wtf(TAG, "getting promoted content without feature flag enabled");
+            Log.wtf(TAG, "getting promoted content without feature flag enabled", new Throwable());
             return null;
         }
     }
@@ -1089,7 +1090,7 @@ public final class NotificationEntry extends ListEntry {
         if (PromotedNotificationContentModel.featureFlagEnabled()) {
             this.mPromotedNotificationContentModel = promotedNotificationContentModel;
         } else {
-            Log.wtf(TAG, "setting promoted content without feature flag enabled");
+            Log.wtf(TAG, "setting promoted content without feature flag enabled", new Throwable());
         }
     }
 

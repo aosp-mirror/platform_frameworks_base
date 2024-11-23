@@ -14,11 +14,11 @@ import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.data.repository.NotificationLaunchAnimationRepository
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.HeadsUpUtil
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.HeadsUpUtil
 import com.android.systemui.testKosmos
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -69,7 +69,7 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 headsUpManager,
                 notification,
                 kosmos.interactionJankMonitor,
-                onFinishAnimationCallback
+                onFinishAnimationCallback,
             )
     }
 
@@ -95,7 +95,7 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 notificationKey,
                 /* releaseImmediately= */ true,
                 /* animate= */ true,
-                /* reason= */ "onIntentStarted(willAnimate=false)"
+                /* reason= */ "onIntentStarted(willAnimate=false)",
             )
         verify(onFinishAnimationCallback).run()
     }
@@ -118,7 +118,7 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 notificationKey,
                 /* releaseImmediately= */ true,
                 /* animate= */ true,
-                /* reason= */ "onLaunchAnimationCancelled()"
+                /* reason= */ "onLaunchAnimationCancelled()",
             )
         verify(onFinishAnimationCallback).run()
     }
@@ -141,7 +141,7 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 notificationKey,
                 /* releaseImmediately= */ true,
                 /* animate= */ false,
-                /* reason= */ "onLaunchAnimationEnd()"
+                /* reason= */ "onLaunchAnimationEnd()",
             )
         verify(onFinishAnimationCallback).run()
     }
@@ -180,14 +180,14 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 summary.key,
                 /* releaseImmediately= */ true,
                 /* animate= */ false,
-                /* reason= */ "onLaunchAnimationEnd()"
+                /* reason= */ "onLaunchAnimationEnd()",
             )
         verify(headsUpManager, never())
             .removeNotification(
                 notification.entry.key,
                 /* releaseImmediately= */ true,
                 /* animate= */ false,
-                /* reason= */ "onLaunchAnimationEnd()"
+                /* reason= */ "onLaunchAnimationEnd()",
             )
     }
 

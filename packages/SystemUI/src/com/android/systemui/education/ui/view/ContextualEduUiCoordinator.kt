@@ -27,6 +27,7 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationCompat
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -39,7 +40,6 @@ import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutoria
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A class to show contextual education on UI based on the edu produced from
@@ -107,6 +107,7 @@ constructor(
     }
 
     private fun showDialog(model: ContextualEduToastViewModel) {
+        dialog?.dismiss()
         dialog = createDialog(model)
         dialog?.show()
     }

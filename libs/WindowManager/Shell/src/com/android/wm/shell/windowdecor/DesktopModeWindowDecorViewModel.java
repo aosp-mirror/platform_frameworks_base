@@ -39,7 +39,7 @@ import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.Indica
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
-import static com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer.MANAGE_WINDOWS_MINIMUM_INSTANCES;
+import static com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer.MANAGE_WINDOWS_MINIMUM_INSTANCES;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -586,11 +586,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (decoration == null) {
             return;
         }
-        mInteractionJankMonitor.begin(
-                decoration.mTaskSurface, mContext, mMainHandler,
-                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo, resizeTrigger,
-                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent));
+                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent), () -> {
+                    mInteractionJankMonitor.begin(
+                            decoration.mTaskSurface, mContext, mMainHandler,
+                            Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
+                    return null;
+                }, () -> {
+                    mInteractionJankMonitor.begin(
+                            decoration.mTaskSurface, mContext, mMainHandler,
+                            Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW, source);
+                    return null;
+                });
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }

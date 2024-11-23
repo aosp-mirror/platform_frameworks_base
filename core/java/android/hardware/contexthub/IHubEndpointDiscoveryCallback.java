@@ -42,7 +42,8 @@ public interface IHubEndpointDiscoveryCallback {
      * Called when a list of hub endpoints have stopped.
      *
      * @param discoveryInfoList The list containing hub discovery information.
+     * @param reason The reason the endpoints stopped.
      */
-    // TODO(b/375487784): Add endpoint stop reason
-    void onEndpointsStopped(@NonNull List<HubDiscoveryInfo> discoveryInfoList);
+    void onEndpointsStopped(
+            @NonNull List<HubDiscoveryInfo> discoveryInfoList, @HubEndpoint.Reason int reason);
 }

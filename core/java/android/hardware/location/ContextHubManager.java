@@ -791,7 +791,7 @@ public final class ContextHubManager {
             }
 
             @Override
-            public void onEndpointsStopped(HubEndpointInfo[] hubEndpointInfoList) {
+            public void onEndpointsStopped(HubEndpointInfo[] hubEndpointInfoList, int reason) {
                 if (hubEndpointInfoList.length == 0) {
                     Log.w(TAG, "onEndpointsStopped: received empty discovery list");
                     return;
@@ -815,7 +815,7 @@ public final class ContextHubManager {
                             if (discoveryList.isEmpty()) {
                                 Log.w(TAG, "onEndpointsStopped: no matching service descriptor");
                             } else {
-                                callback.onEndpointsStopped(discoveryList);
+                                callback.onEndpointsStopped(discoveryList, reason);
                             }
                         });
             }

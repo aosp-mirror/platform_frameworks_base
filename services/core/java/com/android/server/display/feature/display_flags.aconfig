@@ -478,3 +478,14 @@ flag {
     bug: "378385869"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "subscribe_granular_display_events"
+    namespace: "display_manager"
+    description: "Enable subscription to granular display change events."
+    bug: "379250634"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

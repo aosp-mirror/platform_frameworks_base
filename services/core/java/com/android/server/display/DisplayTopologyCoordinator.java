@@ -25,9 +25,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 /**
  * Manages the relative placement (topology) of extended displays. Responsible for updating and
@@ -35,7 +33,7 @@ import java.util.function.Consumer;
  */
 class DisplayTopologyCoordinator {
 
-    @GuardedBy("mSyncRoot")
+    @GuardedBy("mLock")
     private DisplayTopology mTopology;
 
     /**
@@ -43,31 +41,16 @@ class DisplayTopologyCoordinator {
      */
     private final BooleanSupplier mIsExtendedDisplayEnabled;
 
-    /**
-     * Callback used to send topology updates.
-     * Should be invoked from the corresponding executor.
-     * A copy of the topology should be sent that will not be modified by the system.
-     */
-    private final Consumer<DisplayTopology> mOnTopologyChangedCallback;
-    private final Executor mTopologyChangeExecutor;
-    private final DisplayManagerService.SyncRoot mSyncRoot;
+    private final Object mLock = new Object();
 
-    DisplayTopologyCoordinator(BooleanSupplier isExtendedDisplayEnabled,
-            Consumer<DisplayTopology> onTopologyChangedCallback,
-            Executor topologyChangeExecutor, DisplayManagerService.SyncRoot syncRoot) {
-        this(new Injector(), isExtendedDisplayEnabled, onTopologyChangedCallback,
-                topologyChangeExecutor, syncRoot);
+    DisplayTopologyCoordinator(BooleanSupplier isExtendedDisplayEnabled) {
+        this(new Injector(), isExtendedDisplayEnabled);
     }
 
     @VisibleForTesting
-    DisplayTopologyCoordinator(Injector injector, BooleanSupplier isExtendedDisplayEnabled,
-            Consumer<DisplayTopology> onTopologyChangedCallback,
-            Executor topologyChangeExecutor, DisplayManagerService.SyncRoot syncRoot) {
+    DisplayTopologyCoordinator(Injector injector, BooleanSupplier isExtendedDisplayEnabled) {
         mTopology = injector.getTopology();
         mIsExtendedDisplayEnabled = isExtendedDisplayEnabled;
-        mOnTopologyChangedCallback = onTopologyChangedCallback;
-        mTopologyChangeExecutor = topologyChangeExecutor;
-        mSyncRoot = syncRoot;
     }
 
     /**
@@ -78,9 +61,8 @@ class DisplayTopologyCoordinator {
         if (!isDisplayAllowedInTopology(info)) {
             return;
         }
-        synchronized (mSyncRoot) {
+        synchronized (mLock) {
             mTopology.addDisplay(info.displayId, getWidth(info), getHeight(info));
-            sendTopologyUpdateLocked();
         }
     }
 
@@ -89,9 +71,8 @@ class DisplayTopologyCoordinator {
      * @param displayId The logical display ID
      */
     void onDisplayRemoved(int displayId) {
-        synchronized (mSyncRoot) {
+        synchronized (mLock) {
             mTopology.removeDisplay(displayId);
-            sendTopologyUpdateLocked();
         }
     }
 
@@ -99,15 +80,14 @@ class DisplayTopologyCoordinator {
      * @return A deep copy of the topology.
      */
     DisplayTopology getTopology() {
-        synchronized (mSyncRoot) {
+        synchronized (mLock) {
             return mTopology;
         }
     }
 
     void setTopology(DisplayTopology topology) {
-        synchronized (mSyncRoot) {
+        synchronized (mLock) {
             mTopology = topology;
-            sendTopologyUpdateLocked();
         }
     }
 
@@ -116,7 +96,7 @@ class DisplayTopologyCoordinator {
      * @param pw The stream to dump information to.
      */
     void dump(PrintWriter pw) {
-        synchronized (mSyncRoot) {
+        synchronized (mLock) {
             mTopology.dump(pw);
         }
     }
@@ -142,12 +122,6 @@ class DisplayTopologyCoordinator {
     private boolean isDisplayAllowedInTopology(DisplayInfo info) {
         return mIsExtendedDisplayEnabled.getAsBoolean()
                 && info.displayGroupId == Display.DEFAULT_DISPLAY_GROUP;
-    }
-
-    @GuardedBy("mSyncRoot")
-    private void sendTopologyUpdateLocked() {
-        DisplayTopology copy = mTopology.copy();
-        mTopologyChangeExecutor.execute(() -> mOnTopologyChangedCallback.accept(copy));
     }
 
     @VisibleForTesting

@@ -31,7 +31,6 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import com.android.internal.R;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
@@ -279,6 +278,9 @@ public interface ParsingPackage {
 
     ParsingPackage setNativeHeapZeroInitialized(
             @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized);
+
+    /** Manifest option pageSizeCompat will populate this field */
+    ParsingPackage setPageSizeAppCompatFlags(@ApplicationInfo.PageSizeAppCompatFlags int value);
 
     ParsingPackage setRequestRawExternalStorageAccess(
             @Nullable Boolean requestRawExternalStorageAccess);

@@ -74,16 +74,12 @@ class PreferenceScreenBindingHelper(
     private val preferences: ImmutableMap<String, PreferenceHierarchyNode>
     private val dependencies: ImmutableMultimap<String, String>
     private val lifecycleAwarePreferences: Array<PreferenceLifecycleProvider>
-    private val storages = mutableSetOf<KeyedObservable<String>>()
+    private val storages = mutableMapOf<String, KeyedObservable<String>>()
 
     private val preferenceObserver: KeyedObserver<String?>
 
     private val storageObserver =
-        KeyedObserver<String?> { key, _ ->
-            if (key != null) {
-                notifyChange(key, CHANGE_REASON_VALUE)
-            }
-        }
+        KeyedObserver<String> { key, _ -> notifyChange(key, CHANGE_REASON_VALUE) }
 
     init {
         val preferencesBuilder = ImmutableMap.builder<String, PreferenceHierarchyNode>()
@@ -98,7 +94,6 @@ class PreferenceScreenBindingHelper(
                 preferencesBuilder.put(it.key, this)
                 it.dependencyOfEnabledState(context)?.addDependency(it)
                 if (it is PreferenceLifecycleProvider) lifecycleAwarePreferences.add(it)
-                if (it is PersistentPreference<*>) storages.add(it.storage(context))
             }
         }
 
@@ -120,7 +115,16 @@ class PreferenceScreenBindingHelper(
 
         preferenceObserver = KeyedObserver { key, reason -> onPreferenceChange(key, reason) }
         addObserver(preferenceObserver, mainExecutor)
-        for (storage in storages) storage.addObserver(storageObserver, mainExecutor)
+
+        preferenceScreen.forEachRecursively {
+            val preferenceDataStore = it.preferenceDataStore
+            if (preferenceDataStore is PreferenceDataStoreAdapter) {
+                val key = it.key
+                val keyValueStore = preferenceDataStore.keyValueStore
+                storages[key] = keyValueStore
+                keyValueStore.addObserver(key, storageObserver, mainExecutor)
+            }
+        }
     }
 
     private fun onPreferenceChange(key: String?, reason: Int) {
@@ -181,7 +185,7 @@ class PreferenceScreenBindingHelper(
 
     fun onDestroy() {
         removeObserver(preferenceObserver)
-        for (storage in storages) storage.removeObserver(storageObserver)
+        for ((key, storage) in storages) storage.removeObserver(key, storageObserver)
         for (preference in lifecycleAwarePreferences) {
             preference.onDestroy(preferenceLifecycleContext)
         }
