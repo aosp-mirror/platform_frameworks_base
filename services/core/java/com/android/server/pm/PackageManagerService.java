@@ -6640,6 +6640,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @NonNull
+        public List<String> getAllApexDirectories() {
+            PackageManagerServiceUtils.enforceSystemOrRoot(
+                    "getAllApexDirectories can only be called by system or root");
+            List<String> apexDirectories = new ArrayList<>();
+            List<ApexManager.ActiveApexInfo> apexes = mApexManager.getActiveApexInfos();
+            for (int i = 0; i < apexes.size(); i++) {
+                ApexManager.ActiveApexInfo apex = apexes.get(i);
+                apexDirectories.add(apex.apexDirectory.getAbsolutePath());
+            }
+            return apexDirectories;
+        }
+
+        @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
             try {
