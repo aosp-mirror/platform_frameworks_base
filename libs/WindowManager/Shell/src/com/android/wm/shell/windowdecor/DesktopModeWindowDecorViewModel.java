@@ -586,11 +586,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         if (decoration == null) {
             return;
         }
-        mInteractionJankMonitor.begin(
-                decoration.mTaskSurface, mContext, mMainHandler,
-                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo, resizeTrigger,
-                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent));
+                DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent), () -> {
+                    mInteractionJankMonitor.begin(
+                            decoration.mTaskSurface, mContext, mMainHandler,
+                            Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
+                    return null;
+                }, () -> {
+                    mInteractionJankMonitor.begin(
+                            decoration.mTaskSurface, mContext, mMainHandler,
+                            Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW, source);
+                    return null;
+                });
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
