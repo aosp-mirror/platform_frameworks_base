@@ -28,6 +28,7 @@ import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RES
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.InputSettings
 import android.hardware.input.KeyGestureEvent
+import android.hardware.input.KeyGestureEvent.KeyGestureType
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,8 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomization
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.settings.UserTracker
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,8 +55,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @SysUISingleton
 class CustomShortcutCategoriesRepository
@@ -65,7 +66,7 @@ constructor(
     @Background private val bgCoroutineContext: CoroutineContext,
     private val shortcutCategoriesUtils: ShortcutCategoriesUtils,
     private val context: Context,
-    private val inputGestureMaps: InputGestureMaps
+    private val inputGestureMaps: InputGestureMaps,
 ) : ShortcutCategoriesRepository {
 
     private val userContext: Context
@@ -130,9 +131,7 @@ constructor(
                     emptyList()
                 } else {
                     val customInputGesturesForUser: List<InputGestureData> =
-                        if (InputSettings.isCustomizableInputGesturesFeatureFlagEnabled()) {
-                            inputManager.getCustomInputGestures(/* filter= */ null)
-                        } else emptyList()
+                        getCustomInputGestures()
                     val sources = toInternalGroupSources(customInputGesturesForUser)
                     val supportedKeyCodes =
                         shortcutCategoriesUtils.fetchSupportedKeyCodes(
@@ -173,16 +172,20 @@ constructor(
                 .addKeyGestureTypeFromShortcutLabel()
                 .addTriggerFromSelectedKeyCombination()
                 .build()
-            // TODO(b/379648200) add app launch data for application categories shortcut after
-            // dynamic
-            // label/icon mapping implementation
+            // TODO(b/379648200) add app launch data after dynamic label/icon mapping implementation
         } catch (e: IllegalArgumentException) {
             Log.w(TAG, "could not add custom shortcut: $e")
             return null
         }
     }
 
-    suspend fun confirmAndSetShortcutCurrentlyBeingCustomized(): ShortcutCustomizationRequestResult {
+    private fun retrieveInputGestureDataForShortcutBeingDeleted(): InputGestureData? {
+        val keyGestureType = getKeyGestureTypeFromShortcutBeingDeletedLabel()
+        return getCustomInputGestures().firstOrNull { it.action.keyGestureType() == keyGestureType }
+    }
+
+    suspend fun confirmAndSetShortcutCurrentlyBeingCustomized():
+        ShortcutCustomizationRequestResult {
         return withContext(bgCoroutineContext) {
             val inputGestureData =
                 buildInputGestureDataForShortcutBeingCustomized()
@@ -201,24 +204,79 @@ constructor(
         }
     }
 
-    private fun Builder.addKeyGestureTypeFromShortcutLabel(): Builder {
-        val shortcutBeingCustomized =
-            getShortcutBeingCustomized() as? ShortcutCustomizationRequestInfo.Add
-
-        if (shortcutBeingCustomized == null) {
-            Log.w(TAG, "User requested to set shortcut but shortcut being customized is null")
-            return this
+    suspend fun deleteShortcutCurrentlyBeingCustomized():
+        ShortcutCustomizationRequestResult {
+        return withContext(bgCoroutineContext) {
+            val inputGestureData =
+                retrieveInputGestureDataForShortcutBeingDeleted()
+                    ?: return@withContext ShortcutCustomizationRequestResult.ERROR_OTHER
+            return@withContext when (
+                val result = inputManager.removeCustomInputGesture(inputGestureData)
+            ) {
+                CUSTOM_INPUT_GESTURE_RESULT_SUCCESS -> ShortcutCustomizationRequestResult.SUCCESS
+                else -> {
+                    Log.w(
+                        TAG,
+                        "Attempted to delete shortcut being customized " +
+                            "${_shortcutBeingCustomized.value} but ran into an error. InputGestureData" +
+                            " = $inputGestureData, error code: $result",
+                    )
+                    ShortcutCustomizationRequestResult.ERROR_OTHER
+                }
+            }
         }
+    }
 
-        val keyGestureType =
-            inputGestureMaps.shortcutLabelToKeyGestureTypeMap[shortcutBeingCustomized.label]
+    private fun getCustomInputGestures(): List<InputGestureData> {
+        return if (InputSettings.isCustomizableInputGesturesFeatureFlagEnabled()) {
+            inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
+        } else emptyList()
+    }
+
+    private fun Builder.addKeyGestureTypeFromShortcutLabel(): Builder {
+        val keyGestureType = getKeyGestureTypeFromShortcutBeingCustomizedLabel()
 
         if (keyGestureType == null) {
-            Log.w(TAG, "Could not find KeyGestureType for shortcut $shortcutBeingCustomized")
+            Log.w(
+                TAG,
+                "Could not find KeyGestureType for shortcut ${_shortcutBeingCustomized.value}",
+            )
             return this
         }
 
         return setKeyGestureType(keyGestureType)
+    }
+
+    @KeyGestureType
+    private fun getKeyGestureTypeFromShortcutBeingCustomizedLabel(): Int? {
+        val shortcutBeingCustomized =
+            getShortcutBeingCustomized() as? ShortcutCustomizationRequestInfo.Add
+
+        if (shortcutBeingCustomized == null) {
+            Log.w(
+                TAG,
+                "Requested key gesture type from label but shortcut being customized is null",
+            )
+            return null
+        }
+
+        return inputGestureMaps.shortcutLabelToKeyGestureTypeMap[shortcutBeingCustomized.label]
+    }
+
+    @KeyGestureType
+    private fun getKeyGestureTypeFromShortcutBeingDeletedLabel(): Int? {
+        val shortcutBeingCustomized =
+            getShortcutBeingCustomized() as? ShortcutCustomizationRequestInfo.Delete
+
+        if (shortcutBeingCustomized == null) {
+            Log.w(
+                TAG,
+                "Requested key gesture type from label but shortcut being customized is null",
+            )
+            return null
+        }
+
+        return inputGestureMaps.shortcutLabelToKeyGestureTypeMap[shortcutBeingCustomized.label]
     }
 
     private fun Builder.addTriggerFromSelectedKeyCombination(): Builder {
@@ -227,7 +285,7 @@ constructor(
             Log.w(
                 TAG,
                 "User requested to set shortcut but selected key combination is " +
-                        "$selectedKeyCombination",
+                    "$selectedKeyCombination",
             )
             return this
         }
@@ -235,8 +293,7 @@ constructor(
         return setTrigger(
             createKeyTrigger(
                 /* keycode = */ selectedKeyCombination.keyCode,
-                /* modifierState = */
-                shortcutCategoriesUtils.removeUnsupportedModifiers(
+                /* modifierState = */ shortcutCategoriesUtils.removeUnsupportedModifiers(
                     selectedKeyCombination.modifiers
                 ),
             )
@@ -256,10 +313,8 @@ constructor(
                 val keyTrigger = gestureData.trigger as KeyTrigger
                 val keyGestureType = gestureData.action.keyGestureType()
                 fetchGroupLabelByGestureType(keyGestureType)?.let { groupLabel ->
-                    toInternalKeyboardShortcutInfo(
-                        keyGestureType,
-                        keyTrigger
-                    )?.let { internalKeyboardShortcutInfo ->
+                    toInternalKeyboardShortcutInfo(keyGestureType, keyTrigger)?.let {
+                        internalKeyboardShortcutInfo ->
                         val group =
                             InternalKeyboardShortcutGroup(
                                 label = groupLabel,

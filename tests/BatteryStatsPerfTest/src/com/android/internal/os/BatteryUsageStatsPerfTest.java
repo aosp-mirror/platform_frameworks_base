@@ -159,7 +159,7 @@ public class BatteryUsageStatsPerfTest {
 
     private static BatteryUsageStats buildBatteryUsageStats() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[]{"FOO"}, true, false, false, false, 0)
+                new BatteryUsageStats.Builder(new String[]{"FOO"}, false, false, false, 0)
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
@@ -182,8 +182,7 @@ public class BatteryUsageStatsPerfTest {
                             .setTimeInProcessStateMs(UidBatteryConsumer.STATE_BACKGROUND, i * 1000);
             for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
                     componentId++) {
-                consumerBuilder.addConsumedPower(componentId, componentId * 123.0,
-                        BatteryConsumer.POWER_MODEL_POWER_PROFILE);
+                consumerBuilder.addConsumedPower(componentId, componentId * 123.0);
                 consumerBuilder.addUsageDurationMillis(componentId, componentId * 1000);
             }
 

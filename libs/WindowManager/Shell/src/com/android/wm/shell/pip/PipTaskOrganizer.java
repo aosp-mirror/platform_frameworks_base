@@ -26,6 +26,8 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
+import static com.android.wm.shell.desktopmode.DesktopModeUtils.calculateInitialBounds;
+import static com.android.wm.shell.desktopmode.DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
@@ -152,6 +154,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     @Nullable private final PipPerfHintController mPipPerfHintController;
     private final Optional<DesktopRepository> mDesktopRepositoryOptional;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    private final DisplayController mDisplayController;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
 
@@ -425,6 +428,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
         mDesktopRepositoryOptional = desktopRepositoryOptional;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+        mDisplayController = displayController;
         mTaskOrganizer = shellTaskOrganizer;
         mMainExecutor = mainExecutor;
 
@@ -754,19 +758,30 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /** Returns the bounds to restore to when exiting PIP mode. */
     // TODO(b/377581840): Instead of manually tracking bounds, use bounds from Core.
     public Rect getExitDestinationBounds() {
-        if (isPipLaunchedInDesktopMode()) {
-            final Rect freeformBounds = mDesktopRepositoryOptional.get().removeBoundsBeforeMinimize(
+        if (isPipExitingToDesktopMode()) {
+            // If we are exiting PiP while device is in Desktop mode:
+            // 1) If PiP was entered via Desktop minimize (e.g. via minimize button), restore to the
+            //    previous freeform bounds that is saved in DesktopRepository.
+            // 2) If PiP was entered through other means (e.g. user swipe up), exit to initial
+            //    freeform bounds. Note that this case has a flicker at the moment (b/379984108).
+            Rect freeformBounds = mDesktopRepositoryOptional.get().removeBoundsBeforeMinimize(
                     mTaskInfo.taskId);
-            return Objects.requireNonNullElseGet(freeformBounds, mPipBoundsState::getDisplayBounds);
+            return freeformBounds != null
+                    ? freeformBounds
+                    : calculateInitialBounds(
+                            mDisplayController.getDisplayLayout(mTaskInfo.displayId),
+                            mTaskInfo,
+                            DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         }
         return mPipBoundsState.getDisplayBounds();
     }
 
-    /** Returns whether PiP was launched while in desktop mode. */
-    // TODO(377581840): Update this check to include non-minimized cases, e.g. split to PiP etc.
-    private boolean isPipLaunchedInDesktopMode() {
+    /** Returns whether PiP is exiting while we're in desktop mode. */
+    // TODO(b/377581840): Update this check to include non-minimized cases, e.g. split to PiP etc.
+    private boolean isPipExitingToDesktopMode() {
         return Flags.enableDesktopWindowingPip() && mDesktopRepositoryOptional.isPresent()
-                && mDesktopRepositoryOptional.get().isMinimizedTask(mTaskInfo.taskId);
+                && (mDesktopRepositoryOptional.get().getVisibleTaskCount(mTaskInfo.displayId) > 0
+                    || isDisplayInFreeform());
     }
 
     private void exitLaunchIntoPipTask(WindowContainerTransaction wct) {
@@ -1827,23 +1842,28 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 == SPLIT_POSITION_TOP_OR_LEFT;
     }
 
+    private boolean isDisplayInFreeform() {
+        final DisplayAreaInfo tdaInfo = mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(
+                mTaskInfo.displayId);
+        if (tdaInfo != null) {
+            return tdaInfo.configuration.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM;
+        }
+        return false;
+    }
+
     /**
      * The windowing mode to restore to when resizing out of PIP direction. Defaults to undefined
      * and can be overridden to restore to an alternate windowing mode.
      */
     public int getOutPipWindowingMode() {
-        final DisplayAreaInfo tdaInfo = mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(
-                mTaskInfo.displayId);
-
-        // If PiP was launched while in desktop mode (we should return the task to freeform
-        // windowing mode):
+        // If we are exiting PiP while the device is in Desktop mode (the task should expand to
+        // freeform windowing mode):
         // 1) If the display windowing mode is freeform, set windowing mode to undefined so it will
         //    resolve the windowing mode to the display's windowing mode.
         // 2) If the display windowing mode is not freeform, set windowing mode to freeform.
-        if (tdaInfo != null && isPipLaunchedInDesktopMode()) {
-            final int displayWindowingMode =
-                    tdaInfo.configuration.windowConfiguration.getWindowingMode();
-            if (displayWindowingMode == WINDOWING_MODE_FREEFORM) {
+        if (isPipExitingToDesktopMode()) {
+            if (isDisplayInFreeform()) {
                 return WINDOWING_MODE_UNDEFINED;
             } else {
                 return WINDOWING_MODE_FREEFORM;

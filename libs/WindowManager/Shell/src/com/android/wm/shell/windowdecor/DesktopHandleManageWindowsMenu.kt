@@ -24,7 +24,7 @@ import android.view.WindowManager
 import android.window.TaskSnapshot
 import androidx.compose.ui.graphics.toArgb
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer

@@ -133,9 +133,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
 
         Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
 
-        // This is needed to make AndroidJUnit4ClassRunner happy.
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
-
         // Hook point to allow more customization.
         runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);
 

@@ -82,9 +82,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:paddingBottom="?dialogPreferredPadding"
-                    style="?android:attr/buttonBarStyle"
                     android:measureWithLargestChild="true">
                     <Button android:id="@+id/button2"
                             android:layout_width="wrap_content"
@@ -92,7 +91,7 @@
                             android:layout_gravity="center"
                             android:gravity="center"
                             android:layout_weight="1"
-                            style="@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog.Negative" />
+                            style="@*android:style/Widget.DeviceDefault.Button.WearMaterial3"/>
                     <Button android:id="@+id/button3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -100,22 +99,13 @@
                             android:gravity="center"
                             android:layout_weight="1"
                             style="?android:attr/buttonBarButtonStyle"/>
-                    <FrameLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-                        <Button android:id="@+id/button1"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:gravity="center"
-                                android:layout_weight="1"
-                                style="@style/Widget.DeviceDefault.Button.ButtonBar.AlertDialog.Confirm"/>
-                        <!-- This works as background. -->
-                        <ImageView
+                    <Button android:id="@+id/button1"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/dialog_alert_button_positive"/>
-                    </FrameLayout>
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_weight="1"
+                            style="@*android:style/Widget.DeviceDefault.Button.Filled"/>
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>

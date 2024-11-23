@@ -18,6 +18,7 @@ package com.android.systemui.navigationbar.gestural;
 import static android.content.pm.ActivityInfo.CONFIG_FONT_SCALE;
 import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHPAD;
+import static android.view.MotionEvent.TOOL_TYPE_FINGER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.Flags.edgebackGestureHandlerGetRunningTasksBackground;
@@ -216,6 +217,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final int mDisplayId;
 
     private final UiThreadContext mUiThreadContext;
+    private final Handler mBgHandler;
     private final Executor mBackgroundExecutor;
 
     private final Rect mPipExcludedBounds = new Rect();
@@ -378,11 +380,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         @Override
         public void onInputDeviceAdded(int deviceId) {
             if (isTrackpadDevice(deviceId)) {
-                boolean wasEmpty = mTrackpadsConnected.isEmpty();
-                mTrackpadsConnected.add(deviceId);
-                if (wasEmpty) {
-                    update();
-                }
+                // This updates the gesture handler state and should be running on the main thread.
+                mUiThreadContext.getHandler().post(() -> {
+                    boolean wasEmpty = mTrackpadsConnected.isEmpty();
+                    mTrackpadsConnected.add(deviceId);
+                    if (wasEmpty) {
+                        update();
+                    }
+                });
             }
         }
 
@@ -391,10 +396,13 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
         @Override
         public void onInputDeviceRemoved(int deviceId) {
-            mTrackpadsConnected.remove(deviceId);
-            if (mTrackpadsConnected.isEmpty()) {
-                update();
-            }
+            // This updates the gesture handler state and should be running on the main thread.
+            mUiThreadContext.getHandler().post(() -> {
+                mTrackpadsConnected.remove(deviceId);
+                if (mTrackpadsConnected.isEmpty()) {
+                    update();
+                }
+            });
         }
 
         private void update() {
@@ -408,12 +416,12 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         }
 
         private boolean isTrackpadDevice(int deviceId) {
+            // This is a blocking binder call that should run on a bg thread.
             InputDevice inputDevice = mInputManager.getInputDevice(deviceId);
             if (inputDevice == null) {
                 return false;
             }
-            return inputDevice.getSources() == (InputDevice.SOURCE_MOUSE
-                    | InputDevice.SOURCE_TOUCHPAD);
+            return inputDevice.getSources() == (SOURCE_MOUSE | SOURCE_TOUCHPAD);
         }
     };
 
@@ -457,6 +465,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mDisplayId = context.getDisplayId();
         mUiThreadContext = uiThreadContext;
         mBackgroundExecutor = backgroundExecutor;
+        mBgHandler = bgHandler;
         mUserTracker = userTracker;
         mOverviewProxyService = overviewProxyService;
         mSysUiState = sysUiState;
@@ -611,9 +620,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mIsAttached = true;
         mOverviewProxyService.addCallback(mQuickSwitchListener);
         mSysUiState.addCallback(mSysUiStateCallback);
-        mInputManager.registerInputDeviceListener(
-                mInputDeviceListener,
-                mUiThreadContext.getHandler());
+        mInputManager.registerInputDeviceListener(mInputDeviceListener, mBgHandler);
         int[] inputDevices = mInputManager.getInputDeviceIds();
         for (int inputDeviceId : inputDevices) {
             mInputDeviceListener.onInputDeviceAdded(inputDeviceId);
@@ -1089,8 +1096,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         && isValidTrackpadBackGesture(true /* isTrackpadEvent */);
             } else {
                 mAllowGesture = isBackAllowedCommon && !mUsingThreeButtonNav && isWithinInsets
-                    && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
-                    && !isButtonPressFromTrackpad(ev);
+                        && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
+                        && !isButtonPressFromTrackpad(ev);
             }
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
@@ -1202,10 +1209,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     private boolean isButtonPressFromTrackpad(MotionEvent ev) {
-        // We don't allow back for button press from the trackpad, and yet we do with a mouse.
-        int sources = InputManager.getInstance().getInputDevice(ev.getDeviceId()).getSources();
-        int sourceTrackpad = (SOURCE_MOUSE | SOURCE_TOUCHPAD);
-        return (sources & sourceTrackpad) == sourceTrackpad && ev.getButtonState() != 0;
+        return ev.getSource() == (SOURCE_MOUSE | SOURCE_TOUCHPAD)
+                && ev.getToolType(ev.getActionIndex()) == TOOL_TYPE_FINGER;
     }
 
     private void dispatchToBackAnimation(MotionEvent event) {

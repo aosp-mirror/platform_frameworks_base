@@ -164,12 +164,14 @@ class AppCompatCameraOverrides {
      * <p>The treatment is enabled when the following conditions are met:
      * <ul>
      * <li>Feature flag gating the camera compatibility free-form treatment is enabled.
-     * <li>Activity is opted in by the device manufacturer with override.
+     * <li>Activity is opted-in using per-app override, or the treatment is enabled for all apps.
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return Flags.enableCameraCompatForDesktopWindowing() && isChangeEnabled(mActivityRecord,
-                OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT);
+        return Flags.enableCameraCompatForDesktopWindowing() && (isChangeEnabled(mActivityRecord,
+                OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT)
+                || mActivityRecord.mWmService.mAppCompatConfiguration
+                    .isCameraCompatFreeformWindowingTreatmentEnabled());
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {

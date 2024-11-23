@@ -58,7 +58,7 @@ flag {
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable enhanced confirmation incall apis"
-    bug: "310220212"
+    bug: "364535720"
 }
 
 flag {
@@ -67,7 +67,7 @@ flag {
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable the blocking of certain app installs during an unknown call"
-    bug: "310220212"
+    bug: "364535720"
 }
 
 flag {
@@ -435,4 +435,13 @@ flag {
     namespace: "profile_experiences"
     description: "Use profile labels from UserManager for default app section titles to allow partner customization"
     bug: "358369931"
+}
+
+flag {
+    name: "wallet_role_cross_user_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "wallet_integration"
+    description: "Enable the Wallet role within profiles"
+    bug: "356107987"
 }

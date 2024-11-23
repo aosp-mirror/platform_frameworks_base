@@ -17,9 +17,10 @@
 package com.android.systemui.shade
 
 import android.content.Context
-import android.content.MutableContextWrapper
 import android.content.res.Resources
 import android.view.LayoutInflater
+import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.ConfigurationStateImpl
@@ -29,9 +30,12 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImp
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
+import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
+import com.android.systemui.shade.display.ShadeDisplayPolicyModule
 import com.android.systemui.shade.domain.interactor.ShadeDisplaysInteractor
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
@@ -56,7 +60,7 @@ import javax.inject.Provider
  * By using this dedicated module, we ensure the notification shade window always utilizes the
  * correct display context and resources, regardless of the display it's on.
  */
-@Module(includes = [OptionalShadeDisplayAwareBindings::class])
+@Module(includes = [OptionalShadeDisplayAwareBindings::class, ShadeDisplayPolicyModule::class])
 object ShadeDisplayAwareModule {
 
     /** Creates a new context for the shade window. */
@@ -65,9 +69,25 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     fun provideShadeDisplayAwareContext(context: Context): Context {
         return if (ShadeWindowGoesAround.isEnabled) {
-            MutableContextWrapper(context)
+            context
+                .createWindowContext(context.display, TYPE_NOTIFICATION_SHADE, /* options= */ null)
+                .apply { setTheme(R.style.Theme_SystemUI) }
         } else {
             context
+        }
+    }
+
+    @Provides
+    @ShadeDisplayAware
+    @SysUISingleton
+    fun provideShadeWindowManager(
+        defaultWindowManager: WindowManager,
+        @ShadeDisplayAware context: Context,
+    ): WindowManager {
+        return if (ShadeWindowGoesAround.isEnabled) {
+            context.getSystemService(WindowManager::class.java) as WindowManager
+        } else {
+            defaultWindowManager
         }
     }
 
@@ -159,6 +179,15 @@ object ShadeDisplayAwareModule {
     @SysUISingleton
     @Provides
     fun provideShadePositionRepository(impl: ShadeDisplaysRepositoryImpl): ShadeDisplaysRepository {
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        return impl
+    }
+
+    @SysUISingleton
+    @Provides
+    fun provideMutableShadePositionRepository(
+        impl: ShadeDisplaysRepositoryImpl
+    ): MutableShadeDisplaysRepository {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         return impl
     }

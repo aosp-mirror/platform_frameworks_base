@@ -126,7 +126,9 @@ public final class MessageQueue {
             // Use this awful heuristic to detect them.
             if (useConcurrent) {
                 final String processName = Process.myProcessName();
-                if (processName.contains("test") || processName.contains("Test")) {
+                if (processName == null
+                        || processName.contains("test")
+                        || processName.contains("Test")) {
                     useConcurrent = false;
                 }
             }

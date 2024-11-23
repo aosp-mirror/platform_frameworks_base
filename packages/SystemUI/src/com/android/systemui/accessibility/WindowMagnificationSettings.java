@@ -59,7 +59,6 @@ import android.widget.Switch;
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.Flags;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
 import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
@@ -460,12 +459,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
                 mFullScreenButton.setVisibility(View.GONE);
                 if (selectedButtonIndex == MagnificationSize.FULLSCREEN) {
-                    if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
-                        selectedButtonIndex =
-                                windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
-                    } else {
-                        selectedButtonIndex = MagnificationSize.CUSTOM;
-                    }
+                    selectedButtonIndex =
+                            windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
                 }
                 break;
 
@@ -482,10 +477,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 } else { // mode = ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                     mEditButton.setVisibility(View.VISIBLE);
                     mAllowDiagonalScrollingView.setVisibility(View.VISIBLE);
-                    if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
-                        selectedButtonIndex =
-                                windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
-                    }
+                    selectedButtonIndex =
+                            windowMagnificationFrameSizePrefs.getIndexForCurrentDensity();
                 }
                 break;
 

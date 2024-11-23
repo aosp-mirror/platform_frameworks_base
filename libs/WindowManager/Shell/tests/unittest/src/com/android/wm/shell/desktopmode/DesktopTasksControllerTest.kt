@@ -3751,26 +3751,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun toggleImmersive_enter_movesToImmersive() {
-    val task = setUpFreeformTask(DEFAULT_DISPLAY)
-    taskRepository.setTaskInFullImmersiveState(DEFAULT_DISPLAY, task.taskId, false /* immersive */)
-
-    controller.toggleDesktopTaskFullImmersiveState(task)
-
-    verify(mMockDesktopImmersiveController).moveTaskToImmersive(task)
-  }
-
-  @Test
-  fun toggleImmersive_exit_movesToNonImmersive() {
-    val task = setUpFreeformTask(DEFAULT_DISPLAY)
-    taskRepository.setTaskInFullImmersiveState(DEFAULT_DISPLAY, task.taskId, true /* immersive */)
-
-    controller.toggleDesktopTaskFullImmersiveState(task)
-
-    verify(mMockDesktopImmersiveController).moveTaskToNonImmersive(eq(task), any())
-  }
-
-  @Test
   @EnableFlags(FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
   fun onTaskInfoChanged_inImmersiveUnrequestsImmersive_exits() {
     val task = setUpFreeformTask(DEFAULT_DISPLAY)

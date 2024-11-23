@@ -17,7 +17,6 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -47,10 +46,12 @@ public class SatelliteInfo implements Parcelable {
     private UUID mId;
 
     /**
-     * Position information of a satellite.
+     * Position information of a geostationary satellite.
      * This includes the longitude and altitude of the satellite.
+     * If the SatellitePosition is invalid,
+     * longitudeDegree and altitudeKm will be represented as DOUBLE.NaN.
      */
-    @Nullable
+    @NonNull
     private SatellitePosition mPosition;
 
     /**
@@ -89,7 +90,7 @@ public class SatelliteInfo implements Parcelable {
      * @param earfcnRanges      The list of {@link EarfcnRange} objects representing the EARFCN
      *                          ranges supported by the satellite.
      */
-    public SatelliteInfo(@NonNull UUID satelliteId, @Nullable SatellitePosition satellitePosition,
+    public SatelliteInfo(@NonNull UUID satelliteId, @NonNull SatellitePosition satellitePosition,
             @NonNull List<Integer> bandList, @NonNull List<EarfcnRange> earfcnRanges) {
         mId = satelliteId;
         mPosition = satellitePosition;
@@ -135,10 +136,9 @@ public class SatelliteInfo implements Parcelable {
     /**
      * Returns the position of the satellite.
      *
-     * @return The {@link SatellitePosition} of the satellite, or {@code null} if the position is
-     * not available.
+     * @return The {@link SatellitePosition} of the satellite.
      */
-    @Nullable
+    @NonNull
     public SatellitePosition getSatellitePosition() {
         return mPosition;
     }

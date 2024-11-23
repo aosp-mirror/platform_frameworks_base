@@ -73,22 +73,17 @@ constructor(
         return dialogFactory.create(dialogDelegate = ShortcutCustomizationDialogDelegate()) { dialog
             ->
             val uiState by
-            viewModel.shortcutCustomizationUiState.collectAsStateWithLifecycle(
-                initialValue = ShortcutCustomizationUiState.Inactive
-            )
+                viewModel.shortcutCustomizationUiState.collectAsStateWithLifecycle(
+                    initialValue = ShortcutCustomizationUiState.Inactive
+                )
             val coroutineScope = rememberCoroutineScope()
             ShortcutCustomizationDialog(
                 uiState = uiState,
-                modifier = Modifier
-                    .width(364.dp)
-                    .wrapContentHeight()
-                    .padding(vertical = 24.dp),
+                modifier = Modifier.width(364.dp).wrapContentHeight().padding(vertical = 24.dp),
                 onKeyPress = { viewModel.onKeyPressed(it) },
                 onCancel = { dialog.dismiss() },
-                onConfirmSetShortcut = {
-                    coroutineScope.launch { viewModel.onSetShortcut() }
-                },
-                onConfirmDeleteShortcut = { viewModel.onDeleteShortcut() },
+                onConfirmSetShortcut = { coroutineScope.launch { viewModel.onSetShortcut() } },
+                onConfirmDeleteShortcut = { coroutineScope.launch { viewModel.deleteShortcutCurrentlyBeingCustomized() } },
             )
             dialog.setOnDismissListener { viewModel.onDialogDismissed() }
 

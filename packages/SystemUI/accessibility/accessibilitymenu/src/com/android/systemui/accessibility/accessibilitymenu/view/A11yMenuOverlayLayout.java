@@ -220,9 +220,6 @@ public class A11yMenuOverlayLayout {
 
     @SuppressLint("MissingPermission")
     private boolean isShortcutRestricted(int shortcutId) {
-        if (!Flags.hideRestrictedActions()) {
-            return false;
-        }
         final UserManager userManager = mService.getSystemService(UserManager.class);
         if (userManager == null) {
             return false;
@@ -366,12 +363,11 @@ public class A11yMenuOverlayLayout {
         if (mLayout.getVisibility() == View.VISIBLE) {
             mLayout.setVisibility(View.GONE);
         } else {
-            if (Flags.hideRestrictedActions()) {
-                // Reconfigure the shortcut list in case the set of restricted actions has changed.
-                mA11yMenuViewPager.configureViewPagerAndFooter(
-                        mLayout, createShortcutList(), getPageIndex());
-                updateViewLayout();
-            }
+            // Reconfigure the shortcut list in case the set of restricted actions has changed.
+            mA11yMenuViewPager.configureViewPagerAndFooter(
+                    mLayout, createShortcutList(), getPageIndex());
+            updateViewLayout();
+
             mLayout.setVisibility(View.VISIBLE);
         }
     }

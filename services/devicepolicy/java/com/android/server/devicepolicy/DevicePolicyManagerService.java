@@ -23708,24 +23708,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setMtePolicy(int flags, String callerPackageName) {
-        final Set<Integer> allowedModes =
-                Set.of(
-                        DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY,
-                        DevicePolicyManager.MTE_DISABLED,
-                        DevicePolicyManager.MTE_ENABLED);
-        Preconditions.checkArgument(
-                allowedModes.contains(flags), "Provided mode is not one of the allowed values.");
-        // In general, this API should be available when "bootctl_settings_toggle" is set, which
-        // signals that there is a control for MTE in the user settings and this API fundamentally
-        // is a way for the device admin to override that setting.
-        // Allow bootctl_device_policy_manager as an override, e.g. to offer the
-        // DevicePolicyManager only without a visible user setting.
-        if (!mInjector.systemPropertiesGetBoolean(
-                "ro.arm64.memtag.bootctl_device_policy_manager",
-                mInjector.systemPropertiesGetBoolean(
-                        "ro.arm64.memtag.bootctl_settings_toggle", false))) {
-            throw new UnsupportedOperationException("device does not support MTE");
-        }
+        checkMteSupportedAndAllowedPolicy(flags);
         final CallerIdentity caller = getCallerIdentity(callerPackageName);
         // For now we continue to restrict the DISABLED setting to device owner - we might need
         // another permission for this in future.
@@ -23779,6 +23762,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     .setInt(flags)
                     .setAdmin(caller.getPackageName())
                     .write();
+        }
+    }
+
+    @Override
+    public void setMtePolicyBySystem(
+            @NonNull String systemEntity, int policy) {
+        Objects.requireNonNull(systemEntity);
+        checkMteSupportedAndAllowedPolicy(policy);
+
+        Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()),
+                "Only system services can call setMtePolicyBySystem");
+
+        if (!Flags.setMtePolicyCoexistence()) {
+            throw new UnsupportedOperationException("System can not set MTE policy only");
+        }
+
+        EnforcingAdmin admin = EnforcingAdmin.createSystemEnforcingAdmin(systemEntity);
+        if (policy != DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY) {
+            mDevicePolicyEngine.setGlobalPolicy(
+                    PolicyDefinition.MEMORY_TAGGING,
+                    admin,
+                    new IntegerPolicyValue(policy));
+        } else {
+            mDevicePolicyEngine.removeGlobalPolicy(
+                    PolicyDefinition.MEMORY_TAGGING,
+                    admin);
+        }
+    }
+
+    private void checkMteSupportedAndAllowedPolicy(int policy) {
+        final Set<Integer> allowedModes =
+                Set.of(
+                        DevicePolicyManager.MTE_NOT_CONTROLLED_BY_POLICY,
+                        DevicePolicyManager.MTE_DISABLED,
+                        DevicePolicyManager.MTE_ENABLED);
+        Preconditions.checkArgument(
+                allowedModes.contains(policy), "Provided mode is not one of the allowed values.");
+        // In general, this API should be available when "bootctl_settings_toggle" is set, which
+        // signals that there is a control for MTE in the user settings and this API fundamentally
+        // is a way for the device admin to override that setting.
+        // Allow bootctl_device_policy_manager as an override, e.g. to offer the
+        // DevicePolicyManager only without a visible user setting.
+        if (!mInjector.systemPropertiesGetBoolean(
+                "ro.arm64.memtag.bootctl_device_policy_manager",
+                mInjector.systemPropertiesGetBoolean(
+                        "ro.arm64.memtag.bootctl_settings_toggle", false))) {
+            throw new UnsupportedOperationException("device does not support MTE");
         }
     }
 
@@ -24161,6 +24191,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String supervisionBackupId = "36.2.supervision-support";
         boolean supervisionMigrated = maybeMigrateResetPasswordTokenLocked(supervisionBackupId);
         supervisionMigrated |= maybeMigrateSuspendedPackagesLocked(supervisionBackupId);
+        supervisionMigrated |= maybeMigrateSetKeyguardDisabledFeatures(supervisionBackupId);
         if (supervisionMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + supervisionBackupId);
         }
@@ -24172,6 +24203,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         // Additional migration steps should repeat the pattern above with a new backupId.
+    }
+
+    @GuardedBy("getLockObject()")
+    private boolean maybeMigrateSetKeyguardDisabledFeatures(String backupId) {
+        Slog.i(LOG_TAG, "Migrating set keyguard disabled features to policy engine");
+        if (!Flags.setKeyguardDisabledFeaturesCoexistence()) {
+            return false;
+        }
+        if (mOwners.isSetKeyguardDisabledFeaturesMigrated()) {
+            return false;
+        }
+        // Create backup if none exists
+        mDevicePolicyEngine.createBackup(backupId);
+        try {
+            iterateThroughDpcAdminsLocked((admin, enforcingAdmin) -> {
+                if (admin.disabledKeyguardFeatures == 0) {
+                    return;
+                }
+                int userId = enforcingAdmin.getUserId();
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
+                        enforcingAdmin,
+                        new IntegerPolicyValue(admin.disabledKeyguardFeatures),
+                        userId);
+            });
+        } catch (Exception e) {
+            Slog.wtf(LOG_TAG, "Failed to migrate set keyguard disabled to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking set keyguard disabled features migration complete");
+        mOwners.markSetKeyguardDisabledFeaturesMigrated();
+        return true;
     }
 
     private void migratePermissionGrantStatePolicies() {
