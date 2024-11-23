@@ -178,7 +178,7 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -245,7 +245,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected NotificationPanelView mView;
     @Mock protected LayoutInflater mLayoutInflater;
     @Mock protected DynamicPrivacyController mDynamicPrivacyController;
-    @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock protected ShadeTouchableRegionManager mShadeTouchableRegionManager;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected DozeLog mDozeLog;
     private final ShadeLogger mShadeLog = new ShadeLogger(logcatLogBuffer());
@@ -703,7 +703,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mMetricsLogger,
                 mShadeLog,
                 mConfigurationController,
-                () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
+                () -> flingAnimationUtilsBuilder, mShadeTouchableRegionManager,
                 mConversationNotificationManager, mMediaHierarchyManager,
                 mStatusBarKeyguardViewManager,
                 mGutsManager,
@@ -819,7 +819,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
                 mShadeHeaderController,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
                 () -> mStatusBarLongPressGestureDetector,
                 mKeyguardStateController,
                 mKeyguardBypassController,
