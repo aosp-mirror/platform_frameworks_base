@@ -140,7 +140,11 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Tap on the tile to left option in the maximize button menu")
         DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_LEFT(2012),
         @UiEvent(doc = "Tap on the tile to right option in the maximize button menu")
-        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_RIGHT(2013);
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_RIGHT(2013),
+        @UiEvent(doc = "Moving the desktop window by dragging the header")
+        DESKTOP_WINDOW_MOVE_BY_HEADER_DRAG(2021),
+        @UiEvent(doc = "Double tap on the window header to refocus a desktop window")
+        DESKTOP_WINDOW_HEADER_TAP_TO_REFOCUS(2022);
 
         override fun getId(): Int = mId
     }
