@@ -30,9 +30,9 @@ import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.statusBarTouchableRegionManager by
+var Kosmos.shadeTouchableRegionManager by
     Kosmos.Fixture {
-        StatusBarTouchableRegionManager(
+        ShadeTouchableRegionManager(
             applicationContext,
             notificationShadeWindowController,
             configurationController,

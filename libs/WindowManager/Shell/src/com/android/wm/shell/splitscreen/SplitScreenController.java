@@ -582,6 +582,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                 "Legacy startTask does not support hide task token");
+        if (isTaskInSplitScreenForeground(taskId)) return;
         final int[] result = new int[1];
         IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
             @Override

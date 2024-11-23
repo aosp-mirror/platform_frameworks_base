@@ -163,8 +163,6 @@ public class RavenwoodRuntimeEnvironmentController {
     @GuardedBy("sInitializationLock")
     private static Throwable sExceptionFromGlobalInit;
 
-    private static RavenwoodSystemProperties sProps;
-
     private static final int DEFAULT_TARGET_SDK_LEVEL = VERSION_CODES.CUR_DEVELOPMENT;
     private static final String DEFAULT_PACKAGE_NAME = "com.android.ravenwoodtests.defaultname";
 
@@ -234,7 +232,6 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Do the basic set up for the android sysprops.
         RavenwoodSystemProperties.initialize();
-        setSystemProperties(null);
 
         // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
         // before loadFrameworkNativeCode() (which uses $ANDROID_LOG_TAGS).
@@ -356,9 +353,12 @@ public class RavenwoodRuntimeEnvironmentController {
         // will call Mockito.framework().clearInlineMocks() after execution.
         sInstrumentation.basicInit(instContext, targetContext, createMockUiAutomation());
 
+        // Reset some global state
         Process_ravenwood.reset();
         DeviceConfig_host.reset();
         Binder.restoreCallingIdentity(sCallingIdentity);
+
+        SystemProperties.clearChangeCallbacksForTest();
 
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout = sTimeoutExecutor.schedule(
@@ -484,19 +484,6 @@ public class RavenwoodRuntimeEnvironmentController {
         }
     }
 
-    /**
-     * Set the current configuration to the actual SystemProperties.
-     */
-    public static void setSystemProperties(@Nullable RavenwoodSystemProperties systemProperties) {
-        SystemProperties.clearChangeCallbacksForTest();
-        RavenwoodRuntimeNative.clearSystemProperties();
-        if (systemProperties == null) systemProperties = new RavenwoodSystemProperties();
-        sProps = new RavenwoodSystemProperties(systemProperties, true);
-        for (var entry : systemProperties.getValues().entrySet()) {
-            RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
-        }
-    }
-
     private static final String MOCKITO_ERROR = "FATAL: Unsupported Mockito detected!"
             + " Your test or its dependencies use one of the \"mockito-target-*\""
             + " modules as static library, which is unusable on host side."
@@ -544,15 +531,6 @@ public class RavenwoodRuntimeEnvironmentController {
         }).when(mock).dropShellPermissionIdentity();
         doAnswer(inv -> sAdoptedPermissions).when(mock).getAdoptedShellPermissions();
         return mock;
-    }
-
-    @SuppressWarnings("unused")  // Called from native code (ravenwood_sysprop.cpp)
-    private static void checkSystemPropertyAccess(String key, boolean write) {
-        boolean result = write ? sProps.isKeyWritable(key) : sProps.isKeyReadable(key);
-        if (!result) {
-            throw new IllegalArgumentException((write ? "Write" : "Read")
-                    + " access to system property '" + key + "' denied via RavenwoodConfig");
-        }
     }
 
     private static void dumpCommandLineArgs() {

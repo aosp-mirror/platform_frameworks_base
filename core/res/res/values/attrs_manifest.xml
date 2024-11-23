@@ -1867,8 +1867,12 @@
          16 KB device. 4 KB natives libs will be loaded app-compat mode if they are eligible.
          @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
     <attr name="pageSizeCompat">
-        <enum name="enabled" value="5" />
-        <enum name="disabled" value="6" />
+        <!-- value for enabled must match with
+        ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_MANIFEST_OVERRIDE_ENABLED -->
+        <enum name="enabled" value="32" />
+        <!-- value for disabled must match with
+        ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_MANIFEST_OVERRIDE_DISABLED -->
+        <enum name="disabled" value="64" />
     </attr>
 
 

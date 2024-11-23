@@ -219,8 +219,8 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -298,7 +298,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      * The minimum scale to "squish" the Shade and associated elements down to, for Back gesture
      */
     public static final float SHADE_BACK_ANIM_MIN_SCALE = 0.9f;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final ShadeTouchableRegionManager mShadeTouchableRegionManager;
     private final Resources mResources;
     private final KeyguardStateController mKeyguardStateController;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -695,7 +695,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             ShadeLogger shadeLogger,
             @ShadeDisplayAware ConfigurationController configurationController,
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ShadeTouchableRegionManager shadeTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -840,7 +840,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mVibratorHelper = vibratorHelper;
         mMSDLPlayer = msdlPlayer;
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
-        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mShadeTouchableRegionManager = shadeTouchableRegionManager;
         mSystemClock = systemClock;
         mKeyguardMediaController = keyguardMediaController;
         mMetricsLogger = metricsLogger;
@@ -1551,7 +1551,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private Rect calculateGestureExclusionRect() {
         Rect exclusionRect = null;
-        Region touchableRegion = mStatusBarTouchableRegionManager.calculateTouchableRegion();
+        Region touchableRegion = mShadeTouchableRegionManager.calculateTouchableRegion();
         if (isFullyCollapsed() && touchableRegion != null) {
             // Note: The manager also calculates the non-pinned touchable region
             exclusionRect = touchableRegion.getBounds();

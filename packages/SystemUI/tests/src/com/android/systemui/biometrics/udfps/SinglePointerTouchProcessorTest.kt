@@ -29,7 +29,6 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
-import platform.test.runner.parameterized.Parameter
 import org.junit.runner.RunWith
 
 @SmallTest
