@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip2.phone;
 
 import android.annotation.IntDef;
+import android.app.TaskInfo;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -133,16 +134,16 @@ public class PipTransitionState {
     private final Rect mSwipePipToHomeAppBounds = new Rect();
 
     //
-    // Tokens and leashes
+    // Task related caches
     //
-
-    // pinned PiP task's WC token
-    @Nullable
-    private WindowContainerToken mPipTaskToken;
 
     // pinned PiP task's leash
     @Nullable
     private SurfaceControl mPinnedTaskLeash;
+
+    // pinned PiP task info
+    @Nullable
+    private TaskInfo mPipTaskInfo;
 
     // Overlay leash potentially used during swipe PiP to home transition;
     // if null while mInSwipePipToHomeTransition is true, then srcRectHint was invalid.
@@ -305,11 +306,7 @@ public class PipTransitionState {
     }
 
     @Nullable WindowContainerToken getPipTaskToken() {
-        return mPipTaskToken;
-    }
-
-    public void setPipTaskToken(@Nullable WindowContainerToken token) {
-        mPipTaskToken = token;
+        return mPipTaskInfo != null ? mPipTaskInfo.getToken() : null;
     }
 
     @Nullable SurfaceControl getPinnedTaskLeash() {
@@ -318,6 +315,14 @@ public class PipTransitionState {
 
     void setPinnedTaskLeash(@Nullable SurfaceControl leash) {
         mPinnedTaskLeash = leash;
+    }
+
+    @Nullable TaskInfo getPipTaskInfo() {
+        return mPipTaskInfo;
+    }
+
+    void setPipTaskInfo(@Nullable TaskInfo pipTaskInfo) {
+        mPipTaskInfo = pipTaskInfo;
     }
 
     /**

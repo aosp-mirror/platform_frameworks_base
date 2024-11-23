@@ -706,14 +706,14 @@ public class FlexibilityControllerTest {
                 // "True" start is nowElapsed + HOUR_IN_MILLIS
                 nowElapsed + HOUR_IN_MILLIS + adjustmentMs,
                 nowElapsed + 2 * HOUR_IN_MILLIS,
-                0 /* numFailures */, 0 /* numSystemStops */,
+                0 /* numFailures */, 0 /* numAbandonedFailures */, 0 /* numSystemStops */,
                 JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
                 0, 0);
         jsFlex = new JobStatus(jsFlex,
                 // "True" start is nowElapsed + 2 * HOUR_IN_MILLIS - 20 * MINUTE_IN_MILLIS
                 nowElapsed + 2 * HOUR_IN_MILLIS - 20 * MINUTE_IN_MILLIS + adjustmentMs,
                 nowElapsed + 2 * HOUR_IN_MILLIS,
-                0 /* numFailures */, 0 /* numSystemStops */,
+                0 /* numFailures */, 0 /* numAbandonedFailures */, 0 /* numSystemStops */,
                 JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
                 0, 0);
 
@@ -726,13 +726,13 @@ public class FlexibilityControllerTest {
         jsBasic = new JobStatus(jsBasic,
                 nowElapsed + 30 * MINUTE_IN_MILLIS,
                 NO_LATEST_RUNTIME,
-                1 /* numFailures */, 1 /* numSystemStops */,
+                1 /* numFailures */, 0 /* numAbandonedFailures */, 1 /* numSystemStops */,
                 JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
                 0, 0);
         jsFlex = new JobStatus(jsFlex,
                 nowElapsed + 30 * MINUTE_IN_MILLIS,
                 NO_LATEST_RUNTIME,
-                1 /* numFailures */, 1 /* numSystemStops */,
+                1 /* numFailures */, 0 /* numAbandonedFailures */, 1 /* numSystemStops */,
                 JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
                 0, 0);
 
@@ -847,21 +847,24 @@ public class FlexibilityControllerTest {
         JobInfo.Builder jb = createJob(0).setOverrideDeadline(HOUR_IN_MILLIS);
         JobStatus js = createJobStatus("time", jb);
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2, /* numSystemStops */ 0,
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2,
+                0 /* numAbandonedFailures */, /* numSystemStops */ 0,
                 0, FROZEN_TIME, FROZEN_TIME);
 
         assertEquals(mFcConfig.RESCHEDULED_JOB_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed, 0));
 
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2, /* numSystemStops */ 1,
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 2,
+                0 /* numAbandonedFailures */, /* numSystemStops */ 1,
                 0, FROZEN_TIME, FROZEN_TIME);
 
         assertEquals(2 * mFcConfig.RESCHEDULED_JOB_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed, 0));
 
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 0, /* numSystemStops */ 10,
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 0,
+                0 /* numAbandonedFailures */, /* numSystemStops */ 10,
                 0, FROZEN_TIME, FROZEN_TIME);
         assertEquals(mFcConfig.MAX_RESCHEDULED_DEADLINE_MS,
                 mFlexibilityController.getLifeCycleEndElapsedLocked(js, nowElapsed, 0));
@@ -1092,11 +1095,13 @@ public class FlexibilityControllerTest {
         JobInfo.Builder jb = createJob(0);
         JobStatus js = createJobStatus("time", jb);
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 1, /* numSystemStops */ 0,
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 1,
+                /* numAbandonedFailures */ 0, /* numSystemStops */ 0,
                 0, FROZEN_TIME, FROZEN_TIME);
         assertFalse(js.hasFlexibilityConstraint());
         js = new JobStatus(
-                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 0, /* numSystemStops */ 1,
+                js, FROZEN_TIME, NO_LATEST_RUNTIME, /* numFailures */ 0,
+                /* numAbandonedFailures */ 0, /* numSystemStops */ 1,
                 0, FROZEN_TIME, FROZEN_TIME);
         assertFalse(js.hasFlexibilityConstraint());
     }

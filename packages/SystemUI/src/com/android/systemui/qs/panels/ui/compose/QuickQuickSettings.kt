@@ -75,6 +75,8 @@ fun SceneScope.QuickQuickSettings(
                 coroutineScope = scope,
                 bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
                 tileHapticsViewModelFactoryProvider = viewModel.tileHapticsViewModelFactoryProvider,
+                // There should be no QuickQuickSettings when the details view is enabled.
+                detailsViewModel = null,
             )
         }
     }

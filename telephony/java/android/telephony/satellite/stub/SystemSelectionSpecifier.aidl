@@ -16,6 +16,8 @@
 
 package android.telephony.satellite.stub;
 
+import android.telephony.satellite.stub.SatelliteInfo;
+
 /**
  * {@hide}
  */
@@ -24,15 +26,26 @@ parcelable SystemSelectionSpecifier {
     String mMccMnc;
 
     /**
-     * The frequency bands to scan. Bands and earfcns won't overlap.
+     * The frequency bands to scan.
      * Bands will be filled only if the whole band is needed.
      * Maximum length of the vector is 8.
+     * The values are populated from the mBands array within the SatelliteInfo[] array, which is
+     * included in the SystemSelectionSpecifier, for backward compatibility.
      */
     int[] mBands;
 
     /**
      * The radio channels to scan as defined in 3GPP TS 25.101 and 36.101.
+     * The values are populated from the earfcns defined in the EarfcnRange[] array inside
+     * SatelliteInfo[], which is included in the SystemSelectionSpecifier, for backward
+     * compatibility.
      * Maximum length of the vector is 32.
      */
     int[] mEarfcs;
+
+    /* The list of satellites configured for the current location */
+    SatelliteInfo[] satelliteInfos;
+
+    /* The list of tag IDs associated with the current location */
+    int[] tagIds;
 }

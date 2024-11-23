@@ -61,6 +61,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -680,12 +682,17 @@ public class PropertyInvalidatedCache<Query, Result> {
         @GuardedBy("mLock")
         private boolean mTestMode = false;
 
-        /**
-         * The local value of the handler, used during testing but also used directly by the
-         * NonceLocal handler.
-         */
+        // This is the local value of the nonce, as last set by the NonceHandler.  It is always
+        // updated by the setNonce() operation.  The getNonce() operation returns this value in
+        // NonceLocal handlers and handlers in test mode.
         @GuardedBy("mLock")
-        protected long mTestNonce = NONCE_UNSET;
+        protected long mShadowNonce = NONCE_UNSET;
+
+        // A list of watchers to be notified of changes.  This is null until at least one watcher
+        // registers.  Checking for null is meant to be the fastest way the handler can determine
+        // that there are no watchers to be notified.
+        @GuardedBy("mLock")
+        private ArrayList<Semaphore> mWatchers;
 
         /**
          * The methods to get and set a nonce from whatever storage is being used.  mLock may be
@@ -701,27 +708,60 @@ public class PropertyInvalidatedCache<Query, Result> {
 
         /**
          * Get a nonce from storage.  If the handler is in test mode, the nonce is returned from
-         * the local mTestNonce.
+         * the local mShadowNonce.
          */
         long getNonce() {
             synchronized (mLock) {
-                if (mTestMode) return mTestNonce;
+                if (mTestMode) return mShadowNonce;
             }
             return getNonceInternal();
         }
 
         /**
-         * Write a nonce to storage.  If the handler is in test mode, the nonce is written to the
-         * local mTestNonce and storage is not affected.
+         * Write a nonce to storage.  The nonce is always written to the local mShadowNonce.  If
+         * the handler is not in test mode the nonce is also written to storage.
          */
         void setNonce(long val) {
             synchronized (mLock) {
-                if (mTestMode) {
-                    mTestNonce = val;
-                    return;
+                mShadowNonce = val;
+                if (!mTestMode) {
+                    setNonceInternal(val);
+                }
+                wakeAllWatchersLocked();
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void wakeAllWatchersLocked() {
+            if (mWatchers != null) {
+                for (int i = 0; i < mWatchers.size(); i++) {
+                    mWatchers.get(i).release();
                 }
             }
-            setNonceInternal(val);
+        }
+
+        /**
+         * Register a watcher to be notified when a nonce changes.  There is no check for
+         * duplicates.  In general, this method is called only from {@link NonceWatcher}.
+         */
+        void registerWatcher(Semaphore s) {
+            synchronized (mLock) {
+                if (mWatchers == null) {
+                    mWatchers = new ArrayList<>();
+                }
+                mWatchers.add(s);
+            }
+        }
+
+        /**
+         * Unregister a watcher.  Nothing happens if the watcher is not registered.
+         */
+        void unregisterWatcher(Semaphore s) {
+            synchronized (mLock) {
+                if (mWatchers != null) {
+                    mWatchers.remove(s);
+                }
+            }
         }
 
         /**
@@ -854,7 +894,7 @@ public class PropertyInvalidatedCache<Query, Result> {
         void setTestMode(boolean mode) {
             synchronized (mLock) {
                 mTestMode = mode;
-                mTestNonce = NONCE_UNSET;
+                mShadowNonce = NONCE_UNSET;
             }
         }
 
@@ -1028,7 +1068,7 @@ public class PropertyInvalidatedCache<Query, Result> {
     /**
      * SystemProperties and shared storage are protected and cannot be written by random
      * processes.  So, for testing purposes, the NonceLocal handler stores the nonce locally.  The
-     * NonceLocal uses the mTestNonce in the superclass, regardless of test mode.
+     * NonceLocal uses the mShadowNonce in the superclass, regardless of test mode.
      */
     private static class NonceLocal extends NonceHandler {
         // The saved nonce.
@@ -1040,13 +1080,127 @@ public class PropertyInvalidatedCache<Query, Result> {
 
         @Override
         long getNonceInternal() {
-            return mTestNonce;
+            return mShadowNonce;
         }
 
         @Override
         void setNonceInternal(long value) {
-            mTestNonce = value;
+            mShadowNonce = value;
         }
+    }
+
+    /**
+     * A NonceWatcher lets an external client test if a nonce value has changed from the last time
+     * the watcher was checked.
+     * @hide
+     */
+    public static class NonceWatcher implements AutoCloseable {
+        // The handler for the key.
+        private final NonceHandler mHandler;
+
+        // The last-seen value.  This is initialized to "unset".
+        private long mLastSeen = NONCE_UNSET;
+
+        // The semaphore that the watcher waits on.  A permit is released every time the nonce
+        // changes.  Permits are acquired in the wait method.
+        private final Semaphore mSem = new Semaphore(0);
+
+        /**
+         * Create a watcher for a handler.  The last-seen value is not set here and will be
+         * "unset".  Therefore, a call to isChanged() will return true if the nonce has ever been
+         * set, no matter when the watcher is first created.  Clients may want to flush that
+         * change by calling isChanged() immediately after constructing the object.
+         */
+        private NonceWatcher(@NonNull NonceHandler handler) {
+            mHandler = handler;
+            mHandler.registerWatcher(mSem);
+        }
+
+        /**
+         * Unregister to be notified when a nonce changes.  NonceHandler allows a call to
+         * unregisterWatcher with a semaphore that is not registered, so there is no check inside
+         * this method to guard against multiple closures.
+         */
+        @Override
+        public void close() {
+            mHandler.unregisterWatcher(mSem);
+        }
+
+        /**
+         * Return the last seen value of the nonce.  This does not update that value.  Only
+         * {@link #isChanged()} updates the value.
+         */
+        public long lastSeen() {
+            return mLastSeen;
+        }
+
+        /**
+         * Return true if the nonce has changed from the last time isChanged() was called.  The
+         * method is not thread safe.
+         * @hide
+         */
+        public boolean isChanged() {
+            long current = mHandler.getNonce();
+            if (current != mLastSeen) {
+                mLastSeen = current;
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Wait for the nonce value to change.  It is not guaranteed that the nonce has changed when
+         * this returns: clients must confirm with {@link #isChanged}. The wait operation is only
+         * effective in a process that writes the nonces.  The function returns the number of times
+         * the nonce had changed since the last call to the method.
+         * @hide
+         */
+        public int waitForChange() throws InterruptedException {
+            mSem.acquire(1);
+            return 1 + mSem.drainPermits();
+        }
+
+        /**
+         * Wait for the nonce value to change.  It is not guaranteed that the nonce has changed when
+         * this returns: clients must confirm with {@link #isChanged}. The wait operation is only
+         * effective in a process that writes the nonces.  The function returns the number of times
+         * the nonce changed since the last call to the method.  A return value of zero means the
+         * timeout expired.  Beware that a timeout of 0 means the function will not wait at all.
+         * @hide
+         */
+        public int waitForChange(long timeout, TimeUnit timeUnit) throws InterruptedException {
+            if (mSem.tryAcquire(1, timeout, timeUnit)) {
+                return 1 + mSem.drainPermits();
+            } else {
+                return 0;
+            }
+        }
+
+        /**
+         * Wake the watcher by releasing the semaphore.  This can be used to wake clients that are
+         * blocked in {@link #waitForChange} without affecting the underlying nonce.
+         * @hide
+         */
+        public void wakeUp() {
+            mSem.release();
+        }
+    }
+
+    /**
+     * Return a NonceWatcher for the cache.
+     * @hide
+     */
+    public NonceWatcher getNonceWatcher() {
+        return new NonceWatcher(mNonce);
+    }
+
+    /**
+     * Return a NonceWatcher for the given property.  If a handler does not exist for the
+     * property, one is created.  This throws if the property name is not a valid cache key.
+     * @hide
+     */
+    public static NonceWatcher getNonceWatcher(@NonNull String propertyName) {
+        return new NonceWatcher(getNonceHandler(propertyName));
     }
 
     /**
@@ -1660,6 +1814,26 @@ public class PropertyInvalidatedCache<Query, Result> {
     @TestApi
     public void invalidateCache() {
         mNonce.invalidate();
+    }
+
+    /**
+     * Non-static version of corkInvalidations() for situations in which the cache instance is
+     * available.  This is slightly faster than than the static versions because it does not have
+     * to look up the NonceHandler for a given property name.
+     * @hide
+     */
+    public void corkInvalidations() {
+        mNonce.cork();
+    }
+
+    /**
+     * Non-static version of uncorkInvalidations() for situations in which the cache instance is
+     * available.  This is slightly faster than than the static versions because it does not have
+     * to look up the NonceHandler for a given property name.
+     * @hide
+     */
+    public void uncorkInvalidations() {
+        mNonce.uncork();
     }
 
     /**

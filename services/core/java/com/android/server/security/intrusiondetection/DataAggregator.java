@@ -36,6 +36,9 @@ public class DataAggregator {
     private static final int MSG_DISABLE = 2;
 
     private static final int STORED_EVENTS_SIZE_LIMIT = 1024;
+    private static final IntrusionDetectionAdminReceiver ADMIN_RECEIVER =
+            new IntrusionDetectionAdminReceiver();
+
     private final IntrusionDetectionService mIntrusionDetectionService;
     private final ArrayList<DataSource> mDataSources;
 
@@ -60,10 +63,19 @@ public class DataAggregator {
      * Initialize DataSources
      * @return Whether the initialization succeeds.
      */
-    // TODO: Add the corresponding data sources
     public boolean initialize() {
         SecurityLogSource securityLogSource = new SecurityLogSource(mContext, this);
         mDataSources.add(securityLogSource);
+
+        NetworkLogSource networkLogSource = new NetworkLogSource(mContext, this);
+        ADMIN_RECEIVER.setNetworkLogEventCallback(networkLogSource);
+        mDataSources.add(networkLogSource);
+
+        for (DataSource ds : mDataSources) {
+            if (!ds.initialize()) {
+                return false;
+            }
+        }
         return true;
     }
 

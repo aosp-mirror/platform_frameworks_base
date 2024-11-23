@@ -124,7 +124,19 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Drag the window header to an edge to tile it to the left side")
         DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_LEFT(2006),
         @UiEvent(doc = "Drag the window header to an edge to tile it to the right side")
-        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_RIGHT(2007);
+        DESKTOP_WINDOW_APP_HEADER_DRAG_TO_TILE_TO_RIGHT(2007),
+        @UiEvent(doc = "Hover or long press the maximize button to reveal the menu")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_REVEAL_MENU(2015),
+        @UiEvent(doc = "Tap on the maximize option in the maximize button menu")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_MAXIMIZE(2009),
+        @UiEvent(doc = "Tap on the immersive option in the maximize button menu")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_IMMERSIVE(2010),
+        @UiEvent(doc = "Tap on the restore option in the maximize button menu")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_RESTORE(2011),
+        @UiEvent(doc = "Tap on the tile to left option in the maximize button menu")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_LEFT(2012),
+        @UiEvent(doc = "Tap on the tile to right option in the maximize button menu")
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_RIGHT(2013);
 
         override fun getId(): Int = mId
     }

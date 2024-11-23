@@ -231,6 +231,15 @@ flag {
 }
 
 flag {
+     name: "message_queue_testability"
+     namespace: "system_performance"
+     is_exported: true
+     description: "Whether MessageQueue implements test APIs."
+     bug: "379472827"
+     is_fixed_read_only: true
+}
+
+flag {
     name: "network_time_uses_shared_memory"
     namespace: "system_performance"
     description: "SystemClock.currentNetworkTimeMillis() reads network time offset from shared memory"

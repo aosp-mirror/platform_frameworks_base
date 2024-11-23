@@ -4954,31 +4954,24 @@ public class AudioService extends IAudioService.Stub
         }
 
         final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
+        Set<Integer> absVolumeDeviceTypes = new ArraySet<>(
+                AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
+        absVolumeDeviceTypes.addAll(mAbsVolumeMultiModeCaseDevices);
 
-        final Set<Integer> a2dpDevices = AudioSystem.intersectionAudioDeviceTypes(
-                AudioSystem.DEVICE_OUT_ALL_A2DP_SET, deviceTypes);
-        if (!a2dpDevices.isEmpty()) {
-            int index = getStreamVolume(streamType,
-                    a2dpDevices.toArray(new Integer[0])[0].intValue());
-            mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index);
-        }
-
-        final Set<Integer> absVolumeMultiModeCaseDevices =
-                AudioSystem.intersectionAudioDeviceTypes(
-                        mAbsVolumeMultiModeCaseDevices, deviceTypes);
-        if (absVolumeMultiModeCaseDevices.isEmpty()) {
+        final Set<Integer> absVolumeDevices =
+                AudioSystem.intersectionAudioDeviceTypes(absVolumeDeviceTypes, deviceTypes);
+        if (absVolumeDevices.isEmpty()) {
             return;
         }
-        if (absVolumeMultiModeCaseDevices.size() > 1) {
+        if (absVolumeDevices.size() > 1) {
             Log.w(TAG, "onUpdateContextualVolumes too many active devices: "
-                    + absVolumeMultiModeCaseDevices.stream().map(AudioSystem::getOutputDeviceName)
+                    + absVolumeDevices.stream().map(AudioSystem::getOutputDeviceName)
                         .collect(Collectors.joining(","))
                     + ", for stream: " + streamType);
             return;
         }
 
-        final int device = absVolumeMultiModeCaseDevices.toArray(new Integer[0])[0].intValue();
-
+        final int device = absVolumeDevices.toArray(new Integer[0])[0].intValue();
         final int index = getStreamVolume(streamType, device);
 
         if (DEBUG_VOL) {
@@ -4992,6 +4985,8 @@ public class AudioService extends IAudioService.Stub
                     getVssForStreamOrDefault(streamType).getMaxIndex(), streamType);
         } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)) {
+            mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index);
         } else {
             return;
         }

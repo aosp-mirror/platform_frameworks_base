@@ -4177,6 +4177,35 @@ public class DevicePolicyManager {
         }
     }
 
+
+    /**
+     * Similar to the public variant of {@link #setMtePolicy} but for use by the system.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @throws SecurityException if caller is not permitted to set Mte policy
+     * @throws UnsupportedOperationException if the device does not support MTE
+     * @param systemEntity  The service entity that adds the restriction. A user restriction set by
+     *                       a service entity can only be cleared by the same entity. This can be
+     *                       just the calling package name, or any string of the caller's choice
+     *                       can be used.
+     * @param policy the MTE policy to be set
+     * @hide
+     */
+    public void setMtePolicy(@NonNull String systemEntity, @MtePolicy int policy) {
+        throwIfParentInstance("setMtePolicyForUser");
+        if (mService != null) {
+            try {
+                mService.setMtePolicyBySystem(systemEntity, policy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+
+
     /**
      * Called by a device owner, profile owner of an organization-owned device to
      * get the Memory Tagging Extension (MTE) policy

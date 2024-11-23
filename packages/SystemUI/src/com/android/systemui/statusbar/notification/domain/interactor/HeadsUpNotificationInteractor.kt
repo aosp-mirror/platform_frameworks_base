@@ -52,7 +52,9 @@ constructor(
     val topHeadsUpRowIfPinned: Flow<HeadsUpRowKey?> =
         headsUpRepository.topHeadsUpRow
             .flatMapLatest { repository ->
-                repository?.isPinned?.map { pinned -> repository.takeIf { pinned } } ?: flowOf(null)
+                repository?.pinnedStatus?.map { pinnedStatus ->
+                    repository.takeIf { pinnedStatus.isPinned }
+                } ?: flowOf(null)
             }
             .distinctUntilChanged()
 
@@ -64,7 +66,7 @@ constructor(
                 if (repositories.isNotEmpty()) {
                     val toCombine: List<Flow<Pair<HeadsUpRowRepository, Boolean>>> =
                         repositories.map { repo ->
-                            repo.isPinned.map { isPinned -> repo to isPinned }
+                            repo.pinnedStatus.map { pinnedStatus -> repo to pinnedStatus.isPinned }
                         }
                     combine(toCombine) { pairs -> pairs.toSet() }
                 } else {
@@ -102,7 +104,9 @@ constructor(
         } else {
             headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
                 if (rows.isNotEmpty()) {
-                    combine(rows.map { it.isPinned }) { pins -> pins.any { it } }
+                    combine(rows.map { it.pinnedStatus }) { pinnedStatus ->
+                        pinnedStatus.any { it.isPinned }
+                    }
                 } else {
                     // if the set is empty, there are no flows to combine
                     flowOf(false)

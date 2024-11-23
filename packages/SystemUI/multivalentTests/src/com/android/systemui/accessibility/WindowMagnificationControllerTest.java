@@ -63,8 +63,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
@@ -90,7 +88,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -612,46 +609,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 .isEqualTo(expectedRatio);
     }
 
-    @DisableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
-    @Test
-    public void onScreenSizeAndDensityChanged_enabled_restoreSavedMagnifierWindow() {
-        int newSmallestScreenWidthDp =
-                mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
-        int windowFrameSize = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
-        Size preferredWindowSize = new Size(windowFrameSize, windowFrameSize);
-        mSharedPreferences
-                .edit()
-                .putString(String.valueOf(newSmallestScreenWidthDp),
-                        preferredWindowSize.toString())
-                .commit();
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.updateWindowMagnificationInternal(Float.NaN, Float.NaN,
-                    Float.NaN);
-        });
-
-        // Screen density and size change
-        mContext.getResources().getConfiguration().smallestScreenWidthDp = newSmallestScreenWidthDp;
-        final Rect testWindowBounds = new Rect(
-                mWindowManager.getCurrentWindowMetrics().getBounds());
-        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
-                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
-        mWindowManager.setWindowBounds(testWindowBounds);
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
-        });
-
-        // wait for rect update
-        waitForIdleSync();
-        ViewGroup.LayoutParams params = mSurfaceControlViewHost.getView().getLayoutParams();
-        final int mirrorSurfaceMargin = mResources.getDimensionPixelSize(
-                R.dimen.magnification_mirror_surface_margin);
-        // The width and height of the view include the magnification frame and the margins.
-        assertThat(params.width).isEqualTo(windowFrameSize + 2 * mirrorSurfaceMargin);
-        assertThat(params.height).isEqualTo(windowFrameSize + 2 * mirrorSurfaceMargin);
-    }
-
-    @EnableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
     @Test
     public void onScreenSizeAndDensityChanged_enabled_restoreSavedMagnifierIndexAndWindow() {
         int newSmallestScreenWidthDp =

@@ -36,7 +36,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 
 /**
@@ -62,10 +61,8 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         ((TextView) findViewById(R.id.action_bar_title)).setText(
                 getResources().getString(R.string.accessibility_menu_settings_name)
         );
-        if (Flags.actionBarWrapContent()) {
-            setHeightWrapContent(findViewById(com.android.internal.R.id.action_bar));
-            setHeightWrapContent(findViewById(com.android.internal.R.id.action_bar_container));
-        }
+        setHeightWrapContent(findViewById(com.android.internal.R.id.action_bar));
+        setHeightWrapContent(findViewById(com.android.internal.R.id.action_bar_container));
     }
 
     private void setHeightWrapContent(View view) {

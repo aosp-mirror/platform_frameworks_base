@@ -25,6 +25,8 @@ import android.hardware.power.CpuHeadroomParams;
 @JavaDerive(equals = true, toString = true)
 parcelable CpuHeadroomParamsInternal {
     boolean usesDeviceHeadroom = false;
+    int[] tids;
+    int calculationWindowMillis = 1000;
     CpuHeadroomParams.CalculationType calculationType = CpuHeadroomParams.CalculationType.MIN;
     CpuHeadroomParams.SelectionType selectionType = CpuHeadroomParams.SelectionType.ALL;
 }

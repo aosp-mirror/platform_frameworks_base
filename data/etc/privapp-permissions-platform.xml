@@ -677,8 +677,4 @@ applications that come with the platform
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
     </privapp-permissions>
-
-    <privapp-permissions package="com.android.multiuser">
-        <permission name="android.permission.MANAGE_USERS"/>
-    </privapp-permissions>
 </permissions>

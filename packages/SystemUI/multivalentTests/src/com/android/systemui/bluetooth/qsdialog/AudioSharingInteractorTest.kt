@@ -17,6 +17,7 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothLeBroadcast
+import android.bluetooth.BluetoothLeBroadcastMetadata
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -50,6 +51,7 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
     private val kosmos = testKosmos()
     @Mock private lateinit var localBluetoothLeBroadcast: LocalBluetoothLeBroadcast
+    @Mock private lateinit var bluetoothLeBroadcastMetadata: BluetoothLeBroadcastMetadata
     @Captor private lateinit var callbackCaptor: ArgumentCaptor<BluetoothLeBroadcast.Callback>
     private lateinit var underTest: AudioSharingInteractor
 
@@ -202,7 +204,7 @@ class AudioSharingInteractorTest : SysuiTestCase() {
                 verify(localBluetoothLeBroadcast)
                     .registerServiceCallBack(any(), callbackCaptor.capture())
                 runCurrent()
-                callbackCaptor.value.onPlaybackStarted(0, 0)
+                callbackCaptor.value.onBroadcastMetadataChanged(0, bluetoothLeBroadcastMetadata)
                 runCurrent()
 
                 assertThat(bluetoothTileDialogAudioSharingRepository.sourceAdded).isTrue()

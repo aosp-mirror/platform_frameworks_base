@@ -316,6 +316,12 @@ public final class JobStatus {
     private final int numFailures;
 
     /**
+     * How many times this job has stopped due to {@link
+     * JobParameters#STOP_REASON_TIMEOUT_ABANDONED}.
+     */
+    private final int mNumAbandonedFailures;
+
+    /**
      * The number of times JobScheduler has forced this job to stop due to reasons mostly outside
      * of the app's control.
      */
@@ -605,6 +611,8 @@ public final class JobStatus {
      * @param tag A string associated with the job for debugging/logging purposes.
      * @param numFailures Count of how many times this job has requested a reschedule because
      *     its work was not yet finished.
+     * @param mNumAbandonedFailures Count of how many times this job has requested a reschedule
+     *     because it was abandoned.
      * @param numSystemStops Count of how many times JobScheduler has forced this job to stop due to
      *     factors mostly out of the app's control.
      * @param earliestRunTimeElapsedMillis Milestone: earliest point in time at which the job
@@ -617,7 +625,7 @@ public final class JobStatus {
      */
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, int standbyBucket, @Nullable String namespace, String tag,
-            int numFailures, int numSystemStops,
+            int numFailures, int mNumAbandonedFailures, int numSystemStops,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime, long cumulativeExecutionTimeMs,
             int internalFlags,
@@ -677,6 +685,7 @@ public final class JobStatus {
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
+        this.mNumAbandonedFailures = mNumAbandonedFailures;
         mNumSystemStops = numSystemStops;
 
         int requiredConstraints = job.getConstraintFlags();
@@ -750,7 +759,8 @@ public final class JobStatus {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
                 jobStatus.getStandbyBucket(), jobStatus.getNamespace(),
-                jobStatus.getSourceTag(), jobStatus.getNumFailures(), jobStatus.getNumSystemStops(),
+                jobStatus.getSourceTag(), jobStatus.getNumFailures(),
+                jobStatus.getNumAbandonedFailures(), jobStatus.getNumSystemStops(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
                 jobStatus.getCumulativeExecutionTimeMs(),
@@ -787,6 +797,7 @@ public final class JobStatus {
         this(job, callingUid, sourcePkgName, sourceUserId,
                 standbyBucket, namespace,
                 sourceTag, /* numFailures */ 0, /* numSystemStops */ 0,
+                /* mNumAbandonedFailures */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
                 innerFlags, dynamicConstraints);
@@ -806,13 +817,15 @@ public final class JobStatus {
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling,
             long newEarliestRuntimeElapsedMillis,
-            long newLatestRuntimeElapsedMillis, int numFailures, int numSystemStops,
+            long newLatestRuntimeElapsedMillis, int numFailures,
+            int mNumAbandonedFailures, int numSystemStops,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             long cumulativeExecutionTimeMs) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getStandbyBucket(), rescheduling.getNamespace(),
-                rescheduling.getSourceTag(), numFailures, numSystemStops,
+                rescheduling.getSourceTag(), numFailures,
+                mNumAbandonedFailures, numSystemStops,
                 newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
@@ -851,7 +864,8 @@ public final class JobStatus {
         int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
                 sourceUserId, elapsedNow);
         return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
-                standbyBucket, namespace, tag, /* numFailures */ 0, /* numSystemStops */ 0,
+                standbyBucket, namespace, tag, /* numFailures */ 0,
+                /* mNumAbandonedFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 /* cumulativeExecutionTime */ 0,
@@ -1143,6 +1157,13 @@ public final class JobStatus {
      */
     public int getNumFailures() {
         return numFailures;
+    }
+
+    /**
+     * Returns the number of times the job stopped previously for STOP_REASON_TIMEOUT_ABANDONED.
+     */
+    public int getNumAbandonedFailures() {
+        return mNumAbandonedFailures;
     }
 
     /**

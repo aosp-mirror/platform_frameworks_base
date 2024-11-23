@@ -38,7 +38,6 @@ import static com.android.internal.accessibility.common.ShortcutConstants.UserSh
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity.EXTRA_TYPE_TO_CHOOSE;
 import static com.android.server.accessibility.AccessibilityManagerService.ACTION_LAUNCH_HEARING_DEVICES_DIALOG;
-import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -601,7 +600,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
     public void testSetConnectionNull_borderFlagEnabled_unregisterFullScreenMagnification()
             throws RemoteException {
         mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);

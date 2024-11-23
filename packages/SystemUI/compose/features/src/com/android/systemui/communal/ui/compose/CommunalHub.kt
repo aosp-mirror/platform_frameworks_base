@@ -141,6 +141,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -902,11 +903,17 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val titleForEmptyStateCTA = stringResource(R.string.title_for_empty_state_cta)
             Text(
-                text = stringResource(R.string.title_for_empty_state_cta),
+                text = titleForEmptyStateCTA,
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
                 color = colors.secondary,
+                modifier =
+                    Modifier.focusable().semantics(mergeDescendants = true) {
+                        contentDescription = titleForEmptyStateCTA
+                        heading()
+                    },
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(

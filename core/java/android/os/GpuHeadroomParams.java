@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.os.health.SystemHealthManager;
 
 import java.lang.annotation.Retention;
@@ -54,6 +55,16 @@ public final class GpuHeadroomParams {
     public static final int GPU_HEADROOM_CALCULATION_TYPE_AVERAGE = 1;
 
     /**
+     * Minimum GPU headroom calculation window size.
+     */
+    public static final int GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN = 50;
+
+    /**
+     * Maximum GPU headroom calculation window size.
+     */
+    public static final int GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX = 10000;
+
+    /**
      * Sets the headroom calculation type.
      * <p>
      *
@@ -80,6 +91,39 @@ public final class GpuHeadroomParams {
             default -> GPU_HEADROOM_CALCULATION_TYPE_MIN;
         };
         return validatedType;
+    }
+
+    /**
+     * Sets the headroom calculation window size in milliseconds.
+     * <p>
+     *
+     * @param windowMillis the window size in milliseconds, ranged from
+     *                     [{@link #GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN},
+     *                     {@link #GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX}]. The smaller
+     *                     the value, the larger fluctuation in value should be expected. The
+     *                     default value can be retrieved from the
+     *                     {@link #getCalculationWindowMillis}. If the device will try to use the
+     *                     closest feasible window size to this param.
+     * @throws IllegalArgumentException if the window is invalid.
+     */
+    public void setCalculationWindowMillis(
+            @IntRange(from = GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN, to =
+                    GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX) int windowMillis) {
+        if (windowMillis < GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN
+                || windowMillis > GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX) {
+            throw new IllegalArgumentException("Invalid calculation window: " + windowMillis);
+        }
+        mInternal.calculationWindowMillis = windowMillis;
+    }
+
+    /**
+     * Gets the headroom calculation window size in milliseconds.
+     * <p>
+     * This will return the default value chosen by the device if not set.
+     */
+    public @IntRange(from = GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN, to =
+            GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX) int getCalculationWindowMillis() {
+        return mInternal.calculationWindowMillis;
     }
 
     /**
