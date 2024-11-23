@@ -44,6 +44,9 @@ public:
     // base weight in CSS-style units, 1..1000
     int fBaseWeight;
 
+    // True if the Typeface is already created for variation settings.
+    bool fIsVariationInstance;
+
     static const Typeface* resolveDefault(const Typeface* src);
 
     // The following three functions create new Typeface from an existing Typeface with a different
