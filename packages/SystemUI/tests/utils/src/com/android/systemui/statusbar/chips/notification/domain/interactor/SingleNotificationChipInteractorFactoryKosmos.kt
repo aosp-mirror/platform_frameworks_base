@@ -16,17 +16,18 @@
 
 package com.android.systemui.statusbar.chips.notification.domain.interactor
 
+import com.android.systemui.activity.data.repository.activityManagerRepository
+import com.android.systemui.activity.data.repository.fake
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.chips.statusBarChipsLogger
-import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 
-val Kosmos.statusBarNotificationChipsInteractor: StatusBarNotificationChipsInteractor by
+val Kosmos.singleNotificationChipInteractorFactory: SingleNotificationChipInteractor.Factory by
     Kosmos.Fixture {
-        StatusBarNotificationChipsInteractor(
-            testScope.backgroundScope,
-            activeNotificationsInteractor,
-            singleNotificationChipInteractorFactory,
-            logBuffer = statusBarChipsLogger,
-        )
+        SingleNotificationChipInteractor.Factory { startingModel ->
+            SingleNotificationChipInteractor(
+                startingModel,
+                activityManagerRepository.fake,
+                logBuffer = statusBarChipsLogger,
+            )
+        }
     }

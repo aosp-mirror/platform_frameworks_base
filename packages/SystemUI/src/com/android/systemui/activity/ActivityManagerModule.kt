@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.notification.ui.viewmodel
+package com.android.systemui.activity
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
+import com.android.systemui.activity.data.repository.ActivityManagerRepository
+import com.android.systemui.activity.data.repository.ActivityManagerRepositoryImpl
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
 
-val Kosmos.notifChipsViewModel: NotifChipsViewModel by
-    Kosmos.Fixture {
-        NotifChipsViewModel(applicationCoroutineScope, statusBarNotificationChipsInteractor)
-    }
+@Module
+interface ActivityManagerModule {
+    @Binds
+    @SysUISingleton
+    fun activityManagerRepository(impl: ActivityManagerRepositoryImpl): ActivityManagerRepository
+}

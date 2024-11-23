@@ -83,7 +83,9 @@ import org.mockito.MockitoAnnotations
 class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val statusBarNotificationChipsInteractor = kosmos.statusBarNotificationChipsInteractor
+    private val statusBarNotificationChipsInteractor by lazy {
+        kosmos.statusBarNotificationChipsInteractor
+    }
     private val notifCollection = kosmos.mockNotifCollection
 
     private lateinit var coordinator: HeadsUpCoordinator
