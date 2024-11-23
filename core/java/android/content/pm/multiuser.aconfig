@@ -341,6 +341,28 @@ flag {
   is_fixed_read_only: true
 }
 
+flag {
+    name: "cache_user_start_realtime_read_only"
+    namespace: "multiuser"
+    description: "Cache getUserStartRealtime to avoid unnecessary binder calls"
+    bug: "350416205"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_unlock_realtime_read_only"
+    namespace: "multiuser"
+    description: "Cache getUserUnlockRealtime to avoid unnecessary binder calls"
+    bug: "350421407"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
     name: "enable_private_space_features"

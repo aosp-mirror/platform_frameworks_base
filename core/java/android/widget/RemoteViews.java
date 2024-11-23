@@ -1298,7 +1298,13 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mIntentId != -1 || mItems == null) {
+            if (mItems == null) {
+                // Null item indicates adapter conversion took place, so the URIs in cached items
+                // need to be validated.
+                RemoteCollectionItems cachedItems = mCollectionCache.getItemsForId(mIntentId);
+                if (cachedItems != null) {
+                    cachedItems.visitUris(visitor);
+                }
                 return;
             }
 
@@ -9333,7 +9339,11 @@ public class RemoteViews implements Parcelable, Filter {
         Set<Integer> bitmapIdSet = getBitmapIdsUsedByActions(new HashSet<>());
         int result = 0;
         for (int bitmapId: bitmapIdSet) {
-            result += mBitmapCache.getBitmapForId(bitmapId).getAllocationByteCount();
+            Bitmap currentBitmap = mBitmapCache.getBitmapForId(bitmapId);
+            if (currentBitmap == null) {
+                continue;
+            }
+            result += currentBitmap.getAllocationByteCount();
         }
 
         return result;

@@ -848,10 +848,10 @@
     <protected-broadcast android:name="android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED" />
     <protected-broadcast android:name="com.android.uwb.uwbcountrycode.GEOCODE_RETRY" />
-    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
+    <protected-broadcast android:name="android.telephony.satellite.action.SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
     <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_LOADED" />
     <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_UNLOADED" />
-    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION" />
+    <protected-broadcast android:name="android.telephony.satellite.action.SATELLITE_START_NON_EMERGENCY_SESSION" />
 
 
     <!-- ====================================================================== -->
@@ -6516,7 +6516,7 @@
      @hide -->
     <permission android:name="android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION"
         android:featureFlag="android.media.audio.concurrent_audio_record_bypass_permission"
-        android:protectionLevel="signature|privileged|role" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to capture audio for hotword detection.
          <p>Not for use by third-party applications.</p>

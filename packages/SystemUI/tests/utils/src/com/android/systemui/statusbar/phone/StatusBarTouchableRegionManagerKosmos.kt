@@ -24,12 +24,11 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.notification.headsup.headsUpManager
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.policy.configurationController
-import com.android.systemui.statusbar.policy.headsUpManager
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
-import org.mockito.Mockito.mock
 
 var Kosmos.statusBarTouchableRegionManager by
     Kosmos.Fixture {

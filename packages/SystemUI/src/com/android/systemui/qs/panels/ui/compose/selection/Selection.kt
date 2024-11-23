@@ -21,6 +21,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -50,6 +52,7 @@ import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults
 import com.android.systemui.qs.panels.ui.compose.selection.SelectionDefaults.ResizingDotSize
 import com.android.systemui.qs.panels.ui.compose.selection.SelectionDefaults.SelectedBorderWidth
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /**
  * Places a dot to handle resizing drag events. Use this on tiles to resize.
@@ -88,6 +91,7 @@ private fun ResizingHandle(enabled: Boolean, state: ResizingState, modifier: Mod
     // Manually creating the touch target around the resizing dot to ensure that the next tile
     // does not receive the touch input accidentally.
     val minTouchTargetSize = LocalMinimumInteractiveComponentSize.current
+    val scope = rememberCoroutineScope()
     Box(
         modifier
             .layout { measurable, constraints ->
@@ -106,6 +110,9 @@ private fun ResizingHandle(enabled: Boolean, state: ResizingState, modifier: Mod
                 state = state.anchoredDraggableState,
                 orientation = Orientation.Horizontal,
             )
+            .clickable(enabled = enabled, interactionSource = null, indication = null) {
+                scope.launch { state.toggleCurrentValue() }
+            }
     ) {
         ResizingDot(enabled = enabled, modifier = Modifier.align(Alignment.Center))
     }

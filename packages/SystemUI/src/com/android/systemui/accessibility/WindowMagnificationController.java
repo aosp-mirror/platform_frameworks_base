@@ -283,7 +283,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 com.android.internal.R.integer.config_shortAnimTime));
         updateDimensions();
 
-        final Size windowFrameSize = restoreMagnificationWindowFrameSizeIfPossible();
+        final Size windowFrameSize = restoreMagnificationWindowFrameIndexAndSizeIfPossible();
         setMagnificationFrame(windowFrameSize.getWidth(), windowFrameSize.getHeight(),
                 mWindowBounds.width() / 2, mWindowBounds.height() / 2);
         computeBounceAnimationScale();
@@ -541,7 +541,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return false;
         }
         mWindowBounds.set(currentWindowBounds);
-        final Size windowFrameSize = restoreMagnificationWindowFrameSizeIfPossible();
+        final Size windowFrameSize = restoreMagnificationWindowFrameIndexAndSizeIfPossible();
         final float newCenterX = (getCenterX()) * mWindowBounds.width() / oldWindowBounds.width();
         final float newCenterY = (getCenterY()) * mWindowBounds.height() / oldWindowBounds.height();
 
@@ -785,18 +785,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final int initX = centerX - width / 2;
         final int initY = centerY - height / 2;
         mMagnificationFrame.set(initX, initY, initX + width, initY + height);
-    }
-
-    private Size restoreMagnificationWindowFrameSizeIfPossible() {
-        if (Flags.saveAndRestoreMagnificationSettingsButtons()) {
-            return restoreMagnificationWindowFrameIndexAndSizeIfPossible();
-        }
-
-        if (!mWindowMagnificationFrameSizePrefs.isPreferenceSavedForCurrentDensity()) {
-            return getDefaultMagnificationWindowFrameSize();
-        }
-
-        return mWindowMagnificationFrameSizePrefs.getSizeForCurrentDensity();
     }
 
     private Size restoreMagnificationWindowFrameIndexAndSizeIfPossible() {

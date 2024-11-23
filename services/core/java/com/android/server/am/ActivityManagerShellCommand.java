@@ -857,6 +857,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
                 options.setDismissKeyguardIfInsecure();
             }
+            intent.collectExtraIntentKeys();
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
                         mimeType, null, null, 0, mStartFlags, profilerInfo,
@@ -975,6 +976,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         pw.println("Starting service: " + intent);
         pw.flush();
+        intent.collectExtraIntentKeys();
         ComponentName cn = mInterface.startService(null, intent, intent.getType(),
                 asForeground, SHELL_PACKAGE_NAME, null, mUserId);
         if (cn == null) {
@@ -1007,6 +1009,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         pw.println("Stopping service: " + intent);
         pw.flush();
+        intent.collectExtraIntentKeys();
         int result = mInterface.stopService(null, intent, intent.getType(), mUserId);
         if (result == 0) {
             err.println("Service not stopped: was not running.");
@@ -1402,6 +1405,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             LocalDateTime localDateTime = LocalDateTime.now(Clock.systemDefaultZone());
             String logNameTimeString = LOG_NAME_TIME_FORMATTER.format(localDateTime);
             heapFile = "/data/local/tmp/heapdump-" + logNameTimeString + ".prof";
+        }
+
+        String argAfterHeapFile = getNextArg();
+        if (argAfterHeapFile != null) {
+            err.println("Error: Arguments cannot be placed after the heap file");
+            return -1;
         }
 
         // Writes an error message to stderr on failure

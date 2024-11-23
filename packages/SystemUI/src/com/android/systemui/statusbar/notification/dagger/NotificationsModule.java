@@ -77,6 +77,10 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
 import com.android.systemui.statusbar.notification.logging.dagger.NotificationsLogModule;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProvider;
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactory;
 import com.android.systemui.statusbar.notification.row.NotificationEntryProcessorFactoryLooperImpl;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -88,7 +92,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModesCleanupStartable;
 
 import dagger.Binds;
@@ -100,6 +104,8 @@ import dagger.multibindings.IntoMap;
 import kotlin.coroutines.CoroutineContext;
 
 import kotlinx.coroutines.CoroutineScope;
+
+import java.util.Optional;
 
 import javax.inject.Provider;
 
@@ -308,4 +314,22 @@ public interface NotificationsModule {
     @IntoMap
     @ClassKey(ZenModesCleanupStartable.class)
     CoreStartable bindsZenModesCleanup(ZenModesCleanupStartable zenModesCleanup);
+
+    /**
+     * Provides {@link
+     * com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor} if
+     * one of the relevant feature flags is enabled.
+     */
+    @Provides
+    @SysUISingleton
+    static Optional<PromotedNotificationContentExtractor>
+            providePromotedNotificationContentExtractor(
+                    PromotedNotificationsProvider provider, Context context,
+                    PromotedNotificationLogger logger) {
+        if (PromotedNotificationContentModel.featureFlagEnabled()) {
+            return Optional.of(new PromotedNotificationContentExtractor(provider, context, logger));
+        } else {
+            return Optional.empty();
+        }
+    }
 }

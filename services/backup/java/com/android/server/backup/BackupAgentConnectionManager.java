@@ -41,6 +41,7 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.backup.internal.LifecycleOperationStorage;
@@ -71,8 +72,10 @@ public class BackupAgentConnectionManager {
     // Activity Manager; use this lock object to signal when a requested binding has
     // completed.
     private final Object mAgentConnectLock = new Object();
-    private IBackupAgent mConnectedAgent;
-    private volatile boolean mConnecting;
+    @GuardedBy("mAgentConnectLock")
+    @Nullable
+    private BackupAgentConnection mCurrentConnection;
+
     private final ArraySet<String> mRestoreNoRestrictedModePackages = new ArraySet<>();
     private final ArraySet<String> mBackupNoRestrictedModePackages = new ArraySet<>();
 
@@ -96,8 +99,18 @@ public class BackupAgentConnectionManager {
         mUserIdMsg = "[UserID:" + userId + "] ";
     }
 
+    private static final class BackupAgentConnection {
+        public final ApplicationInfo appInfo;
+        public IBackupAgent backupAgent;
+        public boolean connecting = true; // Assume we are trying to connect on creation.
+
+        private BackupAgentConnection(ApplicationInfo appInfo) {
+            this.appInfo = appInfo;
+        }
+    }
+
     /**
-     * Fires off a backup agent, blocking until it attaches (and ActivityManager will call
+     * Fires off a backup agent, blocking until it attaches (i.e. ActivityManager calls
      * {@link #agentConnected(String, IBinder)}) or until this operation times out.
      *
      * @param mode a {@code BACKUP_MODE} from {@link android.app.ApplicationThreadConstants}.
@@ -105,48 +118,56 @@ public class BackupAgentConnectionManager {
     @Nullable
     public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode,
             @BackupAnnotations.BackupDestination int backupDestination) {
-        IBackupAgent agent = null;
         synchronized (mAgentConnectLock) {
-            mConnecting = true;
-            mConnectedAgent = null;
             boolean useRestrictedMode = shouldUseRestrictedBackupModeForPackage(mode,
                     app.packageName);
+            if (mCurrentConnection != null) {
+                Slog.e(TAG, mUserIdMsg + "binding to new agent before unbinding from old one: "
+                        + mCurrentConnection.appInfo.packageName);
+            }
+            mCurrentConnection = new BackupAgentConnection(app);
+
+            // bindBackupAgent() is an async API. It will kick off the app's process and call
+            // agentConnected() when it receives the agent from the app.
+            boolean startedBindSuccessfully = false;
             try {
-                if (mActivityManager.bindBackupAgent(app.packageName, mode, mUserId,
-                        backupDestination, useRestrictedMode)) {
-                    Slog.d(TAG, mUserIdMsg + "awaiting agent for " + app);
-
-                    // success; wait for the agent to arrive
-                    // only wait 10 seconds for the bind to happen
-                    long timeoutMark = System.currentTimeMillis() + 10 * 1000;
-                    while (mConnecting && mConnectedAgent == null && (System.currentTimeMillis()
-                            < timeoutMark)) {
-                        try {
-                            mAgentConnectLock.wait(5000);
-                        } catch (InterruptedException e) {
-                            // just bail
-                            Slog.w(TAG, mUserIdMsg + "Interrupted: " + e);
-                            mConnecting = false;
-                            mConnectedAgent = null;
-                        }
-                    }
-
-                    // if we timed out with no connect, abort and move on
-                    if (mConnecting) {
-                        Slog.w(TAG, mUserIdMsg + "Timeout waiting for agent " + app);
-                        mConnectedAgent = null;
-                    }
-                    Slog.i(TAG, mUserIdMsg + "got agent " + mConnectedAgent);
-                    agent = mConnectedAgent;
-                }
+                startedBindSuccessfully = mActivityManager.bindBackupAgent(app.packageName, mode,
+                        mUserId, backupDestination, useRestrictedMode);
             } catch (RemoteException e) {
                 // can't happen - ActivityManager is local
             }
-        }
-        if (agent == null) {
+
+            if (!startedBindSuccessfully) {
+                Slog.w(TAG, mUserIdMsg + "bind request failed for " + app.packageName);
+                mCurrentConnection = null;
+            } else {
+                Slog.d(TAG, mUserIdMsg + "awaiting agent for " + app.packageName);
+
+                // Wait 10 seconds for the agent and then time out if we still haven't bound to it.
+                long timeoutMark = System.currentTimeMillis() + 10 * 1000;
+                while (mCurrentConnection != null && mCurrentConnection.connecting && (
+                        System.currentTimeMillis() < timeoutMark)) {
+                    try {
+                        mAgentConnectLock.wait(5000);
+                    } catch (InterruptedException e) {
+                        Slog.w(TAG, mUserIdMsg + "Interrupted: " + e);
+                        mCurrentConnection = null;
+                    }
+                }
+            }
+
+            if (mCurrentConnection != null) {
+                if (!mCurrentConnection.connecting) {
+                    return mCurrentConnection.backupAgent;
+                }
+                // If we are still connecting, we've timed out.
+                Slog.w(TAG, mUserIdMsg + "Timeout waiting for agent " + app);
+                mCurrentConnection = null;
+            }
+
             mActivityManagerInternal.clearPendingBackup(mUserId);
+            return null;
         }
-        return agent;
     }
 
     /**
@@ -154,30 +175,49 @@ public class BackupAgentConnectionManager {
      * It will tell the app to destroy the agent.
      */
     public void unbindAgent(ApplicationInfo app) {
-        try {
-            mActivityManager.unbindBackupAgent(app);
-        } catch (RemoteException e) {
-            // Can't happen - activity manager is local
+        synchronized (mAgentConnectLock) {
+            if (mCurrentConnection == null) {
+                Slog.w(TAG, mUserIdMsg + "unbindAgent but no current connection");
+            } else if (!mCurrentConnection.appInfo.packageName.equals(app.packageName)) {
+                Slog.w(TAG, mUserIdMsg + "unbindAgent for unexpected package: " + app.packageName
+                        + " expected: " + mCurrentConnection.appInfo.packageName);
+            } else {
+                mCurrentConnection = null;
+            }
+
+            // Even if we weren't expecting to be bound to this agent, we should still call
+            // ActivityManager just in case. It will ignore the call if it also wasn't expecting it.
+            try {
+                mActivityManager.unbindBackupAgent(app);
+            } catch (RemoteException e) {
+                // Can't happen - activity manager is local
+            }
         }
     }
 
     /**
      * Callback: a requested backup agent has been instantiated. This should only be called from
-     * the
-     * {@link ActivityManager} when it's telling us that an agent is ready after a call to
+     * the {@link ActivityManager} when it's telling us that an agent is ready after a call to
      * {@link #bindToAgentSynchronous(ApplicationInfo, int, int)}.
      */
     public void agentConnected(String packageName, IBinder agentBinder) {
         synchronized (mAgentConnectLock) {
-            if (getCallingUid() == android.os.Process.SYSTEM_UID) {
-                Slog.d(TAG,
-                        mUserIdMsg + "agentConnected pkg=" + packageName + " agent=" + agentBinder);
-                mConnectedAgent = IBackupAgent.Stub.asInterface(agentBinder);
-                mConnecting = false;
-            } else {
+            if (getCallingUid() != Process.SYSTEM_UID) {
                 Slog.w(TAG, mUserIdMsg + "Non-system process uid=" + getCallingUid()
                         + " claiming agent connected");
+                return;
             }
+
+            Slog.d(TAG, mUserIdMsg + "agentConnected pkg=" + packageName + " agent=" + agentBinder);
+            if (mCurrentConnection == null) {
+                Slog.w(TAG, mUserIdMsg + "was not expecting connection");
+            } else if (!mCurrentConnection.appInfo.packageName.equals(packageName)) {
+                Slog.w(TAG, mUserIdMsg + "got agent for unexpected package=" + packageName);
+            } else {
+                mCurrentConnection.backupAgent = IBackupAgent.Stub.asInterface(agentBinder);
+                mCurrentConnection.connecting = false;
+            }
+
             mAgentConnectLock.notifyAll();
         }
     }
@@ -189,15 +229,21 @@ public class BackupAgentConnectionManager {
      */
     public void agentDisconnected(String packageName) {
         synchronized (mAgentConnectLock) {
-            if (getCallingUid() == Process.SYSTEM_UID) {
-                mConnectedAgent = null;
-                mConnecting = false;
-            } else {
+            if (getCallingUid() != Process.SYSTEM_UID) {
                 Slog.w(TAG, mUserIdMsg + "Non-system process uid=" + getCallingUid()
                         + " claiming agent disconnected");
+                return;
             }
+
             Slog.w(TAG, mUserIdMsg + "agentDisconnected: the backup agent for " + packageName
                     + " died: cancel current operations");
+
+            // Only abort the current connection if the agent we were expecting or already
+            // connected to has disconnected.
+            if (mCurrentConnection != null && mCurrentConnection.appInfo.packageName.equals(
+                    packageName)) {
+                mCurrentConnection = null;
+            }
 
             // Offload operation cancellation off the main thread as the cancellation callbacks
             // might call out to BackupTransport. Other operations started on the same package

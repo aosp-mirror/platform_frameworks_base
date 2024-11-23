@@ -53,11 +53,6 @@ public final class RavenwoodRunnerState {
     }
 
     /**
-     * The RavenwoodConfig used to configure the current Ravenwood environment.
-     * This can either come from mConfig or mRule.
-     */
-    private RavenwoodConfig mCurrentConfig;
-    /**
      * The RavenwoodConfig declared in the test class
      */
     private RavenwoodConfig mConfig;
@@ -67,10 +62,6 @@ public final class RavenwoodRunnerState {
     private RavenwoodRule mRule;
     private boolean mHasRavenwoodRule;
     private Description mMethodDescription;
-
-    public RavenwoodConfig getConfig() {
-        return mCurrentConfig;
-    }
 
     public void enterTestRunner() {
         Log.i(TAG, "enterTestRunner: " + mRunner);
@@ -83,31 +74,19 @@ public final class RavenwoodRunnerState {
                 fail("RavenwoodConfig and RavenwoodRule cannot be used in the same class."
                         + " Suggest migrating to RavenwoodConfig.");
             }
-            mCurrentConfig = mConfig;
-        } else if (!mHasRavenwoodRule) {
-            // If no RavenwoodConfig and no RavenwoodRule, use a default config
-            mCurrentConfig = new RavenwoodConfig.Builder().build();
         }
 
-        if (mCurrentConfig != null) {
-            RavenwoodRuntimeEnvironmentController.init(mRunner);
-        }
+        RavenwoodRuntimeEnvironmentController.initForRunner();
     }
 
     public void enterTestClass() {
         Log.i(TAG, "enterTestClass: " + mRunner.mTestJavaClass.getName());
-
-        if (mCurrentConfig != null) {
-            RavenwoodRuntimeEnvironmentController.init(mRunner);
-        }
     }
 
     public void exitTestClass() {
         Log.i(TAG, "exitTestClass: " + mRunner.mTestJavaClass.getName());
         try {
-            if (mCurrentConfig != null) {
-                RavenwoodRuntimeEnvironmentController.reset();
-            }
+            RavenwoodRuntimeEnvironmentController.exitTestClass();
         } finally {
             mConfig = null;
             mRule = null;
@@ -116,11 +95,11 @@ public final class RavenwoodRunnerState {
 
     public void enterTestMethod(Description description) {
         mMethodDescription = description;
+        RavenwoodRuntimeEnvironmentController.initForMethod();
     }
 
     public void exitTestMethod() {
         mMethodDescription = null;
-        RavenwoodRuntimeEnvironmentController.reinit();
     }
 
     public void enterRavenwoodRule(RavenwoodRule rule) {
@@ -133,10 +112,7 @@ public final class RavenwoodRunnerState {
                     + " which is not supported.");
         }
         mRule = rule;
-        if (mCurrentConfig == null) {
-            mCurrentConfig = rule.getConfiguration();
-        }
-        RavenwoodRuntimeEnvironmentController.init(mRunner);
+        RavenwoodRuntimeEnvironmentController.setSystemProperties(rule.mSystemProperties);
     }
 
     public void exitRavenwoodRule(RavenwoodRule rule) {

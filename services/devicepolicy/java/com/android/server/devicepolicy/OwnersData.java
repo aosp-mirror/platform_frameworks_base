@@ -95,6 +95,8 @@ class OwnersData {
             "resetPasswordWithTokenMigrated";
     private static final String ATTR_MEMORY_TAGGING_MIGRATED =
             "memoryTaggingMigrated";
+    private static final String ATTR_SET_KEYGUARD_DISABLED_FEATURES_MIGRATED =
+            "setKeyguardDisabledFeaturesMigrated";
 
     private static final String ATTR_MIGRATED_POST_UPGRADE = "migratedPostUpgrade";
 
@@ -129,6 +131,7 @@ class OwnersData {
     boolean mSuspendedPackagesMigrated = false;
     boolean mResetPasswordWithTokenMigrated = false;
     boolean mMemoryTaggingMigrated = false;
+    boolean mSetKeyguardDisabledFeaturesMigrated = false;
 
     boolean mPoliciesMigratedPostUpdate = false;
 
@@ -434,6 +437,10 @@ class OwnersData {
                 out.attributeBoolean(null, ATTR_MEMORY_TAGGING_MIGRATED,
                         mMemoryTaggingMigrated);
             }
+            if (Flags.setKeyguardDisabledFeaturesCoexistence()) {
+                out.attributeBoolean(null, ATTR_SET_KEYGUARD_DISABLED_FEATURES_MIGRATED,
+                        mSetKeyguardDisabledFeaturesMigrated);
+            }
             out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
 
         }
@@ -510,6 +517,10 @@ class OwnersData {
                     mMemoryTaggingMigrated = Flags.setMtePolicyCoexistence()
                             && parser.getAttributeBoolean(null,
                             ATTR_MEMORY_TAGGING_MIGRATED, false);
+                    mSetKeyguardDisabledFeaturesMigrated =
+                            Flags.setKeyguardDisabledFeaturesCoexistence()
+                                    && parser.getAttributeBoolean(null,
+                                    ATTR_SET_KEYGUARD_DISABLED_FEATURES_MIGRATED, false);
                     break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);

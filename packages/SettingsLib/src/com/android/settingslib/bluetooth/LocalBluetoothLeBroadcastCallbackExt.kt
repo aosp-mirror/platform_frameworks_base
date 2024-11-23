@@ -69,8 +69,8 @@ val LocalBluetoothLeBroadcast.onBroadcastStartedOrStopped: Flow<Unit>
             }
             .buffer(capacity = Channel.CONFLATED)
 
-/** [Flow] for [BluetoothLeBroadcast.Callback] onPlaybackStarted event */
-val LocalBluetoothLeBroadcast.onPlaybackStarted: Flow<Unit>
+/** [Flow] for [BluetoothLeBroadcast.Callback] onBroadcastMetadataChanged event */
+val LocalBluetoothLeBroadcast.onBroadcastMetadataChanged: Flow<Unit>
     get() =
         callbackFlow {
             val listener =
@@ -87,7 +87,6 @@ val LocalBluetoothLeBroadcast.onPlaybackStarted: Flow<Unit>
                     }
 
                     override fun onPlaybackStarted(reason: Int, broadcastId: Int) {
-                        launch { trySend(Unit) }
                     }
 
                     override fun onPlaybackStopped(reason: Int, broadcastId: Int) {
@@ -100,7 +99,9 @@ val LocalBluetoothLeBroadcast.onPlaybackStarted: Flow<Unit>
                     override fun onBroadcastMetadataChanged(
                         broadcastId: Int,
                         metadata: BluetoothLeBroadcastMetadata
-                    ) {}
+                    ) {
+                        trySend(Unit)
+                    }
                 }
             registerServiceCallBack(
                 ConcurrentUtils.DIRECT_EXECUTOR,

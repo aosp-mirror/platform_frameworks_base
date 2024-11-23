@@ -35,9 +35,9 @@ import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.init.NotificationsController
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor

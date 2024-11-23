@@ -617,6 +617,7 @@ interface IDevicePolicyManager {
     int[] getApplicationExemptions(String packageName);
 
     void setMtePolicy(int flag, String callerPackageName);
+    void setMtePolicyBySystem(in String systemEntity, int policy);
     int getMtePolicy(String callerPackageName);
 
     void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);

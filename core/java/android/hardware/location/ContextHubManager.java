@@ -38,6 +38,8 @@ import android.hardware.contexthub.HubDiscoveryInfo;
 import android.hardware.contexthub.HubEndpoint;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubServiceInfo;
+import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
+import android.hardware.contexthub.IHubEndpointDiscoveryCallback;
 import android.hardware.contexthub.IHubEndpointLifecycleCallback;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -49,7 +51,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 /**
@@ -201,6 +205,10 @@ public final class ContextHubManager {
     private final IContextHubService mService;
     private Callback mCallback;
     private Handler mCallbackHandler;
+
+    /** A map of endpoint discovery callbacks currently registered */
+    private Map<IHubEndpointDiscoveryCallback, IContextHubEndpointDiscoveryCallback>
+            mDiscoveryCallbacks = new ConcurrentHashMap<>();
 
     /**
      * @deprecated Use {@code mCallback} instead.
@@ -694,8 +702,6 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull
     public List<HubDiscoveryInfo> findEndpoints(long endpointId) {
-        // TODO(b/379323274): Consider improving these getters to avoid racing with nano app load
-        //  timing.
         try {
             List<HubEndpointInfo> endpointInfos = mService.findEndpoints(endpointId);
             List<HubDiscoveryInfo> results = new ArrayList<>(endpointInfos.size());
@@ -720,8 +726,6 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @NonNull
     public List<HubDiscoveryInfo> findEndpoints(@NonNull String serviceDescriptor) {
-        // TODO(b/379323274): Consider improving these getters to avoid racing with nano app load
-        //  timing.
         if (serviceDescriptor.isBlank()) {
             throw new IllegalArgumentException("Invalid service descriptor: " + serviceDescriptor);
         }
@@ -740,6 +744,188 @@ public final class ContextHubManager {
             return results;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates an interface to invoke endpoint discovery callbacks to send down to the service.
+     *
+     * @param callback the callback to invoke at the client process
+     * @param executor the executor to invoke callbacks for this client
+     * @return the callback interface
+     */
+    private IContextHubEndpointDiscoveryCallback createDiscoveryCallback(
+            IHubEndpointDiscoveryCallback callback,
+            Executor executor,
+            @Nullable String serviceDescriptor) {
+        return new IContextHubEndpointDiscoveryCallback.Stub() {
+            @Override
+            public void onEndpointsStarted(HubEndpointInfo[] hubEndpointInfoList) {
+                if (hubEndpointInfoList.length == 0) {
+                    Log.w(TAG, "onEndpointsStarted: received empty discovery list");
+                    return;
+                }
+                executor.execute(
+                        () -> {
+                            // TODO(b/380293951): Refactor
+                            List<HubDiscoveryInfo> discoveryList =
+                                    new ArrayList<>(hubEndpointInfoList.length);
+                            for (HubEndpointInfo info : hubEndpointInfoList) {
+                                if (serviceDescriptor != null) {
+                                    for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
+                                        if (sInfo.getServiceDescriptor()
+                                                .equals(serviceDescriptor)) {
+                                            discoveryList.add(new HubDiscoveryInfo(info, sInfo));
+                                        }
+                                    }
+                                } else {
+                                    discoveryList.add(new HubDiscoveryInfo(info));
+                                }
+                            }
+                            if (discoveryList.isEmpty()) {
+                                Log.w(TAG, "onEndpointsStarted: no matching service descriptor");
+                            } else {
+                                callback.onEndpointsStarted(discoveryList);
+                            }
+                        });
+            }
+
+            @Override
+            public void onEndpointsStopped(HubEndpointInfo[] hubEndpointInfoList, int reason) {
+                if (hubEndpointInfoList.length == 0) {
+                    Log.w(TAG, "onEndpointsStopped: received empty discovery list");
+                    return;
+                }
+                executor.execute(
+                        () -> {
+                            List<HubDiscoveryInfo> discoveryList =
+                                    new ArrayList<>(hubEndpointInfoList.length);
+                            for (HubEndpointInfo info : hubEndpointInfoList) {
+                                if (serviceDescriptor != null) {
+                                    for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
+                                        if (sInfo.getServiceDescriptor()
+                                                .equals(serviceDescriptor)) {
+                                            discoveryList.add(new HubDiscoveryInfo(info, sInfo));
+                                        }
+                                    }
+                                } else {
+                                    discoveryList.add(new HubDiscoveryInfo(info));
+                                }
+                            }
+                            if (discoveryList.isEmpty()) {
+                                Log.w(TAG, "onEndpointsStopped: no matching service descriptor");
+                            } else {
+                                callback.onEndpointsStopped(discoveryList, reason);
+                            }
+                        });
+            }
+        };
+    }
+
+    /**
+     * Equivalent to {@link #registerEndpointDiscoveryCallback(long, IHubEndpointDiscoveryCallback,
+     * Executor)} with the default executor in the main thread.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void registerEndpointDiscoveryCallback(
+            long endpointId, @NonNull IHubEndpointDiscoveryCallback callback) {
+        registerEndpointDiscoveryCallback(
+                endpointId, callback, new HandlerExecutor(Handler.getMain()));
+    }
+
+    /**
+     * Registers a callback to be notified when the hub endpoint with the corresponding endpoint ID
+     * has started or stopped.
+     *
+     * @param endpointId The identifier of the hub endpoint.
+     * @param callback The callback to be invoked.
+     * @param executor The executor to invoke the callback on.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void registerEndpointDiscoveryCallback(
+            long endpointId,
+            @NonNull IHubEndpointDiscoveryCallback callback,
+            @NonNull Executor executor) {
+        Objects.requireNonNull(callback, "callback cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        IContextHubEndpointDiscoveryCallback iCallback =
+                createDiscoveryCallback(callback, executor, null);
+        try {
+            mService.registerEndpointDiscoveryCallbackId(endpointId, iCallback);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        mDiscoveryCallbacks.put(callback, iCallback);
+    }
+
+    /**
+     * Equivalent to {@link #registerEndpointDiscoveryCallback(String,
+     * IHubEndpointDiscoveryCallback, Executor)} with the default executor in the main thread.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void registerEndpointDiscoveryCallback(
+            @NonNull String serviceDescriptor, @NonNull IHubEndpointDiscoveryCallback callback) {
+        registerEndpointDiscoveryCallback(
+                serviceDescriptor, callback, new HandlerExecutor(Handler.getMain()));
+    }
+
+    /**
+     * Registers a callback to be notified when the hub endpoint with the corresponding service
+     * descriptor has started or stopped.
+     *
+     * @param serviceDescriptor The service descriptor of the hub endpoint.
+     * @param callback The callback to be invoked.
+     * @param executor The executor to invoke the callback on.
+     * @throws IllegalArgumentException if the serviceDescriptor is empty.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void registerEndpointDiscoveryCallback(
+            @NonNull String serviceDescriptor,
+            @NonNull IHubEndpointDiscoveryCallback callback,
+            @NonNull Executor executor) {
+        Objects.requireNonNull(serviceDescriptor, "serviceDescriptor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
+        if (serviceDescriptor.isBlank()) {
+            throw new IllegalArgumentException("Invalid service descriptor: " + serviceDescriptor);
+        }
+
+        IContextHubEndpointDiscoveryCallback iCallback =
+                createDiscoveryCallback(callback, executor, serviceDescriptor);
+        try {
+            mService.registerEndpointDiscoveryCallbackDescriptor(serviceDescriptor, iCallback);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        mDiscoveryCallbacks.put(callback, iCallback);
+    }
+
+    /**
+     * Unregisters a previously registered endpoint discovery callback.
+     *
+     * @param callback The callback previously registered.
+     * @throws IllegalArgumentException If the callback was not previously registered.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    public void unregisterEndpointDiscoveryCallback(
+            @NonNull IHubEndpointDiscoveryCallback callback) {
+        Objects.requireNonNull(callback, "callback cannot be null");
+        IContextHubEndpointDiscoveryCallback iCallback = mDiscoveryCallbacks.remove(callback);
+        if (iCallback == null) {
+            throw new IllegalArgumentException("Callback not previously registered");
+        }
+
+        try {
+            mService.unregisterEndpointDiscoveryCallback(iCallback);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 

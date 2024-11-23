@@ -99,15 +99,17 @@ public final class SatelliteManager {
     private static final ConcurrentHashMap<SatelliteSupportedStateCallback,
             ISatelliteSupportedStateCallback> sSatelliteSupportedStateCallbackMap =
             new ConcurrentHashMap<>();
-
     private static final ConcurrentHashMap<SatelliteCommunicationAllowedStateCallback,
             ISatelliteCommunicationAllowedStateCallback>
             sSatelliteCommunicationAllowedStateCallbackMap =
             new ConcurrentHashMap<>();
-
     private static final ConcurrentHashMap<SatelliteDisallowedReasonsCallback,
             ISatelliteDisallowedReasonsCallback>
             sSatelliteDisallowedReasonsCallbackMap =
+            new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<SelectedNbIotSatelliteSubscriptionCallback,
+            ISelectedNbIotSatelliteSubscriptionCallback>
+            sSelectedNbIotSatelliteSubscriptionCallbackMap =
             new ConcurrentHashMap<>();
 
     private final int mSubId;
@@ -746,7 +748,7 @@ public final class SatelliteManager {
      * @hide
      */
     public static final String ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED =
-            "android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
+            "android.telephony.satellite.action.SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
 
 
     /**
@@ -757,7 +759,7 @@ public final class SatelliteManager {
      * @hide
      */
     public static final String ACTION_SATELLITE_START_NON_EMERGENCY_SESSION =
-            "android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION";
+            "android.telephony.satellite.action.SATELLITE_START_NON_EMERGENCY_SESSION";
     /**
      * Meta-data represents whether the application supports P2P SMS over carrier roaming satellite
      * which needs manual trigger to connect to satellite. The messaging applications that supports
@@ -2537,6 +2539,89 @@ public final class SatelliteManager {
             loge("requestSelectedNbIotSatelliteSubscriptionId() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Registers for selected satellite subscription changed event from the satellite service.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the selected satellite subscription changed event.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteResult public int registerForSelectedNbIotSatelliteSubscriptionChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SelectedNbIotSatelliteSubscriptionCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISelectedNbIotSatelliteSubscriptionCallback internalCallback =
+                        new ISelectedNbIotSatelliteSubscriptionCallback.Stub() {
+                            @Override
+                            public void onSelectedNbIotSatelliteSubscriptionChanged(
+                                    int selectedSubId) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSelectedNbIotSatelliteSubscriptionChanged(
+                                                selectedSubId)));
+                            }
+                        };
+                sSelectedNbIotSatelliteSubscriptionCallbackMap.put(callback, internalCallback);
+                return telephony.registerForSelectedNbIotSatelliteSubscriptionChanged(
+                        internalCallback);
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForSelectedNbIotSatelliteSubscriptionChanged() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_RESULT_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregisters for selected satellite subscription changed event from the satellite service. If
+     * callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to {@link
+     *     #registerForSelectedNbIotSatelliteSubscriptionChanged(Executor,
+     *     SelectedNbIotSatelliteSubscriptionCallback)}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void unregisterForSelectedNbIotSatelliteSubscriptionChanged(
+            @NonNull SelectedNbIotSatelliteSubscriptionCallback callback) {
+        Objects.requireNonNull(callback);
+        ISelectedNbIotSatelliteSubscriptionCallback internalCallback =
+                sSelectedNbIotSatelliteSubscriptionCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForSelectedNbIotSatelliteSubscriptionChanged(
+                            internalCallback);
+                } else {
+                    loge("unregisterForSelectedNbIotSatelliteSubscriptionChanged: " +
+                            "No internal callback.");
+                }
+            } else {
+                throw new IllegalStateException("Telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForSelectedNbIotSatelliteSubscriptionChanged() RemoteException: " +
+                    ex);
+            ex.rethrowFromSystemServer();
         }
     }
 
