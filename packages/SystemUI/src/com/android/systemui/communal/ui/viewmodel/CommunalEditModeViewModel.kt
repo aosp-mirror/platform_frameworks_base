@@ -164,9 +164,8 @@ constructor(
         )
     }
 
-    override fun onReorderWidgetStart() {
-        // Clear selection status
-        setSelectedKey(null)
+    override fun onReorderWidgetStart(draggingItemKey: String) {
+        setSelectedKey(draggingItemKey)
         _reorderingWidgets.value = true
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
     }

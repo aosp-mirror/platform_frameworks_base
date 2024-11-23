@@ -36,6 +36,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.util.MediaFeatureFlag
 import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.plugins.ActivityStarter
@@ -60,9 +61,13 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.icon.IconBuilder
 import com.android.systemui.statusbar.notification.icon.IconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.CoordinateOnClickListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener
@@ -77,7 +82,6 @@ import com.android.systemui.statusbar.notification.row.shared.NotificationRowCon
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartActionInflaterImpl
 import com.android.systemui.statusbar.policy.SmartReplyConstants
 import com.android.systemui.statusbar.policy.SmartReplyInflaterImpl
@@ -221,6 +225,17 @@ class ExpandableNotificationRowBuilder(
                 Mockito.mock(ConversationNotificationManager::class.java, STUB_ONLY),
             )
 
+        val promotedNotificationsProvider = PromotedNotificationsProviderImpl()
+        val promotedNotificationLog = logcatLogBuffer("PromotedNotifLog")
+        val promotedNotificationLogger = PromotedNotificationLogger(promotedNotificationLog)
+
+        val promotedNotificationContentExtractor =
+            PromotedNotificationContentExtractor(
+                promotedNotificationsProvider,
+                context,
+                promotedNotificationLogger,
+            )
+
         mContentBinder =
             if (NotificationRowContentBinderRefactor.isEnabled)
                 NotificationRowContentBinderImpl(
@@ -231,6 +246,7 @@ class ExpandableNotificationRowBuilder(
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
                     Mockito.mock(HeadsUpStyleProvider::class.java, STUB_ONLY),
+                    promotedNotificationContentExtractor,
                     Mockito.mock(NotificationRowContentBinderLogger::class.java, STUB_ONLY),
                 )
             else
@@ -243,6 +259,7 @@ class ExpandableNotificationRowBuilder(
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
                     Mockito.mock(HeadsUpStyleProvider::class.java, STUB_ONLY),
+                    promotedNotificationContentExtractor,
                     Mockito.mock(NotificationRowContentBinderLogger::class.java, STUB_ONLY),
                 )
         mContentBinder.setInflateSynchronously(true)

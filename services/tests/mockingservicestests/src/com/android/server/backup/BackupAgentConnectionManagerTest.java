@@ -196,6 +196,31 @@ public class BackupAgentConnectionManagerTest {
     }
 
     @Test
+    public void bindToAgentSynchronous_unexpectedAgentConnected_doesNotReturnWrongAgent()
+            throws Exception {
+        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(),
+                anyInt(), anyBoolean())).thenReturn(true);
+        // This is so that IBackupAgent.Stub.asInterface() works.
+        when(mBackupAgentStub.queryLocalInterface(any())).thenReturn(mBackupAgentStub);
+        when(mConnectionManager.getCallingUid()).thenReturn(Process.SYSTEM_UID);
+
+        // This is going to block until it receives the callback so we need to run it on a
+        // separate thread.
+        Thread testThread = new Thread(() -> setBackupAgentResult(
+                mConnectionManager.bindToAgentSynchronous(mTestApplicationInfo,
+                        ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD)),
+                "backup-agent-connection-manager-test");
+        testThread.start();
+        // Give the testThread a head start, otherwise agentConnected() might run before
+        // bindToAgentSynchronous() is called.
+        Thread.sleep(500);
+        mConnectionManager.agentConnected("com.other.package", mBackupAgentStub);
+        testThread.join(100); // Avoid waiting the full timeout.
+
+        assertThat(mBackupAgentResult).isNull();
+    }
+
+    @Test
     @DisableFlags(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
     public void bindToAgentSynchronous_restrictedModeChangesFlagOff_shouldUseRestrictedMode()
             throws Exception {
@@ -345,6 +370,7 @@ public class BackupAgentConnectionManagerTest {
 
     @Test
     public void agentDisconnected_cancelsCurrentOperations() throws Exception {
+        when(mConnectionManager.getCallingUid()).thenReturn(Process.SYSTEM_UID);
         when(mOperationStorage.operationTokensForPackage(eq(TEST_PACKAGE))).thenReturn(
                 ImmutableSet.of(123, 456, 789));
         when(mConnectionManager.getThreadForCancellation(any())).thenAnswer(invocation -> {

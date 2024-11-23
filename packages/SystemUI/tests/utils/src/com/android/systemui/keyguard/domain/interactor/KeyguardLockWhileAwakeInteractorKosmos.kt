@@ -24,5 +24,6 @@ val Kosmos.keyguardLockWhileAwakeInteractor by
         KeyguardLockWhileAwakeInteractor(
             biometricSettingsRepository = biometricSettingsRepository,
             keyguardEnabledInteractor = keyguardEnabledInteractor,
+            keyguardServiceLockNowInteractor = keyguardServiceLockNowInteractor,
         )
     }

@@ -19,9 +19,23 @@ package com.android.systemui.keyboard.shortcut.data.source
 import android.hardware.input.InputGestureData
 import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.KeyGestureEvent
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_HOME
+import android.os.SystemClock
 import android.view.KeyEvent
+import android.view.KeyEvent.ACTION_DOWN
+import android.view.KeyEvent.KEYCODE_A
+import android.view.KeyEvent.META_ALT_ON
+import android.view.KeyEvent.META_CTRL_ON
+import android.view.KeyEvent.META_FUNCTION_ON
+import android.view.KeyEvent.META_META_LEFT_ON
+import android.view.KeyEvent.META_META_ON
+import android.view.KeyEvent.META_SHIFT_ON
+import android.view.KeyEvent.META_SHIFT_RIGHT_ON
+import android.view.KeyEvent.META_SYM_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
@@ -29,9 +43,11 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.res.R
 
 object TestShortcuts {
@@ -524,5 +540,111 @@ object TestShortcuts {
             simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
             ),
+        )
+
+    val standardAddCustomShortcutRequestInfo =
+        ShortcutCustomizationRequestInfo.Add(
+            label = "Open apps list",
+            categoryType = System,
+            subCategoryLabel = "System controls",
+        )
+
+    val standardDeleteCustomShortcutRequestInfo =
+        ShortcutCustomizationRequestInfo.Delete(
+            label = "Open apps list",
+            categoryType = System,
+            subCategoryLabel = "System controls",
+        )
+
+    val standardKeyCombination =
+        KeyCombination(
+            modifiers = META_META_ON or META_SHIFT_ON or META_META_LEFT_ON or META_SHIFT_RIGHT_ON,
+            keyCode = KEYCODE_A,
+        )
+
+    const val ALL_SUPPORTED_MODIFIERS =
+        META_META_ON or
+            META_CTRL_ON or
+            META_FUNCTION_ON or
+            META_SHIFT_ON or
+            META_ALT_ON or
+            META_SYM_ON
+
+    val allAppsInputGestureData: InputGestureData =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_ALL_APPS)
+            .setTrigger(
+                createKeyTrigger(
+                    /* keycode = */ standardKeyCombination.keyCode!!,
+                    /* modifierState = */ standardKeyCombination.modifiers and
+                        ALL_SUPPORTED_MODIFIERS,
+                )
+            )
+            .build()
+
+    val goHomeInputGestureData: InputGestureData =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_HOME)
+            .setTrigger(
+                createKeyTrigger(
+                    /* keycode = */ standardKeyCombination.keyCode!!,
+                    /* modifierState = */ standardKeyCombination.modifiers and
+                        ALL_SUPPORTED_MODIFIERS,
+                )
+            )
+            .build()
+
+    val expectedStandardDeleteShortcutUiState =
+        ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)
+
+    val keyDownEventWithoutActionKeyPressed =
+        androidx.compose.ui.input.key.KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ META_CTRL_ON,
+            )
+        )
+
+    val keyDownEventWithActionKeyPressed =
+        androidx.compose.ui.input.key.KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ META_CTRL_ON or META_META_ON,
+            )
+        )
+
+    val keyUpEventWithActionKeyPressed =
+        androidx.compose.ui.input.key.KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ 0,
+            )
+        )
+
+    val standardAddShortcutRequest =
+        ShortcutCustomizationRequestInfo.Add(
+            label = "Standard shortcut",
+            categoryType = ShortcutCategoryType.System,
+            subCategoryLabel = "Standard subcategory",
+        )
+
+    val expectedStandardAddShortcutUiState =
+        ShortcutCustomizationUiState.AddShortcutDialog(
+            shortcutLabel = "Standard shortcut",
+            defaultCustomShortcutModifierKey =
+                ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
+            isDialogShowing = false,
         )
 }

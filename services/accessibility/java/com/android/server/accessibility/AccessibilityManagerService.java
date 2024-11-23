@@ -3797,13 +3797,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 || (Flags.enableMagnificationMultipleFingerMultipleTapGesture()
                     && userState.isMagnificationTwoFingerTripleTapEnabledLocked()));
 
-        final boolean createConnectionForCurrentCapability =
-                com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
-                        || (userState.getMagnificationCapabilitiesLocked()
-                                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
-
-        final boolean connect = (shortcutEnabled && createConnectionForCurrentCapability)
-                || userHasMagnificationServicesLocked(userState);
+        final boolean connect = shortcutEnabled || userHasMagnificationServicesLocked(userState);
 
         getMagnificationConnectionManager().requestConnection(connect);
     }
@@ -4852,8 +4846,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         getMagnificationConnectionManager().setConnection(connection);
 
-        if (com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
-                && connection == null
+        if (connection == null
                 && mMagnificationController.isFullScreenMagnificationControllerInitialized()) {
             // Since the connection does not exist, the system ui cannot provide the border
             // implementation for fullscreen magnification. So we call reset to deactivate the
@@ -6548,8 +6541,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
                 // Only continue setting up the packages if the service has been initialized.
                 // See: b/340927041
-                if (Flags.skipPackageChangeBeforeUserSwitch()
-                        && !mManagerService.isServiceInitializedLocked()) {
+                if (!mManagerService.isServiceInitializedLocked()) {
                     Slog.w(LOG_TAG,
                             "onSomePackagesChanged: service not initialized, skip the callback.");
                     return;

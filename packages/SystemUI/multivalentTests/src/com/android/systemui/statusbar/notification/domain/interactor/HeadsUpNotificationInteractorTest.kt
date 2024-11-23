@@ -31,6 +31,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.testKosmos
@@ -102,7 +103,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun hasPinnedRows_rowGetsPinned_true() =
+    fun hasPinnedRows_rowGetsPinnedNormally_true() =
         testScope.runTest {
             val hasPinnedRows by collectLastValue(underTest.hasPinnedRows)
             // GIVEN no rows are pinned
@@ -115,8 +116,30 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             headsUpRepository.setNotifications(rows)
             runCurrent()
 
-            // WHEN a row gets pinned
-            rows[0].isPinned.value = true
+            // WHEN a row gets pinned normally
+            rows[0].pinnedStatus.value = PinnedStatus.PinnedBySystem
+            runCurrent()
+
+            // THEN hasPinnedRows updates to true
+            assertThat(hasPinnedRows).isTrue()
+        }
+
+    @Test
+    fun hasPinnedRows_rowGetsPinnedByUser_true() =
+        testScope.runTest {
+            val hasPinnedRows by collectLastValue(underTest.hasPinnedRows)
+            // GIVEN no rows are pinned
+            val rows =
+                arrayListOf(
+                    fakeHeadsUpRowRepository("key 0"),
+                    fakeHeadsUpRowRepository("key 1"),
+                    fakeHeadsUpRowRepository("key 2"),
+                )
+            headsUpRepository.setNotifications(rows)
+            runCurrent()
+
+            // WHEN a row gets pinned due to a chip tap
+            rows[0].pinnedStatus.value = PinnedStatus.PinnedByUser
             runCurrent()
 
             // THEN hasPinnedRows updates to true
@@ -138,7 +161,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // THEN that row gets unpinned
-            rows[0].isPinned.value = false
+            rows[0].pinnedStatus.value = PinnedStatus.NotPinned
             runCurrent()
 
             // THEN hasPinnedRows updates to false
@@ -246,7 +269,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN all rows gets pinned
-            rows[2].isPinned.value = true
+            rows[2].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
 
             // THEN no rows are filtered
@@ -271,7 +294,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             assertThat(activeHeadsUpRows).containsExactly(rows[0], rows[1], rows[2])
 
             // WHEN all rows gets pinned
-            rows[2].isPinned.value = true
+            rows[2].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
 
             // THEN no change
@@ -329,7 +352,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN a row gets unpinned
-            rows[0].isPinned.value = false
+            rows[0].pinnedStatus.value = PinnedStatus.NotPinned
             runCurrent()
 
             // THEN the unpinned row is filtered
@@ -351,7 +374,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN a row gets unpinned
-            rows[0].isPinned.value = false
+            rows[0].pinnedStatus.value = PinnedStatus.NotPinned
             runCurrent()
 
             // THEN all rows are still present
@@ -372,15 +395,15 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             headsUpRepository.setNotifications(rows)
             runCurrent()
 
-            rows[0].isPinned.value = true
+            rows[0].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
 
-            rows[0].isPinned.value = false
+            rows[0].pinnedStatus.value = PinnedStatus.NotPinned
             runCurrent()
             assertThat(pinnedHeadsUpRows).isEmpty()
 
-            rows[0].isPinned.value = true
+            rows[0].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
         }
@@ -485,7 +508,5 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
         }
 
     private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =
-        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
-            this.isPinned.value = isPinned
-        }
+        FakeHeadsUpRowRepository(key = key, isPinned = isPinned)
 }

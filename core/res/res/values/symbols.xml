@@ -2393,6 +2393,8 @@
   <java-symbol type="layout" name="notification_2025_template_expanded_base" />
   <java-symbol type="layout" name="notification_2025_template_heads_up_base" />
   <java-symbol type="layout" name="notification_2025_template_header" />
+  <java-symbol type="layout" name="notification_2025_template_collapsed_messaging" />
+  <java-symbol type="layout" name="notification_2025_template_collapsed_media" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_compact_heads_up_base" />
@@ -4695,6 +4697,8 @@
 
   <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
   <java-symbol type="bool" name="config_showUserSwitcherByDefault" />
+  <java-symbol type="bool" name="config_allowChangeUserSwitcherEnabled" />
+  <java-symbol type="bool" name="config_enableUserSwitcherUponUserCreation" />
 
   <!-- Set to true to make assistant show in front of the dream/screensaver. -->
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>

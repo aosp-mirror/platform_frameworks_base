@@ -16,5 +16,5 @@
 
 <resources>
     <dimen name="config_wearMaterial3_buttonCornerRadius">26dp</dimen>
-    <dimen name="config_bottomDialogCornerRadius">18dp</dimen>
+    <dimen name="config_wearMaterial3_bottomDialogCornerRadius">18dp</dimen>
 </resources>

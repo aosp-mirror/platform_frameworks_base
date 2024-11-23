@@ -141,6 +141,14 @@ flag {
 }
 
 flag {
+    name: "enable_route_visibility_control_api"
+    namespace: "media_better_together"
+    description: "API changes to allow more control over route visibility by route providers"
+    bug: "367799834"
+    is_exported: true
+}
+
+flag {
     name: "enable_screen_off_scanning"
     is_exported: true
     namespace: "media_solutions"

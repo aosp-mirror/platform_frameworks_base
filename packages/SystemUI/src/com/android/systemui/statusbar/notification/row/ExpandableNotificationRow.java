@@ -102,6 +102,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -120,7 +121,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
@@ -280,7 +281,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationMenuRowPlugin mMenuRow;
     private ViewStub mGutsStub;
     private boolean mIsSystemChildExpanded;
-    private boolean mIsPinned;
+    private PinnedStatus mPinnedStatus = PinnedStatus.NotPinned;
     private boolean mExpandAnimationRunning;
     private AboveShelfChangedListener mAboveShelfChangedListener;
     private HeadsUpManager mHeadsUpManager;
@@ -1228,17 +1229,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * Set this notification to be pinned to the top if {@link #isHeadsUp()} is true. By doing this
      * the notification will be rendered on top of the screen.
-     *
-     * @param pinned whether it is pinned
      */
-    public void setPinned(boolean pinned) {
+    public void setPinnedStatus(PinnedStatus pinnedStatus) {
         int intrinsicHeight = getIntrinsicHeight();
         boolean wasAboveShelf = isAboveShelf();
-        mIsPinned = pinned;
+        mPinnedStatus = pinnedStatus;
         if (intrinsicHeight != getIntrinsicHeight()) {
             notifyHeightChanged(/* needsAnimation= */ false);
         }
-        if (pinned) {
+        if (pinnedStatus.isPinned()) {
             setAnimationRunning(true);
             mExpandedWhenPinned = false;
         } else if (mExpandedWhenPinned) {
@@ -1252,7 +1251,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean isPinned() {
-        return mIsPinned;
+        return mPinnedStatus.isPinned();
     }
 
     @Override
@@ -3832,7 +3831,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public boolean isAboveShelf() {
         return (canShowHeadsUp()
-                && (mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf)
+                && (mPinnedStatus.isPinned()
+                || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf)
                 || mExpandAnimationRunning || mChildIsExpanding));
     }
 

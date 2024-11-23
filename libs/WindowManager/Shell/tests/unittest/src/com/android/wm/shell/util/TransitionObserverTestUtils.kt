@@ -36,7 +36,6 @@ import android.window.TransitionInfo.TransitionMode
 import android.window.WindowContainerToken
 import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.wm.shell.transition.Transitions.TransitionObserver
-import org.mockito.Mockito
 import org.mockito.kotlin.mock
 
 @DslMarker
@@ -93,10 +92,10 @@ class TransitionObserverTestContext : TransitionObserverTestStep {
  */
 class TransitionObserverInputBuilder : TransitionObserverTestStep {
 
-    private val transition = Mockito.mock(IBinder::class.java)
+    private val transition = mock<IBinder>()
     private var transitionInfo: TransitionInfo? = null
-    private val startTransaction = Mockito.mock(Transaction::class.java)
-    private val finishTransaction = Mockito.mock(Transaction::class.java)
+    private val startTransaction = mock<Transaction>()
+    private val finishTransaction = mock<Transaction>()
 
     fun buildTransitionInfo(
         @TransitionType type: Int = TRANSIT_NONE,
@@ -143,7 +142,7 @@ class TransitionObserverInputBuilder : TransitionObserverTestStep {
             taskId = id
             displayId = DEFAULT_DISPLAY
             configuration.windowConfiguration.windowingMode = windowingMode
-            token = WindowContainerToken(Mockito.mock(IWindowContainerToken::class.java))
+            token = WindowContainerToken(mock<IWindowContainerToken>())
             baseIntent = Intent().apply {
                 component = ComponentName("package", "component.name")
             }

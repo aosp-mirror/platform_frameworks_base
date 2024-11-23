@@ -2861,9 +2861,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         )
 
     private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean) =
-        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
-            this.isPinned.value = isPinned
-        }
+        FakeHeadsUpRowRepository(key = key, elementKey = Any(), isPinned = isPinned)
 
     private fun setFingerprintSensorType(fingerprintSensorType: FingerprintSensorType) {
         kosmos.fingerprintPropertyRepository.setProperties(

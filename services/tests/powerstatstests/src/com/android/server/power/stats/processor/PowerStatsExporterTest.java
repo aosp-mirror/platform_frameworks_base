@@ -342,7 +342,7 @@ public class PowerStatsExporterTest {
         PowerStatsExporter exporter = new PowerStatsExporter(mPowerStatsStore,
                 mPowerStatsAggregator, /* batterySessionTimeSpanSlackMillis */ 0);
 
-        BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(new String[0], false,
+        BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(new String[0],
                 includeProcessStateData, includeScreenStateData, includesPowerStateData, 0);
         exporter.populateBatteryUsageStatsBuilder(builder, aps);
         return builder.build();
@@ -361,7 +361,7 @@ public class PowerStatsExporterTest {
     private void breakdownByProcState_fullRange(boolean includeScreenStateData,
             boolean includePowerStateData) throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[]{"cu570m"},
                 /* includeProcessStateData */ true, includeScreenStateData,
                 includePowerStateData, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
@@ -406,7 +406,7 @@ public class PowerStatsExporterTest {
     @Test
     public void breakdownByProcState_subRange() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[]{"cu570m"},
                 /* includeProcessStateData */ true, true, true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 3700, 6700);
 
@@ -438,7 +438,7 @@ public class PowerStatsExporterTest {
     @Test
     public void combinedProcessStates() throws Exception {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                new String[]{"cu570m"}, /* includePowerModels */ false,
+                new String[]{"cu570m"},
                 /* includeProcessStateData */ false, true, true, /* powerThreshold */ 0);
         exportAggregatedPowerStats(builder, 1000, 10000);
 

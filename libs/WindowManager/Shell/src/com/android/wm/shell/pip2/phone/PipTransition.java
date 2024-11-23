@@ -35,6 +35,7 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -57,6 +58,7 @@ import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.pip2.animation.PipEnterAnimator;
@@ -74,8 +76,8 @@ public class PipTransition extends PipTransitionController implements
     private static final String TAG = PipTransition.class.getSimpleName();
 
     // Used when for ENTERING_PIP state update.
-    private static final String PIP_TASK_TOKEN = "pip_task_token";
     private static final String PIP_TASK_LEASH = "pip_task_leash";
+    private static final String PIP_TASK_INFO = "pip_task_info";
 
     // Used for PiP CHANGING_BOUNDS state update.
     static final String PIP_START_TX = "pip_start_tx";
@@ -245,8 +247,8 @@ public class PipTransition extends PipTransitionController implements
 
             // Update the PipTransitionState while supplying the PiP leash and token to be cached.
             Bundle extra = new Bundle();
-            extra.putParcelable(PIP_TASK_TOKEN, pipChange.getContainer());
             extra.putParcelable(PIP_TASK_LEASH, pipChange.getLeash());
+            extra.putParcelable(PIP_TASK_INFO, pipChange.getTaskInfo());
             mPipTransitionState.setState(PipTransitionState.ENTERING_PIP, extra);
 
             if (isInSwipePipToHomeTransition()) {
@@ -899,10 +901,10 @@ public class PipTransition extends PipTransitionController implements
                 Preconditions.checkState(extra != null,
                         "No extra bundle for " + mPipTransitionState);
 
-                mPipTransitionState.setPipTaskToken(extra.getParcelable(
-                        PIP_TASK_TOKEN, WindowContainerToken.class));
                 mPipTransitionState.setPinnedTaskLeash(extra.getParcelable(
                         PIP_TASK_LEASH, SurfaceControl.class));
+                mPipTransitionState.setPipTaskInfo(extra.getParcelable(
+                        PIP_TASK_INFO, TaskInfo.class));
                 boolean hasValidTokenAndLeash = mPipTransitionState.getPipTaskToken() != null
                         && mPipTransitionState.getPinnedTaskLeash() != null;
 
@@ -910,16 +912,21 @@ public class PipTransition extends PipTransitionController implements
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
-                mPipTransitionState.setPipTaskToken(null);
+                // Save the PiP bounds in case, we re-enter the PiP with the same component.
+                float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                        mPipBoundsState.getBounds());
+                mPipBoundsState.saveReentryState(snapFraction);
+
                 mPipTransitionState.setPinnedTaskLeash(null);
+                mPipTransitionState.setPipTaskInfo(null);
                 break;
         }
     }
 
     @Override
     public boolean isPackageActiveInPip(@Nullable String packageName) {
-        return packageName != null
-                && mPipBoundsState.getLastPipComponentName() != null
-                && packageName.equals(mPipBoundsState.getLastPipComponentName().getPackageName());
+        final TaskInfo inPipTask = mPipTransitionState.getPipTaskInfo();
+        return packageName != null && inPipTask != null && mPipTransitionState.isInPip()
+                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 }

@@ -22,10 +22,10 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.HeadsUpUtil
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.HeadsUpUtil
 import kotlin.math.ceil
 import kotlin.math.max
 
@@ -36,12 +36,12 @@ class NotificationLaunchAnimatorControllerProvider(
     private val notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManager,
-    private val jankMonitor: InteractionJankMonitor
+    private val jankMonitor: InteractionJankMonitor,
 ) {
     @JvmOverloads
     fun getAnimatorController(
         notification: ExpandableNotificationRow,
-        onFinishAnimationCallback: Runnable? = null
+        onFinishAnimationCallback: Runnable? = null,
     ): NotificationTransitionAnimatorController {
         return NotificationTransitionAnimatorController(
             notificationLaunchAnimationInteractor,
@@ -49,7 +49,7 @@ class NotificationLaunchAnimatorControllerProvider(
             headsUpManager,
             notification,
             jankMonitor,
-            onFinishAnimationCallback
+            onFinishAnimationCallback,
         )
     }
 }
@@ -65,7 +65,7 @@ class NotificationTransitionAnimatorController(
     private val headsUpManager: HeadsUpManager,
     private val notification: ExpandableNotificationRow,
     private val jankMonitor: InteractionJankMonitor,
-    private val onFinishAnimationCallback: Runnable?
+    private val onFinishAnimationCallback: Runnable?,
 ) : ActivityTransitionAnimator.Controller {
 
     companion object {
@@ -109,7 +109,7 @@ class NotificationTransitionAnimatorController(
                 left = location[0],
                 right = location[0] + notification.width,
                 topCornerRadius = topCornerRadius,
-                bottomCornerRadius = notification.bottomCornerRadius
+                bottomCornerRadius = notification.bottomCornerRadius,
             )
 
         params.startTranslationZ = notification.translationZ
@@ -177,7 +177,7 @@ class NotificationTransitionAnimatorController(
             row.entry.key,
             true /* releaseImmediately */,
             animate,
-            reason
+            reason,
         )
     }
 
@@ -224,7 +224,7 @@ class NotificationTransitionAnimatorController(
     override fun onTransitionAnimationProgress(
         state: TransitionAnimator.State,
         progress: Float,
-        linearProgress: Float
+        linearProgress: Float,
     ) {
         val params = state as LaunchAnimationParameters
         params.progress = progress
