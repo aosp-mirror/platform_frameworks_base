@@ -130,7 +130,6 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.Immutable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.pm.RoSystemFeatures;
@@ -1015,6 +1014,33 @@ public class ApplicationPackageManager extends PackageManager {
             int uid, byte[] certificate, @CertificateInputType int type) {
         try {
             return mPM.hasUidSigningCertificate(uid, certificate, type);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void setPageSizeAppCompatFlagsSettingsOverride(String packageName, boolean enabled) {
+        try {
+            mPM.setPageSizeAppCompatFlagsSettingsOverride(packageName, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean isPageSizeCompatEnabled(String packageName) {
+        try {
+            return mPM.isPageSizeCompatEnabled(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public String getPageSizeCompatWarningMessage(String packageName) {
+        try {
+            return mPM.getPageSizeCompatWarningMessage(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

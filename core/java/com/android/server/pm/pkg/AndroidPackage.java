@@ -875,6 +875,14 @@ public interface AndroidPackage {
     int getMemtagMode();
 
     /**
+     * @see ApplicationInfo#getPageSizeAppCompatFlags()
+     * @see R.styleable#AndroidManifestApplication_pageSizeCompat
+     * @hide
+     */
+    @ApplicationInfo.PageSizeAppCompatFlags
+    int getPageSizeAppCompatFlags();
+
+    /**
      * TODO(b/135203078): Make all the Bundles immutable (and non-null by shared empty reference?)
      * @see R.styleable#AndroidManifestMetaData
      * @hide

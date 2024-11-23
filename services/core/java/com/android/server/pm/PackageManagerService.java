@@ -5875,6 +5875,67 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     userId, callingPackage);
         }
 
+        @Override
+        public void setPageSizeAppCompatFlagsSettingsOverride(String packageName, boolean enabled) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            int settingsMode = enabled
+                    ? ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_SETTINGS_OVERRIDE_ENABLED
+                    : ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_SETTINGS_OVERRIDE_DISABLED;
+            PackageStateMutator.Result result =
+                    commitPackageStateMutation(
+                            null,
+                            packageName,
+                            packageState ->
+                                    packageState
+                                            .setPageSizeAppCompatFlags(settingsMode));
+            if (result.isSpecificPackageNull()) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            scheduleWriteSettings();
+        }
+
+        @Override
+        public boolean isPageSizeCompatEnabled(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int userId = UserHandle.getCallingUserId();
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            PackageStateInternal packageState =
+                    snapshotComputer().getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+
+            return packageState == null ? false : packageState.isPageSizeAppCompatEnabled();
+        }
+
+        @Override
+        public String getPageSizeCompatWarningMessage(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int userId = UserHandle.getCallingUserId();
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            PackageStateInternal packageState =
+                    snapshotComputer().getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+
+            return packageState == null
+                    ? null
+                    : packageState.getPageSizeCompatWarningMessage(mContext);
+        }
+
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USERS)
         @Override
         public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
