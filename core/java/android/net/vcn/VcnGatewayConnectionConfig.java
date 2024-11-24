@@ -16,6 +16,7 @@
 package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+import static android.net.vcn.Flags.FLAG_MAINLINE_VCN_MODULE_API;
 import static android.net.vcn.Flags.FLAG_SAFE_MODE_CONFIG;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
 
@@ -82,7 +83,15 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public final class VcnGatewayConnectionConfig {
-    /** @hide */
+    /**
+     * Minimum NAT timeout not set.
+     *
+     * <p>When the timeout is not set, the device will automatically choose a keepalive interval and
+     * may reduce the keepalive frequency for power-optimization.
+     */
+    @FlaggedApi(FLAG_MAINLINE_VCN_MODULE_API)
+    // This constant does not represent a minimum value. It indicates the value is not configured.
+    @SuppressLint("MinMaxConstant")
     public static final int MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET = -1;
 
     /** @hide */
@@ -773,7 +782,7 @@ public final class VcnGatewayConnectionConfig {
          *
          * @param minUdpPort4500NatTimeoutSeconds the maximum keepalive timeout supported by the VCN
          *     Gateway Connection, generally the minimum duration a NAT mapping is cached on the VCN
-         *     Gateway.
+         *     Gateway; or {@link MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET} to clear this value.
          * @return this {@link Builder} instance, for chaining
          */
         @NonNull
@@ -781,8 +790,10 @@ public final class VcnGatewayConnectionConfig {
                 @IntRange(from = MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS)
                         int minUdpPort4500NatTimeoutSeconds) {
             Preconditions.checkArgument(
-                    minUdpPort4500NatTimeoutSeconds >= MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS,
-                    "Timeout must be at least 120s");
+                    minUdpPort4500NatTimeoutSeconds == MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET
+                            || minUdpPort4500NatTimeoutSeconds
+                                    >= MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS,
+                    "Timeout must be at least 120s or MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET");
 
             mMinUdpPort4500NatTimeoutSeconds = minUdpPort4500NatTimeoutSeconds;
             return this;
