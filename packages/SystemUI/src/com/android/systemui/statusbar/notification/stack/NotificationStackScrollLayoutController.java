@@ -98,9 +98,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.HeadsUpNotificationViewControllerEmptyImpl;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNotificationViewController;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpNotificationViewControllerEmptyImpl;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper.HeadsUpNotificationViewController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -138,8 +138,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -1222,7 +1222,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void goToFullShade(long delay) {
         SceneContainerFlag.assertInLegacyMode();
-        mView.goToFullShade(delay);
+        mView.animateGoToFullShade(delay);
     }
 
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
@@ -1601,6 +1601,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             default:
                 throw new IllegalStateException("Bad selection: " + selection);
         }
+    }
+
+    /** Sets whether the NSSL is displayed over the unoccluded Lockscreen. */
+    public void setOnLockscreen(boolean isOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mNotificationListContainer.setOnLockscreen(isOnLockscreen);
     }
 
     /**
@@ -2026,6 +2032,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         @Override
         public void addContainerViewAt(View v, int index) {
             mView.addContainerViewAt(v, index);
+        }
+
+        @Override
+        public void setOnLockscreen(boolean isOnLockscreen) {
+            mView.setOnLockscreen(isOnLockscreen);
         }
 
         @Override

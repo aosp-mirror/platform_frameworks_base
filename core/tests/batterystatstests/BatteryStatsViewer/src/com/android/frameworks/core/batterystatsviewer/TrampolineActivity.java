@@ -42,5 +42,6 @@ public class TrampolineActivity extends Activity {
 
     private void launchMainActivity() {
         startActivity(new Intent(this, BatteryConsumerPickerActivity.class));
+        finish();
     }
 }

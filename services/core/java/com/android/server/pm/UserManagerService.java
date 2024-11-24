@@ -6122,8 +6122,11 @@ public class UserManagerService extends IUserManager.Stub {
             // If the user switch hasn't been explicitly toggled on or off by the user, turn it on.
             if (android.provider.Settings.Global.getString(mContext.getContentResolver(),
                     android.provider.Settings.Global.USER_SWITCHER_ENABLED) == null) {
-                android.provider.Settings.Global.putInt(mContext.getContentResolver(),
-                        android.provider.Settings.Global.USER_SWITCHER_ENABLED, 1);
+                if (Resources.getSystem().getBoolean(
+                        com.android.internal.R.bool.config_enableUserSwitcherUponUserCreation)) {
+                    android.provider.Settings.Global.putInt(mContext.getContentResolver(),
+                            android.provider.Settings.Global.USER_SWITCHER_ENABLED, 1);
+                }
             }
         }
     }

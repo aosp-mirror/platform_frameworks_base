@@ -38,6 +38,8 @@
         android:drawableEnd="@drawable/arrow_pointing_down"
         android:layout_marginTop="@dimen/qqs_layout_margin_top"
         android:focusable="false"
+        android:minHeight="@dimen/min_clickable_item_size"
+        android:minWidth="@dimen/min_clickable_item_size"
         android:clickable="true" />
 
     <!-- Screen Record Switch -->
@@ -72,10 +74,10 @@
         <Switch
             android:id="@+id/screenrecord_switch"
             android:layout_width="wrap_content"
-            android:minHeight="@dimen/screenrecord_option_icon_size"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_gravity="fill_vertical"
+            style="@style/ScreenRecord.Switch"
             android:layout_weight="0"
             android:contentDescription="@string/quick_settings_screen_record_label" />
     </LinearLayout>
@@ -112,11 +114,11 @@
         <Switch
             android:id="@+id/bugreport_switch"
             android:layout_width="wrap_content"
-            android:minHeight="@dimen/screenrecord_option_icon_size"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_gravity="fill_vertical"
             android:layout_weight="0"
+            style="@style/ScreenRecord.Switch"
             android:contentDescription="@string/qs_record_issue_bug_report" />
     </LinearLayout>
 </LinearLayout>

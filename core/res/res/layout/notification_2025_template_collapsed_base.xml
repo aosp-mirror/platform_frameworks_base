@@ -123,7 +123,7 @@
                     <!-- This is the simplest way to keep this text vertically centered without
                      gravity="center_vertical" which causes jumpiness in expansion animations. -->
                     <include
-                        layout="@layout/notification_template_text"
+                        layout="@layout/notification_2025_text"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/notification_text_height"
                         android:layout_gravity="center_vertical"

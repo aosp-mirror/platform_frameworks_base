@@ -27,62 +27,56 @@ import android.view.Display.DEFAULT_DISPLAY
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 
-class DesktopTestHelpers {
-    companion object {
-        /** Create a task that has windowing mode set to [WINDOWING_MODE_FREEFORM] */
-        @JvmStatic
-        @JvmOverloads
-        fun createFreeformTask(
-                displayId: Int = DEFAULT_DISPLAY,
-                bounds: Rect? = null
-        ): RunningTaskInfo {
-            return TestRunningTaskInfoBuilder()
-                    .setDisplayId(displayId)
-                    .setToken(MockToken().token())
-                    .setActivityType(ACTIVITY_TYPE_STANDARD)
-                    .setWindowingMode(WINDOWING_MODE_FREEFORM)
-                    .setLastActiveTime(100)
-                    .apply { bounds?.let { setBounds(it) }}
-                    .build()
-        }
+object DesktopTestHelpers {
+    /** Create a task that has windowing mode set to [WINDOWING_MODE_FREEFORM] */
+    fun createFreeformTask(
+        displayId: Int = DEFAULT_DISPLAY,
+        bounds: Rect? = null,
+    ): RunningTaskInfo =
+        TestRunningTaskInfoBuilder()
+            .setDisplayId(displayId)
+            .setToken(MockToken().token())
+            .setActivityType(ACTIVITY_TYPE_STANDARD)
+            .setWindowingMode(WINDOWING_MODE_FREEFORM)
+            .setLastActiveTime(100)
+            .apply { bounds?.let { setBounds(it) } }
+            .build()
 
-        /** Create a task that has windowing mode set to [WINDOWING_MODE_FULLSCREEN] */
-        @JvmStatic
-        @JvmOverloads
-        fun createFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
-            return TestRunningTaskInfoBuilder()
-                .setDisplayId(displayId)
-                .setToken(MockToken().token())
-                .setActivityType(ACTIVITY_TYPE_STANDARD)
-                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
-                .setLastActiveTime(100)
-                .build()
-        }
+    fun createFullscreenTaskBuilder(displayId: Int = DEFAULT_DISPLAY): TestRunningTaskInfoBuilder =
+        TestRunningTaskInfoBuilder()
+            .setDisplayId(displayId)
+            .setToken(MockToken().token())
+            .setActivityType(ACTIVITY_TYPE_STANDARD)
+            .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+            .setLastActiveTime(100)
 
-        /** Create a task that has windowing mode set to [WINDOWING_MODE_MULTI_WINDOW] */
-        @JvmStatic
-        @JvmOverloads
-        fun createSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
-            return TestRunningTaskInfoBuilder()
-                .setDisplayId(displayId)
-                .setToken(MockToken().token())
-                .setActivityType(ACTIVITY_TYPE_STANDARD)
-                .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
-                .setLastActiveTime(100)
-                .build()
-        }
+    /** Create a task that has windowing mode set to [WINDOWING_MODE_FULLSCREEN] */
+    fun createFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo =
+        createFullscreenTaskBuilder(displayId).build()
 
-        /** Create a new home task */
-        @JvmStatic
-        @JvmOverloads
-        fun createHomeTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
-            return TestRunningTaskInfoBuilder()
-                    .setDisplayId(displayId)
-                    .setToken(MockToken().token())
-                    .setActivityType(ACTIVITY_TYPE_HOME)
-                    .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
-                    .setLastActiveTime(100)
-                    .build()
-        }
-    }
+    /** Create a task that has windowing mode set to [WINDOWING_MODE_MULTI_WINDOW] */
+    fun createSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo =
+        TestRunningTaskInfoBuilder()
+            .setDisplayId(displayId)
+            .setToken(MockToken().token())
+            .setActivityType(ACTIVITY_TYPE_STANDARD)
+            .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
+            .setLastActiveTime(100)
+            .build()
+
+    fun createHomeTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo =
+        TestRunningTaskInfoBuilder()
+            .setDisplayId(displayId)
+            .setToken(MockToken().token())
+            .setActivityType(ACTIVITY_TYPE_HOME)
+            .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+            .setLastActiveTime(100)
+            .build()
+
+    /** Create a new System Modal task, i.e. a task with a single transparent activity. */
+    fun createSystemModalTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo =
+        createFullscreenTaskBuilder(displayId)
+            .setTopActivityTransparent(true)
+            .setNumActivities(1)
+            .build()
 }

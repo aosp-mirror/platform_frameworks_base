@@ -236,6 +236,7 @@ aidl_interface {
         "android/os/GpuHeadroomParamsInternal.aidl",
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
+        "android/os/SessionCreationConfig.aidl",
     ],
     unstable: true,
     backend: {
@@ -689,43 +690,8 @@ java_library {
 
 // protolog end
 
-// Whether to enable read-only system feature codegen.
-gen_readonly_feature_apis = select(release_flag("RELEASE_USE_SYSTEM_FEATURE_BUILD_FLAGS"), {
-    true: "true",
-    false: "false",
-    default: "false",
-})
-
-// Generates com.android.internal.pm.RoSystemFeatures, optionally compiling in
-// details about fixed system features defined by build flags. When disabled,
-// the APIs are simply passthrough stubs with no meaningful side effects.
-// TODO(b/203143243): Implement the `--feature=` aggregation  directly with a native soong module.
-genrule {
+java_system_features_srcs {
     name: "systemfeatures-gen-srcs",
-    cmd: "$(location systemfeatures-gen-tool) com.android.internal.pm.RoSystemFeatures " +
-        // --readonly=false (default) makes the codegen an effective no-op passthrough API.
-        " --readonly=" + gen_readonly_feature_apis +
-        " --feature=AUTOMOTIVE:" + select(release_flag("RELEASE_SYSTEM_FEATURE_AUTOMOTIVE"), {
-            any @ value: value,
-            default: "",
-        }) + " --feature=EMBEDDED:" + select(release_flag("RELEASE_SYSTEM_FEATURE_EMBEDDED"), {
-            any @ value: value,
-            default: "",
-        }) + " --feature=LEANBACK:" + select(release_flag("RELEASE_SYSTEM_FEATURE_LEANBACK"), {
-            any @ value: value,
-            default: "",
-        }) + " --feature=PC:" + select(release_flag("RELEASE_SYSTEM_FEATURE_PC"), {
-            any @ value: value,
-            default: "",
-        }) + " --feature=TELEVISION:" + select(release_flag("RELEASE_SYSTEM_FEATURE_TELEVISION"), {
-            any @ value: value,
-            default: "",
-        }) + " --feature=WATCH:" + select(release_flag("RELEASE_SYSTEM_FEATURE_WATCH"), {
-            any @ value: value,
-            default: "",
-        }) + " > $(out)",
-    out: [
-        "RoSystemFeatures.java",
-    ],
-    tools: ["systemfeatures-gen-tool"],
+    full_class_name: "com.android.internal.pm.RoSystemFeatures",
+    visibility: ["//visibility:private"],
 }

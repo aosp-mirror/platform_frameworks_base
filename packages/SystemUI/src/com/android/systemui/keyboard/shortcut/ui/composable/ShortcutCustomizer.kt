@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,57 +40,106 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.res.R
 
 @Composable
-fun AssignNewShortcutDialog(
+fun ShortcutCustomizationDialog(
     uiState: ShortcutCustomizationUiState,
     modifier: Modifier = Modifier,
     onKeyPress: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
+    onConfirmSetShortcut: () -> Unit,
+    onConfirmDeleteShortcut: () -> Unit,
 ) {
-    if (uiState is ShortcutCustomizationUiState.AddShortcutDialog) {
-        Column(modifier = modifier) {
-            Title(
-                uiState.shortcutLabel,
-                modifier = Modifier.padding(horizontal = 24.dp).width(316.dp),
-            )
-            Description(
-                modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp).width(316.dp)
-            )
-            PromptShortcutModifier(
-                modifier =
-                    Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
-                        .width(131.dp)
-                        .height(48.dp),
-                defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
-            )
-            SelectedKeyCombinationContainer(
-                shouldShowErrorMessage = uiState.shouldShowErrorMessage,
-                onKeyPress = onKeyPress,
-            )
-            KeyCombinationAlreadyInUseErrorMessage(uiState.shouldShowErrorMessage)
-            DialogButtons(onCancel, isValidKeyCombination = uiState.isValidKeyCombination)
+    when (uiState) {
+        is ShortcutCustomizationUiState.AddShortcutDialog -> {
+            Column(modifier = modifier) {
+                Title(uiState.shortcutLabel)
+                Description(
+                    text =
+                        stringResource(
+                            id = R.string.shortcut_customize_mode_add_shortcut_description
+                        )
+                )
+                PromptShortcutModifier(
+                    modifier =
+                        Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
+                            .width(131.dp)
+                            .height(48.dp),
+                    defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
+                )
+                SelectedKeyCombinationContainer(
+                    shouldShowError = uiState.errorMessage.isNotEmpty(),
+                    onKeyPress = onKeyPress,
+                    pressedKeys = uiState.pressedKeys,
+                )
+                ErrorMessageContainer(uiState.errorMessage)
+                DialogButtons(
+                    onCancel,
+                    isConfirmButtonEnabled = uiState.pressedKeys.isNotEmpty(),
+                    onConfirm = onConfirmSetShortcut,
+                    confirmButtonText =
+                        stringResource(
+                            R.string.shortcut_helper_customize_dialog_set_shortcut_button_label
+                        ),
+                )
+            }
+        }
+        is ShortcutCustomizationUiState.DeleteShortcutDialog -> {
+            Column(modifier) {
+                Title(
+                    title =
+                        stringResource(
+                            id = R.string.shortcut_customize_mode_remove_shortcut_dialog_title
+                        )
+                )
+                Description(
+                    text =
+                        stringResource(
+                            id = R.string.shortcut_customize_mode_remove_shortcut_description
+                        )
+                )
+                DialogButtons(
+                    onCancel = onCancel,
+                    onConfirm = onConfirmDeleteShortcut,
+                    confirmButtonText =
+                        stringResource(
+                            R.string.shortcut_helper_customize_dialog_remove_button_label
+                        ),
+                )
+            }
+        }
+        else -> {
+            /* No-Op */
         }
     }
 }
 
 @Composable
-fun DialogButtons(onCancel: () -> Unit, isValidKeyCombination: Boolean) {
+fun DialogButtons(
+    onCancel: () -> Unit,
+    isConfirmButtonEnabled: Boolean = true,
+    onConfirm: () -> Unit,
+    confirmButtonText: String,
+) {
     Row(
         modifier =
             Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
@@ -107,23 +157,22 @@ fun DialogButtons(onCancel: () -> Unit, isValidKeyCombination: Boolean) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         ShortcutHelperButton(
-            onClick = {},
+            onClick = onConfirm,
             color = MaterialTheme.colorScheme.primary,
             width = 116.dp,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            text =
-                stringResource(R.string.shortcut_helper_customize_dialog_set_shortcut_button_label),
-            enabled = isValidKeyCombination,
+            text = confirmButtonText,
+            enabled = isConfirmButtonEnabled,
         )
     }
 }
 
 @Composable
-fun KeyCombinationAlreadyInUseErrorMessage(shouldShowErrorMessage: Boolean) {
-    if (shouldShowErrorMessage) {
+fun ErrorMessageContainer(errorMessage: String) {
+    if (errorMessage.isNotEmpty()) {
         Box(modifier = Modifier.padding(horizontal = 16.dp).width(332.dp).height(40.dp)) {
             Text(
-                text = stringResource(R.string.shortcut_helper_customize_dialog_error_message),
+                text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
@@ -137,17 +186,19 @@ fun KeyCombinationAlreadyInUseErrorMessage(shouldShowErrorMessage: Boolean) {
 
 @Composable
 fun SelectedKeyCombinationContainer(
-    keyCombination: String =
-        stringResource(R.string.shortcut_helper_add_shortcut_dialog_placeholder),
-    shouldShowErrorMessage: Boolean,
+    shouldShowError: Boolean,
     onKeyPress: (KeyEvent) -> Boolean,
+    pressedKeys: List<ShortcutKey>,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val outlineColor =
         if (!isFocused) MaterialTheme.colorScheme.outline
-        else if (shouldShowErrorMessage) MaterialTheme.colorScheme.error
+        else if (shouldShowError) MaterialTheme.colorScheme.error
         else MaterialTheme.colorScheme.primary
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     ClickableShortcutSurface(
         onClick = {},
@@ -157,24 +208,21 @@ fun SelectedKeyCombinationContainer(
             Modifier.padding(all = 16.dp)
                 .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
                 .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
-                .onPreviewKeyEvent { onKeyPress(it) },
+                .onKeyEvent { onKeyPress(it) }
+                .focusRequester(focusRequester),
         interactionSource = interactionSource,
     ) {
         Row(
             modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = keyCombination,
-                style = MaterialTheme.typography.headlineSmall,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight.W500,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(252.dp),
-            )
+            if (pressedKeys.isEmpty()) {
+                PressKeyPrompt()
+            } else {
+                PressedKeysTextContainer(pressedKeys)
+            }
             Spacer(modifier = Modifier.weight(1f))
-            if (shouldShowErrorMessage) {
+            if (shouldShowError) {
                 Icon(
                     imageVector = Icons.Default.ErrorOutline,
                     contentDescription = null,
@@ -187,25 +235,89 @@ fun SelectedKeyCombinationContainer(
 }
 
 @Composable
-private fun Title(title: String, modifier: Modifier = Modifier) {
+private fun RowScope.PressedKeysTextContainer(pressedKeys: List<ShortcutKey>) {
+    pressedKeys.forEachIndexed { keyIndex, key ->
+        if (keyIndex > 0) {
+            ShortcutKeySeparator()
+        }
+        if (key is ShortcutKey.Text) {
+            ShortcutTextKey(key)
+        } else if (key is ShortcutKey.Icon) {
+            ShortcutIconKey(key)
+        }
+    }
+}
+
+@Composable
+private fun ShortcutKeySeparator() {
     Text(
-        text = title,
-        style = MaterialTheme.typography.headlineSmall,
-        fontSize = 24.sp,
-        modifier = modifier.wrapContentSize(Alignment.Center),
-        color = MaterialTheme.colorScheme.onSurface,
-        lineHeight = 32.sp,
+        text = stringResource(id = R.string.shortcut_helper_plus_symbol),
+        style = MaterialTheme.typography.titleSmall,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
 
 @Composable
-private fun Description(modifier: Modifier = Modifier) {
+private fun RowScope.ShortcutIconKey(key: ShortcutKey.Icon) {
+    Icon(
+        painter =
+            when (key) {
+                is ShortcutKey.Icon.ResIdIcon -> painterResource(key.drawableResId)
+                is ShortcutKey.Icon.DrawableIcon -> rememberDrawablePainter(drawable = key.drawable)
+            },
+        contentDescription = null,
+        modifier = Modifier.align(Alignment.CenterVertically).height(24.dp),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun PressKeyPrompt() {
     Text(
-        text = stringResource(id = R.string.shortcut_helper_customize_mode_sub_title),
+        text = stringResource(id = R.string.shortcut_helper_add_shortcut_dialog_placeholder),
+        style = MaterialTheme.typography.titleSmall,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun ShortcutTextKey(key: ShortcutKey.Text) {
+    Text(
+        text = key.value,
+        style = MaterialTheme.typography.titleSmall,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun Title(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.headlineSmall,
+        fontSize = 24.sp,
+        modifier =
+            Modifier.padding(horizontal = 24.dp).width(316.dp).wrapContentSize(Alignment.Center),
+        color = MaterialTheme.colorScheme.onSurface,
+        lineHeight = 32.sp,
+        fontWeight = FontWeight.W400,
+    )
+}
+
+@Composable
+private fun Description(text: String) {
+    Text(
+        text = text,
         style = MaterialTheme.typography.bodyMedium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        modifier = modifier.wrapContentSize(Alignment.Center),
+        modifier =
+            Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
+                .width(316.dp)
+                .wrapContentSize(Alignment.Center),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
+import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
 import android.hardware.location.HubInfo;
@@ -137,4 +138,16 @@ interface IContextHubService {
     // Register an endpoint with the context hub
     @EnforcePermission("ACCESS_CONTEXT_HUB")
     IContextHubEndpoint registerEndpoint(in HubEndpointInfo pendingEndpointInfo, in IContextHubEndpointCallback callback);
+
+    // Register an endpoint discovery callback (id)
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void registerEndpointDiscoveryCallbackId(long endpointId, in IContextHubEndpointDiscoveryCallback callback);
+
+    // Register an endpoint discovery callback (descriptor)
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void registerEndpointDiscoveryCallbackDescriptor(String serviceDescriptor, in IContextHubEndpointDiscoveryCallback callback);
+
+    // Unregister an endpoint with the context hub
+    @EnforcePermission("ACCESS_CONTEXT_HUB")
+    void unregisterEndpointDiscoveryCallback(in IContextHubEndpointDiscoveryCallback callback);
 }

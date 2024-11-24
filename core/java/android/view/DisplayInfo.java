@@ -210,6 +210,11 @@ public final class DisplayInfo implements Parcelable {
     public FrameRateCategoryRate frameRateCategoryRate;
 
     /**
+     * All the refresh rates supported in the active mode.
+     */
+    public float[] supportedRefreshRates = new float[0];
+
+    /**
      * The default display mode.
      */
     public int defaultModeId;
@@ -449,6 +454,7 @@ public final class DisplayInfo implements Parcelable {
                 && modeId == other.modeId
                 && hasArrSupport == other.hasArrSupport
                 && Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)
+                && Arrays.equals(supportedRefreshRates, other.supportedRefreshRates)
                 && defaultModeId == other.defaultModeId
                 && userPreferredModeId == other.userPreferredModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
@@ -512,6 +518,8 @@ public final class DisplayInfo implements Parcelable {
         renderFrameRate = other.renderFrameRate;
         hasArrSupport = other.hasArrSupport;
         frameRateCategoryRate = other.frameRateCategoryRate;
+        supportedRefreshRates = Arrays.copyOf(
+                other.supportedRefreshRates, other.supportedRefreshRates.length);
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
@@ -571,6 +579,11 @@ public final class DisplayInfo implements Parcelable {
         hasArrSupport = source.readBoolean();
         frameRateCategoryRate = source.readParcelable(null,
                 android.view.FrameRateCategoryRate.class);
+        int numOfSupportedRefreshRates = source.readInt();
+        supportedRefreshRates = new float[numOfSupportedRefreshRates];
+        for (int i = 0; i < numOfSupportedRefreshRates; i++) {
+            supportedRefreshRates[i] = source.readFloat();
+        }
         defaultModeId = source.readInt();
         userPreferredModeId = source.readInt();
         int nModes = source.readInt();
@@ -646,6 +659,10 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(renderFrameRate);
         dest.writeBoolean(hasArrSupport);
         dest.writeParcelable(frameRateCategoryRate, flags);
+        dest.writeInt(supportedRefreshRates.length);
+        for (float supportedRefreshRate : supportedRefreshRates) {
+            dest.writeFloat(supportedRefreshRate);
+        }
         dest.writeInt(defaultModeId);
         dest.writeInt(userPreferredModeId);
         dest.writeInt(supportedModes.length);
@@ -750,9 +767,19 @@ public final class DisplayInfo implements Parcelable {
     }
 
     /**
-     * Returns the list of supported refresh rates in the default mode.
+     * Returns the list of supported refresh rates in the active mode.
      */
     public float[] getDefaultRefreshRates() {
+        if (supportedRefreshRates.length == 0) {
+            return getDefaultRefreshRatesLegacy();
+        }
+        return Arrays.copyOf(supportedRefreshRates, supportedRefreshRates.length);
+    }
+
+    /**
+     * Returns the list of supported refresh rates in the default mode.
+     */
+    public float[] getDefaultRefreshRatesLegacy() {
         Display.Mode[] modes = appsSupportedModes;
         ArraySet<Float> rates = new ArraySet<>();
         Display.Mode defaultMode = getDefaultMode();
@@ -898,6 +925,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(hasArrSupport);
         sb.append(", frameRateCategoryRate ");
         sb.append(frameRateCategoryRate);
+        sb.append(", supportedRefreshRates ");
+        sb.append(Arrays.toString(supportedRefreshRates));
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", userPreferredModeId ");

@@ -17,8 +17,8 @@
 package com.android.systemui.shade
 
 import com.android.systemui.statusbar.GestureRecorder
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.phone.CentralSurfaces
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
 
 class ShadeSurfaceImpl @Inject constructor() : ShadeSurface, ShadeViewControllerEmptyImpl() {
@@ -26,7 +26,7 @@ class ShadeSurfaceImpl @Inject constructor() : ShadeSurface, ShadeViewController
         centralSurfaces: CentralSurfaces,
         recorder: GestureRecorder,
         hideExpandedRunnable: Runnable,
-        headsUpManager: HeadsUpManager
+        headsUpManager: HeadsUpManager,
     ) {}
 
     override fun cancelPendingCollapse() {

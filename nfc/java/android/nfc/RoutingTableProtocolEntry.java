@@ -97,7 +97,7 @@ public class RoutingTableProtocolEntry extends NfcRoutingTableEntry {
 
     /** @hide */
     public RoutingTableProtocolEntry(int nfceeId, @ProtocolValue int value) {
-        super(nfceeId);
+        super(nfceeId, TYPE_PROTOCOL);
         this.mValue = value;
     }
 

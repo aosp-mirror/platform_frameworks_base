@@ -7363,6 +7363,20 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         verify(callback, never()).onZenModeChanged();
     }
 
+    @Test
+    @EnableFlags(FLAG_MODES_MULTIUSER)
+    public void getNotificationPolicy_fromUserWithoutZenConfig_returnsDefaultPolicy() {
+        // Set a custom policy for the current user to double check we return a default one below.
+        mZenModeHelper.setNotificationPolicy(UserHandle.CURRENT, new Policy(0, 0, 0), ORIGIN_SYSTEM,
+                SYSTEM_UID);
+
+        Policy ghostPolicy = mZenModeHelper.getNotificationPolicy(UserHandle.of(5552368));
+
+        assertThat(ghostPolicy).isNotNull();
+        assertThat(ZenAdapters.notificationPolicyToZenPolicy(ghostPolicy))
+                .isEqualTo(mZenModeHelper.getDefaultZenPolicy());
+    }
+
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
             @Nullable ZenPolicy zenPolicy) {
         ZenRule rule = new ZenRule();

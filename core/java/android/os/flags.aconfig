@@ -4,11 +4,29 @@ container: "system"
 
 # keep-sorted start block=yes newline_separated=yes
 flag {
+     # Holdback study for concurrent MessageQueue.
+     # Do not promote beyond trunkfood.
+     namespace: "system_performance"
+     name: "message_queue_force_legacy"
+     description: "Whether to holdback concurrent MessageQueue (force legacy)."
+     bug: "336880969"
+}
+
+flag {
     name: "adpf_gpu_report_actual_work_duration"
     is_exported: true
     namespace: "game"
     description: "Guards the ADPF GPU APIs."
     bug: "284324521"
+}
+
+flag {
+    name: "adpf_graphics_pipeline"
+    is_exported: true
+    namespace: "game"
+    description: "Guards use of SessionCreationConfig and Graphics Pipeline mode"
+    is_fixed_read_only: true
+    bug: "367803904"
 }
 
 flag {
@@ -210,6 +228,15 @@ flag {
     description: "track tail of message queue."
     bug: "305311707"
     is_fixed_read_only: true
+}
+
+flag {
+     name: "message_queue_testability"
+     namespace: "system_performance"
+     is_exported: true
+     description: "Whether MessageQueue implements test APIs."
+     bug: "379472827"
+     is_fixed_read_only: true
 }
 
 flag {

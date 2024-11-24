@@ -187,8 +187,10 @@ class DesktopModeEventLogger {
      */
     fun logTaskResizingStarted(
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         taskInfo: RunningTaskInfo,
+        taskWidth: Int? = null,
+        taskHeight: Int? = null,
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ) {
@@ -205,8 +207,10 @@ class DesktopModeEventLogger {
 
         val taskSizeUpdate = createTaskSizeUpdate(
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             taskInfo,
+            taskWidth,
+            taskHeight,
             displayController = displayController,
             displayLayoutSize = displayLayoutSize,
         )
@@ -228,10 +232,10 @@ class DesktopModeEventLogger {
      */
     fun logTaskResizingEnded(
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         taskInfo: RunningTaskInfo,
-        taskHeight: Int? = null,
         taskWidth: Int? = null,
+        taskHeight: Int? = null,
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ) {
@@ -248,10 +252,10 @@ class DesktopModeEventLogger {
 
         val taskSizeUpdate = createTaskSizeUpdate(
             resizeTrigger,
-            motionEvent,
+            inputMethod,
             taskInfo,
-            taskHeight,
             taskWidth,
+            taskHeight,
             displayController,
             displayLayoutSize,
         )
@@ -271,10 +275,10 @@ class DesktopModeEventLogger {
 
     private fun createTaskSizeUpdate(
         resizeTrigger: ResizeTrigger,
-        motionEvent: MotionEvent?,
+        inputMethod: InputMethod,
         taskInfo: RunningTaskInfo,
-        taskHeight: Int? = null,
         taskWidth: Int? = null,
+        taskHeight: Int? = null,
         displayController: DisplayController? = null,
         displayLayoutSize: Size? = null,
     ): TaskSizeUpdate {
@@ -292,7 +296,7 @@ class DesktopModeEventLogger {
 
         return TaskSizeUpdate(
             resizeTrigger,
-            getInputMethodFromMotionEvent(motionEvent),
+            inputMethod,
             taskInfo.taskId,
             taskInfo.effectiveUid,
             height,
@@ -442,7 +446,8 @@ class DesktopModeEventLogger {
             val displayArea: Int?,
         )
 
-        private fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
+        @JvmStatic
+        fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
             if (e == null) return InputMethod.UNKNOWN_INPUT_METHOD
 
             val toolType = e.getToolType(

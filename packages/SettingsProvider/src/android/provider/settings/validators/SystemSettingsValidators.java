@@ -213,6 +213,8 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.SIP_ADDRESS_ONLY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SIP_ASK_ME_EACH_TIME, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.POINTER_SPEED, new InclusiveFloatRangeValidator(-7, 7));
+        VALIDATORS.put(System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(System.POINTER_FILL_STYLE,
                 new InclusiveIntegerRangeValidator(POINTER_ICON_VECTOR_STYLE_FILL_BEGIN,
                         POINTER_ICON_VECTOR_STYLE_FILL_END));

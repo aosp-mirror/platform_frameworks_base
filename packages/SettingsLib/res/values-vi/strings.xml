@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Dòng lệnh cục bộ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Bật ứng dụng dòng lệnh cung cấp quyền truy cập vỏ cục bộ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Môi trường phát triển Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Chạy thiết bị đầu cuối Linux trên Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Thử nghiệm) Chạy cửa sổ dòng lệnh Linux trên Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Nếu bạn tắt, dữ liệu trên cửa sổ dòng lệnh Linux sẽ bị xoá"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kiểm tra HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Đặt hành vi kiểm tra HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Gỡ lỗi"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Thiết bị bên ngoài"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Thiết bị đã kết nối"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Điện thoại này"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Không phát được trên thiết bị này"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nâng cấp tài khoản để chuyển đổi"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Không thể phát các tệp đã tải xuống tại đây"</string>

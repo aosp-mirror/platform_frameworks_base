@@ -20,7 +20,10 @@ package android.os;
 import android.os.CpuHeadroomParamsInternal;
 import android.os.GpuHeadroomParamsInternal;
 import android.os.IHintSession;
+import android.os.SessionCreationConfig;
+import android.hardware.power.CpuHeadroomResult;
 import android.hardware.power.ChannelConfig;
+import android.hardware.power.GpuHeadroomResult;
 import android.hardware.power.SessionConfig;
 import android.hardware.power.SessionTag;
 
@@ -34,8 +37,8 @@ interface IHintManager {
      * Throws UnsupportedOperationException if ADPF is not supported, and IllegalStateException
      * if creation is supported but fails.
      */
-    IHintSession createHintSessionWithConfig(in IBinder token, in int[] threadIds,
-            in long durationNanos, in SessionTag tag, out SessionConfig config);
+    IHintSession createHintSessionWithConfig(in IBinder token, in SessionTag tag,
+            in SessionCreationConfig creationConfig, out SessionConfig config);
 
     /**
      * Get preferred rate limit in nanoseconds.
@@ -52,8 +55,13 @@ interface IHintManager {
      */
     @nullable ChannelConfig getSessionChannel(in IBinder token);
     oneway void closeSessionChannel();
-    float[] getCpuHeadroom(in CpuHeadroomParamsInternal params);
+    @nullable CpuHeadroomResult getCpuHeadroom(in CpuHeadroomParamsInternal params);
     long getCpuHeadroomMinIntervalMillis();
-    float getGpuHeadroom(in GpuHeadroomParamsInternal params);
+    @nullable GpuHeadroomResult getGpuHeadroom(in GpuHeadroomParamsInternal params);
     long getGpuHeadroomMinIntervalMillis();
+
+    /**
+     * Get Maximum number of graphics pipeline threads allowed per-app.
+     */
+    int getMaxGraphicsPipelineThreadsCount();
 }

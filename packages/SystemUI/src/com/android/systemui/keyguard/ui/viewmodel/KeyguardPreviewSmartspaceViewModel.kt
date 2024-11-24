@@ -17,11 +17,12 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
-import com.android.systemui.res.R
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
+import com.android.systemui.plugins.clocks.DefaultClockFaceLayout.Companion.getSmallClockTopPadding
+import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,7 @@ constructor(
     interactor: KeyguardClockInteractor,
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val clockViewModel: KeyguardClockViewModel,
+    private val systemBarUtils: SystemBarUtilsProxy,
 ) {
 
     val selectedClockSize: StateFlow<ClockSizeSetting> = interactor.selectedClockSize
@@ -59,29 +61,18 @@ constructor(
         return KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
     }
 
-    fun getSmallClockSmartspaceTopPadding(splitShadePreview: Boolean, context: Context): Int {
-        return getSmallClockTopPadding(splitShadePreview, context) +
-            context.resources.getDimensionPixelSize(
-                com.android.systemui.customization.R.dimen.small_clock_height
-            )
-    }
-
-    fun getLargeClockSmartspaceTopPadding(splitShadePreview: Boolean, context: Context): Int {
-        return getSmallClockTopPadding(splitShadePreview, context)
-    }
-
     /*
      * SmallClockTopPadding decides the top position of smartspace
      */
-    private fun getSmallClockTopPadding(splitShadePreview: Boolean, context: Context): Int {
-        return with(context.resources) {
-            if (splitShadePreview) {
-                getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
-            } else {
-                getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                    SystemBarUtils.getStatusBarHeight(context) +
-                    getDimensionPixelSize(customR.dimen.keyguard_smartspace_top_offset)
-            }
-        }
+    fun getSmallClockSmartspaceTopPadding(config: ClockPreviewConfig): Int {
+        return getSmallClockTopPadding(config, systemBarUtils.getStatusBarHeaderHeightKeyguard()) +
+            config.previewContext.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
+    }
+
+    fun getLargeClockSmartspaceTopPadding(clockPreviewConfig: ClockPreviewConfig): Int {
+        return getSmallClockTopPadding(
+            clockPreviewConfig,
+            systemBarUtils.getStatusBarHeaderHeightKeyguard(),
+        )
     }
 }

@@ -131,6 +131,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     /** Current corner radius */
     private float mCurrentCornerRadius = 0f;
 
+    /** A runnable to start the expansion animation as soon as the task view is made visible. */
+    @Nullable
+    private Runnable mAnimateExpansion = null;
+    private TaskViewVisibilityState mVisibilityState = TaskViewVisibilityState.INVISIBLE;
+
     /**
      * Whether we want the {@code TaskView}'s content to be visible (alpha = 1f). If
      * {@link #mIsAnimating} is true, this may not reflect the {@code TaskView}'s actual alpha
@@ -139,6 +144,18 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private boolean mIsContentVisible = false;
     private boolean mIsAnimating;
     private boolean mIsDragging;
+
+    /** An enum value that tracks the visibility state of the task view */
+    private enum TaskViewVisibilityState {
+        /** The task view is going away, and we're waiting for the surface to be destroyed. */
+        PENDING_INVISIBLE,
+        /** The task view is invisible and does not have a surface. */
+        INVISIBLE,
+        /** The task view is in the process of being added to a surface. */
+        PENDING_VISIBLE,
+        /** The task view is visible and has a surface. */
+        VISIBLE
+    }
 
     public BubbleBarExpandedView(Context context) {
         this(context, null);
@@ -206,16 +223,27 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             mBubbleTaskViewHelper = new BubbleTaskViewHelper(mContext, expandedViewManager,
                     /* listener= */ this, bubbleTaskView,
                     /* viewParent= */ this);
+
+            // if the task view is already attached to a parent we need to remove it
             if (mTaskView.getParent() != null) {
+                // it's possible that the task view is visible, e.g. if we're unfolding, in which
+                // case removing it will trigger a visibility change. we have to wait for that
+                // signal before we can add it to this expanded view, otherwise the signal will be
+                // incorrect because the task view will have a surface.
+                // if the task view is not visible, then it has no surface and removing it will not
+                // trigger any visibility change signals.
+                if (bubbleTaskView.isVisible()) {
+                    mVisibilityState = TaskViewVisibilityState.PENDING_INVISIBLE;
+                }
                 ((ViewGroup) mTaskView.getParent()).removeView(mTaskView);
             }
-            FrameLayout.LayoutParams lp =
-                    new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
-            addView(mTaskView, lp);
-            mTaskView.setEnableSurfaceClipping(true);
-            mTaskView.setCornerRadius(mCurrentCornerRadius);
-            mTaskView.setVisibility(VISIBLE);
-            mTaskView.setCaptionInsets(Insets.of(0, mCaptionHeight, 0, 0));
+
+            // if we're invisible it's safe to setup the task view and then await on the visibility
+            // signal.
+            if (mVisibilityState == TaskViewVisibilityState.INVISIBLE) {
+                mVisibilityState = TaskViewVisibilityState.PENDING_VISIBLE;
+                setupTaskView();
+            }
 
             // Handle view needs to draw on top of task view.
             bringChildToFront(mHandleView);
@@ -267,6 +295,16 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mHandleView.setOnClickListener(view -> {
             mMenuViewController.showMenu(true /* animated */);
         });
+    }
+
+    private void setupTaskView() {
+        FrameLayout.LayoutParams lp =
+                new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+        addView(mTaskView, lp);
+        mTaskView.setEnableSurfaceClipping(true);
+        mTaskView.setCornerRadius(mCurrentCornerRadius);
+        mTaskView.setVisibility(VISIBLE);
+        mTaskView.setCaptionInsets(Insets.of(0, mCaptionHeight, 0, 0));
     }
 
     public BubbleBarHandleView getHandleView() {
@@ -326,15 +364,28 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
     @Override
     public void onTaskCreated() {
-        setContentVisibility(true);
+        if (mTaskView != null) {
+            mTaskView.setAlpha(0);
+        }
         if (mListener != null) {
             mListener.onTaskCreated();
         }
+        // when the task is created we're visible
+        onTaskViewVisible();
     }
 
     @Override
     public void onContentVisibilityChanged(boolean visible) {
-        setContentVisibility(visible);
+        if (mVisibilityState == TaskViewVisibilityState.PENDING_INVISIBLE && !visible) {
+            // the surface is now destroyed. set up the task view and wait for the visibility
+            // signal.
+            mVisibilityState = TaskViewVisibilityState.PENDING_VISIBLE;
+            setupTaskView();
+            return;
+        }
+        if (visible) {
+            onTaskViewVisible();
+        }
     }
 
     @Override
@@ -348,6 +399,25 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     public void onBackPressed() {
         if (mListener == null) return;
         mListener.onBackPressed();
+    }
+
+    void animateExpansionWhenTaskViewVisible(Runnable animateExpansion) {
+        if (mVisibilityState == TaskViewVisibilityState.VISIBLE || mIsOverflow) {
+            animateExpansion.run();
+        } else {
+            mAnimateExpansion = animateExpansion;
+        }
+    }
+
+    private void onTaskViewVisible() {
+        // if we're waiting to be visible, start the expansion animation if it's pending.
+        if (mVisibilityState == TaskViewVisibilityState.PENDING_VISIBLE) {
+            mVisibilityState = TaskViewVisibilityState.VISIBLE;
+            if (mAnimateExpansion != null) {
+                mAnimateExpansion.run();
+                mAnimateExpansion = null;
+            }
+        }
     }
 
     /**

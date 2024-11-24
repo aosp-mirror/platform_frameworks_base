@@ -6271,6 +6271,14 @@ public final class Settings {
         public static final String TOUCHPAD_TAP_DRAGGING = "touchpad_tap_dragging";
 
         /**
+         * Whether to enable three finger tap customization on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION =
+                "touchpad_three_finger_tap_customization";
+
+        /**
          * Whether to enable a right-click zone on touchpads.
          *
          * When set to 1, pressing to click in a section on the right-hand side of the touchpad will
@@ -10989,6 +10997,25 @@ public final class Settings {
          */
         public static final String EMERGENCY_GESTURE_UI_LAST_STARTED_MILLIS =
                 "emergency_gesture_ui_last_started_millis";
+
+        /**
+         * Whether double tap the power button gesture is enabled.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED =
+                "double_tap_power_button_gesture_enabled";
+
+        /**
+         * Double tap power button gesture behavior.
+         * 0 = Camera launch
+         * 1 = Wallet launch
+         * @hide
+         */
+        @Readable
+        public static final String DOUBLE_TAP_POWER_BUTTON_GESTURE =
+                "double_tap_power_button_gesture";
 
         /**
          * Whether the camera launch gesture to double tap the power button when the screen is off

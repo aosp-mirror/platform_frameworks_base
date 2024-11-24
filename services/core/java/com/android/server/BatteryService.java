@@ -69,6 +69,7 @@ import android.service.battery.BatteryServiceDumpProto;
 import android.sysprop.PowerProperties;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -303,6 +304,17 @@ public final class BatteryService extends SystemService {
      */
     @VisibleForTesting
     public long mLastBroadcastVoltageUpdateTime;
+    /**
+     * Time when the max charging current was updated last by HAL and we sent the
+     * {@link Intent#ACTION_BATTERY_CHANGED} broadcast.
+     * Note: This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast
+     * so it is possible that max current was updated but we did not send the broadcast so in that
+     * case we do not update the time.
+     */
+    @VisibleForTesting
+    public long mLastBroadcastMaxChargingCurrentUpdateTime;
+
+    private boolean mIsFirstBatteryChangedUpdate = true;
 
     private Led mLed;
 
@@ -350,16 +362,21 @@ public final class BatteryService extends SystemService {
     private static final int ABSOLUTE_DECI_CELSIUS_DIFF_FOR_TEMP_UPDATE = 10;
     /**
      * This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
-     * only send the broadcast if the last voltage was updated at least 20s seconds back and has a
+     * only send the broadcast if the last voltage was updated at least 20 seconds back and has a
      * fluctuation of at least 1%.
      */
     private static final int TIME_DIFF_FOR_VOLTAGE_UPDATE_MS = 20000;
     /**
      * The value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
-     * only send the broadcast if the last voltage was updated at least 20s seconds back and has a
+     * only send the broadcast if the last voltage was updated at least 20 seconds back and has a
      * fluctuation of at least 1%.
      */
     private static final float BASE_POINT_DIFF_FOR_VOLTAGE_UPDATE = 0.01f;
+    /**
+     * This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
+     * only send the broadcast if the last max charging current was updated at least 5 seconds back.
+     */
+    private static final int TIME_DIFF_FOR_MAX_CHARGING_CURRENT_UPDATE_MS = 5000;
 
     private final Handler.Callback mLocalCallback = msg -> {
         switch (msg.what) {
@@ -1252,8 +1269,10 @@ public final class BatteryService extends SystemService {
         if (!com.android.server.flags.Flags.rateLimitBatteryChangedBroadcast()) {
             return false;
         }
-        if (mLastBroadcastBatteryVoltage == 0 || mLastBroadcastBatteryTemperature == 0) {
+        if (mIsFirstBatteryChangedUpdate) {
             mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            mIsFirstBatteryChangedUpdate = false;
             return false;
         }
 
@@ -1261,13 +1280,14 @@ public final class BatteryService extends SystemService {
                 mLastBroadcastBatteryVoltage != mHealthInfo.batteryVoltageMillivolts;
         final boolean temperatureUpdated =
                 mLastBroadcastBatteryTemperature != mHealthInfo.batteryTemperatureTenthsCelsius;
+        final boolean maxChargingCurrentUpdated =
+                mLastBroadcastMaxChargingCurrent != mHealthInfo.maxChargingCurrentMicroamps;
         final boolean otherStatesUpdated = forceUpdate
                 || mHealthInfo.batteryStatus != mLastBroadcastBatteryStatus
                 || mHealthInfo.batteryHealth != mLastBroadcastBatteryHealth
                 || mHealthInfo.batteryPresent != mLastBroadcastBatteryPresent
                 || mHealthInfo.batteryLevel != mLastBroadcastBatteryLevel
                 || mPlugType != mLastBroadcastPlugType
-                || mHealthInfo.maxChargingCurrentMicroamps != mLastBroadcastMaxChargingCurrent
                 || mHealthInfo.maxChargingVoltageMicrovolts != mLastBroadcastMaxChargingVoltage
                 || mInvalidCharger != mLastBroadcastInvalidCharger
                 || mHealthInfo.batteryCycleCount != mLastBroadcastBatteryCycleCount
@@ -1279,6 +1299,9 @@ public final class BatteryService extends SystemService {
 
             if (voltageUpdated) {
                 mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            }
+            if (maxChargingCurrentUpdated) {
+                mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
             }
             return false;
         }
@@ -1295,6 +1318,9 @@ public final class BatteryService extends SystemService {
                         >= TIME_DIFF_FOR_VOLTAGE_UPDATE_MS) {
             mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
 
+            if (maxChargingCurrentUpdated) {
+                mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            }
             return false;
         }
 
@@ -1303,6 +1329,20 @@ public final class BatteryService extends SystemService {
                 && abs(
                 mLastBroadcastBatteryTemperature - mHealthInfo.batteryTemperatureTenthsCelsius)
                         >= ABSOLUTE_DECI_CELSIUS_DIFF_FOR_TEMP_UPDATE) {
+
+            if (voltageUpdated) {
+                mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            }
+            if (maxChargingCurrentUpdated) {
+                mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            }
+            return false;
+        }
+
+        if (maxChargingCurrentUpdated
+                && SystemClock.elapsedRealtime() - mLastBroadcastMaxChargingCurrentUpdateTime
+                >= TIME_DIFF_FOR_MAX_CHARGING_CURRENT_UPDATE_MS) {
+            mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
 
             if (voltageUpdated) {
                 mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
@@ -1615,6 +1655,9 @@ public final class BatteryService extends SystemService {
                 pw.println("  Wireless powered: " + mHealthInfo.chargerWirelessOnline);
                 pw.println("  Dock powered: " + mHealthInfo.chargerDockOnline);
                 pw.println("  Max charging current: " + mHealthInfo.maxChargingCurrentMicroamps);
+                pw.println(" Time when the latest updated value of the Max charging current was"
+                        + " sent via battery changed broadcast: "
+                        + TimeUtils.formatDuration(mLastBroadcastMaxChargingCurrentUpdateTime));
                 pw.println("  Max charging voltage: " + mHealthInfo.maxChargingVoltageMicrovolts);
                 pw.println("  Charge counter: " + mHealthInfo.batteryChargeCounterUah);
                 pw.println("  status: " + mHealthInfo.batteryStatus);
@@ -1624,7 +1667,8 @@ public final class BatteryService extends SystemService {
                 pw.println("  scale: " + BATTERY_SCALE);
                 pw.println("  voltage: " + mHealthInfo.batteryVoltageMillivolts);
                 pw.println(" Time when the latest updated value of the voltage was sent via "
-                        + "battery changed broadcast: " + mLastBroadcastVoltageUpdateTime);
+                        + "battery changed broadcast: "
+                        + TimeUtils.formatDuration(mLastBroadcastVoltageUpdateTime));
                 pw.println(" The last voltage value sent via the battery changed broadcast: "
                         + mLastBroadcastBatteryVoltage);
                 pw.println("  temperature: " + mHealthInfo.batteryTemperatureTenthsCelsius);

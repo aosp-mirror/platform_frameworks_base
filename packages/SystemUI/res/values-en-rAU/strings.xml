@@ -113,8 +113,8 @@
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Record one app"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Record entire screen"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"Record entire screen: %s"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"When you\'re recording your entire screen, anything displayed on your screen is recorded. So, be careful with things like passwords, payment details, messages, photos, audio and video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"When you\'re recording an app, anything displayed or played in that app is recorded. So, be careful with things like passwords, payment details, messages, photos, audio and video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"When you\'re recording your entire screen, anything displayed on your screen is recorded. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"When you\'re recording an app, anything displayed or played in that app is recorded. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Record screen"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Choose app to record"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Record audio"</string>
@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Input"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Hearing aids"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Turning on…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Can\'t adjust brightness because it\'s being\n controlled by the top app"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Auto-rotate"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Auto-rotate screen"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Location"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Click to pair new device"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Couldn\'t update preset"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Preset"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Selected"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tools"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Live Caption"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Note"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Unblock device microphone?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Unblock device camera?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Unblock device camera and microphone?"</string>
@@ -871,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Switch to the app on the right or below while using split screen"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Switch to the app on the left or above while using split screen"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"During split screen: Replace an app from one to another"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Move active window between displays"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Switch to next language"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Switch to previous language"</string>
@@ -1221,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Use fewer than <xliff:g id="LENGTH">%1$d</xliff:g> characters"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build number"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build number copied to clipboard."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Conversation widgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tap a conversation to add it to your home screen"</string>
@@ -1356,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"For higher resolution, flip the phone"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldable device being unfolded"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldable device being flipped around"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"folded"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"unfolded"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1415,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibility"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Keyboard shortcuts"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Customise keyboard shortcuts"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Press key to assign shortcut"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Search shortcuts"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"No search results"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Collapse icon"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Action or Meta key icon"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Plus icon"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Customise"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Done"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Expand icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"or"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Drag handle"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Keyboard settings"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Set shortcut"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancel"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Press key"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Key combination already in use. Try another key."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigate using your keyboard"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Learn keyboards shortcuts"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigate using your touchpad"</string>

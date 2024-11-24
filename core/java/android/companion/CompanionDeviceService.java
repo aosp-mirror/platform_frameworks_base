@@ -249,7 +249,7 @@ public abstract class CompanionDeviceService extends Service {
 
     // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
-     * Called by system whenever a device associated with this app is connected.
+     * Called by the system when an associated device is nearby or connected.
      *
      * @param associationInfo A record for the companion device.
      */
@@ -262,7 +262,7 @@ public abstract class CompanionDeviceService extends Service {
 
     // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
-     * Called by system whenever a device associated with this app is disconnected.
+     * Called by the system when an associated device is out of range or disconnected.
      *
      * @param associationInfo A record for the companion device.
      */
@@ -274,7 +274,7 @@ public abstract class CompanionDeviceService extends Service {
     }
 
     /**
-     * Called by the system during device events.
+     * Called by the system when an associated device's presence state changes.
      *
      * @see CompanionDeviceManager#startObservingDevicePresence(ObservingDevicePresenceRequest)
      */

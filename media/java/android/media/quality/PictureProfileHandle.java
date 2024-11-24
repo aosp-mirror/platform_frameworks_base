@@ -17,46 +17,58 @@
 package android.media.quality;
 
 import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.NonNull;
-
-// TODO(b/337330263): Expose as public API after API review
 /**
-  * A type-safe handle to a picture profile, which represents a collection of parameters used to
-  * configure picture processing hardware to enhance the quality of graphic buffers.
+  * A type-safe handle to a picture profile used to apply picture processing to a SurfaceControl.
+  *
+  * A picture profile represents a collection of parameters used to configure picture processing
+  * to enhance the quality of graphic buffers.
+  *
   * @hide
   */
-@FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+@SystemApi
+@FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
 public final class PictureProfileHandle implements Parcelable {
+    public static final @NonNull PictureProfileHandle NONE = new PictureProfileHandle(0);
+
     private final long mId;
 
-    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+    /** @hide */
     public PictureProfileHandle(long id) {
         mId = id;
     }
 
-    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+    /** @hide */
+    @SystemApi
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
     public long getId() {
         return mId;
     }
 
-    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+    /** @hide */
+    @SystemApi
     @Override
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mId);
     }
 
-    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+    /** @hide */
+    @SystemApi
     @Override
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
     public int describeContents() {
         return 0;
     }
 
-    @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
-    @NonNull
-    public static final Creator<PictureProfileHandle> CREATOR =
+    /** @hide */
+    @SystemApi
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
+    public static final @NonNull Creator<PictureProfileHandle> CREATOR =
             new Creator<PictureProfileHandle>() {
                 @Override
                 public PictureProfileHandle createFromParcel(Parcel in) {

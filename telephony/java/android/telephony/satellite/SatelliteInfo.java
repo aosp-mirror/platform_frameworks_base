@@ -25,7 +25,9 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.telephony.flags.Flags;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -44,20 +46,23 @@ public class SatelliteInfo implements Parcelable {
     private UUID mId;
 
     /**
-     * Position information of a satellite.
+     * Position information of a geostationary satellite.
      * This includes the longitude and altitude of the satellite.
+     * If the SatellitePosition is invalid,
+     * longitudeDegree and altitudeKm will be represented as DOUBLE.NaN.
      */
+    @NonNull
     private SatellitePosition mPosition;
 
     /**
-     * The frequency bands to scan. Bands and earfcns won't overlap.
+     * The frequency band list to scan. Bands and earfcns won't overlap.
      * Bands will be filled only if the whole band is needed.
      * Maximum length of the vector is 8.
      */
-    private int[] mBands;
+    private List<Integer> mBandList;
 
     /**
-     * EARFCN (E-UTRA Absolute Radio Frequency Channel Number) Ranges
+     * EARFCN (E-UTRA Absolute Radio Frequency Channel Number) range list
      * The supported frequency range list.
      * Maximum length of the vector is 8.
      */
@@ -71,13 +76,8 @@ public class SatelliteInfo implements Parcelable {
         }
         mPosition = in.readParcelable(SatellitePosition.class.getClassLoader(),
                 SatellitePosition.class);
-        int numBands = in.readInt();
-        mBands = new int[numBands];
-        if (numBands > 0) {
-            for (int i = 0; i < numBands; i++) {
-                mBands[i] = in.readInt();
-            }
-        }
+        mBandList = new ArrayList<>();
+        in.readList(mBandList, Integer.class.getClassLoader(), Integer.class);
         mEarfcnRangeList = in.createTypedArrayList(EarfcnRange.CREATOR);
     }
 
@@ -86,15 +86,15 @@ public class SatelliteInfo implements Parcelable {
      *
      * @param satelliteId       The ID of the satellite.
      * @param satellitePosition The {@link SatellitePosition} of the satellite.
-     * @param bands             The list of frequency bands supported by the satellite.
+     * @param bandList          The list of frequency bandList supported by the satellite.
      * @param earfcnRanges      The list of {@link EarfcnRange} objects representing the EARFCN
      *                          ranges supported by the satellite.
      */
     public SatelliteInfo(@NonNull UUID satelliteId, @NonNull SatellitePosition satellitePosition,
-            @NonNull int[] bands, @NonNull List<EarfcnRange> earfcnRanges) {
+            @NonNull List<Integer> bandList, @NonNull List<EarfcnRange> earfcnRanges) {
         mId = satelliteId;
         mPosition = satellitePosition;
-        mBands = bands;
+        mBandList = bandList;
         mEarfcnRangeList = earfcnRanges;
     }
 
@@ -119,12 +119,7 @@ public class SatelliteInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(new ParcelUuid(mId), flags);
         dest.writeParcelable(mPosition, flags);
-        if (mBands != null && mBands.length > 0) {
-            dest.writeInt(mBands.length);
-            dest.writeIntArray(mBands);
-        } else {
-            dest.writeInt(0);
-        }
+        dest.writeList(mBandList);
         dest.writeTypedList(mEarfcnRangeList);
     }
 
@@ -143,6 +138,7 @@ public class SatelliteInfo implements Parcelable {
      *
      * @return The {@link SatellitePosition} of the satellite.
      */
+    @NonNull
     public SatellitePosition getSatellitePosition() {
         return mPosition;
     }
@@ -153,8 +149,8 @@ public class SatelliteInfo implements Parcelable {
      * @return The list of frequency bands.
      */
     @NonNull
-    public int[] getBands() {
-        return mBands;
+    public List<Integer> getBands() {
+        return mBandList;
     }
 
     /**
@@ -165,5 +161,36 @@ public class SatelliteInfo implements Parcelable {
     @NonNull
     public List<EarfcnRange> getEarfcnRanges() {
         return mEarfcnRangeList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SatelliteInfo that)) return false;
+
+        return mId.equals(that.mId)
+                && Objects.equals(mPosition, that.mPosition)
+                && Objects.equals(mBandList, that.mBandList)
+                && mEarfcnRangeList.equals(that.mEarfcnRangeList);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(mId, mPosition, mEarfcnRangeList);
+        result = 31 * result + Objects.hashCode(mBandList);
+        return result;
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SatelliteInfo{");
+        sb.append("mId=").append(mId);
+        sb.append(", mPosition=").append(mPosition);
+        sb.append(", mBandList=").append(mBandList);
+        sb.append(", mEarfcnRangeList=").append(mEarfcnRangeList);
+        sb.append('}');
+        return sb.toString();
     }
 }

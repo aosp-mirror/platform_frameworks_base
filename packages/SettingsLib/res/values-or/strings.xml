@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ଡେଭେଲପମେଣ୍ଟର ପରିବେଶ"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidରେ Linux ଟର୍ମିନାଲ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ପରୀକ୍ଷାମୂଳକ) Androidରେ Linux ଟର୍ମିନାଲ ଚଲାନ୍ତୁ"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ଯଦି ଆପଣ ଅକ୍ଷମ କରନ୍ତି, ତେବେ Linux ଟର୍ମିନାଲ ଡାଟା ଖାଲି ହୋଇଯିବ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCPର ଯାଞ୍ଚ ଗତିବିଧି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ଡିବଗ୍‌ କରୁଛି"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ଏକ୍ସଟର୍ନଲ ଡିଭାଇସ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"କନେକ୍ଟ କରାଯାଇଥିବା ଡିଭାଇସ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ଏହି ଫୋନ୍"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ଆନାଲଗ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"ଅକ୍ସିଲାରି"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ଏହି ଡିଭାଇସରେ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ସ୍ୱିଚ କରିବା ପାଇଁ ଆକାଉଣ୍ଟକୁ ଅପଗ୍ରେଡ କରନ୍ତୁ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ଏଠାରେ ଡାଉନଲୋଡଗୁଡ଼ିକୁ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>

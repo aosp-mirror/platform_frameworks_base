@@ -152,7 +152,8 @@ public class PackageWatchdogTest {
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
         adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG,
-                Manifest.permission.WRITE_DEVICE_CONFIG);
+                Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
@@ -391,7 +392,7 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A below the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount() - 1; i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+            watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                     PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
@@ -1024,14 +1025,14 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
         // Fail APP_A below the threshold which should not trigger package failures
         for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+            watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                     PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         mTestLooper.dispatchAll();
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
 
         // One more to trigger the package failure
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
@@ -1050,10 +1051,10 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
@@ -1061,10 +1062,10 @@ public class PackageWatchdogTest {
         // DEFAULT_TRIGGER_FAILURE_DURATION_MS.
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
 
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS - 1);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
@@ -1128,17 +1129,17 @@ public class PackageWatchdogTest {
 
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), Long.MAX_VALUE);
         // Raise 2 failures at t=0 and t=900 respectively
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         moveTimeForwardAndDispatch(900);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Raise 2 failures at t=1100
         moveTimeForwardAndDispatch(200);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
@@ -1432,13 +1433,13 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
         watchdog.startObservingHealth(observer, List.of(APP_A), SHORT_DURATION);
         for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
-            watchdog.onPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
+            watchdog.notifyPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
                     PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         mTestLooper.dispatchAll();
         assertThat(observer.mMitigatedPackages).isEmpty();
         watchdog.startObservingHealth(observer, List.of(APP_A), LONG_DURATION);
-        watchdog.onPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
+        watchdog.notifyPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
         assertThat(observer.mMitigatedPackages).isEqualTo(List.of(APP_A));
@@ -1736,7 +1737,7 @@ public class PackageWatchdogTest {
             triggerFailureCount = 1;
         }
         for (int i = 0; i < triggerFailureCount; i++) {
-            watchdog.onPackageFailure(packages, failureReason);
+            watchdog.notifyPackageFailure(packages, failureReason);
         }
         mTestLooper.dispatchAll();
         if (Flags.recoverabilityDetection()) {

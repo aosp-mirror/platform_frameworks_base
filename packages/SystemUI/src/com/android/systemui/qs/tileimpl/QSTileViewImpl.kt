@@ -27,6 +27,7 @@ import android.content.res.Resources.ID_NULL
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -308,6 +309,14 @@ constructor(
         }
         setLabelColor(getLabelColorForState(QSTile.State.DEFAULT_STATE))
         setSecondaryLabelColor(getSecondaryLabelColorForState(QSTile.State.DEFAULT_STATE))
+
+        if (Flags.gsfQuickSettings()) {
+            label.apply {
+                typeface = Typeface.create("gsf-title-small-emphasized", Typeface.NORMAL)
+            }
+            secondaryLabel.apply { typeface = Typeface.create("gsf-label-medium", Typeface.NORMAL) }
+        }
+
         addView(labelContainer)
     }
 
@@ -415,7 +424,10 @@ constructor(
             initLongPressEffectCallback()
             init(
                 { _: View -> longPressEffect.onTileClick() },
-                { _: View -> true }, // Haptics and long-clicks are handled by [QSLongPressEffect]
+                { _: View ->
+                    longPressEffect.onTileLongClick()
+                    true
+                }, // Haptics and long-clicks are handled by [QSLongPressEffect]
             )
         } else {
             val expandable = Expandable.fromView(this)

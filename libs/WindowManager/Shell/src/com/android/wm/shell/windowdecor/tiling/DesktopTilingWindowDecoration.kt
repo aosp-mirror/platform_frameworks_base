@@ -225,18 +225,23 @@ class DesktopTilingWindowDecoration(
     fun onDividerHandleDragStart(motionEvent: MotionEvent) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
 
         desktopModeEventLogger.logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             leftTiledTask.taskInfo,
+            leftTiledTask.bounds.width(),
+            leftTiledTask.bounds.height(),
             displayController,
         )
 
         desktopModeEventLogger.logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             rightTiledTask.taskInfo,
+            rightTiledTask.bounds.width(),
+            rightTiledTask.bounds.height(),
             displayController,
         )
     }
@@ -296,22 +301,23 @@ class DesktopTilingWindowDecoration(
     ) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
 
         desktopModeEventLogger.logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             leftTiledTask.taskInfo,
-            leftTiledTask.newBounds.height(),
             leftTiledTask.newBounds.width(),
+            leftTiledTask.newBounds.height(),
             displayController,
         )
 
         desktopModeEventLogger.logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             rightTiledTask.taskInfo,
-            rightTiledTask.newBounds.height(),
             rightTiledTask.newBounds.width(),
+            rightTiledTask.newBounds.height(),
             displayController,
         )
 
@@ -486,9 +492,8 @@ class DesktopTilingWindowDecoration(
 
     // Only called if [taskInfo] relates to a focused task
     private fun isTilingRefocused(taskInfo: RunningTaskInfo): Boolean {
-        return !isTilingFocused &&
-            (taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
-                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId)
+        return taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
+                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId
     }
 
     private fun buildTiledTasksMoveToFront(leftOnTop: Boolean): WindowContainerTransaction {

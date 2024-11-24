@@ -85,6 +85,7 @@ import static android.view.contentprotection.flags.Flags.createAccessibilityOver
 
 import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
 import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
+import static com.android.hardware.input.Flags.inputManagerLifecycleSupport;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
@@ -7106,7 +7107,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (modifierShortcutManagerMultiuser()) {
             mModifierShortcutManager.setCurrentUser(UserHandle.of(newUserId));
         }
-        mInputManagerInternal.setCurrentUser(newUserId);
+        if (!inputManagerLifecycleSupport()) {
+            mInputManagerInternal.setCurrentUser(newUserId);
+        }
     }
 
     @Override

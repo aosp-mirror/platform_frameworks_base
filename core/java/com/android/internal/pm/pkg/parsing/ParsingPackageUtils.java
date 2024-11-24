@@ -541,6 +541,7 @@ public class ParsingPackageUtils {
 
         pkg.setGwpAsanMode(-1);
         pkg.setMemtagMode(-1);
+        pkg.setPageSizeAppCompatFlags(ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED);
 
         afterParseBaseApplication(pkg);
 
@@ -2182,6 +2183,13 @@ public class ParsingPackageUtils {
 
             pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
             pkg.setMemtagMode(sa.getInt(R.styleable.AndroidManifestApplication_memtagMode, -1));
+
+            if (Flags.appCompatOption16kb()) {
+                pkg.setPageSizeAppCompatFlags(
+                        sa.getInt(R.styleable.AndroidManifestApplication_pageSizeCompat,
+                                ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED));
+            }
+
             if (sa.hasValue(R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized)) {
                 final boolean v = sa.getBoolean(
                         R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized, false);
@@ -2377,6 +2385,7 @@ public class ParsingPackageUtils {
      * Flags are separated by type and by default value. They are sorted alphabetically within each
      * section.
      */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
     private void parseBaseAppBasicFlags(ParsingPackage pkg, TypedArray sa) {
         int targetSdk = pkg.getTargetSdkVersion();
         //@formatter:off
@@ -2414,12 +2423,20 @@ public class ParsingPackageUtils {
                 .setResetEnabledSettingsOnAppDataCleared(bool(false,
                         R.styleable.AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared,
                         sa))
-                .setOnBackInvokedCallbackEnabled(bool(false, R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(bool(targetSdk >= Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture, sa))
                 .setHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))
                 .setRequestLegacyExternalStorage(bool(targetSdk < Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_requestLegacyExternalStorage, sa))
                 .setCleartextTrafficAllowed(bool(targetSdk < Build.VERSION_CODES.P, R.styleable.AndroidManifestApplication_usesCleartextTraffic, sa))
+                // CompatChange.isChangeEnabled() can't be used here because this is called during
+                // PackageManagerService initialization. PlatformCompat can't be used because this
+                // code is not guaranteed to be called from the system_server process. Therefore
+                // accessing Build.VERSION_CODES directly and suppressing
+                // AndroidFrameworkCompatChange warning
+                .setOnBackInvokedCallbackEnabled(bool(
+                        com.android.window.flags.Flags.predictiveBackDefaultEnableSdk36()
+                            && targetSdk > Build.VERSION_CODES.VANILLA_ICE_CREAM,
+                        R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // Ints Default 0
                 .setUiOptions(anInt(R.styleable.AndroidManifestApplication_uiOptions, sa))
                 // Ints

@@ -99,6 +99,7 @@ class DesktopImmersiveController(
 
     /** Starts a transition to enter full immersive state inside the desktop. */
     fun moveTaskToImmersive(taskInfo: RunningTaskInfo) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
         if (inProgress) {
             logV(
                 "Cannot start entry because transition(s) already in progress: %s",
@@ -119,7 +120,9 @@ class DesktopImmersiveController(
         )
     }
 
-    fun moveTaskToNonImmersive(taskInfo: RunningTaskInfo) {
+    /** Starts a transition to move an immersive task out of immersive. */
+    fun moveTaskToNonImmersive(taskInfo: RunningTaskInfo, reason: ExitReason) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
         if (inProgress) {
             logV(
                 "Cannot start exit because transition(s) already in progress: %s",
@@ -131,7 +134,7 @@ class DesktopImmersiveController(
         val wct = WindowContainerTransaction().apply {
             setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
         }
-        logV("Moving task ${taskInfo.taskId} out of immersive mode")
+        logV("Moving task %d out of immersive mode, reason: %s", taskInfo.taskId, reason)
         val transition = transitions.startTransition(TRANSIT_CHANGE, wct, /* handler= */ this)
         state = TransitionState(
             transition = transition,
@@ -151,10 +154,11 @@ class DesktopImmersiveController(
     fun exitImmersiveIfApplicable(
         transition: IBinder,
         wct: WindowContainerTransaction,
-        displayId: Int
+        displayId: Int,
+        reason: ExitReason,
     ) {
         if (!Flags.enableFullyImmersiveInDesktop()) return
-        val result = exitImmersiveIfApplicable(wct, displayId)
+        val result = exitImmersiveIfApplicable(wct, displayId, excludeTaskId = null, reason)
         result.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
@@ -170,6 +174,7 @@ class DesktopImmersiveController(
         wct: WindowContainerTransaction,
         displayId: Int,
         excludeTaskId: Int? = null,
+        reason: ExitReason,
     ): ExitResult {
         if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
         val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId)
@@ -179,7 +184,10 @@ class DesktopImmersiveController(
         }
         val taskInfo = shellTaskOrganizer.getRunningTaskInfo(immersiveTask)
             ?: return ExitResult.NoExit
-        logV("Appending immersive exit for task: $immersiveTask in display: $displayId")
+        logV(
+            "Appending immersive exit for task: %d in display: %d for reason: %s",
+            immersiveTask, displayId, reason
+        )
         wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
         return ExitResult.Exit(
             exitingTask = immersiveTask,
@@ -198,14 +206,15 @@ class DesktopImmersiveController(
      */
     fun exitImmersiveIfApplicable(
         wct: WindowContainerTransaction,
-        taskInfo: RunningTaskInfo
+        taskInfo: RunningTaskInfo,
+        reason: ExitReason,
     ): ExitResult {
         if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
         if (desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
             // A full immersive task is being minimized, make sure the immersive state is broken
             // (i.e. resize back to max bounds).
             wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
-            logV("Appending immersive exit for task: ${taskInfo.taskId}")
+            logV("Appending immersive exit for task: %d for reason: %s", taskInfo.taskId, reason)
             return ExitResult.Exit(
                 exitingTask = taskInfo.taskId,
                 runOnTransitionStart = { transition ->
@@ -548,6 +557,15 @@ class DesktopImmersiveController(
     @VisibleForTesting
     enum class Direction {
         ENTER, EXIT
+    }
+
+    /** The reason for moving the task out of desktop immersive mode. */
+    enum class ExitReason {
+        APP_NOT_IMMERSIVE, // The app stopped requesting immersive treatment.
+        USER_INTERACTION, // Explicit user intent request, e.g. a button click.
+        TASK_LAUNCH, // A task launched/moved on top of the immersive task.
+        MINIMIZED, // The immersive task was minimized.
+        CLOSED, // The immersive task was closed.
     }
 
     private fun logV(msg: String, vararg arguments: Any?) {

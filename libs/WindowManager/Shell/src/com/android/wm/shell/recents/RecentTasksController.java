@@ -19,8 +19,10 @@ package com.android.wm.shell.recents;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PC;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
+import static com.android.wm.shell.desktopmode.DesktopWallpaperActivity.isWallpaperTask;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_OBSERVER;
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
@@ -53,6 +55,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.launcher3.Flags;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -280,6 +283,17 @@ public class RecentTasksController implements TaskStackListenerCallback,
         // so we should also invalidate the change id to ensure we load a new list instead of
         // reusing a stale list.
         notifyRecentTasksChanged();
+    }
+
+    /**
+     * This method only gets notified when a task is removed from recents as a result of another
+     * task being added to recent tasks.
+     */
+    @Override
+    public void onRecentTaskRemovedForAddTask(int taskId) {
+        mDesktopRepository.ifPresent(
+                repo -> repo.removeFreeformTask(INVALID_DISPLAY, taskId)
+        );
     }
 
     public void onTaskAdded(RunningTaskInfo taskInfo) {
@@ -530,6 +544,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 groupedTasks.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
+                if (Flags.enableRefactorTaskThumbnail() && isWallpaperTask(taskInfo)) {
+                    // Don't add the wallpaper task as an entry in grouped tasks
+                    continue;
+                }
                 // TODO(346588978): Consolidate multiple visible fullscreen tasks into the same
                 //  grouped task
                 groupedTasks.add(GroupedTaskInfo.forFullscreenTasks(taskInfo));
@@ -665,8 +683,10 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 }
                 mTransitionHandler.addTransitionStateListener(new RecentsTransitionStateListener() {
                     @Override
-                    public void onAnimationStateChanged(boolean running) {
-                        executor.execute(() -> listener.accept(running));
+                    public void onTransitionStateChanged(@RecentsTransitionState int state) {
+                        executor.execute(() -> {
+                            listener.accept(RecentsTransitionStateListener.isAnimating(state));
+                        });
                     }
                 });
             });

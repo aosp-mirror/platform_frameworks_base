@@ -24,6 +24,7 @@ import com.android.internal.os.MonotonicClock;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 
 /**
  * Query parameters for the {@link BatteryStatsManager#getBatteryUsageStats()} call.
@@ -64,12 +65,6 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      * @hide
      */
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY = 0x0002;
-
-    /**
-     * Indicates that identifiers of power models used for computations of power
-     * consumption should be included in the BatteryUsageStats.
-     */
-    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS = 0x0004;
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA = 0x0008;
 
@@ -202,7 +197,24 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         return mAggregatedToTimestamp;
     }
 
+    @Override
+    public String toString() {
+        return "BatteryUsageStatsQuery{"
+                + "mFlags=" + Integer.toHexString(mFlags)
+                + ", mUserIds=" + Arrays.toString(mUserIds)
+                + ", mMaxStatsAgeMs=" + mMaxStatsAgeMs
+                + ", mAggregatedFromTimestamp=" + mAggregatedFromTimestamp
+                + ", mAggregatedToTimestamp=" + mAggregatedToTimestamp
+                + ", mMonotonicStartTime=" + mMonotonicStartTime
+                + ", mMonotonicEndTime=" + mMonotonicEndTime
+                + ", mMinConsumedPowerThreshold=" + mMinConsumedPowerThreshold
+                + ", mPowerComponents=" + Arrays.toString(mPowerComponents)
+                + '}';
+    }
+
     private BatteryUsageStatsQuery(Parcel in) {
+        mMonotonicStartTime = in.readLong();
+        mMonotonicEndTime = in.readLong();
         mFlags = in.readInt();
         mUserIds = new int[in.readInt()];
         in.readIntArray(mUserIds);
@@ -215,6 +227,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mMonotonicStartTime);
+        dest.writeLong(mMonotonicEndTime);
         dest.writeInt(mFlags);
         dest.writeInt(mUserIds.length);
         dest.writeIntArray(mUserIds);
@@ -311,7 +325,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * power monitoring data is available.
          *
          * Should only be used for testing and debugging.
+         *
+         * @deprecated PowerModel is no longer supported
          */
+        @Deprecated
         public Builder powerProfileModeledOnly() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL;
             return this;
@@ -322,9 +339,10 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * of power consumption.
          *
          * Should only be used for testing and debugging.
+         * @deprecated PowerModel is no longer supported
          */
+        @Deprecated
         public Builder includePowerModels() {
-            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS;
             return this;
         }
 

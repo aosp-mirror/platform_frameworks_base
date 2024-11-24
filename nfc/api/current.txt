@@ -202,6 +202,7 @@ package android.nfc.cardemulation {
     method public boolean categoryAllowsForegroundPreference(String);
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public java.util.List<java.lang.String> getAidsForPreferredPaymentService();
     method public java.util.List<java.lang.String> getAidsForService(android.content.ComponentName, String);
+    method @FlaggedApi("android.nfc.enable_card_emulation_euicc") public int getDefaultNfcSubscriptionId();
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public CharSequence getDescriptionForPreferredPaymentService();
     method public static android.nfc.cardemulation.CardEmulation getInstance(android.nfc.NfcAdapter);
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public String getRouteDestinationForPreferredPaymentService();
@@ -232,6 +233,7 @@ package android.nfc.cardemulation {
     field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_NFC_CRASH_RESTART = 1; // 0x1
     field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_NFC_HARDWARE_ERROR = 2; // 0x2
     field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("android.nfc.nfc_associated_role_services") public static final String PROPERTY_ALLOW_SHARED_ROLE_PRIORITY = "android.nfc.cardemulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY";
     field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_DEFAULT = 3; // 0x3
     field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_DH = 0; // 0x0
     field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE = 1; // 0x1

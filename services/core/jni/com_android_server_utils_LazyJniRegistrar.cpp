@@ -22,6 +22,7 @@ namespace android {
 
 // Forward declared per-class registration methods.
 int register_android_server_ConsumerIrService(JNIEnv* env);
+int register_android_server_app_GameManagerService(JNIEnv* env);
 int register_android_server_vr_VrManagerService(JNIEnv* env);
 
 namespace {
@@ -33,12 +34,17 @@ void registerConsumerIrService(JNIEnv* env, jclass) {
     register_android_server_ConsumerIrService(env);
 }
 
+void registerGameManagerService(JNIEnv* env, jclass) {
+    register_android_server_app_GameManagerService(env);
+}
+
 void registerVrManagerService(JNIEnv* env, jclass) {
     register_android_server_vr_VrManagerService(env);
 }
 
 static const JNINativeMethod sJniRegistrarMethods[] = {
         {"registerConsumerIrService", "()V", (void*)registerConsumerIrService},
+        {"registerGameManagerService", "()V", (void*)registerGameManagerService},
         {"registerVrManagerService", "()V", (void*)registerVrManagerService},
 };
 

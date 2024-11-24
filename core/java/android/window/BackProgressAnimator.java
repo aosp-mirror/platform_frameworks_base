@@ -67,7 +67,6 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
             .setStiffness(SpringForce.STIFFNESS_MEDIUM)
             .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY);
     private final SpringForce mButtonSpringForce = new SpringForce()
-            .setStiffness(500)
             .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY);
     private final DynamicAnimation.OnAnimationEndListener mOnAnimationEndListener =
             (animation, canceled, value, velocity) -> {
@@ -157,6 +156,7 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
                 /* frameTime */ System.nanoTime() / TimeUtils.NANOS_PER_MS);
         if (predictiveBackSwipeEdgeNoneApi()) {
             if (event.getSwipeEdge() == EDGE_NONE) {
+                mButtonSpringForce.setStiffness(SpringForce.STIFFNESS_LOW);
                 mSpring.setSpring(mButtonSpringForce);
                 mSpring.animateToFinalPosition(SCALE_FACTOR);
             } else {
@@ -228,6 +228,7 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
      * @param finishCallback the callback to be invoked when the progress is reach to 0.
      */
     public void onBackCancelled(@NonNull Runnable finishCallback) {
+        mButtonSpringForce.setStiffness(SpringForce.STIFFNESS_MEDIUM);
         mBackCancelledFinishRunnable = finishCallback;
         mSpring.addEndListener(mOnAnimationEndListener);
         mSpring.animateToFinalPosition(0);

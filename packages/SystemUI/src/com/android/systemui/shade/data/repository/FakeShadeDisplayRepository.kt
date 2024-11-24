@@ -23,14 +23,14 @@ import kotlinx.coroutines.flow.StateFlow
 class FakeShadeDisplayRepository : ShadeDisplaysRepository {
     private val _displayId = MutableStateFlow(Display.DEFAULT_DISPLAY)
 
-    override fun setDisplayId(displayId: Int) {
+    fun setDisplayId(displayId: Int) {
         _displayId.value = displayId
     }
 
     override val displayId: StateFlow<Int>
         get() = _displayId
 
-    override fun resetDisplayId() {
+    fun resetDisplayId() {
         _displayId.value = Display.DEFAULT_DISPLAY
     }
 }

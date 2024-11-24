@@ -84,30 +84,53 @@ constructor(
             )
 
     /**
+     * Emits `true` when the current scene switches to [Scenes.Gone] for the first time after having
+     * been on [Scenes.Lockscreen].
+     *
+     * Different from [isDeviceEntered] such that the current scene must actually go through
+     * [Scenes.Gone] to produce a `true`. [isDeviceEntered] also takes into account the navigation
+     * back stack and will produce a `true` value even when the current scene is still not
+     * [Scenes.Gone] but the bottommost entry of the navigation back stack switched from
+     * [Scenes.Lockscreen] to [Scenes.Gone] while the user is staring at another scene.
+     */
+    val isDeviceEnteredDirectly: StateFlow<Boolean> =
+        sceneInteractor.currentScene
+            .filter { currentScene ->
+                currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
+            }
+            .mapLatestConflated { scene ->
+                if (scene == Scenes.Gone) {
+                    // Make sure device unlock status is definitely unlocked before we
+                    // consider the device "entered".
+                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
+                    true
+                } else {
+                    false
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+
+    /**
      * Whether the device has been entered (i.e. the lockscreen has been dismissed, by any method).
      * This can be `false` when the device is unlocked, e.g. when the user still needs to swipe away
      * the non-secure lockscreen, even though they've already authenticated.
      *
      * Note: This does not imply that the lockscreen is visible or not.
+     *
+     * Different from [isDeviceEnteredDirectly] such that the current scene doesn't actually have to
+     * go through [Scenes.Gone] to produce a `true`. [isDeviceEnteredDirectly] doesn't take the
+     * navigation back stack into account and will only produce a `true` value even when the current
+     * scene is actually [Scenes.Gone].
      */
     val isDeviceEntered: StateFlow<Boolean> =
         combine(
                 // This flow emits true when the currentScene switches to Gone for the first time
                 // after having been on Lockscreen.
-                sceneInteractor.currentScene
-                    .filter { currentScene ->
-                        currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
-                    }
-                    .mapLatestConflated { scene ->
-                        if (scene == Scenes.Gone) {
-                            // Make sure device unlock status is definitely unlocked before we
-                            // consider the device "entered".
-                            deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
-                            true
-                        } else {
-                            false
-                        }
-                    },
+                isDeviceEnteredDirectly,
                 // This flow emits true only if the bottom of the navigation back stack has been
                 // switched from Lockscreen to Gone. In other words, only if the device was unlocked
                 // while visiting at least one scene "above" the Lockscreen scene.

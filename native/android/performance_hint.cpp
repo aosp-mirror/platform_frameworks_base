@@ -26,6 +26,7 @@
 #include <aidl/android/hardware/power/WorkDurationFixedV1.h>
 #include <aidl/android/os/IHintManager.h>
 #include <aidl/android/os/IHintSession.h>
+#include <aidl/android/os/SessionCreationConfig.h>
 #include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
 #include <android/binder_manager.h>
@@ -65,6 +66,13 @@ struct APerformanceHintSession;
 
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
 struct AWorkDuration : public hal::WorkDuration {};
+struct ASessionCreationConfig : public SessionCreationConfig {};
+
+bool kForceGraphicsPipeline = false;
+
+bool useGraphicsPipeline() {
+    return android::os::adpf_graphics_pipeline() || kForceGraphicsPipeline;
+}
 
 // A pair of values that determine the behavior of the
 // load hint rate limiter, to only allow "X hints every Y seconds"
@@ -142,7 +150,11 @@ public:
                                            bool isJava = false);
     APerformanceHintSession* getSessionFromJava(JNIEnv* _Nonnull env, jobject _Nonnull sessionObj);
 
+    APerformanceHintSession* createSessionUsingConfig(ASessionCreationConfig* sessionCreationConfig,
+                                                      hal::SessionTag tag = hal::SessionTag::APP,
+                                                      bool isJava = false);
     int64_t getPreferredRateNanos() const;
+    int32_t getMaxGraphicsPipelineThreadsCount();
     FMQWrapper& getFMQWrapper();
     bool canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) REQUIRES(sHintMutex);
     void initJava(JNIEnv* _Nonnull env);
@@ -163,6 +175,7 @@ private:
     std::shared_ptr<IHintManager> mHintManager;
     ndk::SpAIBinder mToken;
     const int64_t mPreferredRateNanos;
+    std::optional<int32_t> mMaxGraphicsPipelineThreadsCount;
     FMQWrapper mFMQWrapper;
     double mHintBudget = kMaxLoadHintsPerInterval;
     int64_t mLastBudgetReplenish = 0;
@@ -220,8 +233,10 @@ private:
     std::vector<int32_t> mLastThreadIDs GUARDED_BY(sHintMutex);
     std::optional<hal::SessionConfig> mSessionConfig GUARDED_BY(sHintMutex);
     // Tracing helpers
-    void traceThreads(std::vector<int32_t>& tids) REQUIRES(sHintMutex);
+    void traceThreads(const std::vector<int32_t>& tids) REQUIRES(sHintMutex);
     void tracePowerEfficient(bool powerEfficient);
+    void traceGraphicsPipeline(bool graphicsPipeline);
+    void traceModes(const std::vector<hal::SessionMode>& modesToEnable);
     void traceActualDuration(int64_t actualDuration);
     void traceBatchSize(size_t batchSize);
     void traceTargetDuration(int64_t targetDuration);
@@ -311,27 +326,45 @@ bool APerformanceHintManager::canSendLoadHints(std::vector<hal::SessionHint>& hi
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos,
         hal::SessionTag tag, bool isJava) {
-    std::vector<int32_t> tids(threadIds, threadIds + size);
-    std::shared_ptr<IHintSession> session;
     ndk::ScopedAStatus ret;
     hal::SessionConfig sessionConfig{.id = -1};
-    ret = mHintManager->createHintSessionWithConfig(mToken, tids, initialTargetWorkDurationNanos,
-                                                    tag, &sessionConfig, &session);
+
+    SessionCreationConfig creationConfig{
+            .tids = std::vector<int32_t>(threadIds, threadIds + size),
+            .targetWorkDurationNanos = initialTargetWorkDurationNanos,
+    };
+
+    return APerformanceHintManager::createSessionUsingConfig(static_cast<ASessionCreationConfig*>(
+                                                                     &creationConfig),
+                                                             tag, isJava);
+}
+
+APerformanceHintSession* APerformanceHintManager::createSessionUsingConfig(
+        ASessionCreationConfig* sessionCreationConfig, hal::SessionTag tag, bool isJava) {
+    std::shared_ptr<IHintSession> session;
+    hal::SessionConfig sessionConfig{.id = -1};
+    ndk::ScopedAStatus ret;
+
+    ret = mHintManager->createHintSessionWithConfig(mToken, tag,
+                                                    *static_cast<SessionCreationConfig*>(
+                                                            sessionCreationConfig),
+                                                    &sessionConfig, &session);
 
     if (!ret.isOk() || !session) {
         ALOGE("%s: PerformanceHint cannot create session. %s", __FUNCTION__, ret.getMessage());
         return nullptr;
     }
     auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
-                                           initialTargetWorkDurationNanos, isJava,
+                                           sessionCreationConfig->targetWorkDurationNanos, isJava,
                                            sessionConfig.id == -1
                                                    ? std::nullopt
                                                    : std::make_optional<hal::SessionConfig>(
                                                              std::move(sessionConfig)));
     std::scoped_lock lock(sHintMutex);
-    out->traceThreads(tids);
-    out->traceTargetDuration(initialTargetWorkDurationNanos);
-    out->tracePowerEfficient(false);
+    out->traceThreads(sessionCreationConfig->tids);
+    out->traceTargetDuration(sessionCreationConfig->targetWorkDurationNanos);
+    out->traceModes(sessionCreationConfig->modesToEnable);
+
     return out;
 }
 
@@ -349,6 +382,23 @@ APerformanceHintSession* APerformanceHintManager::getSessionFromJava(JNIEnv* env
 
 int64_t APerformanceHintManager::getPreferredRateNanos() const {
     return mPreferredRateNanos;
+}
+
+int32_t APerformanceHintManager::getMaxGraphicsPipelineThreadsCount() {
+    if (!mMaxGraphicsPipelineThreadsCount.has_value()) {
+        int32_t threadsCount = -1;
+        ndk::ScopedAStatus ret = mHintManager->getMaxGraphicsPipelineThreadsCount(&threadsCount);
+        if (!ret.isOk()) {
+            ALOGE("%s: PerformanceHint cannot get max graphics pipeline threads count. %s",
+                  __FUNCTION__, ret.getMessage());
+            return -1;
+        }
+        if (threadsCount <= 0) {
+            threadsCount = -1;
+        }
+        mMaxGraphicsPipelineThreadsCount.emplace(threadsCount);
+    }
+    return mMaxGraphicsPipelineThreadsCount.value();
 }
 
 FMQWrapper& APerformanceHintManager::getFMQWrapper() {
@@ -787,7 +837,7 @@ bool FMQWrapper::setMode(std::optional<hal::SessionConfig>& config, hal::Session
 
 // ===================================== Tracing helpers
 
-void APerformanceHintSession::traceThreads(std::vector<int32_t>& tids) {
+void APerformanceHintSession::traceThreads(const std::vector<int32_t>& tids) {
     std::set<int32_t> tidSet{tids.begin(), tids.end()};
 
     // Disable old TID tracing
@@ -811,6 +861,30 @@ void APerformanceHintSession::traceThreads(std::vector<int32_t>& tids) {
 
 void APerformanceHintSession::tracePowerEfficient(bool powerEfficient) {
     ATrace_setCounter((mSessionName + " power efficiency mode").c_str(), powerEfficient);
+}
+
+void APerformanceHintSession::traceGraphicsPipeline(bool graphicsPipeline) {
+    ATrace_setCounter((mSessionName + " graphics pipeline mode").c_str(), graphicsPipeline);
+}
+
+void APerformanceHintSession::traceModes(const std::vector<hal::SessionMode>& modesToEnable) {
+    // Iterate through all modes to trace, set to enable for all modes in modesToEnable,
+    // and set to disable for those are not.
+    for (hal::SessionMode mode :
+         {hal::SessionMode::POWER_EFFICIENCY, hal::SessionMode::GRAPHICS_PIPELINE}) {
+        bool isEnabled =
+                find(modesToEnable.begin(), modesToEnable.end(), mode) != modesToEnable.end();
+        switch (mode) {
+            case hal::SessionMode::POWER_EFFICIENCY:
+                tracePowerEfficient(isEnabled);
+                break;
+            case hal::SessionMode::GRAPHICS_PIPELINE:
+                traceGraphicsPipeline(isEnabled);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void APerformanceHintSession::traceActualDuration(int64_t actualDuration) {
@@ -855,6 +929,22 @@ APerformanceHintSession* APerformanceHint_createSession(APerformanceHintManager*
     return manager->createSession(threadIds, size, initialTargetWorkDurationNanos);
 }
 
+APerformanceHintSession* APerformanceHint_createSessionUsingConfig(
+        APerformanceHintManager* manager, ASessionCreationConfig* sessionCreationConfig) {
+    VALIDATE_PTR(manager);
+    VALIDATE_PTR(sessionCreationConfig);
+    return manager->createSessionUsingConfig(sessionCreationConfig);
+}
+
+APerformanceHintSession* APerformanceHint_createSessionUsingConfigInternal(
+        APerformanceHintManager* manager, ASessionCreationConfig* sessionCreationConfig,
+        SessionTag tag) {
+    VALIDATE_PTR(manager);
+    VALIDATE_PTR(sessionCreationConfig);
+    return manager->createSessionUsingConfig(sessionCreationConfig,
+                                             static_cast<hal::SessionTag>(tag));
+}
+
 APerformanceHintSession* APerformanceHint_createSessionInternal(
         APerformanceHintManager* manager, const int32_t* threadIds, size_t size,
         int64_t initialTargetWorkDurationNanos, SessionTag tag) {
@@ -883,6 +973,11 @@ APerformanceHintSession* APerformanceHint_borrowSessionFromJava(JNIEnv* env,
 int64_t APerformanceHint_getPreferredUpdateRateNanos(APerformanceHintManager* manager) {
     VALIDATE_PTR(manager)
     return manager->getPreferredRateNanos();
+}
+
+int APerformanceHint_getMaxGraphicsPipelineThreadsCount(APerformanceHintManager* manager) {
+    VALIDATE_PTR(manager);
+    return manager->getMaxGraphicsPipelineThreadsCount();
 }
 
 int APerformanceHint_updateTargetWorkDuration(APerformanceHintSession* session,
@@ -1016,6 +1111,81 @@ void APerformanceHint_setIHintManagerForTesting(void* iManager) {
 
 void APerformanceHint_setUseFMQForTesting(bool enabled) {
     gForceFMQEnabled = enabled;
+}
+
+ASessionCreationConfig* ASessionCreationConfig_create() {
+    return new ASessionCreationConfig();
+}
+
+void ASessionCreationConfig_release(ASessionCreationConfig* config) {
+    VALIDATE_PTR(config)
+
+    delete config;
+}
+
+int ASessionCreationConfig_setTids(ASessionCreationConfig* config, const pid_t* tids, size_t size) {
+    VALIDATE_PTR(config)
+    VALIDATE_PTR(tids)
+
+    if (!useGraphicsPipeline()) {
+        return ENOTSUP;
+    }
+
+    if (size <= 0) {
+        LOG_ALWAYS_FATAL_IF(size <= 0,
+                            "%s: Invalid value. Thread id list size should be greater than zero.",
+                            __FUNCTION__);
+        return EINVAL;
+    }
+    config->tids = std::vector<int32_t>(tids, tids + size);
+    return 0;
+}
+
+int ASessionCreationConfig_setTargetWorkDurationNanos(ASessionCreationConfig* config,
+                                                      int64_t targetWorkDurationNanos) {
+    VALIDATE_PTR(config)
+    VALIDATE_INT(targetWorkDurationNanos, >= 0)
+
+    if (!useGraphicsPipeline()) {
+        return ENOTSUP;
+    }
+
+    config->targetWorkDurationNanos = targetWorkDurationNanos;
+    return 0;
+}
+
+int ASessionCreationConfig_setPreferPowerEfficiency(ASessionCreationConfig* config, bool enabled) {
+    VALIDATE_PTR(config)
+
+    if (!useGraphicsPipeline()) {
+        return ENOTSUP;
+    }
+
+    if (enabled) {
+        config->modesToEnable.push_back(hal::SessionMode::POWER_EFFICIENCY);
+    } else {
+        std::erase(config->modesToEnable, hal::SessionMode::POWER_EFFICIENCY);
+    }
+    return 0;
+}
+
+int ASessionCreationConfig_setGraphicsPipeline(ASessionCreationConfig* config, bool enabled) {
+    VALIDATE_PTR(config)
+
+    if (!useGraphicsPipeline()) {
+        return ENOTSUP;
+    }
+
+    if (enabled) {
+        config->modesToEnable.push_back(hal::SessionMode::GRAPHICS_PIPELINE);
+    } else {
+        std::erase(config->modesToEnable, hal::SessionMode::GRAPHICS_PIPELINE);
+    }
+    return 0;
+}
+
+void APerformanceHint_setUseGraphicsPipelineForTesting(bool enabled) {
+    kForceGraphicsPipeline = enabled;
 }
 
 void APerformanceHint_getRateLimiterPropertiesForTesting(int32_t* maxLoadHintsPerInterval,

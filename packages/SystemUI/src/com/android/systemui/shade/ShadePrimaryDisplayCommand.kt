@@ -20,11 +20,14 @@ import android.view.Display
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.display.data.repository.DisplayRepository
-import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
+import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
+import com.android.systemui.shade.display.ShadeDisplayPolicy
+import com.android.systemui.shade.display.SpecificDisplayIdPolicy
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlin.text.toIntOrNull
 
 @SysUISingleton
 class ShadePrimaryDisplayCommand
@@ -32,7 +35,9 @@ class ShadePrimaryDisplayCommand
 constructor(
     private val commandRegistry: CommandRegistry,
     private val displaysRepository: DisplayRepository,
-    private val positionRepository: ShadeDisplaysRepository,
+    private val positionRepository: MutableShadeDisplaysRepository,
+    private val policies: Set<@JvmSuppressWildcards ShadeDisplayPolicy>,
+    private val defaultPolicy: ShadeDisplayPolicy,
 ) : Command, CoreStartable {
 
     override fun start() {
@@ -40,8 +45,11 @@ constructor(
     }
 
     override fun help(pw: PrintWriter) {
-        pw.println("shade_display_override <displayId> ")
-        pw.println("Set the display which is holding the shade.")
+        pw.println("shade_display_override (<displayId>|<policyName>) ")
+        pw.println("Set the display which is holding the shade, or the policy that defines it.")
+        pw.println()
+        pw.println("shade_display_override policies")
+        pw.println("Lists available policies")
         pw.println()
         pw.println("shade_display_override reset ")
         pw.println("Reset the display which is holding the shade.")
@@ -68,21 +76,27 @@ constructor(
                 "reset" -> reset()
                 "list",
                 "status" -> printStatus()
+                "policies" -> printPolicies()
                 "any_external" -> anyExternal()
-                else -> {
-                    val cmdAsInteger = command?.toIntOrNull()
-                    if (cmdAsInteger != null) {
-                        changeDisplay(displayId = cmdAsInteger)
-                    } else {
-                        help(pw)
-                    }
+                null -> help(pw)
+                else -> parsePolicy(command)
+            }
+        }
+
+        private fun parsePolicy(policyIdentifier: String) {
+            val displayId = policyIdentifier.toIntOrNull()
+            when {
+                displayId != null -> changeDisplay(displayId = displayId)
+                policies.any { it.name == policyIdentifier } -> {
+                    positionRepository.policy.value = policies.first { it.name == policyIdentifier }
                 }
+                else -> help(pw)
             }
         }
 
         private fun reset() {
-            positionRepository.resetDisplayId()
-            pw.println("Reset shade primary display id to ${Display.DEFAULT_DISPLAY}")
+            positionRepository.policy.value = defaultPolicy
+            pw.println("Reset shade display policy to default policy: ${defaultPolicy.name}")
         }
 
         private fun printStatus() {
@@ -92,6 +106,15 @@ constructor(
             displays.forEach {
                 pw.print(" - ${it.displayId}")
                 pw.println(if (it.displayId == shadeDisplay) " (Shade window is here)" else "")
+            }
+        }
+
+        private fun printPolicies() {
+            val currentPolicyName = positionRepository.policy.value.name
+            pw.println("Available policies: ")
+            policies.forEach {
+                pw.print(" - ${it.name}")
+                pw.println(if (currentPolicyName == it.name) " (Current policy)" else "")
             }
         }
 
@@ -116,7 +139,7 @@ constructor(
         }
 
         private fun setDisplay(id: Int) {
-            positionRepository.setDisplayId(id)
+            positionRepository.policy.value = SpecificDisplayIdPolicy(id)
             pw.println("New shade primary display id is $id")
         }
     }

@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ଆଖପାଖର ଅଲଟ୍ରା-ୱାଇଡବ୍ୟାଣ୍ଡ ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ଆଖପାଖର ୱାଇ-ଫାଇ ଡିଭାଇସଗୁଡ଼ିକ ସହ ଇଣ୍ଟରାକ୍ଟ କରନ୍ତୁ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ଆଖପାଖର ୱାଇ-ଫାଇ ଡିଭାଇସରେ ବିଜ୍ଞାପନ ଦେବା, ତା ସହ ସଂଯୋଗ କରିବା ଓ ତା’ର ଆପେକ୍ଷିକ ଅବସ୍ଥିତି ନିର୍ଦ୍ଧାରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"ଆଖପାଖର ଡିଭାଇସ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କର"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକ ମଧ୍ୟରେ ଆପେକ୍ଷିକ ଅବସ୍ଥିତିକୁ ନିର୍ଦ୍ଧାରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ପସନ୍ଦର NFC ପେମେଣ୍ଟ ସେବା ସୂଚନା"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ପଞ୍ଜିକୃତ ଯନ୍ତ୍ର ଏବଂ ମାର୍ଗ ଲକ୍ଷସ୍ଥଳ ପରି ପସନ୍ଦର nfc ପେମେଣ୍ଟ ସେବା ସୂଚନା ପାଇବାକୁ ଆପ୍ ଅନୁମତି କରିଥାଏ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ନିଅର୍ ଫିଲ୍ଡ କମ୍ୟୁନିକେଶନ୍ ଉପରେ ନିୟନ୍ତ୍ରଣ ରଖନ୍ତୁ"</string>
@@ -1993,7 +1991,7 @@
     <string name="importance_from_user" msgid="2782756722448800447">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ପ୍ରମୁଖତା ଆପଣ ସେଟ୍‍ କରନ୍ତି।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ସମ୍ପୃକ୍ତ ଲୋକଙ୍କ କାରଣରୁ ଏହା ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଅଟେ।"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"କଷ୍ଟମ୍ ଆପ୍ ବିଜ୍ଞପ୍ତି"</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ (ପୂର୍ବରୁ ଏହି ଆକାଉଣ୍ଟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନାମରେ ଅଛି) ଅନୁମତି ଦେବେ?"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ୟୁଜର ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ (ପୂର୍ବରୁ ଏହି ଆକାଉଣ୍ଟ ୟୁଜରଙ୍କ ନାମରେ ଅଛି) ଅନୁମତି ଦେବେ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ୟୁଜର ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"ନିରୀକ୍ଷିତ ୟୁଜର ଯୋଗ କରନ୍ତୁ"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଗ କରନ୍ତୁ"</string>
@@ -2435,54 +2433,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ପଛକୁ ଫେରନ୍ତୁ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ବାକି ଅଛି…"</string>
-    <!-- no translation found for satellite_sos_available_notification_title (5396708154268096124) -->
-    <skip />
-    <!-- no translation found for satellite_sos_available_notification_summary (1727088812951848330) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_title (2659100983227637285) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_supported_notification_summary (1071762454665310549) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_title (8564738683795406715) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_provisioned_notification_summary (3127320958911180629) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_title (3164093193467075926) -->
-    <skip />
-    <!-- no translation found for satellite_sos_not_in_allowed_region_notification_summary (7686947667515679672) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_title (292528603128702080) -->
-    <skip />
-    <!-- no translation found for satellite_sos_unsupported_default_sms_app_notification_summary (3165168393504548437) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_title (5427987916850950591) -->
-    <skip />
-    <!-- no translation found for satellite_sos_location_disabled_notification_summary (1544937460641058567) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_title (3366657987618784706) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_available_notification_summary (7573949038500243670) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_title (8202139632766878610) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_supported_notification_summary (61629858627638545) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_title (961909101918169727) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_provisioned_notification_summary (1060961852174442155) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_title (2035303593479031655) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_not_in_allowed_region_notification_summary (5270294879531815854) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_title (1004808759472360189) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_unsupported_default_sms_app_notification_summary (17084124893763593) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_title (7270641894250928494) -->
-    <skip />
-    <!-- no translation found for satellite_messaging_location_disabled_notification_summary (1450824950686221810) -->
-    <skip />
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ବର୍ତ୍ତମାନ ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ଅଛି"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"କୌଣସି ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ନଥିଲେ ଆପଣ ଜରୁରୀକାଳୀନ ସେବାଗୁଡ଼ିକୁ ମେସେଜ କରିପାରିବେ। Google Messages ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ହେବା ଆବଶ୍ୟକ।"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ସେଟେଲାଇଟ SOS ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ଏହି ଡିଭାଇସରେ ସେଟେଲାଇଟ SOS ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ସେଟେଲାଇଟ SOS ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ଆପଣ ଇଣ୍ଟର୍ନେଟ ସହ କନେକ୍ଟ ଅଛନ୍ତି ବୋଲି ସୁନିଶ୍ଚିତ କରି ପୁଣି ସେଟଅପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ସେଟେଲାଇଟ SOS ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ମେସେଜ କରିବା ପାଇଁ Google Messagesକୁ ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ SOS ଉପଲବ୍ଧ ଅଛି ନା ନାହିଁ ତାହା ଯାଞ୍ଚ କରିବାକୁ ଲୋକେସନ ସେଟିଂସ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ଅଛି"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"କୌଣସି ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ନଥିଲେ ଆପଣ ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ମେସେଜ କରିପାରିବେ। Google Messages ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ହେବା ଆବଶ୍ୟକ।"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ସେଟେଲାଇଟ ମେସେଜିଂ ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ଏହି ଡିଭାଇସରେ ସେଟେଲାଇଟ ମେସେଜିଂ ସପୋର୍ଟ କରୁନାହିଁ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"ସେଟେଲାଇଟ ମେସେଜିଂ ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ଆପଣ ଇଣ୍ଟର୍ନେଟ ସହ କନେକ୍ଟ ଅଛନ୍ତି ବୋଲି ସୁନିଶ୍ଚିତ କରି ପୁଣି ସେଟଅପ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"ସେଟେଲାଇଟ ମେସେଜିଂ ସେଟ ଅପ କରାଯାଇନାହିଁ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ମେସେଜ କରିବା ପାଇଁ Google Messagesକୁ ଆପଣଙ୍କର ଡିଫଲ୍ଟ ମେସେଜିଂ ଆପ ଭାବେ ସେଟ କରନ୍ତୁ"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ଏହି ଦେଶ କିମ୍ବା ଅଞ୍ଚଳରେ ସେଟେଲାଇଟ ମେସେଜିଂ ଉପଲବ୍ଧ ଅଛି ନା ନାହିଁ ତାହା ଯାଞ୍ଚ କରିବାକୁ ଲୋକେସନ ସେଟିଂସ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ପୁଣି ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>କୁ ଆଉ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ଏବଂ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>କୁ ଆଉ ଚିହ୍ନଟ କରାଯାଇପାରିବ ନାହିଁ।"</string>

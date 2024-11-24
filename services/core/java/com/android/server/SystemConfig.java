@@ -1318,6 +1318,7 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "disabled-in-sku":
                     case "disabled-until-used-preinstalled-carrier-app": {
                         if (allowAppConfigs) {
                             String pkgname = parser.getAttributeValue(null, "package");
@@ -1328,6 +1329,24 @@ public class SystemConfig {
                                                 + parser.getPositionDescription());
                             } else {
                                 mDisabledUntilUsedPreinstalledCarrierApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "enabled-in-sku-override": {
+                        if (allowAppConfigs) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG,
+                                        "<" + name + "> without "
+                                                + "package in " + permFile + " at "
+                                                + parser.getPositionDescription());
+                            } else if (!mDisabledUntilUsedPreinstalledCarrierApps.remove(pkgname)) {
+                                Slog.w(TAG,
+                                        "<" + name + "> packagename:" + pkgname + " not included"
+                                                + "in disabled-in-sku");
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

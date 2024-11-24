@@ -25,6 +25,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.provider.Settings
 import android.provider.Settings.Secure
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -48,20 +49,21 @@ import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Logic related to the ability to wake directly to GONE from asleep (AOD/DOZING), without going
  * through LOCKSCREEN or a BOUNCER state.
  *
  * This is possible in the following scenarios:
- * - The lockscreen is disabled, either from an app request (SUW does this), or by the security
+ * - The keyguard is not enabled, either from an app request (SUW does this), or by the security
  *   "None" setting.
+ * - The keyguard was suppressed via adb.
  * - A biometric authentication event occurred while we were asleep (fingerprint auth, etc). This
  *   specifically is referred to throughout the codebase as "wake and unlock".
  * - The screen timed out, but the "lock after screen timeout" duration has not elapsed.
@@ -86,43 +88,44 @@ constructor(
     private val lockPatternUtils: LockPatternUtils,
     private val systemSettings: SystemSettings,
     private val selectedUserInteractor: SelectedUserInteractor,
+    keyguardEnabledInteractor: KeyguardEnabledInteractor,
+    keyguardServiceLockNowInteractor: KeyguardServiceLockNowInteractor,
 ) {
 
     /**
-     * Whether the lockscreen was disabled as of the last wake/sleep event, according to
-     * LockPatternUtils.
-     *
-     * This will always be true if [repository.isKeyguardServiceEnabled]=false, but it can also be
-     * true when the keyguard service is enabled if the lockscreen has been disabled via adb using
-     * the `adb shell locksettings set-disabled true` command, which is often done in tests.
-     *
-     * Unlike keyguardServiceEnabled, changes to this value should *not* immediately show or hide
-     * the keyguard. If the lockscreen is disabled in this way, it will just not show on the next
-     * sleep/wake.
+     * Whether the keyguard was suppressed as of the most recent wakefulness event or lockNow
+     * command. Keyguard suppression can only be queried (there is no callback available), and
+     * legacy code only queried the value in onStartedGoingToSleep and doKeyguardTimeout. Tests now
+     * depend on that behavior, so for now, we'll replicate it here.
      */
-    private val isLockscreenDisabled: Flow<Boolean> =
-        powerInteractor.isAwake.map { isLockscreenDisabled() }
+    private val shouldSuppressKeyguard =
+        merge(powerInteractor.isAwake, keyguardServiceLockNowInteractor.lockNowEvents)
+            .map { keyguardEnabledInteractor.isKeyguardSuppressed() }
+            // Default to false, so that flows that combine this one emit prior to the first
+            // wakefulness emission.
+            .onStart { emit(false) }
 
     /**
      * Whether we can wake from AOD/DOZING directly to GONE, bypassing LOCKSCREEN/BOUNCER states.
      *
      * This is possible in the following cases:
      * - Keyguard is disabled, either from an app request or from security being set to "None".
+     * - Keyguard is suppressed, via adb locksettings.
      * - We're wake and unlocking (fingerprint auth occurred while asleep).
      * - We're allowed to ignore auth and return to GONE, due to timeouts not elapsing.
      */
     val canWakeDirectlyToGone =
         combine(
                 repository.isKeyguardEnabled,
-                isLockscreenDisabled,
+                shouldSuppressKeyguard,
                 repository.biometricUnlockState,
                 repository.canIgnoreAuthAndReturnToGone,
             ) {
                 keyguardEnabled,
-                isLockscreenDisabled,
+                shouldSuppressKeyguard,
                 biometricUnlockState,
                 canIgnoreAuthAndReturnToGone ->
-                (!keyguardEnabled || isLockscreenDisabled) ||
+                (!keyguardEnabled || shouldSuppressKeyguard) ||
                     BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode) ||
                     canIgnoreAuthAndReturnToGone
             }
@@ -186,9 +189,9 @@ constructor(
                 .sample(
                     transitionInteractor.isCurrentlyIn(
                         Scenes.Gone,
-                        stateWithoutSceneContainer = KeyguardState.GONE
+                        stateWithoutSceneContainer = KeyguardState.GONE,
                     ),
-                    ::Pair
+                    ::Pair,
                 )
                 .collect { (wakefulness, finishedInGone) ->
                     // Save isAwake for use in onDreamingStarted/onDreamingStopped.
@@ -260,7 +263,7 @@ constructor(
             delayedActionFilter,
             SYSTEMUI_PERMISSION,
             null /* scheduler */,
-            Context.RECEIVER_EXPORTED_UNAUDITED
+            Context.RECEIVER_EXPORTED_UNAUDITED,
         )
     }
 
@@ -282,7 +285,7 @@ constructor(
                 context,
                 0,
                 intent,
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
         val time = systemClock.elapsedRealtime() + getCanIgnoreAuthAndReturnToGoneDuration()
@@ -311,16 +314,6 @@ constructor(
     }
 
     /**
-     * Returns whether the lockscreen is disabled, either because the keyguard service is disabled
-     * or because an adb command has disabled the lockscreen.
-     */
-    private fun isLockscreenDisabled(
-        userId: Int = selectedUserInteractor.getSelectedUserId()
-    ): Boolean {
-        return lockPatternUtils.isLockScreenDisabled(userId)
-    }
-
-    /**
      * Returns the duration within which we can return to GONE without auth after a screen timeout
      * (or power button press, if lock instantly is disabled).
      *
@@ -336,7 +329,7 @@ constructor(
                 .getIntForUser(
                     Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
                     KEYGUARD_CAN_IGNORE_AUTH_DURATION,
-                    userId
+                    userId,
                 )
                 .toLong()
 
@@ -352,7 +345,7 @@ constructor(
                     .getIntForUser(
                         Settings.System.SCREEN_OFF_TIMEOUT,
                         KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT,
-                        userId
+                        userId,
                     )
                     .toLong()
 

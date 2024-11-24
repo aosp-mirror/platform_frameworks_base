@@ -333,7 +333,8 @@ public class BackgroundActivityStartControllerExemptionTests {
         int realCallingPid = REGULAR_PID_2;
 
         // setup state
-        mActiveUids.onNonAppSurfaceVisibilityChanged(callingUid, true);
+        mActiveUids.onNonAppSurfaceVisibilityChanged(callingUid,
+                WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY, true);
         when(mService.getBalAppSwitchesState()).thenReturn(APP_SWITCH_ALLOW);
 
         // prepare call
@@ -367,7 +368,8 @@ public class BackgroundActivityStartControllerExemptionTests {
         int realCallingPid = REGULAR_PID_2;
 
         // setup state
-        mActiveUids.onNonAppSurfaceVisibilityChanged(realCallingUid, true);
+        mActiveUids.onNonAppSurfaceVisibilityChanged(realCallingUid,
+                WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY, true);
         when(mService.getBalAppSwitchesState()).thenReturn(APP_SWITCH_ALLOW);
 
         // prepare call

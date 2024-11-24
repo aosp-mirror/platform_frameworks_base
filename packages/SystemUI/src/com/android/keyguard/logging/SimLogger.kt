@@ -47,12 +47,15 @@ class SimLogger @Inject constructor(@SimLog private val logBuffer: LogBuffer) {
 
     fun log(@CompileTimeConstant msg: String, level: LogLevel) = logBuffer.log(TAG, level, msg)
 
-    fun logInvalidSubId(subId: Int) {
+    fun logInvalidSubId(subId: Int, slotId: Int) {
         logBuffer.log(
             TAG,
             INFO,
-            { int1 = subId },
-            { "Previously active sub id $int1 is now invalid, will remove" },
+            {
+                int1 = subId
+                int2 = slotId
+            },
+            { "Previously active subId: $int1, slotId: $int2 is now invalid, will remove" },
         )
     }
 
@@ -94,16 +97,16 @@ class SimLogger @Inject constructor(@SimLog private val logBuffer: LogBuffer) {
         )
     }
 
-    fun logSimState(subId: Int, slotId: Int, state: Int) {
+    fun logSimState(subId: Int, slotId: Int, state: String) {
         logBuffer.log(
             TAG,
             DEBUG,
             {
                 int1 = subId
                 int2 = slotId
-                long1 = state.toLong()
+                str1 = state
             },
-            { "handleSimStateChange(subId=$int1, slotId=$int2, state=$long1)" },
+            { "handleSimStateChange(subId=$int1, slotId=$int2, state=$str1)" },
         )
     }
 

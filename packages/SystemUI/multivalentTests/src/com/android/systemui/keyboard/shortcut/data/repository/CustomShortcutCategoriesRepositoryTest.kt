@@ -18,27 +18,30 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.KeyEvent.KEYCODE_SLASH
-import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CAPS_LOCK_ON
-import android.view.KeyEvent.META_CTRL_ON
-import android.view.KeyEvent.META_FUNCTION_ON
 import android.view.KeyEvent.META_META_ON
-import android.view.KeyEvent.META_SHIFT_ON
-import android.view.KeyEvent.META_SYM_ON
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.hardware.input.Flags.FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES
 import com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult
 import com.android.systemui.keyboard.shortcut.customShortcutCategoriesRepository
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.ALL_SUPPORTED_MODIFIERS
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsInputGestureData
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allCustomizableInputGesturesWithSimpleShortcutCombinations
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.customizableInputGestureWithUnknownKeyGestureType
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedShortcutCategoriesWithSimpleShortcutCombination
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeInputGestureData
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardAddCustomShortcutRequestInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardDeleteCustomShortcutRequestInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardKeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
@@ -66,24 +69,21 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
             it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 
-    private val fakeInputManager = kosmos.fakeInputManager
+    private val inputManager = kosmos.fakeInputManager.inputManager
     private val testScope = kosmos.testScope
     private val helper = kosmos.shortcutHelperTestHelper
     private val repo = kosmos.customShortcutCategoriesRepository
 
     @Before
     fun setup() {
-        whenever(mockUserContext.getSystemService(INPUT_SERVICE))
-            .thenReturn(fakeInputManager.inputManager)
+        whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
     }
 
     @Test
     @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     fun categories_emitsCorrectlyConvertedShortcutCategories() {
         testScope.runTest {
-            whenever(
-                    fakeInputManager.inputManager.getCustomInputGestures(/* filter= */ anyOrNull())
-                )
+            whenever(inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
                 .thenReturn(allCustomizableInputGesturesWithSimpleShortcutCombinations)
 
             helper.toggle(deviceId = 123)
@@ -98,9 +98,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
     @DisableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     fun categories_emitsEmptyListWhenFlagIsDisabled() {
         testScope.runTest {
-            whenever(
-                    fakeInputManager.inputManager.getCustomInputGestures(/* filter= */ anyOrNull())
-                )
+            whenever(inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
                 .thenReturn(allCustomizableInputGesturesWithSimpleShortcutCombinations)
 
             helper.toggle(deviceId = 123)
@@ -114,9 +112,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
     @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     fun categories_ignoresUnknownKeyGestureTypes() {
         testScope.runTest {
-            whenever(
-                    fakeInputManager.inputManager.getCustomInputGestures(/* filter= */ anyOrNull())
-                )
+            whenever(inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
                 .thenReturn(customizableInputGestureWithUnknownKeyGestureType)
 
             helper.toggle(deviceId = 123)
@@ -143,7 +139,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
             helper.toggle(deviceId = 123)
             val pressedKeys by collectLastValue(repo.pressedKeys)
             repo.updateUserKeyCombination(
-                KeyCombination(modifiers = allSupportedModifiers, keyCode = null)
+                KeyCombination(modifiers = ALL_SUPPORTED_MODIFIERS, keyCode = null)
             )
 
             assertThat(pressedKeys)
@@ -188,11 +184,71 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
         }
     }
 
-    private val allSupportedModifiers =
-        META_META_ON or
-            META_CTRL_ON or
-            META_FUNCTION_ON or
-            META_SHIFT_ON or
-            META_ALT_ON or
-            META_SYM_ON
+    @Test
+    fun shortcutBeingCustomized_updatedOnCustomizationRequested() {
+        testScope.runTest {
+            repo.onCustomizationRequested(standardAddCustomShortcutRequestInfo)
+
+            val shortcutBeingCustomized = repo.getShortcutBeingCustomized()
+
+            assertThat(shortcutBeingCustomized).isEqualTo(standardAddCustomShortcutRequestInfo)
+        }
+    }
+
+    @Test
+    fun buildInputGestureDataForShortcutBeingCustomized_noShortcutBeingCustomized_returnsNull() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.updateUserKeyCombination(standardKeyCombination)
+
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            assertThat(inputGestureData).isNull()
+        }
+    }
+
+    @Test
+    fun buildInputGestureDataForShortcutBeingCustomized_noKeyCombinationSelected_returnsNull() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(standardAddCustomShortcutRequestInfo)
+
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            assertThat(inputGestureData).isNull()
+        }
+    }
+
+    @Test
+    fun buildInputGestureDataForShortcutBeingCustomized_successfullyBuildInputGestureData() {
+        testScope.runTest {
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(standardAddCustomShortcutRequestInfo)
+            repo.updateUserKeyCombination(standardKeyCombination)
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            // using toString as we're testing for only structural equality not referential.
+            // inputGestureData is a java class and isEqual Tests for referential equality
+            // as well which would cause this assert to fail
+            assertThat(inputGestureData.toString()).isEqualTo(allAppsInputGestureData.toString())
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun deleteShortcut_successfullyRetrievesGestureDataAndDeletesShortcut() {
+        testScope.runTest {
+            whenever(inputManager.getCustomInputGestures(anyOrNull()))
+                .thenReturn(listOf(allAppsInputGestureData, goHomeInputGestureData))
+            whenever(inputManager.removeCustomInputGesture(allAppsInputGestureData))
+                .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_SUCCESS)
+
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
+
+            val result = repo.deleteShortcutCurrentlyBeingCustomized()
+
+            assertThat(result).isEqualTo(ShortcutCustomizationRequestResult.SUCCESS)
+        }
+    }
 }

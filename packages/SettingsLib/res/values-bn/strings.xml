@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ডেভেলপমেন্ট এনভায়র্নমেন্ট"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android-এ Linux টার্মিনাল রান করান"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(পরীক্ষামূলক) Android-এ Linux টার্মিনাল চালান"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"আপনি বন্ধ করে দিলে, Linux টার্মিনাল ডেটা মুছে যাবে"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"এক্সটার্নাল ডিভাইস"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"কানেক্ট থাকা ডিভাইস"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফোনটি"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"অ্যানালগ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইসে চালানো যাবে না"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"পাল্টাতে অ্যাকাউন্ট আপগ্রেড করুন"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"এতে ডাউনলোড করা কন্টেন্ট প্লে করা যাবে না"</string>

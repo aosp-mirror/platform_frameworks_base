@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.SystemClock
 import android.platform.uiautomatorhelpers.DeviceHelpers
+import android.tools.PlatformConsts
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -163,7 +164,10 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             .StateSyncBuilder()
             .withAppTransitionIdle()
             .apply {
-                if (isPip) withPipShown() else withWindowSurfaceDisappeared(innerHelper)
+                if (isPip) withPipShown()
+                else
+                    withWindowSurfaceDisappeared(innerHelper)
+                        .withActivityState(innerHelper, PlatformConsts.STATE_STOPPED)
             }
             .waitForAndVerify()
     }

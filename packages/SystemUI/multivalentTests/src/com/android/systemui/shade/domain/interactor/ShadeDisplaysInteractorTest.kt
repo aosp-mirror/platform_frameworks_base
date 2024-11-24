@@ -29,7 +29,7 @@ import com.android.systemui.display.data.repository.FakeDisplayWindowPropertiesR
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.data.repository.FakeShadeDisplayRepository
-import com.android.systemui.statusbar.phone.ConfigurationForwarder
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -51,26 +52,22 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
     private val shadeRootview = mock<WindowRootView>()
     private val positionRepository = FakeShadeDisplayRepository()
-    private val defaultContext = mock<Context>()
-    private val secondaryContext = mock<Context>()
+    private val shadeContext = mock<Context>()
     private val contextStore = FakeDisplayWindowPropertiesRepository()
     private val testScope = TestScope(UnconfinedTestDispatcher())
-    private val configurationForwarder = mock<ConfigurationForwarder>()
-    private val defaultWm = mock<WindowManager>()
-    private val secondaryWm = mock<WindowManager>()
+    private val shadeWm = mock<WindowManager>()
     private val resources = mock<Resources>()
     private val configuration = mock<Configuration>()
     private val display = mock<Display>()
 
     private val interactor =
         ShadeDisplaysInteractor(
-            shadeRootview,
+            Optional.of(shadeRootview),
             positionRepository,
-            defaultContext,
-            contextStore,
-            testScope,
-            configurationForwarder,
-            testScope.coroutineContext,
+            shadeContext,
+            shadeWm,
+            testScope.backgroundScope,
+            testScope.backgroundScope.coroutineContext,
         )
 
     @Before
@@ -79,30 +76,16 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(display.displayId).thenReturn(0)
 
         whenever(resources.configuration).thenReturn(configuration)
-        whenever(resources.configuration).thenReturn(configuration)
 
-        whenever(defaultContext.displayId).thenReturn(0)
-        whenever(defaultContext.getSystemService(any())).thenReturn(defaultWm)
-        whenever(defaultContext.resources).thenReturn(resources)
+        whenever(shadeContext.displayId).thenReturn(0)
+        whenever(shadeContext.getSystemService(any())).thenReturn(shadeWm)
+        whenever(shadeContext.resources).thenReturn(resources)
         contextStore.insert(
             DisplayWindowProperties(
                 displayId = 0,
                 windowType = TYPE_NOTIFICATION_SHADE,
-                context = defaultContext,
-                windowManager = defaultWm,
-                layoutInflater = mock(),
-            )
-        )
-
-        whenever(secondaryContext.displayId).thenReturn(1)
-        whenever(secondaryContext.getSystemService(any())).thenReturn(secondaryWm)
-        whenever(secondaryContext.resources).thenReturn(resources)
-        contextStore.insert(
-            DisplayWindowProperties(
-                displayId = 1,
-                windowType = TYPE_NOTIFICATION_SHADE,
-                context = secondaryContext,
-                windowManager = secondaryWm,
+                context = shadeContext,
+                windowManager = shadeWm,
                 layoutInflater = mock(),
             )
         )
@@ -115,8 +98,7 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         interactor.start()
         testScope.advanceUntilIdle()
 
-        verifyNoMoreInteractions(defaultWm)
-        verifyNoMoreInteractions(secondaryWm)
+        verifyNoMoreInteractions(shadeWm)
     }
 
     @Test
@@ -124,10 +106,11 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(display.displayId).thenReturn(0)
         positionRepository.setDisplayId(1)
         interactor.start()
-        testScope.advanceUntilIdle()
 
-        verify(defaultWm).removeView(eq(shadeRootview))
-        verify(secondaryWm).addView(eq(shadeRootview), any())
+        inOrder(shadeWm).apply {
+            verify(shadeWm).removeView(eq(shadeRootview))
+            verify(shadeWm).addView(eq(shadeRootview), any())
+        }
     }
 
     @Test
@@ -135,25 +118,12 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(display.displayId).thenReturn(0)
         positionRepository.setDisplayId(0)
         interactor.start()
-        testScope.advanceUntilIdle()
 
         positionRepository.setDisplayId(1)
-        testScope.advanceUntilIdle()
 
-        verify(defaultWm).removeView(eq(shadeRootview))
-        verify(secondaryWm).addView(eq(shadeRootview), any())
-    }
-
-    @Test
-    fun start_shadePositionChanges_newConfigPropagated() {
-        whenever(display.displayId).thenReturn(0)
-        positionRepository.setDisplayId(0)
-        interactor.start()
-        testScope.advanceUntilIdle()
-
-        positionRepository.setDisplayId(1)
-        testScope.advanceUntilIdle()
-
-        verify(configurationForwarder).onConfigurationChanged(eq(configuration))
+        inOrder(shadeWm).apply {
+            verify(shadeWm).removeView(eq(shadeRootview))
+            verify(shadeWm).addView(eq(shadeRootview), any())
+        }
     }
 }

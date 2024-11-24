@@ -30,9 +30,11 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import com.android.hardware.input.Flags.manageKeyGestures
 import com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import java.util.Optional
 
 /**
@@ -45,6 +47,7 @@ class DesktopModeKeyGestureHandler(
     inputManager: InputManager,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val focusTransitionObserver: FocusTransitionObserver,
+    @ShellMainThread private val mainExecutor: ShellExecutor,
     ) : KeyGestureEventHandler {
 
     init {
@@ -66,15 +69,14 @@ class DesktopModeKeyGestureHandler(
                 }
                 return true
             }
-            // TODO(b/375356876): Modify function to pass in keyboard shortcut as the input
-            // method for logging task resize
             KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW -> {
                 logV("Key gesture SNAP_LEFT_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
                     desktopModeWindowDecorViewModel.get().onSnapResize(
                         it.taskId,
                         true,
-                        null
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                        /* fromMenu= */ false
                     )
                 }
                 return true
@@ -85,7 +87,8 @@ class DesktopModeKeyGestureHandler(
                     desktopModeWindowDecorViewModel.get().onSnapResize(
                         it.taskId,
                         false,
-                        null
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                        /* fromMenu= */ false
                     )
                 }
                 return true
@@ -96,7 +99,7 @@ class DesktopModeKeyGestureHandler(
                     desktopTasksController.get().toggleDesktopTaskSize(
                         it,
                         ResizeTrigger.MAXIMIZE_MENU,
-                        null,
+                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
                     )
                 }
                 return true
@@ -104,9 +107,11 @@ class DesktopModeKeyGestureHandler(
             KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW -> {
                 logV("Key gesture MINIMIZE_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
-                    desktopTasksController.get().minimizeTask(
-                        it,
-                    )
+                    mainExecutor.execute {
+                        desktopTasksController.get().minimizeTask(
+                            it,
+                        )
+                    }
                 }
                 return true
             }

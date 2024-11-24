@@ -613,10 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Autorisez l\'appli à déterminer la position relative entre des appareils à bande ultralarge à proximité"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagir avec les appareils Wi-Fi à proximité"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet à l\'appli de diffuser des annonces, de se connecter et de déterminer la position relative des appareils Wi-Fi à proximité"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"Dét. position relative entre appareils à proximité"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Autorisez l\'appli à déterminer la position relative entre des appareils à proximité"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information sur le service préféré de paiement CCP"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'appli d\'obtenir de l\'information sur le service préféré de paiement CCP comme les aides enregistrées et la route de destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"gérer la communication en champ proche"</string>

@@ -191,7 +191,9 @@
     <item msgid="3079622119444911877">"Vimezimwa"</item>
     <item msgid="3028994095749238254">"Vimewashwa"</item>
   </string-array>
-    <!-- no translation found for tile_states_notes:0 (5894333929299989301) -->
-    <!-- no translation found for tile_states_notes:1 (6419996398343291862) -->
-    <!-- no translation found for tile_states_notes:2 (5908720590832378783) -->
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"Halipatikani"</item>
+    <item msgid="6419996398343291862">"Limezimwa"</item>
+    <item msgid="5908720590832378783">"Limewashwa"</item>
+  </string-array>
 </resources>

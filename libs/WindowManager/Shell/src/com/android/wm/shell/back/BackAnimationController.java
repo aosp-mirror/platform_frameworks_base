@@ -37,6 +37,7 @@ import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_B
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskInfo;
@@ -73,10 +74,12 @@ import android.window.BackMotionEvent;
 import android.window.BackNavigationInfo;
 import android.window.BackTouchTracker;
 import android.window.IBackAnimationFinishedCallback;
+import android.window.IBackAnimationHandoffHandler;
 import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowAnimationState;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -84,6 +87,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.animation.TransitionAnimator;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
@@ -227,6 +232,15 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private Runnable mPilferPointerCallback;
     private BackAnimation.TopUiRequest mRequestTopUiCallback;
 
+    private final IBackAnimationHandoffHandler mHandoffHandler =
+            new IBackAnimationHandoffHandler.Stub() {
+                @Override
+                public void handOffAnimation(
+                        RemoteAnimationTarget[] targets, WindowAnimationState[] states) {
+                    mBackTransitionHandler.handOffAnimation(targets, states);
+                }
+            };
+
     public BackAnimationController(
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
@@ -282,7 +296,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellCommandHandler = shellCommandHandler;
         mWindowManager = context.getSystemService(WindowManager.class);
         mTransitions = transitions;
-        mBackTransitionHandler = new BackTransitionHandler();
+        mBackTransitionHandler = new BackTransitionHandler(mTransitions);
         mTransitions.addHandler(mBackTransitionHandler);
         mHandler = handler;
         mTransitions.registerObserver(mBackTransitionObserver);
@@ -715,6 +729,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
         try {
             callback.onBackStarted(backEvent);
+            if (mBackTransitionHandler.canHandOffAnimation()) {
+                callback.setHandoffHandler(mHandoffHandler);
+            }
             mOnBackStartDispatched = true;
         } catch (RemoteException e) {
             Log.e(TAG, "dispatchOnBackStarted error: ", e);
@@ -1192,6 +1209,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     class BackTransitionHandler implements Transitions.TransitionHandler {
+        private final Transitions mTransitions;
 
         Runnable mOnAnimationFinishCallback;
         boolean mCloseTransitionRequested;
@@ -1203,6 +1221,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         // animation is canceled, start a close prepare transition to finish the whole transition.
         IBinder mClosePrepareTransition;
         TransitionInfo mOpenTransitionInfo;
+        Transitions.TransitionHandler mTakeoverHandler;
+
+        BackTransitionHandler(Transitions transitions) {
+            mTransitions = transitions;
+        }
+
         void onAnimationFinished() {
             if (!mCloseTransitionRequested && mPrepareOpenTransition != null) {
                 createClosePrepareTransition();
@@ -1214,18 +1238,23 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         private void applyFinishOpenTransition() {
-            mOpenTransitionInfo = null;
-            mPrepareOpenTransition = null;
             if (mFinishOpenTransaction != null) {
                 final SurfaceControl.Transaction t = mFinishOpenTransaction;
-                mFinishOpenTransaction = null;
                 t.apply();
             }
             if (mFinishOpenTransitionCallback != null) {
                 final Transitions.TransitionFinishCallback callback = mFinishOpenTransitionCallback;
-                mFinishOpenTransitionCallback = null;
                 callback.onTransitionFinished(null);
             }
+            cleanUpInternalState();
+        }
+
+        private void cleanUpInternalState() {
+            mOpenTransitionInfo = null;
+            mPrepareOpenTransition = null;
+            mFinishOpenTransaction = null;
+            mFinishOpenTransitionCallback = null;
+            mTakeoverHandler = null;
         }
 
         private void applyAndFinish(@NonNull SurfaceControl.Transaction st,
@@ -1237,6 +1266,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             finishCallback.onTransitionFinished(null);
             mCloseTransitionRequested = false;
         }
+
         @Override
         public boolean startAnimation(@NonNull IBinder transition,
                 @NonNull TransitionInfo info,
@@ -1246,6 +1276,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             final boolean isPrepareTransition =
                     info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
             if (isPrepareTransition) {
+                if (checkTakeoverFlags()) {
+                    mTakeoverHandler = mTransitions.getHandlerForTakeover(transition, info);
+                }
                 kickStartAnimation();
             }
             // Both mShellExecutor and Transitions#mMainExecutor are ShellMainThread, so we don't
@@ -1286,6 +1319,57 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 return true;
             }
             return handleCloseTransition(info, st, ft, finishCallback);
+        }
+
+        private boolean canHandOffAnimation() {
+            if (!checkTakeoverFlags()) {
+                return false;
+            }
+
+            return mTakeoverHandler != null;
+        }
+
+        private void handOffAnimation(
+                RemoteAnimationTarget[] targets, WindowAnimationState[] states) {
+            if (!checkTakeoverFlags()) {
+                ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                        "Trying to hand off the animation, but the required flags are disabled.");
+                return;
+            } else if (mTakeoverHandler == null) {
+                ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                        "Missing takeover handler when trying to hand off animation.");
+                return;
+            } else if (targets.length != states.length) {
+                ProtoLog.e(WM_SHELL_BACK_PREVIEW,
+                        "Targets passed for takeover don't match the window states.");
+                return;
+            }
+
+            // The states passed to this method are paired with the targets, but they need to be
+            // paired with the changes inside the TransitionInfo. So for each change we find its
+            // matching target, and leave the state for any change missing a matching target blank.
+            WindowAnimationState[] updatedStates =
+                    new WindowAnimationState[mOpenTransitionInfo.getChanges().size()];
+            for (int i = 0; i < mOpenTransitionInfo.getChanges().size(); i++) {
+                ActivityManager.RunningTaskInfo taskInfo =
+                        mOpenTransitionInfo.getChanges().get(i).getTaskInfo();
+                if (taskInfo == null) {
+                    continue;
+                }
+
+                for (int j = 0; j < targets.length; j++) {
+                    if (taskInfo.taskId == targets[j].taskId) {
+                        updatedStates[i] = states[j];
+                        break;
+                    }
+                }
+            }
+
+            mTakeoverHandler.takeOverAnimation(
+                    mPrepareOpenTransition, mOpenTransitionInfo, new SurfaceControl.Transaction(),
+                    mFinishOpenTransitionCallback, updatedStates);
+
+            cleanUpInternalState();
         }
 
         @Override
@@ -1672,6 +1756,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 return new WindowContainerTransaction();
             }
             return null;
+        }
+
+        private static boolean checkTakeoverFlags() {
+            return TransitionAnimator.Companion.longLivedReturnAnimationsEnabled()
+                    && Flags.unifyBackNavigationTransition();
         }
     }
 

@@ -56,7 +56,7 @@ aconfig_declarations_group {
         "android.media.tv.flags-aconfig-java",
         "android.multiuser.flags-aconfig-java",
         "android.net.platform.flags-aconfig-java",
-        "android.net.vcn.flags-aconfig-java",
+        "android.net.vcn.flags-aconfig-java-export",
         "android.net.wifi.flags-aconfig-java",
         "android.nfc.flags-aconfig-java",
         "android.os.flags-aconfig-java",
@@ -100,7 +100,7 @@ aconfig_declarations_group {
         "com.android.media.flags.performance-aconfig-java",
         "com.android.media.flags.projection-aconfig-java",
         "com.android.net.thread.platform.flags-aconfig-java",
-        "com.android.ranging.flags.ranging-aconfig-java",
+        "com.android.ranging.flags.ranging-aconfig-java-export",
         "com.android.server.contextualsearch.flags-java",
         "com.android.server.flags.services-aconfig-java",
         "com.android.text.flags-aconfig-java",
@@ -373,6 +373,11 @@ java_aconfig_library {
     name: "android.security.flags-aconfig-java-export",
     aconfig_declarations: "android.security.flags-aconfig",
     mode: "exported",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.wifi",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -1170,16 +1175,21 @@ java_aconfig_library {
 }
 
 // VCN
+// TODO:376339506 Move the VCN code, the flag declaration and
+// java_aconfig_library to framework-connectivity-b
 aconfig_declarations {
     name: "android.net.vcn.flags-aconfig",
     package: "android.net.vcn",
-    container: "system",
+    container: "com.android.tethering",
+    exportable: true,
     srcs: ["core/java/android/net/vcn/*.aconfig"],
 }
 
 java_aconfig_library {
-    name: "android.net.vcn.flags-aconfig-java",
+    name: "android.net.vcn.flags-aconfig-java-export",
     aconfig_declarations: "android.net.vcn.flags-aconfig",
+    mode: "exported",
+    min_sdk_version: "35",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -1643,13 +1653,6 @@ java_aconfig_library {
     name: "com.android.internal.pm.pkg.component.flags-aconfig-java-host",
     aconfig_declarations: "com.android.internal.pm.pkg.component.flags-aconfig",
     host_supported: true,
-    defaults: ["framework-minus-apex-aconfig-java-defaults"],
-}
-
-// Ranging
-java_aconfig_library {
-    name: "com.android.ranging.flags.ranging-aconfig-java",
-    aconfig_declarations: "ranging_aconfig_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

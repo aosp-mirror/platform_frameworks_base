@@ -30,8 +30,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
-import androidx.annotation.BinderThread;
-import androidx.annotation.GuardedBy;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -39,14 +37,12 @@ import androidx.window.common.layout.CommonFoldingFeature;
 import androidx.window.common.layout.DisplayFoldFeatureCommon;
 
 import com.android.internal.R;
-import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -70,19 +66,7 @@ public final class DeviceStateManagerFoldingFeatureProducer
      * "rear display". Concurrent mode for example is activated via public API and can be active in
      * both the "open" and "half folded" device states.
      */
-    // TODO: b/337820752 - Add @GuardedBy("mCurrentDeviceStateLock") after flag cleanup.
     private DeviceState mCurrentDeviceState = INVALID_DEVICE_STATE;
-
-    /**
-     * Lock to synchronize access to {@link #mCurrentDeviceState}.
-     *
-     * <p>This lock is used to ensure thread-safety when accessing and modifying the
-     * {@link #mCurrentDeviceState} field. It is acquired by both the binder thread (if
-     * {@link Flags#wlinfoOncreate()} is enabled) and the main thread (if
-     * {@link Flags#wlinfoOncreate()} is disabled) to prevent race conditions and
-     * ensure data consistency.
-     */
-    private final Object mCurrentDeviceStateLock = new Object();
 
     @NonNull
     private final RawFoldingFeatureProducer mRawFoldSupplier;
@@ -95,15 +79,12 @@ public final class DeviceStateManagerFoldingFeatureProducer
         // The GuardedBy analysis is intra-procedural, meaning it doesn’t consider the getData()
         // implementation. See https://errorprone.info/bugpattern/GuardedBy for limitations.
         @SuppressWarnings("GuardedBy")
-        @BinderThread // When Flags.wlinfoOncreate() is enabled.
-        @MainThread // When Flags.wlinfoOncreate() is disabled.
+        @MainThread
         @Override
         public void onDeviceStateChanged(@NonNull DeviceState state) {
-            synchronized (mCurrentDeviceStateLock) {
-                mCurrentDeviceState = state;
-                mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer.this
-                        ::notifyFoldingFeatureChangeLocked);
-            }
+            mCurrentDeviceState = state;
+            mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer.this
+                    ::notifyFoldingFeatureChangeLocked);
         }
     };
 
@@ -115,10 +96,8 @@ public final class DeviceStateManagerFoldingFeatureProducer
                 new DeviceStateMapper(context, deviceStateManager.getSupportedDeviceStates());
 
         if (!mDeviceStateMapper.isDeviceStateToPostureMapEmpty()) {
-            final Executor executor =
-                    Flags.wlinfoOncreate() ? Runnable::run : context.getMainExecutor();
             Objects.requireNonNull(deviceStateManager)
-                    .registerCallback(executor, mDeviceStateCallback);
+                    .registerCallback(context.getMainExecutor(), mDeviceStateCallback);
         }
     }
 
@@ -145,21 +124,17 @@ public final class DeviceStateManagerFoldingFeatureProducer
     @Override
     protected void onListenersChanged() {
         super.onListenersChanged();
-        synchronized (mCurrentDeviceStateLock) {
-            if (hasListeners()) {
-                mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChangeLocked);
-            } else {
-                mCurrentDeviceState = INVALID_DEVICE_STATE;
-                mRawFoldSupplier.removeDataChangedCallback(this::notifyFoldingFeatureChangeLocked);
-            }
+        if (hasListeners()) {
+            mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChangeLocked);
+        } else {
+            mCurrentDeviceState = INVALID_DEVICE_STATE;
+            mRawFoldSupplier.removeDataChangedCallback(this::notifyFoldingFeatureChangeLocked);
         }
     }
 
     @NonNull
     private DeviceState getCurrentDeviceState() {
-        synchronized (mCurrentDeviceStateLock) {
-            return mCurrentDeviceState;
-        }
+        return mCurrentDeviceState;
     }
 
     @NonNull
@@ -231,7 +206,6 @@ public final class DeviceStateManagerFoldingFeatureProducer
         });
     }
 
-    @GuardedBy("mCurrentDeviceStateLock")
     private void notifyFoldingFeatureChangeLocked(String displayFeaturesString) {
         final DeviceState state = mCurrentDeviceState;
         if (!mDeviceStateMapper.isDeviceStateValid(state)) {
@@ -252,29 +226,16 @@ public final class DeviceStateManagerFoldingFeatureProducer
         return parseListFromString(displayFeaturesString, hingeState);
     }
 
-    /**
-     * Internal class to map device states to corresponding postures.
-     *
-     * <p>This class encapsulates the logic for mapping device states to postures. The mapping is
-     * immutable after initialization to ensure thread safety.
-     */
+    /** Internal class to map device states to corresponding postures. */
     private static class DeviceStateMapper {
         /**
          * Emulated device state
          * {@link DeviceStateManager.DeviceStateCallback#onDeviceStateChanged(DeviceState)} to
          * {@link CommonFoldingFeature.State} map.
-         *
-         * <p>This map must be immutable after initialization to ensure thread safety, as it may be
-         * accessed from multiple threads. Modifications should only occur during object
-         * construction.
          */
         private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
 
-        /**
-         * The list of device states that are supported.
-         *
-         * <p>This list must be immutable after initialization to ensure thread safety.
-         */
+        /** The list of device states that are supported. */
         @NonNull
         private final List<DeviceState> mSupportedStates;
 

@@ -311,10 +311,6 @@ public class BatteryUsageStatsAtomTest {
                 bus.getAggregateBatteryConsumer(AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE),
                 proto.deviceBatteryConsumer);
 
-        for (int i = 0; i < BatteryConsumer.POWER_COMPONENT_COUNT; i++) {
-            assertPowerComponentModel(i, abc.getPowerModel(i), proto);
-        }
-
         // Now for the UidBatteryConsumers.
         final List<android.os.UidBatteryConsumer> uidConsumers = bus.getUidBatteryConsumers();
         uidConsumers.sort((a, b) -> a.getUid() - b.getUid());
@@ -450,34 +446,6 @@ public class BatteryUsageStatsAtomTest {
         }
     }
 
-    /**
-     * Validates the PowerComponentModel object that matches powerComponent.
-     */
-    private void assertPowerComponentModel(int powerComponent,
-            @BatteryConsumer.PowerModel int powerModel, BatteryUsageStatsAtomsProto proto) {
-        boolean found = false;
-        for (BatteryUsageStatsAtomsProto.PowerComponentModel powerComponentModel :
-                proto.componentModels) {
-            if (powerComponentModel.component == powerComponent) {
-                if (found) {
-                    fail("Power component " + BatteryConsumer.powerComponentIdToString(
-                            powerComponent) + " found multiple times in the proto");
-                }
-                found = true;
-                final int expectedPowerModel = BatteryConsumer.powerModelToProtoEnum(powerModel);
-                assertEquals(expectedPowerModel, powerComponentModel.powerModel);
-            }
-        }
-        if (!found) {
-            final int model = BatteryConsumer.powerModelToProtoEnum(powerModel);
-            assertEquals(
-                    "Power component " + BatteryConsumer.powerComponentIdToString(powerComponent)
-                            + " was not found in the proto but has a defined power model.",
-                    BatteryUsageStatsAtomsProto.PowerComponentModel.UNDEFINED,
-                    model);
-        }
-    }
-
     /** Converts charge from milliamp hours (mAh) to decicoulombs (dC). */
     private long convertMahToDc(double powerMah) {
         return (long) (powerMah * 36 + 0.5);
@@ -486,7 +454,6 @@ public class BatteryUsageStatsAtomTest {
     private BatteryUsageStats buildBatteryUsageStats() {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[]{"CustomConsumer1", "CustomConsumer2"},
-                        /* includePowerModels */ true,
                         /* includeProcessStats */ true,
                         /* includeScreenStateData */ false,
                         /* includePowerStateData */ false,
@@ -524,13 +491,13 @@ public class BatteryUsageStatsAtomTest {
         final BatteryConsumer.Key keyCached = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
                 BatteryConsumer.PROCESS_STATE_CACHED);
 
-        uidBuilder.addConsumedPower(keyFg, 9100, BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+        uidBuilder.addConsumedPower(keyFg, 9100)
                 .addUsageDurationMillis(keyFg, 8100)
-                .addConsumedPower(keyBg, 9200, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
+                .addConsumedPower(keyBg, (double) 9200)
                 .addUsageDurationMillis(keyBg, 8200)
-                .addConsumedPower(keyFgs, 9300, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
+                .addConsumedPower(keyFgs, (double) 9300)
                 .addUsageDurationMillis(keyFgs, 8300)
-                .addConsumedPower(keyCached, 9400, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
+                .addConsumedPower(keyCached, (double) 9400)
                 .addUsageDurationMillis(keyCached, 8400);
 
         final BatteryConsumer.Key keyCustomFg = uidBuilder.getKey(
@@ -539,10 +506,8 @@ public class BatteryUsageStatsAtomTest {
         final BatteryConsumer.Key keyCustomBg = uidBuilder.getKey(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
                 BatteryConsumer.PROCESS_STATE_BACKGROUND);
-        uidBuilder.addConsumedPower(
-                keyCustomFg, 100, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
-        uidBuilder.addConsumedPower(
-                keyCustomBg, 350, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+        uidBuilder.addConsumedPower(keyCustomFg, 100);
+        uidBuilder.addConsumedPower(keyCustomBg, 350);
 
         builder.getOrCreateUidBatteryConsumerBuilder(UID_1)
                 .setPackageWithHighestDrain("myPackage1")
@@ -557,14 +522,11 @@ public class BatteryUsageStatsAtomTest {
         builder.getAggregateBatteryConsumerBuilder(AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .addConsumedPower(30000)
                 .addConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_CPU, 20100,
-                        BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                        BatteryConsumer.POWER_COMPONENT_CPU, 20100)
                 .addConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_AUDIO, 0,
-                        BatteryConsumer.POWER_MODEL_POWER_PROFILE) // Empty
+                        BatteryConsumer.POWER_COMPONENT_AUDIO, 0) // Empty
                 .addConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_CAMERA, 20150,
-                        BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
+                        BatteryConsumer.POWER_COMPONENT_CAMERA, 20150)
                 .addConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20200)
                 .addUsageDurationMillis(
@@ -576,8 +538,7 @@ public class BatteryUsageStatsAtomTest {
         builder.getAggregateBatteryConsumerBuilder(
                         BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .addConsumedPower(
-                        BatteryConsumer.POWER_COMPONENT_CPU, 10100,
-                        BatteryConsumer.POWER_MODEL_POWER_PROFILE)
+                        BatteryConsumer.POWER_COMPONENT_CPU, 10100)
                 .addConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200);
 
@@ -587,7 +548,7 @@ public class BatteryUsageStatsAtomTest {
     @Test
     public void testLargeAtomTruncated() throws Exception {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[0], true, false, false, false, 0);
+                new BatteryUsageStats.Builder(new String[0], false, false, false, 0);
         // If not truncated, this BatteryUsageStats object would generate a proto buffer
         // significantly larger than 50 Kb
         for (int i = 0; i < 3000; i++) {

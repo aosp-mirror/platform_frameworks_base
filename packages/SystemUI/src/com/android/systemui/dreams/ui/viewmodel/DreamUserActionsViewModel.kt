@@ -19,8 +19,8 @@ package com.android.systemui.dreams.ui.viewmodel
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.map
 class DreamUserActionsViewModel
 @AssistedInject
 constructor(
+    private val communalInteractor: CommunalInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val shadeInteractor: ShadeInteractor,
 ) : UserActionsViewModel() {
@@ -51,17 +52,17 @@ constructor(
                 } else {
                     combine(
                         deviceUnlockedInteractor.deviceUnlockStatus.map { it.isUnlocked },
+                        communalInteractor.isCommunalAvailable,
                         shadeInteractor.shadeMode,
-                    ) { isDeviceUnlocked, shadeMode ->
+                    ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
                         buildList {
-                                add(Swipe.Start to Scenes.Communal)
+                                if (isCommunalAvailable) {
+                                    add(Swipe.Start to Scenes.Communal)
+                                }
 
                                 val bouncerOrGone =
                                     if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer
                                 add(Swipe.Up to bouncerOrGone)
-
-                                // "Home" is either Dream, Lockscreen, or Gone.
-                                add(Swipe.End to SceneFamilies.Home)
 
                                 addAll(
                                     when (shadeMode) {

@@ -47,6 +47,11 @@ constructor(
     @Background private val backgroundCoroutineContext: CoroutineContext,
     private val inputManager: InputManager,
 ) {
+
+    fun removeUnsupportedModifiers(modifierMask: Int): Int {
+        return SUPPORTED_MODIFIERS.reduce { acc, modifier -> acc or modifier } and modifierMask
+    }
+
     fun fetchShortcutCategory(
         type: ShortcutCategoryType?,
         groups: List<InternalKeyboardShortcutGroup>,

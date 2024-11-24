@@ -21,6 +21,9 @@
         <option name="install-arg" value="-t" />
         <option name="test-file-name" value="CtsSurfaceControlTestsStaging.apk" />
     </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.FeatureFlagTargetPreparer" >
+        <option name="flag-value" value="media_tv/android.media.tv.flags.apply_picture_profiles=true" />
+    </target_preparer>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="android.view.surfacecontroltests" />
         <option name="hidden-api-checks" value="false" />

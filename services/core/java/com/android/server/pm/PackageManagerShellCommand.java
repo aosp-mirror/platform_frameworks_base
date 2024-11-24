@@ -399,10 +399,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runUnarchive();
                 case "get-domain-verification-agent":
                     return runGetDomainVerificationAgent();
-                case "get-verification-policy":
-                    return runGetVerificationPolicy();
-                case "set-verification-policy":
-                    return runSetVerificationPolicy();
                 default: {
                     if (ART_SERVICE_COMMANDS.contains(cmd)) {
                         return runArtServiceCommand();
@@ -3603,12 +3599,9 @@ class PackageManagerShellCommand extends ShellCommand {
                             .setCompilerFilter(sessionParams.dexoptCompilerFilter)
                             .build();
                     break;
-                case "--force-verification":
-                    sessionParams.setForceVerification();
-                    break;
                 case "--disable-auto-install-dependencies":
                     if (Flags.sdkDependencyInstaller()) {
-                        sessionParams.setEnableAutoInstallDependencies(false);
+                        sessionParams.setAutoInstallDependenciesEnabled(false);
                     } else {
                         throw new IllegalArgumentException("Unknown option " + opt);
                     }
@@ -4656,87 +4649,6 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runGetVerificationPolicy() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        int userId = UserHandle.USER_ALL;
-
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            if (opt.equals("--user")) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
-                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
-                    UserManagerInternal umi =
-                            LocalServices.getService(UserManagerInternal.class);
-                    UserInfo userInfo = umi.getUserInfo(userId);
-                    if (userInfo == null) {
-                        pw.println("Failure [user " + userId + " doesn't exist]");
-                        return 1;
-                    }
-                }
-            } else {
-                pw.println("Error: Unknown option: " + opt);
-                return 1;
-            }
-        }
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_SYSTEM, "runGetVerificationPolicy");
-        try {
-            final IPackageInstaller installer = mInterface.getPackageInstaller();
-            // TODO(b/360129657): global verification policy should be per user
-            final int policy = installer.getVerificationPolicy(translatedUserId);
-            pw.println(policy);
-        } catch (Exception e) {
-            pw.println("Failure [" + e.getMessage() + "]");
-            return 1;
-        }
-        return 0;
-    }
-
-    private int runSetVerificationPolicy() throws RemoteException {
-        final PrintWriter pw = getOutPrintWriter();
-        int userId = UserHandle.USER_ALL;
-
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            if (opt.equals("--user")) {
-                userId = UserHandle.parseUserArg(getNextArgRequired());
-                if (userId != UserHandle.USER_ALL && userId != UserHandle.USER_CURRENT) {
-                    UserManagerInternal umi =
-                            LocalServices.getService(UserManagerInternal.class);
-                    UserInfo userInfo = umi.getUserInfo(userId);
-                    if (userInfo == null) {
-                        pw.println("Failure [user " + userId + " doesn't exist]");
-                        return 1;
-                    }
-                }
-            } else {
-                pw.println("Error: Unknown option: " + opt);
-                return 1;
-            }
-        }
-        final String policyStr = getNextArg();
-        if (policyStr == null) {
-            pw.println("Error: policy not specified");
-            return 1;
-        }
-        final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_SYSTEM, "runSetVerificationPolicy");
-        try {
-            final IPackageInstaller installer = mInterface.getPackageInstaller();
-            // TODO(b/360129657): global verification policy should be per user
-            final boolean success = installer.setVerificationPolicy(Integer.parseInt(policyStr),
-                    translatedUserId);
-            if (!success) {
-                pw.println("Failure setting verification policy.");
-                return 1;
-            }
-        } catch (Exception e) {
-            pw.println("Failure [" + e.getMessage() + "]");
-            return 1;
-        }
-        return 0;
-    }
-
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -4900,7 +4812,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          https://source.android.com/docs/core/runtime/configure"
                 + "#compiler_filters");
         pw.println("          or 'skip'");
-        pw.println("      --force-verification: if set, enable the verification for this install");
         if (Flags.sdkDependencyInstaller()) {
             pw.println("      --disable-auto-install-dependencies: if set, any missing shared");
             pw.println("          library dependencies will not be auto-installed");
@@ -5169,14 +5080,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --user: return the agent of the given user (SYSTEM_USER if unspecified)");
         pw.println("  get-package-storage-stats [--user <USER_ID>] <PACKAGE>");
         pw.println("    Return the storage stats for the given app, if present");
-        pw.println("  get-verification-policy [--user USER_ID]");
-        pw.println("    Display current verification enforcement policy which will be applied to");
-        pw.println("    all the future installation sessions");
-        pw.println("      --user: show the policy of the given user (SYSTEM_USER if unspecified)");
-        pw.println("  set-verification-policy POLICY [--user USER_ID]");
-        pw.println("    Sets the verification policy of all the future installation sessions.");
-        pw.println("      --user: set the policy of the given user (SYSTEM_USER if unspecified)");
-        pw.println("");
         pw.println("");
         printArtServiceHelp();
         pw.println("");

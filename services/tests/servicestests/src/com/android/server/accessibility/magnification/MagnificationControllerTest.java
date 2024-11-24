@@ -57,10 +57,6 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -82,7 +78,6 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
-import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,9 +95,6 @@ import org.mockito.stubbing.Answer;
  */
 @RunWith(AndroidJUnit4.class)
 public class MagnificationControllerTest {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     private static final int TEST_SERVICE_ID = 1;
@@ -1365,23 +1357,11 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
-    public void onFullscreenMagnificationActivationState_systemUiBorderFlagOn_notifyConnection() {
+    public void onFullscreenMagnificationActivationState_notifyConnection() {
         mMagnificationController.onFullScreenMagnificationActivationState(
                 TEST_DISPLAY, /* activated= */ true);
 
         verify(mMagnificationConnectionManager)
-                .onFullscreenMagnificationActivationChanged(TEST_DISPLAY, /* activated= */ true);
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
-    public void
-            onFullscreenMagnificationActivationState_systemUiBorderFlagOff_neverNotifyConnection() {
-        mMagnificationController.onFullScreenMagnificationActivationState(
-                TEST_DISPLAY, /* activated= */ true);
-
-        verify(mMagnificationConnectionManager, never())
                 .onFullscreenMagnificationActivationChanged(TEST_DISPLAY, /* activated= */ true);
     }
 

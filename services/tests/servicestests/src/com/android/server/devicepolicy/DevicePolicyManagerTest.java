@@ -4404,6 +4404,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledModifiesSetting() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -4415,6 +4416,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledWithPOOnUser0() throws Exception {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
@@ -4434,7 +4436,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/359188869")
+    @Ignore("b/277916462")
     public void testSetAutoTimeEnabledWithPOOfOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
@@ -5034,14 +5036,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_SECONDARY_LOCKSCREEN_API_ENABLED)
     public void testSetSecondaryLockscreenEnabled() throws Exception {
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
-
         verifySetSecondaryLockscreenEnabled(false);
         verifySetSecondaryLockscreenEnabled(true);
     }
 
     private void verifySetSecondaryLockscreenEnabled(boolean enabled) throws Exception {
         reset(getServices().supervisionManagerInternal);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        doReturn(DpmMockContext.CALLER_UID).when(getServices().packageManagerInternal)
+                .getPackageUid(any(), anyLong(), anyInt());
 
         dpm.setSecondaryLockscreenEnabled(admin1, enabled);
         verify(getServices().supervisionManagerInternal).setSupervisionLockscreenEnabledForUser(

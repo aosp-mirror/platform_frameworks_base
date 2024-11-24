@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.launcher3.Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
@@ -51,6 +52,7 @@ import android.app.ActivityTaskManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -72,6 +74,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.shared.GroupedTaskInfo;
 import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -235,6 +238,19 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 t1.taskId, -1,
                 t2.taskId, -1,
                 t3.taskId, -1);
+    }
+
+    @EnableFlags(FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    @Test
+    public void testGetRecentTasks_removesDesktopWallpaperActivity() {
+        RecentTaskInfo t1 = makeTaskInfo(1);
+        RecentTaskInfo desktopWallpaperTaskInfo = makeDesktopWallpaperTaskInfo(2);
+        RecentTaskInfo t3 = makeTaskInfo(3);
+        setRawList(t1, desktopWallpaperTaskInfo, t3);
+
+        ArrayList<GroupedTaskInfo> recentTasks =
+                mRecentTasksController.getRecentTasks(MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+        assertGroupedTasksListEquals(recentTasks, t1.taskId, -1, t3.taskId, -1);
     }
 
     @Test
@@ -691,7 +707,21 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private RecentTaskInfo makeTaskInfo(int taskId) {
         RecentTaskInfo info = new RecentTaskInfo();
         info.taskId = taskId;
+
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com." + taskId, "Activity" + taskId));
+        info.baseIntent = intent;
+
         info.lastNonFullscreenBounds = new Rect();
+        return info;
+    }
+
+    /**
+     * Helper to create a desktop wallpaper activity with a given task id.
+     */
+    private RecentTaskInfo makeDesktopWallpaperTaskInfo(int taskId) {
+        RecentTaskInfo info = makeTaskInfo(taskId);
+        info.baseIntent.setComponent(DesktopWallpaperActivity.getWallpaperActivityComponent());
         return info;
     }
 
