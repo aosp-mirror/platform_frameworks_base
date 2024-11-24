@@ -48,7 +48,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -1633,7 +1632,7 @@ public class KeyguardIndicationControllerTest extends KeyguardIndicationControll
         } else {
             verify(mRotateTextViewController).hideIndication(type);
             verify(mRotateTextViewController, never()).updateIndication(eq(type),
-                    anyObject(), anyBoolean());
+                    any(), anyBoolean());
         }
     }
 

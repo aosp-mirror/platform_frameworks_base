@@ -141,7 +141,7 @@ public class MainSwitchPreference extends TwoStatePreference
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        super.setChecked(isChecked);
+        buttonView.post(() -> super.setChecked(isChecked));
     }
 
     /**

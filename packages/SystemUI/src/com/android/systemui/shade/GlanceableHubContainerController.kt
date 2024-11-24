@@ -37,9 +37,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Flags
+import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
@@ -70,7 +72,6 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controller that's responsible for the glanceable hub container view and its touch handling.
@@ -513,14 +514,19 @@ constructor(
         val touchOnUmo = keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt())
         val touchOnSmartspace =
             lockscreenSmartspaceController.isWithinSmartspaceBounds(ev.x.toInt(), ev.y.toInt())
-        if (!hubShowing && (touchOnNotifications || touchOnUmo || touchOnSmartspace)) {
+        val glanceableHubV2 = communalHubOnMobile()
+        if (
+            !hubShowing &&
+                (touchOnNotifications || touchOnUmo || touchOnSmartspace || glanceableHubV2)
+        ) {
             logger.d({
                 "Lockscreen touch ignored: touchOnNotifications: $bool1, touchOnUmo: $bool2, " +
-                    "touchOnSmartspace: $bool3"
+                    "touchOnSmartspace: $bool3, glanceableHubV2: $bool4"
             }) {
                 bool1 = touchOnNotifications
                 bool2 = touchOnUmo
                 bool3 = touchOnSmartspace
+                bool4 = glanceableHubV2
             }
             return false
         }

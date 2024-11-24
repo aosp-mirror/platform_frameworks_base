@@ -41,12 +41,12 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-class StatusBarTouchableRegionManagerTest : SysuiTestCase() {
+class ShadeTouchableRegionManagerTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneRepository = kosmos.sceneContainerRepository
 
-    private val underTest by Lazy { kosmos.statusBarTouchableRegionManager }
+    private val underTest by Lazy { kosmos.shadeTouchableRegionManager }
 
     @Test
     @EnableSceneContainer

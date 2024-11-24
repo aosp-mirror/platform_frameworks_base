@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package android.platform.test.ravenwood;
 
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
@@ -21,26 +20,30 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.getRavenwoodRunt
 
 import android.util.Log;
 
+import com.android.ravenwood.RavenwoodRuntimeNative;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A class to manage the core default system properties of the Ravenwood environment.
+ */
 public class RavenwoodSystemProperties {
     private static final String TAG = "RavenwoodSystemProperties";
 
-    /** We pull in propeties from this file. */
+    /** We pull in properties from this file. */
     private static final String RAVENWOOD_BUILD_PROP = "ravenwood-data/ravenwood-build.prop";
 
     /** This is the actual build.prop we use to build the device (contents depends on lunch). */
     private static final String DEVICE_BUILD_PROP = "ravenwood-data/build.prop";
 
     /** The default values. */
-    private static final Map<String, String> sDefaultValues = new HashMap<>();
+    static final Map<String, String> sDefaultValues = new HashMap<>();
 
     private static final String[] PARTITIONS = {
             "bootimage",
@@ -91,7 +94,7 @@ public class RavenwoodSystemProperties {
                 var deviceValue = deviceProps.get(deviceKey);
                 if (deviceValue == null) {
                     throw new RuntimeException("Failed to initialize system properties. Key '"
-                             + deviceKey + "' doesn't exist in the device side build.prop");
+                            + deviceKey + "' doesn't exist in the device side build.prop");
                 }
                 value = deviceValue;
             } else {
@@ -115,6 +118,7 @@ public class RavenwoodSystemProperties {
                 }
             }
         }
+
         if (RAVENWOOD_VERBOSE_LOGGING) {
             // Dump all properties for local debugging.
             Log.v(TAG, "All system properties:");
@@ -122,35 +126,12 @@ public class RavenwoodSystemProperties {
                 Log.v(TAG, "" + key + "=" + sDefaultValues.get(key));
             }
         }
+
+        // Actually set the system properties
+        sDefaultValues.forEach(RavenwoodRuntimeNative::setSystemProperty);
     }
 
-    private volatile boolean mIsImmutable;
-
-    private final Map<String, String> mValues = new HashMap<>();
-
-    /** Set of additional keys that should be considered readable */
-    private final Set<String> mKeyReadable = new HashSet<>();
-
-    /** Set of additional keys that should be considered writable */
-    private final Set<String> mKeyWritable = new HashSet<>();
-
-    public RavenwoodSystemProperties() {
-        mValues.putAll(sDefaultValues);
-    }
-
-    /** Copy constructor */
-    public RavenwoodSystemProperties(RavenwoodSystemProperties source, boolean immutable) {
-        mKeyReadable.addAll(source.mKeyReadable);
-        mKeyWritable.addAll(source.mKeyWritable);
-        mValues.putAll(source.mValues);
-        mIsImmutable = immutable;
-    }
-
-    public Map<String, String> getValues() {
-        return new HashMap<>(mValues);
-    }
-
-    public boolean isKeyReadable(String key) {
+    private static boolean isKeyReadable(String key) {
         final String root = getKeyRoot(key);
 
         if (root.startsWith("debug.")) return true;
@@ -183,10 +164,10 @@ public class RavenwoodSystemProperties {
                 return true;
         }
 
-        return mKeyReadable.contains(key);
+        return false;
     }
 
-    public boolean isKeyWritable(String key) {
+    private static boolean isKeyWritable(String key) {
         final String root = getKeyRoot(key);
 
         if (root.startsWith("debug.")) return true;
@@ -194,42 +175,11 @@ public class RavenwoodSystemProperties {
         // For PropertyInvalidatedCache
         if (root.startsWith("cache_key.")) return true;
 
-        return mKeyWritable.contains(key);
+        return false;
     }
 
-    private void ensureNotImmutable() {
-        if (mIsImmutable) {
-            throw new RuntimeException("Unable to update immutable instance");
-        }
-    }
-
-    public void setValue(String key, Object value) {
-        ensureNotImmutable();
-
-        final String valueString = (value == null) ? null : String.valueOf(value);
-        if ((valueString == null) || valueString.isEmpty()) {
-            mValues.remove(key);
-        } else {
-            mValues.put(key, valueString);
-        }
-    }
-
-    public void setAccessNone(String key) {
-        ensureNotImmutable();
-        mKeyReadable.remove(key);
-        mKeyWritable.remove(key);
-    }
-
-    public void setAccessReadOnly(String key) {
-        ensureNotImmutable();
-        mKeyReadable.add(key);
-        mKeyWritable.remove(key);
-    }
-
-    public void setAccessReadWrite(String key) {
-        ensureNotImmutable();
-        mKeyReadable.add(key);
-        mKeyWritable.add(key);
+    static boolean isKeyAccessible(String key, boolean write) {
+        return write ? isKeyWritable(key) : isKeyReadable(key);
     }
 
     /**

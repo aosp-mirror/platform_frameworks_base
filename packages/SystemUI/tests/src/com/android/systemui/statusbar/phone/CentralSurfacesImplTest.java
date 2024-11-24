@@ -334,7 +334,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
-    @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock private ShadeTouchableRegionManager mShadeTouchableRegionManager;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
@@ -617,7 +617,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardIndicationController,
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,

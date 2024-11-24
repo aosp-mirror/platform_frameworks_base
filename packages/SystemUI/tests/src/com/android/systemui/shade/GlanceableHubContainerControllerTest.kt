@@ -33,6 +33,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB_ON_MOBILE
 import com.android.systemui.Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
@@ -630,6 +631,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
     @Test
     fun onTouchEvent_shadeInteracting_movesNotDispatched() =
         with(kosmos) {
@@ -686,6 +688,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
     @Test
     fun onTouchEvent_bouncerInteracting_movesNotDispatched() =
         with(kosmos) {
@@ -715,6 +718,19 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 // An up event is still delivered.
                 assertThat(underTest.onTouchEvent(UP_EVENT)).isFalse()
                 verify(containerView).onTouchEvent(UP_EVENT)
+            }
+        }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @Test
+    fun onTouchEvent_onLockscreenAndGlanceableHubV2_touchIgnored() =
+        with(kosmos) {
+            testScope.runTest {
+                // On lockscreen.
+                goToScene(CommunalScenes.Blank)
+
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+                verify(containerView, never()).onTouchEvent(DOWN_EVENT)
             }
         }
 

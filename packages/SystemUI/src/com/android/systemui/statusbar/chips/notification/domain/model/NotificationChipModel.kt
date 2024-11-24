@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.testapp;
+package com.android.systemui.statusbar.chips.notification.domain.model
 
-import android.content.Intent;
-import android.os.Bundle;
+import com.android.systemui.statusbar.StatusBarIconView
 
-public class BottomHalfPipLaunchingActivity extends SimpleActivity {
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        final Intent intent = new Intent(this, BottomHalfPipActivity.class);
-        startActivity(intent);
-    }
-}
+/** Modeling all the data needed to render a status bar notification chip. */
+data class NotificationChipModel(val key: String, val statusBarChipIconView: StatusBarIconView)

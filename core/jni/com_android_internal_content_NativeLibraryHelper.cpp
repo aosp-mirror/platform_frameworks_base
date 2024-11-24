@@ -21,6 +21,7 @@
 #include <androidfw/ApkParsing.h>
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
+#include <elf.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -38,6 +39,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "com_android_internal_content_FileSystemUtils.h"
 #include "core_jni_helpers.h"
@@ -59,6 +61,12 @@ enum install_status_t {
     INSTALL_FAILED_NO_MATCHING_ABIS = -113,
     NO_NATIVE_LIBRARIES = -114
 };
+
+// These code should match with PageSizeAppCompatFlags inside ApplicationInfo.java
+constexpr int PAGE_SIZE_APP_COMPAT_FLAG_ERROR = -1;
+constexpr int PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED = 0;
+constexpr int PAGE_SIZE_APP_COMPAT_FLAG_UNCOMPRESSED_LIBS_NOT_ALIGNED = 1 << 1;
+constexpr int PAGE_SIZE_APP_COMPAT_FLAG_ELF_NOT_ALIGNED = 1 << 2;
 
 typedef install_status_t (*iterFunc)(JNIEnv*, void*, ZipFileRO*, ZipEntryRO, const char*);
 
@@ -524,11 +532,7 @@ static inline bool app_compat_16kb_enabled() {
     static const size_t kPageSize = getpagesize();
 
     // App compat is only applicable on 16kb-page-size devices.
-    if (kPageSize != 0x4000) {
-        return false;
-    }
-
-    return android::base::GetBoolProperty("bionic.linker.16kb.app_compat.enabled", false);
+    return kPageSize == 0x4000;
 }
 
 static jint
@@ -626,6 +630,166 @@ com_android_internal_content_NativeLibraryHelper_openApkFd(JNIEnv *env, jclass,
     return reinterpret_cast<jlong>(zipFile);
 }
 
+static jint checkLoadSegmentAlignment(const char* fileName, off64_t offset) {
+    std::vector<Elf64_Phdr> programHeaders;
+    if (!getLoadSegmentPhdrs(fileName, offset, programHeaders)) {
+        ALOGE("Failed to read program headers from ELF file.");
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    int mode = PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
+    for (auto programHeader : programHeaders) {
+        if (programHeader.p_type != PT_LOAD) {
+            continue;
+        }
+
+        // Set ELF alignment bit if 4 KB aligned LOAD segment is found
+        if (programHeader.p_align == 0x1000) {
+            ALOGI("Setting page size compat mode PAGE_SIZE_APP_COMPAT_FLAG_ELF_NOT_ALIGNED");
+            mode |= PAGE_SIZE_APP_COMPAT_FLAG_ELF_NOT_ALIGNED;
+            break;
+        }
+    }
+
+    return mode;
+}
+
+static jint checkExtractedLibAlignment(ZipFileRO* zipFile, ZipEntryRO zipEntry,
+                                       const char* fileName, const std::string nativeLibPath) {
+    // Build local file path
+    const size_t fileNameLen = strlen(fileName);
+    char localFileName[nativeLibPath.size() + fileNameLen + 2];
+
+    if (strlcpy(localFileName, nativeLibPath.c_str(), sizeof(localFileName)) !=
+        nativeLibPath.size()) {
+        ALOGE("Couldn't allocate local file name for library");
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    *(localFileName + nativeLibPath.size()) = '/';
+
+    if (strlcpy(localFileName + nativeLibPath.size() + 1, fileName,
+                sizeof(localFileName) - nativeLibPath.size() - 1) != fileNameLen) {
+        ALOGE("Couldn't allocate local file name for library");
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    struct statfs64 fsInfo;
+    int result = statfs64(localFileName, &fsInfo);
+    if (result < 0) {
+        ALOGE("Failed to stat file :%s", localFileName);
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    return checkLoadSegmentAlignment(localFileName, 0);
+}
+
+static jint checkAlignment(JNIEnv* env, jstring javaNativeLibPath, jboolean extractNativeLibs,
+                           ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName) {
+    int mode = PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
+    // Need two separate install status for APK and ELF alignment
+    static const size_t kPageSize = getpagesize();
+    jint ret = INSTALL_SUCCEEDED;
+
+    ScopedUtfChars nativeLibPath(env, javaNativeLibPath);
+    if (extractNativeLibs) {
+        ALOGI("extractNativeLibs specified, checking for extracted lib %s", fileName);
+        return checkExtractedLibAlignment(zipFile, zipEntry, fileName, nativeLibPath.c_str());
+    }
+
+    uint16_t method;
+    off64_t offset;
+    if (!zipFile->getEntryInfo(zipEntry, &method, nullptr, nullptr, &offset, nullptr, nullptr,
+                               nullptr)) {
+        ALOGE("Couldn't read zip entry info from zipFile %s", zipFile->getZipFileName());
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    // check if library is uncompressed and page-aligned
+    if (method != ZipFileRO::kCompressStored) {
+        ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
+              fileName);
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    if (offset % kPageSize != 0) {
+        ALOGW("Library '%s' is not PAGE(%zu)-aligned - will not be able to open it directly "
+              "from apk.\n",
+              fileName, kPageSize);
+        mode |= PAGE_SIZE_APP_COMPAT_FLAG_UNCOMPRESSED_LIBS_NOT_ALIGNED;
+        ALOGI("Setting page size compat mode "
+              "PAGE_SIZE_APP_COMPAT_FLAG_UNCOMPRESSED_LIBS_NOT_ALIGNED for %s",
+              zipFile->getZipFileName());
+    }
+
+    int loadMode = checkLoadSegmentAlignment(zipFile->getZipFileName(), offset);
+    if (loadMode == PAGE_SIZE_APP_COMPAT_FLAG_ERROR) {
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+    mode |= loadMode;
+    return mode;
+}
+
+// TODO(b/371049373): This function is copy of iterateOverNativeFiles with different way of handling
+// and combining return values for all ELF and APKs. Find a way to consolidate two functions.
+static jint com_android_internal_content_NativeLibraryHelper_checkApkAlignment(
+        JNIEnv* env, jclass clazz, jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
+        jboolean extractNativeLibs, jboolean debuggable) {
+    int mode = PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
+    ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
+    if (zipFile == nullptr) {
+        ALOGE("zipfile handle is null");
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    auto result = NativeLibrariesIterator::create(zipFile, debuggable);
+    if (!result.ok()) {
+        ALOGE("Can't iterate over native libs for file:%s", zipFile->getZipFileName());
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+    std::unique_ptr<NativeLibrariesIterator> it(std::move(result.value()));
+
+    const ScopedUtfChars cpuAbi(env, javaCpuAbi);
+    if (cpuAbi.c_str() == nullptr) {
+        ALOGE("cpuAbi is nullptr");
+        // This would've thrown, so this return code isn't observable by Java.
+        return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+    }
+
+    while (true) {
+        auto next = it->next();
+        if (!next.ok()) {
+            ALOGE("next iterator not found Error:%d", next.error());
+            return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+        }
+        auto entry = next.value();
+        if (entry == nullptr) {
+            break;
+        }
+
+        const char* fileName = it->currentEntry();
+        const char* lastSlash = it->lastSlash();
+
+        // Check to make sure the CPU ABI of this file is one we support.
+        const char* cpuAbiOffset = fileName + APK_LIB_LEN;
+        const size_t cpuAbiRegionSize = lastSlash - cpuAbiOffset;
+
+        if (cpuAbi.size() == cpuAbiRegionSize &&
+            !strncmp(cpuAbiOffset, cpuAbi.c_str(), cpuAbiRegionSize)) {
+            int ret = checkAlignment(env, javaNativeLibPath, extractNativeLibs, zipFile, entry,
+                                     lastSlash + 1);
+            if (ret == PAGE_SIZE_APP_COMPAT_FLAG_ERROR) {
+                ALOGE("Alignment check returned for zipfile: %s, entry:%s",
+                      zipFile->getZipFileName(), lastSlash + 1);
+                return PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+            }
+            mode |= ret;
+        }
+    }
+
+    return mode;
+}
+
 static void
 com_android_internal_content_NativeLibraryHelper_close(JNIEnv *env, jclass, jlong apkHandle)
 {
@@ -633,28 +797,22 @@ com_android_internal_content_NativeLibraryHelper_close(JNIEnv *env, jclass, jlon
 }
 
 static const JNINativeMethod gMethods[] = {
-    {"nativeOpenApk",
-            "(Ljava/lang/String;)J",
-            (void *)com_android_internal_content_NativeLibraryHelper_openApk},
-    {"nativeOpenApkFd",
-            "(Ljava/io/FileDescriptor;Ljava/lang/String;)J",
-            (void *)com_android_internal_content_NativeLibraryHelper_openApkFd},
-    {"nativeClose",
-            "(J)V",
-            (void *)com_android_internal_content_NativeLibraryHelper_close},
-    {"nativeCopyNativeBinaries",
-            "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
-            (void *)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
-    {"nativeSumNativeBinaries",
-            "(JLjava/lang/String;Z)J",
-            (void *)com_android_internal_content_NativeLibraryHelper_sumNativeBinaries},
-    {"nativeFindSupportedAbi",
-            "(J[Ljava/lang/String;Z)I",
-            (void *)com_android_internal_content_NativeLibraryHelper_findSupportedAbi},
-    {"hasRenderscriptBitcode", "(J)I",
-            (void *)com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode},
+        {"nativeOpenApk", "(Ljava/lang/String;)J",
+         (void*)com_android_internal_content_NativeLibraryHelper_openApk},
+        {"nativeOpenApkFd", "(Ljava/io/FileDescriptor;Ljava/lang/String;)J",
+         (void*)com_android_internal_content_NativeLibraryHelper_openApkFd},
+        {"nativeClose", "(J)V", (void*)com_android_internal_content_NativeLibraryHelper_close},
+        {"nativeCopyNativeBinaries", "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
+         (void*)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
+        {"nativeSumNativeBinaries", "(JLjava/lang/String;Z)J",
+         (void*)com_android_internal_content_NativeLibraryHelper_sumNativeBinaries},
+        {"nativeFindSupportedAbi", "(J[Ljava/lang/String;Z)I",
+         (void*)com_android_internal_content_NativeLibraryHelper_findSupportedAbi},
+        {"hasRenderscriptBitcode", "(J)I",
+         (void*)com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode},
+        {"nativeCheckAlignment", "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
+         (void*)com_android_internal_content_NativeLibraryHelper_checkApkAlignment},
 };
-
 
 int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env)
 {
