@@ -1215,6 +1215,13 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_v2"
+  namespace: "systemui"
+  description: "Gates the refreshed glanceable hub experience that also brings the glanceable hub to mobile phones"
+  bug: "375689917"
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"
@@ -1502,6 +1509,16 @@ flag {
 }
 
 flag {
+   name: "sim_pin_use_slot_id"
+   namespace: "systemui"
+   description: "Reorient SIM data processing around slotId instead of subId"
+   bug: "376173142"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "use_transitions_for_keyguard_occluded"
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"
@@ -1780,6 +1797,16 @@ flag {
 }
 
 flag {
+    name: "notification_reentrant_dismiss"
+    namespace: "systemui"
+    description: "Posts to avoid a crashing reentrant pipeline run"
+    bug: "328328054"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+      }
+}
+
+flag {
     name: "stoppable_fgs_system_app"
     namespace: "systemui"
     description: "System app with foreground service can opt in to be stoppable."
@@ -1797,4 +1824,32 @@ flag {
     metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "gsf_bouncer"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Bouncer surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "gsf_quick_settings"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Quick Settings surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "glanceable_hub_shortcut_button"
+    namespace: "systemui"
+    description: "Adds a shortcut button to lockscreen to show glanceable hub."
+    bug: "378173531"
+}
+
+flag {
+    name: "spatial_model_launcher_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on Launcher when users pull down shade."
+    bug: "370562309"
 }

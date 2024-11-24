@@ -533,6 +533,8 @@ applications that come with the platform
         <permission name="com.android.cellbroadcastservice.FULL_ACCESS_CELL_BROADCAST_HISTORY" />
         <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
         <permission name="android.permission.LOCK_DEVICE" />
+        <!-- Permission required for AuthenticationPolicyManagerTest -->
+        <permission name="android.permission.MANAGE_SECURE_LOCK_DEVICE" />
         <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
@@ -581,7 +583,6 @@ applications that come with the platform
         <permission name="android.permission.READ_BLOCKED_NUMBERS" />
         <!-- Permission required for CTS test - PackageManagerTest -->
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
-        <permission name="android.permission.VERIFICATION_AGENT"/>
         <!-- Permission required for CTS test CtsInputTestCases -->
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
         <!-- Permission required for CTS test - PackageManagerShellCommandInstallTest -->
@@ -598,14 +599,14 @@ applications that come with the platform
         <!-- Permission required for CTS test - CtsAppTestCases -->
         <permission name="android.permission.KILL_UID" />
         <!-- Permission required for CTS test - AdvancedProtectionManagerTest -->
-        <permission name="android.permission.SET_ADVANCED_PROTECTION_MODE" />
+        <permission name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE" />
         <permission name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
         <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
         <permission name="android.permission.READ_SYSTEM_PREFERENCES" />
         <permission name="android.permission.WRITE_SYSTEM_PREFERENCES" />
-        <!-- Permission required for CTS test - ForensicManagerTest -->
-        <permission name="android.permission.READ_FORENSIC_STATE" />
-        <permission name="android.permission.MANAGE_FORENSIC_STATE" />
+        <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
+        <permission name="android.permission.READ_INTRUSION_DETECTION_STATE" />
+        <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -675,9 +676,5 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.multiuser">
-        <permission name="android.permission.MANAGE_USERS"/>
     </privapp-permissions>
 </permissions>

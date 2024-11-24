@@ -280,7 +280,8 @@ public class RuntimeColorFilter extends ColorFilter {
         if (colorFilter == null) {
             throw new NullPointerException("The colorFilter parameter must not be null");
         }
-        nativeUpdateChild(getNativeInstance(), filterName, colorFilter.getNativeInstance());
+        nativeUpdateInputColorFilter(getNativeInstance(), filterName,
+                colorFilter.getNativeInstance());
     }
 
     /**
@@ -318,5 +319,6 @@ public class RuntimeColorFilter extends ColorFilter {
             long colorFilter, String uniformName, int value1, int value2, int value3,
             int value4, int count);
     private static native void nativeUpdateChild(long colorFilter, String childName, long child);
-
+    private static native void nativeUpdateInputColorFilter(long colorFilter, String childName,
+            long inputFilter);
 }

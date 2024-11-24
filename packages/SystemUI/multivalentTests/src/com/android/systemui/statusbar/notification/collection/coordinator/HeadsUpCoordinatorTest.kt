@@ -38,12 +38,13 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.mockNotifCollection
-import com.android.systemui.statusbar.notification.collection.notifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.DecisionImpl
@@ -51,8 +52,6 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
-import com.android.systemui.statusbar.policy.BaseHeadsUpManager
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -84,7 +83,9 @@ import org.mockito.MockitoAnnotations
 class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val statusBarNotificationChipsInteractor = kosmos.statusBarNotificationChipsInteractor
+    private val statusBarNotificationChipsInteractor by lazy {
+        kosmos.statusBarNotificationChipsInteractor
+    }
     private val notifCollection = kosmos.mockNotifCollection
 
     private lateinit var coordinator: HeadsUpCoordinator
@@ -101,7 +102,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private val notifPipeline: NotifPipeline = mock()
     private val logger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
-    private val headsUpManager: BaseHeadsUpManager = mock()
+    private val headsUpManager: HeadsUpManagerImpl = mock()
     private val headsUpViewBinder: HeadsUpViewBinder = mock()
     private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
     private val remoteInputManager: NotificationRemoteInputManager = mock()

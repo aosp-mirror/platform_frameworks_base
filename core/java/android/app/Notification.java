@@ -441,8 +441,8 @@ public class Notification implements Parcelable
 
     /**
      * A large-format version of {@link #contentView}, giving the Notification an
-     * opportunity to show more detail. The system UI may choose to show this
-     * instead of the normal content view at its discretion.
+     * opportunity to show more detail when expanded. The system UI may choose
+     * to show this instead of the normal content view at its discretion.
      *
      * As of N, this field may be null. The expanded notification view is determined by the
      * inputs to {@link Notification.Builder}; a custom RemoteViews can optionally be
@@ -811,18 +811,30 @@ public class Notification implements Parcelable
     }
 
     private static boolean isStandardLayout(int layoutId) {
-        // TODO: b/359128724 - Add to static list when inlining the flag.
+        if (Flags.notificationsRedesignTemplates()) {
+            return switch (layoutId) {
+                case R.layout.notification_2025_template_collapsed_base,
+                     R.layout.notification_2025_template_expanded_base,
+                     R.layout.notification_2025_template_heads_up_base,
+                     R.layout.notification_2025_template_header,
+                     R.layout.notification_2025_template_collapsed_messaging,
+                     R.layout.notification_2025_template_collapsed_media,
+                     R.layout.notification_template_material_big_picture,
+                     R.layout.notification_template_material_big_text,
+                     R.layout.notification_template_material_inbox,
+                     R.layout.notification_template_material_big_messaging,
+                     R.layout.notification_template_material_conversation,
+                     R.layout.notification_template_material_big_media,
+                     R.layout.notification_template_material_call,
+                     R.layout.notification_template_material_big_call,
+                     R.layout.notification_template_header -> true;
+                case R.layout.notification_template_material_progress -> Flags.apiRichOngoing();
+                default -> false;
+            };
+        }
         if (Flags.apiRichOngoing()) {
             if (layoutId == R.layout.notification_template_material_progress) {
                 return true;
-            }
-        }
-        // TODO: b/378660052 - Add to static list when inlining the flag.
-        if (Flags.notificationsRedesignTemplates()) {
-            switch(layoutId) {
-                case R.layout.notification_2025_template_collapsed_base:
-                case R.layout.notification_2025_template_header:
-                    return true;
             }
         }
         return STANDARD_LAYOUTS.contains(layoutId);
@@ -1325,7 +1337,7 @@ public class Notification implements Parcelable
     public static final String EXTRA_SUMMARY_TEXT = "android.summaryText";
 
     /**
-     * {@link #extras} key: this is the longer text shown in the big form of a
+     * {@link #extras} key: this is the longer text shown in the expanded form of a
      * {@link BigTextStyle} notification, as supplied to
      * {@link BigTextStyle#bigText(CharSequence)}.
      */
@@ -3148,12 +3160,16 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
-        }
 
-        if (Flags.apiRichOngoing()) {
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON, Icon.class));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_START_ICON, Icon.class));
-            visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_END_ICON, Icon.class));
+
+            if (Flags.apiRichOngoing()) {
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON,
+                    Icon.class));
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_START_ICON,
+                    Icon.class));
+                visitIconUri(visitor, extras.getParcelable(EXTRA_PROGRESS_END_ICON,
+                    Icon.class));
+            }
         }
 
         if (mBubbleMetadata != null) {
@@ -3245,8 +3261,9 @@ public class Notification implements Parcelable
      */
     @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean hasPromotableCharacteristics() {
-        return isColorized()
+        return isColorizedRequested()
                 && hasTitle()
+                && !isGroupSummary()
                 && !containsCustomViews()
                 && hasPromotableStyle();
     }
@@ -4069,6 +4086,12 @@ public class Notification implements Parcelable
             if ((flags & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) != 0) {
                 flagStrings.add("LIFETIME_EXTENDED_BY_DIRECT_REPLY");
                 flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+            }
+        }
+        if (Flags.apiRichOngoing()) {
+            if ((flags & FLAG_PROMOTED_ONGOING) != 0) {
+                flagStrings.add("PROMOTED_ONGOING");
+                flags &= ~FLAG_PROMOTED_ONGOING;
             }
         }
 
@@ -5896,12 +5919,12 @@ public class Notification implements Parcelable
 
         private RemoteViews applyStandardTemplate(int resId, StandardTemplateParams p,
                 TemplateBindResult result) {
-            p.headerless(resId == getBaseLayoutResource()
+            p.headerless(resId == getCollapsedBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
                     || resId == getCompactHeadsUpBaseLayoutResource()
                     || resId == getMessagingCompactHeadsUpLayoutResource()
-                    || resId == getMessagingLayoutResource()
-                    || resId == R.layout.notification_template_material_media);
+                    || resId == getCollapsedMessagingLayoutResource()
+                    || resId == getCollapsedMediaLayoutResource());
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
 
             resetStandardTemplate(contentView);
@@ -6355,7 +6378,7 @@ public class Notification implements Parcelable
             boolean hideSnoozeButton = mN.isFgsOrUij()
                     || mN.fullScreenIntent != null
                     || isBackgroundColorized(p)
-                    || p.mViewType != StandardTemplateParams.VIEW_TYPE_BIG;
+                    || p.mViewType != StandardTemplateParams.VIEW_TYPE_EXPANDED;
             big.setBoolean(R.id.snooze_button, "setEnabled", !hideSnoozeButton);
             if (hideSnoozeButton) {
                 // Only hide; NotificationContentView will show it when it adds the click listener
@@ -6560,19 +6583,21 @@ public class Notification implements Parcelable
                     .decorationType(StandardTemplateParams.DECORATION_MINIMAL)
                     .fillTextsFrom(this);
             TemplateBindResult result = new TemplateBindResult();
-            RemoteViews standard = applyStandardTemplate(getBaseLayoutResource(), p, result);
+            RemoteViews standard = applyStandardTemplate(getCollapsedBaseLayoutResource(),
+                    p, result);
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
             return standard;
         }
 
-        private RemoteViews minimallyDecoratedBigContentView(@NonNull RemoteViews customContent) {
+        private RemoteViews minimallyDecoratedExpandedContentView(
+                @NonNull RemoteViews customContent) {
             StandardTemplateParams p = mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .decorationType(StandardTemplateParams.DECORATION_MINIMAL)
                     .fillTextsFrom(this);
             TemplateBindResult result = new TemplateBindResult();
-            RemoteViews standard = applyStandardTemplateWithActions(getBigBaseLayoutResource(),
+            RemoteViews standard = applyStandardTemplateWithActions(getExpandedBaseLayoutResource(),
                     p, result);
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
@@ -6618,7 +6643,7 @@ public class Notification implements Parcelable
             StandardTemplateParams p = mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .fillTextsFrom(this);
-            return applyStandardTemplate(getBaseLayoutResource(), p, null /* result */);
+            return applyStandardTemplate(getCollapsedBaseLayoutResource(), p, null /* result */);
         }
 
         private boolean useExistingRemoteView(RemoteViews customContent) {
@@ -6656,24 +6681,29 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public RemoteViews createBigContentView() {
+            return createExpandedContentView();
+        }
+
+        private RemoteViews createExpandedContentView() {
             RemoteViews result = null;
             if (useExistingRemoteView(mN.bigContentView)) {
                 return fullyCustomViewRequiresDecoration(false /* fromStyle */)
-                        ? minimallyDecoratedBigContentView(mN.bigContentView) : mN.bigContentView;
+                        ? minimallyDecoratedExpandedContentView(mN.bigContentView)
+                        : mN.bigContentView;
             }
             if (mStyle != null) {
-                result = mStyle.makeBigContentView();
+                result = mStyle.makeExpandedContentView();
                 if (fullyCustomViewRequiresDecoration(true /* fromStyle */)) {
-                    result = minimallyDecoratedBigContentView(result);
+                    result = minimallyDecoratedExpandedContentView(result);
                 }
             }
             if (result == null) {
-                if (bigContentViewRequired()) {
+                if (expandedContentViewRequired()) {
                     StandardTemplateParams p = mParams.reset()
-                            .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                            .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                             .allowTextWithProgress(true)
                             .fillTextsFrom(this);
-                    result = applyStandardTemplateWithActions(getBigBaseLayoutResource(), p,
+                    result = applyStandardTemplateWithActions(getExpandedBaseLayoutResource(), p,
                             null /* result */);
                 }
             }
@@ -6687,7 +6717,7 @@ public class Notification implements Parcelable
         // apps can detect the change, it's most likely that the changes will simply result in
         // visual regressions.
         @SuppressWarnings("AndroidFrameworkCompatChange")
-        private boolean bigContentViewRequired() {
+        private boolean expandedContentViewRequired() {
             if (Flags.notificationExpansionOptional()) {
                 // Notifications without a bigContentView, style, or actions do not need to expand
                 boolean exempt = mN.bigContentView == null
@@ -7116,7 +7146,9 @@ public class Notification implements Parcelable
          */
         public CharSequence ensureColorSpanContrastOrStripStyling(CharSequence cs,
                 int buttonFillColor) {
-            if (Flags.cleanUpSpansAndNewLines()) {
+            // Ongoing promoted notifications are allowed to have styling.
+            final boolean isPromotedOngoing = mN.isPromotedOngoing();
+            if (!isPromotedOngoing && Flags.cleanUpSpansAndNewLines()) {
                 return stripStyling(cs);
             }
 
@@ -7496,7 +7528,7 @@ public class Notification implements Parcelable
         }
 
         @UnsupportedAppUsage
-        private int getBaseLayoutResource() {
+        private int getCollapsedBaseLayoutResource() {
             if (Flags.notificationsRedesignTemplates()) {
                 return R.layout.notification_2025_template_collapsed_base;
             } else {
@@ -7505,7 +7537,11 @@ public class Notification implements Parcelable
         }
 
         private int getHeadsUpBaseLayoutResource() {
-            return R.layout.notification_template_material_heads_up_base;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_heads_up_base;
+            } else {
+                return R.layout.notification_template_material_heads_up_base;
+            }
         }
 
         private int getCompactHeadsUpBaseLayoutResource() {
@@ -7516,8 +7552,12 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_messaging_compact_heads_up;
         }
 
-        private int getBigBaseLayoutResource() {
-            return R.layout.notification_template_material_big_base;
+        private int getExpandedBaseLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_base;
+            } else {
+                return R.layout.notification_template_material_big_base;
+            }
         }
 
         private int getBigPictureLayoutResource() {
@@ -7532,12 +7572,24 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_inbox;
         }
 
-        private int getMessagingLayoutResource() {
-            return R.layout.notification_template_material_messaging;
+        private int getCollapsedMessagingLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_messaging;
+            } else {
+                return R.layout.notification_template_material_messaging;
+            }
         }
 
-        private int getBigMessagingLayoutResource() {
+        private int getExpandedMessagingLayoutResource() {
             return R.layout.notification_template_material_big_messaging;
+        }
+
+        private int getCollapsedMediaLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_media;
+            } else {
+                return R.layout.notification_template_material_media;
+            }
         }
 
         private int getConversationLayoutResource() {
@@ -7776,8 +7828,16 @@ public class Notification implements Parcelable
      * @hide
      */
     public boolean isColorized() {
-        return extras.getBoolean(EXTRA_COLORIZED)
-                && (hasColorizedPermission() || isFgsOrUij());
+        return isColorizedRequested()
+                && (hasColorizedPermission() || isFgsOrUij() || isPromotedOngoing());
+    }
+
+    /**
+     * @return true if this notification has requested to be colorized, regardless of whether it
+     * meets the requirements to be displayed that way.
+     */
+    private boolean isColorizedRequested() {
+        return extras.getBoolean(EXTRA_COLORIZED);
     }
 
     /**
@@ -7788,6 +7848,19 @@ public class Notification implements Parcelable
      */
     public boolean hasColorizedPermission() {
         return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
+    }
+
+    /**
+     * Returns whether this notification is a promoted ongoing notification.
+     *
+     * This requires the Notification.FLAG_PROMOTED_ONGOING flag to be set
+     * (which may be true once the api_rich_ongoing feature flag is enabled),
+     * and requires that the ui_rich_ongoing feature flag is enabled.
+     *
+     * @hide
+     */
+    public boolean isPromotedOngoing() {
+        return Flags.uiRichOngoing() && (flags & Notification.FLAG_PROMOTED_ONGOING) != 0;
     }
 
     /**
@@ -7984,7 +8057,7 @@ public class Notification implements Parcelable
         protected Builder mBuilder;
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         protected void internalSetBigContentTitle(CharSequence title) {
@@ -7992,7 +8065,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         protected void internalSetSummaryText(CharSequence cs) {
             mSummaryText = cs;
@@ -8055,10 +8128,10 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Construct a Style-specific RemoteViews for the final big notification layout.
+         * Construct a Style-specific RemoteViews for the final expanded notification layout.
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             return null;
         }
 
@@ -8222,7 +8295,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         @NonNull
@@ -8232,7 +8305,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         @NonNull
         public BigPictureStyle setSummaryText(@Nullable CharSequence cs) {
@@ -8291,7 +8364,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Override the large icon when the big notification is shown.
+         * Override the large icon when the expanded notification is shown.
          */
         @NonNull
         public BigPictureStyle bigLargeIcon(@Nullable Bitmap b) {
@@ -8299,7 +8372,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Override the large icon when the big notification is shown.
+         * Override the large icon when the expanded notification is shown.
          */
         @NonNull
         public BigPictureStyle bigLargeIcon(@Nullable Icon icon) {
@@ -8363,7 +8436,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .fillTextsFrom(mBuilder)
                     .promotedPicture(mPictureIcon);
-            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
+            return getStandardView(mBuilder.getCollapsedBaseLayoutResource(), p, null /* result */);
         }
 
         /**
@@ -8385,7 +8458,7 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             // Replace mN.mLargeIcon with mBigLargeIcon if mBigLargeIconSet
             // This covers the following cases:
             //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
@@ -8404,7 +8477,7 @@ public class Notification implements Parcelable
             }
 
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG).fillTextsFrom(mBuilder);
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED).fillTextsFrom(mBuilder);
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource(),
                     p, null /* result */);
             if (mSummaryTextSet) {
@@ -8551,7 +8624,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         public BigTextStyle setBigContentTitle(CharSequence title) {
@@ -8560,7 +8633,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         public BigTextStyle setSummaryText(CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
@@ -8568,7 +8641,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Provide the longer text to be displayed in the big form of the
+         * Provide the longer text to be displayed in the expanded form of the
          * template in place of the content text.
          */
         public BigTextStyle bigText(CharSequence cs) {
@@ -8612,7 +8685,7 @@ public class Notification implements Parcelable
             if (increasedHeight) {
                 ArrayList<Action> originalActions = mBuilder.mActions;
                 mBuilder.mActions = new ArrayList<>();
-                RemoteViews remoteViews = makeBigContentView();
+                RemoteViews remoteViews = makeExpandedContentView();
                 mBuilder.mActions = originalActions;
                 return remoteViews;
             }
@@ -8626,7 +8699,7 @@ public class Notification implements Parcelable
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             if (increasedHeight && mBuilder.mActions.size() > 0) {
                 // TODO(b/163626038): pass VIEW_TYPE_HEADS_UP?
-                return makeBigContentView();
+                return makeExpandedContentView();
             }
             return super.makeHeadsUpContentView(increasedHeight);
         }
@@ -8634,16 +8707,18 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .allowTextWithProgress(true)
                     .textViewId(R.id.big_text)
                     .fillTextsFrom(mBuilder);
 
             // Replace the text with the big text, but only if the big text is not empty.
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
-            if (Flags.cleanUpSpansAndNewLines()) {
+            // Ongoing promoted notifications are allowed to have styling.
+            final boolean isPromotedOngoing = mBuilder.mN.isPromotedOngoing();
+            if (!isPromotedOngoing && Flags.cleanUpSpansAndNewLines()) {
                 bigTextText = normalizeBigText(stripStyling(bigTextText));
             }
             if (!TextUtils.isEmpty(bigTextText)) {
@@ -9306,20 +9381,20 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
-            return makeMessagingView(StandardTemplateParams.VIEW_TYPE_BIG);
+        public RemoteViews makeExpandedContentView() {
+            return makeMessagingView(StandardTemplateParams.VIEW_TYPE_EXPANDED);
         }
 
         /**
          * Create a messaging layout.
          *
-         * @param viewType one of StandardTemplateParams.VIEW_TYPE_NORMAL, VIEW_TYPE_BIG,
+         * @param viewType one of StandardTemplateParams.VIEW_TYPE_NORMAL, VIEW_TYPE_EXPANDEDIG,
          *                VIEW_TYPE_HEADS_UP
          * @return the created remoteView.
          */
         @NonNull
         private RemoteViews makeMessagingView(int viewType) {
-            boolean isCollapsed = viewType != StandardTemplateParams.VIEW_TYPE_BIG;
+            boolean isCollapsed = viewType != StandardTemplateParams.VIEW_TYPE_EXPANDED;
             boolean hideRightIcons = viewType != StandardTemplateParams.VIEW_TYPE_NORMAL;
             boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
@@ -9363,8 +9438,8 @@ public class Notification implements Parcelable
                     isConversationLayout
                             ? mBuilder.getConversationLayoutResource()
                             : isCollapsed
-                                    ? mBuilder.getMessagingLayoutResource()
-                                    : mBuilder.getBigMessagingLayoutResource(),
+                                    ? mBuilder.getCollapsedMessagingLayoutResource()
+                                    : mBuilder.getExpandedMessagingLayoutResource(),
                     p,
                     bindResult);
             if (isConversationLayout) {
@@ -9987,7 +10062,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Overrides ContentTitle in the big form of the template.
+         * Overrides ContentTitle in the expanded form of the template.
          * This defaults to the value passed to setContentTitle().
          */
         public InboxStyle setBigContentTitle(CharSequence title) {
@@ -9996,7 +10071,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set the first line of text after the detail section in the big form of the template.
+         * Set the first line of text after the detail section in the expanded form of the template.
          */
         public InboxStyle setSummaryText(CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
@@ -10044,9 +10119,9 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .fillTextsFrom(mBuilder).text(null);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews contentView = getStandardView(mBuilder.getInboxLayoutResource(), p, result);
@@ -10301,8 +10376,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
-            return makeMediaBigContentView(null /* customContent */);
+        public RemoteViews makeExpandedContentView() {
+            return makeMediaExpandedContentView(null /* customContent */);
         }
 
         /**
@@ -10417,7 +10492,7 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews template = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_media, p,
+                    mBuilder.getCollapsedMediaLayoutResource(), p,
                     null /* result */);
 
             for (int i = 0; i < MAX_MEDIA_BUTTONS_IN_COMPACT; i++) {
@@ -10438,10 +10513,10 @@ public class Notification implements Parcelable
         }
 
         /** @hide */
-        protected RemoteViews makeMediaBigContentView(@Nullable RemoteViews customContent) {
+        protected RemoteViews makeMediaExpandedContentView(@Nullable RemoteViews customContent) {
             final int actionCount = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .hideProgress(true)
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
@@ -10747,8 +10822,8 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        public RemoteViews makeBigContentView() {
-            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_BIG);
+        public RemoteViews makeExpandedContentView() {
+            return makeCallLayout(StandardTemplateParams.VIEW_TYPE_EXPANDED);
         }
 
         @NonNull
@@ -11494,7 +11569,7 @@ public class Notification implements Parcelable
                     .hideProgress(true)
                     .fillTextsFrom(mBuilder);
 
-            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
+            return getStandardView(mBuilder.getCollapsedBaseLayoutResource(), p, null /* result */);
         }
         /**
          * @hide
@@ -11512,9 +11587,9 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .allowTextWithProgress(true)
                     .hideProgress(true)
                     .fillTextsFrom(mBuilder);
@@ -11547,11 +11622,9 @@ public class Notification implements Parcelable
             contentView.setBundle(R.id.progress,
                     "setProgressModel", model.toBundle());
 
-            if (mTrackerIcon != null) {
-                contentView.setIcon(R.id.progress,
-                        "setProgressTrackerIcon",
-                        mTrackerIcon);
-            }
+            contentView.setIcon(R.id.progress,
+                    "setProgressTrackerIcon",
+                    mTrackerIcon);
 
             return contentView;
         }
@@ -11657,8 +11730,10 @@ public class Notification implements Parcelable
             return points;
         }
 
-        @NonNull
-        private NotificationProgressModel createProgressModel(int defaultProgressColor,
+        /**
+         * @hide
+         */
+        public @NonNull NotificationProgressModel createProgressModel(int defaultProgressColor,
                 int backgroundColor) {
             final NotificationProgressModel model;
             if (mIndeterminate) {
@@ -11958,8 +12033,8 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
-            return makeDecoratedBigContentView();
+        public RemoteViews makeExpandedContentView() {
+            return makeDecoratedExpandedContentView();
         }
 
         /**
@@ -12002,13 +12077,13 @@ public class Notification implements Parcelable
                     .decorationType(StandardTemplateParams.DECORATION_PARTIAL)
                     .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplate(
-                    mBuilder.getBaseLayoutResource(), p, result);
+                    mBuilder.getCollapsedBaseLayoutResource(), p, result);
             buildCustomContentIntoTemplate(mBuilder.mContext, remoteViews, customContent,
                     p, result);
             return remoteViews;
         }
 
-        private RemoteViews makeDecoratedBigContentView() {
+        private RemoteViews makeDecoratedExpandedContentView() {
             RemoteViews bigContentView = mBuilder.mN.bigContentView == null
                     ? mBuilder.mN.contentView
                     : mBuilder.mN.bigContentView;
@@ -12017,11 +12092,11 @@ public class Notification implements Parcelable
             }
             TemplateBindResult result = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .viewType(StandardTemplateParams.VIEW_TYPE_EXPANDED)
                     .decorationType(StandardTemplateParams.DECORATION_PARTIAL)
                     .fillTextsFrom(mBuilder);
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
-                    mBuilder.getBigBaseLayoutResource(), p, result);
+                    mBuilder.getExpandedBaseLayoutResource(), p, result);
             buildCustomContentIntoTemplate(mBuilder.mContext, remoteViews, bigContentView,
                     p, result);
             return remoteViews;
@@ -12094,11 +12169,11 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeBigContentView() {
+        public RemoteViews makeExpandedContentView() {
             RemoteViews customContent = mBuilder.mN.bigContentView != null
                     ? mBuilder.mN.bigContentView
                     : mBuilder.mN.contentView;
-            return makeMediaBigContentView(customContent);
+            return makeMediaExpandedContentView(customContent);
         }
 
         /**
@@ -12109,7 +12184,7 @@ public class Notification implements Parcelable
             RemoteViews customContent = mBuilder.mN.headsUpContentView != null
                     ? mBuilder.mN.headsUpContentView
                     : mBuilder.mN.contentView;
-            return makeMediaBigContentView(customContent);
+            return makeMediaExpandedContentView(customContent);
         }
 
         /**
@@ -14435,7 +14510,7 @@ public class Notification implements Parcelable
 
         public static int VIEW_TYPE_UNSPECIFIED = 0;
         public static int VIEW_TYPE_NORMAL = 1;
-        public static int VIEW_TYPE_BIG = 2;
+        public static int VIEW_TYPE_EXPANDED = 2;
         public static int VIEW_TYPE_HEADS_UP = 3;
         public static int VIEW_TYPE_MINIMIZED = 4;    // header only for minimized state
         public static int VIEW_TYPE_PUBLIC = 5;       // header only for automatic public version

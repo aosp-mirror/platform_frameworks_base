@@ -184,3 +184,11 @@ flag {
   bug: "350047836"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "verify_key_event"
+  namespace: "input_method"
+  description: "Verify KeyEvents in IME"
+  bug: "331730488"
+  is_fixed_read_only: true
+}

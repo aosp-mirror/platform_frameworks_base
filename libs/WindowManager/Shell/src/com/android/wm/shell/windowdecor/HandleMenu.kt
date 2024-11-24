@@ -45,6 +45,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
+import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.apptoweb.isBrowserApp
 import com.android.wm.shell.shared.split.SplitScreenConstants
@@ -75,6 +76,7 @@ class HandleMenu(
     private val shouldShowNewWindowButton: Boolean,
     private val shouldShowManageWindowsButton: Boolean,
     private val shouldShowChangeAspectRatioButton: Boolean,
+    private val shouldShowDesktopModeButton: Boolean,
     private val isBrowserApp: Boolean,
     private val openInAppOrBrowserIntent: Intent?,
     private val captionWidth: Int,
@@ -185,6 +187,7 @@ class HandleMenu(
             shouldShowNewWindowButton = shouldShowNewWindowButton,
             shouldShowManageWindowsButton = shouldShowManageWindowsButton,
             shouldShowChangeAspectRatioButton = shouldShowChangeAspectRatioButton,
+            shouldShowDesktopModeButton = shouldShowDesktopModeButton,
             isBrowserApp = isBrowserApp
         ).apply {
             bind(taskInfo, appIconBitmap, appName, shouldShowMoreActionsPill)
@@ -218,7 +221,8 @@ class HandleMenu(
                             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                             WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                     view = handleMenuView.rootView,
-                    forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 }
+                    forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 },
+                    ignoreCutouts = Flags.showAppHandleLargeScreens()
                 )
             } else {
                 parentDecor.addWindow(
@@ -462,6 +466,7 @@ class HandleMenu(
         private val shouldShowNewWindowButton: Boolean,
         private val shouldShowManageWindowsButton: Boolean,
         private val shouldShowChangeAspectRatioButton: Boolean,
+        private val shouldShowDesktopModeButton: Boolean,
         private val isBrowserApp: Boolean
     ) {
         val rootView = LayoutInflater.from(context)
@@ -658,12 +663,15 @@ class HandleMenu(
             floatingBtn.isSelected = taskInfo.isPinned
             floatingBtn.isEnabled = !taskInfo.isPinned
             floatingBtn.imageTintList = style.windowingButtonColor
+            desktopBtn.isGone = !shouldShowDesktopModeButton
             desktopBtn.isSelected = taskInfo.isFreeform
             desktopBtn.isEnabled = !taskInfo.isFreeform
             desktopBtn.imageTintList = style.windowingButtonColor
         }
 
         private fun bindMoreActionsPill(style: MenuStyle) {
+            moreActionsPill.background.setTint(style.backgroundColor)
+
             arrayOf(
                 screenshotBtn to SHOULD_SHOW_SCREENSHOT_BUTTON,
                 newWindowBtn to shouldShowNewWindowButton,
@@ -674,7 +682,6 @@ class HandleMenu(
                 val shouldShow = it.second
                 button.apply {
                     isGone = !shouldShow
-                    background.setTint(style.backgroundColor)
                     setTextColor(style.textColor)
                     compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
                 }
@@ -738,6 +745,7 @@ interface HandleMenuFactory {
         shouldShowNewWindowButton: Boolean,
         shouldShowManageWindowsButton: Boolean,
         shouldShowChangeAspectRatioButton: Boolean,
+        shouldShowDesktopModeButton: Boolean,
         isBrowserApp: Boolean,
         openInAppOrBrowserIntent: Intent?,
         captionWidth: Int,
@@ -760,6 +768,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         shouldShowNewWindowButton: Boolean,
         shouldShowManageWindowsButton: Boolean,
         shouldShowChangeAspectRatioButton: Boolean,
+        shouldShowDesktopModeButton: Boolean,
         isBrowserApp: Boolean,
         openInAppOrBrowserIntent: Intent?,
         captionWidth: Int,
@@ -778,6 +787,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             shouldShowNewWindowButton,
             shouldShowManageWindowsButton,
             shouldShowChangeAspectRatioButton,
+            shouldShowDesktopModeButton,
             isBrowserApp,
             openInAppOrBrowserIntent,
             captionWidth,

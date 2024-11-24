@@ -15,31 +15,18 @@
  */
 package android.platform.test.ravenwood;
 
-import static android.os.Process.FIRST_APPLICATION_UID;
-import static android.os.UserHandle.SYSTEM;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Instrumentation;
-import android.content.Context;
-import android.os.Build;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Represents how to configure the ravenwood environment for a test class.
- *
- * If a ravenwood test class has a public static field with the {@link Config} annotation,
- * Ravenwood will extract the config from it and initializes the environment. The type of the
- * field must be of {@link RavenwoodConfig}.
+ * @deprecated This class will be removed. Reach out to g/ravenwood if you need any features in it.
  */
+@Deprecated
 public final class RavenwoodConfig {
     /**
      * Use this to mark a field as the configuration.
@@ -50,37 +37,10 @@ public final class RavenwoodConfig {
     public @interface Config {
     }
 
-    private static final int NOBODY_UID = 9999;
-
-    private static final AtomicInteger sNextPid = new AtomicInteger(100);
-
-    int mCurrentUser = SYSTEM.getIdentifier();
-
-    /**
-     * Unless the test author requests differently, run as "nobody", and give each collection of
-     * tests its own unique PID.
-     */
-    int mUid = FIRST_APPLICATION_UID;
-    int mPid = sNextPid.getAndIncrement();
-
-    String mTestPackageName;
-    String mTargetPackageName;
-
-    int mTargetSdkLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
-
-    final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
-
-    final List<Class<?>> mServicesRequired = new ArrayList<>();
-
-    volatile Context mInstContext;
-    volatile Context mTargetContext;
-    volatile Instrumentation mInstrumentation;
-
     /**
      * Stores internal states / methods associated with this config that's only needed in
      * junit-impl.
      */
-    final RavenwoodConfigState mState = new RavenwoodConfigState(this);
     private RavenwoodConfig() {
     }
 
@@ -89,12 +49,6 @@ public final class RavenwoodConfig {
      */
     public static boolean isOnRavenwood() {
         return RavenwoodRule.isOnRavenwood();
-    }
-
-    private void setDefaults() {
-        if (mTargetPackageName == null) {
-            mTargetPackageName = mTestPackageName;
-        }
     }
 
     public static class Builder {
@@ -120,28 +74,27 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure the package name of the test, which corresponds to
-         * {@link Instrumentation#getContext()}.
+         * @deprecated no longer used. Package name is set in the build file. (for now)
          */
+        @Deprecated
         public Builder setPackageName(@NonNull String packageName) {
-            mConfig.mTestPackageName = Objects.requireNonNull(packageName);
             return this;
         }
 
         /**
-         * Configure the package name of the target app, which corresponds to
-         * {@link Instrumentation#getTargetContext()}. Defaults to {@link #setPackageName}.
+         * @deprecated no longer used. Package name is set in the build file. (for now)
          */
+        @Deprecated
         public Builder setTargetPackageName(@NonNull String packageName) {
-            mConfig.mTargetPackageName = Objects.requireNonNull(packageName);
             return this;
         }
 
+
         /**
-         * Configure the target SDK level of the test.
+         * @deprecated no longer used. Target SDK level is set in the build file. (for now)
          */
+        @Deprecated
         public Builder setTargetSdkLevel(int sdkLevel) {
-            mConfig.mTargetSdkLevel = sdkLevel;
             return this;
         }
 
@@ -154,58 +107,32 @@ public final class RavenwoodConfig {
         }
 
         /**
-         * Configure the given system property as immutable for the duration of the test.
-         * Read access to the key is allowed, and write access will fail. When {@code value} is
-         * {@code null}, the value is left as undefined.
-         *
-         * All properties in the {@code debug.*} namespace are automatically mutable, with no
-         * developer action required.
-         *
-         * Has no effect on non-Ravenwood environments.
+         * @deprecated Use {@link RavenwoodRule.Builder#setSystemPropertyImmutable(String, Object)}
          */
+        @Deprecated
         public Builder setSystemPropertyImmutable(@NonNull String key,
                 @Nullable Object value) {
-            mConfig.mSystemProperties.setValue(key, value);
-            mConfig.mSystemProperties.setAccessReadOnly(key);
             return this;
         }
 
         /**
-         * Configure the given system property as mutable for the duration of the test.
-         * Both read and write access to the key is allowed, and its value will be reset between
-         * each test. When {@code value} is {@code null}, the value is left as undefined.
-         *
-         * All properties in the {@code debug.*} namespace are automatically mutable, with no
-         * developer action required.
-         *
-         * Has no effect on non-Ravenwood environments.
+         * @deprecated Use {@link RavenwoodRule.Builder#setSystemPropertyMutable(String, Object)}
          */
+        @Deprecated
         public Builder setSystemPropertyMutable(@NonNull String key,
                 @Nullable Object value) {
-            mConfig.mSystemProperties.setValue(key, value);
-            mConfig.mSystemProperties.setAccessReadWrite(key);
             return this;
         }
 
         /**
-         * Configure the set of system services that are required for this test to operate.
-         *
-         * For example, passing {@code android.hardware.SerialManager.class} as an argument will
-         * ensure that the underlying service is created, initialized, and ready to use for the
-         * duration of the test. The {@code SerialManager} instance can be obtained via
-         * {@code RavenwoodRule.getContext()} and {@code Context.getSystemService()}, and
-         * {@code SerialManagerInternal} can be obtained via {@code LocalServices.getService()}.
+         * @deprecated no longer used. All supported services are available.
          */
+        @Deprecated
         public Builder setServicesRequired(@NonNull Class<?>... services) {
-            mConfig.mServicesRequired.clear();
-            for (Class<?> service : services) {
-                mConfig.mServicesRequired.add(service);
-            }
             return this;
         }
 
         public RavenwoodConfig build() {
-            mConfig.setDefaults();
             return mConfig;
         }
     }

@@ -311,7 +311,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"від’єднати"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активувати"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Автоматично ввімкнути завтра"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Такі функції, як швидкий обмін і \"Знайти пристрій\", використовують Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Такі функції, як \"Швидкий обмін\" і \"Знайти пристрій\", використовують Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth увімкнеться завтра вранці"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Поділитись аудіо"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Надсилання аудіо"</string>
@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Джерело сигналу"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Слухові апарати"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Увімкнення…"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Не вдається змінити яскравість, оскільки\n нею керує основний додаток"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автообертання"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматично обертати екран"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Геодані"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Натисніть, щоб підключити новий пристрій"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не вдалось оновити набір налаштувань"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Набір налаштувань"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Вибрано"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Інструменти"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Живі субтитри"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Нотатка"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Надати доступ до камери пристрою?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Надати доступ до камери й мікрофона?"</string>
@@ -593,8 +593,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"Почати зараз"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Сповіщень немає"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Немає нових сповіщень"</string>
-    <!-- no translation found for adaptive_notification_edu_hun_title (2594042455998795122) -->
-    <skip />
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"Зниження гучності сповіщень увімкнено"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Коли ви отримуєте забагато сповіщень за раз, пристрій автоматично знижує їх гучність і кількість на період до 2 хвилин."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Вимкнути"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Розблокуйте, щоб переглянути старіші"</string>
@@ -872,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти до додатка праворуч або внизу на розділеному екрані"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Під час розділення екрана перемикатися на додаток ліворуч або вгорі"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Під час розділення екрана: замінити додаток іншим"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Перемістити активне вікно між дисплеями"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Метод введення"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Вибрати наступну мову"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Вибрати попередню мову"</string>
@@ -1203,8 +1201,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки й екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Пропоновані пристрої"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Введення"</string>
-    <string name="media_output_group_title" msgid="6789001895863332576">"Виведення"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Ввід"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Вивід"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Зупиніть сеанс спільного доступу, щоб перенести медіаконтент на інший пристрій"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Зупинити"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як працює трансляція"</string>
@@ -1222,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Кількість символів має бути менше ніж <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер складання"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер складання скопійовано в буфер обміну."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Відкрита розмова"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Віджети розмов"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Натисніть розмову, щоб додати її на головний екран"</string>
@@ -1357,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Для вищої роздільної здатності переверніть телефон"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Розкладний пристрій у розкладеному стані"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Розкладний пристрій обертається"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"складений"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"розкладений"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1416,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Доступність"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Комбінації клавіш"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Налаштуйте комбінації клавіш"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Натисніть клавішу, щоб призначити комбінацію клавіш"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Комбінації клавіш для пошуку"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нічого не знайдено"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок згортання"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Значок клавіші дії або метаклавіші"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Значок \"плюс\""</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Налаштувати"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок розгортання"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"або"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер переміщення"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Налаштування клавіатури"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Налаштувати комбінацію клавіш"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Скасувати"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Натисніть клавішу"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Комбінація клавіш уже використовується. Спробуйте іншу клавішу."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навігація за допомогою клавіатури"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Дізнайтеся більше про комбінації клавіш"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навігація за допомогою сенсорної панелі"</string>

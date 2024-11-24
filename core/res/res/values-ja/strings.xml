@@ -612,10 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"付近の Ultra Wideband デバイス間の相対位置の特定をアプリに許可します"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"付近の Wi-Fi デバイスとの通信"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"付近の Wi-Fi デバイスについて、情報の表示、接続、相対位置の確認をアプリに許可します"</string>
-    <!-- no translation found for permlab_ranging (2854543350668593390) -->
-    <skip />
-    <!-- no translation found for permdesc_ranging (6703905535621521710) -->
-    <skip />
+    <string name="permlab_ranging" msgid="2854543350668593390">"付近のデバイス間の相対位置の特定"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"付近のデバイス間の相対位置の特定をアプリに許可します"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFCの管理"</string>

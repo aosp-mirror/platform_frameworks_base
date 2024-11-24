@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -45,13 +46,18 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
             float y,
             float width,
             float height,
-            Component parent,
+            @Nullable Component parent,
             int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
     public RootLayoutComponent(
-            int componentId, float x, float y, float width, float height, Component parent) {
+            int componentId,
+            float x,
+            float y,
+            float width,
+            float height,
+            @Nullable Component parent) {
         super(parent, componentId, -1, x, y, width, height);
     }
 
@@ -130,7 +136,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         if (!mNeedsMeasure) {
             return;
         }
-        context.lastComponent = this;
+        context.mLastComponent = this;
         mWidth = context.mWidth;
         mHeight = context.mHeight;
 
@@ -149,7 +155,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     @Override
     public void paint(@NonNull PaintContext context) {
         mNeedsRepaint = false;
-        context.getContext().lastComponent = this;
+        context.getContext().mLastComponent = this;
         context.save();
 
         if (mParent == null) { // root layout

@@ -16,12 +16,24 @@
 
 package com.android.systemui.keyboard.shortcut.domain.interactor
 
+import android.content.Context
+import android.content.Context.INPUT_SERVICE
+import android.hardware.input.InputGestureData
+import android.hardware.input.fakeInputManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allCustomizableInputGesturesWithSimpleShortcutCombinations
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.customInputGestureTypeHome
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.groupWithGoHomeShortcutInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.systemCategoryWithCustomHomeShortcut
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.systemCategoryWithMergedGoHomeShortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.InputMethodEditor
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
@@ -34,6 +46,8 @@ import com.android.systemui.keyboard.shortcut.shortcutHelperSystemShortcutsSourc
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.userTracker
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,13 +56,18 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
 
+    private val mockUserContext: Context = mock()
     private val systemShortcutsSource = FakeKeyboardShortcutGroupsSource()
     private val multitaskingShortcutsSource = FakeKeyboardShortcutGroupsSource()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private val kosmos =
         testKosmos().also {
@@ -57,17 +76,23 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             it.shortcutHelperMultiTaskingShortcutsSource = multitaskingShortcutsSource
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 
+    private val fakeInputManager = kosmos.fakeInputManager
     private val testScope = kosmos.testScope
-    private val interactor = kosmos.shortcutHelperCategoriesInteractor
+    private lateinit var interactor: ShortcutHelperCategoriesInteractor
     private val helper = kosmos.shortcutHelperTestHelper
+    private val inter by lazy { kosmos.shortcutHelperCategoriesInteractor }
 
     @Before
     fun setShortcuts() {
+        interactor = kosmos.shortcutHelperCategoriesInteractor
         helper.setImeShortcuts(TestShortcuts.imeGroups)
         systemShortcutsSource.setGroups(TestShortcuts.systemGroups)
         multitaskingShortcutsSource.setGroups(TestShortcuts.multitaskingGroups)
+        whenever(mockUserContext.getSystemService(INPUT_SERVICE))
+            .thenReturn(fakeInputManager.inputManager)
     }
 
     @Test
@@ -120,7 +145,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     ShortcutCategory(
                         type = InputMethodEditor,
                         subCategories =
-                            TestShortcuts.imeSubCategoriesWithGroupedDuplicatedShortcutLabels
+                            TestShortcuts.imeSubCategoriesWithGroupedDuplicatedShortcutLabels,
                     ),
                 )
                 .inOrder()
@@ -140,7 +165,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     ShortcutCategory(
                         type = System,
                         subCategories =
-                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
+                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels,
                     ),
                     TestShortcuts.multitaskingCategory,
                     TestShortcuts.imeCategory,
@@ -163,7 +188,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     ShortcutCategory(
                         type = MultiTasking,
                         subCategories =
-                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels
+                            TestShortcuts.subCategoriesWithGroupedDuplicatedShortcutLabels,
                     ),
                     TestShortcuts.imeCategory,
                 )
@@ -185,7 +210,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     ShortcutCategory(
                         type = InputMethodEditor,
                         subCategories =
-                            TestShortcuts.imeSubCategoriesWithUnsupportedModifiersRemoved
+                            TestShortcuts.imeSubCategoriesWithUnsupportedModifiersRemoved,
                     ),
                 )
                 .inOrder()
@@ -203,7 +228,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                 .containsExactly(
                     ShortcutCategory(
                         type = System,
-                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
+                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved,
                     ),
                     TestShortcuts.multitaskingCategory,
                     TestShortcuts.imeCategory,
@@ -224,7 +249,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
                     TestShortcuts.systemCategory,
                     ShortcutCategory(
                         type = MultiTasking,
-                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved
+                        subCategories = TestShortcuts.subCategoriesWithUnsupportedModifiersRemoved,
                     ),
                     TestShortcuts.imeCategory,
                 )
@@ -240,10 +265,7 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             helper.showFromActivity()
 
             assertThat(categories)
-                .containsExactly(
-                    TestShortcuts.multitaskingCategory,
-                    TestShortcuts.imeCategory,
-                )
+                .containsExactly(TestShortcuts.multitaskingCategory, TestShortcuts.imeCategory)
                 .inOrder()
         }
 
@@ -256,10 +278,63 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
             helper.showFromActivity()
 
             assertThat(categories)
-                .containsExactly(
-                    TestShortcuts.systemCategory,
-                    TestShortcuts.imeCategory,
-                )
+                .containsExactly(TestShortcuts.systemCategory, TestShortcuts.imeCategory)
                 .inOrder()
         }
+
+    @Test
+    @DisableFlags(Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_SHORTCUT_CUSTOMIZER)
+    fun categories_excludesCustomShortcutsWhenFlagIsOff() {
+        testScope.runTest {
+            setCustomInputGestures(allCustomizableInputGesturesWithSimpleShortcutCombinations)
+            helper.showFromActivity()
+            val categories by collectLastValue(interactor.shortcutCategories)
+            assertThat(categories)
+                .containsExactly(
+                    TestShortcuts.systemCategory,
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_SHORTCUT_CUSTOMIZER)
+    fun categories_includesCustomShortcutsWhenFlagIsOn() {
+        testScope.runTest {
+            setCustomInputGestures(listOf(customInputGestureTypeHome))
+            helper.showFromActivity()
+            val categories by collectLastValue(interactor.shortcutCategories)
+            assertThat(categories)
+                .containsExactly(
+                    systemCategoryWithCustomHomeShortcut,
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYBOARD_SHORTCUT_HELPER_SHORTCUT_CUSTOMIZER)
+    fun categories_correctlyMergesDefaultAndCustomShortcutsOfSameType() {
+        testScope.runTest {
+            setCustomInputGestures(listOf(customInputGestureTypeHome))
+            systemShortcutsSource.setGroups(groupWithGoHomeShortcutInfo)
+            helper.showFromActivity()
+
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            assertThat(categories)
+                .containsExactly(
+                    systemCategoryWithMergedGoHomeShortcut,
+                    TestShortcuts.multitaskingCategory,
+                    TestShortcuts.imeCategory,
+                )
+        }
+    }
+
+    private fun setCustomInputGestures(customInputGestures: List<InputGestureData>) {
+        whenever(fakeInputManager.inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
+            .thenReturn(customInputGestures)
+    }
 }

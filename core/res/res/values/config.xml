@@ -2731,6 +2731,8 @@
     </string-array>
     <!-- The list of supported dream complications -->
     <integer-array name="config_supportedDreamComplications">
+        <!-- COMPLICATION_TYPE_TIME -->
+        <item>1</item>
     </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
@@ -6001,6 +6003,12 @@
     <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
     <bool name="config_showUserSwitcherByDefault">false</bool>
 
+    <!-- If true, user can change state of multiuser switcher. -->
+    <bool name="config_allowChangeUserSwitcherEnabled">true</bool>
+
+    <!-- If true, multiuser switcher would be automatically enabled when second user is created on the device. -->
+    <bool name="config_enableUserSwitcherUponUserCreation">true</bool>
+
     <!-- Set to true to make assistant show in front of the dream/screensaver. -->
     <bool name="config_assistantOnTopOfDream">false</bool>
 
@@ -7184,6 +7192,10 @@
          screen. -->
     <bool name="config_dragToMaximizeInDesktopMode">false</bool>
 
+    <!-- Whether showing the app handle is supported on this device.
+         If config_isDesktopModeSupported, then this has no effect -->
+    <bool name="config_enableAppHandle">false</bool>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7225,12 +7237,18 @@
     <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
     <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 
-    <!-- The name of the service for forensic event transport. -->
-    <string name="config_forensicEventTransport" translatable="false"></string>
+    <!-- The name of the service for intrusion detection event transport. -->
+    <string name="config_intrusionDetectionEventTransport" translatable="false"></string>
 
     <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
     <bool name="config_screen_off_udfps_enabled">false</bool>
 
     <!-- The name of the system package that will hold the dependency installer role. -->
     <string name="config_systemDependencyInstaller" translatable="false" />
+
+    <!-- Whether allow normal brightness when doze policy can be requested. When this is false,
+        brightness follows the display state i.e. ON means bright, DOZE means dim. If true,
+        POLICY_DOZE can also dim the screen unless parameter useNormalBrightnessForDoze of
+        DreamService#setDozeScreenState requests an exception. -->
+    <bool name="config_allowNormalBrightnessForDozePolicy">false</bool>
 </resources>

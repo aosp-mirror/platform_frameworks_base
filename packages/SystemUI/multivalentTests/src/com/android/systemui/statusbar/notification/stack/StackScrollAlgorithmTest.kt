@@ -27,11 +27,11 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView.FooterViewState
+import com.android.systemui.statusbar.notification.headsup.AvalancheController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.policy.AvalancheController
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

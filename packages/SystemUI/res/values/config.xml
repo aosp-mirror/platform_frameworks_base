@@ -506,6 +506,12 @@
          icon will be shown. -->
     <string name="config_screenshotFilesApp" translatable="false"></string>
 
+    <!-- Recommends a UI mode for the default note-taking app when launched with
+         android.content.Intent#ACTION_CREATE_NOTE
+         0: No UI recommendation. The note app should use its default mode
+         1: Recommend a UI optimized for stylus input. -->
+    <integer name="config_preferredNotesMode">1</integer>
+
     <!-- The component name of the screenshot editing activity that provides the App Clips flow.
          The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
          and finally letting user send the screenshot to the calling notes app. This activity

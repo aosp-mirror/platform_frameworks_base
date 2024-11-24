@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES;
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE;
@@ -63,6 +64,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -1207,17 +1209,36 @@ public final class Display {
 
     /**
      * Get the supported refresh rates of this display in frames per second.
-     * <p>
-     * This method only returns refresh rates for the display's default modes. For more options, use
-     * {@link #getSupportedModes()}.
      *
-     * @deprecated use {@link #getSupportedModes()} instead
+     * <ul>
+     * <li> Android version {@link Build.VERSION_CODES#BAKLAVA} and above:
+     * returns display supported render rates.
+     * <li> Android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and below:
+     * This method only returns refresh rates for the display's default modes. For more options,
+     * use {@link #getSupportedModes()}.
+     * </ul>
      */
-    @Deprecated
-    public float[] getSupportedRefreshRates() {
+    @FlaggedApi(FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES)
+    public @NonNull float[] getSupportedRefreshRates() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.getDefaultRefreshRates();
+            final float[] refreshRates = mDisplayInfo.getDefaultRefreshRates();
+            Objects.requireNonNull(refreshRates);
+            return refreshRates;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @SuppressLint({"UnflaggedApi"}) // Usage in the CTS to test backward compatibility.
+    public @NonNull float[] getSupportedRefreshRatesLegacy() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final float[] refreshRates = mDisplayInfo.getDefaultRefreshRatesLegacy();
+            Objects.requireNonNull(refreshRates);
+            return refreshRates;
         }
     }
 
@@ -1279,8 +1300,19 @@ public final class Display {
         }
     }
 
+    /**
+     * Represents the {@link FrameRateCategory} for the Normal frame rate
+     *
+     * @see FrameRateCategory
+     */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
+
+    /**
+     * Represents the {@link FrameRateCategory} for the High frame rate
+     *
+     * @see FrameRateCategory
+     */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_HIGH = 1;
 
@@ -2438,6 +2470,8 @@ public final class Display {
          * constrained by the system.
          * @hide
          */
+        @SuppressWarnings("UnflaggedApi") // For testing only
+        @TestApi
         public float getVsyncRate() {
             return mVsyncRate;
         }

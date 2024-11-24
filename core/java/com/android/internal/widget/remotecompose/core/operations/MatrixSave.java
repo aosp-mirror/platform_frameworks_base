@@ -41,7 +41,7 @@ public class MatrixSave extends PaintOperation {
         return "MatrixSave;";
     }
 
-    public static void read(WireBuffer buffer, @NonNull List<Operation> operations) {
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         MatrixSave op = new MatrixSave();
         operations.add(op);
     }

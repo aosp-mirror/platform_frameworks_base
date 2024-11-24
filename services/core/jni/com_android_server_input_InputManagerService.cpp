@@ -2330,6 +2330,12 @@ static void nativeToggleCapsLock(JNIEnv* env, jobject nativeImplObj, jint device
     im->getInputManager()->getReader().toggleCapsLockState(deviceId);
 }
 
+static void resetLockedModifierState(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->getInputManager()->getReader().resetLockedModifierState();
+}
+
 static void nativeDisplayRemoved(JNIEnv* env, jobject nativeImplObj, jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -3134,6 +3140,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"verifyInputEvent", "(Landroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
          (void*)nativeVerifyInputEvent},
         {"toggleCapsLock", "(I)V", (void*)nativeToggleCapsLock},
+        {"resetLockedModifierState", "()V", (void*)resetLockedModifierState},
         {"displayRemoved", "(I)V", (void*)nativeDisplayRemoved},
         {"setFocusedApplication", "(ILandroid/view/InputApplicationHandle;)V",
          (void*)nativeSetFocusedApplication},

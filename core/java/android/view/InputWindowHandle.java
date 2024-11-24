@@ -260,6 +260,15 @@ public final class InputWindowHandle {
         touchableRegionSurfaceControl = new WeakReference<>(bounds);
     }
 
+    /**
+     * Resize the window touchable region.
+     * @param rect new touchable region rectangle.
+     */
+    public void setTouchableRegion(Rect rect) {
+        touchableRegion.set(rect);
+    }
+
+
     public void setWindowToken(IBinder iwindow) {
         windowToken = iwindow;
     }

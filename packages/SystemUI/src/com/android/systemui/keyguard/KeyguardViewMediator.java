@@ -3943,7 +3943,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void notifyDefaultDisplayCallbacks(boolean showing) {
-        if (SceneContainerFlag.isEnabled()) {
+        if (SceneContainerFlag.isEnabled() || KeyguardWmStateRefactor.isEnabled()) {
             return;
         }
 

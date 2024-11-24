@@ -60,7 +60,7 @@ public class AdvancedProtectionServiceTest {
     public void setup() throws Settings.SettingNotFoundException {
         mContext = mock(Context.class);
         mPermissionEnforcer = new FakePermissionEnforcer();
-        mPermissionEnforcer.grant(Manifest.permission.SET_ADVANCED_PROTECTION_MODE);
+        mPermissionEnforcer.grant(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE);
         mPermissionEnforcer.grant(Manifest.permission.QUERY_ADVANCED_PROTECTION_MODE);
 
         mStore = new AdvancedProtectionService.AdvancedProtectionStore(mContext) {
@@ -299,7 +299,7 @@ public class AdvancedProtectionServiceTest {
 
     @Test
     public void testSetProtection_withoutPermission() {
-        mPermissionEnforcer.revoke(Manifest.permission.SET_ADVANCED_PROTECTION_MODE);
+        mPermissionEnforcer.revoke(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE);
         assertThrows(SecurityException.class, () -> mService.setAdvancedProtectionEnabled(true));
     }
 

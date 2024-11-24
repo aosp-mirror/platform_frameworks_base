@@ -24,5 +24,6 @@ import android.hardware.power.GpuHeadroomParams;
  */
 @JavaDerive(equals = true, toString = true)
 parcelable GpuHeadroomParamsInternal {
+    int calculationWindowMillis = 1000;
     GpuHeadroomParams.CalculationType calculationType = GpuHeadroomParams.CalculationType.MIN;
 }

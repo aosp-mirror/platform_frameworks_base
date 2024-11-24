@@ -466,6 +466,11 @@
     <integer name="config_satellite_location_query_throttle_interval_minutes">10</integer>
     <java-symbol type="integer" name="config_satellite_location_query_throttle_interval_minutes" />
 
+    <!-- The file contains satellite access configuration like supported frequencies, bands,
+    satellite positions, and so on -->
+    <string name="satellite_access_config_file" translatable="false"></string>
+    <java-symbol type="string" name="satellite_access_config_file" />
+
     <!-- Boolean indicating whether to enable MT SMS polling for NB IOT NTN. -->
     <bool name="config_enabled_mt_sms_polling">true</bool>
     <java-symbol type="bool" name="config_enabled_mt_sms_polling" />
@@ -484,7 +489,7 @@
 
     <!-- Whether to show the system notification to users whenever there is a change
      in the satellite availability state at the current location. -->
-    <bool name="config_satellite_should_notify_availability">false</bool>
+    <bool name="config_satellite_should_notify_availability">true</bool>
     <java-symbol type="bool" name="config_satellite_should_notify_availability" />
 
 </resources>

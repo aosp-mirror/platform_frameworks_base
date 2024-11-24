@@ -318,17 +318,13 @@ internal class MultiPointerDraggableNode(
                                             velocityTracker.calculateVelocity(maxVelocity)
                                         }
                                         .toFloat(),
-                                onFling = {
-                                    controller.onStop(it, canChangeContent = true).invoke()
-                                },
+                                onFling = { controller.onStop(it, canChangeContent = true) },
                             )
                         },
                         onDragCancel = { controller ->
                             startFlingGesture(
                                 initialVelocity = 0f,
-                                onFling = {
-                                    controller.onStop(it, canChangeContent = true).invoke()
-                                },
+                                onFling = { controller.onStop(it, canChangeContent = true) },
                             )
                         },
                         swipeDetector = swipeDetector,
@@ -519,8 +515,19 @@ internal class MultiPointerDraggableNode(
                 // we intercept an ongoing swipe transition (i.e. startDragImmediately() returned
                 // true).
                 if (overSlop == 0f) {
-                    val delta = (drag.position - consumablePointer.position).toFloat()
-                    check(delta != 0f) { "delta is equal to 0" }
+                    // If the user drags in the opposite direction, the delta becomes zero because
+                    // we return to the original point. Therefore, we should use the previous event
+                    // to calculate the direction.
+                    val delta = (drag.position - drag.previousPosition).toFloat()
+                    check(delta != 0f) {
+                        buildString {
+                            append("delta is equal to 0 ")
+                            append("touchSlop ${currentValueOf(LocalViewConfiguration).touchSlop} ")
+                            append("consumablePointer.position ${consumablePointer.position} ")
+                            append("drag.position ${drag.position} ")
+                            append("drag.previousPosition ${drag.previousPosition}")
+                        }
+                    }
                     overSlop = delta.sign
                 }
                 drag

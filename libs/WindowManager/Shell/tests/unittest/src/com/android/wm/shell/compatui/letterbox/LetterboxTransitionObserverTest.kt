@@ -16,10 +16,13 @@
 
 package com.android.wm.shell.compatui.letterbox
 
+import android.graphics.Point
+import android.graphics.Rect
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
+import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CLOSE
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags
@@ -33,12 +36,12 @@ import java.util.function.Consumer
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
-import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.verify
 import org.mockito.verification.VerificationMode
 
 /**
@@ -93,7 +96,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                     r.creationEventDetected(expected = false)
                     r.visibilityEventDetected(expected = false)
                     r.destroyEventDetected(expected = false)
-                    r.boundsEventDetected(expected = false)
+                    r.updateSurfaceBoundsEventDetected(expected = false)
                 }
             }
         }
@@ -107,14 +110,23 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
 
                 inputBuilder {
                     buildTransitionInfo()
-                    r.createTopActivityChange(inputBuilder = this, isLetterboxed = true)
+                    r.createTopActivityChange(
+                        inputBuilder = this,
+                        isLetterboxed = true,
+                        taskPosition = Point(20, 30),
+                        taskWidth = 200,
+                        taskHeight = 300
+                    )
                 }
 
                 validateOutput {
                     r.creationEventDetected(expected = true)
                     r.visibilityEventDetected(expected = true, visible = true)
                     r.destroyEventDetected(expected = false)
-                    r.boundsEventDetected(expected = true)
+                    r.updateSurfaceBoundsEventDetected(
+                        expected = true,
+                        taskBounds = Rect(20, 30, 200, 300)
+                    )
                 }
             }
         }
@@ -135,7 +147,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                     r.creationEventDetected(expected = false)
                     r.visibilityEventDetected(expected = true, visible = false)
                     r.destroyEventDetected(expected = false)
-                    r.boundsEventDetected(expected = false)
+                    r.updateSurfaceBoundsEventDetected(expected = false)
                 }
             }
         }
@@ -156,7 +168,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                     r.destroyEventDetected(expected = true)
                     r.creationEventDetected(expected = false)
                     r.visibilityEventDetected(expected = false, visible = false)
-                    r.boundsEventDetected(expected = false)
+                    r.updateSurfaceBoundsEventDetected(expected = false)
                 }
             }
         }
@@ -189,10 +201,10 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
         val observerFactory: () -> LetterboxTransitionObserver
 
         init {
-            executor = Mockito.mock(ShellExecutor::class.java)
+            executor = mock<ShellExecutor>()
             shellInit = ShellInit(executor)
-            transitions = Mockito.mock(Transitions::class.java)
-            letterboxController = Mockito.mock(LetterboxController::class.java)
+            transitions = mock<Transitions>()
+            letterboxController = mock<LetterboxController>()
             letterboxObserver =
                 LetterboxTransitionObserver(shellInit, transitions, letterboxController)
             observerFactory = { letterboxObserver }
@@ -203,67 +215,78 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
         fun observer() = letterboxObserver
 
         fun checkObservableIsRegistered(expected: Boolean) {
-            Mockito.verify(transitions, expected.asMode()).registerObserver(observer())
+            verify(transitions, expected.asMode()).registerObserver(observer())
         }
 
         fun creationEventDetected(
             expected: Boolean,
             displayId: Int = DISPLAY_ID,
             taskId: Int = TASK_ID
-        ) {
-            Mockito.verify(letterboxController, expected.asMode()).createLetterboxSurface(
-                toLetterboxKeyMatcher(displayId, taskId),
-                anyOrNull(),
-                anyOrNull()
-            )
-        }
+        ) = verify(
+            letterboxController,
+            expected.asMode()
+        ).createLetterboxSurface(
+            eq(LetterboxKey(displayId, taskId)),
+            any<SurfaceControl.Transaction>(),
+            any<SurfaceControl>()
+        )
 
         fun visibilityEventDetected(
             expected: Boolean,
+            visible: Boolean = true,
             displayId: Int = DISPLAY_ID,
-            taskId: Int = TASK_ID,
-            visible: Boolean? = null
-        ) {
-            Mockito.verify(letterboxController, expected.asMode()).updateLetterboxSurfaceVisibility(
-                toLetterboxKeyMatcher(displayId, taskId),
-                anyOrNull(),
-                visible.asMatcher()
-            )
-        }
+            taskId: Int = TASK_ID
+        ) = verify(letterboxController, expected.asMode()).updateLetterboxSurfaceVisibility(
+            eq(LetterboxKey(displayId, taskId)),
+            any<SurfaceControl.Transaction>(),
+            eq(visible)
+        )
 
         fun destroyEventDetected(
             expected: Boolean,
             displayId: Int = DISPLAY_ID,
             taskId: Int = TASK_ID
-        ) {
-            Mockito.verify(letterboxController, expected.asMode()).destroyLetterboxSurface(
-                toLetterboxKeyMatcher(displayId, taskId),
-                anyOrNull()
-            )
-        }
+        ) = verify(
+            letterboxController,
+            expected.asMode()
+        ).destroyLetterboxSurface(
+            eq(LetterboxKey(displayId, taskId)),
+            any<SurfaceControl.Transaction>()
+        )
 
-        fun boundsEventDetected(
+        fun updateSurfaceBoundsEventDetected(
             expected: Boolean,
             displayId: Int = DISPLAY_ID,
-            taskId: Int = TASK_ID
-        ) {
-            Mockito.verify(letterboxController, expected.asMode()).updateLetterboxSurfaceBounds(
-                toLetterboxKeyMatcher(displayId, taskId),
-                anyOrNull(),
-                anyOrNull()
-            )
-        }
+            taskId: Int = TASK_ID,
+            taskBounds: Rect = Rect()
+        ) = verify(
+            letterboxController,
+            expected.asMode()
+        ).updateLetterboxSurfaceBounds(
+            eq(LetterboxKey(displayId, taskId)),
+            any<SurfaceControl.Transaction>(),
+            eq(taskBounds)
+        )
 
         fun createTopActivityChange(
             inputBuilder: TransitionObserverInputBuilder,
             isLetterboxed: Boolean = true,
             displayId: Int = DISPLAY_ID,
-            taskId: Int = TASK_ID
+            taskId: Int = TASK_ID,
+            taskPosition: Point = Point(),
+            taskWidth: Int = 0,
+            taskHeight: Int = 0
         ) {
-            inputBuilder.addChange(changeTaskInfo = inputBuilder.createTaskInfo().apply {
-                appCompatTaskInfo.isTopActivityLetterboxed = isLetterboxed
-                this.taskId = taskId
-                this.displayId = displayId
+            inputBuilder.addChange(inputBuilder.createChange(
+                changeTaskInfo = inputBuilder.createTaskInfo().apply {
+                    appCompatTaskInfo.isTopActivityLetterboxed = isLetterboxed
+                    this.taskId = taskId
+                    this.displayId = displayId
+                }
+            ).apply {
+                endRelOffset.x = taskPosition.x
+                endRelOffset.y = taskPosition.y
+                endAbsBounds.set(Rect(0, 0, taskWidth, taskHeight))
             })
         }
 
@@ -279,16 +302,5 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
         }
 
         private fun Boolean.asMode(): VerificationMode = if (this) times(1) else never()
-
-        private fun Boolean?.asMatcher(): Boolean =
-            if (this != null) eq(this) else any()
-
-        private fun toLetterboxKeyMatcher(displayId: Int, taskId: Int): LetterboxKey {
-            if (displayId < 0 || taskId < 0) {
-                return any()
-            } else {
-                return eq(LetterboxKey(displayId, taskId))
-            }
-        }
     }
 }

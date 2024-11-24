@@ -848,10 +848,10 @@
     <protected-broadcast android:name="android.app.action.CONSOLIDATED_NOTIFICATION_POLICY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED" />
     <protected-broadcast android:name="com.android.uwb.uwbcountrycode.GEOCODE_RETRY" />
-    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
+    <protected-broadcast android:name="android.telephony.satellite.action.SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
     <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_LOADED" />
     <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_UNLOADED" />
-    <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION" />
+    <protected-broadcast android:name="android.telephony.satellite.action.SATELLITE_START_NON_EMERGENCY_SESSION" />
 
 
     <!-- ====================================================================== -->
@@ -2649,6 +2649,22 @@
         android:label="@string/permlab_getAccounts" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
+    <!-- @SystemApi Allows access to remove an account.
+         @FlaggedApi(android.app.admin.flags.Flags.FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.REMOVE_ACCOUNTS"
+        android:protectionLevel="signature|role"
+        android:featureFlag="android.app.admin.flags.split_create_managed_profile_enabled" />
+
+    <!-- @SystemApi Allows access to copy an account to another user.
+         @FlaggedApi(android.app.admin.flags.Flags.FLAG_SPLIT_CREATE_MANAGED_PROFILE_ENABLED)
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.COPY_ACCOUNTS"
+        android:protectionLevel="signature|role"
+        android:featureFlag="android.app.admin.flags.split_create_managed_profile_enabled" />
+
     <!-- Allows applications to call into AccountAuthenticators.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCOUNT_MANAGER"
@@ -4185,53 +4201,54 @@
                 android:protectionLevel="signature|installer" />
     <uses-permission android:name="android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES" />
 
-    <!-- Allows an application to toggle the device's advanced protection mode status.
-        @FlaggedApi("android.security.aapm_api")
+    <!-- Allows an application to modify the device's advanced protection mode status, and query
+         the list of enabled features
+        @FlaggedApi(android.security.Flags.FLAG_AAPM_API)
         @SystemApi
         @hide -->
-    <permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+    <permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE"
         android:protectionLevel="signature|privileged"
         android:featureFlag="android.security.aapm_api"/>
-    <uses-permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+    <uses-permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
 
     <!-- Allows an application to query the device's advanced protection mode status.
-        @FlaggedApi("android.security.aapm_api") -->
+        @FlaggedApi(android.security.Flags.FLAG_AAPM_API) -->
     <permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
         android:protectionLevel="normal"
         android:featureFlag="android.security.aapm_api"/>
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
 
-    <!-- Allows an application to read the state of the ForensicService
+    <!-- Allows an application to read the state of the IntrusionDetectionService
          @FlaggedApi(android.security.Flags.FLAG_AFL_API)
          @SystemApi
          @hide -->
-    <permission android:name="android.permission.READ_FORENSIC_STATE"
+    <permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"
         android:protectionLevel="signature|privileged" />
-    <uses-permission android:name="android.permission.READ_FORENSIC_STATE"
+    <uses-permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"/>
 
-    <!-- Allows an application to change the state of the ForensicService
+    <!-- Allows an application to change the state of the IntrusionDetectionService
          @FlaggedApi(android.security.Flags.FLAG_AFL_API)
          @SystemApi
          @hide -->
-    <permission android:name="android.permission.MANAGE_FORENSIC_STATE"
+    <permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"
         android:protectionLevel="signature|privileged" />
-    <uses-permission android:name="android.permission.MANAGE_FORENSIC_STATE"
+    <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
         android:featureFlag="android.security.afl_api"/>
 
-    <!-- Must be required by any ForensicEventTransportService to ensure that
+    <!-- Must be required by any IntrusionDetectionEventTransportService to ensure that
          only the system can bind to it.
          @FlaggedApi(android.security.Flags.FLAG_AFL_API)
          @SystemApi
          @hide -->
-    <permission android:name="android.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE"
+    <permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE"
         android:featureFlag="android.security.afl_api"
         android:protectionLevel="signature" />
-    <uses-permission android:name="android.permission.BIND_FORENSIC_EVENT_TRANSPORT_SERVICE"
+    <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE"
         android:featureFlag="android.security.afl_api"/>
 
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
@@ -6492,6 +6509,15 @@
     <permission android:name="android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT"
         android:protectionLevel="signature|privileged|role" />
 
+    <!-- @SystemApi Allows an application to bypass concurrency restrictions while
+        recording audio. For example, apps with this permission can continue to record
+        while a voice call is active.</p>
+     @FlaggedApi(android.media.audio.Flags.FLAG_CONCURRENT_AUDIO_RECORD_BYPASS_PERMISSION)
+     @hide -->
+    <permission android:name="android.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION"
+        android:featureFlag="android.media.audio.concurrent_audio_record_bypass_permission"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to capture audio for hotword detection.
          <p>Not for use by third-party applications.</p>
          @hide -->
@@ -8034,6 +8060,13 @@
     <permission android:name="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY"
                 android:protectionLevel="signature|role"/>
 
+    <!-- Allows an application to create displays that mirror other displays' content.
+         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
+         @hide @SystemApi -->
+    <permission android:name="android.permission.ADD_MIRROR_DISPLAY"
+        android:protectionLevel="internal|role"
+        android:featureFlag="android.companion.virtualdevice.flags.enable_limited_vdm_role" />
+
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|role" />
@@ -8651,6 +8684,17 @@
     <permission android:name="android.permission.SETUP_FSVERITY"
                 android:protectionLevel="signature|privileged"/>
 
+    <!-- @SystemApi
+        @FlaggedApi(android.security.Flags.FLAG_SECURE_LOCKDOWN)
+        Allows an application to lock down the device into an enhanced security state.
+        <p>Not for use by third-party applications.
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.MANAGE_SECURE_LOCK_DEVICE"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.security.secure_lockdown" />
+
     <!-- Allows app to enter trade-in-mode.
         <p>Protection level: signature|privileged
         @hide
@@ -8679,29 +8723,6 @@
     -->
     <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
                 android:protectionLevel="signature"/>
-
-    <!-- @SystemApi
-        @FlaggedApi("android.content.pm.verification_service")
-        Allows app to be the verification agent to verify packages.
-        <p>Protection level: signature|privileged
-        @hide
-    -->
-    <permission android:name="android.permission.VERIFICATION_AGENT"
-        android:protectionLevel="signature|privileged"
-        android:featureFlag="android.content.pm.verification_service" />
-
-    <!-- @SystemApi
-        @FlaggedApi("android.content.pm.verification_service")
-        Must be required by a privileged {@link android.content.pm.verify.pkg.VerifierService}
-        to ensure that only the system can bind to it.
-        This permission should not be held by anything other than the system.
-        <p>Not for use by third-party applications. </p>
-        <p>Protection level: signature
-        @hide
-    -->
-    <permission android:name="android.permission.BIND_VERIFICATION_AGENT"
-        android:protectionLevel="internal"
-        android:featureFlag="android.content.pm.verification_service" />
 
     <!--
         This permission allows the system to receive PACKAGE_CHANGED broadcasts when the component
@@ -9325,6 +9346,17 @@
                  android:exported="true">
             <meta-data android:name="android.telecom.INCLUDE_SELF_MANAGED_CALLS"
                        android:value="true" />
+            <intent-filter>
+                <action android:name="android.telecom.InCallService"/>
+            </intent-filter>
+        </service>
+
+        <service android:name="com.android.ecm.EnhancedConfirmationCallTrackerService"
+            android:permission="android.permission.BIND_INCALL_SERVICE"
+            android:featureFlag="android.permission.flags.enhanced_confirmation_in_call_apis_enabled"
+            android:exported="true">
+            <meta-data android:name="android.telecom.INCLUDE_SELF_MANAGED_CALLS"
+                android:value="true" />
             <intent-filter>
                 <action android:name="android.telecom.InCallService"/>
             </intent-filter>

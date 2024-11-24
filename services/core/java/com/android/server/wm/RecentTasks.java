@@ -495,11 +495,18 @@ class RecentTasks {
         mTaskNotificationController.notifyTaskListUpdated();
     }
 
-    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
+    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess,
+            boolean removedForAddTask) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).onRecentTaskRemoved(task, wasTrimmed, killProcess);
         }
         mTaskNotificationController.notifyTaskListUpdated();
+        if (removedForAddTask) {
+            mTaskNotificationController.notifyRecentTaskRemovedForAddTask(task.mTaskId);
+        }
+    }
+    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
+        notifyTaskRemoved(task, wasTrimmed, killProcess, false /* removedForAddTask */);
     }
 
     /**
@@ -1635,7 +1642,8 @@ class RecentTasks {
                 // from becoming dangling.
                 mHiddenTasks.add(0, removedTask);
             }
-            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
+            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */,
+                    true /* removedForAddTask */);
             if (DEBUG_RECENTS_TRIM_TASKS) {
                 Slog.d(TAG, "Trimming task=" + removedTask
                         + " for addition of task=" + task);
@@ -2025,21 +2033,8 @@ class RecentTasks {
         // Fill in some deprecated values.
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
-        rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
         if (!getTasksAllowed) {
             Task.trimIneffectiveInfo(tr, rti);
-        }
-
-        // Fill in organized child task info for the task created by organizer.
-        if (tr.mCreatedByOrganizer) {
-            for (int i = tr.getChildCount() - 1; i >= 0; i--) {
-                final Task childTask = tr.getChildAt(i).asTask();
-                if (childTask != null && childTask.isOrganized()) {
-                    final ActivityManager.RecentTaskInfo cti = new ActivityManager.RecentTaskInfo();
-                    childTask.fillTaskInfo(cti, true /* stripExtras */, tda);
-                    rti.childrenTaskInfos.add(cti);
-                }
-            }
         }
         return rti;
     }

@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.SystemClock
 import android.platform.uiautomatorhelpers.DeviceHelpers
+import android.tools.PlatformConsts
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -92,7 +93,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     }
 
     /** Move an app to Desktop by dragging the app handle at the top. */
-    fun enterDesktopModeWithDrag(
+    private fun enterDesktopModeWithDrag(
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
         motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH)
@@ -155,14 +156,19 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             ?: error("Unable to find resource $MINIMIZE_BUTTON_VIEW\n")
     }
 
-    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice, isPip: Boolean = false) {
         val caption = getCaptionForTheApp(wmHelper, device)
         val minimizeButton = getMinimizeButtonForTheApp(caption)
         minimizeButton.click()
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()
-            .withWindowSurfaceDisappeared(innerHelper)
+            .apply {
+                if (isPip) withPipShown()
+                else
+                    withWindowSurfaceDisappeared(innerHelper)
+                        .withActivityState(innerHelper, PlatformConsts.STATE_STOPPED)
+            }
             .waitForAndVerify()
     }
 

@@ -48,7 +48,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.vcn.Flags;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
@@ -890,20 +889,11 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         while (configsIterator.hasNext()) {
             final ParcelUuid subGrp = configsIterator.next();
 
-            if (Flags.fixConfigGarbageCollection()) {
-                if (!subGroups.contains(subGrp)) {
-                    // Trim subGrps with no more subscriptions; must have moved to another subGrp
-                    logDbg("Garbage collect VcnConfig for group=" + subGrp);
-                    configsIterator.remove();
-                    shouldWrite = true;
-                }
-            } else {
-                final List<SubscriptionInfo> subscriptions = subMgr.getSubscriptionsInGroup(subGrp);
-                if (subscriptions == null || subscriptions.isEmpty()) {
-                    // Trim subGrps with no more subscriptions; must have moved to another subGrp
-                    configsIterator.remove();
-                    shouldWrite = true;
-                }
+            if (!subGroups.contains(subGrp)) {
+                // Trim subGrps with no more subscriptions; must have moved to another subGrp
+                logDbg("Garbage collect VcnConfig for group=" + subGrp);
+                configsIterator.remove();
+                shouldWrite = true;
             }
         }
 

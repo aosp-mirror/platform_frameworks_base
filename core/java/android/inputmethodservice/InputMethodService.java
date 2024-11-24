@@ -56,6 +56,7 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
 import static android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API;
+import static android.view.inputmethod.Flags.FLAG_VERIFY_KEY_EVENT;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 import static android.view.inputmethod.Flags.predictiveBackIme;
 
@@ -405,6 +406,12 @@ public class InputMethodService extends AbstractInputMethodService {
      * Tracks the ctrl+shift shortcut
      **/
     private boolean mUsingCtrlShiftShortcut = false;
+
+    /**
+     * Last handwriting bounds used for stylus handwriting
+     * {@link #setStylusHandwritingRegion(Region)}.
+     */
+    private Region mLastHandwritingRegion;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -1192,6 +1199,11 @@ public class InputMethodService extends AbstractInputMethodService {
                     // when the stylus is not down.
                     mPrivOps.setHandwritingSurfaceNotTouchable(true);
                     break;
+                case MotionEvent.ACTION_OUTSIDE:
+                    // TODO(b/350047836): determine if there is use-case for simultaneous touch
+                    //  and stylus handwriting and we shouldn't finish for that.
+                    finishStylusHandwriting();
+                    break;
             }
         }
 
@@ -1532,6 +1544,7 @@ public class InputMethodService extends AbstractInputMethodService {
                     return;
                 }
                 editorInfo.makeCompatible(getApplicationInfo().targetSdkVersion);
+                mLastHandwritingRegion = null;
                 getInputMethodInternal().restartInput(new RemoteInputConnection(ric, sessionId),
                         editorInfo);
             }
@@ -2840,6 +2853,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mHandler.removeCallbacks(mFinishHwRunnable);
         }
         mFinishHwRunnable = null;
+        mLastHandwritingRegion = null;
 
         final int requestId = mHandwritingRequestId.getAsInt();
         mHandwritingRequestId = OptionalInt.empty();
@@ -3166,6 +3180,41 @@ public class InputMethodService extends AbstractInputMethodService {
         registerDefaultOnBackInvokedCallback();
     }
 
+    /**
+     * Sets a new stylus handwriting region as user continues to write on an editor on screen.
+     * Stylus strokes that are started within the {@code touchableRegion} are treated as
+     * continuation of handwriting and all the events outside are passed-through to the IME target
+     * app, causing stylus handwriting to finish {@link #finishStylusHandwriting()}.
+     * By default, {@link WindowManager#getMaximumWindowMetrics()} is handwritable and
+     * {@code touchableRegion} resets after each handwriting session.
+     * <p>
+     * For example, the IME can use this API to dynamically expand the stylus handwriting region on
+     * every stylus stroke as user continues to write on an editor. The region should grow around
+     * the last stroke so that a UI element below the IME window is still interactable when it is
+     * spaced sufficiently away (~2 character dimensions) from last stroke.
+     * </p>
+     * <p>
+     * Note: Setting handwriting touchable region is supported on IMEs that support stylus
+     * handwriting {@link InputMethodInfo#supportsStylusHandwriting()}.
+     * </p>
+     *
+     * @param handwritingRegion new stylus handwritable {@link Region} that can accept stylus touch.
+     */
+    @FlaggedApi(Flags.FLAG_ADAPTIVE_HANDWRITING_BOUNDS)
+    public final void setStylusHandwritingRegion(@NonNull Region handwritingRegion) {
+        if (handwritingRegion.equals(mLastHandwritingRegion)) {
+            Log.v(TAG, "Failed to set setStylusHandwritingRegion():"
+                    + " same region set twice.");
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Setting new handwriting region for stylus handwriting "
+                    + handwritingRegion + " from last " + mLastHandwritingRegion);
+        }
+        mPrivOps.setHandwritingTouchableRegion(handwritingRegion);
+        mLastHandwritingRegion = handwritingRegion;
+    }
 
     /**
      * Registers an {@link OnBackInvokedCallback} to handle back invocation when ahead-of-time
@@ -3732,6 +3781,23 @@ public class InputMethodService extends AbstractInputMethodService {
         }
 
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
+    }
+
+    /**
+     * Received by the IME before dispatch to {@link #onKeyDown(int, KeyEvent)} to let the system
+     * know if the {@link KeyEvent} needs to be verified that it originated from the system.
+     * {@link KeyEvent}s may originate from outside of the system and any sensitive keys should be
+     * marked for verification. One example of this could be using key shortcuts for switching to
+     * another IME.
+     *
+     * @param keyEvent the event that may need verification.
+     * @return {@code true} if {@link KeyEvent} should have its HMAC verified before dispatch,
+     * {@code false} otherwise.
+     */
+    @FlaggedApi(FLAG_VERIFY_KEY_EVENT)
+    @Override
+    public boolean onShouldVerifyKeyEvent(@NonNull KeyEvent keyEvent) {
+        return false;
     }
 
     /**

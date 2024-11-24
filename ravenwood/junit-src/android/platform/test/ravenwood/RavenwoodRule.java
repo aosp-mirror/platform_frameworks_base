@@ -36,10 +36,8 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * @deprecated Use {@link RavenwoodConfig} to configure the ravenwood environment instead.
- * A {@link RavenwoodRule} is no longer needed for {@link DisabledOnRavenwood}. To get the
- * {@link Context} and {@link Instrumentation}, use
- * {@link androidx.test.platform.app.InstrumentationRegistry} instead.
+ * @deprecated This class is undergoing a major change. Reach out to g/ravenwood if you need
+ * any featues in it.
  */
 @Deprecated
 public final class RavenwoodRule implements TestRule {
@@ -94,19 +92,11 @@ public final class RavenwoodRule implements TestRule {
         }
     }
 
-    private final RavenwoodConfig mConfiguration;
-
-    public RavenwoodRule() {
-        mConfiguration = new RavenwoodConfig.Builder().build();
-    }
-
-    private RavenwoodRule(RavenwoodConfig config) {
-        mConfiguration = config;
-    }
+    final RavenwoodTestProperties mProperties = new RavenwoodTestProperties();
 
     public static class Builder {
-        private final RavenwoodConfig.Builder mBuilder =
-                new RavenwoodConfig.Builder();
+
+        private final RavenwoodRule mRule = new RavenwoodRule();
 
         public Builder() {
         }
@@ -128,11 +118,10 @@ public final class RavenwoodRule implements TestRule {
         }
 
         /**
-         * Configure the identity of this process to be the given package name for the duration
-         * of the test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used.
          */
+        @Deprecated
         public Builder setPackageName(@NonNull String packageName) {
-            mBuilder.setPackageName(packageName);
             return this;
         }
 
@@ -155,7 +144,8 @@ public final class RavenwoodRule implements TestRule {
          * Has no effect on non-Ravenwood environments.
          */
         public Builder setSystemPropertyImmutable(@NonNull String key, @Nullable Object value) {
-            mBuilder.setSystemPropertyImmutable(key, value);
+            mRule.mProperties.setValue(key, value);
+            mRule.mProperties.setAccessReadOnly(key);
             return this;
         }
 
@@ -170,26 +160,21 @@ public final class RavenwoodRule implements TestRule {
          * Has no effect on non-Ravenwood environments.
          */
         public Builder setSystemPropertyMutable(@NonNull String key, @Nullable Object value) {
-            mBuilder.setSystemPropertyMutable(key, value);
+            mRule.mProperties.setValue(key, value);
+            mRule.mProperties.setAccessReadWrite(key);
             return this;
         }
 
         /**
-         * Configure the set of system services that are required for this test to operate.
-         *
-         * For example, passing {@code android.hardware.SerialManager.class} as an argument will
-         * ensure that the underlying service is created, initialized, and ready to use for the
-         * duration of the test. The {@code SerialManager} instance can be obtained via
-         * {@code RavenwoodRule.getContext()} and {@code Context.getSystemService()}, and
-         * {@code SerialManagerInternal} can be obtained via {@code LocalServices.getService()}.
+         * @deprecated no longer used. All supported services are available.
          */
+        @Deprecated
         public Builder setServicesRequired(@NonNull Class<?>... services) {
-            mBuilder.setServicesRequired(services);
             return this;
         }
 
         public RavenwoodRule build() {
-            return new RavenwoodRule(mBuilder.build());
+            return mRule;
         }
     }
 
@@ -230,7 +215,7 @@ public final class RavenwoodRule implements TestRule {
 
     @Override
     public Statement apply(Statement base, Description description) {
-        if (!RavenwoodConfig.isOnRavenwood()) {
+        if (!IS_ON_RAVENWOOD) {
             return base;
         }
         return new Statement() {
@@ -298,9 +283,5 @@ public final class RavenwoodRule implements TestRule {
 
     public static RavenwoodPrivate private$ravenwood() {
         return sRavenwoodPrivate;
-    }
-
-    RavenwoodConfig getConfiguration() {
-        return mConfiguration;
     }
 }

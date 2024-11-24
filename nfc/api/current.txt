@@ -81,11 +81,14 @@ package android.nfc {
     method @FlaggedApi("android.nfc.enable_nfc_reader_option") public boolean isReaderOptionSupported();
     method public boolean isSecureNfcEnabled();
     method public boolean isSecureNfcSupported();
+    method @FlaggedApi("android.nfc.nfc_check_tag_intent_preference") public boolean isTagIntentAllowed();
+    method @FlaggedApi("android.nfc.nfc_check_tag_intent_preference") public boolean isTagIntentAppPreferenceSupported();
     method @FlaggedApi("android.nfc.enable_nfc_charging") public boolean isWlcEnabled();
     method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void resetDiscoveryTechnology(@NonNull android.app.Activity);
     method @FlaggedApi("android.nfc.enable_nfc_set_discovery_tech") public void setDiscoveryTechnology(@NonNull android.app.Activity, int, int);
     method @FlaggedApi("android.nfc.nfc_observe_mode") public boolean setObserveModeEnabled(boolean);
     field public static final String ACTION_ADAPTER_STATE_CHANGED = "android.nfc.action.ADAPTER_STATE_CHANGED";
+    field @FlaggedApi("android.nfc.nfc_check_tag_intent_preference") public static final String ACTION_CHANGE_TAG_INTENT_PREFERENCE = "android.nfc.action.CHANGE_TAG_INTENT_PREFERENCE";
     field public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
     field @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public static final String ACTION_PREFERRED_PAYMENT_CHANGED = "android.nfc.action.PREFERRED_PAYMENT_CHANGED";
     field public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
@@ -199,6 +202,7 @@ package android.nfc.cardemulation {
     method public boolean categoryAllowsForegroundPreference(String);
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public java.util.List<java.lang.String> getAidsForPreferredPaymentService();
     method public java.util.List<java.lang.String> getAidsForService(android.content.ComponentName, String);
+    method @FlaggedApi("android.nfc.enable_card_emulation_euicc") public int getDefaultNfcSubscriptionId();
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public CharSequence getDescriptionForPreferredPaymentService();
     method public static android.nfc.cardemulation.CardEmulation getInstance(android.nfc.NfcAdapter);
     method @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public String getRouteDestinationForPreferredPaymentService();
@@ -225,6 +229,11 @@ package android.nfc.cardemulation {
     field public static final String CATEGORY_PAYMENT = "payment";
     field public static final String EXTRA_CATEGORY = "category";
     field public static final String EXTRA_SERVICE_COMPONENT = "component";
+    field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_COMMAND_TIMEOUT = 3; // 0x3
+    field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_NFC_CRASH_RESTART = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_NFC_HARDWARE_ERROR = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_event_listener") public static final int NFC_INTERNAL_ERROR_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("android.nfc.nfc_associated_role_services") public static final String PROPERTY_ALLOW_SHARED_ROLE_PRIORITY = "android.nfc.cardemulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY";
     field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_DEFAULT = 3; // 0x3
     field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_DH = 0; // 0x0
     field @FlaggedApi("android.nfc.nfc_override_recover_routing_table") public static final int PROTOCOL_AND_TECHNOLOGY_ROUTE_ESE = 1; // 0x1
@@ -236,8 +245,13 @@ package android.nfc.cardemulation {
   }
 
   @FlaggedApi("android.nfc.nfc_event_listener") public static interface CardEmulation.NfcEventListener {
+    method @FlaggedApi("android.nfc.nfc_event_listener") public default void onAidConflictOccurred(@NonNull String);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public default void onAidNotRouted(@NonNull String);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public default void onInternalErrorReported(int);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public default void onNfcStateChanged(int);
     method @FlaggedApi("android.nfc.nfc_event_listener") public default void onObserveModeStateChanged(boolean);
     method @FlaggedApi("android.nfc.nfc_event_listener") public default void onPreferredServiceChanged(boolean);
+    method @FlaggedApi("android.nfc.nfc_event_listener") public default void onRemoteFieldChanged(boolean);
   }
 
   public abstract class HostApduService extends android.app.Service {

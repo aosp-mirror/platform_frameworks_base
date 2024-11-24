@@ -16,13 +16,38 @@
 
 package com.android.systemui.keyboard.shortcut.domain.interactor
 
-import android.view.KeyEvent.META_META_ON
+import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult
+import com.android.systemui.keyboard.shortcut.data.repository.CustomShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperKeys
+import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import javax.inject.Inject
 
-class ShortcutCustomizationInteractor @Inject constructor() {
+class ShortcutCustomizationInteractor
+@Inject
+constructor(private val customShortcutRepository: CustomShortcutCategoriesRepository) {
+    val pressedKeys = customShortcutRepository.pressedKeys
+
+    fun updateUserSelectedKeyCombination(keyCombination: KeyCombination?) {
+        customShortcutRepository.updateUserKeyCombination(keyCombination)
+    }
+
     fun getDefaultCustomShortcutModifierKey(): ShortcutKey.Icon.ResIdIcon {
-        return ShortcutKey.Icon.ResIdIcon(ShortcutHelperKeys.keyIcons[META_META_ON]!!)
+        return ShortcutKey.Icon.ResIdIcon(ShortcutHelperKeys.metaModifierIconResId)
+    }
+
+    fun onCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo?) {
+        customShortcutRepository.onCustomizationRequested(requestInfo)
+    }
+
+    suspend fun confirmAndSetShortcutCurrentlyBeingCustomized():
+        ShortcutCustomizationRequestResult {
+        return customShortcutRepository.confirmAndSetShortcutCurrentlyBeingCustomized()
+    }
+
+    suspend fun deleteShortcutCurrentlyBeingCustomized():
+        ShortcutCustomizationRequestResult {
+        return customShortcutRepository.deleteShortcutCurrentlyBeingCustomized()
     }
 }

@@ -30,6 +30,7 @@ import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopModeOrShowAppHandle;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge;
@@ -103,7 +104,7 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
@@ -154,6 +155,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnNewWindowClickListener;
     private Function0<Unit> mOnManageWindowsClickListener;
     private Function0<Unit> mOnChangeAspectRatioClickListener;
+    private Function0<Unit> mOnMaximizeHoverListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private Runnable mCurrentViewHostRunnable = null;
@@ -367,6 +369,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Registers a listener to be called when the aspect ratio action is triggered. */
     void setOnChangeAspectRatioClickListener(Function0<Unit> listener) {
         mOnChangeAspectRatioClickListener = listener;
+    }
+
+    /** Registers a listener to be called when the maximize header button is hovered. */
+    void setOnMaximizeHoverListener(Function0<Unit> listener) {
+        mOnMaximizeHoverListener = listener;
     }
 
     void setCaptionListeners(
@@ -840,12 +847,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mOnCaptionGenericMotionListener,
                     mAppName,
                     mAppIconBitmap,
-                    () -> {
-                        if (!isMaximizeMenuActive()) {
-                            createMaximizeMenu();
-                        }
-                        return Unit.INSTANCE;
-                    });
+                    mOnMaximizeHoverListener);
         }
         throw new IllegalArgumentException("Unexpected layout resource id");
     }
@@ -1397,10 +1399,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mAppIconBitmap,
                 mAppName,
                 mSplitScreenController,
-                canEnterDesktopMode(mContext),
+                canEnterDesktopModeOrShowAppHandle(mContext),
                 supportsMultiInstance,
                 shouldShowManageWindowsButton,
                 shouldShowChangeAspectRatioButton,
+                canEnterDesktopMode(mContext),
                 isBrowserApp,
                 isBrowserApp ? getAppLink() : getBrowserLink(),
                 mResult.mCaptionWidth,
@@ -1414,7 +1417,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorViewHolder.onHandleMenuOpened();
         mHandleMenu.show(
                 /* onToDesktopClickListener= */ () -> {
-                    mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
                     mOnToDesktopClickListener.accept(APP_HANDLE_MENU_BUTTON);
                     return Unit.INSTANCE;
                 },
@@ -1457,10 +1459,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Function1<Integer, Unit> onIconClickListener
     ) {
         if (mTaskInfo.isFreeform()) {
+            // The menu uses display-wide coordinates for positioning, so make position the sum
+            // of task position and caption position.
+            final Rect taskBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
             mManageWindowsMenu = new DesktopHeaderManageWindowsMenu(
                     mTaskInfo,
-                    /* x= */ mResult.mCaptionX,
-                    /* y= */ mResult.mCaptionY + mResult.mCaptionTopPadding,
+                    /* x= */ taskBounds.left + mResult.mCaptionX,
+                    /* y= */ taskBounds.top + mResult.mCaptionY + mResult.mCaptionTopPadding,
                     mDisplayController,
                     mRootTaskDisplayAreaOrganizer,
                     mContext,

@@ -156,7 +156,7 @@ public final class HubEndpointInfo implements Parcelable {
         mRequiredPermissions = Arrays.asList(endpointInfo.requiredPermissions);
         mHubServiceInfos = new ArrayList<>(endpointInfo.services.length);
         for (int i = 0; i < endpointInfo.services.length; i++) {
-            mHubServiceInfos.set(i, new HubServiceInfo(endpointInfo.services[i]));
+            mHubServiceInfos.add(new HubServiceInfo(endpointInfo.services[i]));
         }
     }
 

@@ -755,36 +755,7 @@ public class GroupHelper {
                     Log.i(TAG, "isGroupChildWithoutSummary OR isGroupSummaryWithoutChild"
                             + record);
                 }
-
-                ArrayMap<String, NotificationAttributes> ungrouped =
-                        mUngroupedAbuseNotifications.getOrDefault(fullAggregateGroupKey,
-                            new ArrayMap<>());
-                ungrouped.put(record.getKey(), new NotificationAttributes(
-                    record.getFlags(),
-                    record.getNotification().getSmallIcon(),
-                    record.getNotification().color,
-                    record.getNotification().visibility,
-                    record.getNotification().getGroupAlertBehavior(),
-                    record.getChannel().getId()));
-                mUngroupedAbuseNotifications.put(fullAggregateGroupKey, ungrouped);
-                // Create/update summary and group if >= mAutoGroupAtCount notifications
-                //  or if aggregate group exists
-                boolean hasSummary = !mAggregatedNotifications.getOrDefault(fullAggregateGroupKey,
-                    new ArrayMap<>()).isEmpty();
-                if (ungrouped.size() >= mAutoGroupAtCount || hasSummary) {
-                    if (DEBUG) {
-                        if (ungrouped.size() >= mAutoGroupAtCount) {
-                            Log.i(TAG,
-                                "Found >=" + mAutoGroupAtCount
-                                    + " ungrouped notifications => force grouping");
-                        } else {
-                            Log.i(TAG, "Found aggregate summary => force grouping");
-                        }
-                    }
-                    aggregateUngroupedNotifications(fullAggregateGroupKey, sbn.getKey(),
-                            ungrouped, hasSummary, sectioner.mSummaryId);
-                }
-
+                addToUngroupedAndMaybeAggregate(record, fullAggregateGroupKey, sectioner);
                 return;
             }
 
@@ -812,6 +783,38 @@ public class GroupHelper {
                     Slog.wtf(TAG, "Failed to group sparse groups", e);
                 }
             }
+        }
+    }
+
+    @GuardedBy("mAggregatedNotifications")
+    private void addToUngroupedAndMaybeAggregate(NotificationRecord record,
+            FullyQualifiedGroupKey fullAggregateGroupKey, NotificationSectioner sectioner) {
+        ArrayMap<String, NotificationAttributes> ungrouped =
+                mUngroupedAbuseNotifications.getOrDefault(fullAggregateGroupKey,
+                    new ArrayMap<>());
+        ungrouped.put(record.getKey(), new NotificationAttributes(
+                record.getFlags(),
+                record.getNotification().getSmallIcon(),
+                record.getNotification().color,
+                record.getNotification().visibility,
+                record.getNotification().getGroupAlertBehavior(),
+                record.getChannel().getId()));
+        mUngroupedAbuseNotifications.put(fullAggregateGroupKey, ungrouped);
+        // Create/update summary and group if >= mAutoGroupAtCount notifications
+        //  or if aggregate group exists
+        boolean hasSummary = !mAggregatedNotifications.getOrDefault(fullAggregateGroupKey,
+                new ArrayMap<>()).isEmpty();
+        if (ungrouped.size() >= mAutoGroupAtCount || hasSummary) {
+            if (DEBUG) {
+                if (ungrouped.size() >= mAutoGroupAtCount) {
+                    Slog.i(TAG, "Found >=" + mAutoGroupAtCount
+                            + " ungrouped notifications => force grouping");
+                } else {
+                    Slog.i(TAG, "Found aggregate summary => force grouping");
+                }
+            }
+            aggregateUngroupedNotifications(fullAggregateGroupKey, record.getKey(),
+                    ungrouped, hasSummary, sectioner.mSummaryId);
         }
     }
 
@@ -892,6 +895,73 @@ public class GroupHelper {
                 if (record.isCanceled) {
                     maybeClearCanceledSummariesCache(pkgName, userId,
                             record.getNotification().getGroup(), notificationList);
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when a child notification is removed, after some delay, so that this helper can
+     * trigger a forced grouping if the group has become sparse/singleton
+     * or only the summary is left.
+     *
+     * see also {@link #onNotificationPostedWithDelay(NotificationRecord, List, Map)}
+     *
+     * @param summaryRecord the group summary of the notification that was removed
+     * @param notificationList the full notification list from NotificationManagerService
+     * @param summaryByGroupKey the map of group summaries from NotificationManagerService
+     */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING)
+    protected void onGroupedNotificationRemovedWithDelay(final NotificationRecord summaryRecord,
+            final List<NotificationRecord> notificationList,
+            final Map<String, NotificationRecord> summaryByGroupKey) {
+        final StatusBarNotification sbn = summaryRecord.getSbn();
+        if (!sbn.isAppGroup()) {
+            return;
+        }
+
+        if (summaryRecord.isCanceled) {
+            return;
+        }
+
+        if (mIsTestHarnessExempted) {
+            return;
+        }
+
+        final NotificationSectioner sectioner = getSection(summaryRecord);
+        if (sectioner == null) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "Skipping autogrouping for " + summaryRecord + " no valid section found.");
+            }
+            return;
+        }
+
+        final String pkgName = sbn.getPackageName();
+        final FullyQualifiedGroupKey fullAggregateGroupKey = new FullyQualifiedGroupKey(
+                summaryRecord.getUserId(), pkgName, sectioner);
+
+        // This notification is already aggregated
+        if (summaryRecord.getGroupKey().equals(fullAggregateGroupKey.toString())) {
+            return;
+        }
+
+        synchronized (mAggregatedNotifications) {
+            if (isGroupSummaryWithoutChildren(summaryRecord, notificationList)) {
+                if (DEBUG) {
+                    Slog.i(TAG, "isGroupSummaryWithoutChild " + summaryRecord);
+                }
+                addToUngroupedAndMaybeAggregate(summaryRecord, fullAggregateGroupKey, sectioner);
+                return;
+            }
+
+            // Check if notification removal turned this group into a sparse/singleton group
+            if (Flags.notificationForceGroupSingletons()) {
+                try {
+                    groupSparseGroups(summaryRecord, notificationList, summaryByGroupKey, sectioner,
+                            fullAggregateGroupKey);
+                } catch (Throwable e) {
+                    Slog.wtf(TAG, "Failed to group sparse groups", e);
                 }
             }
         }

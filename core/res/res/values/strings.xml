@@ -199,6 +199,21 @@
     <!-- Displayed to confirm to the user that caller ID will not be restricted on the next call or in general. -->
     <string name="CLIRDefaultOffNextCallOff">Caller ID defaults to not restricted. Next call: Not restricted</string>
 
+    <!-- Message displayed in dialog when APK is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_warning">This app isn’t 16 KB compatible. APK alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; </string>
+
+    <!-- Message displayed in dialog when ELF is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_elf_warning">This app isn’t 16 KB compatible. ELF alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
+    <!-- Message displayed in dialog when APK and ELF are not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_and_elf_warning">This app isn’t 16 KB compatible. APK and ELF alignment checks failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
 
     <!-- Displayed to tell the user that caller ID is not provisioned for their SIM. -->
     <string name="serviceNotProvisioned">Service not provisioned.</string>
@@ -5357,6 +5372,8 @@
     <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] General template for a start - end range in a text summary, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_summary_range_words"><xliff:g id="start" example="Sunday">%1$s</xliff:g> to <xliff:g id="end" example="Thursday">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=NONE] General template for combining a days of week start-end range with a time-based start-end range, for example: "Sun-Thurs, 10:00 PM - 7:00 AM" -->
+    <string name="zen_mode_trigger_summary_combined"><xliff:g id="days" example="Sat-Thurs">%1$s</xliff:g>,\u0020<xliff:g id="times" example="10:00 PM - 7:00 AM">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
 

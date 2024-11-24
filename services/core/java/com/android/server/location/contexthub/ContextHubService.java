@@ -34,6 +34,7 @@ import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
+import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubMessage;
@@ -325,9 +326,16 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        if (Flags.offloadApi()) {
-            mHubInfoRegistry = new HubInfoRegistry(mContextHubWrapper);
-            Log.i(TAG, "Enabling generic offload API");
+        if (Flags.offloadApi() && Flags.offloadImplementation()) {
+            HubInfoRegistry registry;
+            try {
+                registry = new HubInfoRegistry(mContextHubWrapper);
+                Log.i(TAG, "Enabling generic offload API");
+            } catch (UnsupportedOperationException e) {
+                registry = null;
+                Log.w(TAG, "Generic offload API not supported, disabling");
+            }
+            mHubInfoRegistry = registry;
         } else {
             mHubInfoRegistry = null;
             Log.i(TAG, "Disabling generic offload API");
@@ -520,8 +528,8 @@ public class ContextHubService extends IContextHubService.Stub {
         try {
             mContextHubWrapper.registerEndpointCallback(
                     new ContextHubHalEndpointCallback(mHubInfoRegistry));
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while registering IEndpointCallback", e);
+        } catch (RemoteException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while registering IEndpointCallback", e);
         }
     }
 
@@ -784,6 +792,31 @@ public class ContextHubService extends IContextHubService.Stub {
         super.registerEndpoint_enforcePermission();
         // TODO(b/375487784): Implement this
         return null;
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void registerEndpointDiscoveryCallbackId(
+            long endpointId, IContextHubEndpointDiscoveryCallback callback) throws RemoteException {
+        super.registerEndpointDiscoveryCallbackId_enforcePermission();
+        // TODO(b/375487784): Implement this
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void registerEndpointDiscoveryCallbackDescriptor(
+            String serviceDescriptor, IContextHubEndpointDiscoveryCallback callback)
+            throws RemoteException {
+        super.registerEndpointDiscoveryCallbackDescriptor_enforcePermission();
+        // TODO(b/375487784): Implement this
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void unregisterEndpointDiscoveryCallback(IContextHubEndpointDiscoveryCallback callback)
+            throws RemoteException {
+        super.unregisterEndpointDiscoveryCallback_enforcePermission();
+        // TODO(b/375487784): Implement this
     }
 
     /**

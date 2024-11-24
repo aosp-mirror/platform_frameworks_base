@@ -368,6 +368,9 @@
     <!-- The vertical space between items in the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
 
+    <!-- Extra space for guts bundle feedback button -->
+    <dimen name="notification_guts_bundle_feedback_size">48dp</dimen>
+
     <dimen name="notification_importance_toggle_size">48dp</dimen>
     <dimen name="notification_importance_button_separation">8dp</dimen>
     <dimen name="notification_importance_drawable_padding">8dp</dimen>
@@ -788,6 +791,18 @@
     <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_avatar_size">24dp</dimen>
 
+    <!-- Size of the face pile shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_size">16dp</dimen>
+
+    <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation
+         notifications (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_avatar_size">11dp</dimen>
+
+    <!-- Size of an avatar shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_avatar_size">16dp</dimen>
+
     <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
 
@@ -936,7 +951,6 @@
     <dimen name="keyguard_translate_distance_on_swipe_up">-200dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
-    <dimen name="lock_icon_margin_bottom">74dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>
 
 
@@ -2045,6 +2059,9 @@
     <!-- UDFPS view attributes -->
     <!-- UDFPS icon size in microns/um -->
     <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Limits the updates to at most one update per debounce duration to avoid too many
+         updates due to quick changes to padding.   -->
+    <integer name="udfps_padding_debounce_duration">100</integer>
     <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
          relies on this value will not be sized correctly. -->
     <item name="pixel_pitch" format="float" type="dimen">-1</item>

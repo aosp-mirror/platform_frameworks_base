@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package com.android.systemui.shade.data.repository
 
-import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.statusbar.commandline.commandRegistry
+import com.android.systemui.shade.display.ShadeDisplayPolicy
+import com.android.systemui.shade.display.SpecificDisplayIdPolicy
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import java.io.PrintWriter
-import java.io.StringWriter
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,45 +36,54 @@ import org.junit.runner.RunWith
 class ShadeDisplaysRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val commandRegistry = kosmos.commandRegistry
-    private val pw = PrintWriter(StringWriter())
+    private val defaultPolicy = SpecificDisplayIdPolicy(0)
 
-    private val underTest = ShadeDisplaysRepositoryImpl(commandRegistry)
+    private val shadeDisplaysRepository =
+        ShadeDisplaysRepositoryImpl(defaultPolicy, testScope.backgroundScope)
 
-    @Before
-    fun setUp() {
-        underTest.start()
+    @Test
+    fun policy_changing_propagatedFromTheLatestPolicy() =
+        testScope.runTest {
+            val displayIds by collectValues(shadeDisplaysRepository.displayId)
+            val policy1 = MutablePolicy()
+            val policy2 = MutablePolicy()
+
+            assertThat(displayIds).containsExactly(0)
+
+            shadeDisplaysRepository.policy.value = policy1
+
+            policy1.sendDisplayId(1)
+
+            assertThat(displayIds).containsExactly(0, 1)
+
+            policy1.sendDisplayId(2)
+
+            assertThat(displayIds).containsExactly(0, 1, 2)
+
+            shadeDisplaysRepository.policy.value = policy2
+
+            assertThat(displayIds).containsExactly(0, 1, 2, 0)
+
+            policy1.sendDisplayId(4)
+
+            // Changes to the first policy don't affect the output now
+            assertThat(displayIds).containsExactly(0, 1, 2, 0)
+
+            policy2.sendDisplayId(5)
+
+            assertThat(displayIds).containsExactly(0, 1, 2, 0, 5)
+        }
+
+    private class MutablePolicy : ShadeDisplayPolicy {
+        fun sendDisplayId(id: Int) {
+            _displayId.value = id
+        }
+
+        private val _displayId = MutableStateFlow(0)
+        override val name: String
+            get() = "mutable_policy"
+
+        override val displayId: StateFlow<Int>
+            get() = _displayId
     }
-
-    @Test
-    fun commandDisplayOverride_updatesDisplayId() =
-        testScope.runTest {
-            val displayId by collectLastValue(underTest.displayId)
-            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
-
-            val newDisplayId = 2
-            commandRegistry.onShellCommand(
-                pw,
-                arrayOf("shade_display_override", newDisplayId.toString()),
-            )
-
-            assertThat(displayId).isEqualTo(newDisplayId)
-        }
-
-    @Test
-    fun commandShadeDisplayOverride_resetsDisplayId() =
-        testScope.runTest {
-            val displayId by collectLastValue(underTest.displayId)
-            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
-
-            val newDisplayId = 2
-            commandRegistry.onShellCommand(
-                pw,
-                arrayOf("shade_display_override", newDisplayId.toString()),
-            )
-            assertThat(displayId).isEqualTo(newDisplayId)
-
-            commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", "reset"))
-            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
-        }
 }

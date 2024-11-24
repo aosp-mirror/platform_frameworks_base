@@ -89,6 +89,10 @@ per-file DdmSyncState.java = sanglardf@google.com, rpaquay@google.com
 per-file DdmSyncStageUpdater.java = sanglardf@google.com, rpaquay@google.com
 
 # PerformanceHintManager
+per-file CpuHeadroom*.aidl = file:/ADPF_OWNERS
+per-file GpuHeadroom*.aidl = file:/ADPF_OWNERS
+per-file CpuHeadroom*.java = file:/ADPF_OWNERS
+per-file GpuHeadroom*.java = file:/ADPF_OWNERS
 per-file PerformanceHintManager.java = file:/ADPF_OWNERS
 per-file WorkDuration.java = file:/ADPF_OWNERS
 per-file IHintManager.aidl = file:/ADPF_OWNERS

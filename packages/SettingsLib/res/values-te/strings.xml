@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"స్థానిక షెల్ యాక్సెస్‌ను అందించే టెర్మినల్ యాప్‌ను ప్రారంభించండి"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux డెవలప్మెంట్ ఎన్విరాన్మెంట్"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidలో Linux టెర్మినల్‌ను రన్ చేయండి"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ప్రయోగాత్మకం) Linux టెర్మినల్‌ను Androidలో రన్ చేయండి"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"మీరు డిజేబుల్ చేస్తే, Linux టెర్మినల్ డేటా క్లియర్ అవుతుంది"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP చెకింగ్‌"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP తనిఖీ ప్రవర్తనను సెట్ చేయండి"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"డీబగ్గింగ్"</string>
@@ -591,12 +592,9 @@
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ఎక్స్‌టర్నల్ పరికరం"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"కనెక్ట్ చేసిన పరికరం"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ఈ ఫోన్"</string>
-    <!-- no translation found for media_transfer_digital_line_name (312091711951124301) -->
-    <skip />
-    <!-- no translation found for media_transfer_analog_line_name (1841163866716302104) -->
-    <skip />
-    <!-- no translation found for media_transfer_aux_line_name (894135835967856689) -->
-    <skip />
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"అనలాగ్"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ఈ పరికరంలో ప్లే చేయడం సాధ్యపడదు"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"మారడానికి ఖాతాను అప్‌గ్రేడ్ చేయండి"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ఇక్కడ డౌన్‌లోడ్‌లను ప్లే చేయడం సాధ్యపడదు"</string>

@@ -140,6 +140,8 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "aaos_audio_triage",
+        "aaos_power_triage",
         "aaos_sdv",
         "accessibility",
         "android_core_networking",
@@ -257,6 +259,7 @@ public class SettingsToPropertiesMapper {
         "wear_systems",
         "wear_sysui",
         "wear_system_managed_surfaces",
+        "wear_watchfaces",
         "window_surfaces",
         "windowing_frontend",
         "xr",
@@ -532,9 +535,8 @@ public class SettingsToPropertiesMapper {
      * @param packageName the package of the flag
      * @param flagName the name of the flag
      * @param immediate if true, clear immediately; otherwise, clear on next reboot
-     *
-     * @hide
      */
+    @VisibleForTesting
     public static void writeFlagOverrideRemovalRequest(
         ProtoOutputStream proto, String packageName, String flagName, boolean immediate) {
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
@@ -590,7 +592,8 @@ public class SettingsToPropertiesMapper {
      * apply flag local override in aconfig new storage
      * @param props
      */
-    static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
+    @VisibleForTesting
+    public static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
         int num_requests = 0;
         ProtoOutputStream requests = new ProtoOutputStream();
         for (String flagName : props.getKeyset()) {

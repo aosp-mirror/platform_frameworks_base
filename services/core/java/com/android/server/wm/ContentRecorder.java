@@ -32,6 +32,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.media.projection.IMediaProjectionManager;
+import android.media.projection.StopReason;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -226,6 +227,7 @@ final class ContentRecorder implements WindowContainerListener {
                                 + "size %s",
                         mDisplayContent.getDisplayId(), recordedContentBounds,
                         recordedContentOrientation, surfaceSize);
+
                 updateMirroredSurface(mRecordedWindowContainer.getSyncTransaction(),
                         recordedContentBounds, surfaceSize);
             } else {
@@ -295,12 +297,12 @@ final class ContentRecorder implements WindowContainerListener {
      * Ensure recording does not fall back to the display stack; ensure the recording is stopped
      * and the client notified by tearing down the virtual display.
      */
-    private void stopMediaProjection() {
+    private void stopMediaProjection(@StopReason int stopReason) {
         ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
                 "Content Recording: Stop MediaProjection on virtual display %d",
                 mDisplayContent.getDisplayId());
         if (mMediaProjectionManager != null) {
-            mMediaProjectionManager.stopActiveProjection();
+            mMediaProjectionManager.stopActiveProjection(stopReason);
         }
     }
 
@@ -507,7 +509,7 @@ final class ContentRecorder implements WindowContainerListener {
         if (shouldExitTaskRecording) {
             // Clean up the cached session first to ensure recording doesn't re-start, since
             // tearing down the display will generate display events which will trickle back here.
-            stopMediaProjection();
+            stopMediaProjection(StopReason.STOP_ERROR);
         }
     }
 
@@ -599,9 +601,13 @@ final class ContentRecorder implements WindowContainerListener {
         mLastRecordedBounds = new Rect(recordedContentBounds);
         mLastConsumingSurfaceSize.x = surfaceSize.x;
         mLastConsumingSurfaceSize.y = surfaceSize.y;
-        // Request to notify the client about the resize.
-        mMediaProjectionManager.notifyActiveProjectionCapturedContentResized(
-                mLastRecordedBounds.width(), mLastRecordedBounds.height());
+
+        // Request to notify the client about the updated bounds.
+        mMediaProjectionManager.notifyCaptureBoundsChanged(
+                mContentRecordingSession.getContentToRecord(),
+                mContentRecordingSession.getTargetUid(),
+                mLastRecordedBounds
+        );
     }
 
     /**
@@ -641,7 +647,7 @@ final class ContentRecorder implements WindowContainerListener {
         clearContentRecordingSession();
         // Clean up the cached session first to ensure recording doesn't re-start, since
         // tearing down the display will generate display events which will trickle back here.
-        stopMediaProjection();
+        stopMediaProjection(StopReason.STOP_TARGET_REMOVED);
     }
 
     // WindowContainerListener
@@ -674,10 +680,10 @@ final class ContentRecorder implements WindowContainerListener {
     }
 
     @VisibleForTesting interface MediaProjectionManagerWrapper {
-        void stopActiveProjection();
-        void notifyActiveProjectionCapturedContentResized(int width, int height);
+        void stopActiveProjection(@StopReason int stopReason);
         void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
         void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode);
+        void notifyCaptureBoundsChanged(int contentToRecord, int targetUid, Rect captureBounds);
     }
 
     private static final class RemoteMediaProjectionManagerWrapper implements
@@ -691,7 +697,7 @@ final class ContentRecorder implements WindowContainerListener {
         }
 
         @Override
-        public void stopActiveProjection() {
+        public void stopActiveProjection(@StopReason int stopReason) {
             fetchMediaProjectionManager();
             if (mIMediaProjectionManager == null) {
                 return;
@@ -700,29 +706,12 @@ final class ContentRecorder implements WindowContainerListener {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: stopping active projection for display %d",
                         mDisplayId);
-                mIMediaProjectionManager.stopActiveProjection();
+                mIMediaProjectionManager.stopActiveProjection(stopReason);
             } catch (RemoteException e) {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: Unable to tell MediaProjectionManagerService to stop "
                                 + "the active projection for display %d: %s",
                         mDisplayId, e);
-            }
-        }
-
-        @Override
-        public void notifyActiveProjectionCapturedContentResized(int width, int height) {
-            fetchMediaProjectionManager();
-            if (mIMediaProjectionManager == null) {
-                return;
-            }
-            try {
-                mIMediaProjectionManager.notifyActiveProjectionCapturedContentResized(width,
-                        height);
-            } catch (RemoteException e) {
-                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
-                        "Content Recording: Unable to tell MediaProjectionManagerService about "
-                                + "resizing the active projection: %s",
-                        e);
             }
         }
 
@@ -756,6 +745,22 @@ final class ContentRecorder implements WindowContainerListener {
             } catch (RemoteException e) {
                 ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
                         "Content Recording: Unable to tell log windowing mode change: %s", e);
+            }
+        }
+
+        @Override
+        public void notifyCaptureBoundsChanged(int contentToRecord, int targetUid,
+                Rect captureBounds) {
+            fetchMediaProjectionManager();
+            if (mIMediaProjectionManager == null) {
+                return;
+            }
+            try {
+                mIMediaProjectionManager.notifyCaptureBoundsChanged(
+                        contentToRecord, targetUid, captureBounds);
+            } catch (RemoteException e) {
+                ProtoLog.e(WM_DEBUG_CONTENT_RECORDING,
+                        "Content Recording: Unable to tell log bounds change: %s", e);
             }
         }
 

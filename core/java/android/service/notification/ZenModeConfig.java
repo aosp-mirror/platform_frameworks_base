@@ -2532,7 +2532,7 @@ public class ZenModeConfig implements Parcelable {
 
     /** Returns whether the rule id corresponds to an implicit rule. */
     public static boolean isImplicitRuleId(@NonNull String ruleId) {
-        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
+        return ruleId != null && ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
     }
 
     private static int[] tryParseHourAndMinute(String value) {

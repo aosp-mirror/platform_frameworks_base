@@ -36,6 +36,7 @@ import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.bounceableInfo
 import com.android.systemui.qs.panels.ui.compose.rememberEditListState
 import com.android.systemui.qs.panels.ui.viewmodel.BounceableTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridViewModel
@@ -49,17 +50,14 @@ import javax.inject.Inject
 class InfiniteGridLayout
 @Inject
 constructor(
+    private val detailsViewModel: DetailsViewModel,
     private val iconTilesViewModel: IconTilesViewModel,
     private val viewModelFactory: InfiniteGridViewModel.Factory,
     private val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
 ) : PaginatableGridLayout {
 
     @Composable
-    override fun SceneScope.TileGrid(
-        tiles: List<TileViewModel>,
-        modifier: Modifier,
-        editModeStart: () -> Unit,
-    ) {
+    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
@@ -104,6 +102,7 @@ constructor(
                 tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
                 coroutineScope = scope,
                 bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                detailsViewModel = detailsViewModel,
             )
         }
     }

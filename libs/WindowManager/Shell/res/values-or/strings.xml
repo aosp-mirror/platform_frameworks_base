@@ -125,6 +125,7 @@
     <string name="select_text" msgid="5139083974039906583">"ଚୟନ କରନ୍ତୁ"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"ସ୍କ୍ରିନସଟ"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ବ୍ରାଉଜରରେ ଖୋଲନ୍ତୁ"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"ଆପରେ ଖୋଲନ୍ତୁ"</string>
     <string name="new_window_text" msgid="6318648868380652280">"ନୂଆ ୱିଣ୍ଡୋ"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="change_aspect_ratio_text" msgid="9104456064548212806">"ଚଉଡ଼ା ଓ ଉଚ୍ଚତାର ଅନୁପାତ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
@@ -132,7 +133,8 @@
     <string name="collapse_menu_text" msgid="7515008122450342029">"ମେନୁ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ମେନୁ ଖୋଲନ୍ତୁ"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ସ୍କ୍ରିନକୁ ବଡ଼ କରନ୍ତୁ"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"ସ୍କ୍ରିନକୁ ସ୍ନାପ କରନ୍ତୁ"</string>
+    <!-- no translation found for desktop_mode_maximize_menu_snap_text (5673738963174074006) -->
+    <skip />
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"ଆପକୁ ଏଠାକୁ ମୁଭ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"ଇମର୍ସିଭ"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"ରିଷ୍ଟୋର କରନ୍ତୁ"</string>

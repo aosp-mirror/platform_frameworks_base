@@ -753,7 +753,7 @@
     <!-- QuickSettings: Bluetooth dialog device in audio sharing default summary [CHAR LIMIT=50]-->
     <string name="quick_settings_bluetooth_device_audio_sharing">Audio Sharing</string>
     <!-- QuickSettings: Bluetooth dialog device summary for devices that are capable of audio sharing and switching to active[CHAR LIMIT=NONE]-->
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active">Tap to switch or share audio</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active">Supports audio sharing</string>
     <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_saved">Saved</string>
     <!-- QuickSettings: Accessibility label to disconnect a device [CHAR LIMIT=NONE]-->
@@ -1336,6 +1336,10 @@
     <string name="communal_widgets_disclaimer_text">To open an app using a widget, you\u2019ll need to verify it\u2019s you. Also, keep in mind that anyone can view them, even when your tablet\u2019s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here.</string>
     <!-- Button for user to verify they understand the information presented. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_button">Got it</string>
+    <!-- Lockscreen affordance to open glanceable hub. [CHAR LIMIT=20] -->
+    <string name="glanceable_hub_lockscreen_affordance_label">Widgets</string>
+    <!-- Text explaining that the glanceable hub affordance is disabled. [CHAR LIMIT=NONE] -->
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add Widgets on the lock screen as a shortcut, make sure it is enabled in settings.</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -2033,6 +2037,9 @@
 
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
+
+    <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
+    <string name="notification_guts_bundle_feedback">Provide Bundle Feedback</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -3214,6 +3221,9 @@
     <!-- Text to display when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_copy_toast">Build number copied to clipboard.</string>
 
+    <!-- Text for accessibility action for copying content to clipboard [CHAR LIMIT=NONE]-->
+    <string name="copy_to_clipboard_a11y_action">copy to clipboard.</string>
+
      <!-- Status for conversation without interaction data [CHAR LIMIT=120] -->
     <string name="basic_status">Open conversation</string>
     <!--Title text for Conversation widget set up screen [CHAR LIMIT=180] -->
@@ -3750,11 +3760,20 @@
          is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
+    <!-- Title at the top of the keyboard shortcut helper remove shortcut dialog.
+         The helper is a component that shows the user which keyboard shortcuts they can use. Also
+         allows the user to add/remove custom shortcuts.[CHAR LIMIT=NONE] -->
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title">Remove shortcut?</string>
     <!-- Sub title at the top of the keyboard shortcut helper customization dialog. Explains to the
          user what action they need to take in the customization dialog to assign a new custom shortcut.
-         The helper is a component that shows the user which keyboard shortcuts they can use.
+         The shortcut customize dialog allows users to add/remove custom shortcuts
          [CHAR LIMIT=NONE] -->
-    <string name="shortcut_helper_customize_mode_sub_title">Press key to assign shortcut</string>
+    <string name="shortcut_customize_mode_add_shortcut_description">Press key to assign shortcut</string>
+    <!-- Sub title at the top of the remove custom shortcut dialog. Explains to the user what action
+         they're about to take when they click remove shortcut. The shortcut customize dialog allows
+         users to add/remove custom shortcuts
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_customize_mode_remove_shortcut_description">This will delete your custom shortcut permanently.</string>
     <!-- Placeholder text shown in the search box of the keyboard shortcut helper, when the user
          hasn't typed in anything in the search box yet. The helper is a  component that shows the
          user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
@@ -3810,6 +3829,10 @@
          confirm and assign key combination to selected shortcut. The helper is a  component that
          shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label">Set shortcut</string>
+    <!-- Label on the remove shortcut button in keyboard shortcut helper customize dialog, that allows user to
+         confirm and remove previously added custom shortcut. The helper is a  component that
+         shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_customize_dialog_remove_button_label">Remove</string>
     <!-- Label on the cancel button in keyboard shortcut helper customize dialog, that allows user to
          cancel and exit shortcut customization dialog, returning to the main shortcut helper page.
          The helper is a  component that shows the user which keyboard shortcuts they can use.
@@ -3823,8 +3846,16 @@
     <!-- Error message displayed when the user select a key combination that is already in use while
          assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
          component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
-    <string name="shortcut_helper_customize_dialog_error_message">Key combination already in use. Try another key.</string>
-
+    <string name="shortcut_customizer_key_combination_in_use_error_message">Key combination already in use. Try another key.</string>
+    <!-- Generic error message displayed when the user selected key combination cannot be used as
+         custom keyboard shortcut in shortcut helper. The helper is a component that shows the user
+         which keyboard shortcuts they can use and allows users to customize their keyboard
+         shortcuts. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_customizer_generic_error_message">Shortcut cannot be set.</string>
+    <!-- Plus sign, used in keyboard shortcut helper to combine keys for shortcut. E.g. Ctrl + A
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_plus_symbol">+</string>
 
     <!-- Keyboard touchpad tutorial scheduler-->
     <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->

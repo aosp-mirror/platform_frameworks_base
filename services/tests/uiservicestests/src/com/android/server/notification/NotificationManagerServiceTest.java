@@ -232,7 +232,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.ModuleInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -337,11 +336,11 @@ import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
-import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
-
 import com.google.android.collect.Lists;
 import com.google.common.collect.ImmutableList;
+
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -361,9 +360,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -377,6 +373,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -3091,6 +3090,92 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(mService.mNotificationList).hasSize(1);
         assertThat(mService.mNotificationList.get(0).getFlags() & FLAG_GROUP_SUMMARY).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testScheduleGroupHelperWithDelay_onChildNotificationCanceled() throws Exception {
+        // Post summary + 2 child notification
+        final String originalGroupName = "originalGroup";
+        final int summaryId = 0;
+        final NotificationRecord r1 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 1, originalGroupName, false);
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 2, originalGroupName, false);
+        mService.addNotification(r2);
+        final NotificationRecord summary = generateNotificationRecord(mTestNotificationChannel,
+                summaryId, originalGroupName, true);
+        mService.addNotification(summary);
+        final String originalGroupKey = summary.getGroupKey();
+        assertThat(mService.mSummaryByGroupKey).containsEntry(originalGroupKey, summary);
+
+        // Cancel the child notifications
+        mBinderService.cancelNotificationWithTag(r1.getSbn().getPackageName(),
+                r1.getSbn().getPackageName(), r1.getSbn().getTag(),
+                r1.getSbn().getId(), r1.getSbn().getUserId());
+        waitForIdle();
+
+        mBinderService.cancelNotificationWithTag(r2.getSbn().getPackageName(),
+                r2.getSbn().getPackageName(), r2.getSbn().getTag(),
+                r2.getSbn().getId(), r2.getSbn().getUserId());
+        waitForIdle();
+
+        mTestableLooper.moveTimeForward(DELAY_FORCE_REGROUP_TIME);
+        waitForIdle();
+
+        // Check that onGroupedNotificationRemovedWithDelay was called only once
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(r1), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(r2), any());
+        verify(mGroupHelper, times(1)).onGroupedNotificationRemovedWithDelay(eq(summary), any(),
+                any());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testCleanupScheduleGroupHelperWithDelay_onAllNotificationCanceled()
+            throws Exception {
+        // Post summary + 2 child notification
+        final String originalGroupName = "originalGroup";
+        final int summaryId = 0;
+        final NotificationRecord r1 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 1, originalGroupName, false);
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 2, originalGroupName, false);
+        mService.addNotification(r2);
+        final NotificationRecord summary = generateNotificationRecord(mTestNotificationChannel,
+                summaryId, originalGroupName, true);
+        mService.addNotification(summary);
+        final String originalGroupKey = summary.getGroupKey();
+        assertThat(mService.mSummaryByGroupKey).containsEntry(originalGroupKey, summary);
+
+        // Cancel all notifications: children + summary
+        mBinderService.cancelNotificationWithTag(r1.getSbn().getPackageName(),
+                r1.getSbn().getPackageName(), r1.getSbn().getTag(),
+                r1.getSbn().getId(), r1.getSbn().getUserId());
+        waitForIdle();
+
+        mBinderService.cancelNotificationWithTag(r2.getSbn().getPackageName(),
+                r2.getSbn().getPackageName(), r2.getSbn().getTag(),
+                r2.getSbn().getId(), r2.getSbn().getUserId());
+        waitForIdle();
+
+        mBinderService.cancelNotificationWithTag(summary.getSbn().getPackageName(),
+                summary.getSbn().getPackageName(), summary.getSbn().getTag(),
+                summary.getSbn().getId(), summary.getSbn().getUserId());
+        waitForIdle();
+
+        mTestableLooper.moveTimeForward(DELAY_FORCE_REGROUP_TIME);
+        waitForIdle();
+
+        // Check that onGroupedNotificationRemovedWithDelay was never called: summary was canceled
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(r1), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(r2), any());
+        verify(mGroupHelper, times(1)).onNotificationRemoved(eq(summary), any());
+        verify(mGroupHelper, never()).onGroupedNotificationRemovedWithDelay(any(), any(), any());
     }
 
     @Test
@@ -7534,6 +7619,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(true);
 
         // Set up notifications that will be adjusted
         final NotificationRecord r1 = spy(generateNotificationRecord(
@@ -17142,6 +17228,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
         when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(true);
 
         Bundle signals = new Bundle();
         signals.putInt(KEY_TYPE, TYPE_NEWS);
@@ -17176,10 +17263,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testApplyAdjustment_keyTypeForDisallowedPackage_DoesNotApply() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(KEY_TYPE, TYPE_NEWS);
+        Adjustment adjustment = new Adjustment(
+                r.getSbn().getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+
+        waitForIdle();
+
+        r.applyAdjustments();
+
+        assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+
+        // When we block adjustments for this package
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(false);
+
+        signals.putInt(KEY_TYPE, TYPE_PROMOTION);
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r.applyAdjustments();
+        // Then the adjustment is not applied.
+        assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+    }
+
+    @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_granted() throws Exception {
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17254,8 +17375,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17285,8 +17404,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_revoked() throws Exception {
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // start from true state
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
@@ -17350,8 +17467,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_revoked_onlyNotifiesOnce() throws Exception {
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // start from true state
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
@@ -17387,8 +17502,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testPostPromotableNotification() throws Exception {
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isTrue();
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
 
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -17415,8 +17528,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_noPermission() throws Exception {
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isFalse();
+
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
@@ -17444,8 +17558,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_unimportantNotification() throws Exception {
         mBinderService.setCanBePromoted(mPkg, mUid, true, true);
-        mContext.getTestablePermissions().setPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         Notification n = new Notification.Builder(mContext, mMinChannel.getId())
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))

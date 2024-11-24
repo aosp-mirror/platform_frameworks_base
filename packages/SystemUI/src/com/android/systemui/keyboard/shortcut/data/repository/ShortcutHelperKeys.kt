@@ -116,9 +116,10 @@ import com.android.systemui.res.R
 
 object ShortcutHelperKeys {
 
+    val metaModifierIconResId = R.drawable.ic_ksh_key_meta
+
     val keyIcons =
         mapOf(
-            META_META_ON to R.drawable.ic_ksh_key_meta,
             KEYCODE_BACK to R.drawable.ic_arrow_back_2,
             KEYCODE_HOME to R.drawable.ic_radio_button_unchecked,
             KEYCODE_RECENT_APPS to R.drawable.ic_check_box_outline_blank,

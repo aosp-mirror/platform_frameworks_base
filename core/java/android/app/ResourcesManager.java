@@ -206,11 +206,15 @@ public class ResourcesManager {
             assets.addPresetApkKeys(extractApkKeys(collector.collectedKey()));
             return new Pair<>(assets, size);
         }
-        final var newAssetsBuilder = new AssetManager.Builder();
+        final var newAssetsBuilder = new AssetManager.Builder().setNoInit();
         for (final var asset : assets.getApkAssets()) {
-            if (!asset.isForLoader()) {
-                newAssetsBuilder.addApkAssets(asset);
+            // Skip everything that's either default, or will get added by the collector (builder
+            // doesn't check for duplicates at all).
+            if (asset.isSystem() || asset.isForLoader() || asset.isOverlay()
+                    || asset.isSharedLib()) {
+                continue;
             }
+            newAssetsBuilder.addApkAssets(asset);
         }
         for (final var key : extractApkKeys(collector.collectedKey())) {
             try {

@@ -200,6 +200,13 @@ flag {
 }
 
 flag {
+  name: "show_app_handle_large_screens"
+  namespace: "windowing_frontend"
+  description: "Show the app handle and the app menu also on large screens that don't enable desktop mode"
+  bug: "377689543"
+}
+
+flag {
   name: "filter_irrelevant_input_device_change"
   namespace: "windowing_frontend"
   description: "Recompute display configuration only for necessary input device changes"
@@ -433,4 +440,12 @@ flag {
     namespace: "systemui"
     description: "Enable Predictive Back Animation for 3-button-nav"
     bug: "373544911"
+}
+
+flag {
+    name: "predictive_back_default_enable_sdk_36"
+    namespace: "systemui"
+    description: "Enable Predictive Back by default with targetSdk>=36"
+    is_fixed_read_only: true
+    bug: "376407910"
 }

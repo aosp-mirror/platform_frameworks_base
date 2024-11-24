@@ -18,6 +18,7 @@ package android.media.quality;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.media.tv.TvInputInfo;
 import android.media.tv.flags.Flags;
 import android.os.Parcel;
@@ -33,10 +34,9 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Profile for sound quality.
- * @hide
  */
 @FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
-public class SoundProfile implements Parcelable {
+public final class SoundProfile implements Parcelable {
     @Nullable
     private String mId;
     private final int mType;
@@ -113,7 +113,7 @@ public class SoundProfile implements Parcelable {
      */
     public static final int ERROR_NOT_ALLOWLISTED = 4;
 
-    protected SoundProfile(@NonNull Parcel in) {
+    private SoundProfile(@NonNull Parcel in) {
         mId = in.readString();
         mType = in.readInt();
         mName = in.readString();
@@ -251,9 +251,8 @@ public class SoundProfile implements Parcelable {
 
     /**
      * A builder for {@link SoundProfile}
-     * @hide
      */
-    public static class Builder {
+    public static final class Builder {
         @Nullable
         private String mId;
         private int mType = TYPE_APPLICATION;
@@ -300,6 +299,7 @@ public class SoundProfile implements Parcelable {
          *
          * @hide
          */
+        @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
         @NonNull
         public Builder setProfileType(@ProfileType int value) {
@@ -314,6 +314,7 @@ public class SoundProfile implements Parcelable {
          *
          * @hide
          */
+        @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
         @NonNull
         public Builder setInputId(@NonNull String value) {
@@ -328,6 +329,7 @@ public class SoundProfile implements Parcelable {
          *
          * @hide
          */
+        @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
         @NonNull
         public Builder setPackageName(@NonNull String value) {

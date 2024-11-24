@@ -27,6 +27,7 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
@@ -139,7 +140,7 @@ final class HandwritingModeController {
         }
 
         mHandwritingSurface = new HandwritingEventReceiverSurface(
-                name, displayId, surface, channel);
+                mContext, name, displayId, surface, channel);
 
         // Use a dup of the input channel so that event processing can be paused by disposing the
         // event receiver without causing a fd hangup.
@@ -161,6 +162,13 @@ final class HandwritingModeController {
             return;
         }
         mHandwritingSurface.setNotTouchable(notTouchable);
+    }
+
+    void setHandwritingTouchableRegion(Region region) {
+        if (!getCurrentRequestId().isPresent()) {
+            return;
+        }
+        mHandwritingSurface.setTouchableRegion(region);
     }
 
     boolean isStylusGestureOngoing() {

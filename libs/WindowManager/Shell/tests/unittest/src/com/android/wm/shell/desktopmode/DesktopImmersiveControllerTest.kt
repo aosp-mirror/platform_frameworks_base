@@ -42,7 +42,8 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
-import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitReason.USER_INTERACTION
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.StubTransaction
@@ -168,7 +169,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task, USER_INTERACTION)
         controller.onTransitionReady(
             transition = mockBinder,
             info = createTransitionInfo(
@@ -195,7 +196,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         )
         desktopRepository.saveBoundsBeforeFullImmersive(task.taskId, Rect(100, 100, 600, 600))
 
-        controller.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task, USER_INTERACTION)
         controller.onTransitionReady(
             transition = mockBinder,
             info = createTransitionInfo(
@@ -252,8 +253,8 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
             .thenReturn(mockBinder)
 
-        controller.moveTaskToNonImmersive(task)
-        controller.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task, USER_INTERACTION)
+        controller.moveTaskToNonImmersive(task, USER_INTERACTION)
 
         verify(mockTransitions, times(1))
             .startTransition(eq(TRANSIT_CHANGE), any(), eq(controller))
@@ -272,7 +273,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
@@ -293,7 +294,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = false
         )
 
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         assertThat(controller.pendingExternalExitTransitions.any { exit ->
             exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
@@ -314,7 +315,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         assertThat(wct.hasBoundsChange(task.token)).isTrue()
     }
@@ -332,7 +333,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = false
         )
 
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         assertThat(wct.hasBoundsChange(task.token)).isFalse()
     }
@@ -353,7 +354,8 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         controller.exitImmersiveIfApplicable(
             wct = wct,
             displayId = DEFAULT_DISPLAY,
-            excludeTaskId = task.taskId
+            excludeTaskId = task.taskId,
+            reason = USER_INTERACTION,
         ).asExit()?.runOnTransitionStart?.invoke(transition)
 
         assertThat(controller.pendingExternalExitTransitions.any { exit ->
@@ -374,7 +376,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task, reason = USER_INTERACTION)
 
         assertThat(wct.hasBoundsChange(task.token)).isTrue()
     }
@@ -391,7 +393,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = false
         )
 
-        controller.exitImmersiveIfApplicable(wct, task)
+        controller.exitImmersiveIfApplicable(wct, task, USER_INTERACTION)
 
         assertThat(wct.hasBoundsChange(task.token)).isFalse()
     }
@@ -409,7 +411,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(wct, task)
+        controller.exitImmersiveIfApplicable(wct, task, USER_INTERACTION)
             .asExit()?.runOnTransitionStart?.invoke(transition)
 
         assertThat(controller.pendingExternalExitTransitions.any { exit ->
@@ -430,7 +432,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = false
         )
 
-        val result = controller.exitImmersiveIfApplicable(wct, task)
+        val result = controller.exitImmersiveIfApplicable(wct, task, USER_INTERACTION)
 
         assertThat(result).isEqualTo(DesktopImmersiveController.ExitResult.NoExit)
     }
@@ -447,7 +449,8 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = false
         )
 
-        val result = controller.exitImmersiveIfApplicable(wct, task.displayId)
+        val result = controller.exitImmersiveIfApplicable(
+            wct, task.displayId, excludeTaskId = null, USER_INTERACTION)
 
         assertThat(result).isEqualTo(DesktopImmersiveController.ExitResult.NoExit)
     }
@@ -464,7 +467,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         controller.onTransitionReady(
             transition = transition,
@@ -495,7 +498,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         controller.onTransitionReady(
             transition = transition,
@@ -530,7 +533,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         controller.onTransitionReady(
             transition = transition,
@@ -560,7 +563,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
         desktopRepository.saveBoundsBeforeFullImmersive(task.taskId, Rect(100, 100, 600, 600))
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         controller.onTransitionReady(
             transition = transition,
@@ -587,7 +590,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task, reason = USER_INTERACTION)
 
         assertThat(
             wct.hasBoundsChange(task.token, calculateMaximizeBounds(mockDisplayLayout, task))
@@ -611,7 +614,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         val preImmersiveBounds = Rect(100, 100, 500, 500)
         desktopRepository.saveBoundsBeforeFullImmersive(task.taskId, preImmersiveBounds)
 
-        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task, reason = USER_INTERACTION)
 
         assertThat(
             wct.hasBoundsChange(task.token, preImmersiveBounds)
@@ -634,7 +637,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task)
+        controller.exitImmersiveIfApplicable(wct = wct, taskInfo = task, reason = USER_INTERACTION)
 
         assertThat(
             wct.hasBoundsChange(task.token, calculateInitialBounds(mockDisplayLayout, task))
@@ -652,10 +655,10 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             taskId = task.taskId,
             immersive = true
         )
-        controller.exitImmersiveIfApplicable(wct, task)
+        controller.exitImmersiveIfApplicable(wct, task, USER_INTERACTION)
             .asExit()?.runOnTransitionStart?.invoke(Binder())
 
-        controller.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task, USER_INTERACTION)
 
         verify(mockTransitions, never()).startTransition(any(), any(), any())
     }
@@ -674,7 +677,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY)
+        controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
         assertThat(controller.isImmersiveChange(transition, change)).isTrue()
     }
@@ -692,7 +695,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             immersive = true
         )
 
-        controller.moveTaskToNonImmersive(task)
+        controller.moveTaskToNonImmersive(task, USER_INTERACTION)
 
         controller.animateResizeChange(
             change = TransitionInfo.Change(task.token, SurfaceControl()).apply {

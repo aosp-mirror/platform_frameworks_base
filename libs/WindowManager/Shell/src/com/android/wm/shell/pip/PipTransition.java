@@ -73,6 +73,7 @@ import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
@@ -1344,6 +1345,13 @@ public class PipTransition extends PipTransitionController {
         if (pipChange == null) return false;
         updatePipForUnhandledTransition(pipChange, startTransaction, finishTransaction);
         return true;
+    }
+
+    @Override
+    public boolean isPackageActiveInPip(@Nullable String packageName) {
+        final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
+        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
+                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 
     private void updatePipForUnhandledTransition(@NonNull TransitionInfo.Change pipChange,

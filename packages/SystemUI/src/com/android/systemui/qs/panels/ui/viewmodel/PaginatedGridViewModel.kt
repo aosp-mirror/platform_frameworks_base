@@ -17,6 +17,9 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import androidx.compose.runtime.getValue
+import com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.development.ui.viewmodel.BuildNumberViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
@@ -34,6 +37,9 @@ constructor(
     columnsWithMediaViewModelFactory: QSColumnsViewModel.Factory,
     paginatedGridInteractor: PaginatedGridInteractor,
     inFirstPageViewModel: InFirstPageViewModel,
+    val buildNumberViewModelFactory: BuildNumberViewModel.Factory,
+    val editModeButtonViewModelFactory: EditModeButtonViewModel.Factory,
+    private val falsingInteractor: FalsingInteractor,
 ) : IconTilesViewModel by iconTilesViewModel, ExclusiveActivatable() {
 
     private val hydrator = Hydrator("PaginatedGridViewModel")
@@ -50,6 +56,10 @@ constructor(
 
     val columns: Int
         get() = columnsWithMediaViewModel.columns
+
+    fun registerSideSwipeGesture() {
+        falsingInteractor.isFalseTouch(QS_SWIPE_SIDE)
+    }
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {

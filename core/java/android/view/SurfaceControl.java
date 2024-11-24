@@ -37,6 +37,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ColorSpace;
@@ -58,6 +59,7 @@ import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.media.quality.PictureProfileHandle;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLSync;
 import android.os.Build;
@@ -234,7 +236,6 @@ public final class SurfaceControl implements Parcelable {
             long nativeObject, float currentBufferRatio, float desiredRatio);
     private static native void nativeSetDesiredHdrHeadroom(long transactionObj,
             long nativeObject, float desiredRatio);
-
     private static native void nativeSetCachingHint(long transactionObj,
             long nativeObject, int cachingHint);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
@@ -314,6 +315,11 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetLuts(long transactionObj, long nativeObject,
             float[] buffers, int[] slots, int[] dimensions, int[] sizes, int[] samplingKeys);
     private static native void nativeEnableDebugLogCallPoints(long transactionObj);
+    private static native int nativeGetMaxPictureProfiles();
+    private static native void nativeSetPictureProfileId(long transactionObj,
+            long nativeObject, long pictureProfileId);
+    private static native void nativeSetContentPriority(long transactionObj, long nativeObject,
+            int priority);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -598,8 +604,11 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Request a flush of any pending jank classification data. May cause the registered
-         * listener to be invoked inband.
+         * Request a flush of any pending jank classification data.
+         * <p>
+         * May cause the registered listener to be invoked inband. Since jank is tracked by the
+         * system compositor by surface, flushing the data on one listener, will also cause other
+         * listeners on the same surface to receive jank classification data.
          */
         public void flush() {
             nativeFlushJankData(mNativeObject);
@@ -1923,6 +1932,7 @@ public final class SurfaceControl implements Parcelable {
         public float renderFrameRate;
         public boolean hasArrSupport;
         public FrameRateCategoryRate frameRateCategoryRate;
+        public float[] supportedRefreshRates;
 
         public int[] supportedColorModes;
         public int activeColorMode;
@@ -1942,6 +1952,7 @@ public final class SurfaceControl implements Parcelable {
                     + ", renderFrameRate=" + renderFrameRate
                     + ", hasArrSupport=" + hasArrSupport
                     + ", frameRateCategoryRate=" + frameRateCategoryRate
+                    + ", supportedRefreshRates=" + Arrays.toString(supportedRefreshRates)
                     + ", supportedColorModes=" + Arrays.toString(supportedColorModes)
                     + ", activeColorMode=" + activeColorMode
                     + ", hdrCapabilities=" + hdrCapabilities
@@ -1963,14 +1974,15 @@ public final class SurfaceControl implements Parcelable {
                 && Objects.equals(hdrCapabilities, that.hdrCapabilities)
                 && preferredBootDisplayMode == that.preferredBootDisplayMode
                 && hasArrSupport == that.hasArrSupport
-                && Objects.equals(frameRateCategoryRate, that.frameRateCategoryRate);
+                && Objects.equals(frameRateCategoryRate, that.frameRateCategoryRate)
+                && Arrays.equals(supportedRefreshRates, that.supportedRefreshRates);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(Arrays.hashCode(supportedDisplayModes), activeDisplayModeId,
                     renderFrameRate, activeColorMode, hdrCapabilities, hasArrSupport,
-                    frameRateCategoryRate);
+                    frameRateCategoryRate, Arrays.hashCode(supportedRefreshRates));
         }
     }
 
@@ -2830,6 +2842,33 @@ public final class SurfaceControl implements Parcelable {
      */
     public static boolean bootFinished() {
         return nativeBootFinished();
+    }
+
+    /**
+     * Retrieve the maximum number of concurrent picture profiles allowed across all displays.
+     *
+     * A picture profile is assigned to a layer via:
+     * <ul>
+     *     <li>Picture processing via {@link MediaCodec.KEY_PICTURE_PROFILE}</li>
+     *     <li>Picture processing via {@link SurfaceControl.Transaction#setPictureProfileHandle}
+     *     </li>
+     * </ul>
+     *
+     * If the maximum number is exceeded, some layers will not receive profiles based on:
+     * <ul>
+     *     <li>The content priority assigned by the app</li>
+     *     <li>The system-determined priority of the app owning the layer</li>
+     * </ul>
+     *
+     * @see MediaCodec.KEY_PICTURE_PROFILE
+     * @see SurfaceControl.Transaction#setPictureProfileHandle
+     * @see SurfaceControl.Transaction#setContentPriority
+     *
+     * @hide
+     */
+    @IntRange(from = 0)
+    public static int getMaxPictureProfiles() {
+        return nativeGetMaxPictureProfiles();
     }
 
     /**
@@ -4591,6 +4630,71 @@ public final class SurfaceControl implements Parcelable {
             } else {
                 nativeSetLuts(mNativeObject, sc.mNativeObject, null, null, null, null, null);
             }
+            return this;
+        }
+
+        /**
+         * Sets the desired picture profile handle for a layer.
+         * <p>
+         * A handle, retrieved from {@link MediaQualityManager#getProfileHandles}, which
+         * refers a set of parameters that are used to configure picture processing that is applied
+         * to all subsequent buffers to enhance the quality of their contents (e.g. gamma, color
+         * temperature, hue, saturation, etc.).
+         * <p>
+         * Setting a handle does not guarantee access to limited picture processing. The content
+         * priority for the  as well as the prominance of app to the current user experience plays a
+         * role in which layer(s) get access to the limited picture processing resources. A maximum
+         * number of {@link MediaQualityManager.getMaxPictureProfiles} can be applied at any given
+         * point in time.
+         *
+         * @param sc The SurfaceControl of the layer that should be updated
+         * @param handle The picture profile handle which refers to the set of desired parameters
+         *
+         * @see MediaQualityManager#getMaxPictureProfiles
+         * @see MediaQualityManager#getProfileHandles
+         * @see MediaCodec.KEY_PICTURE_PROFILE
+         * @see SurfaceControl.Transaction#setContentPriority
+         *
+         * @hide
+         */
+        @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
+        @SystemApi
+        public @NonNull Transaction setPictureProfileHandle(@NonNull SurfaceControl sc,
+                                                            @NonNull PictureProfileHandle handle) {
+            checkPreconditions(sc);
+
+            nativeSetPictureProfileId(mNativeObject, sc.mNativeObject, handle.getId());
+            return this;
+        }
+
+        /**
+         * Sets the importance the layer's contents has to the app's user experience.
+         * <p>
+         * When a two layers within the same app are competing for a limited rendering resource,
+         * the priority will determine which layer gets access to the resource. The lower the
+         * priority, the more likely the layer will get access to the resource.
+         * <p>
+         * Resources managed by this priority:
+         * <ul>
+         *     <li>Picture processing via {@link MediaCodec.KEY_PICTURE_PROFILE}</li>
+         *     <li>Picture processing via {@link SurfaceControl.Transaction#setPictureProfileHandle}
+         *     </li>
+         * </ul>
+         *
+         * @param sc The SurfaceControl of the layer that should be updated
+         * @param priority The priority this layer should have with respect to other layers in the
+         *                 app. The default priority is zero.
+         *
+         * @see MediaQualityManager#getMaxPictureProfiles
+         * @see MediaCodec.KEY_PICTURE_PROFILE
+         * @see SurfaceControl.Transaction#setPictureProfileHandle
+         */
+        @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
+        public @NonNull Transaction setContentPriority(@NonNull SurfaceControl sc,
+                                                       int priority) {
+            checkPreconditions(sc);
+
+            nativeSetContentPriority(mNativeObject, sc.mNativeObject, priority);
             return this;
         }
 

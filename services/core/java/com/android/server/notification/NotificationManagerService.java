@@ -26,6 +26,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_RECEIVE_SENSITIVE_NOTIFICATIONS;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
+import static android.app.Flags.notificationClassificationUi;
 import static android.app.Flags.sortSectionByTime;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
@@ -4225,6 +4226,22 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+        public @NonNull String[] getTypeAdjustmentDeniedPackages() {
+            checkCallerIsSystemOrSystemUiOrShell();
+            return mAssistants.getTypeAdjustmentDeniedPackages();
+        }
+
+        @Override
+        @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+        public void setTypeAdjustmentForPackageState(String pkg, boolean enabled) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            mAssistants.setTypeAdjustmentForPackageState(pkg, enabled);
+
+            handleSavePolicyFile();
+        }
+
+        @Override
         @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
         public boolean appCanBePromoted(String pkg, int uid) {
             checkCallerIsSystemOrSystemUiOrShell();
@@ -6580,6 +6597,14 @@ public class NotificationManagerService extends SystemService {
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
                         "setNotificationListenerAccessGrantedForUser for user " + userId);
             }
+            if (mUmInternal.isVisibleBackgroundFullUser(userId)) {
+                // The main use case for visible background users is the Automotive multi-display
+                // configuration where a passenger can use a secondary display while the driver is
+                // using the main display. NotificationListeners is designed only for the current
+                // user and work profile. We added a condition to prevent visible background users
+                // from updating the data managed within the NotificationListeners object.
+                return;
+            }
             checkNotificationListenerAccess();
             if (granted && listener.flattenToString().length()
                     > NotificationManager.MAX_SERVICE_COMPONENT_NAME_LENGTH) {
@@ -7005,6 +7030,10 @@ public class NotificationManagerService extends SystemService {
                 }
                 if (notificationClassification() && adjustments.containsKey(KEY_TYPE)) {
                     if (!mAssistants.isAdjustmentKeyTypeAllowed(adjustments.getInt(KEY_TYPE))) {
+                        toRemove.add(potentialKey);
+                    } else if (notificationClassificationUi()
+                            && !mAssistants.isTypeAdjustmentAllowedForPackage(
+                            r.getSbn().getPackageName())) {
                         toRemove.add(potentialKey);
                     }
                 }
@@ -10500,6 +10529,27 @@ public class NotificationManagerService extends SystemService {
                             mGroupHelper.onNotificationRemoved(r, mNotificationList);
                         }
                     });
+
+                    // Wait 3 seconds so that the app has a chance to cancel/post
+                    // a group summary or children
+                    final NotificationRecord groupSummary = mSummaryByGroupKey.get(r.getGroupKey());
+                    if (groupSummary != null
+                            && !GroupHelper.isAggregatedGroup(groupSummary)
+                            && !groupSummary.getKey().equals(canceledKey)) {
+                        // We only care about app-provided valid group summaries
+                        final String summaryKey = groupSummary.getKey();
+                        mHandler.removeCallbacksAndEqualMessages(summaryKey);
+                        mHandler.postDelayed(() -> {
+                            synchronized (mNotificationLock) {
+                                NotificationRecord summaryRecord = mNotificationsByKey.get(
+                                        summaryKey);
+                                if (summaryRecord != null) {
+                                    mGroupHelper.onGroupedNotificationRemovedWithDelay(
+                                            summaryRecord, mNotificationList, mSummaryByGroupKey);
+                                }
+                            }
+                        }, summaryKey, DELAY_FORCE_REGROUP_TIME);
+                    }
                 } else {
                     mHandler.post(new Runnable() {
                         @Override
@@ -11643,6 +11693,7 @@ public class NotificationManagerService extends SystemService {
         private static final String ATT_DENIED = "denied_adjustments";
         private static final String ATT_ENABLED_TYPES = "enabled_key_types";
         private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
+        private static final String ATT_TYPES_DENIED_APPS = "types_denied_apps";
 
         private final Object mLock = new Object();
 
@@ -11657,6 +11708,9 @@ public class NotificationManagerService extends SystemService {
 
         @GuardedBy("mLock")
         private Map<Integer, HashSet<String>> mNasUnsupported = new ArrayMap<>();
+
+        @GuardedBy("mLock")
+        private Set<String> mClassificationTypeDeniedPackages = new ArraySet<>();
 
         protected ComponentName mDefaultFromConfig = null;
 
@@ -11857,6 +11911,44 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+        protected @NonNull boolean isTypeAdjustmentAllowedForPackage(String pkg) {
+            synchronized (mLock) {
+                if (notificationClassificationUi()) {
+                    return !mClassificationTypeDeniedPackages.contains(pkg);
+                }
+            }
+            return true;
+        }
+
+        @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+        protected @NonNull String[] getTypeAdjustmentDeniedPackages() {
+            synchronized (mLock) {
+                if (notificationClassificationUi()) {
+                    return mClassificationTypeDeniedPackages.toArray(new String[0]);
+                }
+            }
+            return new String[]{};
+        }
+
+        /**
+         * Set whether a particular package can have its notification channels adjusted to have a
+         * different type by NotificationAssistants.
+         */
+        @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+        public void setTypeAdjustmentForPackageState(String pkg, boolean enabled) {
+            if (!notificationClassificationUi()) {
+                return;
+            }
+            synchronized (mLock) {
+                if (enabled) {
+                    mClassificationTypeDeniedPackages.remove(pkg);
+                } else {
+                    mClassificationTypeDeniedPackages.add(pkg);
+                }
+            }
+        }
+
         protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {
             for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
                 ArrayList<String> keys = new ArrayList<>(records.size());
@@ -11953,8 +12045,10 @@ public class NotificationManagerService extends SystemService {
                             assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel(),
                                     update);
                         }
+                    } catch (DeadObjectException ex) {
+                        Slog.wtf(TAG, "unable to notify assistant (enqueued): " + info, ex);
                     } catch (RemoteException ex) {
-                        Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                        Slog.e(TAG, "unable to notify assistant (enqueued): " + info, ex);
                     }
                 }
             }
@@ -12075,19 +12169,21 @@ public class NotificationManagerService extends SystemService {
                     r.getSbn(),
                     r.getNotificationType(),
                     true /* sameUserOnly */,
-                    (assistant, sbnToPost) -> {
+                    (info, sbnToPost) -> {
                         try {
                             if (android.app.Flags.noSbnholder()) {
-                                assistant.onNotificationSnoozedUntilContextFull(
+                                info.onNotificationSnoozedUntilContextFull(
                                         sbnToPost, snoozeCriterionId);
                             } else {
                                 final StatusBarNotificationHolder sbnHolder =
                                         new StatusBarNotificationHolder(sbnToPost);
-                                assistant.onNotificationSnoozedUntilContext(
+                                info.onNotificationSnoozedUntilContext(
                                         sbnHolder, snoozeCriterionId);
                             }
+                        } catch (DeadObjectException ex) {
+                            Slog.wtf(TAG, "unable to notify assistant (snoozed): " + info, ex);
                         } catch (RemoteException ex) {
-                            Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (snoozed): " + info, ex);
                         }
                     });
         }
@@ -12315,6 +12411,12 @@ public class NotificationManagerService extends SystemService {
                 out.attribute(null, ATT_TYPES,
                         TextUtils.join(",", mAllowedAdjustmentKeyTypes));
                 out.endTag(null, ATT_ENABLED_TYPES);
+                if (notificationClassificationUi()) {
+                    out.startTag(null, ATT_TYPES_DENIED_APPS);
+                    out.attribute(null, ATT_TYPES,
+                            TextUtils.join(",", mClassificationTypeDeniedPackages));
+                    out.endTag(null, ATT_TYPES_DENIED_APPS);
+                }
             }
         }
 
@@ -12344,6 +12446,14 @@ public class NotificationManagerService extends SystemService {
                                 Slog.wtf(TAG, "Bad type specified", e);
                             }
                         }
+                    }
+                }
+            } else if (notificationClassificationUi() && ATT_TYPES_DENIED_APPS.equals(tag)) {
+                final String apps = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                synchronized (mLock) {
+                    mClassificationTypeDeniedPackages.clear();
+                    if (!TextUtils.isEmpty(apps)) {
+                        mClassificationTypeDeniedPackages.addAll(Arrays.asList(apps.split(",")));
                     }
                 }
             }
@@ -12641,6 +12751,20 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        @Override
+        public void onUserUnlocked(int user) {
+            if (mUmInternal.isVisibleBackgroundFullUser(user)) {
+                // The main use case for visible background users is the Automotive
+                // multi-display configuration where a passenger can use a secondary
+                // display while the driver is using the main display.
+                // NotificationListeners is designed only for the current user and work
+                // profile. We added a condition to prevent visible background users from
+                // updating the data managed within the NotificationListeners object.
+                return;
+            }
+            super.onUserUnlocked(user);
         }
 
         @Override

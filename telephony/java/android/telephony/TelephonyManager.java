@@ -8825,9 +8825,6 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
      *          authType.
      */
-    // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
-    // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
-    // it's not public API.
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public String getIccAuthentication(int appType, @AuthType int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
@@ -12239,9 +12236,10 @@ public class TelephonyManager {
      * @param subId Subscription ID
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
-     * Use {@link ImsMmTelManager.RegistrationCallback} instead.
      * @hide
+     * @deprecated Use {@link ImsMmTelManager#getRegistrationState(Executor, Consumer)} instead.
      */
+    @Deprecated
     public boolean isImsRegistered(int subId) {
         try {
             return getITelephony().isImsRegistered(subId);
@@ -12259,8 +12257,10 @@ public class TelephonyManager {
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
      * @see SubscriptionManager#getDefaultSubscriptionId()
+     * @deprecated Use {@link ImsMmTelManager#getRegistrationState(Executor, Consumer)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean isImsRegistered() {
        try {
@@ -12277,9 +12277,10 @@ public class TelephonyManager {
      * @return true if Voice over LTE is available or false if it is unavailable or unknown.
      * @see SubscriptionManager#getDefaultSubscriptionId()
      * <p>
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isVolteAvailable() {
         try {
@@ -12297,9 +12298,10 @@ public class TelephonyManager {
      * used during creation, the default subscription ID will be used. To query the
      * underlying technology that VT is available on, use {@link #getImsRegTechnologyForMmTel}.
      * @return true if VT is available, or false if it is unavailable or unknown.
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isVideoTelephonyAvailable() {
         try {
@@ -12313,9 +12315,10 @@ public class TelephonyManager {
      * Returns the Status of Wi-Fi calling (Voice over WiFi) for the subscription ID specified.
      * @param subId the subscription ID.
      * @return true if VoWiFi is available, or false if it is unavailable or unknown.
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isWifiCallingAvailable() {
        try {
@@ -12336,9 +12339,11 @@ public class TelephonyManager {
      *  other sim's internet, or
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_NONE} if we are not registered or the
      *  result is unavailable.
-     *  Use {@link ImsMmTelManager.RegistrationCallback} instead.
+     *  @Deprecated Use {@link ImsMmTelManager#registerImsRegistrationCallback(Executor, RegistrationCallback)}
+     *      or {@link ImsMmTelManager#getRegistrationTransportType(Executor, Consumer)} instead.
      *  @hide
      */
+    @Deprecated
     public @ImsRegistrationImplBase.ImsRegistrationTech int getImsRegTechnologyForMmTel() {
         try {
             return getITelephony().getImsRegTechnologyForMmTel(getSubId());
@@ -19593,5 +19598,38 @@ public class TelephonyManager {
             Rlog.e(TAG, "getTestEuiccUiComponent() RemoteException : " + ex);
             throw ex.rethrowAsRuntimeException();
         }
+    }
+
+    /**
+     * Returns carrier id maps to the passing CarrierIdentifier.
+     * To recognize a carrier (including MVNO) as a first-class identity,
+     * Android assigns each carrier with a canonical integer a.k.a. carrier id.
+     * The carrier ID is an Android platform-wide identifier for a carrier.
+     * AOSP maintains carrier ID assignments in
+     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/latest_carrier_id/carrier_list.textpb">here</a>
+     *
+     * @param carrierIdentifier {@link CarrierIdentifier}
+     *
+     * @return Carrier id. Return {@link #UNKNOWN_CARRIER_ID} if the carrier cannot be identified.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ID_FROM_CARRIER_IDENTIFIER)
+    @SystemApi
+    @WorkerThread
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getCarrierIdFromCarrierIdentifier(@NonNull CarrierIdentifier carrierIdentifier) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromIdentifier(carrierIdentifier);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
     }
 }

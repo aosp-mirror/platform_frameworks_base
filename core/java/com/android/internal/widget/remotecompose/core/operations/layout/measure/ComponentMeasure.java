@@ -26,7 +26,7 @@ public class ComponentMeasure {
     float mY;
     float mW;
     float mH;
-    Component.Visibility mVisibility = Component.Visibility.VISIBLE;
+    @NonNull Component.Visibility mVisibility = Component.Visibility.VISIBLE;
 
     public void setX(float value) {
         mX = value;
@@ -60,16 +60,16 @@ public class ComponentMeasure {
         return mH;
     }
 
-    public Component.Visibility getVisibility() {
+    public @NonNull Component.Visibility getVisibility() {
         return mVisibility;
     }
 
-    public void setVisibility(Component.Visibility visibility) {
+    public void setVisibility(@NonNull Component.Visibility visibility) {
         mVisibility = visibility;
     }
 
     public ComponentMeasure(
-            int id, float x, float y, float w, float h, Component.Visibility visibility) {
+            int id, float x, float y, float w, float h, @NonNull Component.Visibility visibility) {
         this.mId = id;
         this.mX = x;
         this.mY = y;

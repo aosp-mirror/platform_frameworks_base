@@ -392,6 +392,10 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private int memtagMode;
     @ApplicationInfo.NativeHeapZeroInitialized
     private int nativeHeapZeroInitialized;
+
+    @ApplicationInfo.PageSizeAppCompatFlags private int mPageSizeAppCompatFlags =
+            ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
+
     @Nullable
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForBoolean.class)
     private Boolean requestRawExternalStorageAccess;
@@ -1116,6 +1120,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public int getNativeHeapZeroInitialized() {
         return nativeHeapZeroInitialized;
+    }
+
+    @ApplicationInfo.PageSizeAppCompatFlags
+    @Override
+    public int getPageSizeAppCompatFlags() {
+        return mPageSizeAppCompatFlags;
     }
 
     @Override
@@ -2221,6 +2231,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public PackageImpl setPageSizeAppCompatFlags(@ApplicationInfo.PageSizeAppCompatFlags int flag) {
+        mPageSizeAppCompatFlags = flag;
+        return this;
+    }
+
+    @Override
     public PackageImpl setNetworkSecurityConfigResourceId(int value) {
         networkSecurityConfigRes = value;
         return this;
@@ -2703,6 +2719,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
             appInfo.setKnownActivityEmbeddingCerts(mKnownActivityEmbeddingCerts);
         }
         appInfo.allowCrossUidActivitySwitchFromBelow = mAllowCrossUidActivitySwitchFromBelow;
+        appInfo.setPageSizeAppCompatFlags(mPageSizeAppCompatFlags);
 
         return appInfo;
     }
@@ -3305,6 +3322,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeInt(this.mIntentMatchingFlags);
         dest.writeIntArray(this.mAlternateLauncherIconResIds);
         dest.writeIntArray(this.mAlternateLauncherLabelResIds);
+        dest.writeInt(this.mPageSizeAppCompatFlags);
     }
 
     private void writeFeatureFlagState(@NonNull Parcel dest) {
@@ -3499,6 +3517,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.mIntentMatchingFlags = in.readInt();
         this.mAlternateLauncherIconResIds = in.createIntArray();
         this.mAlternateLauncherLabelResIds = in.createIntArray();
+        this.mPageSizeAppCompatFlags = in.readInt();
 
         assignDerivedFields();
         assignDerivedFields2();

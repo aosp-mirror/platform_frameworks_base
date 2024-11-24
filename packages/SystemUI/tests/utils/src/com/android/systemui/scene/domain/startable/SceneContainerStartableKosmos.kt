@@ -37,6 +37,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.disabledContentInteractor
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -83,5 +84,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         alternateBouncerInteractor = alternateBouncerInteractor,
         vibratorHelper = vibratorHelper,
         msdlPlayer = msdlPlayer,
+        disabledContentInteractor = disabledContentInteractor,
     )
 }

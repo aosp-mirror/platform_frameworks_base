@@ -33,7 +33,7 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.desktopmode.DesktopRepository
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer

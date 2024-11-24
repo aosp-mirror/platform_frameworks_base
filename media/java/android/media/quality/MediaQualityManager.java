@@ -271,6 +271,17 @@ public final class MediaQualityManager {
         }
     }
 
+    /**
+     * Gets picture profile handle by profile ID.
+     * @hide
+     */
+    public PictureProfileHandle getPictureProfileHandle(String id) {
+        try {
+            return mService.getPictureProfileHandle(id);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Creates a picture profile and store it in the system.
@@ -312,7 +323,6 @@ public final class MediaQualityManager {
 
     /**
      * Registers a {@link SoundProfileCallback}.
-     * @hide
      */
     public void registerSoundProfileCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -326,7 +336,6 @@ public final class MediaQualityManager {
 
     /**
      * Unregisters the existing {@link SoundProfileCallback}.
-     * @hide
      */
     public void unregisterSoundProfileCallback(@NonNull final SoundProfileCallback callback) {
         Preconditions.checkNotNull(callback);
@@ -348,7 +357,6 @@ public final class MediaQualityManager {
      *
      * @return the corresponding sound profile if available; {@code null} if the name doesn't
      *         exist.
-     * @hide
      */
     @Nullable
     public SoundProfile getSoundProfile(
@@ -362,9 +370,11 @@ public final class MediaQualityManager {
 
 
     /**
-     * @SystemApi gets profiles that available to the given package
+     * Gets profiles that available to the given package.
+     *
      * @hide
      */
+    @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getSoundProfilesByPackage(@NonNull String packageName) {
@@ -376,8 +386,7 @@ public final class MediaQualityManager {
     }
 
     /**
-     * Gets profiles that available to the caller package
-     * @hide
+     * Gets profiles that available to the caller package.
      */
     @NonNull
     public List<SoundProfile> getAvailableSoundProfiles() {
@@ -389,11 +398,13 @@ public final class MediaQualityManager {
     }
 
     /**
-     * @SystemApi Gets all package names whose sound profiles are available.
+     * Gets all package names whose sound profiles are available.
      *
      * @see #getSoundProfilesByPackage(String)
+     *
      * @hide
      */
+    @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<String> getSoundProfilePackageNames() {
@@ -409,8 +420,7 @@ public final class MediaQualityManager {
      * Creates a sound profile and store it in the system.
      *
      * <p>If the profile is created successfully,
-     * {@link SoundProfileCallback#onSoundProfileAdded(long, SoundProfile)} is invoked.
-     * @hide
+     * {@link SoundProfileCallback#onSoundProfileAdded(String, SoundProfile)} is invoked.
      */
     public void createSoundProfile(@NonNull SoundProfile sp) {
         try {
@@ -423,7 +433,6 @@ public final class MediaQualityManager {
 
     /**
      * Updates an existing sound profile and store it in the system.
-     * @hide
      */
     public void updateSoundProfile(@NonNull String profileId, @NonNull SoundProfile sp) {
         try {
@@ -436,7 +445,6 @@ public final class MediaQualityManager {
 
     /**
      * Removes a sound profile from the system.
-     * @hide
      */
     public void removeSoundProfile(@NonNull String profileId) {
         try {
@@ -497,6 +505,7 @@ public final class MediaQualityManager {
      * @see #removeSoundProfile(String)
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     @NonNull
     public List<String> getSoundProfileAllowList() {
@@ -511,6 +520,7 @@ public final class MediaQualityManager {
      * Sets the allowlist of packages that can create and removed sound profiles
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public void setSoundProfileAllowList(@NonNull List<String> packageNames) {
         try {
@@ -597,6 +607,7 @@ public final class MediaQualityManager {
      * @param enabled {@code true} to enable, {@code false} to disable.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public void setAutoSoundQualityEnabled(boolean enabled) {
         try {
@@ -608,7 +619,6 @@ public final class MediaQualityManager {
 
     /**
      * Returns {@code true} if auto sound quality is enabled; {@code false} otherwise.
-     * @hide
      */
     public boolean isAutoSoundQualityEnabled() {
         try {
@@ -620,7 +630,6 @@ public final class MediaQualityManager {
 
     /**
      * Registers a {@link AmbientBacklightCallback}.
-     * @hide
      */
     public void registerAmbientBacklightCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -634,7 +643,6 @@ public final class MediaQualityManager {
 
     /**
      * Unregisters the existing {@link AmbientBacklightCallback}.
-     * @hide
      */
     public void unregisterAmbientBacklightCallback(
             @NonNull final AmbientBacklightCallback callback) {
@@ -655,7 +663,6 @@ public final class MediaQualityManager {
      * Set the ambient backlight settings.
      *
      * @param settings The settings to use for the backlight detector.
-     * @hide
      */
     public void setAmbientBacklightSettings(
             @NonNull AmbientBacklightSettings settings) {
@@ -668,10 +675,20 @@ public final class MediaQualityManager {
     }
 
     /**
+     * Returns {@code true} if ambient backlight is enabled; {@code false} otherwise.
+     */
+    public boolean isAmbientBacklightEnabled() {
+        try {
+            return mService.isAmbientBacklightEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Enables or disables the ambient backlight detection.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
-     * @hide
      */
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
@@ -882,7 +899,6 @@ public final class MediaQualityManager {
 
     /**
      * Callback used to monitor status of sound profiles.
-     * @hide
      */
     public abstract static class SoundProfileCallback {
         /**
@@ -890,7 +906,6 @@ public final class MediaQualityManager {
          *
          * @param profileId the ID of the profile.
          * @param profile the newly added profile.
-         * @hide
          */
         public void onSoundProfileAdded(
                 @NonNull String profileId, @NonNull SoundProfile profile) {
@@ -901,7 +916,6 @@ public final class MediaQualityManager {
          *
          * @param profileId the ID of the profile.
          * @param profile the profile with updated info.
-         * @hide
          */
         public void onSoundProfileUpdated(
                 @NonNull String profileId, @NonNull SoundProfile profile) {
@@ -912,7 +926,6 @@ public final class MediaQualityManager {
          *
          * @param profileId the ID of the profile.
          * @param profile the removed profile.
-         * @hide
          */
         public void onSoundProfileRemoved(
                 @NonNull String profileId, @NonNull SoundProfile profile) {
@@ -922,7 +935,6 @@ public final class MediaQualityManager {
          * This is invoked when an issue has occurred.
          *
          * @param errorCode the error code
-         * @hide
          */
         public void onError(@SoundProfile.ErrorCode int errorCode) {
         }
@@ -934,7 +946,6 @@ public final class MediaQualityManager {
          * @param profileId the ID of the profile used by the media content. {@code null} if there
          *                  is no associated profile
          * @param updatedCaps the updated capabilities.
-         * @hide
          */
         public void onParamCapabilitiesChanged(
                 @Nullable String profileId, @NonNull List<ParamCapability> updatedCaps) {
@@ -943,7 +954,6 @@ public final class MediaQualityManager {
 
     /**
      * Callback used to monitor status of ambient backlight.
-     * @hide
      */
     public abstract static class AmbientBacklightCallback {
         /**

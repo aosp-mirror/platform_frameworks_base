@@ -7,3 +7,10 @@ flag {
     description: "Option to launch the Wallet app on double-tap of the power button"
     bug: "378469025"
 }
+
+flag {
+    name: "launch_selected_card_from_qs_tile"
+    namespace: "wallet_integration"
+    description: "When the wallet QS tile is tapped, launch the selected card pending intent instead of the home screen pending intent."
+    bug: "378469025"
+}

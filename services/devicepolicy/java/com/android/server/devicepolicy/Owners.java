@@ -695,6 +695,19 @@ class Owners {
         }
     }
 
+    void markSetKeyguardDisabledFeaturesMigrated() {
+        synchronized (mData) {
+            mData.mSetKeyguardDisabledFeaturesMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isSetKeyguardDisabledFeaturesMigrated() {
+        synchronized (mData) {
+            return mData.mSetKeyguardDisabledFeaturesMigrated;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

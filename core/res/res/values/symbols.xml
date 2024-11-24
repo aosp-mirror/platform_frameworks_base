@@ -2390,7 +2390,11 @@
   <java-symbol type="layout" name="notification_material_action_list" />
   <java-symbol type="layout" name="notification_material_action_tombstone" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_base" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_base" />
+  <java-symbol type="layout" name="notification_2025_template_heads_up_base" />
   <java-symbol type="layout" name="notification_2025_template_header" />
+  <java-symbol type="layout" name="notification_2025_template_collapsed_messaging" />
+  <java-symbol type="layout" name="notification_2025_template_collapsed_media" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_compact_heads_up_base" />
@@ -2665,6 +2669,7 @@
   <java-symbol type="string" name="zen_mode_trigger_summary_divider_text" />
   <java-symbol type="string" name="zen_mode_trigger_summary_range_symbol_combination" />
   <java-symbol type="string" name="zen_mode_trigger_summary_range_words" />
+  <java-symbol type="string" name="zen_mode_trigger_summary_combined" />
   <java-symbol type="string" name="zen_mode_trigger_event_calendar_any" />
 
   <java-symbol type="string" name="display_rotation_camera_compat_toast_after_rotation" />
@@ -3306,6 +3311,11 @@
   <java-symbol type="string" name="region_picker_section_suggested_bilingual" />
   <java-symbol type="string" name="language_selection_title" />
   <java-symbol type="string" name="search_language_hint" />
+
+  <!-- Strings for page size app compat dialog -->
+  <java-symbol type="string" name="page_size_compat_apk_warning" />
+  <java-symbol type="string" name="page_size_compat_elf_warning" />
+  <java-symbol type="string" name="page_size_compat_apk_and_elf_warning" />
 
   <!--  Work profile unlaunchable app alert dialog-->
   <java-symbol type="style" name="AlertDialogWithEmergencyButton"/>
@@ -4692,6 +4702,8 @@
 
   <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
   <java-symbol type="bool" name="config_showUserSwitcherByDefault" />
+  <java-symbol type="bool" name="config_allowChangeUserSwitcherEnabled" />
+  <java-symbol type="bool" name="config_enableUserSwitcherUponUserCreation" />
 
   <!-- Set to true to make assistant show in front of the dream/screensaver. -->
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
@@ -5108,7 +5120,6 @@
   <java-symbol type="layout" name="notification_expand_button"/>
   <java-symbol type="id" name="close_button" />
   <java-symbol type="layout" name="notification_close_button"/>
-  <java-symbol type="id" name="notification_buttons_column" />
 
   <java-symbol type="bool" name="config_supportsMicToggle" />
   <java-symbol type="bool" name="config_supportsCamToggle" />
@@ -5317,6 +5328,91 @@
   <java-symbol type="integer" name="config_accumulatedBatteryUsageStatsSpanSize" />
 
   <!--Dynamic Tokens-->
+  <java-symbol name="materialColorBackground" type="color"/>
+  <java-symbol name="materialColorControlActivated" type="color"/>
+  <java-symbol name="materialColorControlHighlight" type="color"/>
+  <java-symbol name="materialColorControlNormal" type="color"/>
+  <java-symbol name="materialColorError" type="color"/>
+  <java-symbol name="materialColorErrorContainer" type="color"/>
+  <java-symbol name="materialColorInverseOnSurface" type="color"/>
+  <java-symbol name="materialColorInversePrimary" type="color"/>
+  <java-symbol name="materialColorInverseSurface" type="color"/>
+  <java-symbol name="materialColorOnBackground" type="color"/>
+  <java-symbol name="materialColorOnError" type="color"/>
+  <java-symbol name="materialColorOnErrorContainer" type="color"/>
+  <java-symbol name="materialColorOnPrimary" type="color"/>
+  <java-symbol name="materialColorOnPrimaryContainer" type="color"/>
+  <java-symbol name="materialColorOnSecondary" type="color"/>
+  <java-symbol name="materialColorOnSecondaryContainer" type="color"/>
+  <java-symbol name="materialColorOnSurface" type="color"/>
+  <java-symbol name="materialColorOnSurfaceVariant" type="color"/>
+  <java-symbol name="materialColorOnTertiary" type="color"/>
+  <java-symbol name="materialColorOnTertiaryContainer" type="color"/>
+  <java-symbol name="materialColorOutline" type="color"/>
+  <java-symbol name="materialColorOutlineVariant" type="color"/>
+  <java-symbol name="materialColorPaletteKeyColorNeutral" type="color"/>
+  <java-symbol name="materialColorPaletteKeyColorNeutralVariant" type="color"/>
+  <java-symbol name="materialColorPaletteKeyColorPrimary" type="color"/>
+  <java-symbol name="materialColorPaletteKeyColorSecondary" type="color"/>
+  <java-symbol name="materialColorPaletteKeyColorTertiary" type="color"/>
+  <java-symbol name="materialColorPrimary" type="color"/>
+  <java-symbol name="materialColorPrimaryContainer" type="color"/>
+  <java-symbol name="materialColorScrim" type="color"/>
+  <java-symbol name="materialColorSecondary" type="color"/>
+  <java-symbol name="materialColorSecondaryContainer" type="color"/>
+  <java-symbol name="materialColorShadow" type="color"/>
+  <java-symbol name="materialColorSurface" type="color"/>
+  <java-symbol name="materialColorSurfaceBright" type="color"/>
+  <java-symbol name="materialColorSurfaceContainer" type="color"/>
+  <java-symbol name="materialColorSurfaceContainerHigh" type="color"/>
+  <java-symbol name="materialColorSurfaceContainerHighest" type="color"/>
+  <java-symbol name="materialColorSurfaceContainerLow" type="color"/>
+  <java-symbol name="materialColorSurfaceContainerLowest" type="color"/>
+  <java-symbol name="materialColorSurfaceDim" type="color"/>
+  <java-symbol name="materialColorSurfaceTint" type="color"/>
+  <java-symbol name="materialColorSurfaceVariant" type="color"/>
+  <java-symbol name="materialColorTertiary" type="color"/>
+  <java-symbol name="materialColorTertiaryContainer" type="color"/>
+  <java-symbol name="materialColorTextHintInverse" type="color"/>
+  <java-symbol name="materialColorTextPrimaryInverse" type="color"/>
+  <java-symbol name="materialColorTextPrimaryInverseDisableOnly" type="color"/>
+  <java-symbol name="materialColorTextSecondaryAndTertiaryInverse" type="color"/>
+  <java-symbol name="materialColorTextSecondaryAndTertiaryInverseDisabled" type="color"/>
+  <java-symbol name="materialColorOnPrimaryFixed" type="color"/>
+  <java-symbol name="materialColorOnPrimaryFixedVariant" type="color"/>
+  <java-symbol name="materialColorOnSecondaryFixed" type="color"/>
+  <java-symbol name="materialColorOnSecondaryFixedVariant" type="color"/>
+  <java-symbol name="materialColorOnTertiaryFixed" type="color"/>
+  <java-symbol name="materialColorOnTertiaryFixedVariant" type="color"/>
+  <java-symbol name="materialColorPrimaryFixed" type="color"/>
+  <java-symbol name="materialColorPrimaryFixedDim" type="color"/>
+  <java-symbol name="materialColorSecondaryFixed" type="color"/>
+  <java-symbol name="materialColorSecondaryFixedDim" type="color"/>
+  <java-symbol name="materialColorTertiaryFixed" type="color"/>
+  <java-symbol name="materialColorTertiaryFixedDim" type="color"/>
+  <java-symbol name="customColorBrandA" type="color"/>
+  <java-symbol name="customColorBrandB" type="color"/>
+  <java-symbol name="customColorBrandC" type="color"/>
+  <java-symbol name="customColorBrandD" type="color"/>
+  <java-symbol name="customColorClockHour" type="color"/>
+  <java-symbol name="customColorClockMinute" type="color"/>
+  <java-symbol name="customColorClockSecond" type="color"/>
+  <java-symbol name="customColorOnShadeActive" type="color"/>
+  <java-symbol name="customColorOnShadeActiveVariant" type="color"/>
+  <java-symbol name="customColorOnShadeInactive" type="color"/>
+  <java-symbol name="customColorOnShadeInactiveVariant" type="color"/>
+  <java-symbol name="customColorOnThemeApp" type="color"/>
+  <java-symbol name="customColorOverviewBackground" type="color"/>
+  <java-symbol name="customColorShadeActive" type="color"/>
+  <java-symbol name="customColorShadeDisabled" type="color"/>
+  <java-symbol name="customColorShadeInactive" type="color"/>
+  <java-symbol name="customColorThemeApp" type="color"/>
+  <java-symbol name="customColorThemeAppRing" type="color"/>
+  <java-symbol name="customColorThemeNotif" type="color"/>
+  <java-symbol name="customColorUnderSurface" type="color"/>
+  <java-symbol name="customColorWeatherTemp" type="color"/>
+  <java-symbol name="customColorWidgetBackground" type="color"/>
+
   <java-symbol type="attr" name="materialColorBackground"/>
   <java-symbol type="attr" name="materialColorControlActivated"/>
   <java-symbol type="attr" name="materialColorControlHighlight"/>
@@ -5606,6 +5702,7 @@
 
   <!-- DisplayManager configs. -->
   <java-symbol type="bool" name="config_evenDimmerEnabled" />
+  <java-symbol type="string" name="config_pluginsProviderJarPath" />
 
   <java-symbol type="bool" name="config_watchlistUseFileHashesCache" />
   <java-symbol type="string" name="config_defaultContextualSearchPackageName" />
@@ -5633,6 +5730,9 @@
   <!-- Whether a desktop window should be maximized when it's dragged to the top edge of the
        screen. -->
   <java-symbol type="bool" name="config_dragToMaximizeInDesktopMode" />
+
+  <!-- Whether showing the app handle is supported on this device -->
+  <java-symbol type="bool" name="config_enableAppHandle" />
 
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
@@ -5702,9 +5802,14 @@
   <java-symbol type="string" name="identity_check_settings_action" />
   <java-symbol type="string" name="identity_check_settings_package_name" />
 
-  <!-- Forensic event transport -->
-  <java-symbol type="string" name="config_forensicEventTransport" />
+  <!-- Intrusion detection event transport -->
+  <java-symbol type="string" name="config_intrusionDetectionEventTransport" />
 
   <!-- Fingerprint screen off unlock config -->
   <java-symbol type="bool" name="config_screen_off_udfps_enabled" />
+
+  <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
+
+  <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
 </resources>

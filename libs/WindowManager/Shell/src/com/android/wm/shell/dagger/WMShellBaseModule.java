@@ -636,7 +636,7 @@ public abstract class WMShellBaseModule {
     static Optional<FreeformComponents> provideFreeformComponents(
             @DynamicOverride Optional<FreeformComponents> freeformComponents,
             Context context) {
-        if (FreeformComponents.isFreeformEnabled(context)) {
+        if (FreeformComponents.requiresFreeformComponents(context)) {
             return freeformComponents;
         }
         return Optional.empty();
@@ -799,10 +799,11 @@ public abstract class WMShellBaseModule {
             Transitions transitions,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread Handler mainHandler,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            FocusTransitionObserver focusTransitionObserver) {
         return new KeyguardTransitionHandler(
                 shellInit, shellController, displayController, transitions, taskStackListener,
-                mainHandler, mainExecutor);
+                mainHandler, mainExecutor, focusTransitionObserver);
     }
 
     @WMSingleton
@@ -992,7 +993,7 @@ public abstract class WMShellBaseModule {
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
         return desktopTasksController.flatMap((lazy) -> {
-            if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
                 return Optional.of(lazy.get());
             }
             return Optional.empty();

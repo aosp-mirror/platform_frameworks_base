@@ -326,8 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Vhodna naprava"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Slušni aparati"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Vklapljanje …"</string>
-    <!-- no translation found for quick_settings_brightness_unable_adjust_msg (786478497970492300) -->
-    <skip />
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Svetlosti ni mogoče prilagoditi, ker jo\n nadzoruje aplikacija na vrhu"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Samodejno sukanje"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Samodejno sukanje zaslona"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokacija"</string>
@@ -415,9 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknite za seznanitev nove naprave"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Prednastavljenih vrednosti ni bilo mogoče posodobiti"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Prednastavljeno"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Izbrano"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Orodja"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Samodejni podnapisi"</string>
-    <!-- no translation found for quick_settings_notes_label (1028004078001002623) -->
-    <skip />
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Opomba"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Želite odblokirati mikrofon v napravi?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Želite odblokirati fotoaparat v napravi?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Želite odblokirati fotoaparat in mikrofon v napravi?"</string>
@@ -561,8 +561,8 @@
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je onemogočila to možnost"</string>
     <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Izbira aplikacije za deljenje"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Želite predvajati vsebino zaslona?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Predvajanje vsebine ene aplikacije"</string>
-    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Predvajanje vsebine celotnega zaslona"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Predvajanje ene aplikacije"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Predvajanje celotnega zaslona"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Pri predvajanju vsebine celotnega zaslona je vidno vse na zaslonu. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Pri predvajanju vsebine aplikacije je vidno vse, kar je prikazano ali predvajano v tej aplikaciji. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Predvajanje zaslona"</string>
@@ -699,7 +699,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Prostorski zvok"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Izklopljeno"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fiksno"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje premikov glave"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje glave"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dotaknite se, če želite spremeniti način zvonjenja."</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"način zvonjenja"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"izklop zvoka"</string>
@@ -871,8 +871,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Preklop na aplikacijo desno ali spodaj med uporabo razdeljenega zaslona"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Preklop na aplikacijo levo ali zgoraj med uporabo razdeljenega zaslona"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Pri razdeljenem zaslonu: medsebojna zamenjava aplikacij"</string>
-    <!-- no translation found for system_multitasking_move_to_next_display (6169737557526976997) -->
-    <skip />
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Premikanje aktivnega okna med zasloni"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vnos"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Preklop na naslednji jezik"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Preklop na prejšnji jezik"</string>
@@ -1202,8 +1201,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Zvočniki in zasloni"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Predlagane naprave"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Vhodno"</string>
-    <string name="media_output_group_title" msgid="6789001895863332576">"Izhodno"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Vhod"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Izhod"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Ustavi deljeno sejo za premik predstavnosti v drugo napravo."</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Ustavi"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
@@ -1221,6 +1220,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Uporabite manj kot <xliff:g id="LENGTH">%1$d</xliff:g> znakov."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delovna različica"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delovna različica je bila kopirana v odložišče."</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"Odprt pogovor"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Pripomočki za pogovore"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Dotaknite se pogovora, da ga dodate na začetni zaslon."</string>
@@ -1356,6 +1357,8 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Za višjo ločljivost obrnite telefon"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Razpiranje zložljive naprave"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Obračanje zložljive naprave"</string>
+    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
+    <skip />
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"zaprto"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"razprto"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1415,29 +1418,22 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Dostopnost"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Bližnjične tipke"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Prilagajanje bližnjičnih tipk"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_sub_title (2479732335876820286) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Pritisnite tipko za dodelitev bližnjice"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Iskanje po bližnjicah"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ni rezultatov iskanja"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona za strnitev"</string>
-    <!-- no translation found for shortcut_helper_content_description_meta_key (3989315044342124818) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_content_description_plus_icon (6152683734278299020) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikona tipke za dejanje ali metapodatke"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ikona znaka plus"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Prilagodi"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Končano"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona za razširitev"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ali"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Ročica za vlečenje"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Nastavitve tipkovnice"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_set_shortcut_button_label (4754492225010429382) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_cancel_button_label (5595546460431741178) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_add_shortcut_dialog_placeholder (9154297849458741995) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_customize_dialog_error_message (5954264095841845768) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Nastavite bližnjico"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Prekliči"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pritisnite tipko"</string>
+    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Kombinacija tipk je že v uporabi. Poskusite z drugo tipko."</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Krmarjenje s tipkovnico"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Učenje bližnjičnih tipk"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Krmarjenje s sledilno ploščico"</string>

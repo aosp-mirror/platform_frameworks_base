@@ -18,21 +18,21 @@ package com.android.systemui.shade.domain.interactor
 
 import android.content.Context
 import android.util.Log
-import android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE
+import android.view.WindowManager
+import androidx.annotation.UiThread
 import com.android.app.tracing.coroutines.launchTraced
 import com.android.app.tracing.traceSection
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.display.data.repository.DisplayWindowPropertiesRepository
-import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.ShadeWindowLayoutParams
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
-import com.android.systemui.statusbar.phone.ConfigurationForwarder
+import com.android.systemui.util.kotlin.getOrNull
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -43,14 +43,26 @@ import kotlinx.coroutines.withContext
 class ShadeDisplaysInteractor
 @Inject
 constructor(
-    private val shadeRootView: WindowRootView,
+    optionalShadeRootView: Optional<WindowRootView>,
     private val shadePositionRepository: ShadeDisplaysRepository,
     @ShadeDisplayAware private val shadeContext: Context,
-    private val displayWindowPropertiesRepository: DisplayWindowPropertiesRepository,
+    @ShadeDisplayAware private val wm: WindowManager,
     @Background private val bgScope: CoroutineScope,
-    @ShadeDisplayAware private val configurationForwarder: ConfigurationForwarder,
-    @Main private val mainContext: CoroutineContext,
+    @Main private val mainThreadContext: CoroutineContext,
 ) : CoreStartable {
+
+    private val shadeLayoutParams: WindowManager.LayoutParams =
+        ShadeWindowLayoutParams.create(shadeContext)
+
+    private val shadeRootView =
+        optionalShadeRootView.getOrNull()
+            ?: error(
+                """
+            ShadeRootView must be provided for this ShadeDisplayInteractor to work.
+            If it is not, it means this is being instantiated in a SystemUI variant that shouldn't.
+            """
+                    .trimIndent()
+            )
 
     override fun start() {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
@@ -60,51 +72,52 @@ constructor(
     }
 
     /** Tries to move the shade. If anything wrong happens, fails gracefully without crashing. */
-    private suspend fun moveShadeWindowTo(destinationDisplayId: Int) {
-        val currentId = shadeRootView.display.displayId
-        if (currentId == destinationDisplayId) {
+    private suspend fun moveShadeWindowTo(destinationId: Int) {
+        Log.d(TAG, "Trying to move shade window to display with id $destinationId")
+        val currentDisplay = shadeRootView.display
+        if (currentDisplay == null) {
+            Log.w(TAG, "Current shade display is null")
+            return
+        }
+        val currentId = currentDisplay.displayId
+        if (currentId == destinationId) {
             Log.w(TAG, "Trying to move the shade to a display it was already in")
             return
         }
         try {
-            moveShadeWindow(fromId = currentId, toId = destinationDisplayId)
+            withContext(mainThreadContext) { moveShadeWindow(toId = destinationId) }
         } catch (e: IllegalStateException) {
             Log.e(
                 TAG,
-                "Unable to move the shade window from display $currentId to $destinationDisplayId",
+                "Unable to move the shade window from display $currentId to $destinationId",
                 e,
             )
         }
     }
 
-    private suspend fun moveShadeWindow(fromId: Int, toId: Int) {
-        val sourceProperties = getDisplayWindowProperties(fromId)
-        val destinationProperties = getDisplayWindowProperties(toId)
-        traceSection({ "MovingShadeWindow from $fromId to $toId" }) {
-            withContext(mainContext) {
-                traceSection("removeView") {
-                    sourceProperties.windowManager.removeView(shadeRootView)
-                }
-                traceSection("addView") {
-                    destinationProperties.windowManager.addView(
-                        shadeRootView,
-                        ShadeWindowLayoutParams.create(shadeContext),
-                    )
-                }
-            }
-        }
-        traceSection("SecondaryShadeInteractor#onConfigurationChanged") {
-            configurationForwarder.onConfigurationChanged(
-                destinationProperties.context.resources.configuration
-            )
+    @UiThread
+    private fun moveShadeWindow(toId: Int) {
+        traceSection({ "moveShadeWindow  to $toId" }) {
+            removeShadeWindow()
+            updateContextDisplay(toId)
+            addShadeWindow()
         }
     }
 
-    private fun getDisplayWindowProperties(displayId: Int): DisplayWindowProperties {
-        return displayWindowPropertiesRepository.get(displayId, TYPE_NOTIFICATION_SHADE)
+    @UiThread
+    private fun removeShadeWindow(): Unit =
+        traceSection("removeShadeWindow") { wm.removeView(shadeRootView) }
+
+    @UiThread
+    private fun addShadeWindow(): Unit =
+        traceSection("addShadeWindow") { wm.addView(shadeRootView, shadeLayoutParams) }
+
+    @UiThread
+    private fun updateContextDisplay(newDisplayId: Int) {
+        traceSection("updateContextDisplay") { shadeContext.updateDisplay(newDisplayId) }
     }
 
     private companion object {
-        const val TAG = "SecondaryShadeInteractor"
+        const val TAG = "ShadeDisplaysInteractor"
     }
 }

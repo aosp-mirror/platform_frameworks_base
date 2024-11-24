@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
+import static android.Manifest.permission.ADD_MIRROR_DISPLAY;
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
@@ -177,6 +178,7 @@ import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.display.notifications.DisplayNotificationManager;
+import com.android.server.display.plugin.PluginManager;
 import com.android.server.display.utils.DebugUtils;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.input.InputManagerInternal;
@@ -583,6 +585,7 @@ public final class DisplayManagerService extends SystemService {
 
     private final DisplayNotificationManager mDisplayNotificationManager;
     private final ExternalDisplayStatsService mExternalDisplayStatsService;
+    private final PluginManager mPluginManager;
 
     // Manages the relative placement of extended displays
     @Nullable
@@ -669,6 +672,7 @@ public final class DisplayManagerService extends SystemService {
         } else {
             mDisplayTopologyCoordinator = null;
         }
+        mPluginManager = new PluginManager(mContext, mFlags);
     }
 
     public void setupSchedulerPolicies() {
@@ -739,6 +743,7 @@ public final class DisplayManagerService extends SystemService {
             mLogicalDisplayMapper.onBootCompleted();
             mDisplayNotificationManager.onBootCompleted();
             mExternalDisplayPolicy.onBootCompleted();
+            mPluginManager.onBootCompleted();
         }
     }
 
@@ -1673,15 +1678,10 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private boolean canCreateMirrorDisplays(IVirtualDevice virtualDevice) {
-        if (virtualDevice == null) {
-            return false;
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            return checkCallingPermission(ADD_MIRROR_DISPLAY, "canCreateMirrorDisplays");
         }
-        try {
-            return virtualDevice.canCreateMirrorDisplays();
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Unable to query virtual device for permissions", e);
-            return false;
-        }
+        return virtualDevice != null;
     }
 
     private boolean canProjectVideo(IMediaProjection projection) {
@@ -1814,7 +1814,7 @@ public final class DisplayManagerService extends SystemService {
             // display.
             if (!canProjectVideo(projection) && !canCreateMirrorDisplays(virtualDevice)
                     && !hasVideoOutputPermission("createVirtualDisplayInternal")) {
-                throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
+                throw new SecurityException("Requires ADD_MIRROR_DISPLAY, CAPTURE_VIDEO_OUTPUT or "
                         + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                         + "MediaProjection token in order to create a screen sharing virtual "
                         + "display. In order to create a virtual display that does not perform "
@@ -3552,6 +3552,9 @@ public final class DisplayManagerService extends SystemService {
         SparseArray<DisplayPowerController> displayPowerControllersLocal = new SparseArray<>();
         int displayPowerControllerCount;
 
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
+        ipw.increaseIndent();
+
         synchronized (mSyncRoot) {
             brightnessTrackerLocal = mBrightnessTracker;
 
@@ -3598,9 +3601,6 @@ public final class DisplayManagerService extends SystemService {
                 pw.println("  Display Brightness=" + brightnessPair.brightness);
                 pw.println("  Display SdrBrightness=" + brightnessPair.sdrBrightness);
             }
-
-            IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
-            ipw.increaseIndent();
 
             pw.println();
             pw.println("Display Adapters: size=" + mDisplayAdapters.size());
@@ -3664,6 +3664,8 @@ public final class DisplayManagerService extends SystemService {
             pw.println();
             mDisplayTopologyCoordinator.dump(pw);
         }
+        pw.println();
+        mPluginManager.dump(ipw);
 
         pw.println();
         mFlags.dump(pw);

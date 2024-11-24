@@ -1126,20 +1126,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     break;
                 }
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL:
-                    if (Flags.disableCompositeBatteryUsageStatsAtoms()) {
-                        return StatsManager.PULL_SKIP;
-                    }
+                    return StatsManager.PULL_SKIP;
 
-                    final BatteryUsageStatsQuery queryPowerProfile =
-                            new BatteryUsageStatsQuery.Builder()
-                                    .setMaxStatsAgeMs(0)
-                                    .includeProcessStateData()
-                                    .includeVirtualUids()
-                                    .powerProfileModeledOnly()
-                                    .includePowerModels()
-                                    .build();
-                    bus = getBatteryUsageStats(List.of(queryPowerProfile)).get(0);
-                    break;
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET: {
                     if (Flags.disableCompositeBatteryUsageStatsAtoms()) {
                         return StatsManager.PULL_SKIP;
@@ -1262,6 +1250,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mFrameworkStatsLogger = frameworkStatsLogger;
         }
 
+        private static float clampPowerMah(double powerMah, String consumer) {
+            float resultPowerMah = 0;
+            if (powerMah <= Float.MAX_VALUE && powerMah >= Float.MIN_VALUE) {
+                resultPowerMah = (float) powerMah;
+            } else {
+                // Handle overflow appropriately
+                Slog.wtfStack(TAG, consumer + " reported powerMah float overflow: " + powerMah);
+            }
+            return resultPowerMah;
+        }
+
         /**
          * Generates StatsEvents for the supplied battery usage stats and adds them to
          * the supplied list.
@@ -1282,7 +1281,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     bus.getAggregateBatteryConsumer(
                             BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
 
-            final float totalDeviceConsumedPowerMah = (float) deviceConsumer.getConsumedPower();
+            final float totalDeviceConsumedPowerMah =
+                    clampPowerMah(deviceConsumer.getConsumedPower(), "AggregateBatteryConsumer");
 
             for (@BatteryConsumer.PowerComponentId int powerComponentId :
                     deviceConsumer.getPowerComponentIds()) {
@@ -1314,7 +1314,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             // Log single atom for BatteryUsageStats per uid/process_state/component/etc.
             for (UidBatteryConsumer uidConsumer : uidConsumers) {
                 final int uid = uidConsumer.getUid();
-                final float totalConsumedPowerMah = (float) uidConsumer.getConsumedPower();
+
+                final float totalConsumedPowerMah =
+                        clampPowerMah(uidConsumer.getConsumedPower(), "uidConsumer-" + uid);
 
                 for (@BatteryConsumer.PowerComponentId int powerComponentId :
                         uidConsumer.getPowerComponentIds()) {
@@ -1358,7 +1360,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
 
             final String powerComponentName = batteryConsumer.getPowerComponentName(componentId);
-            final float powerMah = (float) batteryConsumer.getConsumedPower(key);
+            final double consumedPowerMah = batteryConsumer.getConsumedPower(key);
+            float powerMah =
+                    clampPowerMah(
+                            consumedPowerMah, "uidConsumer-" + uid + "-" + powerComponentName);
             final long powerComponentDurationMillis = batteryConsumer.getUsageDurationMillis(key);
 
             if (powerMah == 0 && powerComponentDurationMillis == 0) {
@@ -3167,7 +3172,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    private void dumpUsageStats(FileDescriptor fd, PrintWriter pw, int model,
+    private void dumpUsageStats(FileDescriptor fd, PrintWriter pw,
             boolean proto, boolean accumulated) {
         awaitCompletion();
         syncStats("dump", BatteryExternalStatsWorker.UPDATE_ALL);
@@ -3178,9 +3183,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 .includePowerModels();
         if (Flags.batteryUsageStatsByPowerAndScreenState()) {
             builder.includeScreenStateData().includePowerStateData();
-        }
-        if (model == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
-            builder.powerProfileModeledOnly();
         }
         if (accumulated) {
             builder.accumulated();
@@ -3376,7 +3378,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     dumpPowerProfile(pw);
                     return;
                 } else if ("--usage".equals(arg)) {
-                    int model = BatteryConsumer.POWER_MODEL_UNDEFINED;
                     boolean proto = false;
                     boolean accumulated = false;
                     for (int j = i + 1; j < args.length; j++) {
@@ -3384,29 +3385,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                             case "--proto":
                                 proto = true;
                                 break;
-                            case "--model": {
-                                if (j + 1 < args.length) {
-                                    j++;
-                                    if ("power-profile".equals(args[j])) {
-                                        model = BatteryConsumer.POWER_MODEL_POWER_PROFILE;
-                                    } else {
-                                        pw.println("Unknown power model: " + args[j]);
-                                        dumpHelp(pw);
-                                        return;
-                                    }
-                                } else {
-                                    pw.println("--model without a value");
-                                    dumpHelp(pw);
-                                    return;
-                                }
-                                break;
-                            }
                             case "--accumulated":
                                 accumulated = true;
                                 break;
                         }
                     }
-                    dumpUsageStats(fd, pw, model, proto, accumulated);
+                    dumpUsageStats(fd, pw, proto, accumulated);
                     return;
                 } else if ("--wakeups".equals(arg)) {
                     mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "),

@@ -101,9 +101,13 @@ public class BubblePositioner {
     private int mBubbleBarTopOnScreen;
 
     public BubblePositioner(Context context, WindowManager windowManager) {
+        this(context, DeviceConfig.create(context, windowManager));
+    }
+
+    public BubblePositioner(Context context, DeviceConfig deviceConfig) {
         mContext = context;
-        mDeviceConfig = DeviceConfig.create(context, windowManager);
-        update(mDeviceConfig);
+        mDeviceConfig = deviceConfig;
+        update(deviceConfig);
     }
 
     /**
@@ -828,6 +832,13 @@ public class BubblePositioner {
      */
     public void setShowingInBubbleBar(boolean showingInBubbleBar) {
         mShowingInBubbleBar = showingInBubbleBar;
+    }
+
+    /**
+     * Whether bubbles ar showing in the bubble bar from launcher.
+     */
+    boolean isShowingInBubbleBar() {
+        return mShowingInBubbleBar;
     }
 
     public void setBubbleBarLocation(BubbleBarLocation location) {

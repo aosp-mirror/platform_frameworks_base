@@ -36,10 +36,14 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.UidObserver;
+import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -131,6 +135,27 @@ public final class QuotaController extends StateController {
     private static int hashLong(long val) {
         return (int) (val ^ (val >>> 32));
     }
+
+    /**
+     * When enabled this change id overrides the default quota policy enforcement to the jobs
+     * running in the foreground process state.
+     */
+    // TODO: b/379681266 - Might need some refactoring for a better app-compat strategy.
+    @VisibleForTesting
+    @ChangeId
+    @Disabled // Disabled by default
+    @Overridable // The change can be overridden in user build
+    static final long OVERRIDE_QUOTA_ENFORCEMENT_TO_FGS_JOBS = 341201311L;
+
+    /**
+     * When enabled this change id overrides the default quota policy enforcement policy
+     * the jobs started when app was in the TOP state.
+     */
+    @VisibleForTesting
+    @ChangeId
+    @Disabled // Disabled by default
+    @Overridable // The change can be overridden in user build.
+    static final long OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS = 374323858L;
 
     @VisibleForTesting
     static class ExecutionStats {
@@ -622,7 +647,9 @@ public final class QuotaController extends StateController {
         }
 
         final int uid = jobStatus.getSourceUid();
-        if (!Flags.enforceQuotaPolicyToTopStartedJobs() && mTopAppCache.get(uid)) {
+        if ((!Flags.enforceQuotaPolicyToTopStartedJobs()
+                || CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS,
+                        uid)) && mTopAppCache.get(uid)) {
             if (DEBUG) {
                 Slog.d(TAG, jobStatus.toShortString() + " is top started job");
             }
@@ -659,7 +686,9 @@ public final class QuotaController extends StateController {
                 timer.stopTrackingJob(jobStatus);
             }
         }
-        if (!Flags.enforceQuotaPolicyToTopStartedJobs()) {
+        if (!Flags.enforceQuotaPolicyToTopStartedJobs()
+                || CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS,
+                        jobStatus.getSourceUid())) {
             mTopStartedJobs.remove(jobStatus);
         }
     }
@@ -772,7 +801,13 @@ public final class QuotaController extends StateController {
 
     /** @return true if the job was started while the app was in the TOP state. */
     private boolean isTopStartedJobLocked(@NonNull final JobStatus jobStatus) {
-        return !Flags.enforceQuotaPolicyToTopStartedJobs() && mTopStartedJobs.contains(jobStatus);
+        if (!Flags.enforceQuotaPolicyToTopStartedJobs()
+                || CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS,
+                        jobStatus.getSourceUid())) {
+            return mTopStartedJobs.contains(jobStatus);
+        }
+
+        return false;
     }
 
     /** Returns the maximum amount of time this job could run for. */
@@ -2634,9 +2669,13 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
-    int getProcessStateQuotaFreeThreshold() {
-        return Flags.enforceQuotaPolicyToFgsJobs() ? ActivityManager.PROCESS_STATE_BOUND_TOP :
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+    int getProcessStateQuotaFreeThreshold(int uid) {
+        if (Flags.enforceQuotaPolicyToFgsJobs()
+                && !CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_FGS_JOBS, uid)) {
+            return ActivityManager.PROCESS_STATE_BOUND_TOP;
+        }
+
+        return ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
     private class QcHandler extends Handler {
@@ -2776,7 +2815,7 @@ public final class QuotaController extends StateController {
                                 isQuotaFree = true;
                             } else {
                                 final boolean reprocess;
-                                if (procState <= getProcessStateQuotaFreeThreshold()) {
+                                if (procState <= getProcessStateQuotaFreeThreshold(uid)) {
                                     reprocess = !mForegroundUids.get(uid);
                                     mForegroundUids.put(uid, true);
                                     isQuotaFree = true;

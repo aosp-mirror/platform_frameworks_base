@@ -16,6 +16,7 @@
 
 package com.android.systemui.brightness.ui.compose
 
+import android.view.MotionEvent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -41,6 +42,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -221,7 +223,16 @@ fun BrightnessSliderContainer(
                     )
                     .then(if (viewModel.showMirror) Modifier.drawInOverlay() else Modifier)
                     .sliderBackground(containerColor)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .pointerInteropFilter {
+                        if (
+                            it.actionMasked == MotionEvent.ACTION_UP ||
+                                it.actionMasked == MotionEvent.ACTION_CANCEL
+                        ) {
+                            viewModel.emitBrightnessTouchForFalsing()
+                        }
+                        false
+                    },
             formatter = viewModel::formatValue,
             hapticsViewModelFactory = viewModel.hapticsViewModelFactory,
         )

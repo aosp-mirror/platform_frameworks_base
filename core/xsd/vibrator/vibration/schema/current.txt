@@ -15,12 +15,20 @@ package com.android.internal.vibrator.persistence {
     enum_constant public static final com.android.internal.vibrator.persistence.PredefinedEffectName tick;
   }
 
+  public enum PrimitiveDelayType {
+    method public String getRawName();
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveDelayType pause;
+    enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveDelayType relative_start_offset;
+  }
+
   public class PrimitiveEffect {
     ctor public PrimitiveEffect();
     method public java.math.BigInteger getDelayMs();
+    method public com.android.internal.vibrator.persistence.PrimitiveDelayType getDelayType();
     method public com.android.internal.vibrator.persistence.PrimitiveEffectName getName();
     method public float getScale();
     method public void setDelayMs(java.math.BigInteger);
+    method public void setDelayType(com.android.internal.vibrator.persistence.PrimitiveDelayType);
     method public void setName(com.android.internal.vibrator.persistence.PrimitiveEffectName);
     method public void setScale(float);
   }

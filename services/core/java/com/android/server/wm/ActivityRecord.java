@@ -630,8 +630,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // The locusId associated with this activity, if set.
     private LocusId mLocusId;
 
-    // Whether the activity is requesting to limit the system's educational dialogs
-    public boolean mShouldLimitSystemEducationDialogs;
+    // The timestamp of the last request to show the "Open in browser" education
+    public long mRequestOpenInBrowserEducationTimestamp;
 
     // Whether the activity was launched from a bubble.
     private boolean mLaunchedFromBubble;
@@ -1623,6 +1623,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 newParent.setResumedActivity(this, "onParentChanged");
             }
             mAppCompatController.getTransparentPolicy().start();
+            if (mState == INITIALIZING && isRestrictedFixedOrientation(info.screenOrientation)) {
+                Slog.i(TAG, "Ignoring manifest-declared fixed orientation "
+                        + ActivityInfo.screenOrientationToString(info.screenOrientation)
+                        + " of " + this + " since target sdk 36");
+            }
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
@@ -3192,6 +3197,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
+     * Returns {@code true} if the orientation will be ignored for {@link #isUniversalResizeable()}.
+     */
+    private boolean isRestrictedFixedOrientation(
+            @ActivityInfo.ScreenOrientation int orientation) {
+        // Exclude "locked" because it is not explicit portrait or landscape.
+        return orientation != ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                && ActivityInfo.isFixedOrientation(orientation)
+                && isUniversalResizeable();
+    }
+
+    /**
      * Returns {@code true} if the fixed orientation, aspect ratio, resizability of this activity
      * will be ignored.
      */
@@ -3214,8 +3230,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
-        return !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
-                .shouldApplyUserMinAspectRatioOverride();
+        return mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
+                .userPreferenceCompatibleWithNonResizability();
     }
 
     boolean isResizeable() {
@@ -4559,10 +4575,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // at #postWindowRemoveCleanupLocked
                 return false;
             }
+
+            // Link the fixed rotation transform to this activity since we are transferring the
+            // starting window.
+            if (fromActivity.hasFixedRotationTransform()) {
+                mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(this,
+                        false /* checkOpening */);
+            }
             // Do not transfer if the orientation doesn't match, redraw starting window while it is
             // on top will cause flicker.
-            if (fromActivity.getRequestedConfigurationOrientation()
-                    != getRequestedConfigurationOrientation()) {
+            final int fromOrientation = fromActivity.getConfiguration().orientation;
+            final int requestedOrientation = getRequestedConfigurationOrientation();
+            if (requestedOrientation == ORIENTATION_UNDEFINED) {
+                if (fromOrientation != getConfiguration().orientation) {
+                    return false;
+                }
+            } else if (fromOrientation != requestedOrientation) {
                 return false;
             }
             // In this case, the starting icon has already been displayed, so start
@@ -4576,13 +4604,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final long origId = Binder.clearCallingIdentity();
             try {
-                // Link the fixed rotation transform to this activity since we are transferring the
-                // starting window.
-                if (fromActivity.hasFixedRotationTransform()) {
-                    mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(this,
-                            false /* checkOpening */);
-                }
-
                 // Transfer the starting window over to the new token.
                 mStartingData = fromActivity.mStartingData;
                 mStartingSurface = fromActivity.mStartingSurface;
@@ -7326,9 +7347,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mLocusId;
     }
 
-    void setLimitSystemEducationDialogs(boolean limitSystemEducationDialogs) {
-        if (mShouldLimitSystemEducationDialogs == limitSystemEducationDialogs) return;
-        mShouldLimitSystemEducationDialogs = limitSystemEducationDialogs;
+    void requestOpenInBrowserEducation() {
+        mRequestOpenInBrowserEducationTimestamp = System.currentTimeMillis();
         final Task task = getTask();
         if (task != null) {
             final boolean force = isVisibleRequested() && this == task.getTopNonFinishingActivity();
@@ -8123,7 +8143,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Setting requested orientation %s for %s",
                 ActivityInfo.screenOrientationToString(requestedOrientation), this);
-        setOrientation(requestedOrientation, this);
+        final int resolvedOrientation = setOrientation(requestedOrientation, this);
+        if (resolvedOrientation != requestedOrientation
+                && isRestrictedFixedOrientation(requestedOrientation)) {
+            Slog.i(TAG, "Ignoring requested fixed orientation "
+                    + ActivityInfo.screenOrientationToString(requestedOrientation)
+                    + " of " + this + " since target sdk 36");
+        }
 
         // Push the new configuration to the requested app in case where it's not pushed, e.g. when
         // the request is handled at task level with letterbox.
@@ -8214,9 +8240,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
         int candidateOrientation = super.getOverrideOrientation();
-        if (candidateOrientation != ActivityInfo.SCREEN_ORIENTATION_LOCKED
-                && ActivityInfo.isFixedOrientation(candidateOrientation)
-                && isUniversalResizeable()) {
+        if (isRestrictedFixedOrientation(candidateOrientation)) {
             candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()

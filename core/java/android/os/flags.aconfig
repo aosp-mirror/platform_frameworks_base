@@ -21,6 +21,15 @@ flag {
 }
 
 flag {
+    name: "adpf_graphics_pipeline"
+    is_exported: true
+    namespace: "game"
+    description: "Guards use of SessionCreationConfig and Graphics Pipeline mode"
+    is_fixed_read_only: true
+    bug: "367803904"
+}
+
+flag {
     name: "adpf_hwui_gpu"
     namespace: "game"
     description: "Guards use of the FMQ channel for ADPF"
@@ -219,6 +228,15 @@ flag {
     description: "track tail of message queue."
     bug: "305311707"
     is_fixed_read_only: true
+}
+
+flag {
+     name: "message_queue_testability"
+     namespace: "system_performance"
+     is_exported: true
+     description: "Whether MessageQueue implements test APIs."
+     bug: "379472827"
+     is_fixed_read_only: true
 }
 
 flag {

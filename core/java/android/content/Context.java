@@ -18,6 +18,7 @@ package android.content;
 
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
+import static android.security.Flags.FLAG_SECURE_LOCKDOWN;
 
 import android.annotation.AttrRes;
 import android.annotation.CallbackExecutor;
@@ -4249,6 +4250,7 @@ public abstract class Context {
             //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
             WIFI_RTT_RANGING_SERVICE,
+            WIFI_USD_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             AUDIO_DEVICE_VOLUME_SERVICE,
@@ -4256,6 +4258,7 @@ public abstract class Context {
             FINGERPRINT_SERVICE,
             //@hide: FACE_SERVICE,
             BIOMETRIC_SERVICE,
+            AUTHENTICATION_POLICY_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
@@ -4437,6 +4440,9 @@ public abstract class Context {
      * web domain approval state.
      * <dt> {@link #DISPLAY_HASH_SERVICE} ("display_hash")
      * <dd> A {@link android.view.displayhash.DisplayHashManager} for management of display hashes.
+     * <dt> {@link #AUTHENTICATION_POLICY_SERVICE} ("authentication_policy")
+     * <dd> A {@link android.security.authenticationpolicy.AuthenticationPolicyManager}
+     * for managing authentication related policies on the device.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -4521,8 +4527,9 @@ public abstract class Context {
      * @see android.content.pm.verify.domain.DomainVerificationManager
      * @see #DISPLAY_HASH_SERVICE
      * @see android.view.displayhash.DisplayHashManager
+     * @see #AUTHENTICATION_POLICY_SERVICE
+     * @see android.security.authenticationpolicy.AuthenticationPolicyManager
      */
-    // TODO(b/347269120): Re-add @Nullable
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
@@ -4543,7 +4550,8 @@ public abstract class Context {
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager},
      * {@link android.content.pm.verify.domain.DomainVerificationManager},
-     * {@link android.view.displayhash.DisplayHashManager}.
+     * {@link android.view.displayhash.DisplayHashManager}
+     * {@link android.security.authenticationpolicy.AuthenticationPolicyManager}.
      * </p>
      *
      * <p>
@@ -4568,7 +4576,6 @@ public abstract class Context {
      */
     @SuppressWarnings("unchecked")
     @RavenwoodKeep
-    // TODO(b/347269120): Re-add @Nullable
     public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
@@ -5090,6 +5097,19 @@ public abstract class Context {
      */
     public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
 
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.wifi.usd.UsdManager} for Unsynchronized Service Discovery (USD) operation.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.usd.UsdManager
+     * @hide
+     */
+    @FlaggedApi(android.net.wifi.flags.Flags.FLAG_USD)
+    @SystemApi
+    public static final String WIFI_USD_SERVICE = "wifi_usd";
+
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.lowpan.LowpanManager} for handling management of
@@ -5181,6 +5201,18 @@ public abstract class Context {
      * @hide
      */
     public static final String AUTH_SERVICE = "auth";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an {@link
+     * android.security.authenticationpolicy.AuthenticationPolicyManager}.
+     * @see #getSystemService
+     * @see android.security.authenticationpolicy.AuthenticationPolicyManager
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURE_LOCKDOWN)
+    public static final String AUTHENTICATION_POLICY_SERVICE = "authentication_policy";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -5695,12 +5727,12 @@ public abstract class Context {
     public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
 
     /**
-     * System service name for ForensicService.
-     * The service manages the forensic info on device.
+     * System service name for IntrusionDetectionService.
+     * The service manages the intrusion detection info on device.
      * @hide
      */
     @FlaggedApi(android.security.Flags.FLAG_AFL_API)
-    public static final String FORENSIC_SERVICE = "forensic";
+    public static final String INTRUSION_DETECTION_SERVICE = "intrusion_detection";
 
     /**
      * System service name for the DeviceIdleManager.

@@ -18,7 +18,6 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -61,22 +60,22 @@ public class ValueIntegerChangeActionOperation implements ActionOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void write(WireBuffer buffer) {}
+    public void write(@NonNull WireBuffer buffer) {}
 
     @Override
     public void runAction(
             @NonNull RemoteContext context,
-            CoreDocument document,
-            Component component,
+            @NonNull CoreDocument document,
+            @NonNull Component component,
             float x,
             float y) {
         context.overrideInteger(mTargetValueId, mValue);

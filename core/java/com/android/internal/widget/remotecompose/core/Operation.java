@@ -15,22 +15,22 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 
 /** Base interface for RemoteCompose operations */
 public interface Operation {
 
     /** add the operation to the buffer */
-    void write(WireBuffer buffer);
+    void write(@NonNull WireBuffer buffer);
 
     /**
      * paint an operation
      *
      * @param context the paint context used to paint the operation
      */
-    void apply(RemoteContext context);
+    void apply(@NonNull RemoteContext context);
 
     /** Debug utility to display an operation + indentation */
-    @Nullable
-    String deepToString(String indent);
+    @NonNull
+    String deepToString(@NonNull String indent);
 }

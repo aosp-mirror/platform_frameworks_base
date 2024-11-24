@@ -1805,6 +1805,7 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.REMAP_MODIFIER_KEYS) public void remapModifierKey(int, int);
     method @FlaggedApi("com.android.input.flags.device_associations") @RequiresPermission("android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY") public void removeUniqueIdAssociationByDescriptor(@NonNull String);
     method @RequiresPermission("android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY") public void removeUniqueIdAssociationByPort(@NonNull String);
+    method public void resetLockedModifierState();
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
   }
 
@@ -2492,6 +2493,7 @@ package android.os {
     method public boolean areAutoPowerSaveModesEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
     method @FlaggedApi("android.os.battery_saver_supported_check_api") public boolean isBatterySaverSupported();
+    method public boolean isInteractive(int);
     field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
     field @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public static final int SYSTEM_WAKELOCK = -2147483648; // 0x80000000
   }
@@ -2780,6 +2782,17 @@ package android.os.storage {
 }
 
 package android.os.vibrator {
+
+  @FlaggedApi("android.os.vibrator.normalized_pwle_effects") public final class BasicPwleSegment extends android.os.vibrator.VibrationEffectSegment {
+    method public int describeContents();
+    method public long getDuration();
+    method public float getEndIntensity();
+    method public float getEndSharpness();
+    method public float getStartIntensity();
+    method public float getStartSharpness();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.BasicPwleSegment> CREATOR;
+  }
 
   public final class PrebakedSegment extends android.os.vibrator.VibrationEffectSegment {
     method public int describeContents();
@@ -3282,7 +3295,7 @@ package android.service.quicksettings {
 package android.service.settings.preferences {
 
   @FlaggedApi("com.android.settingslib.flags.settings_catalyst") public class SettingsPreferenceServiceClient implements java.lang.AutoCloseable {
-    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @Nullable android.content.ServiceConnection);
+    ctor public SettingsPreferenceServiceClient(@NonNull android.content.Context, @NonNull String, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.service.settings.preferences.SettingsPreferenceServiceClient,java.lang.Exception>);
   }
 
 }
@@ -3717,6 +3730,7 @@ package android.view {
     method @NonNull public android.view.Display.Mode getDefaultMode();
     method public int getRemoveMode();
     method @NonNull public int[] getReportedHdrTypes();
+    method @NonNull public float[] getSupportedRefreshRatesLegacy();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
     method public int getType();
@@ -3739,6 +3753,7 @@ package android.view {
 
   public static final class Display.Mode implements android.os.Parcelable {
     ctor public Display.Mode(int, int, float);
+    method public float getVsyncRate();
     method public boolean isSynthetic();
     method public boolean matches(int, int, float);
   }

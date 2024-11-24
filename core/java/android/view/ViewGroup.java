@@ -20,6 +20,7 @@ import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 import static android.view.flags.Flags.FLAG_TOOLKIT_VIEWGROUP_SET_REQUESTED_FRAME_RATE_API;
 import static android.view.flags.Flags.toolkitViewgroupSetRequestedFrameRateApi;
+import static android.view.flags.Flags.scrollCaptureTargetZOrderFix;
 
 import android.animation.LayoutTransition;
 import android.annotation.CallSuper;
@@ -7657,6 +7658,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             @NonNull Rect localVisibleRect, @NonNull Point windowOffset,
             @NonNull Consumer<ScrollCaptureTarget> targets) {
 
+        // Only visible views can be captured.
+        if (getVisibility() != View.VISIBLE) {
+            return;
+        }
+
         if (getClipToPadding() && !localVisibleRect.intersect(mPaddingLeft, mPaddingTop,
                     (mRight - mLeft)  - mPaddingRight, (mBottom - mTop) - mPaddingBottom)) {
             return;
@@ -7665,19 +7671,39 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Dispatch to self first.
         super.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, targets);
 
+        final int childrenCount = mChildrenCount;
+        if (childrenCount == 0) {
+            return;
+        }
+
         // Skip children if descendants excluded.
         if ((getScrollCaptureHint() & SCROLL_CAPTURE_HINT_EXCLUDE_DESCENDANTS) != 0) {
             return;
         }
-
         final Rect tmpRect = getTempRect();
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
+
+        ArrayList<View> preorderedList = null;
+        boolean customOrder = false;
+        if (scrollCaptureTargetZOrderFix()) {
+            preorderedList = buildOrderedChildList();
+            customOrder = preorderedList == null && isChildrenDrawingOrderEnabled();
+        }
+        final View[] children = mChildren;
+        for (int i = 0; i < childrenCount; i++) {
+            View child;
+            if (scrollCaptureTargetZOrderFix()) {
+                // Traverse children in the same order they will be drawn (honors Z if set)
+                final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+                child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+            } else {
+                child = children[i];
+            }
+
             // Only visible views can be captured.
             if (child.getVisibility() != View.VISIBLE) {
                 continue;
             }
+
             // Offset the given rectangle (in parent's local coordinates) into child's coordinate
             // space and clip the result to the child View's bounds, padding and clipRect as needed.
             // If the resulting rectangle is not empty, the request is forwarded to the child.
@@ -7705,6 +7731,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (rectIsVisible) {
                 child.dispatchScrollCaptureSearch(tmpRect, childWindowOffset, targets);
             }
+        }
+        if (preorderedList != null) {
+            preorderedList.clear();
         }
     }
 

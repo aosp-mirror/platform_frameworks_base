@@ -198,7 +198,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -334,7 +334,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
-    @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock private ShadeTouchableRegionManager mShadeTouchableRegionManager;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
@@ -607,7 +607,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mShadeController,
                 mWindowRootViewVisibilityInteractor,
                 mStatusBarKeyguardViewManager,
-                () -> mStatusBarLongPressGestureDetector,
                 mViewMediatorCallback,
                 mInitController,
                 new Handler(TestableLooper.get(this).getLooper()),
@@ -618,7 +617,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardIndicationController,
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,

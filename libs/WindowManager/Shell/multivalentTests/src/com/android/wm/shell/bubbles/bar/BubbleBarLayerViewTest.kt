@@ -165,7 +165,7 @@ class BubbleBarLayerViewTest {
                 }
 
         val viewInfo = FakeBubbleFactory.createViewInfo(bubbleBarExpandedView)
-        bubble = FakeBubbleFactory.createChatBubbleWithViewInfo(context, viewInfo = viewInfo)
+        bubble = FakeBubbleFactory.createChatBubble(context, viewInfo = viewInfo)
     }
 
     @After
@@ -253,6 +253,7 @@ class BubbleBarLayerViewTest {
 
         getInstrumentation().runOnMainSync {
             bubbleBarLayerView.showExpandedView(bubble)
+            bubble.bubbleBarExpandedView!!.onContentVisibilityChanged(true)
         }
         waitForExpandedViewAnimation()
 
@@ -276,6 +277,7 @@ class BubbleBarLayerViewTest {
 
         getInstrumentation().runOnMainSync {
             bubbleBarLayerView.showExpandedView(bubble)
+            bubble.bubbleBarExpandedView!!.onContentVisibilityChanged(true)
         }
         waitForExpandedViewAnimation()
 

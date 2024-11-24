@@ -49,6 +49,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.concurrentAudioRecordBypassPermission;
 import static android.media.audio.Flags.featureSpatialAudioHeadtrackingLowLatency;
 import static android.media.audio.Flags.focusFreezeTestApi;
 import static android.media.audio.Flags.roForegroundAudioControl;
@@ -4888,6 +4889,8 @@ public class AudioService extends IAudioService.Stub
                 + equalScoLeaVcIndexRange());
         pw.println("\tcom.android.media.audio.ringMyCar:"
                 + ringMyCar());
+        pw.println("\tandroid.media.audio.Flags.concurrentAudioRecordBypassPermission:"
+                + concurrentAudioRecordBypassPermission());
     }
 
     private void dumpAudioMode(PrintWriter pw) {
@@ -4951,22 +4954,24 @@ public class AudioService extends IAudioService.Stub
         }
 
         final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
-        final Set<Integer> absVolumeMultiModeCaseDevices =
-                AudioSystem.intersectionAudioDeviceTypes(
-                        mAbsVolumeMultiModeCaseDevices, deviceTypes);
-        if (absVolumeMultiModeCaseDevices.isEmpty()) {
+        Set<Integer> absVolumeDeviceTypes = new ArraySet<>(
+                AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
+        absVolumeDeviceTypes.addAll(mAbsVolumeMultiModeCaseDevices);
+
+        final Set<Integer> absVolumeDevices =
+                AudioSystem.intersectionAudioDeviceTypes(absVolumeDeviceTypes, deviceTypes);
+        if (absVolumeDevices.isEmpty()) {
             return;
         }
-        if (absVolumeMultiModeCaseDevices.size() > 1) {
+        if (absVolumeDevices.size() > 1) {
             Log.w(TAG, "onUpdateContextualVolumes too many active devices: "
-                    + absVolumeMultiModeCaseDevices.stream().map(AudioSystem::getOutputDeviceName)
+                    + absVolumeDevices.stream().map(AudioSystem::getOutputDeviceName)
                         .collect(Collectors.joining(","))
                     + ", for stream: " + streamType);
             return;
         }
 
-        final int device = absVolumeMultiModeCaseDevices.toArray(new Integer[0])[0].intValue();
-
+        final int device = absVolumeDevices.toArray(new Integer[0])[0].intValue();
         final int index = getStreamVolume(streamType, device);
 
         if (DEBUG_VOL) {
@@ -4980,6 +4985,8 @@ public class AudioService extends IAudioService.Stub
                     getVssForStreamOrDefault(streamType).getMaxIndex(), streamType);
         } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)) {
+            mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index);
         } else {
             return;
         }
@@ -11420,6 +11427,10 @@ public class AudioService extends IAudioService.Stub
         Objects.requireNonNull(attributes);
         Objects.requireNonNull(format);
         return mSpatializerHelper.canBeSpatialized(attributes, format);
+    }
+
+    public @NonNull List<Integer> getSpatializedChannelMasks() {
+        return mSpatializerHelper.getSpatializedChannelMasks();
     }
 
     /** @see Spatializer.SpatializerInfoDispatcherStub */

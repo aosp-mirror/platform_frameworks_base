@@ -39,6 +39,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.se.omapi.Reader;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -148,6 +149,48 @@ public final class NfcOemExtension {
     public @interface ControllerMode{}
 
     /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_NONE = 0;
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_A = 1;
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_B = 1 << 1;
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_F = 1 << 2;
+
+    /**
+     * Nfc technology flags for {@link #getActiveNfceeList()}.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, value = {
+        NFCEE_TECH_NONE,
+        NFCEE_TECH_A,
+        NFCEE_TECH_B,
+        NFCEE_TECH_F,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NfceeTechnology {}
+
+    /**
      * Event that Host Card Emulation is activated.
      */
     public static final int HCE_ACTIVATE = 1;
@@ -171,6 +214,31 @@ public final class NfcOemExtension {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface HostCardEmulationAction {}
+
+    /**
+     * Status code returned when the polling state change request succeeded.
+     * @see #pausePolling()
+     * @see #resumePolling()
+     */
+    public static final int POLLING_STATE_CHANGE_SUCCEEDED = 1;
+    /**
+     * Status code returned when the polling state change request is already in
+     * required state.
+     * @see #pausePolling()
+     * @see #resumePolling()
+     */
+    public static final int POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE = 2;
+    /**
+     * Possible status codes for {@link #pausePolling()} and
+     * {@link #resumePolling()}.
+     * @hide
+     */
+    @IntDef(value = {
+            POLLING_STATE_CHANGE_SUCCEEDED,
+            POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PollingStateChangeStatusCode {}
 
     /**
      * Status OK
@@ -367,6 +435,15 @@ public final class NfcOemExtension {
         void onEeListenActivated(boolean isActivated);
 
         /**
+        * Notifies that some NFCEE (NFC Execution Environment) has been updated.
+        *
+        * <p> This indicates that some applet has been installed/updated/removed in
+        * one of the NFCEE's.
+        * </p>
+        */
+        void onEeUpdated();
+
+        /**
          * Gets the intent to find the OEM package in the OEM App market. If the consumer returns
          * {@code null} or a timeout occurs, the intent from the first available package will be
          * used instead.
@@ -455,6 +532,28 @@ public final class NfcOemExtension {
         mContext = context;
         mAdapter = adapter;
         mOemNfcExtensionCallback = new NfcOemExtensionCallback();
+    }
+
+    /**
+     * Get an instance of {@link T4tNdefNfcee} object for performing T4T (Type-4 Tag)
+     * NDEF (NFC Data Exchange Format) NFCEE (NFC Execution Environment) operations.
+     * This can be used to write NDEF data to emulate a T4T tag in an NFCEE
+     * (NFC Execution Environment - eSE, SIM, etc). Refer to the NFC forum specification
+     * "NFCForum-TS-NCI-2.3 section 10.4" and "NFCForum-TS-T4T-1.1 section 4.2" for more details.
+     *
+     * This is a singleton object which shall be used by OEM extension module to do NDEF-NFCEE
+     * read/write operations.
+     *
+     * <p>Returns {@link T4tNdefNfcee}
+     * <p>Does not cause any RF activity and does not block.
+     * @return NFC Data Exchange Format (NDEF) NFC Execution Environment (NFCEE) object
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public T4tNdefNfcee getT4tNdefNfcee() {
+        return T4tNdefNfcee.getInstance();
     }
 
     /**
@@ -571,14 +670,18 @@ public final class NfcOemExtension {
     /**
      * Get the Active NFCEE (NFC Execution Environment) List
      *
-     * @return List of activated secure elements on success
-     *         which can contain "eSE" and "UICC", otherwise empty list.
+     * @see Reader#getName() for the list of possible NFCEE names.
+     *
+     * @return Map< String, @NfceeTechnology Integer >
+     *         A HashMap where keys are activated secure elements and
+     *         the values are bitmap of technologies supported by each secure element
+     *         on success keys can contain "eSE" and "UICC", otherwise empty map.
      */
     @NonNull
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
-    public List<String> getActiveNfceeList() {
+    public Map<String, Integer> getActiveNfceeList() {
         return NfcAdapter.callServiceReturn(() ->
-            NfcAdapter.sService.fetchActiveNfceeList(), new ArrayList<String>());
+            NfcAdapter.sService.fetchActiveNfceeList(), new HashMap<String, Integer>());
     }
 
     /**
@@ -644,24 +747,45 @@ public final class NfcOemExtension {
 
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
-     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
-     * use {@link #resumePolling()} to resume the polling.
-     * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely.
+     * Use {@link #resumePolling()} to resume the polling.
+     * Use {@link #getMaxPausePollingTimeoutMs()} to check the max timeout value.
+     * @param timeoutInMs the pause polling duration in millisecond.
+     * @return status of the operation
+     * @throws IllegalArgumentException if timeoutInMs value is invalid
+     *         (0 < timeoutInMs < max).
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void pausePolling(@DurationMillisLong int timeoutInMs) {
-        NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
+    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong long timeoutInMs) {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.pausePolling(timeoutInMs),
+                POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
     }
 
     /**
      * Resumes default NFC tag reader mode polling for the current device state if polling is
      * paused. Calling this while already in polling is a no-op.
+     * @return status of the operation
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void resumePolling() {
-        NfcAdapter.callService(() -> NfcAdapter.sService.resumePolling());
+    public @PollingStateChangeStatusCode int resumePolling() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.resumePolling(),
+                POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
+    }
+
+    /**
+     * Gets the max pause polling timeout value in millisecond.
+     * @return long integer representing the max timeout
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @DurationMillisLong
+    public long getMaxPausePollingTimeoutMills() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.getMaxPausePollingTimeoutMs(), 0L);
     }
 
     /**
@@ -827,6 +951,12 @@ public final class NfcOemExtension {
             mEeListenActivated = isActivated;
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(isActivated, cb::onEeListenActivated, ex));
+        }
+
+        @Override
+        public void onEeUpdated() throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(null, (Object input) -> cb.onEeUpdated(), ex));
         }
 
         @Override

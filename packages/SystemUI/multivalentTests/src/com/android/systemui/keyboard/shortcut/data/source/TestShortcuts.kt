@@ -16,13 +16,38 @@
 
 package com.android.systemui.keyboard.shortcut.data.source
 
+import android.hardware.input.InputGestureData
+import android.hardware.input.InputGestureData.createKeyTrigger
+import android.hardware.input.KeyGestureEvent
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_HOME
+import android.os.SystemClock
 import android.view.KeyEvent
+import android.view.KeyEvent.ACTION_DOWN
+import android.view.KeyEvent.KEYCODE_A
+import android.view.KeyEvent.META_ALT_ON
+import android.view.KeyEvent.META_CTRL_ON
+import android.view.KeyEvent.META_FUNCTION_ON
+import android.view.KeyEvent.META_META_LEFT_ON
+import android.view.KeyEvent.META_META_ON
+import android.view.KeyEvent.META_SHIFT_ON
+import android.view.KeyEvent.META_SHIFT_RIGHT_ON
+import android.view.KeyEvent.META_SYM_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.AppCategories
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.res.R
 
 object TestShortcuts {
@@ -64,6 +89,13 @@ object TestShortcuts {
             }
         }
 
+    private val goHomeShortcutInfo =
+        KeyboardShortcutInfo(
+            /* label = */ "Go to home screen",
+            /* keycode = */ KeyEvent.KEYCODE_B,
+            /* modifiers = */ KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+        )
+
     private val standardShortcutInfo1 =
         KeyboardShortcutInfo(
             /* label = */ "Standard shortcut 1",
@@ -76,6 +108,16 @@ object TestShortcuts {
             command {
                 key(R.drawable.ic_ksh_key_meta)
                 key("N")
+            }
+        }
+
+    private val customGoHomeShortcut =
+        shortcut("Go to home screen") {
+            command {
+                key("Ctrl")
+                key("Alt")
+                key("A")
+                isCustom(true)
             }
         }
 
@@ -123,35 +165,38 @@ object TestShortcuts {
             listOf(
                 shortcutInfoWithRepeatedLabel,
                 shortcutInfoWithRepeatedLabelAlternate,
-                shortcutInfoWithRepeatedLabelSecondAlternate
-            )
+                shortcutInfoWithRepeatedLabelSecondAlternate,
+            ),
         )
 
     private val subCategoryWithGroupedRepeatedShortcutLabels =
         ShortcutSubCategory(
             label = groupWithRepeatedShortcutLabels.label!!.toString(),
-            shortcuts = listOf(shortcutWithGroupedRepeatedLabel)
+            shortcuts = listOf(shortcutWithGroupedRepeatedLabel),
         )
 
     private val groupWithStandardShortcutInfo =
         KeyboardShortcutGroup("Standard group", listOf(standardShortcutInfo1))
 
+    val groupWithGoHomeShortcutInfo =
+        KeyboardShortcutGroup("System controls", listOf(goHomeShortcutInfo))
+
     private val subCategoryWithStandardShortcut =
         ShortcutSubCategory(
             label = groupWithStandardShortcutInfo.label!!.toString(),
-            shortcuts = listOf(standardShortcut1)
+            shortcuts = listOf(standardShortcut1),
         )
 
     private val groupWithOnlyUnsupportedModifierShortcut =
         KeyboardShortcutGroup(
             "Group with unsupported modifiers",
-            listOf(shortcutInfoWithUnsupportedModifiers)
+            listOf(shortcutInfoWithUnsupportedModifiers),
         )
 
     private val groupWithSupportedAndUnsupportedModifierShortcut =
         KeyboardShortcutGroup(
             "Group with mix of supported and not supported modifiers",
-            listOf(standardShortcutInfo3, shortcutInfoWithUnsupportedModifiers)
+            listOf(standardShortcutInfo3, shortcutInfoWithUnsupportedModifiers),
         )
 
     private val switchToNextLanguageShortcut =
@@ -174,19 +219,19 @@ object TestShortcuts {
     private val subCategoryForInputLanguageSwitchShortcuts =
         ShortcutSubCategory(
             "Input",
-            listOf(switchToNextLanguageShortcut, switchToPreviousLanguageShortcut)
+            listOf(switchToNextLanguageShortcut, switchToPreviousLanguageShortcut),
         )
 
     private val subCategoryWithUnsupportedShortcutsRemoved =
         ShortcutSubCategory(
             groupWithSupportedAndUnsupportedModifierShortcut.label!!.toString(),
-            listOf(standardShortcut3)
+            listOf(standardShortcut3),
         )
 
     private val standardGroup1 =
         KeyboardShortcutGroup(
             "Standard group 1",
-            listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3)
+            listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3),
         )
 
     private val standardPackageName1 = "standard.app.group1"
@@ -194,38 +239,63 @@ object TestShortcuts {
     private val standardAppGroup1 =
         KeyboardShortcutGroup(
                 "Standard app group 1",
-                listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3)
+                listOf(standardShortcutInfo1, standardShortcutInfo2, standardShortcutInfo3),
             )
             .apply { packageName = standardPackageName1 }
+
+    private val standardSystemAppSubcategoryWithCustomHomeShortcut =
+        ShortcutSubCategory("System controls", listOf(customGoHomeShortcut))
 
     private val standardSubCategory1 =
         ShortcutSubCategory(
             standardGroup1.label!!.toString(),
-            listOf(standardShortcut1, standardShortcut2, standardShortcut3)
+            listOf(standardShortcut1, standardShortcut2, standardShortcut3),
         )
 
     private val standardGroup2 =
         KeyboardShortcutGroup(
             "Standard group 2",
-            listOf(standardShortcutInfo3, standardShortcutInfo2, standardShortcutInfo1)
+            listOf(standardShortcutInfo3, standardShortcutInfo2, standardShortcutInfo1),
         )
 
     private val standardSubCategory2 =
         ShortcutSubCategory(
             standardGroup2.label!!.toString(),
-            listOf(standardShortcut3, standardShortcut2, standardShortcut1)
+            listOf(standardShortcut3, standardShortcut2, standardShortcut1),
         )
     private val standardGroup3 =
         KeyboardShortcutGroup(
             "Standard group 3",
-            listOf(standardShortcutInfo2, standardShortcutInfo1)
+            listOf(standardShortcutInfo2, standardShortcutInfo1),
         )
 
     private val standardSubCategory3 =
         ShortcutSubCategory(
             standardGroup3.label!!.toString(),
-            listOf(standardShortcut2, standardShortcut1)
+            listOf(standardShortcut2, standardShortcut1),
         )
+
+    private val systemSubCategoryWithGoHomeShortcuts =
+        ShortcutSubCategory(
+            label = "System controls",
+            shortcuts =
+                listOf(
+                    shortcut("Go to home screen") {
+                        command {
+                            key("Ctrl")
+                            key("Alt")
+                            key("B")
+                        }
+                        command {
+                            key("Ctrl")
+                            key("Alt")
+                            key("A")
+                            isCustom(true)
+                        }
+                    }
+                ),
+        )
+
     val imeGroups = listOf(standardGroup1, standardGroup2, standardGroup3)
     val imeCategory =
         ShortcutCategory(
@@ -235,8 +305,8 @@ object TestShortcuts {
                     subCategoryForInputLanguageSwitchShortcuts,
                     standardSubCategory1,
                     standardSubCategory2,
-                    standardSubCategory3
-                )
+                    standardSubCategory3,
+                ),
         )
 
     val currentAppGroups = listOf(standardAppGroup1)
@@ -245,15 +315,33 @@ object TestShortcuts {
     val systemGroups = listOf(standardGroup3, standardGroup2, standardGroup1)
     val systemCategory =
         ShortcutCategory(
-            type = ShortcutCategoryType.System,
-            subCategories = listOf(standardSubCategory3, standardSubCategory2, standardSubCategory1)
+            type = System,
+            subCategories = listOf(standardSubCategory3, standardSubCategory2, standardSubCategory1),
+        )
+
+    val systemCategoryWithMergedGoHomeShortcut =
+        ShortcutCategory(
+            type = System,
+            subCategories = listOf(systemSubCategoryWithGoHomeShortcuts),
+        )
+
+    val systemCategoryWithCustomHomeShortcut =
+        ShortcutCategory(
+            type = System,
+            subCategories =
+                listOf(
+                    standardSubCategory3,
+                    standardSubCategory2,
+                    standardSubCategory1,
+                    standardSystemAppSubcategoryWithCustomHomeShortcut,
+                ),
         )
 
     val multitaskingGroups = listOf(standardGroup2, standardGroup1)
     val multitaskingCategory =
         ShortcutCategory(
-            type = ShortcutCategoryType.MultiTasking,
-            subCategories = listOf(standardSubCategory2, standardSubCategory1)
+            type = MultiTasking,
+            subCategories = listOf(standardSubCategory2, standardSubCategory1),
         )
 
     val groupsWithDuplicateShortcutLabels =
@@ -266,14 +354,14 @@ object TestShortcuts {
         listOf(
             subCategoryForInputLanguageSwitchShortcuts,
             subCategoryWithGroupedRepeatedShortcutLabels,
-            subCategoryWithStandardShortcut
+            subCategoryWithStandardShortcut,
         )
 
     val groupsWithUnsupportedModifier =
         listOf(
             groupWithStandardShortcutInfo,
             groupWithOnlyUnsupportedModifierShortcut,
-            groupWithSupportedAndUnsupportedModifierShortcut
+            groupWithSupportedAndUnsupportedModifierShortcut,
         )
 
     val subCategoriesWithUnsupportedModifiersRemoved =
@@ -283,8 +371,280 @@ object TestShortcuts {
         listOf(
             subCategoryForInputLanguageSwitchShortcuts,
             subCategoryWithStandardShortcut,
-            subCategoryWithUnsupportedShortcutsRemoved
+            subCategoryWithUnsupportedShortcutsRemoved,
         )
 
     val groupsWithOnlyUnsupportedModifiers = listOf(groupWithOnlyUnsupportedModifierShortcut)
+
+    private fun simpleInputGestureData(
+        keyCode: Int = KeyEvent.KEYCODE_A,
+        modifiers: Int = KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+        keyGestureType: Int,
+    ): InputGestureData {
+        val builder = InputGestureData.Builder()
+        builder.setKeyGestureType(keyGestureType)
+        builder.setTrigger(createKeyTrigger(keyCode, modifiers))
+        return builder.build()
+    }
+
+    private fun simpleShortcutCategory(
+        category: ShortcutCategoryType,
+        subcategoryLabel: String,
+        shortcutLabel: String,
+    ): ShortcutCategory {
+        return ShortcutCategory(
+            type = category,
+            subCategories =
+                listOf(
+                    ShortcutSubCategory(
+                        label = subcategoryLabel,
+                        shortcuts = listOf(simpleShortcut(shortcutLabel)),
+                    )
+                ),
+        )
+    }
+
+    private fun simpleShortcut(label: String) =
+        Shortcut(
+            label = label,
+            commands =
+                listOf(
+                    ShortcutCommand(
+                        isCustom = true,
+                        keys =
+                            listOf(
+                                ShortcutKey.Text("Ctrl"),
+                                ShortcutKey.Text("Alt"),
+                                ShortcutKey.Text("A"),
+                            ),
+                    )
+                ),
+        )
+
+    val customizableInputGestureWithUnknownKeyGestureType =
+        // These key gesture events are currently not supported by shortcut helper customizer
+        listOf(
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_GLOBAL_ACTIONS
+            ),
+            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_MEDIA_KEY),
+        )
+
+    val expectedShortcutCategoriesWithSimpleShortcutCombination =
+        listOf(
+            simpleShortcutCategory(System, "System apps", "Open assistant"),
+            simpleShortcutCategory(System, "System controls", "Go to home screen"),
+            simpleShortcutCategory(System, "System apps", "Open settings"),
+            simpleShortcutCategory(System, "System controls", "Lock screen"),
+            simpleShortcutCategory(System, "System controls", "View notifications"),
+            simpleShortcutCategory(System, "System apps", "Take a note"),
+            simpleShortcutCategory(System, "System controls", "Take screenshot"),
+            simpleShortcutCategory(System, "System controls", "Go back"),
+            simpleShortcutCategory(
+                MultiTasking,
+                "Split screen",
+                "Switch from split screen to full screen",
+            ),
+            simpleShortcutCategory(
+                MultiTasking,
+                "Split screen",
+                "Use split screen with current app on the left",
+            ),
+            simpleShortcutCategory(
+                MultiTasking,
+                "Split screen",
+                "Switch to app on left or above while using split screen",
+            ),
+            simpleShortcutCategory(
+                MultiTasking,
+                "Split screen",
+                "Use split screen with current app on the right",
+            ),
+            simpleShortcutCategory(
+                MultiTasking,
+                "Split screen",
+                "Switch to app on right or below while using split screen",
+            ),
+            simpleShortcutCategory(System, "System controls", "Show shortcuts"),
+            simpleShortcutCategory(System, "System controls", "View recent apps"),
+            simpleShortcutCategory(AppCategories, "Applications", "Calculator"),
+            simpleShortcutCategory(AppCategories, "Applications", "Calendar"),
+            simpleShortcutCategory(AppCategories, "Applications", "Browser"),
+            simpleShortcutCategory(AppCategories, "Applications", "Contacts"),
+            simpleShortcutCategory(AppCategories, "Applications", "Email"),
+            simpleShortcutCategory(AppCategories, "Applications", "Maps"),
+            simpleShortcutCategory(AppCategories, "Applications", "SMS"),
+            simpleShortcutCategory(MultiTasking, "Recent apps", "Cycle forward through recent apps"),
+        )
+    val customInputGestureTypeHome =
+        simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+
+    val allCustomizableInputGesturesWithSimpleShortcutCombinations =
+        listOf(
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT
+            ),
+            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_HOME),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS
+            ),
+            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL
+            ),
+            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT
+            ),
+            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_BACK),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER
+            ),
+            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING
+            ),
+            simpleInputGestureData(
+                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
+            ),
+        )
+
+    val standardAddCustomShortcutRequestInfo =
+        ShortcutCustomizationRequestInfo.Add(
+            label = "Open apps list",
+            categoryType = System,
+            subCategoryLabel = "System controls",
+        )
+
+    val standardDeleteCustomShortcutRequestInfo =
+        ShortcutCustomizationRequestInfo.Delete(
+            label = "Open apps list",
+            categoryType = System,
+            subCategoryLabel = "System controls",
+        )
+
+    val standardKeyCombination =
+        KeyCombination(
+            modifiers = META_META_ON or META_SHIFT_ON or META_META_LEFT_ON or META_SHIFT_RIGHT_ON,
+            keyCode = KEYCODE_A,
+        )
+
+    const val ALL_SUPPORTED_MODIFIERS =
+        META_META_ON or
+            META_CTRL_ON or
+            META_FUNCTION_ON or
+            META_SHIFT_ON or
+            META_ALT_ON or
+            META_SYM_ON
+
+    val allAppsInputGestureData: InputGestureData =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_ALL_APPS)
+            .setTrigger(
+                createKeyTrigger(
+                    /* keycode = */ standardKeyCombination.keyCode!!,
+                    /* modifierState = */ standardKeyCombination.modifiers and
+                        ALL_SUPPORTED_MODIFIERS,
+                )
+            )
+            .build()
+
+    val goHomeInputGestureData: InputGestureData =
+        InputGestureData.Builder()
+            .setKeyGestureType(KEY_GESTURE_TYPE_HOME)
+            .setTrigger(
+                createKeyTrigger(
+                    /* keycode = */ standardKeyCombination.keyCode!!,
+                    /* modifierState = */ standardKeyCombination.modifiers and
+                        ALL_SUPPORTED_MODIFIERS,
+                )
+            )
+            .build()
+
+    val expectedStandardDeleteShortcutUiState =
+        ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)
+
+    val keyDownEventWithoutActionKeyPressed =
+        androidx.compose.ui.input.key.KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ META_CTRL_ON,
+            )
+        )
+
+    val keyDownEventWithActionKeyPressed =
+        androidx.compose.ui.input.key.KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ META_CTRL_ON or META_META_ON,
+            )
+        )
+
+    val keyUpEventWithActionKeyPressed =
+        androidx.compose.ui.input.key.KeyEvent(
+            android.view.KeyEvent(
+                /* downTime = */ SystemClock.uptimeMillis(),
+                /* eventTime = */ SystemClock.uptimeMillis(),
+                /* action = */ ACTION_DOWN,
+                /* code = */ KEYCODE_A,
+                /* repeat = */ 0,
+                /* metaState = */ 0,
+            )
+        )
+
+    val standardAddShortcutRequest =
+        ShortcutCustomizationRequestInfo.Add(
+            label = "Standard shortcut",
+            categoryType = ShortcutCategoryType.System,
+            subCategoryLabel = "Standard subcategory",
+        )
+
+    val expectedStandardAddShortcutUiState =
+        ShortcutCustomizationUiState.AddShortcutDialog(
+            shortcutLabel = "Standard shortcut",
+            defaultCustomShortcutModifierKey =
+                ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
+            isDialogShowing = false,
+        )
 }

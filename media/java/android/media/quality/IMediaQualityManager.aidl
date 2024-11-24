@@ -21,6 +21,7 @@ import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
 import android.media.quality.ParamCapability;
+import android.media.quality.PictureProfileHandle;
 import android.media.quality.PictureProfile;
 import android.media.quality.SoundProfile;
 
@@ -38,6 +39,7 @@ interface IMediaQualityManager {
     List<String> getPictureProfilePackageNames();
     List<String> getPictureProfileAllowList();
     void setPictureProfileAllowList(in List<String> packages);
+    PictureProfileHandle getPictureProfileHandle(in String id);
 
     SoundProfile createSoundProfile(in SoundProfile pp);
     void updateSoundProfile(in String id, in SoundProfile pp);
@@ -65,4 +67,5 @@ interface IMediaQualityManager {
 
     void setAmbientBacklightSettings(in AmbientBacklightSettings settings);
     void setAmbientBacklightEnabled(in boolean enabled);
+    boolean isAmbientBacklightEnabled();
 }

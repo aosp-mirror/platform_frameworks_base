@@ -283,9 +283,9 @@ public class ActivityManagerServiceTest {
         // Required for updating DeviceConfig.
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation()
-                .adoptShellPermissionIdentity(
-                Manifest.permission.READ_DEVICE_CONFIG,
-                Manifest.permission.WRITE_DEVICE_CONFIG);
+                .adoptShellPermissionIdentity(Manifest.permission.READ_DEVICE_CONFIG,
+                        Manifest.permission.WRITE_DEVICE_CONFIG,
+                        Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
         sProcessListSettingsListener = mAms.mProcessList.getProcessListSettingsListener();
         assertThat(sProcessListSettingsListener).isNotNull();
     }

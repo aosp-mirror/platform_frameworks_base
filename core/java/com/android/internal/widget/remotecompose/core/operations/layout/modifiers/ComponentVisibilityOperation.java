@@ -63,16 +63,16 @@ public class ComponentVisibilityOperation
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
     @NonNull
     @Override
-    public String deepToString(@Nullable String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void write(WireBuffer buffer) {}
+    public void write(@NonNull WireBuffer buffer) {}
 
     public static void apply(@NonNull WireBuffer buffer, int valueId) {
         buffer.start(OP_CODE);
@@ -114,10 +114,10 @@ public class ComponentVisibilityOperation
         }
     }
 
-    public void setParent(LayoutComponent parent) {
+    public void setParent(@Nullable LayoutComponent parent) {
         mParent = parent;
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {}
+    public void layout(@NonNull RemoteContext context, float width, float height) {}
 }

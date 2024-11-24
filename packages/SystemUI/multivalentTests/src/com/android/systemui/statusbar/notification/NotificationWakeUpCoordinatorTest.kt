@@ -39,13 +39,13 @@ import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_WAKEUP
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat

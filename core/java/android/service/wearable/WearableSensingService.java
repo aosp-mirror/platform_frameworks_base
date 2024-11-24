@@ -27,6 +27,7 @@ import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.wearable.Flags;
 import android.app.wearable.IWearableSensingCallback;
+import android.app.wearable.WearableConnection;
 import android.app.wearable.WearableSensingDataRequest;
 import android.app.wearable.WearableSensingManager;
 import android.content.Context;
@@ -380,7 +381,11 @@ public abstract class WearableSensingService extends Service {
      *
      * @param secureWearableConnection The secure connection to the wearable.
      * @param statusConsumer The consumer for the service status.
+     * @deprecated Use {@link #onSecureConnectionProvided(ParcelFileDescriptor, PersistableBundle,
+     *     Consumer)} instead to receive a remote wearable device connection.
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    @Deprecated
     @BinderThread
     public void onSecureConnectionProvided(
             @NonNull ParcelFileDescriptor secureWearableConnection,
@@ -389,12 +394,20 @@ public abstract class WearableSensingService extends Service {
     }
 
     /**
-     * Called when a secure connection to the wearable is available.
+     * Called when a secure connection to the wearable is available. See {@link
+     * WearableSensingManager#provideConnection(WearableConnection, Executor)} for details about the
+     * secure connection.
+     *
+     * <p>When the {@code secureWearableConnection} is closed, the system will send a {@link
+     * WearableSensingManager#STATUS_CHANNEL_ERROR} status code to the error callback provided by
+     * the caller of {@link WearableSensingManager#provideConnection(WearableConnection, Executor)}.
+     *
+     * <p>The implementing class should override this method. It should return an appropriate status
+     * code via {@code statusConsumer} after receiving the {@code secureWearableConnection}.
      *
      * @param secureWearableConnection The secure connection to the wearable.
      * @param metadata Metadata related to the provided connection.
      * @param statusConsumer The consumer for the service status.
-     * @see #onSecureConnectionProvided(ParcelFileDescriptor, Consumer)
      */
     @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
     @BinderThread

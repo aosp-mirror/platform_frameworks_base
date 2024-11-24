@@ -22,6 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -45,6 +46,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -243,6 +245,25 @@ public final class CardEmulation {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SetServiceEnabledStatusCode {}
+
+    /**
+     * Property name used to indicate that an application wants to allow associated services
+     * to share the same AID routing priority when this application is the role holder.
+     * <p>
+     * Example:
+     * <pre>
+     *     {@code
+     *     <application>
+     *       ...
+     *       <property android:name="android.nfc.cardemulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY"
+     *         android:value="true"/>
+     *     </application>
+     *     }
+     * </pre>
+     */
+    @FlaggedApi(Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES)
+    public static final String PROPERTY_ALLOW_SHARED_ROLE_PRIORITY =
+            "android.nfc.cardemulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY";
 
     static boolean sIsInitialized = false;
     static HashMap<Context, CardEmulation> sCardEmus = new HashMap<Context, CardEmulation>();
@@ -947,7 +968,7 @@ public final class CardEmulation {
      *
      * @param service The ComponentName of the service
      * @param status  true to enable, false to disable
-     * @return true if preferred service is successfully set or unset, otherwise return false.
+     * @return status code defined in {@link SetServiceEnabledStatusCode}
      *
      * @hide
      */
@@ -1010,6 +1031,7 @@ public final class CardEmulation {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
     public void overrideRoutingTable(
             @NonNull Activity activity, @ProtocolAndTechnologyRoute int protocol,
@@ -1037,6 +1059,7 @@ public final class CardEmulation {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_NFC_OVERRIDE_RECOVER_ROUTING_TABLE)
     public void recoverRoutingTable(@NonNull Activity activity) {
         if (!activity.isResumed()) {
@@ -1055,6 +1078,97 @@ public final class CardEmulation {
     @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
     public boolean isEuiccSupported() {
         return callServiceReturn(() -> sService.isEuiccSupported(), false);
+    }
+
+    /**
+     * Setting the default subscription ID succeeded.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_SUCCESS = 0;
+
+    /**
+     * Setting the default subscription ID failed because the subscription ID is invalid.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID = 1;
+
+    /**
+     * Setting the default subscription ID failed because there was an internal error processing
+     * the request. For ex: NFC service died in the middle of handling the API.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR = 2;
+
+    /**
+     * Setting the default subscription ID failed because this feature is not supported on the
+     * device.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED = 3;
+
+    /** @hide */
+    @IntDef(prefix = "SET_SUBSCRIPTION_ID_STATUS_",
+            value = {
+                    SET_SUBSCRIPTION_ID_STATUS_SUCCESS,
+                    SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID,
+                    SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR,
+                    SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetSubscriptionIdStatus {}
+
+    /**
+     * Sets the system's default NFC subscription id.
+     *
+     * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this sets the
+     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     *
+     * @param subscriptionId the default NFC subscription Id to set.
+     * @return status of the operation.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     * {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public @SetSubscriptionIdStatus int setDefaultNfcSubscriptionId(int subscriptionId) {
+        return callServiceReturn(() ->
+                        sService.setDefaultNfcSubscriptionId(
+                                subscriptionId, mContext.getPackageName()),
+                SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR);
+    }
+
+    /**
+     * Returns the system's default NFC subscription id.
+     *
+     * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this returns the
+     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     * <p> If the device has no UICC that can serve as NFCEE, this will return
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.</p>
+     *
+     * @return the default NFC subscription Id if set,
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} otherwise.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     * {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public int getDefaultNfcSubscriptionId() {
+        return callServiceReturn(() ->
+                sService.getDefaultNfcSubscriptionId(mContext.getPackageName()),
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
     /**
@@ -1144,6 +1258,40 @@ public final class CardEmulation {
         };
     }
 
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+    public static final int NFC_INTERNAL_ERROR_UNKNOWN = 0;
+
+    /**
+     * This error is reported when the NFC command watchdog restarts the NFC stack.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+    public static final int NFC_INTERNAL_ERROR_NFC_CRASH_RESTART = 1;
+
+    /**
+     * This error is reported when the NFC controller does not respond or there's an NCI transport
+     * error.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+    public static final int NFC_INTERNAL_ERROR_NFC_HARDWARE_ERROR = 2;
+
+    /**
+     * This error is reported when the NFC stack times out while waiting for a response to a command
+     * sent to the NFC hardware.
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+    public static final int NFC_INTERNAL_ERROR_COMMAND_TIMEOUT = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+    @IntDef(prefix = "NFC_INTERNAL_ERROR_", value = {
+            NFC_INTERNAL_ERROR_UNKNOWN,
+            NFC_INTERNAL_ERROR_NFC_CRASH_RESTART,
+            NFC_INTERNAL_ERROR_NFC_HARDWARE_ERROR,
+            NFC_INTERNAL_ERROR_COMMAND_TIMEOUT,
+    })
+    public @interface NfcInternalErrorType {}
+
     /** Listener for preferred service state changes. */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
     public interface NfcEventListener {
@@ -1166,6 +1314,57 @@ public final class CardEmulation {
          */
         @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
         default void onObserveModeStateChanged(boolean isEnabled) {}
+
+        /**
+         * This method is called when an AID conflict is detected during an NFC transaction. This
+         * can happen when multiple services are registered for the same AID.
+         *
+         * @param aid The AID that is in conflict
+         */
+        @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+        default void onAidConflictOccurred(@NonNull String aid) {}
+
+        /**
+         * This method is called when an AID is not routed to any service during an NFC
+         * transaction. This can happen when no service is registered for the given AID.
+         *
+         * @param aid the AID that was not routed
+         */
+        @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+        default void onAidNotRouted(@NonNull String aid) {}
+
+        /**
+         * This method is called when the NFC state changes.
+         *
+         * @see NfcAdapter#getAdapterState()
+         *
+         * @param state The new NFC state
+         */
+        @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+        default void onNfcStateChanged(@NfcAdapter.AdapterState int state) {}
+        /**
+         * This method is called when the NFC controller is in card emulation mode and an NFC
+         * reader's field is either detected or lost.
+         *
+         * @param isDetected true if an NFC reader is detected, false if it is lost
+         */
+        @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+        default void onRemoteFieldChanged(boolean isDetected) {}
+
+        /**
+         * This method is called when an internal error is reported by the NFC stack.
+         *
+         * No action is required in response to these events as the NFC stack will automatically
+         * attempt to recover. These errors are reported for informational purposes only.
+         *
+         * Note that these errors can be reported when performing various internal NFC operations
+         * (such as during device shutdown) and cannot always be explicitly correlated with NFC
+         * transaction failures.
+         *
+         * @param errorType The type of the internal error
+         */
+        @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
+        default void onInternalErrorReported(@NfcInternalErrorType int errorType) {}
     }
 
     private final ArrayMap<NfcEventListener, Executor> mNfcEventListeners = new ArrayMap<>();
@@ -1185,25 +1384,61 @@ public final class CardEmulation {
                                             mContext.getPackageName(),
                                             componentNameAndUser.getComponentName()
                                                     .getPackageName());
-                    synchronized (mNfcEventListeners) {
-                        mNfcEventListeners.forEach(
-                                (listener, executor) -> {
-                                    executor.execute(
-                                            () -> listener.onPreferredServiceChanged(isPreferred));
-                                });
-                    }
+                    callListeners(listener -> listener.onPreferredServiceChanged(isPreferred));
                 }
 
                 public void onObserveModeStateChanged(boolean isEnabled) {
                     if (!android.nfc.Flags.nfcEventListener()) {
                         return;
                     }
+                    callListeners(listener -> listener.onObserveModeStateChanged(isEnabled));
+                }
+
+                public void onAidConflictOccurred(String aid) {
+                    if (!android.nfc.Flags.nfcEventListener()) {
+                        return;
+                    }
+                    callListeners(listener -> listener.onAidConflictOccurred(aid));
+                }
+
+                public void onAidNotRouted(String aid) {
+                    if (!android.nfc.Flags.nfcEventListener()) {
+                        return;
+                    }
+                    callListeners(listener -> listener.onAidNotRouted(aid));
+                }
+
+                public void onNfcStateChanged(int state) {
+                    if (!android.nfc.Flags.nfcEventListener()) {
+                        return;
+                    }
+                    callListeners(listener -> listener.onNfcStateChanged(state));
+                }
+
+                public void onRemoteFieldChanged(boolean isDetected) {
+                    if (!android.nfc.Flags.nfcEventListener()) {
+                        return;
+                    }
+                    callListeners(listener -> listener.onRemoteFieldChanged(isDetected));
+                }
+
+                public void onInternalErrorReported(@NfcInternalErrorType int errorType) {
+                    if (!android.nfc.Flags.nfcEventListener()) {
+                        return;
+                    }
+                    callListeners(listener -> listener.onInternalErrorReported(errorType));
+                }
+
+                interface ListenerCall {
+                    void invoke(NfcEventListener listener);
+                }
+
+                private void callListeners(ListenerCall listenerCall) {
                     synchronized (mNfcEventListeners) {
                         mNfcEventListeners.forEach(
-                                (listener, executor) -> {
-                                    executor.execute(
-                                            () -> listener.onObserveModeStateChanged(isEnabled));
-                                });
+                            (listener, executor) -> {
+                                executor.execute(() -> listenerCall.invoke(listener));
+                            });
                     }
                 }
             };

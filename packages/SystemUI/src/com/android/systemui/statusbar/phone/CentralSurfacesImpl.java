@@ -171,14 +171,12 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.shade.StatusBarLongPressGestureDetector;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.AutoHideUiElement;
@@ -223,7 +221,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
@@ -368,7 +366,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private PhoneStatusBarViewController mPhoneStatusBarViewController;
     private PhoneStatusBarTransitions mStatusBarTransitions;
-    private final Provider<StatusBarLongPressGestureDetector> mStatusBarLongPressGestureDetector;
     private final AuthRippleController mAuthRippleController;
     @WindowVisibleState private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -404,7 +401,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardStateController mKeyguardStateController;
     private final HeadsUpManager mHeadsUpManager;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final ShadeTouchableRegionManager mShadeTouchableRegionManager;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -674,7 +671,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ShadeController shadeController,
             WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            Provider<StatusBarLongPressGestureDetector> statusBarLongPressGestureDetector,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
             @Named(TIME_TICK_HANDLER_NAME) Handler timeTickHandler,
@@ -685,7 +681,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ShadeTouchableRegionManager shadeTouchableRegionManager,
             BrightnessSliderController.Factory brightnessSliderFactory,
             ScreenOffAnimationController screenOffAnimationController,
             WallpaperController wallpaperController,
@@ -728,7 +724,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mHeadsUpManager = headsUpManager;
         mBackActionInteractor = backActionInteractor;
         mKeyguardIndicationController = keyguardIndicationController;
-        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mShadeTouchableRegionManager = shadeTouchableRegionManager;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -782,7 +778,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeController = shadeController;
         mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
-        mStatusBarLongPressGestureDetector = statusBarLongPressGestureDetector;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
         mPluginDependencyProvider = pluginDependencyProvider;
@@ -1237,7 +1232,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mStatusBarInitializer.initializeStatusBar();
         }
 
-        mStatusBarTouchableRegionManager.setup(getNotificationShadeWindowView());
+        mShadeTouchableRegionManager.setup(getNotificationShadeWindowView());
 
         if (!StatusBarConnectedDisplays.isEnabled()) {
             createNavigationBar(result);
@@ -1532,11 +1527,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // to touch outside the customizer to close it, such as on the status or nav bar.
                 mShadeController.onStatusBarTouch(event);
             }
-            if (ShadeExpandsOnStatusBarLongPress.isEnabled()
-                    && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
-                mStatusBarLongPressGestureDetector.get().handleTouch(event);
-            }
-
             return getNotificationShadeWindowView().onTouchEvent(event);
         };
     }
@@ -1866,10 +1856,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             pw.println("  mHeadsUpManager: null");
         }
 
-        if (mStatusBarTouchableRegionManager != null) {
-            mStatusBarTouchableRegionManager.dump(pw, args);
+        if (mShadeTouchableRegionManager != null) {
+            mShadeTouchableRegionManager.dump(pw, args);
         } else {
-            pw.println("  mStatusBarTouchableRegionManager: null");
+            pw.println("  mShadeTouchableRegionManager: null");
         }
 
         if (mLightBarController != null) {
@@ -2576,7 +2566,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
-            mStatusBarTouchableRegionManager.updateTouchableRegion();
+            mShadeTouchableRegionManager.updateTouchableRegion();
 
             // The unlocked screen off and fold to aod animations might use our LightRevealScrim -
             // we need to be expanded for it to be visible.
@@ -2665,7 +2655,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // once we fully woke up.
             updateRevealEffect(true /* wakingUp */);
             updateNotificationPanelTouchState();
-            mStatusBarTouchableRegionManager.updateTouchableRegion();
+            mShadeTouchableRegionManager.updateTouchableRegion();
 
             // If we are waking up during the screen off animation, we should undo making the
             // expanded visible (we did that so the LightRevealScrim would be visible).

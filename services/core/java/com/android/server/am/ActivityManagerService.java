@@ -131,6 +131,9 @@ import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.security.Flags.preventIntentRedirect;
+import static android.security.Flags.preventIntentRedirectCollectNestedKeysOnServerIfNotCollected;
+import static android.security.Flags.preventIntentRedirectShowToast;
+import static android.security.Flags.preventIntentRedirectThrowExceptionIfNestedKeysNotCollected;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -387,6 +390,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManagerInternal;
+import android.widget.Toast;
 
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
@@ -437,6 +441,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
+import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
@@ -478,6 +483,7 @@ import com.android.server.wm.WindowProcessController;
 
 import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.VMRuntime;
+
 import libcore.util.EmptyArray;
 
 import java.io.File;
@@ -17923,6 +17929,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void notifyActiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyActiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
+        public void notifyInactiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyInactiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
         public ArraySet<String> getClientPackages(String servicePackageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.getClientPackagesLocked(servicePackageName);
@@ -19070,8 +19094,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean enableFgsNotificationRateLimit(boolean enable) {
-        enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
-                "enableFgsNotificationRateLimit");
+        if (android.security.Flags.protectDeviceConfigFlags()) {
+            enforceCallingHasAtLeastOnePermission("enableFgsNotificationRateLimit",
+                    permission.WRITE_DEVICE_CONFIG, permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
+        } else {
+            enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
+                    "enableFgsNotificationRateLimit");
+        }
         synchronized (this) {
             return mServices.enableFgsNotificationRateLimitLocked(enable);
         }
@@ -19290,8 +19319,31 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
         if (!preventIntentRedirect()) return;
-
         if (intent == null) return;
+
+        if ((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0) {
+            Slog.wtf(TAG,
+                    "[IntentRedirect] The intent does not have its nested keys collected as a "
+                            + "preparation for creating intent creator tokens. Intent: "
+                            + intent + "; creatorPackage: " + creatorPackage);
+            if (preventIntentRedirectShowToast()) {
+                UiThread.getHandler().post(
+                        () -> Toast.makeText(mContext,
+                                "Nested keys not collected. go/report-bug-intentRedir to report a"
+                                        + " bug", Toast.LENGTH_LONG).show());
+            }
+            if (preventIntentRedirectThrowExceptionIfNestedKeysNotCollected()) {
+                // this flag will be internal only, not ramped to public.
+                throw new SecurityException(
+                        "The intent does not have its nested keys collected as a preparation for "
+                                + "creating intent creator tokens. Intent: "
+                                + intent + "; creatorPackage: " + creatorPackage);
+            }
+            if (preventIntentRedirectCollectNestedKeysOnServerIfNotCollected()) {
+                // this flag will be ramped to public.
+                intent.collectExtraIntentKeys();
+            }
+        }
 
         String targetPackage = intent.getComponent() != null
                 ? intent.getComponent().getPackageName()

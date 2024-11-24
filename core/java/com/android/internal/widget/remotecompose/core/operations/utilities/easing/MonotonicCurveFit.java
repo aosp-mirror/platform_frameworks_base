@@ -22,11 +22,11 @@ import java.util.Arrays;
 /** This performs a spline interpolation in multiple dimensions */
 public class MonotonicCurveFit {
     private static final String TAG = "MonotonicCurveFit";
-    private double[] mT;
-    private double[][] mY;
-    private double[][] mTangent;
+    @NonNull private final double[] mT;
+    @NonNull private final double[][] mY;
+    @NonNull private final double[][] mTangent;
     private boolean mExtrapolate = true;
-    double[] mSlopeTemp;
+    @NonNull final double[] mSlopeTemp;
 
     /**
      * create a collection of curves
@@ -81,7 +81,7 @@ public class MonotonicCurveFit {
      * @param t
      * @param v
      */
-    public void getPos(double t, double[] v) {
+    public void getPos(double t, @NonNull double[] v) {
         final int n = mT.length;
         final int dim = mY[0].length;
         if (mExtrapolate) {
@@ -141,7 +141,7 @@ public class MonotonicCurveFit {
      * @param t
      * @param v
      */
-    public void getPos(double t, float[] v) {
+    public void getPos(double t, @NonNull float[] v) {
         final int n = mT.length;
         final int dim = mY[0].length;
         if (mExtrapolate) {
@@ -243,7 +243,7 @@ public class MonotonicCurveFit {
      * @param t
      * @param v
      */
-    public void getSlope(double t, double[] v) {
+    public void getSlope(double t, @NonNull double[] v) {
         final int n = mT.length;
         int dim = mY[0].length;
         if (t <= mT[0]) {
@@ -297,7 +297,7 @@ public class MonotonicCurveFit {
         return 0; // should never reach here
     }
 
-    public double[] getTimePoints() {
+    public @NonNull double[] getTimePoints() {
         return mT;
     }
 

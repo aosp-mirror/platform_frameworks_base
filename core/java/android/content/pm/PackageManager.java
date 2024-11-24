@@ -804,7 +804,6 @@ public abstract class PackageManager {
         @Deprecated
         private void __metadata() {}
 
-
         //@formatter:on
         // End of generated code
 
@@ -3200,6 +3199,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of ranging with
+     * other devices using channel sounding via Bluetooth Low Energy radio.
+     */
+    @FlaggedApi(com.android.ranging.flags.Flags.FLAG_RANGING_CS_ENABLED)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING =
+             "android.hardware.bluetooth_le.channel_sounding";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
      */
@@ -5172,25 +5181,6 @@ public abstract class PackageManager {
             "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
 
     /**
-     * Used by the system to query a {@link android.content.pm.verify.pkg.VerifierService} provider,
-     * which registers itself via an intent-filter handling this action.
-     *
-     * <p class="note">Only the system can bind to such a verifier service. This is protected by the
-     * {@link android.Manifest.permission#BIND_VERIFICATION_AGENT} permission. The verifier service
-     * app should protect the service by adding this permission in the service declaration in its
-     * manifest.
-     * <p>
-     * A verifier service must be a privileged app and hold the
-     * {@link android.Manifest.permission#VERIFICATION_AGENT} permission.
-     *
-     * @hide
-     */
-    @SystemApi
-    @FlaggedApi(android.content.pm.Flags.FLAG_VERIFICATION_SERVICE)
-    @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String ACTION_VERIFY_PACKAGE = "android.content.pm.action.VERIFY_PACKAGE";
-
-    /**
      * The names of the requested permissions.
      * <p>
      * <strong>Type:</strong> String[]
@@ -6738,6 +6728,11 @@ public abstract class PackageManager {
      * If the given permission already exists, the info you supply here
      * will be used to update it.
      *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
+     *
      * @param info Description of the permission to be added.
      *
      * @return Returns true if a new permission was created, false if an
@@ -6748,7 +6743,9 @@ public abstract class PackageManager {
      *
      * @see #removePermission(String)
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract boolean addPermission(@NonNull PermissionInfo info);
 
     /**
@@ -6757,8 +6754,15 @@ public abstract class PackageManager {
      * allowing it to return quicker and batch a series of adds at the
      * expense of no guarantee the added permission will be retained if
      * the device is rebooted before it is written.
+     *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract boolean addPermissionAsync(@NonNull PermissionInfo info);
 
     /**
@@ -6767,6 +6771,11 @@ public abstract class PackageManager {
      * -- you are only allowed to remove permissions that you are allowed
      * to add.
      *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
+     *
      * @param permName The name of the permission to remove.
      *
      * @throws SecurityException if you are not allowed to remove the
@@ -6774,7 +6783,9 @@ public abstract class PackageManager {
      *
      * @see #addPermission(PermissionInfo)
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract void removePermission(@NonNull String permName);
 
     /**
@@ -10996,6 +11007,41 @@ public abstract class PackageManager {
     }
 
     /**
+     * Set the page compat mode override for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public void setPageSizeAppCompatFlagsSettingsOverride(@NonNull String packageName,
+            boolean enabled) {
+        throw new UnsupportedOperationException(
+                "setPageSizeAppCompatFlagsSettingsOverride not implemented in subclass");
+    }
+
+    /**
+     * Check whether page size app compat mode is enabled for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public boolean isPageSizeCompatEnabled(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "isPageSizeCompatEnabled not implemented in subclass");
+    }
+
+    /**
+     * Get the page size app compat warning dialog to show at app launch time
+     *
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public String getPageSizeCompatWarningMessage(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "getPageSizeCompatWarningMessage not implemented in subclass");
+    }
+
+     /**
      * Returns the harmful app warning string for the given app, or null if there is none set.
      *
      * @param packageName The full name of the desired package.

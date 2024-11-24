@@ -4863,7 +4863,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
-    public void testCameraCompatAspectRatio_defualtAspectRatioAppliedWhenGreater() {
+    public void testCameraCompatAspectRatio_defaultAspectRatioAppliedWhenGreater() {
         // Needed to create camera compat policy in DisplayContent.
         allowDesktopMode();
         // Create display that has all stable insets and does not rotate.
@@ -4917,7 +4917,8 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(minAspect, aspectRatioPolicy.getMinAspectRatio(), 0 /* delta */);
 
         // User override can still take effect.
-        doReturn(true).when(aspectRatioOverrides).shouldApplyUserMinAspectRatioOverride();
+        doReturn(USER_MIN_ASPECT_RATIO_3_2).when(aspectRatioOverrides)
+                .getUserMinAspectRatioOverrideCode();
         assertFalse(mActivity.isResizeable());
         assertEquals(maxAspect, aspectRatioPolicy.getMaxAspectRatio(), 0 /* delta */);
         assertNotEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOverrideOrientation());
@@ -4928,6 +4929,7 @@ public class SizeCompatTests extends WindowTestsBase {
         spyOn(pm);
         final PackageManager.Property property = new PackageManager.Property("propertyName",
                 true /* value */, name.getPackageName(), name.getClassName());
+        // Activity level.
         try {
             doReturn(property).when(pm).getPropertyAsUser(
                     WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
@@ -4938,6 +4940,19 @@ public class SizeCompatTests extends WindowTestsBase {
         final ActivityRecord optOutActivity = new ActivityBuilder(mAtm)
                 .setComponent(name).setTask(mTask).build();
         assertFalse(optOutActivity.isUniversalResizeable());
+
+        // Application level.
+        try {
+            doReturn(property).when(pm).getProperty(
+                    WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
+                    name.getPackageName());
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        final ActivityRecord optOutAppActivity = new ActivityBuilder(mAtm)
+                .setComponent(getUniqueComponentName(mContext.getPackageName()))
+                .setTask(mTask).build();
+        assertFalse(optOutAppActivity.isUniversalResizeable());
     }
 
 
