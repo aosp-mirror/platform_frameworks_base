@@ -29,12 +29,23 @@ import com.android.internal.compat.IPlatformCompat;
  * Handles caching of calls to {@link com.android.internal.compat.IPlatformCompat}
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ChangeIdStateCache
         extends PropertyInvalidatedCache<ChangeIdStateQuery, Boolean> {
     private static final String CACHE_KEY = "cache_key.is_compat_change_enabled";
     private static final int MAX_ENTRIES = 64;
-    private static boolean sDisabled = false;
+    private static boolean sDisabled = getDefaultDisabled();
     private volatile IPlatformCompat mPlatformCompat;
+
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean getDefaultDisabled() {
+        return false;
+    }
+
+    private static boolean getDefaultDisabled$ravenwood() {
+        return true; // TODO(b/376676753) Disable the cache for now.
+    }
 
     /** @hide */
     public ChangeIdStateCache() {

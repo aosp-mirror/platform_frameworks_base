@@ -23,11 +23,11 @@ import static android.nfc.cardemulation.CardEmulation.routeIntToString;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -173,6 +173,31 @@ public final class NfcOemExtension {
     public @interface HostCardEmulationAction {}
 
     /**
+     * Status code returned when the polling state change request succeeded.
+     * @see #pausePolling()
+     * @see #resumePolling()
+     */
+    public static final int POLLING_STATE_CHANGE_SUCCEEDED = 1;
+    /**
+     * Status code returned when the polling state change request is already in
+     * required state.
+     * @see #pausePolling()
+     * @see #resumePolling()
+     */
+    public static final int POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE = 2;
+    /**
+     * Possible status codes for {@link #pausePolling()} and
+     * {@link #resumePolling()}.
+     * @hide
+     */
+    @IntDef(value = {
+            POLLING_STATE_CHANGE_SUCCEEDED,
+            POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PollingStateChangeStatusCode {}
+
+    /**
      * Status OK
      */
     public static final int STATUS_OK = 0;
@@ -193,6 +218,30 @@ public final class NfcOemExtension {
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusCode {}
 
+    /**
+     * Routing commit succeeded.
+     */
+    public static final int COMMIT_ROUTING_STATUS_OK = 0;
+    /**
+     * Routing commit failed.
+     */
+    public static final int COMMIT_ROUTING_STATUS_FAILED = 3;
+    /**
+     * Routing commit failed due to the update is in progress.
+     */
+    public static final int COMMIT_ROUTING_STATUS_FAILED_UPDATE_IN_PROGRESS = 6;
+
+    /**
+     * Status codes returned when calling {@link #forceRoutingTableCommit()}
+     * @hide
+     */
+    @IntDef(prefix = "COMMIT_ROUTING_STATUS_", value = {
+            COMMIT_ROUTING_STATUS_OK,
+            COMMIT_ROUTING_STATUS_FAILED,
+            COMMIT_ROUTING_STATUS_FAILED_UPDATE_IN_PROGRESS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CommitRoutingStatusCode {}
     /**
      * Interface for Oem extensions for NFC.
      */
@@ -233,8 +282,7 @@ public final class NfcOemExtension {
          *                  {@link Boolean#TRUE}, otherwise call with {@link Boolean#FALSE}.
          * false if NFC cannot be enabled at this time.
          */
-        @SuppressLint("MethodNameTense")
-        void onEnable(@NonNull Consumer<Boolean> isAllowed);
+        void onEnableRequested(@NonNull Consumer<Boolean> isAllowed);
         /**
          * Method to check if Nfc is allowed to be disabled by OEMs.
          * @param isAllowed The {@link Consumer} to be completed. If disabling NFC is allowed,
@@ -242,7 +290,7 @@ public final class NfcOemExtension {
          *                  {@link Boolean#TRUE}, otherwise call with {@link Boolean#FALSE}.
          * false if NFC cannot be disabled at this time.
          */
-        void onDisable(@NonNull Consumer<Boolean> isAllowed);
+        void onDisableRequested(@NonNull Consumer<Boolean> isAllowed);
 
         /**
          * Callback to indicate that Nfc starts to boot.
@@ -255,7 +303,7 @@ public final class NfcOemExtension {
         void onEnableStarted();
 
         /**
-         * Callback to indicate that Nfc starts to enable.
+         * Callback to indicate that Nfc starts to disable.
          */
         void onDisableStarted();
 
@@ -287,8 +335,12 @@ public final class NfcOemExtension {
 
         /**
          * Notifies routing configuration is changed.
+         * @param isCommitRoutingSkipped The {@link Consumer} to be
+         * completed. If routing commit should be skipped,
+         * the {@link Consumer#accept(Object)} should be called with
+         * {@link Boolean#TRUE}, otherwise call with {@link Boolean#FALSE}.
          */
-        void onRoutingChanged();
+        void onRoutingChanged(@NonNull Consumer<Boolean> isCommitRoutingSkipped);
 
         /**
          * API to activate start stop cpu boost on hce event.
@@ -338,6 +390,15 @@ public final class NfcOemExtension {
         * @param isActivated true, if EE Listen is ON, else EE Listen is OFF.
         */
         void onEeListenActivated(boolean isActivated);
+
+        /**
+        * Notifies that some NFCEE (NFC Execution Environment) has been updated.
+        *
+        * <p> This indicates that some applet has been installed/updated/removed in
+        * one of the NFCEE's.
+        * </p>
+        */
+        void onEeUpdated();
 
         /**
          * Gets the intent to find the OEM package in the OEM App market. If the consumer returns
@@ -405,6 +466,19 @@ public final class NfcOemExtension {
          * @param item the log items that contains log information of NFC event.
          */
         void onLogEventNotified(@NonNull OemLogItems item);
+
+        /**
+         * Callback to to extract OEM defined packages from given NDEF message when
+         * a NFC tag is detected. These are used to handle NFC tags encoded with a
+         * proprietary format for storing app name (Android native app format).
+         *
+         * @param message NDEF message containing OEM package names
+         * @param packageConsumer The {@link Consumer} to be completed.
+         *                        The {@link Consumer#accept(Object)} should be called with
+         *                        the list of package names.
+         */
+        void onExtractOemPackages(@NonNull NdefMessage message,
+                @NonNull Consumer<List<String>> packageConsumer);
     }
 
 
@@ -415,6 +489,28 @@ public final class NfcOemExtension {
         mContext = context;
         mAdapter = adapter;
         mOemNfcExtensionCallback = new NfcOemExtensionCallback();
+    }
+
+    /**
+     * Get an instance of {@link T4tNdefNfcee} object for performing T4T (Type-4 Tag)
+     * NDEF (NFC Data Exchange Format) NFCEE (NFC Execution Environment) operations.
+     * This can be used to write NDEF data to emulate a T4T tag in an NFCEE
+     * (NFC Execution Environment - eSE, SIM, etc). Refer to the NFC forum specification
+     * "NFCForum-TS-NCI-2.3 section 10.4" and "NFCForum-TS-T4T-1.1 section 4.2" for more details.
+     *
+     * This is a singleton object which shall be used by OEM extension module to do NDEF-NFCEE
+     * read/write operations.
+     *
+     * <p>Returns {@link T4tNdefNfcee}
+     * <p>Does not cause any RF activity and does not block.
+     * @return NFC Data Exchange Format (NDEF) NFC Execution Environment (NFCEE) object
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public T4tNdefNfcee getT4tNdefNfcee() {
+        return T4tNdefNfcee.getInstance();
     }
 
     /**
@@ -604,24 +700,32 @@ public final class NfcOemExtension {
 
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
-     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely
-     * use {@link #resumePolling() to resume the polling.
-     * @param timeoutInMs the pause polling duration in millisecond
+     * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely.
+     * Use {@link #resumePolling() to resume the polling.
+     * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
+     * @return status of the operation
+     * @throws IllegalArgumentException if timeoutInMs value is invalid
+     *         (0 < timeoutInMs < max).
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void pausePolling(int timeoutInMs) {
-        NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
+    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong int timeoutInMs) {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.pausePolling(timeoutInMs),
+                POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
     }
 
     /**
      * Resumes default NFC tag reader mode polling for the current device state if polling is
      * paused. Calling this while already in polling is a no-op.
+     * @return status of the operation
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void resumePolling() {
-        NfcAdapter.callService(() -> NfcAdapter.sService.resumePolling());
+    public @PollingStateChangeStatusCode int resumePolling() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.resumePolling(),
+                POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
     }
 
     /**
@@ -741,6 +845,18 @@ public final class NfcOemExtension {
         return result;
     }
 
+    /**
+     * API to force a routing table commit.
+     * @return a {@link StatusCode} to indicate if commit routing succeeded or not
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @CommitRoutingStatusCode
+    public int forceRoutingTableCommit() {
+        return NfcAdapter.callServiceReturn(
+                () -> NfcAdapter.sService.commitRouting(), COMMIT_ROUTING_STATUS_FAILED);
+    }
+
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override
@@ -778,6 +894,12 @@ public final class NfcOemExtension {
         }
 
         @Override
+        public void onEeUpdated() throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoidCallback(null, (Object input) -> cb.onEeUpdated(), ex));
+        }
+
+        @Override
         public void onStateUpdated(int state) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(state, cb::onStateUpdated, ex));
@@ -799,13 +921,13 @@ public final class NfcOemExtension {
         public void onEnable(ResultReceiver isAllowed) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper<>(isAllowed), cb::onEnable, ex));
+                        new ReceiverWrapper<>(isAllowed), cb::onEnableRequested, ex));
         }
         @Override
         public void onDisable(ResultReceiver isAllowed) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(
-                        new ReceiverWrapper<>(isAllowed), cb::onDisable, ex));
+                        new ReceiverWrapper<>(isAllowed), cb::onDisableRequested, ex));
         }
         @Override
         public void onBootStarted() throws RemoteException {
@@ -844,9 +966,10 @@ public final class NfcOemExtension {
                         new ReceiverWrapper<>(isSkipped), cb::onTagDispatch, ex));
         }
         @Override
-        public void onRoutingChanged() throws RemoteException {
+        public void onRoutingChanged(ResultReceiver isSkipped) throws RemoteException {
             mCallbackMap.forEach((cb, ex) ->
-                    handleVoidCallback(null, (Object input) -> cb.onRoutingChanged(), ex));
+                    handleVoidCallback(
+                            new ReceiverWrapper<>(isSkipped), cb::onRoutingChanged, ex));
         }
         @Override
         public void onHceEventReceived(int action) throws RemoteException {
@@ -923,6 +1046,15 @@ public final class NfcOemExtension {
         public void onLogEventNotified(OemLogItems item) throws RemoteException  {
             mCallbackMap.forEach((cb, ex) ->
                     handleVoidCallback(item, cb::onLogEventNotified, ex));
+        }
+
+        @Override
+        public void onExtractOemPackages(NdefMessage message, ResultReceiver packageConsumer)
+                throws RemoteException {
+            mCallbackMap.forEach((cb, ex) ->
+                    handleVoid2ArgCallback(message,
+                            new ReceiverWrapper<>(packageConsumer),
+                            cb::onExtractOemPackages, ex));
         }
 
         private <T> void handleVoidCallback(
@@ -1035,8 +1167,14 @@ public final class NfcOemExtension {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("intent", (Intent) result);
                 mResultReceiver.send(0, bundle);
+            } else if (result instanceof List<?> list) {
+                if (list.stream().allMatch(String.class::isInstance)) {
+                    Bundle bundle = new Bundle();
+                    bundle.putStringArray("packageNames",
+                            list.stream().map(pkg -> (String) pkg).toArray(String[]::new));
+                    mResultReceiver.send(0, bundle);
+                }
             }
-
         }
 
         @Override

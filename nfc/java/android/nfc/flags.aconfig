@@ -181,3 +181,11 @@ flag {
     description: "Enable set service enabled for category other"
     bug: "338157113"
 }
+
+flag {
+    name: "nfc_check_tag_intent_preference"
+    is_exported: true
+    namespace: "nfc"
+    description: "App can check its tag intent preference status"
+    bug: "335916336"
+}

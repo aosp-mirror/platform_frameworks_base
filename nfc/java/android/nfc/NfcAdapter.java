@@ -49,6 +49,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.io.IOException;
@@ -588,6 +589,7 @@ public final class NfcAdapter {
     static INfcTag sTagService;
     static INfcCardEmulation sCardEmulationService;
     static INfcFCardEmulation sNfcFCardEmulationService;
+    static IT4tNdefNfcee sNdefNfceeService;
 
     /**
      * The NfcAdapter object for each application context.
@@ -826,7 +828,13 @@ public final class NfcAdapter {
                     throw new UnsupportedOperationException();
                 }
             }
-
+            try {
+                sNdefNfceeService = sService.getT4tNdefNfceeInterface();
+            } catch (RemoteException e) {
+                sNdefNfceeService = null;
+                Log.e(TAG, "could not retrieve NDEF NFCEE service");
+                throw new UnsupportedOperationException();
+            }
             sIsInitialized = true;
         }
         NfcAdapter adapter = sNfcAdapters.get(context);
@@ -2505,22 +2513,22 @@ public final class NfcAdapter {
     }
 
     /**
-     * Checks if the device supports Tag application preference.
+     * Checks if the device supports Tag Intent App Preference functionality.
+     *
+     * When supported, {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED} or
+     * {@link #ACTION_TAG_DISCOVERED} will not be dispatched to an Activity if
+     * {@link isTagIntentAllowed} returns {@code false}.
      *
      * @return {@code true} if the device supports Tag application preference, {@code false}
      * otherwise
      * @throws UnsupportedOperationException if FEATURE_NFC is unavailable
-     *
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_NFC_CHECK_TAG_INTENT_PREFERENCE)
     public boolean isTagIntentAppPreferenceSupported() {
         if (!sHasNfcFeature) {
             throw new UnsupportedOperationException();
         }
         return callServiceReturn(() ->  sService.isTagIntentAppPreferenceSupported(), false);
-
     }
 
    /**
@@ -2894,5 +2902,43 @@ public final class NfcAdapter {
             }
         }
         return mNfcOemExtension;
+    }
+
+    /**
+     * Activity action: Bring up the settings page that allows the user to enable or disable tag
+     * intent reception for apps.
+     *
+     * <p>This will direct user to the settings page shows a list that asks users whether
+     * they want to allow or disallow the package to start an activity when a tag is discovered.
+     *
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @FlaggedApi(Flags.FLAG_NFC_CHECK_TAG_INTENT_PREFERENCE)
+    public static final String ACTION_CHANGE_TAG_INTENT_PREFERENCE =
+            "android.nfc.action.CHANGE_TAG_INTENT_PREFERENCE";
+
+    /**
+     * Checks whether the user has disabled the calling app from receiving NFC tag intents.
+     *
+     * <p>This method checks whether the caller package name is either not present in the user
+     * disabled list or is explicitly allowed by the user.
+     *
+     * @return {@code true} if an app is either not present in the list or is added to the list
+     * with the flag set to {@code true}. Otherwise, it returns {@code false}.
+     * It also returns {@code true} if {@link isTagIntentAppPreferenceSupported} returns
+     * {@code false}.
+     *
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_CHECK_TAG_INTENT_PREFERENCE)
+    public boolean isTagIntentAllowed() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        if (!isTagIntentAppPreferenceSupported()) {
+            return true;
+        }
+        return callServiceReturn(() ->  sService.isTagIntentAllowed(mContext.getPackageName(),
+                UserHandle.myUserId()), false);
     }
 }

@@ -1,5 +1,5 @@
 package: "android.net.vcn"
-container: "system"
+container: "com.android.tethering"
 
 flag {
     name: "safe_mode_config"
@@ -15,14 +15,4 @@ flag {
      description: "Expose APIs from VCN for mainline migration"
      is_exported: true
      bug: "376339506"
-}
-
-flag {
-    name: "fix_config_garbage_collection"
-    namespace: "vcn"
-    description: "Handle race condition in subscription change"
-    bug: "370862489"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
 }
