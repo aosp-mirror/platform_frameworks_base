@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.location.altitude;
+package com.android.internal.location.geometry;
 
 import android.annotation.NonNull;
 
@@ -48,11 +48,21 @@ public final class S2CellIdUtils {
     private static final double UV_LIMIT = calculateUvLimit();
     private static final UvTransform[] UV_TRANSFORMS = createUvTransforms();
     private static final XyzTransform[] XYZ_TRANSFORMS = createXyzTransforms();
+    private static final long MAX_SI_TI = 1L << (MAX_LEVEL + 1);
 
     // Used to encode (i, j, o) coordinates into primitive longs.
     private static final int I_SHIFT = 33;
     private static final int J_SHIFT = 2;
     private static final long J_MASK = (1L << 31) - 1;
+
+    // Used to insert latitude and longitude values into arrays.
+    public static final int LAT_LNG_MIN_LENGTH = 2;
+    public static final int LAT_INDEX = 0;
+    public static final int LNG_INDEX = 1;
+
+    // Used to encode (si, ti) coordinates into primitive longs.
+    private static final int SI_SHIFT = 32;
+    private static final long TI_MASK = (1L << 32) - 1;
 
     static {
         initLookupCells();
@@ -60,6 +70,130 @@ public final class S2CellIdUtils {
 
     /** Prevents instantiation. */
     private S2CellIdUtils() {
+    }
+
+    /**
+     * Inserts into {@code latLngDegrees} the centroid latitude and longitude, in that order and
+     * both measured in degrees, for the specified S2 cell ID. This array must be non-null and of
+     * minimum length two. A reference to this array is returned.
+     *
+     * <p>Behavior is undefined for invalid S2 cell IDs.
+     */
+    public static double[] toLatLngDegrees(long s2CellId, double[] latLngDegrees) {
+        // Used latLngDegrees as scratchpad for toLatLngRadians(long, double[]).
+        final double[] latLngRadians = latLngDegrees;
+        toLatLngRadians(s2CellId, latLngRadians);
+        latLngDegrees[LAT_INDEX] = Math.toDegrees(latLngRadians[LAT_INDEX]);
+        latLngDegrees[LNG_INDEX] = Math.toDegrees(latLngRadians[LNG_INDEX]);
+        return latLngDegrees;
+    }
+
+
+    /**
+     * Inserts into {@code latLngRadians} the centroid latitude and longitude, in that order and
+     * both measured in radians, for the specified S2 cell ID. This array must be non-null and of
+     * minimum length two. A reference to this array is returned.
+     *
+     * <p>Behavior is undefined for invalid S2 cell IDs.
+     */
+    public static double[] toLatLngRadians(long s2CellId, double[] latLngRadians) {
+        checkNotNull(latLngRadians);
+        checkLengthGreaterThanOrEqualTo(LAT_LNG_MIN_LENGTH, latLngRadians.length);
+
+        final long siTi = toSiTi(s2CellId);
+        final double u = siTiToU(siTi);
+        final double v = siTiToV(siTi);
+
+        final int face = getFace(s2CellId);
+        final XyzTransform xyzTransform = faceToXyzTransform(face);
+        final double x = xyzTransform.uvToX(u, v);
+        final double y = xyzTransform.uvToY(u, v);
+        final double z = xyzTransform.uvToZ(u, v);
+
+        latLngRadians[LAT_INDEX] = xyzToLatRadians(x, y, z);
+        latLngRadians[LNG_INDEX] = xyzToLngRadians(x, y);
+        return latLngRadians;
+    }
+
+    private static long toSiTi(long s2CellId) {
+        final long ijo = toIjo(s2CellId);
+        final int i = ijoToI(ijo);
+        final int j = ijoToJ(ijo);
+        int delta = isLeaf(s2CellId) ? 1 : (((i ^ (((int) s2CellId) >>> 2)) & 1) != 0) ? 2 : 0;
+        return (((long) (2 * i + delta)) << SI_SHIFT) | ((2 * j + delta) & TI_MASK);
+    }
+
+    private static int siTiToSi(long siTi) {
+        return (int) (siTi >> SI_SHIFT);
+    }
+
+    private static int siTiToTi(long siTi) {
+        return (int) siTi;
+    }
+
+    private static double siTiToU(long siTi) {
+        final int si = siTiToSi(siTi);
+        return siToU(si);
+    }
+
+    private static double siTiToV(long siTi) {
+        final int ti = siTiToTi(siTi);
+        return tiToV(ti);
+    }
+
+    private static double siToU(long si) {
+        final double s = (1.0 / MAX_SI_TI) * si;
+        if (s >= 0.5) {
+            return (1 / 3.) * (4 * s * s - 1);
+        }
+        return (1 / 3.) * (1 - 4 * (1 - s) * (1 - s));
+    }
+
+    private static double tiToV(long ti) {
+        // Same calculation as siToU.
+        return siToU(ti);
+    }
+
+    private static XyzTransform faceToXyzTransform(int face) {
+        // We map illegal face indices to the largest face index to preserve legacy behavior, i.e.,
+        // we do not want to throw an index out of bounds exception. Note that getFace(s2CellId) is
+        // guaranteed to return a non-negative face index even for invalid S2 cells, so it is
+        // sufficient to just map all face indices greater than the largest face index to the
+        // largest face index.
+        return XYZ_TRANSFORMS[Math.min(NUM_FACES - 1, face)];
+    }
+
+    private static double xyzToLngRadians(double x, double y) {
+        return Math.atan2(y, x);
+    }
+
+    private static double xyzToLatRadians(double x, double y, double z) {
+        return Math.atan2(z, Math.sqrt(x * x + y * y));
+    }
+
+    private static void checkNotNull(Object object) {
+        if (object == null) {
+            throw new NullPointerException("Given array cannot be null.");
+        }
+    }
+
+    private static void checkLengthGreaterThanOrEqualTo(int minLength, int actualLength) {
+        if (actualLength < minLength) {
+            throw new IllegalArgumentException(
+                "Given array of length " + actualLength + " needs to be of minimum length "
+                + minLength);
+        }
+    }
+
+    /**
+     * Returns true if the provided S2 cell contains the provided latitude/longitude, both measured
+     * in degrees.
+     */
+    public static boolean containsLatLngDegrees(long s2CellId, double latDegrees,
+            double lngDegrees) {
+        int level = getLevel(s2CellId);
+        long leafCellId = fromLatLngDegrees(latDegrees, lngDegrees);
+        return (getParent(leafCellId, level) == s2CellId);
     }
 
     /**
@@ -176,7 +310,7 @@ public final class S2CellIdUtils {
      * Returns the level of the specified S2 cell. The returned level is in [0, 30] for valid
      * S2 cell IDs. Behavior is undefined for invalid S2 cell IDs.
      */
-    static int getLevel(long s2CellId) {
+    public static int getLevel(long s2CellId) {
         if (isLeaf(s2CellId)) {
             return MAX_LEVEL;
         }
@@ -197,12 +331,12 @@ public final class S2CellIdUtils {
      * Returns the ID of the first S2 cell in a traversal of the children S2 cells at the specified
      * level, in Hilbert curve order.
      */
-    static long getTraversalStart(long s2CellId, int level) {
+    public static long getTraversalStart(long s2CellId, int level) {
         return s2CellId - getLowestOnBit(s2CellId) + getLowestOnBitForLevel(level);
     }
 
     /** Returns the ID of the next S2 cell at the same level along the Hilbert curve. */
-    static long getTraversalNext(long s2CellId) {
+    public static long getTraversalNext(long s2CellId) {
         return s2CellId + (getLowestOnBit(s2CellId) << 1);
     }
 
@@ -211,7 +345,7 @@ public final class S2CellIdUtils {
      * lower levels (i.e., larger cells) are encoded into fewer characters.
      */
     @NonNull
-    static String getToken(long s2CellId) {
+    public static String getToken(long s2CellId) {
         if (s2CellId == 0) {
             return "X";
         }
