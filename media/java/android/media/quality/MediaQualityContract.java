@@ -74,6 +74,130 @@ public class MediaQualityContract {
          */
         public static final String PARAMETER_SATURATION = "saturation";
 
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR = "color";
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_HUE = "hue";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_BACKLIGHT = "backlight";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_BRIGHTNESS = "color_tuner_brightness";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION = "color_tuner_saturation";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE = "color_tuner_hue";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_REDO_FFSET = "color_tuner_red_offset";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_GREEN_OFFSET = "color_tuner_green_offset";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_BLUE_OFFSET = "color_tuner_blue_offset";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_RED_GAIN = "color_tuner_red_gain";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_GREEN_GAIN = "color_tuner_green_gain";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_BLUE_GAIN = "color_tuner_blue_gain";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_AI_PQ = "ai_pq";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_AI_SUPER_RESOLUTION = "ai_super_resolution";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_NOISE_REDUCTION = "noise_reduction";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_MPEG_NOISE_REDUCTION = "mpeg_noise_reduction";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_FLESH_TONE = "flesh_tone";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DECONTOUR = "decontour";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DYNAMIC_LUMA_CONTROL = "dynamic_luma_control";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_FILM_MODE = "film_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_BLACK_STRETCH = "black_stretch";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_BLUE_STRETCH = "blue_stretch";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNE = "color_tune";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE = "color_temperature";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_GLOBAL_DIMMING = "global_dimming";
+
         private PictureQuality() {
         }
     }
