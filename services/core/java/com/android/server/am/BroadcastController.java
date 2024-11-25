@@ -57,6 +57,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.app.BroadcastStickyCache;
 import android.app.IApplicationThread;
 import android.app.compat.CompatChanges;
 import android.appwidget.AppWidgetManager;
@@ -183,6 +184,13 @@ class BroadcastController {
     final HashMap<IBinder, ReceiverList> mRegisteredReceivers = new HashMap<>();
 
     /**
+     * If {@code false} invalidate the list of {@link android.os.IpcDataCache} present inside the
+     * {@link BroadcastStickyCache} class.
+     * The invalidation is required to start caching of the sticky broadcast in the client side.
+     */
+    private volatile boolean mAreStickyCachesInvalidated = false;
+
+    /**
      * Resolver for broadcast intents to registered receivers.
      * Holds BroadcastFilter (subclass of IntentFilter).
      */
@@ -288,6 +296,11 @@ class BroadcastController {
             IIntentReceiver receiver, IntentFilter filter, String permission,
             int userId, int flags) {
         mService.enforceNotIsolatedCaller("registerReceiver");
+
+        if (!mAreStickyCachesInvalidated) {
+            BroadcastStickyCache.invalidateAllCaches();
+            mAreStickyCachesInvalidated = true;
+        }
         ArrayList<StickyBroadcast> stickyBroadcasts = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps =
@@ -700,6 +713,7 @@ class BroadcastController {
             String[] excludedPackages, int appOp, Bundle bOptions,
             boolean serialized, boolean sticky, int userId) {
         mService.enforceNotIsolatedCaller("broadcastIntent");
+        final int result;
 
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
@@ -722,7 +736,7 @@ class BroadcastController {
 
             final long origId = Binder.clearCallingIdentity();
             try {
-                return broadcastIntentLocked(callerApp,
+                result = broadcastIntentLocked(callerApp,
                         callerApp != null ? callerApp.info.packageName : null, callingFeatureId,
                         intent, resolvedType, resultToApp, resultTo, resultCode, resultData,
                         resultExtras, requiredPermissions, excludedPermissions, excludedPackages,
@@ -733,6 +747,11 @@ class BroadcastController {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
         }
+
+        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
+            BroadcastStickyCache.invalidateCache(intent.getAction());
+        }
+        return result;
     }
 
     // Not the binder call surface
@@ -743,6 +762,7 @@ class BroadcastController {
             boolean serialized, boolean sticky, int userId,
             BackgroundStartPrivileges backgroundStartPrivileges,
             @Nullable int[] broadcastAllowList) {
+        final int result;
         synchronized (mService) {
             intent = verifyBroadcastLocked(intent);
 
@@ -750,7 +770,7 @@ class BroadcastController {
             String[] requiredPermissions = requiredPermission == null ? null
                     : new String[] {requiredPermission};
             try {
-                return broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
+                result =  broadcastIntentLocked(null, packageName, featureId, intent, resolvedType,
                         resultToApp, resultTo, resultCode, resultData, resultExtras,
                         requiredPermissions, null, null, OP_NONE, bOptions, serialized, sticky, -1,
                         uid, realCallingUid, realCallingPid, userId,
@@ -760,6 +780,11 @@ class BroadcastController {
                 Binder.restoreCallingIdentity(origId);
             }
         }
+
+        if (sticky && result == ActivityManager.BROADCAST_SUCCESS) {
+            BroadcastStickyCache.invalidateCache(intent.getAction());
+        }
+        return result;
     }
 
     @GuardedBy("mService")
@@ -1458,6 +1483,7 @@ class BroadcastController {
                     list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive,
                             callingUid, callerAppProcessState, resolvedType));
                 }
+                BroadcastStickyCache.invalidateCache(intent.getAction());
             }
         }
 
@@ -1724,6 +1750,7 @@ class BroadcastController {
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
+        final ArrayList<String> changedStickyBroadcasts = new ArrayList<>();
         synchronized (mStickyBroadcasts) {
             ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies != null) {
@@ -1740,11 +1767,15 @@ class BroadcastController {
                     if (list.size() <= 0) {
                         stickies.remove(intent.getAction());
                     }
+                    changedStickyBroadcasts.add(intent.getAction());
                 }
                 if (stickies.size() <= 0) {
                     mStickyBroadcasts.remove(userId);
                 }
             }
+        }
+        for (int i = changedStickyBroadcasts.size() - 1; i >= 0; --i) {
+            BroadcastStickyCache.invalidateCache(changedStickyBroadcasts.get(i));
         }
     }
 
@@ -2124,8 +2155,17 @@ class BroadcastController {
     }
 
     void removeStickyBroadcasts(int userId) {
+        final ArrayList<String> changedStickyBroadcasts = new ArrayList<>();
         synchronized (mStickyBroadcasts) {
+            final ArrayMap<String, ArrayList<StickyBroadcast>> stickies =
+                    mStickyBroadcasts.get(userId);
+            if (stickies != null) {
+                changedStickyBroadcasts.addAll(stickies.keySet());
+            }
             mStickyBroadcasts.remove(userId);
+        }
+        for (int i = changedStickyBroadcasts.size() - 1; i >= 0; --i) {
+            BroadcastStickyCache.invalidateCache(changedStickyBroadcasts.get(i));
         }
     }
 
