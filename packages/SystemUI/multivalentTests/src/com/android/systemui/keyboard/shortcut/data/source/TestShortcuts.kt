@@ -87,6 +87,10 @@ object TestShortcuts {
                 key("Shift")
                 key("M")
             }
+            contentDescription {
+                "${shortcutInfoWithRepeatedLabel.label}, " +
+                    "Press key Meta plus H, or Meta plus L, or Shift plus M"
+            }
         }
 
     private val goHomeShortcutInfo =
@@ -109,6 +113,7 @@ object TestShortcuts {
                 key(R.drawable.ic_ksh_key_meta)
                 key("N")
             }
+            contentDescription { "${standardShortcutInfo1.label}, Press key Meta plus N" }
         }
 
     private val customGoHomeShortcut =
@@ -119,6 +124,7 @@ object TestShortcuts {
                 key("A")
                 isCustom(true)
             }
+            contentDescription { "Go to home screen, Press key Ctrl plus Alt plus A" }
         }
 
     private val standardShortcutInfo2 =
@@ -135,6 +141,7 @@ object TestShortcuts {
                 key("Shift")
                 key("Z")
             }
+            contentDescription { "${standardShortcutInfo2.label}, Press key Alt plus Shift plus Z" }
         }
 
     private val standardShortcutInfo3 =
@@ -150,6 +157,7 @@ object TestShortcuts {
                 key("Ctrl")
                 key("J")
             }
+            contentDescription { "${standardShortcutInfo3.label}, Press key Ctrl plus J" }
         }
 
     private val shortcutInfoWithUnsupportedModifiers =
@@ -205,6 +213,7 @@ object TestShortcuts {
                 key("Ctrl")
                 key("Space")
             }
+            contentDescription { "Switch to next language, Press key Ctrl plus Space" }
         }
 
     private val switchToPreviousLanguageShortcut =
@@ -213,6 +222,9 @@ object TestShortcuts {
                 key("Ctrl")
                 key("Shift")
                 key("Space")
+            }
+            contentDescription {
+                "Switch to previous language, Press key Ctrl plus Shift plus Space"
             }
         }
 
@@ -291,6 +303,10 @@ object TestShortcuts {
                             key("Alt")
                             key("A")
                             isCustom(true)
+                        }
+                        contentDescription {
+                            "Go to home screen, Press key Ctrl plus Alt plus B, " +
+                                "or Ctrl plus Alt plus A"
                         }
                     }
                 ),
