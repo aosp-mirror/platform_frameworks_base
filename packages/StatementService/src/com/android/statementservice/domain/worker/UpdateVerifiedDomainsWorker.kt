@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,13 @@
 package com.android.statementservice.domain.worker
 
 import android.content.Context
-import androidx.work.NetworkType
 import androidx.work.WorkerParameters
 import com.android.statementservice.domain.VerifyStatus
 
-/**
- * Scheduled every 24 hours with [NetworkType.CONNECTED] and every 72 hours without any constraints
- * to retry all domains for all packages with a failing error code.
- */
-class RetryRequestWorker(
+class UpdateVerifiedDomainsWorker(
     appContext: Context,
     params: WorkerParameters
 ) : PeriodicUpdateWorker(appContext, params) {
 
-    override suspend fun doWork() = updateDomainVerificationStatus(VerifyStatus::shouldRetry)
+    override suspend fun doWork() = updateDomainVerificationStatus(VerifyStatus::canUpdate)
 }

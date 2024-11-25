@@ -30,6 +30,7 @@ class StatementServiceApplication : Application() {
             // WorkManager can only schedule when the user data directories are unencrypted (after
             // the user has entered their lock password.
             DomainVerificationUtils.schedulePeriodicCheckUnlocked(WorkManager.getInstance(this))
+            DomainVerificationUtils.schedulePeriodicUpdateUnlocked(WorkManager.getInstance(this))
         }
     }
 }
