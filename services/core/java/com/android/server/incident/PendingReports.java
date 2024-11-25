@@ -324,16 +324,12 @@ class PendingReports {
 
         // Allow system apps to skip the consent dialog and use their in-built consent mechanism
         // instead.
-        boolean captureConsentlessBugreportDelegatedConsentGranted = false;
-        if ((flags & IncidentManager.FLAG_ALLOW_CONSENTLESS_BUGREPORT) != 0) {
-            captureConsentlessBugreportDelegatedConsentGranted =
-                    mPermissionManager.checkPermissionForDataDelivery(
-                                    Manifest.permission
-                                            .CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT,
-                                    attributionSource,
-                                    /* message= */ null)
-                            == PERMISSION_GRANTED;
-        }
+        boolean captureConsentlessBugreportDelegatedConsentGranted =
+                mPermissionManager.checkPermissionForDataDelivery(
+                        Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT,
+                        attributionSource,
+                        /* message= */ null)
+                        == PERMISSION_GRANTED;
 
         if (captureConsentlessBugreportOnUserdebugBuildGranted
                 || captureConsentlessBugreportDelegatedConsentGranted) {
