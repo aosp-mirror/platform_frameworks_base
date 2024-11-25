@@ -3812,6 +3812,9 @@
          shortcut helper The helper is a  component that shows the  user which keyboard shortcuts
          they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_button_text">Customize</string>
+    <!-- Description text of the button that allows user to resets all custom shortcuts in keyboard
+         shortcut helper when in customization mode. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_reset_button_text">Reset</string>
     <!-- Description text of the button that allows user to exit shortcut customization mode in
          keyboard shortcut helper The helper is a  component that shows the  user which keyboard
          shortcuts they can use. [CHAR LIMIT=NONE] -->

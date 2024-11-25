@@ -18,6 +18,13 @@ package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import android.app.role.RoleManager
 import android.app.role.mockRoleManager
+import android.content.Context
+import android.content.Context.INPUT_SERVICE
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
+import android.hardware.input.InputGestureData
+import android.hardware.input.fakeInputManager
 import android.view.KeyEvent
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
@@ -31,6 +38,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsInputGestureData
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.CurrentApp
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
@@ -56,7 +64,6 @@ import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SHORTCUT_HELPER_SHOWING
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -64,6 +71,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -73,6 +84,9 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
     private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
     private val fakeCurrentAppsSource = FakeKeyboardShortcutGroupsSource()
+    private val mockPackageManager: PackageManager = mock()
+    private val mockUserContext: Context = mock()
+    private val mockApplicationInfo: ApplicationInfo = mock()
 
     private val kosmos =
         Kosmos().also {
@@ -83,7 +97,7 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = fakeCurrentAppsSource
-            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { context })
+            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 
     private val testScope = kosmos.testScope
@@ -91,13 +105,20 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     private val sysUiState = kosmos.sysUiState
     private val fakeUserTracker = kosmos.fakeUserTracker
     private val mockRoleManager = kosmos.mockRoleManager
+    private val inputManager = kosmos.fakeInputManager.inputManager
     private val viewModel = kosmos.shortcutHelperViewModel
+
 
     @Before
     fun setUp() {
         fakeSystemSource.setGroups(TestShortcuts.systemGroups)
         fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
         fakeCurrentAppsSource.setGroups(TestShortcuts.currentAppGroups)
+        whenever(mockPackageManager.getApplicationInfo(anyString(), eq(0))).thenReturn(mockApplicationInfo)
+        whenever(mockPackageManager.getApplicationLabel(mockApplicationInfo)).thenReturn("Current App")
+        whenever(mockPackageManager.getApplicationIcon(anyString())).thenThrow(NameNotFoundException())
+        whenever(mockUserContext.packageManager).thenReturn(mockPackageManager)
+        whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
     }
 
     @Test
@@ -259,11 +280,11 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
     fun shortcutsUiState_currentAppIsLauncher_defaultSelectedCategoryIsSystem() =
         testScope.runTest {
             whenever(
-                    mockRoleManager.getRoleHoldersAsUser(
-                        RoleManager.ROLE_HOME,
-                        fakeUserTracker.userHandle,
-                    )
+                mockRoleManager.getRoleHoldersAsUser(
+                    RoleManager.ROLE_HOME,
+                    fakeUserTracker.userHandle,
                 )
+            )
                 .thenReturn(listOf(TestShortcuts.currentAppPackageName))
             val uiState by collectLastValue(viewModel.shortcutsUiState)
 
@@ -299,23 +320,23 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
                         label = "System",
                         iconSource = IconSource(imageVector = Icons.Default.Tv),
                         shortcutCategory =
-                            ShortcutCategory(
-                                System,
-                                subCategoryWithShortcutLabels("first Foo shortcut1"),
-                                subCategoryWithShortcutLabels(
-                                    "second foO shortcut2",
-                                    subCategoryLabel = SECOND_SIMPLE_GROUP_LABEL,
-                                ),
+                        ShortcutCategory(
+                            System,
+                            subCategoryWithShortcutLabels("first Foo shortcut1"),
+                            subCategoryWithShortcutLabels(
+                                "second foO shortcut2",
+                                subCategoryLabel = SECOND_SIMPLE_GROUP_LABEL,
                             ),
+                        ),
                     ),
                     ShortcutCategoryUi(
                         label = "Multitasking",
                         iconSource = IconSource(imageVector = Icons.Default.VerticalSplit),
                         shortcutCategory =
-                            ShortcutCategory(
-                                MultiTasking,
-                                subCategoryWithShortcutLabels("third FoO shortcut1"),
-                            ),
+                        ShortcutCategory(
+                            MultiTasking,
+                            subCategoryWithShortcutLabels("third FoO shortcut1"),
+                        ),
                     ),
                 )
         }
@@ -385,6 +406,31 @@ class ShortcutHelperViewModelTest : SysuiTestCase() {
 
             val activeUiState = uiState as ShortcutsUiState.Active
             assertThat(activeUiState.defaultSelectedCategory).isInstanceOf(CurrentApp::class.java)
+        }
+
+    @Test
+    fun shortcutsUiState_shouldShowResetButton_isFalseWhenThereAreNoCustomShortcuts() =
+        testScope.runTest {
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.shouldShowResetButton).isFalse()
+        }
+
+    @Test
+    fun shortcutsUiState_shouldShowResetButton_isTrueWhenThereAreCustomShortcuts() =
+        testScope.runTest {
+            whenever(
+                inputManager.getCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
+            ).thenReturn(listOf(allAppsInputGestureData))
+            val uiState by collectLastValue(viewModel.shortcutsUiState)
+
+            testHelper.showFromActivity()
+
+            val activeUiState = uiState as ShortcutsUiState.Active
+            assertThat(activeUiState.shouldShowResetButton).isTrue()
         }
 
     private fun groupWithShortcutLabels(
