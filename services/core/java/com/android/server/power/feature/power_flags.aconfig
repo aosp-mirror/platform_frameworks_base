@@ -31,7 +31,7 @@ flag {
     name: "framework_wakelock_info"
     namespace: "power"
     description: "Feature flag to enable statsd pulling of FrameworkWakelockInfo atoms"
-    bug: "352602149"
+    bug: "380847722"
 }
 
 flag {
