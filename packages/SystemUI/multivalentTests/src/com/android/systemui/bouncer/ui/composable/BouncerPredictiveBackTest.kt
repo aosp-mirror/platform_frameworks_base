@@ -59,6 +59,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
+import com.android.systemui.qs.ui.viewmodel.fakeQsSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.sceneContainerViewModelFactory
@@ -183,6 +184,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                                 initialSceneKey = Scenes.Bouncer,
                                 overlayByKey = emptyMap(),
                                 dataSourceDelegator = kosmos.sceneDataSourceDelegator,
+                                qsSceneAdapter = { kosmos.fakeQsSceneAdapter },
                             )
                         }
                     },
