@@ -3212,18 +3212,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * will be ignored.
      */
     boolean isUniversalResizeable() {
-        if (info.applicationInfo.category == ApplicationInfo.CATEGORY_GAME) {
-            return false;
-        }
-        final boolean compatEnabled = Flags.universalResizableByDefault()
-                && mDisplayContent != null && mDisplayContent.getConfiguration()
-                    .smallestScreenWidthDp >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
-                && mDisplayContent.getIgnoreOrientationRequest()
-                && info.isChangeEnabled(ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT);
-        if (!compatEnabled && !mWmService.mConstants.mIgnoreActivityOrientationRequest) {
-            return false;
-        }
-        if (mWmService.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(packageName)) {
+        final boolean isLargeScreen = mDisplayContent != null && mDisplayContent.getConfiguration()
+                .smallestScreenWidthDp >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
+                && mDisplayContent.getIgnoreOrientationRequest();
+        if (!canBeUniversalResizeable(info.applicationInfo, mWmService, isLargeScreen,
+                true /* forActivity */)) {
             return false;
         }
         if (mAppCompatController.mAllowRestrictedResizability.getAsBoolean()) {
@@ -3232,6 +3225,31 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the user preference respects aspect ratio, then it becomes non-resizable.
         return mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
                 .userPreferenceCompatibleWithNonResizability();
+    }
+
+    /**
+     * Returns {@code true} if the fixed orientation, aspect ratio, resizability of the application
+     * can be ignored.
+     */
+    static boolean canBeUniversalResizeable(ApplicationInfo appInfo, WindowManagerService wms,
+            boolean isLargeScreen, boolean forActivity) {
+        if (appInfo.category == ApplicationInfo.CATEGORY_GAME) {
+            return false;
+        }
+        final boolean compatEnabled = isLargeScreen && Flags.universalResizableByDefault()
+                && appInfo.isChangeEnabled(ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT);
+        if (!compatEnabled && !wms.mConstants.mIgnoreActivityOrientationRequest) {
+            return false;
+        }
+        if (wms.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(appInfo.packageName)) {
+            return false;
+        }
+        if (forActivity) {
+            // The caller will check both application and activity level property.
+            return true;
+        }
+        return !AppCompatController.allowRestrictedResizability(wms.mContext.getPackageManager(),
+                appInfo.packageName);
     }
 
     boolean isResizeable() {
