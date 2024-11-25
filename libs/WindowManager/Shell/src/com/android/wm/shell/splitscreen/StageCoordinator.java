@@ -488,6 +488,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /**
      * Deactivates main stage by removing the stage from the top level split root (usually when a
      * task underneath gets removed from the stage root).
+     * This function should always be called as part of exiting split screen.
      * @param stageToTop stage which we want to put on top
      */
     private void deactivateSplit(WindowContainerTransaction wct, @StageType int stageToTop) {
