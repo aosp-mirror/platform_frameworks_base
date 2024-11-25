@@ -34,6 +34,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraExtensionCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CameraMetadataInfo;
 import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
@@ -59,6 +60,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
@@ -128,6 +131,8 @@ public class CameraDeviceImpl extends CameraDevice
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
+
+    private long mFMQReader; // native fmq reader ptr
 
     private final StateCallback mDeviceCallback;
     private volatile StateCallbackKK mSessionStateCallback;
@@ -476,6 +481,9 @@ public class CameraDeviceImpl extends CameraDevice
             if (mInError) return;
 
             mRemoteDevice = new ICameraDeviceUserWrapper(remoteDevice);
+            Parcel resultParcel = Parcel.obtain();
+            mRemoteDevice.getCaptureResultMetadataQueue().writeToParcel(resultParcel, 0);
+            mFMQReader = nativeCreateFMQReader(resultParcel);
 
             IBinder remoteDeviceBinder = remoteDevice.asBinder();
             // For legacy camera device, remoteDevice is in the same process, and
@@ -1682,6 +1690,7 @@ public class CameraDeviceImpl extends CameraDevice
             if (mRemoteDevice != null || mInError) {
                 mDeviceExecutor.execute(mCallOnClosed);
             }
+            nativeClose(mFMQReader);
 
             mRemoteDevice = null;
         }
@@ -2416,27 +2425,61 @@ public class CameraDeviceImpl extends CameraDevice
                 }
             }
         }
+        private PhysicalCaptureResultInfo[] readMetadata(
+            PhysicalCaptureResultInfo[] srcPhysicalResults) {
+            PhysicalCaptureResultInfo[] retVal =
+                    new PhysicalCaptureResultInfo[srcPhysicalResults.length];
+            int i = 0;
+            long fmqSize = 0;
+            for (PhysicalCaptureResultInfo srcPhysicalResult : srcPhysicalResults) {
+                CameraMetadataNative physicalCameraMetadata = null;
+                if (srcPhysicalResult.getCameraMetadataInfo().getTag() ==
+                        CameraMetadataInfo.fmqSize) {
+                    fmqSize = srcPhysicalResult.getCameraMetadataInfo().getFmqSize();
+                    physicalCameraMetadata =
+                            new CameraMetadataNative(nativeReadResultMetadata(mFMQReader, fmqSize));
+                } else {
+                    physicalCameraMetadata = srcPhysicalResult.getCameraMetadata();
+                }
+                PhysicalCaptureResultInfo physicalResultInfo =
+                        new PhysicalCaptureResultInfo(
+                                srcPhysicalResult.getCameraId(), physicalCameraMetadata);
+                retVal[i] = physicalResultInfo;
+                i++;
+            }
+           return retVal;
+        }
 
         @Override
-        public void onResultReceived(CameraMetadataNative result,
+        public void onResultReceived(CameraMetadataInfo resultInfo,
                 CaptureResultExtras resultExtras, PhysicalCaptureResultInfo physicalResults[])
                 throws RemoteException {
             int requestId = resultExtras.getRequestId();
             long frameNumber = resultExtras.getFrameNumber();
-
-            if (DEBUG) {
-                Log.v(TAG, "Received result frame " + frameNumber + " for id "
-                        + requestId);
-            }
-
             synchronized(mInterfaceLock) {
                 if (mRemoteDevice == null) return; // Camera already closed
-
+                PhysicalCaptureResultInfo savedPhysicalResults[] = physicalResults;
+                CameraMetadataNative result;
+                if (resultInfo.getTag() == CameraMetadataInfo.fmqSize) {
+                    CameraMetadataNative fmqMetadata =
+                            new CameraMetadataNative(
+                                    nativeReadResultMetadata(mFMQReader, resultInfo.getFmqSize()));
+                    result = fmqMetadata;
+                } else {
+                    result = resultInfo.getMetadata();
+                }
+                physicalResults = readMetadata(savedPhysicalResults);
+                if (DEBUG) {
+                    Log.v(TAG, "Received result frame " + frameNumber + " for id "
+                            + requestId);
+                }
 
                 // Redirect device callback to the offline session in case we are in the middle
                 // of an offline switch
                 if (mOfflineSessionImpl != null) {
-                    mOfflineSessionImpl.getCallbacks().onResultReceived(result, resultExtras,
+                    CameraMetadataInfo resultInfoOffline = CameraMetadataInfo.metadata(result);
+                    mOfflineSessionImpl.getCallbacks().onResultReceived(resultInfoOffline,
+                            resultExtras,
                             physicalResults);
                     return;
                 }
@@ -2823,6 +2866,11 @@ public class CameraDeviceImpl extends CameraDevice
             mRemoteDevice.setCameraAudioRestriction(mode);
         }
     }
+
+    private static native long nativeCreateFMQReader(Parcel resultQueue);
+    //TODO: Investigate adding FastNative b/62791857
+    private static native long nativeReadResultMetadata(long ptr, long metadataSize);
+    private static native void nativeClose(long ptr);
 
     @Override
     public @CAMERA_AUDIO_RESTRICTION int getCameraAudioRestriction() throws CameraAccessException {
