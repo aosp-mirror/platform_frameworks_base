@@ -2544,8 +2544,11 @@ class MediaRouter2ServiceImpl {
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
             mSystemProvider =
-                    new SystemMediaRoute2Provider(
-                            service.mContext, UserHandle.of(userRecord.mUserId), looper);
+                    Flags.enableMirroringInMediaRouter2()
+                            ? new SystemMediaRoute2Provider2(
+                                    service.mContext, UserHandle.of(userRecord.mUserId), looper)
+                            : new SystemMediaRoute2Provider(
+                                    service.mContext, UserHandle.of(userRecord.mUserId), looper);
             mRouteProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);

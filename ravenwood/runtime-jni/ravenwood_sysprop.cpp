@@ -117,7 +117,7 @@ void __system_property_read_callback(const prop_info* pi,
 // ---- JNI ----
 
 static JavaVM* gVM = nullptr;
-static jclass gEnvController = nullptr;
+static jclass gRunnerState = nullptr;
 static jmethodID gCheckSystemPropertyAccess;
 
 static void reloadNativeLibrary(JNIEnv* env, jclass, jstring javaPath) {
@@ -128,11 +128,11 @@ static void reloadNativeLibrary(JNIEnv* env, jclass, jstring javaPath) {
 
 // Call back into Java code to check property access
 static void check_system_property_access(const char* key, bool write) {
-    if (gVM != nullptr && gEnvController != nullptr) {
+    if (gVM != nullptr && gRunnerState != nullptr) {
         JNIEnv* env;
         if (gVM->GetEnv((void**)&env, JNI_VERSION_1_4) >= 0) {
             ALOGI("%s access to system property '%s'", write ? "Write" : "Read", key);
-            env->CallStaticVoidMethod(gEnvController, gCheckSystemPropertyAccess,
+            env->CallStaticVoidMethod(gRunnerState, gCheckSystemPropertyAccess,
                                       env->NewStringUTF(key), write ? JNI_TRUE : JNI_FALSE);
             return;
         }
@@ -155,16 +155,29 @@ static jboolean setSystemProperty(JNIEnv* env, jclass, jstring javaKey, jstring 
     return property_set(key.c_str(), value.c_str()) ? JNI_TRUE : JNI_FALSE;
 }
 
-static void clearSystemProperties(JNIEnv*, jclass) {
+static jboolean removeSystemProperty(JNIEnv* env, jclass, jstring javaKey) {
     std::lock_guard lock(g_properties_lock);
-    g_properties.clear();
+
+    if (javaKey == nullptr) {
+        g_properties.clear();
+        return JNI_TRUE;
+    } else {
+        ScopedUtfChars key(env, javaKey);
+        auto it = g_properties.find(key);
+        if (it != g_properties.end()) {
+            g_properties.erase(it);
+            return JNI_TRUE;
+        } else {
+            return JNI_FALSE;
+        }
+    }
 }
 
 static const JNINativeMethod sMethods[] = {
         {"reloadNativeLibrary", "(Ljava/lang/String;)V", (void*)reloadNativeLibrary},
         {"getSystemProperty", "(Ljava/lang/String;)Ljava/lang/String;", (void*)getSystemProperty},
         {"setSystemProperty", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)setSystemProperty},
-        {"clearSystemProperties", "()V", (void*)clearSystemProperties},
+        {"removeSystemProperty", "(Ljava/lang/String;)Z", (void*)removeSystemProperty},
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
@@ -174,9 +187,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
     gVM = vm;
 
     // Fetch several references for future use
-    gEnvController = FindGlobalClassOrDie(env, kRuntimeEnvController);
+    gRunnerState = FindGlobalClassOrDie(env, kRunnerState);
     gCheckSystemPropertyAccess =
-            GetStaticMethodIDOrDie(env, gEnvController, "checkSystemPropertyAccess",
+            GetStaticMethodIDOrDie(env, gRunnerState, "checkSystemPropertyAccess",
                                    "(Ljava/lang/String;Z)V");
 
     // Expose raw property methods as JNI methods

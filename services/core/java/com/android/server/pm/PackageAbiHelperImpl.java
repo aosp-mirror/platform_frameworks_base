@@ -625,4 +625,20 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
         }
         return adjustedAbi;
     }
+
+    @Override
+    public int checkPackageAlignment(
+            AndroidPackage pkg,
+            String libraryRoot,
+            boolean nativeLibraryRootRequiresIsa,
+            String abiOverride) {
+        NativeLibraryHelper.Handle handle = null;
+        try {
+            handle = AndroidPackageUtils.createNativeLibraryHandle(pkg);
+            return NativeLibraryHelper.checkAlignmentForCompatMode(
+                            handle, libraryRoot, nativeLibraryRootRequiresIsa, abiOverride);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
