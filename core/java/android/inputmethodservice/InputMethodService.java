@@ -1199,6 +1199,11 @@ public class InputMethodService extends AbstractInputMethodService {
                     // when the stylus is not down.
                     mPrivOps.setHandwritingSurfaceNotTouchable(true);
                     break;
+                case MotionEvent.ACTION_OUTSIDE:
+                    // TODO(b/350047836): determine if there is use-case for simultaneous touch
+                    //  and stylus handwriting and we shouldn't finish for that.
+                    finishStylusHandwriting();
+                    break;
             }
         }
 
@@ -3207,6 +3212,7 @@ public class InputMethodService extends AbstractInputMethodService {
             Log.d(TAG, "Setting new handwriting region for stylus handwriting "
                     + handwritingRegion + " from last " + mLastHandwritingRegion);
         }
+        mPrivOps.setHandwritingTouchableRegion(handwritingRegion);
         mLastHandwritingRegion = handwritingRegion;
     }
 
