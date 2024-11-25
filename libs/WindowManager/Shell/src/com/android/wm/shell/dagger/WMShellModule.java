@@ -150,6 +150,8 @@ import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
+import com.android.wm.shell.windowdecor.common.viewhost.DefaultWindowDecorViewHostSupplier;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationPromoController;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController;
 import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel;
@@ -335,6 +337,13 @@ public abstract class WMShellModule {
     @Provides
     static AdditionalSystemViewContainer.Factory provideAdditionalSystemViewContainerFactory() {
         return new AdditionalSystemViewContainer.Factory();
+    }
+
+    @WMSingleton
+    @Provides
+    static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
+            @ShellMainThread @NonNull CoroutineScope mainScope) {
+        return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
 
     //
