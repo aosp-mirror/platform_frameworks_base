@@ -68,6 +68,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
+import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.testKosmos
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.awaitCancellation
@@ -115,7 +116,13 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
     private val Kosmos.initialSceneKey by Fixture { Scenes.Bouncer }
     private val Kosmos.sceneContainerConfig by Fixture {
         val navigationDistances = mapOf(Scenes.Lockscreen to 1, Scenes.Bouncer to 0)
-        SceneContainerConfig(sceneKeys, initialSceneKey, emptyList(), navigationDistances)
+        SceneContainerConfig(
+            sceneKeys,
+            initialSceneKey,
+            SceneContainerTransitions,
+            emptyList(),
+            navigationDistances,
+        )
     }
     private val view = mock<View>()
 
@@ -182,6 +189,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                                         Scenes.Bouncer to bouncerScene,
                                     ),
                                 initialSceneKey = Scenes.Bouncer,
+                                sceneTransitions = SceneContainerTransitions,
                                 overlayByKey = emptyMap(),
                                 dataSourceDelegator = kosmos.sceneDataSourceDelegator,
                                 qsSceneAdapter = { kosmos.fakeQsSceneAdapter },
