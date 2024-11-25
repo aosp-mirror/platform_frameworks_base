@@ -26,6 +26,7 @@ package android {
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field @FlaggedApi("android.app.smartspace.flags.access_smartspace") public static final String ACCESS_SMARTSPACE = "android.permission.ACCESS_SMARTSPACE";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
+    field @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled") public static final String ACCESS_TEXT_CLASSIFIER_BY_TYPE = "android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE";
     field public static final String ACCESS_TUNED_INFO = "android.permission.ACCESS_TUNED_INFO";
     field public static final String ACCESS_TV_DESCRAMBLER = "android.permission.ACCESS_TV_DESCRAMBLER";
     field public static final String ACCESS_TV_SHARED_FILTER = "android.permission.ACCESS_TV_SHARED_FILTER";
@@ -19289,6 +19290,20 @@ package android.view.inputmethod {
 
   public final class InputMethodManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfoAsUser(@NonNull android.os.UserHandle);
+  }
+
+}
+
+package android.view.textclassifier {
+
+  public final class TextClassificationManager {
+    method @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled") @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE) public android.view.textclassifier.TextClassifier getClassifier(int);
+  }
+
+  public interface TextClassifier {
+    field @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled") public static final int CLASSIFIER_TYPE_ANDROID_DEFAULT = 2; // 0x2
+    field @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled") public static final int CLASSIFIER_TYPE_DEVICE_DEFAULT = 1; // 0x1
+    field @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled") public static final int CLASSIFIER_TYPE_SELF_PROVIDED = 0; // 0x0
   }
 
 }

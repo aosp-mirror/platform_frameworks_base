@@ -992,6 +992,10 @@
     <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
 
+    <!-- Permission for TestClassifier tests to get access to classifier by type -->
+    <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
+        android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
