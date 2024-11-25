@@ -50,6 +50,7 @@ import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AssistContentRequester;
+import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -87,7 +88,6 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeKeyGestureHandler;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger;
-import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
@@ -1049,6 +1049,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopMixedTransitionHandler> desktopMixedTransitionHandler,
+            Optional<BackAnimationController> backAnimationController,
             ShellInit shellInit) {
         return desktopUserRepositories.flatMap(
                 repository ->
@@ -1059,6 +1060,7 @@ public abstract class WMShellModule {
                                         transitions,
                                         shellTaskOrganizer,
                                         desktopMixedTransitionHandler.get(),
+                                        backAnimationController.get(),
                                         shellInit)));
     }
 

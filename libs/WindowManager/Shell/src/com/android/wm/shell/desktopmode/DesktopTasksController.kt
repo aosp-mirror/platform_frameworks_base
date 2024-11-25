@@ -1777,16 +1777,6 @@ class DesktopTasksController(
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
             desktopTilingDecorViewModel.removeTaskIfTiled(task.displayId, task.taskId)
-        } else if (requestType == TRANSIT_CLOSE) {
-            // Handle closing tasks, tasks that are going to back are handled in
-            // [DesktopTasksTransitionObserver].
-            desktopMixedTransitionHandler.addPendingMixedTransition(
-                DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
-                    transition,
-                    task.taskId,
-                    taskRepository.getVisibleTaskCount(task.displayId) == 1,
-                )
-            )
         }
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
