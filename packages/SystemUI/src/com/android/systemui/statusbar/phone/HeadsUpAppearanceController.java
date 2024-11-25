@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
@@ -97,7 +98,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     @VisibleForTesting
     float mAppearFraction;
     private ExpandableNotificationRow mTrackedChild;
-    private boolean mShown;
+    private PinnedStatus mPinnedStatus = PinnedStatus.NotPinned;
     private final ViewClippingUtil.ClippingParameters mParentClippingParams =
             new ViewClippingUtil.ClippingParameters() {
                 @Override
@@ -224,21 +225,27 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         if (newEntry != previousEntry) {
             if (newEntry == null) {
                 // no heads up anymore, lets start the disappear animation
-                setShown(false);
+                setPinnedStatus(PinnedStatus.NotPinned);
             } else if (previousEntry == null) {
                 // We now have a headsUp and didn't have one before. Let's start the disappear
                 // animation
-                setShown(true);
+                setPinnedStatus(PinnedStatus.PinnedBySystem);
             }
-            mHeadsUpNotificationIconInteractor.setIsolatedIconNotificationKey(
-                    newEntry == null ? null : newEntry.getRepresentativeEntry().getKey());
+
+            String isolatedIconKey;
+            if (newEntry != null) {
+                isolatedIconKey = newEntry.getRepresentativeEntry().getKey();
+            } else {
+                isolatedIconKey = null;
+            }
+            mHeadsUpNotificationIconInteractor.setIsolatedIconNotificationKey(isolatedIconKey);
         }
     }
 
-    private void setShown(boolean isShown) {
-        if (mShown != isShown) {
-            mShown = isShown;
-            if (isShown) {
+    private void setPinnedStatus(PinnedStatus pinnedStatus) {
+        if (mPinnedStatus != pinnedStatus) {
+            mPinnedStatus = pinnedStatus;
+            if (pinnedStatus.isPinned()) {
                 updateParentClipping(false /* shouldClip */);
                 mView.setVisibility(View.VISIBLE);
                 show(mView);
@@ -322,8 +329,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     }
 
     @VisibleForTesting
-    public boolean isShown() {
-        return mShown;
+    public PinnedStatus getPinnedStatus() {
+        return mPinnedStatus;
     }
 
     /**
