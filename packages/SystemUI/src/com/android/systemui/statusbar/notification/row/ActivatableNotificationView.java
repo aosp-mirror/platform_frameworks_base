@@ -557,14 +557,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateAppearRect(ClipSide.BOTTOM);
     }
 
-    private float getInterpolatedAppearAnimationFraction() {
-
-        if (mAppearAnimationFraction >= 0) {
-            return mCurrentAppearInterpolator.getInterpolation(mAppearAnimationFraction);
-        }
-        return 1.0f;
-    }
-
     private void updateAppearAnimationAlpha() {
         updateAppearAnimationContentAlpha(
                 mAppearAnimationFraction,
@@ -632,16 +624,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void applyRoundnessAndInvalidate() {
         applyBackgroundRoundness(getTopCornerRadius(), getBottomCornerRadius());
         super.applyRoundnessAndInvalidate();
-    }
-
-    @Override
-    public float getTopCornerRadius() {
-        return super.getTopCornerRadius();
-    }
-
-    @Override
-    public float getBottomCornerRadius() {
-        return super.getBottomCornerRadius();
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {
