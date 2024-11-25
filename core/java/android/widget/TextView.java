@@ -10120,6 +10120,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     outAttrs.extras.putBoolean(
                             STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY, handwritingEnabled);
                 }
+                if (android.view.inputmethod.Flags.writingTools()) {
+                    // default to same behavior as isSuggestionsEnabled().
+                    outAttrs.setWritingToolsEnabled(isSuggestionsEnabled());
+                }
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);
                 gestures.add(SelectRangeGesture.class);
