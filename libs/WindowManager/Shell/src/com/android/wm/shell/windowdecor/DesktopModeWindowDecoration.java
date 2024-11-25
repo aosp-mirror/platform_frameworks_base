@@ -980,10 +980,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             relayoutParams.mInputFeatures
                     |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         }
-        if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ hasGlobalFocus)) {
-            relayoutParams.mShadowRadiusId = hasGlobalFocus
-                    ? R.dimen.freeform_decor_shadow_focused_thickness
-                    : R.dimen.freeform_decor_shadow_unfocused_thickness;
+        if (isAppHeader
+                && DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ hasGlobalFocus)) {
+            relayoutParams.mShadowRadius = hasGlobalFocus
+                    ? context.getResources().getDimensionPixelSize(
+                            R.dimen.freeform_decor_shadow_focused_thickness)
+                    : context.getResources().getDimensionPixelSize(
+                            R.dimen.freeform_decor_shadow_unfocused_thickness);
+        } else {
+            relayoutParams.mShadowRadius = INVALID_SHADOW_RADIUS;
         }
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
         relayoutParams.mSetTaskVisibilityPositionAndCrop = shouldSetTaskVisibilityPositionAndCrop;
