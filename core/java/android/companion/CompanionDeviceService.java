@@ -247,12 +247,14 @@ public abstract class CompanionDeviceService extends Service {
                 .detachSystemDataTransport(associationId);
     }
 
-    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Called by the system when an associated device is nearby or connected.
      *
      * @param associationInfo A record for the companion device.
+     * @deprecated use {@link #onDevicePresenceEvent(DevicePresenceEvent)}} instead.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @Deprecated
     @MainThread
     public void onDeviceAppeared(@NonNull AssociationInfo associationInfo) {
         if (!associationInfo.isSelfManaged()) {
@@ -260,12 +262,14 @@ public abstract class CompanionDeviceService extends Service {
         }
     }
 
-    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Called by the system when an associated device is out of range or disconnected.
      *
      * @param associationInfo A record for the companion device.
+     * @deprecated use {@link #onDevicePresenceEvent(DevicePresenceEvent)}} instead.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @Deprecated
     @MainThread
     public void onDeviceDisappeared(@NonNull AssociationInfo associationInfo) {
         if (!associationInfo.isSelfManaged()) {
