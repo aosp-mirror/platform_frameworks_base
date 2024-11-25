@@ -28,6 +28,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
@@ -112,7 +113,7 @@ constructor(
                 ActivityTransitionAnimator.Controller.fromView(
                     backgroundView,
                     InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                )
+                ),
             )
         }
     }
@@ -121,10 +122,8 @@ constructor(
         private val phoneIcon =
             Icon.Resource(
                 com.android.internal.R.drawable.ic_phone,
-                ContentDescription.Resource(
-                    R.string.ongoing_phone_call_content_description,
-                ),
+                ContentDescription.Resource(R.string.ongoing_phone_call_content_description),
             )
-        private const val TAG = "CallVM"
+        private val TAG = "CallVM".pad()
     }
 }

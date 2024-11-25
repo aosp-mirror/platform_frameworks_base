@@ -20,6 +20,7 @@ import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
 import static android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO;
 import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 import static android.util.proto.ProtoInputStream.NO_MORE_FIELDS;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
@@ -54,6 +55,10 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
+import android.content.om.FabricatedOverlay;
+import android.content.om.OverlayInfo;
+import android.content.om.OverlayManager;
+import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
@@ -1293,7 +1298,13 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mIntentId != -1 || mItems == null) {
+            if (mItems == null) {
+                // Null item indicates adapter conversion took place, so the URIs in cached items
+                // need to be validated.
+                RemoteCollectionItems cachedItems = mCollectionCache.getItemsForId(mIntentId);
+                if (cachedItems != null) {
+                    cachedItems.visitUris(visitor);
+                }
                 return;
             }
 
@@ -1559,6 +1570,16 @@ public class RemoteViews implements Parcelable, Filter {
             final Context context = ActivityThread.currentApplication();
 
             final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
+            String contextPackageName = context.getPackageName();
+            ComponentName intentComponent = intent.getComponent();
+            if (contextPackageName != null
+                    && intentComponent != null
+                    && (!contextPackageName.equals(intentComponent.getPackageName()))) {
+                // We shouldn't allow for connections to other packages
+                result.complete(new RemoteCollectionItems.Builder().build());
+                return result;
+            }
+
             context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
                     result.defaultExecutor(), new ServiceConnection() {
                         @Override
@@ -8468,8 +8489,11 @@ public class RemoteViews implements Parcelable, Filter {
             }
             try {
                 LoadedApk.checkAndUpdateApkPaths(mApplication);
-                return context.createApplicationContext(mApplication,
+                Context applicationContext = context.createApplicationContext(mApplication,
                         Context.CONTEXT_RESTRICTED);
+                // Get the correct apk paths while maintaining the current context's configuration.
+                return applicationContext.createConfigurationContext(
+                        context.getResources().getConfiguration());
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + mApplication.packageName + " not found");
             }
@@ -8547,8 +8571,6 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Object allowing the modification of a context to overload the system's dynamic colors.
      *
-     * Only colors from {@link android.R.color#system_accent1_0} to
-     * {@link android.R.color#system_neutral2_1000} can be overloaded.
      * @hide
      */
     public static final class ColorResources {
@@ -8558,6 +8580,9 @@ public class RemoteViews implements Parcelable, Filter {
             android.R.color.system_error_1000;
         // Size, in bytes, of an entry in the array of colors in an ARSC file.
         private static final int ARSC_ENTRY_SIZE = 16;
+
+        private static final String OVERLAY_NAME = "remote_views_color_resources";
+        private static final String OVERLAY_TARGET_PACKAGE_NAME = "android";
 
         private final ResourcesLoader mLoader;
         private final SparseIntArray mColorMapping;
@@ -8629,7 +8654,11 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         /**
-         *  Adds a resource loader for theme colors to the given context.
+         *  Adds a resource loader for theme colors to the given context. The loader is created
+         *  based on resource files created at build time.
+         *
+         * <p>Only colors from {@link android.R.color#system_accent1_0} to
+         * {@link android.R.color#system_error_1000} can be overloaded.</p>
          *
          * @param context Context of the view hosting the widget.
          * @param colorMapping Mapping of resources to color values.
@@ -8664,6 +8693,57 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             } catch (Exception ex) {
                 Log.e(LOG_TAG, "Failed to setup the context for theme colors", ex);
+            }
+            return null;
+        }
+
+        /**
+         *  Adds a resource loader for theme colors to the given context. The loader is created
+         *  using fabricated runtime resource overlay (FRRO).
+         *
+         *  <p>The created class can overlay any color resources, private or public, at runtime.</p>
+         *
+         * @param context Context of the view hosting the widget.
+         * @param colorMapping Mapping of resources to color values.
+         *
+         * @hide
+         */
+        @Nullable
+        public static ColorResources createWithOverlay(Context context,
+                SparseIntArray colorMapping) {
+            try {
+                String owningPackage = context.getPackageName();
+                FabricatedOverlay overlay = new FabricatedOverlay.Builder(owningPackage,
+                        OVERLAY_NAME, OVERLAY_TARGET_PACKAGE_NAME).build();
+
+                for (int i = 0; i < colorMapping.size(); i++) {
+                    overlay.setResourceValue(
+                            context.getResources().getResourceName(colorMapping.keyAt(i)),
+                            TYPE_INT_COLOR_ARGB8, colorMapping.valueAt(i), null);
+                }
+                OverlayManager overlayManager = context.getSystemService(OverlayManager.class);
+                OverlayManagerTransaction.Builder transaction =
+                        new OverlayManagerTransaction.Builder()
+                                .registerFabricatedOverlay(overlay)
+                                .setSelfTargeting(true);
+                overlayManager.commit(transaction.build());
+
+                OverlayInfo overlayInfo =
+                        overlayManager.getOverlayInfosForTarget(OVERLAY_TARGET_PACKAGE_NAME)
+                                .stream()
+                                .filter(info -> TextUtils.equals(info.overlayName, OVERLAY_NAME)
+                                        && TextUtils.equals(info.packageName, owningPackage))
+                                .findFirst()
+                                .orElse(null);
+                if (overlayInfo == null) {
+                    Log.e(LOG_TAG, "Failed to get overlay info ", new Throwable());
+                    return null;
+                }
+                ResourcesLoader colorsLoader = new ResourcesLoader();
+                colorsLoader.addProvider(ResourcesProvider.loadOverlay(overlayInfo));
+                return new ColorResources(colorsLoader, colorMapping.clone());
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to add theme color overlay into loader", e);
             }
             return null;
         }
@@ -9259,7 +9339,11 @@ public class RemoteViews implements Parcelable, Filter {
         Set<Integer> bitmapIdSet = getBitmapIdsUsedByActions(new HashSet<>());
         int result = 0;
         for (int bitmapId: bitmapIdSet) {
-            result += mBitmapCache.getBitmapForId(bitmapId).getAllocationByteCount();
+            Bitmap currentBitmap = mBitmapCache.getBitmapForId(bitmapId);
+            if (currentBitmap == null) {
+                continue;
+            }
+            result += currentBitmap.getAllocationByteCount();
         }
 
         return result;

@@ -21,6 +21,7 @@ import android.animation.RectEvaluator
 import android.animation.ValueAnimator
 import android.graphics.Rect
 import android.os.IBinder
+import android.view.Choreographer
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
@@ -118,6 +119,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             initialBounds = null
                             boundsAnimator = null
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW)
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
                         }
                     )
@@ -126,6 +128,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                         tx.setPosition(leash, rect.left.toFloat(), rect.top.toFloat())
                             .setWindowCrop(leash, rect.width(), rect.height())
                             .show(leash)
+                            .setFrameTimeline(Choreographer.getInstance().getVsyncId())
                         onTaskResizeAnimationListener.onBoundsChange(taskId, tx, rect)
                     }
                     start()

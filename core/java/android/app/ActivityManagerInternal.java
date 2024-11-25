@@ -1150,6 +1150,33 @@ public abstract class ActivityManagerInternal {
     public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
 
     /**
+     * Notifies that a media foreground service associated with a media session has
+     * transitioned to a "user-disengaged" state.
+     * Upon receiving this notification, service may be removed from the foreground state. It
+     * should only be called by {@link com.android.server.media.MediaSessionService}
+     *
+     * @param packageName The package name of the app running the media foreground service.
+     * @param userId The user ID associated with the foreground service.
+     * @param notificationId The ID of the media notification associated with the foreground
+     *                      service.
+     */
+    public abstract void notifyInactiveMediaForegroundService(@NonNull String packageName,
+            @UserIdInt int userId, int notificationId);
+
+    /**
+     * Notifies that a media service associated with a media session has transitioned to a
+     * "user-engaged" state. Upon receiving this notification, service will transition to the
+     * foreground state. It should only be called by
+     * {@link com.android.server.media.MediaSessionService}
+     *
+     * @param packageName The package name of the app running the media service.
+     * @param userId The user ID associated with the service.
+     * @param notificationId The ID of the media notification associated with the service.
+     */
+    public abstract void notifyActiveMediaForegroundService(@NonNull String packageName,
+            @UserIdInt int userId, int notificationId);
+
+    /**
      * Same as {@link android.app.IActivityManager#startProfile(int userId)}, but it would succeed
      * even if the profile is disabled - it should only be called by
      * {@link com.android.server.devicepolicy.DevicePolicyManagerService} when starting a profile

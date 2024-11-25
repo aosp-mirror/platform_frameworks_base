@@ -17,11 +17,13 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.IntArray;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -39,16 +41,26 @@ public final class SystemSelectionSpecifier implements Parcelable {
      * The radio channels to scan as defined in 3GPP TS 25.101 and 36.101.
      * Maximum length of the vector is 32.
      */
-    @NonNull private IntArray mEarfcs;
+    @NonNull private IntArray mEarfcns;
+
+    /* The list of satellites configured for the current location */
+    @Nullable
+    private SatelliteInfo[] mSatelliteInfos;
+
+    /* The list of tag IDs associated with the current location */
+    @Nullable private IntArray mTagIds;
 
     /**
      * @hide
      */
     public SystemSelectionSpecifier(@NonNull String mccmnc, @NonNull IntArray bands,
-            @NonNull IntArray earfcs) {
+            @NonNull IntArray earfcns, @Nullable SatelliteInfo[] satelliteInfos,
+            @Nullable IntArray tagIds) {
         mMccMnc = mccmnc;
         mBands = bands;
-        mEarfcs = earfcs;
+        mEarfcns = earfcns;
+        mSatelliteInfos = satelliteInfos;
+        mTagIds = tagIds;
     }
 
     private SystemSelectionSpecifier(Parcel in) {
@@ -74,10 +86,21 @@ public final class SystemSelectionSpecifier implements Parcelable {
             out.writeInt(0);
         }
 
-        if (mEarfcs != null && mEarfcs.size() > 0) {
-            out.writeInt(mEarfcs.size());
-            for (int i = 0; i < mEarfcs.size(); i++) {
-                out.writeInt(mEarfcs.get(i));
+        if (mEarfcns != null && mEarfcns.size() > 0) {
+            out.writeInt(mEarfcns.size());
+            for (int i = 0; i < mEarfcns.size(); i++) {
+                out.writeInt(mEarfcns.get(i));
+            }
+        } else {
+            out.writeInt(0);
+        }
+
+        out.writeTypedArray(mSatelliteInfos, flags);
+
+        if (mTagIds != null) {
+            out.writeInt(mTagIds.size());
+            for (int i = 0; i < mTagIds.size(); i++) {
+                out.writeInt(mTagIds.get(i));
             }
         } else {
             out.writeInt(0);
@@ -115,14 +138,35 @@ public final class SystemSelectionSpecifier implements Parcelable {
         }
 
         sb.append("earfcs:");
-        if (mEarfcs != null && mEarfcs.size() > 0) {
-            for (int i = 0; i < mEarfcs.size(); i++) {
-                sb.append(mEarfcs.get(i));
+        if (mEarfcns != null && mEarfcns.size() > 0) {
+            for (int i = 0; i < mEarfcns.size(); i++) {
+                sb.append(mEarfcns.get(i));
                 sb.append(",");
             }
         } else {
             sb.append("none");
         }
+
+        sb.append("mSatelliteInfos:");
+        if (mSatelliteInfos != null && mSatelliteInfos.length > 0) {
+            for (SatelliteInfo satelliteInfo : mSatelliteInfos) {
+                sb.append(satelliteInfo);
+                sb.append(",");
+            }
+        } else {
+            sb.append("none");
+        }
+
+        sb.append("mTagIds:");
+        if (mTagIds != null && mTagIds.size() > 0) {
+            for (int i = 0; i < mTagIds.size(); i++) {
+                sb.append(mTagIds.get(i));
+                sb.append(",");
+            }
+        } else {
+            sb.append("none");
+        }
+
         return sb.toString();
     }
 
@@ -133,12 +177,15 @@ public final class SystemSelectionSpecifier implements Parcelable {
         SystemSelectionSpecifier that = (SystemSelectionSpecifier) o;
         return Objects.equals(mMccMnc, that.mMccMnc)
                 && Objects.equals(mBands, that.mBands)
-                && Objects.equals(mEarfcs, that.mEarfcs);
+                && Objects.equals(mEarfcns, that.mEarfcns)
+                && (mSatelliteInfos == null ? that.mSatelliteInfos == null : Arrays.equals(
+                mSatelliteInfos, that.mSatelliteInfos))
+                && Objects.equals(mTagIds, that.mTagIds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMccMnc, mBands, mEarfcs);
+        return Objects.hash(mMccMnc, mBands, mEarfcns);
     }
 
     @NonNull public String getMccMnc() {
@@ -149,8 +196,18 @@ public final class SystemSelectionSpecifier implements Parcelable {
         return mBands;
     }
 
-    @NonNull public IntArray getEarfcs() {
-        return mEarfcs;
+    @NonNull public IntArray getEarfcns() {
+        return mEarfcns;
+    }
+
+    @NonNull
+    public SatelliteInfo[] getSatelliteInfos() {
+        return mSatelliteInfos;
+    }
+
+    @NonNull
+    public IntArray getTagIds() {
+        return mTagIds;
     }
 
     private void readFromParcel(Parcel in) {
@@ -164,11 +221,20 @@ public final class SystemSelectionSpecifier implements Parcelable {
             }
         }
 
-        mEarfcs = new IntArray();
-        int numEarfcs = in.readInt();
-        if (numEarfcs > 0) {
-            for (int i = 0; i < numEarfcs; i++) {
-                mEarfcs.add(in.readInt());
+        mEarfcns = new IntArray();
+        int numEarfcns = in.readInt();
+        if (numEarfcns > 0) {
+            for (int i = 0; i < numEarfcns; i++) {
+                mEarfcns.add(in.readInt());
+            }
+        }
+
+        mSatelliteInfos = in.createTypedArray(SatelliteInfo.CREATOR);
+
+        int numTagIds = in.readInt();
+        if (numTagIds > 0) {
+            for (int i = 0; i < numTagIds; i++) {
+                mTagIds.add(in.readInt());
             }
         }
     }

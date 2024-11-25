@@ -16,7 +16,7 @@
 
 package com.android.compose.animation.scene.content
 
-import androidx.compose.foundation.gestures.Orientation
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -72,6 +72,7 @@ internal sealed class Content(
     var targetSize by mutableStateOf(IntSize.Zero)
     var userActions by mutableStateOf(actions)
 
+    @SuppressLint("NotConstructor")
     @Composable
     fun Content(modifier: Modifier = Modifier) {
         Box(
@@ -151,8 +152,7 @@ internal class ContentScopeImpl(
         isExternalOverscrollGesture: () -> Boolean,
     ): Modifier {
         return nestedScrollToScene(
-            layoutImpl = layoutImpl,
-            orientation = Orientation.Horizontal,
+            draggableHandler = layoutImpl.horizontalDraggableHandler,
             topOrLeftBehavior = leftBehavior,
             bottomOrRightBehavior = rightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
@@ -165,8 +165,7 @@ internal class ContentScopeImpl(
         isExternalOverscrollGesture: () -> Boolean,
     ): Modifier {
         return nestedScrollToScene(
-            layoutImpl = layoutImpl,
-            orientation = Orientation.Vertical,
+            draggableHandler = layoutImpl.verticalDraggableHandler,
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,

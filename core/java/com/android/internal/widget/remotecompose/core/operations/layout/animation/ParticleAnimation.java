@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -24,15 +26,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ParticleAnimation {
-    HashMap<Integer, ArrayList<Particle>> mAllParticles = new HashMap<>();
+    @NonNull HashMap<Integer, ArrayList<Particle>> mAllParticles = new HashMap<>();
 
-    PaintBundle mPaint = new PaintBundle();
+    @NonNull PaintBundle mPaint = new PaintBundle();
 
     public void animate(
-            PaintContext context,
-            Component component,
-            ComponentMeasure start,
-            ComponentMeasure end,
+            @NonNull PaintContext context,
+            @NonNull Component component,
+            @NonNull ComponentMeasure start,
+            @NonNull ComponentMeasure end,
             float progress) {
         ArrayList<Particle> particles = mAllParticles.get(component.getComponentId());
         if (particles == null) {

@@ -63,6 +63,7 @@ import android.hardware.camera2.params.OisSample;
 import android.hardware.camera2.params.RecommendedStreamConfiguration;
 import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.ReprocessFormatsMap;
+import android.hardware.camera2.params.SharedSessionConfiguration;
 import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.params.StreamConfigurationDuration;
 import android.hardware.camera2.params.StreamConfigurationMap;
@@ -390,6 +391,18 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     /**
+     * Take ownership of native metadata
+     */
+    public CameraMetadataNative(long metadataPtr) {
+        super();
+        mMetadataPtr = metadataPtr;
+        if (mMetadataPtr == 0) {
+            throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
+        }
+        updateNativeAllocation();
+    }
+
+    /**
      * Move the contents from {@code other} into a new camera metadata instance.</p>
      *
      * <p>After this call, {@code other} will become empty.</p>
@@ -437,7 +450,7 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public synchronized void writeToParcel(Parcel dest, int flags) {
         nativeWriteToParcel(dest, mMetadataPtr);
     }
 
@@ -479,7 +492,7 @@ public class CameraMetadataNative implements Parcelable {
         return getBase(key);
     }
 
-    public void readFromParcel(Parcel in) {
+    public synchronized void readFromParcel(Parcel in) {
         nativeReadFromParcel(in, mMetadataPtr);
         updateNativeAllocation();
     }
@@ -592,28 +605,33 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     private <T> T getBase(Key<T> key) {
-        int tag;
-        if (key.hasTag()) {
-            tag = key.getTag();
-        } else {
-            tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.getName());
-            key.cacheTag(tag);
-        }
-        byte[] values = readValues(tag);
-        if (values == null) {
-            // If the key returns null, use the fallback key if exists.
-            // This is to support old key names for the newly published keys.
-            if (key.mFallbackName == null) {
-                return null;
+        int tag, nativeType;
+        byte[] values = null;
+        synchronized (this) {
+            if (key.hasTag()) {
+                tag = key.getTag();
+            } else {
+                tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.getName());
+                key.cacheTag(tag);
             }
-            tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.mFallbackName);
             values = readValues(tag);
             if (values == null) {
-                return null;
+                // If the key returns null, use the fallback key if exists.
+                // This is to support old key names for the newly published keys.
+                if (key.mFallbackName == null) {
+                    return null;
+                }
+                tag = nativeGetTagFromKeyLocal(mMetadataPtr, key.mFallbackName);
+                values = readValues(tag);
+                if (values == null) {
+                    return null;
+                }
             }
-        }
 
-        int nativeType = nativeGetTypeFromTagLocal(mMetadataPtr, tag);
+            nativeType = nativeGetTypeFromTagLocal(mMetadataPtr, tag);
+        }
+        // This block of code doesn't need to be synchronized since we aren't writing or reading
+        // from the metadata buffer for this instance of CameraMetadataNative.
         Marshaler<T> marshaler = getMarshalerForKey(key, nativeType);
         ByteBuffer buffer = ByteBuffer.wrap(values).order(ByteOrder.nativeOrder());
         return marshaler.unmarshal(buffer);
@@ -859,6 +877,15 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getLensIntrinsicSamples();
+                    }
+                });
+        sGetCommandMap.put(
+                CameraCharacteristics.SHARED_SESSION_CONFIGURATION.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getSharedSessionConfiguration();
                     }
                 });
     }
@@ -1385,6 +1412,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             /*highspeedvideoconfigurations*/ null,
                             /*inputoutputformatsmap*/ null, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1402,6 +1432,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             highSpeedVideoConfigurations,
                             /*inputoutputformatsmap*/ null, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1419,6 +1452,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRcconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             /*highSpeedVideoConfigurations*/ null,
                             inputOutputFormatsMap, listHighResolution, supportsPrivate[i]);
                     break;
@@ -1436,6 +1472,9 @@ public class CameraMetadataNative implements Parcelable {
                             /*jpegRconfiguration*/ null,
                             /*jpegRminduration*/ null,
                             /*jpegRstallduration*/ null,
+                            /*heicUltraHDRcconfiguration*/ null,
+                            /*heicUltraHDRminduration*/ null,
+                            /*heicUltraHDRstallduration*/ null,
                             /*highSpeedVideoConfigurations*/ null,
                             /*inputOutputFormatsMap*/ null, listHighResolution, supportsPrivate[i]);
             }
@@ -1607,6 +1646,17 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS);
         StreamConfigurationDuration[] heicStallDurations = getBase(
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_STALL_DURATIONS);
+        StreamConfiguration[] heicUltraHDRConfigurations = null;
+        StreamConfigurationDuration[] heicUltraHDRMinFrameDurations = null;
+        StreamConfigurationDuration[] heicUltraHDRStallDurations = null;
+        if (Flags.cameraHeifGainmap()) {
+            heicUltraHDRConfigurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STREAM_CONFIGURATIONS);
+            heicUltraHDRMinFrameDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_MIN_FRAME_DURATIONS);
+            heicUltraHDRStallDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STALL_DURATIONS);
+        }
         StreamConfiguration[] jpegRConfigurations = getBase(
                 CameraCharacteristics.JPEGR_AVAILABLE_JPEG_R_STREAM_CONFIGURATIONS);
         StreamConfigurationDuration[] jpegRMinFrameDurations = getBase(
@@ -1625,8 +1675,25 @@ public class CameraMetadataNative implements Parcelable {
                 dynamicDepthStallDurations, heicConfigurations,
                 heicMinFrameDurations, heicStallDurations,
                 jpegRConfigurations, jpegRMinFrameDurations, jpegRStallDurations,
-                highSpeedVideoConfigurations, inputOutputFormatsMap,
+                heicUltraHDRConfigurations, heicUltraHDRMinFrameDurations,
+                heicUltraHDRStallDurations, highSpeedVideoConfigurations, inputOutputFormatsMap,
                 listHighResolution);
+    }
+
+    private SharedSessionConfiguration getSharedSessionConfiguration() {
+        if (!Flags.cameraMultiClient()) {
+            return null;
+        }
+        Integer sharedSessionColorSpace = getBase(
+                CameraCharacteristics.SHARED_SESSION_COLOR_SPACE);
+        long[] sharedOutputConfigurations = getBase(
+                CameraCharacteristics.SHARED_SESSION_OUTPUT_CONFIGURATIONS);
+
+        if ((sharedSessionColorSpace == null) || (sharedOutputConfigurations == null)) {
+            return null;
+        }
+
+        return new SharedSessionConfiguration(sharedSessionColorSpace, sharedOutputConfigurations);
     }
 
     private StreamConfigurationMap getStreamConfigurationMapMaximumResolution() {
@@ -1662,6 +1729,17 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] heicStallDurations = getBase(
                 CameraCharacteristics.HEIC_AVAILABLE_HEIC_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        StreamConfiguration[] heicUltraHDRConfigurations = null;
+        StreamConfigurationDuration[] heicUltraHDRMinFrameDurations = null;
+        StreamConfigurationDuration[] heicUltraHDRStallDurations = null;
+        if (Flags.cameraHeifGainmap()) {
+            heicUltraHDRConfigurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
+            heicUltraHDRMinFrameDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
+            heicUltraHDRStallDurations = getBase(
+                    CameraCharacteristics.HEIC_AVAILABLE_HEIC_ULTRA_HDR_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        }
         StreamConfiguration[] jpegRConfigurations = getBase(
                 CameraCharacteristics.JPEGR_AVAILABLE_JPEG_R_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] jpegRMinFrameDurations = getBase(
@@ -1681,7 +1759,8 @@ public class CameraMetadataNative implements Parcelable {
                 dynamicDepthStallDurations, heicConfigurations,
                 heicMinFrameDurations, heicStallDurations,
                 jpegRConfigurations, jpegRMinFrameDurations, jpegRStallDurations,
-                highSpeedVideoConfigurations, inputOutputFormatsMap,
+                heicUltraHDRConfigurations, heicUltraHDRMinFrameDurations,
+                heicUltraHDRStallDurations, highSpeedVideoConfigurations, inputOutputFormatsMap,
                 listHighResolution, false);
     }
 
@@ -1909,8 +1988,12 @@ public class CameraMetadataNative implements Parcelable {
         setBase(key.getNativeKey(), value);
     }
 
-    private <T> void setBase(Key<T> key, T value) {
-        int tag;
+    // The whole method needs to be synchronized since we're making
+    // multiple calls to the native layer. From one call to the other (within setBase)
+    // we expect the metadata's properties such as vendor id etc to
+    // stay the same and as a result the whole method should be synchronized for safety.
+    private synchronized <T> void setBase(Key<T> key, T value) {
+        int tag, nativeType;
         if (key.hasTag()) {
             tag = key.getTag();
         } else {
@@ -1923,7 +2006,7 @@ public class CameraMetadataNative implements Parcelable {
             return;
         } // else update the entry to a new value
 
-        int nativeType = nativeGetTypeFromTagLocal(mMetadataPtr, tag);
+        nativeType = nativeGetTypeFromTagLocal(mMetadataPtr, tag);
         Marshaler<T> marshaler = getMarshalerForKey(key, nativeType);
         int size = marshaler.calculateMarshalSize(value);
 
@@ -2126,7 +2209,7 @@ public class CameraMetadataNative implements Parcelable {
         return true;
     }
 
-    private void updateNativeAllocation() {
+    private synchronized void updateNativeAllocation() {
         long currentBufferSize = nativeGetBufferSize(mMetadataPtr);
 
         if (currentBufferSize != mBufferSize) {
@@ -2209,6 +2292,11 @@ public class CameraMetadataNative implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mMetadataPtr; // native std::shared_ptr<CameraMetadata>*
 
+    // FastNative doesn't work with synchronized methods and we can do synchronization
+    // wherever needed in the java layer (caller). At some places in java such as
+    // setBase() / getBase(), we do need to synchronize the whole method, so leaving
+    // synchronized out for these native methods.
+
     @FastNative
     private static native long nativeAllocate();
     @FastNative
@@ -2218,28 +2306,41 @@ public class CameraMetadataNative implements Parcelable {
 
     @FastNative
     private static native void nativeUpdate(long dst, long src);
-    private static synchronized native void nativeWriteToParcel(Parcel dest, long ptr);
-    private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
-    private static synchronized native void nativeSwap(long ptr, long otherPtr)
+    @FastNative
+    private static native void nativeWriteToParcel(Parcel dest, long ptr);
+    @FastNative
+    private static native void nativeReadFromParcel(Parcel source, long ptr);
+    @FastNative
+    private static native void nativeSwap(long ptr, long otherPtr)
             throws NullPointerException;
     @FastNative
     private static native void nativeSetVendorId(long ptr, long vendorId);
-    private static synchronized native void nativeClose(long ptr);
-    private static synchronized native boolean nativeIsEmpty(long ptr);
-    private static synchronized native int nativeGetEntryCount(long ptr);
-    private static synchronized native long nativeGetBufferSize(long ptr);
+    @FastNative
+    private static native void nativeClose(long ptr);
+    @FastNative
+    private static native boolean nativeIsEmpty(long ptr);
+    @FastNative
+    private static native int nativeGetEntryCount(long ptr);
+    @FastNative
+    private static native long nativeGetBufferSize(long ptr);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static synchronized native byte[] nativeReadValues(int tag, long ptr);
-    private static synchronized native void nativeWriteValues(int tag, byte[] src, long ptr);
-    private static synchronized native void nativeDump(long ptr) throws IOException; // dump to LOGD
+    @FastNative
+    private static native byte[] nativeReadValues(int tag, long ptr);
+    @FastNative
+    private static native void nativeWriteValues(int tag, byte[] src, long ptr);
+    @FastNative
+    private static native void nativeDump(long ptr) throws IOException; // dump to LOGD
 
-    private static synchronized native ArrayList nativeGetAllVendorKeys(long ptr, Class keyClass);
+    @FastNative
+    private static native ArrayList nativeGetAllVendorKeys(long ptr, Class keyClass);
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static synchronized native int nativeGetTagFromKeyLocal(long ptr, String keyName)
+    @FastNative
+    private static native int nativeGetTagFromKeyLocal(long ptr, String keyName)
             throws IllegalArgumentException;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static synchronized native int nativeGetTypeFromTagLocal(long ptr, int tag)
+    @FastNative
+    private static native int nativeGetTypeFromTagLocal(long ptr, int tag)
             throws IllegalArgumentException;
     @FastNative
     private static native int nativeGetTagFromKey(String keyName, long vendorId)
@@ -2257,7 +2358,7 @@ public class CameraMetadataNative implements Parcelable {
      * @throws NullPointerException if other was null
      * @hide
      */
-    public void swap(CameraMetadataNative other) {
+    public synchronized void swap(CameraMetadataNative other) {
         nativeSwap(mMetadataPtr, other.mMetadataPtr);
         mCameraId = other.mCameraId;
         mHasMandatoryConcurrentStreams = other.mHasMandatoryConcurrentStreams;
@@ -2272,14 +2373,14 @@ public class CameraMetadataNative implements Parcelable {
      *
      * @hide
      */
-    public void setVendorId(long vendorId) {
+    public synchronized void setVendorId(long vendorId) {
         nativeSetVendorId(mMetadataPtr, vendorId);
     }
 
     /**
      * @hide
      */
-    public int getEntryCount() {
+    public synchronized int getEntryCount() {
         return nativeGetEntryCount(mMetadataPtr);
     }
 
@@ -2288,7 +2389,7 @@ public class CameraMetadataNative implements Parcelable {
      *
      * @hide
      */
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return nativeIsEmpty(mMetadataPtr);
     }
 
@@ -2307,7 +2408,7 @@ public class CameraMetadataNative implements Parcelable {
      *
      * @hide
      */
-    public <K>  ArrayList<K> getAllVendorKeys(Class<K> keyClass) {
+    public synchronized <K> ArrayList<K> getAllVendorKeys(Class<K> keyClass) {
         if (keyClass == null) {
             throw new NullPointerException();
         }
@@ -2362,7 +2463,7 @@ public class CameraMetadataNative implements Parcelable {
      *
      * @hide
      */
-    public void writeValues(int tag, byte[] src) {
+    public synchronized void writeValues(int tag, byte[] src) {
         nativeWriteValues(tag, src, mMetadataPtr);
     }
 
@@ -2377,7 +2478,7 @@ public class CameraMetadataNative implements Parcelable {
      * @return {@code null} if there were 0 entries for this tag, a byte[] otherwise.
      * @hide
      */
-    public byte[] readValues(int tag) {
+    public synchronized byte[] readValues(int tag) {
         // TODO: Optimization. Native code returns a ByteBuffer instead.
         return nativeReadValues(tag, mMetadataPtr);
     }
@@ -2390,7 +2491,7 @@ public class CameraMetadataNative implements Parcelable {
      *
      * @hide
      */
-    public void dumpToLog() {
+    public synchronized void dumpToLog() {
         try {
             nativeDump(mMetadataPtr);
         } catch (IOException e) {

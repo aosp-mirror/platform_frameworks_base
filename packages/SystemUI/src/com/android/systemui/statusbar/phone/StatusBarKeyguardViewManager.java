@@ -520,6 +520,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mListenForCanShowAlternateBouncer.cancel(null);
         }
         mListenForCanShowAlternateBouncer = null;
+
         // Collector that keeps the AlternateBouncerInteractor#canShowAlternateBouncer flow hot.
         mListenForCanShowAlternateBouncer = mJavaAdapter.alwaysCollectFlow(
                 mAlternateBouncerInteractor.getCanShowAlternateBouncer(),
@@ -568,6 +569,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void consumeCanShowAlternateBouncer(boolean canShow) {
+        if (SceneContainerFlag.isEnabled()) {
+            // When the scene framework is enabled, the alternative bouncer is hidden from the scene
+            // framework logic so there's no need for this logic here.
+            return;
+        }
+
         // Hack: this is required to fix issues where
         // KeyguardBouncerRepository#alternateBouncerVisible state is incorrectly set and then never
         // reset. This is caused by usages of show()/forceShow() that only read this flow to set the

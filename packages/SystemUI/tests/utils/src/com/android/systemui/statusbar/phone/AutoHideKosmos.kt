@@ -16,9 +16,49 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.content.Context
+import android.os.Handler
+import android.view.Display
+import android.view.IWindowManager
+import com.android.systemui.display.data.repository.displayRepository
+import com.android.systemui.display.data.repository.fakeDisplayWindowPropertiesRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.kosmos.applicationCoroutineScope
+import org.mockito.Mockito.mock
 
-val Kosmos.mockAutoHideController by Kosmos.Fixture { mock<AutoHideController>() }
+val Kosmos.mockAutoHideController: AutoHideController by
+    Kosmos.Fixture { mock(AutoHideController::class.java) }
 
-var Kosmos.autoHideController by Kosmos.Fixture { mockAutoHideController }
+val Kosmos.fakeAutoHideControllerFactory by Kosmos.Fixture { FakeAutoHideControllerFactory() }
+
+val Kosmos.multiDisplayAutoHideControllerStore by
+    Kosmos.Fixture {
+        MultiDisplayAutoHideControllerStore(
+            applicationCoroutineScope,
+            displayRepository,
+            fakeDisplayWindowPropertiesRepository,
+            fakeAutoHideControllerFactory,
+        )
+    }
+
+val Kosmos.fakeAutoHideControllerStore by Kosmos.Fixture { FakeAutoHideControllerStore() }
+
+class FakeAutoHideControllerFactory :
+    AutoHideControllerImpl.Factory(mock(Handler::class.java), mock(IWindowManager::class.java)) {
+
+    override fun create(context: Context): AutoHideControllerImpl {
+        return mock(AutoHideControllerImpl::class.java)
+    }
+}
+
+class FakeAutoHideControllerStore : AutoHideControllerStore {
+
+    private val perDisplayMocks = mutableMapOf<Int, AutoHideController>()
+
+    override val defaultDisplay: AutoHideController
+        get() = forDisplay(Display.DEFAULT_DISPLAY)
+
+    override fun forDisplay(displayId: Int): AutoHideController {
+        return perDisplayMocks.computeIfAbsent(displayId) { mock(AutoHideController::class.java) }
+    }
+}

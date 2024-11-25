@@ -30,9 +30,11 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.accessibility.Flags.FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS;
 import static android.view.accessibility.Flags.FLAG_SUPPLEMENTAL_DESCRIPTION;
 import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
 import static android.view.accessibility.Flags.supplementalDescription;
+import static android.view.accessibility.Flags.supportMultipleLabeledby;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -42,6 +44,7 @@ import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_H
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.calculateBoundsInParentFromBoundsInScreen;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateAnimationBugfix25q1;
@@ -62,6 +65,7 @@ import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFI
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static com.android.window.flags.Flags.FLAG_DELEGATE_UNHANDLED_DRAGS;
+import static com.android.window.flags.Flags.FLAG_SUPPORTS_DRAG_ASSISTANT_TO_MULTIWINDOW;
 
 import static java.lang.Math.max;
 
@@ -88,6 +92,8 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
 import android.app.PendingIntent;
+import android.app.jank.AppJankStats;
+import android.app.jank.JankTracker;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.ClipData;
@@ -968,6 +974,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Ignore an optimization that skips unnecessary EXACTLY layout passes.
      */
     private static boolean sAlwaysRemeasureExactly = false;
+
+    /**
+     * When true calculates the bounds in parent from bounds in screen relative to its parents.
+     * This addresses the deprecated API (setBoundsInParent) in Compose, which causes empty
+     * getBoundsInParent call for Compose apps.
+     */
+    private static boolean sCalculateBoundsInParentFromBoundsInScreenFlagValue = false;
 
     /**
      * When true makes it possible to use onMeasure caches also when the force layout flag is
@@ -2561,6 +2574,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
         sToolkitMetricsForFrameRateDecisionFlagValue = toolkitMetricsForFrameRateDecision();
+        sCalculateBoundsInParentFromBoundsInScreenFlagValue =
+                calculateBoundsInParentFromBoundsInScreen();
         sUseMeasureCacheDuringForceLayoutFlagValue = enableUseMeasureCacheDuringForceLayout();
     }
 
@@ -5538,10 +5553,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag indicating that this drag will result in the caller activity's task to be hidden for the
-     * duration of the drag, this means that the source activity will not receive drag events for
-     * the current drag gesture. Only the current voice interaction service may use this flag.
-     * @hide
+     * duration of the drag, which means that the source activity will not receive drag events for
+     * the current drag gesture. Only the current
+     * {@link android.service.voice.VoiceInteractionService} may use this flag.
      */
+    @FlaggedApi(FLAG_SUPPORTS_DRAG_ASSISTANT_TO_MULTIWINDOW)
     public static final int DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START = 1 << 14;
 
     /**
@@ -8941,44 +8957,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Convenience method for sending a {@link AccessibilityEvent#TYPE_ANNOUNCEMENT}
-     * {@link AccessibilityEvent} to suggest that an accessibility service announce the
-     * specified text to its users.
-     * <p>
-     * Note: The event generated with this API carries no semantic meaning, and is appropriate only
-     * in exceptional situations. Apps can generally achieve correct behavior for accessibility by
-     * accurately supplying the semantics of their UI.
-     * They should not need to specify what exactly is announced to users.
+     * Convenience method for sending a {@link AccessibilityEvent#TYPE_ANNOUNCEMENT} {@link
+     * AccessibilityEvent} to suggest that an accessibility service announce the specified text to
+     * its users.
      *
-     * <p>
-     * In general, only announce transitions and don't generate a confirmation message for simple
-     * actions like a button press. Label your controls concisely and precisely instead, and for
-     * significant UI changes like window changes, use
-     * {@link android.app.Activity#setTitle(CharSequence)} and
-     * {@link #setAccessibilityPaneTitle(CharSequence)}.
+     * <p>Note: The event generated with this API carries no semantic meaning, and accessibility
+     * services may choose to ignore it. Apps that accurately supply accessibility with the
+     * semantics of their UI should not need to specify what exactly is announced.
      *
-     * <p>
-     * Use {@link #setAccessibilityLiveRegion(int)} to inform the user of changes to critical
+     * <p>In general, do not attempt to generate announcements as confirmation message for simple
+     * actions like a button press. Label your controls concisely and precisely instead.
+     *
+     * <p>To convey significant UI changes like window changes, use {@link
+     * android.app.Activity#setTitle(CharSequence)} and {@link
+     * #setAccessibilityPaneTitle(CharSequence)}.
+     *
+     * <p>Use {@link #setAccessibilityLiveRegion(int)} to inform the user of changes to critical
      * views within the user interface. These should still be used sparingly as they may generate
      * announcements every time a View is updated.
      *
-     * <p>
-     * For notifying users about errors, such as in a login screen with text that displays an
-     * "incorrect password" notification, that view should send an AccessibilityEvent of type
-     * {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR} and set
-     * {@link AccessibilityNodeInfo#setError(CharSequence)} instead. Custom widgets should expose
-     * error-setting methods that support accessibility automatically. For example, instead of
-     * explicitly sending this event when using a TextView, use
-     * {@link android.widget.TextView#setError(CharSequence)}.
-     *
-     * <p>
-     * Use {@link #setStateDescription(CharSequence)} to convey state changes to views within the
+     * <p>Use {@link #setStateDescription(CharSequence)} to convey state changes to views within the
      * user interface. While a live region may send different types of events generated by the view,
      * state description will send {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} events of
      * type {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_STATE_DESCRIPTION}.
      *
+     * <p>For notifying users about errors, such as in a login screen with text that displays an
+     * "incorrect password" notification, set {@link AccessibilityNodeInfo#setError(CharSequence)}
+     * and dispatch an {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event with a change
+     * type of {@link AccessibilityEvent#CONTENT_CHANGE_TYPE_ERROR}, instead. Some widgets may
+     * expose methods that convey error states to accessibility automatically, such as {@link
+     * android.widget.TextView#setError(CharSequence)}, which manages these accessibility semantics
+     * and event dispatch for callers.
+     *
+     * @deprecated Use one of the methods described in the documentation above to semantically
+     *     describe UI instead of using an announcement, as accessibility services may choose to
+     *     ignore events dispatched with this method.
      * @param text The announcement text.
      */
+    @FlaggedApi(FLAG_DEPRECATE_ACCESSIBILITY_ANNOUNCEMENT_APIS)
+    @Deprecated
     public void announceForAccessibility(CharSequence text) {
         if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null) {
             AccessibilityEvent event = AccessibilityEvent.obtain(
@@ -9806,7 +9823,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);
             if (info != null) {
-                populateVirtualStructure(root, provider, info, forAutofill);
+                populateVirtualStructure(root, provider, info, null, forAutofill);
                 info.recycle();
             } else {
                 Log.w(AUTOFILL_LOG_TAG, "AccessibilityNodeInfo is null.");
@@ -11105,11 +11122,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void populateVirtualStructure(ViewStructure structure,
             AccessibilityNodeProvider provider, AccessibilityNodeInfo info,
-            boolean forAutofill) {
+            @Nullable AccessibilityNodeInfo parentInfo, boolean forAutofill) {
         structure.setId(AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId()),
                 null, null, info.getViewIdResourceName());
         Rect rect = structure.getTempRect();
-        info.getBoundsInParent(rect);
+        // The bounds in parent for Jetpack Compose views aren't set as setBoundsInParent is
+        // deprecated, and only setBoundsInScreen is called.
+        // The bounds in parent can be calculated by diff'ing the child view's bounds in screen with
+        // the parent's.
+        if (sCalculateBoundsInParentFromBoundsInScreenFlagValue) {
+            getBoundsInParent(info, parentInfo, rect);
+        } else {
+            info.getBoundsInParent(rect);
+        }
         structure.setDimens(rect.left, rect.top, 0, 0, rect.width(), rect.height());
         structure.setVisibility(VISIBLE);
         structure.setEnabled(info.isEnabled());
@@ -11193,9 +11218,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         AccessibilityNodeInfo.getVirtualDescendantId(info.getChildId(i)));
                 if (cinfo != null) {
                     ViewStructure child = structure.newChild(i);
-                    populateVirtualStructure(child, provider, cinfo, forAutofill);
+                    populateVirtualStructure(child, provider, cinfo, info, forAutofill);
                     cinfo.recycle();
                 }
+            }
+        }
+    }
+
+    private void getBoundsInParent(@NonNull AccessibilityNodeInfo info,
+            @Nullable AccessibilityNodeInfo parentInfo, @NonNull Rect rect) {
+        info.getBoundsInParent(rect);
+        // Fallback to calculate bounds in parent by diffing the bounds in
+        // screen if it's all 0.
+        if ((rect.left | rect.top | rect.right | rect.bottom) == 0) {
+            if (parentInfo != null) {
+                Rect parentBoundsInScreen = parentInfo.getBoundsInScreen();
+                Rect boundsInScreen = info.getBoundsInScreen();
+                rect.set(boundsInScreen.left - parentBoundsInScreen.left,
+                        boundsInScreen.top - parentBoundsInScreen.top,
+                        boundsInScreen.right - parentBoundsInScreen.left,
+                        boundsInScreen.bottom - parentBoundsInScreen.top);
+            } else {
+                info.getBoundsInScreen(rect);
             }
         }
     }
@@ -11363,7 +11407,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             View label = rootView.findLabelForView(this, mID);
             if (label != null) {
-                info.setLabeledBy(label);
+                if (supportMultipleLabeledby()) {
+                    info.addLabeledBy(label);
+                } else {
+                    info.setLabeledBy(label);
+                }
             }
 
             if ((mAttachInfo.mAccessibilityFetchFlags
@@ -16706,9 +16754,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_DETERMINED;
             }
         }
-        final boolean processForRotaryScrollHaptics =
-                isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0);
-        if (processForRotaryScrollHaptics) {
+        if (isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0)) {
             mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT;
             mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT;
         }
@@ -16725,7 +16771,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Process scroll haptics after `onGenericMotionEvent`, since that's where scrolling usually
         // happens. Some views may return false from `onGenericMotionEvent` even if they have done
         // scrolling, so disregard the return value when processing for scroll haptics.
-        if (processForRotaryScrollHaptics) {
+        // Check for `PFLAG4_ROTARY_HAPTICS_ENABLED` again, because the View implementation may
+        // call `disableRotaryScrollFeedback` in `onGenericMotionEvent`, which could change the
+        // value of `PFLAG4_ROTARY_HAPTICS_ENABLED`.
+        if (isRotaryEncoderEvent && ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_ENABLED) != 0)) {
             if ((mPrivateFlags4 & PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT) != 0) {
                 doRotaryProgressForScrollHaptics(event);
             } else {
@@ -18668,7 +18717,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private HapticScrollFeedbackProvider getScrollFeedbackProvider() {
         if (mScrollFeedbackProvider == null) {
             mScrollFeedbackProvider = new HapticScrollFeedbackProvider(this,
-                    ViewConfiguration.get(mContext), /* disabledIfViewPlaysScrollHaptics= */ false);
+                    ViewConfiguration.get(mContext), /* isFromView= */ true);
         }
         return mScrollFeedbackProvider;
     }
@@ -18695,6 +18744,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_SCROLL_SINCE_LAST_ROTARY_INPUT;
             mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_WAITING_FOR_SCROLL_EVENT;
         }
+    }
+
+    /**
+     * Disables the rotary scroll feedback implementation of the View class.
+     *
+     * <p>Note that this does NOT disable all rotary scroll feedback; it just disables the logic
+     * implemented within the View class. The child implementation of the View may implement its own
+     * rotary scroll feedback logic or use {@link ScrollFeedbackProvider} to generate rotary scroll
+     * feedback.
+     */
+    void disableRotaryScrollFeedback() {
+        // Force set PFLAG4_ROTARY_HAPTICS_DETERMINED to avoid recalculating
+        // PFLAG4_ROTARY_HAPTICS_ENABLED under any circumstance.
+        mPrivateFlags4 |= PFLAG4_ROTARY_HAPTICS_DETERMINED;
+        mPrivateFlags4 &= ~PFLAG4_ROTARY_HAPTICS_ENABLED;
     }
 
     /**
@@ -23838,12 +23902,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         draw(canvas);
                     }
-                }
 
-                // For VRR to vote the preferred frame rate
-                if (sToolkitSetFrameRateReadOnlyFlagValue
-                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-                    votePreferredFrameRate();
+                    // For VRR to vote the preferred frame rate
+                    if (sToolkitSetFrameRateReadOnlyFlagValue
+                            && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                        votePreferredFrameRate();
+                    }
                 }
             } finally {
                 renderNode.endRecording();
@@ -34375,5 +34439,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     boolean getSelfRequestedFrameRateFlag() {
         return (mPrivateFlags4 & PFLAG4_SELF_REQUESTED_FRAME_RATE) != 0;
+    }
+
+    /**
+     * Called from apps when they want to report jank stats to the system.
+     * @param appJankStats the stats that will be merged with the stats collected by the system.
+     */
+    @FlaggedApi(android.app.jank.Flags.FLAG_DETAILED_APP_JANK_METRICS_API)
+    public void reportAppJankStats(@NonNull AppJankStats appJankStats) {
+        getRootView().reportAppJankStats(appJankStats);
+    }
+
+    /**
+     * Called by widgets to get a reference to JankTracker in order to update states.
+     * @hide
+     */
+    public @Nullable JankTracker getJankTracker() {
+        return getRootView().getJankTracker();
     }
 }

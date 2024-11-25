@@ -19,21 +19,22 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the size of an element to the size of another element. */
-internal class AnchoredSize(
-    override val matcher: ElementMatcher,
+internal class AnchoredSize
+private constructor(
     private val anchor: ElementKey,
     private val anchorWidth: Boolean,
     private val anchorHeight: Boolean,
-) : PropertyTransformation<IntSize> {
+) : InterpolatedPropertyTransformation<IntSize> {
+    override val property = PropertyTransformation.Property.Size
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: IntSize,
+        idleValue: IntSize,
     ): IntSize {
         fun anchorSizeIn(content: ContentKey): IntSize {
             val size =
@@ -45,8 +46,8 @@ internal class AnchoredSize(
                     )
 
             return IntSize(
-                width = if (anchorWidth) size.width else value.width,
-                height = if (anchorHeight) size.height else value.height,
+                width = if (anchorWidth) size.width else idleValue.width,
+                height = if (anchorHeight) size.height else idleValue.height,
             )
         }
 
@@ -58,5 +59,13 @@ internal class AnchoredSize(
         } else {
             anchorSizeIn(transition.fromContent)
         }
+    }
+
+    class Factory(
+        private val anchor: ElementKey,
+        private val anchorWidth: Boolean,
+        private val anchorHeight: Boolean,
+    ) : Transformation.Factory {
+        override fun create(): Transformation = AnchoredSize(anchor, anchorWidth, anchorHeight)
     }
 }

@@ -27,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -36,7 +35,6 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Trace;
@@ -179,8 +177,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private float[] mMatrix;
     private ColorMatrixColorFilter mMatrixColorFilter;
     private Runnable mLayoutRunnable;
-    private boolean mDismissed;
-    private Runnable mOnDismissListener;
     private boolean mIncreasedSize;
     private boolean mShowsConversation;
     private float mDozeAmount;
@@ -520,34 +516,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 userId = UserHandle.USER_SYSTEM;
             }
 
-            // Try to load the monochrome app icon if applicable
-            Drawable icon = maybeGetMonochromeAppIcon(context, statusBarIcon);
-            // Otherwise, just use the icon normally
-            if (icon == null) {
-                icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
-            }
-            return icon;
+            return statusBarIcon.icon.loadDrawableAsUser(context, userId);
         }
-    }
-
-    @Nullable
-    private Drawable maybeGetMonochromeAppIcon(Context context,
-            StatusBarIcon statusBarIcon) {
-        if (android.app.Flags.notificationsUseMonochromeAppIcon()
-                && statusBarIcon.type == StatusBarIcon.Type.MaybeMonochromeAppIcon) {
-            // Check if we have a monochrome app icon
-            PackageManager pm = context.getPackageManager();
-            Drawable appIcon = context.getApplicationInfo().loadIcon(pm);
-            if (appIcon instanceof AdaptiveIconDrawable) {
-                Drawable monochrome = ((AdaptiveIconDrawable) appIcon).getMonochrome();
-                if (monochrome != null) {
-                    setCropToPadding(true);
-                    setScaleType(ScaleType.CENTER);
-                    return new ScalingDrawableWrapper(monochrome, APP_ICON_SCALE);
-                }
-            }
-        }
-        return null;
     }
 
     public StatusBarIcon getStatusBarIcon() {
@@ -982,21 +952,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     public void executeOnLayout(Runnable runnable) {
         mLayoutRunnable = runnable;
-    }
-
-    public void setDismissed() {
-        mDismissed = true;
-        if (mOnDismissListener != null) {
-            mOnDismissListener.run();
-        }
-    }
-
-    public boolean isDismissed() {
-        return mDismissed;
-    }
-
-    public void setOnDismissListener(Runnable onDismissListener) {
-        mOnDismissListener = onDismissListener;
     }
 
     @Override

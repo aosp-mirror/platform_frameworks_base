@@ -73,7 +73,7 @@
     <string name="learn_more" msgid="4690632085667273811">"थप जान्नुहोस्"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रिनसट"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"एक्स्टेन्ड अनलक अफ गरिएको छ"</string>
-    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै छवि पठाइयो"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै फोटो पठाइयो"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"कार्य प्रोफाइलमा स्क्रिनसट सेभ गरिँदै छ…"</string>
     <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"निजी प्रोफाइलमा स्क्रिनसट सेभ गरिँदै छ"</string>
@@ -112,12 +112,11 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"तपाईंको स्क्रिन रेकर्ड गर्ने हो?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एउटा एप रेकर्ड गर्नुहोस्"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरै स्क्रिन रेकर्ड गर्नुहोस्"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"सम्पूर्ण स्क्रिन रेकर्ड गर्नुहोस्: %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"तपाईंले आफ्नो पूरै स्क्रिन रेकर्ड गरिरहेका बेला तपाईंको स्क्रिनमा देखाइने सबै सामग्री रेकर्ड गरिन्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"तपाईंले यो एप रेकर्ड गरिरहेका बेला यो एपमा देखाइने वा प्ले गरिने सबै सामग्री रेकर्ड गरिन्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रिन रेकर्ड गर्नुहोस्"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"रेकर्ड गर्न छनौट गर्नुहोस्"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"रेकर्ड गर्न एप छनौट गर्नुहोस्"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिभाइसको अडियो"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तपाईंको डिभाइसका सङ्गीत, कल र रिङटोन जस्ता साउन्ड"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"तपाईं अहिले <xliff:g id="APP_NAME">%1$s</xliff:g> रेकर्ड गरिरहनुभएको छ"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"रेकर्ड गर्न छाड्नुहोस्"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"स्क्रिन सेयर गरिँदै छ"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"सामग्री सेयर गरिँदै छ"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"स्क्रिन सेयर गर्न छाड्ने हो?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"सेयर गर्न छाड्ने हो?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"तपाईं अहिले <xliff:g id="HOST_APP_NAME">%1$s</xliff:g> सँग आफ्नो डिभाइसको पूरै स्क्रिन सेयर गरिरहनुभएको छ"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"तपाईं अहिले कुनै एपसँग आफ्नो डिभाइसको पूरै स्क्रिन सेयर गरिरहनुभएको छ"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"तपाईं अहिले <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> सेयर गरिरहनुभएको छ"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"तपाईं अहिले कुनै एप सेयर गरिरहनुभएको छ"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"तपाईं अहिले एपसँग सेयर गरिरहनुभएको छ"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"सेयर गर्न छाड्नुहोस्"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"स्क्रिन कास्ट गरिँदै छ"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"कास्ट गर्न छाड्ने हो?"</string>
@@ -315,7 +311,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"एक्टिभेट गर्नुहोस्"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"भोलि स्वतः अन गर्नुहोस्"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"क्विक सेयर र Find My Device जस्ता सुविधाहरू प्रयोग गर्न ब्लुटुथ चाहिन्छ"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"क्विक सेयर र Find My Device जस्ता सुविधाहरू प्रयोग गर्न ब्लुटुथ अन गर्नु पर्ने हुन्छ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ब्लुटुथ भोलि बिहान अन हुने छ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"अडियो सेयर गर्नुहोस्"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"अडियो सेयर गरिँदै छ"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"इनपुट"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"हियरिङ डिभाइसहरू"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"सक्रिय गर्दै…"</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"टप एपले चमक नियन्त्रण गरिरहेकाले\n चमक मिलाउन मिल्दैन"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"अटो रोटेट"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"स्क्रिन स्वतःघुम्ने"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"लोकेसन"</string>
@@ -417,7 +414,10 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"नयाँ डिभाइसमा कनेक्ट गर्न क्लिक गर्नुहोस्"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"प्रिसेट अपडेट गर्न सकिएन"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"पूर्वनिर्धारित"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"चयन गरिएको छ"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"टुल"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"लाइभ क्याप्सन"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"नोट"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"डिभाइसको माइक्रोफोन अनब्लक गर्ने हो?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"डिभाइसको क्यामेरा अनब्लक गर्ने हो?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"डिभाइसको क्यामेरा र माइक्रोफोन अनब्लक गर्ने हो?"</string>
@@ -523,13 +523,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"लक स्क्रिन विजेटहरू"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"तपाईंको ट्याब्लेट लक भएका बेला पनि सबैले लक स्क्रिनमा भएका विजेट हेर्न सक्छन्।"</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"विजेटको चयन रद्द गर्नुहोस्"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"उचाइ घटाउनुहोस्"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"उचाइ बढाउनुहोस्"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"लक स्क्रिन विजेटहरू"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"विजेट प्रयोग गरी एप खोल्न तपाईंले आफ्नो पहिचान पुष्टि गर्नु पर्ने हुन्छ। साथै, तपाईंको ट्याब्लेट लक भएका बेला पनि सबै जनाले तिनलाई देख्न सक्छन् भन्ने कुरा ख्याल गर्नुहोस्। केही विजेटहरू लक स्क्रिनमा प्रयोग गर्ने उद्देश्यले नबनाइएका हुन सक्छन् र तिनलाई यहाँ हाल्नु सुरक्षित नहुन सक्छ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"बुझेँ"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनु"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
@@ -583,10 +585,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थित गर्नुहोस्"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"हिस्ट्री"</string>
-    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
-    <skip />
-    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
-    <skip />
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"नोटिफिकेसन सेटिङ"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"नोटिफिकेसनसम्बन्धी हिस्ट्री"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नयाँ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"साइलेन्ट"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाहरू"</string>
@@ -597,7 +597,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कुनै सूचनाहरू छैनन्"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कुनै पनि नयाँ सूचना छैन"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"नोटिफिकेसन कुलडाउन अन छ"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"नोटिफिकेसन कुलडाउन अहिले अन छ"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"तपाईंले एकै पटक धेरै नोटिफिकेसन प्राप्त गर्दा बढीमा २ मिनेटसम्म तपाईंको डिभाइसको भोल्युम र अलर्टहरूको सङ्ख्या स्वतः घटाइन्छ।"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"अफ गर्नुहोस्"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुराना सूचनाहरू हेर्न अनलक गर्नुहोस्"</string>
@@ -705,6 +705,7 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"निश्चित"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"हेड ट्र्याकिङ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिङ्गर मोड बदल्न ट्याप गर्नुहोस्"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"घण्टी बजाउने मोड"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्युट गर्नुहोस्"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्युट गर्नुहोस्"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"कम्पन गर्नुहोस्"</string>
@@ -783,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यो वार्तालापका सूचनाहरूको सिरानमा, बबलका रूपमा र लक स्क्रिनमा प्रोफाइल फोटोका रूपमा देखिन्छ। साथै, यसले गर्दा \'बाधा नपुऱ्याउनुहोस्\' नामक सुविधामा अवरोध आउँछ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा वार्तालापसम्बन्धी सुविधा प्रयोग गर्न मिल्दैन"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कलसम्बन्धी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"यहाँबाट सूचनाहरूको यो समूह कन्फिगर गर्न सकिँदैन"</string>
@@ -874,6 +877,7 @@
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रिन प्रयोग गर्दै गर्दा दायाँ वा तलको एप चलाउनुहोस्"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रिन प्रयोग गर्दै गर्दा बायाँ वा माथिको एप चलाउनुहोस्"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रिन प्रयोग गरिएका बेला: एउटा स्क्रिनमा भएको एप अर्कोमा लैजानुहोस्"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"सक्रिय विन्डोलाई एउटा डिस्प्लेबाट सारेर अर्को डिस्प्लेमा लैजानुहोस्"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"इनपुट"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"अर्को भाषा प्रयोग गर्नुहोस्"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"अघिल्लो भाषा प्रयोग गर्नुहोस्"</string>
@@ -1007,7 +1011,7 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ अफ छ"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प अफ छ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै एपले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
@@ -1222,6 +1226,8 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> वटा भन्दा कम वर्ण प्रयोग गर्नुहोस्"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
+    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
+    <skip />
     <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"वार्तालापसम्बन्धी विजेटहरू"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"कुनै वार्तालाप होम स्क्रिनमा हाल्न उक्त वार्तालापमा ट्याप गर्नुहोस्"</string>
@@ -1355,8 +1361,9 @@
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"स्क्रिनहरू बदल्ने हो?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"उच्च रिजोल्युसनको सेल्फी खिच्न पछाडिको क्यामेरा प्रयोग गर्नुहोस्"</string>
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रिजोल्युसनको सेल्फी खिच्न फोन फ्लिप गर्नुहोस्"</string>
-    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड गर्न मिल्ने डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
-    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड गर्न मिल्ने डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्डेबल डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्डेबल डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"अगाडिको स्क्रिन अन गरिएको छ"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"फोल्ड गरिएको"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"अनफोल्ड गरिएको"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1415,19 +1422,35 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"हालको एप"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"सर्वसुलभता"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"किबोर्डका सर्टकटहरू"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"किबोर्डका सर्टकटहरू कस्टमाइज गर्नुहोस्"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
     <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"खोजका सर्टकटहरू"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"कुनै पनि खोज परिणाम भेटिएन"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"\"कोल्याप्स गर्नुहोस्\" आइकन"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"एक्सन वा Meta कीको आइकन"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"प्लस आइकन"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"कस्टमाइज गर्नुहोस्"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"पूरा भयो"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"\"एक्स्पान्ड गर्नुहोस्\" आइकन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"वा"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ड्र्याग ह्यान्डल"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"किबोर्डसम्बन्धी सेटिङ"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"सर्टकट सेट गर्नुहोस्"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"रद्द गर्नुहोस्"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"की थिच्नुहोस्"</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_plus_symbol (4534843157353732011) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"किबोर्ड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"किबोर्डका सर्टकटहरू प्रयोग गर्न सिक्नुहोस्"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"टचप्याड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
@@ -1441,7 +1464,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"पछाडि जानुहोस्"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"तीन वटा औँला प्रयोग गरी टचप्याडमा बायाँ वा दायाँतिर स्वाइप गर्नुहोस्"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"राम्रो!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"तपाईंले \'पछाडि जानुहोस्\' नामक इसारा प्रयोग गर्ने तरिका सिक्नुभयो।"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"तपाईंले जेस्चर प्रयोग गरी पछाडि जाने तरिका सिक्नुभएको छ।"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"होमपेजमा जानुहोस्"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"टचप्याडमा तीन वटा औँलाले माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"अद्भुत!"</string>
@@ -1449,11 +1472,11 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"हालसालै चलाइएका एपहरू हेर्नुहोस्"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"तीन वटा औँला प्रयोग गरी टचप्याडमा माथितिर स्वाइप गर्नुहोस् र होल्ड गर्नुहोस्"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"अद्भुत!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"तपाईंले हालसालै चलाइएका एपहरू हेर्ने जेस्चर पूरा गर्नुभएको छ।"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"तपाईंले जेस्चर प्रयोग गरी हालसालै चलाइएका एपहरू हेर्ने तरिका सिक्नुभएको छ।"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"सबै एपहरू हेर्नुहोस्"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"आफ्नो किबोर्डमा भएको एक्सन की थिच्नुहोस्"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"स्याबास!"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"तपाईंले \"सबै एपहरू हेर्नुहोस्\" नामक जेस्चर प्रयोग गर्ने तरिका सिक्नुभयो"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"तपाईंले जेस्चर प्रयोग गरी सबै एपहरू हेर्ने तरिका सिक्नुभएको छ"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कन्ट्रोलहरू"</string>
@@ -1485,6 +1508,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"एपले उपलब्ध गराएका"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"डिस्प्ले"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"अज्ञात"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"टाइलहरू रिसेट गर्नुहोस्"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"टाइलहरूको डिफल्ट क्रम र आकार रिसेट गर्ने हो?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"सबै टाइलहरू रिसेट गर्ने हो?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"द्रुत सेटिङका सबै टाइलहरू रिसेट गरी डिभाइसका मूल सेटिङ लागू गरिने छन्"</string>
 </resources>

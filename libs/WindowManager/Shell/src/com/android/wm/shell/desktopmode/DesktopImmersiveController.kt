@@ -34,10 +34,13 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.sysui.ShellCommandHandler
+import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
+import java.io.PrintWriter
 
 /**
  * A controller to move tasks in/out of desktop's full immersive state where the task
@@ -45,27 +48,34 @@ import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
  * be transient below the status bar like in fullscreen immersive mode.
  */
 class DesktopImmersiveController(
+    shellInit: ShellInit,
     private val transitions: Transitions,
     private val desktopRepository: DesktopRepository,
     private val displayController: DisplayController,
     private val shellTaskOrganizer: ShellTaskOrganizer,
+    private val shellCommandHandler: ShellCommandHandler,
     private val transactionSupplier: () -> SurfaceControl.Transaction,
 ) : TransitionHandler, TransitionObserver {
 
     constructor(
+        shellInit: ShellInit,
         transitions: Transitions,
         desktopRepository: DesktopRepository,
         displayController: DisplayController,
         shellTaskOrganizer: ShellTaskOrganizer,
+        shellCommandHandler: ShellCommandHandler,
     ) : this(
+        shellInit,
         transitions,
         desktopRepository,
         displayController,
         shellTaskOrganizer,
+        shellCommandHandler,
         { SurfaceControl.Transaction() }
     )
 
-    private var state: TransitionState? = null
+    @VisibleForTesting
+    var state: TransitionState? = null
 
     @VisibleForTesting
     val pendingExternalExitTransitions = mutableListOf<ExternalPendingExit>()
@@ -79,10 +89,22 @@ class DesktopImmersiveController(
     /** A listener to invoke on animation changes during entry/exit. */
     var onTaskResizeAnimationListener: OnTaskResizeAnimationListener? = null
 
+    init {
+        shellInit.addInitCallback({ onInit() }, this)
+    }
+
+    fun onInit() {
+        shellCommandHandler.addDumpCallback(this::dump, this)
+    }
+
     /** Starts a transition to enter full immersive state inside the desktop. */
     fun moveTaskToImmersive(taskInfo: RunningTaskInfo) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
         if (inProgress) {
-            logV("Cannot start entry because transition already in progress.")
+            logV(
+                "Cannot start entry because transition(s) already in progress: %s",
+                getRunningTransitions()
+            )
             return
         }
         val wct = WindowContainerTransaction().apply {
@@ -98,16 +120,21 @@ class DesktopImmersiveController(
         )
     }
 
-    fun moveTaskToNonImmersive(taskInfo: RunningTaskInfo) {
+    /** Starts a transition to move an immersive task out of immersive. */
+    fun moveTaskToNonImmersive(taskInfo: RunningTaskInfo, reason: ExitReason) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
         if (inProgress) {
-            logV("Cannot start exit because transition already in progress.")
+            logV(
+                "Cannot start exit because transition(s) already in progress: %s",
+                getRunningTransitions()
+            )
             return
         }
 
         val wct = WindowContainerTransaction().apply {
             setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
         }
-        logV("Moving task ${taskInfo.taskId} out of immersive mode")
+        logV("Moving task %d out of immersive mode, reason: %s", taskInfo.taskId, reason)
         val transition = transitions.startTransition(TRANSIT_CHANGE, wct, /* handler= */ this)
         state = TransitionState(
             transition = transition,
@@ -127,10 +154,11 @@ class DesktopImmersiveController(
     fun exitImmersiveIfApplicable(
         transition: IBinder,
         wct: WindowContainerTransaction,
-        displayId: Int
+        displayId: Int,
+        reason: ExitReason,
     ) {
         if (!Flags.enableFullyImmersiveInDesktop()) return
-        val result = exitImmersiveIfApplicable(wct, displayId)
+        val result = exitImmersiveIfApplicable(wct, displayId, excludeTaskId = null, reason)
         result.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
@@ -146,6 +174,7 @@ class DesktopImmersiveController(
         wct: WindowContainerTransaction,
         displayId: Int,
         excludeTaskId: Int? = null,
+        reason: ExitReason,
     ): ExitResult {
         if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
         val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId)
@@ -155,7 +184,10 @@ class DesktopImmersiveController(
         }
         val taskInfo = shellTaskOrganizer.getRunningTaskInfo(immersiveTask)
             ?: return ExitResult.NoExit
-        logV("Appending immersive exit for task: $immersiveTask in display: $displayId")
+        logV(
+            "Appending immersive exit for task: %d in display: %d for reason: %s",
+            immersiveTask, displayId, reason
+        )
         wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
         return ExitResult.Exit(
             exitingTask = immersiveTask,
@@ -174,14 +206,15 @@ class DesktopImmersiveController(
      */
     fun exitImmersiveIfApplicable(
         wct: WindowContainerTransaction,
-        taskInfo: RunningTaskInfo
+        taskInfo: RunningTaskInfo,
+        reason: ExitReason,
     ): ExitResult {
         if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
         if (desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
             // A full immersive task is being minimized, make sure the immersive state is broken
             // (i.e. resize back to max bounds).
             wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
-            logV("Appending immersive exit for task: ${taskInfo.taskId}")
+            logV("Appending immersive exit for task: %d for reason: %s", taskInfo.taskId, reason)
             return ExitResult.Exit(
                 exitingTask = taskInfo.taskId,
                 runOnTransitionStart = { transition ->
@@ -225,14 +258,19 @@ class DesktopImmersiveController(
         finishCallback: Transitions.TransitionFinishCallback
     ): Boolean {
         val state = requireState()
-        if (transition != state.transition) return false
+        check(state.transition == transition) {
+            "Transition $transition did not match expected state=$state"
+        }
         logD("startAnimation transition=%s", transition)
         animateResize(
             targetTaskId = state.taskId,
             info = info,
             startTransaction = startTransaction,
             finishTransaction = finishTransaction,
-            finishCallback = finishCallback
+            finishCallback = {
+                finishCallback.onTransitionFinished(/* wct= */ null)
+                clearState()
+            },
         )
         return true
     }
@@ -242,12 +280,18 @@ class DesktopImmersiveController(
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
-        finishCallback: Transitions.TransitionFinishCallback
+        finishCallback: Transitions.TransitionFinishCallback,
     ) {
         logD("animateResize for task#%d", targetTaskId)
-        val change = info.changes.first { c ->
+        val change = info.changes.firstOrNull { c ->
             val taskInfo = c.taskInfo
-            return@first taskInfo != null && taskInfo.taskId == targetTaskId
+            return@firstOrNull taskInfo != null && taskInfo.taskId == targetTaskId
+        }
+        if (change == null) {
+            logD("Did not find change for task#%d to animate", targetTaskId)
+            startTransaction.apply()
+            finishCallback.onTransitionFinished(/* wct= */ null)
+            return
         }
         animateResizeChange(change, startTransaction, finishTransaction, finishCallback)
     }
@@ -288,7 +332,6 @@ class DesktopImmersiveController(
                         .apply()
                     onTaskResizeAnimationListener?.onAnimationEnd(taskId)
                     finishCallback.onTransitionFinished(null /* wct */)
-                    clearState()
                 }
             )
             addUpdateListener { animation ->
@@ -357,8 +400,17 @@ class DesktopImmersiveController(
         // Check if this is a direct immersive enter/exit transition.
         if (transition == state?.transition) {
             val state = requireState()
-            val startBounds = info.changes.first { c -> c.taskInfo?.taskId == state.taskId }
-                .startAbsBounds
+            val immersiveChange = info.changes.firstOrNull { c ->
+                c.taskInfo?.taskId == state.taskId
+            }
+            if (immersiveChange == null) {
+                logV(
+                    "Direct move for task#%d in %s direction missing immersive change.",
+                    state.taskId, state.direction
+                )
+                return
+            }
+            val startBounds = immersiveChange.startAbsBounds
             logV("Direct move for task#%d in %s direction verified", state.taskId, state.direction)
             when (state.direction) {
                 Direction.ENTER -> {
@@ -446,11 +498,30 @@ class DesktopImmersiveController(
     private fun requireState(): TransitionState =
         state ?: error("Expected non-null transition state")
 
+    private fun getRunningTransitions(): List<IBinder> {
+        val running = mutableListOf<IBinder>()
+        state?.let {
+            running.add(it.transition)
+        }
+        pendingExternalExitTransitions.forEach {
+            running.add(it.transition)
+        }
+        return running
+    }
+
     private fun TransitionInfo.hasTaskChange(taskId: Int): Boolean =
         changes.any { c -> c.taskInfo?.taskId == taskId }
 
+    private fun dump(pw: PrintWriter, prefix: String) {
+        val innerPrefix = "$prefix  "
+        pw.println("${prefix}DesktopImmersiveController")
+        pw.println(innerPrefix + "state=" + state)
+        pw.println(innerPrefix + "pendingExternalExitTransitions=" + pendingExternalExitTransitions)
+    }
+
     /** The state of the currently running transition. */
-    private data class TransitionState(
+    @VisibleForTesting
+    data class TransitionState(
         val transition: IBinder,
         val displayId: Int,
         val taskId: Int,
@@ -483,8 +554,18 @@ class DesktopImmersiveController(
         fun asExit(): Exit? = if (this is Exit) this else null
     }
 
-    private enum class Direction {
+    @VisibleForTesting
+    enum class Direction {
         ENTER, EXIT
+    }
+
+    /** The reason for moving the task out of desktop immersive mode. */
+    enum class ExitReason {
+        APP_NOT_IMMERSIVE, // The app stopped requesting immersive treatment.
+        USER_INTERACTION, // Explicit user intent request, e.g. a button click.
+        TASK_LAUNCH, // A task launched/moved on top of the immersive task.
+        MINIMIZED, // The immersive task was minimized.
+        CLOSED, // The immersive task was closed.
     }
 
     private fun logV(msg: String, vararg arguments: Any?) {
@@ -495,9 +576,10 @@ class DesktopImmersiveController(
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }
 
-    private companion object {
+    companion object {
         private const val TAG = "DesktopImmersive"
 
-        private const val FULL_IMMERSIVE_ANIM_DURATION_MS = 336L
+        @VisibleForTesting
+        const val FULL_IMMERSIVE_ANIM_DURATION_MS = 336L
     }
 }

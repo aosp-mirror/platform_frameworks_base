@@ -23,12 +23,15 @@ import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
+import android.telephony.CellularIdentifierDisclosure;
 import android.telephony.LinkCapacityEstimate;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.satellite.NtnSignalStrength;
+import android.telephony.SecurityAlgorithmUpdate;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
@@ -125,8 +128,13 @@ interface ITelephonyRegistry {
     void notifyCarrierRoamingNtnModeChanged(int subId, in boolean active);
     void notifyCarrierRoamingNtnEligibleStateChanged(int subId, in boolean eligible);
     void notifyCarrierRoamingNtnAvailableServicesChanged(int subId, in int[] availableServices);
+    void notifyCarrierRoamingNtnSignalStrengthChanged(int subId, in NtnSignalStrength ntnSignalStrength);
 
     void addSatelliteStateChangeListener(ISatelliteStateChangeListener listener, String pkg, String featureId);
     void removeSatelliteStateChangeListener(ISatelliteStateChangeListener listener, String pkg);
     void notifySatelliteStateChanged(boolean isEnabled);
+
+    void notifySecurityAlgorithmsChanged(int phoneId, int subId, in SecurityAlgorithmUpdate update);
+    void notifyCellularIdentifierDisclosedChanged(
+            int phoneId, int subId, in CellularIdentifierDisclosure disclosure);
 }

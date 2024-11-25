@@ -1229,7 +1229,6 @@ public final class CompanionDeviceManager {
         }
     }
 
-    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
      *
@@ -1261,7 +1260,12 @@ public final class CompanionDeviceManager {
      *
      * @throws DeviceNotAssociatedException if the given device was not previously associated
      * with this app.
+     *
+     * @deprecated use {@link #startObservingDevicePresence(ObservingDevicePresenceRequest)}
+     * instead.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
     public void startObservingDevicePresence(@NonNull String deviceAddress)
             throws DeviceNotAssociatedException {
@@ -1288,7 +1292,7 @@ public final class CompanionDeviceManager {
                             callingUid, callingPid);
         }
     }
-    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
+
     /**
      * Unregister for receiving callbacks whenever the associated device comes in and out of range.
      *
@@ -1305,7 +1309,12 @@ public final class CompanionDeviceManager {
      *
      * @throws DeviceNotAssociatedException if the given device was not previously associated
      * with this app.
+     *
+     * @deprecated use {@link #stopObservingDevicePresence(ObservingDevicePresenceRequest)}
+     * instead.
      */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
     public void stopObservingDevicePresence(@NonNull String deviceAddress)
             throws DeviceNotAssociatedException {

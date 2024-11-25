@@ -24,7 +24,9 @@ import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
+import com.android.systemui.statusbar.events.domain.interactor.systemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.collapsedStatusBarInteractor
 
@@ -34,12 +36,14 @@ val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
             collapsedStatusBarInteractor,
             lightsOutInteractor,
             activeNotificationsInteractor,
+            headsUpNotificationInteractor,
             keyguardTransitionInteractor,
             keyguardInteractor,
             sceneInteractor,
             sceneContainerOcclusionInteractor,
             shadeInteractor,
             ongoingActivityChipsViewModel,
+            systemStatusEventAnimationInteractor,
             applicationCoroutineScope,
         )
     }

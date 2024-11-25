@@ -318,6 +318,12 @@
     <bool name="config_oem_enabled_satellite_access_allow">true</bool>
     <java-symbol type="bool" name="config_oem_enabled_satellite_access_allow" />
 
+    <!-- Whether the satellite modem support concurrent TN scanning while device is in
+         NTN mode.
+         -->
+    <bool name="config_satellite_modem_support_concurrent_tn_scanning">true</bool>
+    <java-symbol type="bool" name="config_satellite_modem_support_concurrent_tn_scanning" />
+
     <!-- The time duration in seconds which is used to decide whether the Location returned from
          LocationManager#getLastKnownLocation is fresh.
 
@@ -460,6 +466,11 @@
     <integer name="config_satellite_location_query_throttle_interval_minutes">10</integer>
     <java-symbol type="integer" name="config_satellite_location_query_throttle_interval_minutes" />
 
+    <!-- The file contains satellite access configuration like supported frequencies, bands,
+    satellite positions, and so on -->
+    <string name="satellite_access_config_file" translatable="false"></string>
+    <java-symbol type="string" name="satellite_access_config_file" />
+
     <!-- Boolean indicating whether to enable MT SMS polling for NB IOT NTN. -->
     <bool name="config_enabled_mt_sms_polling">true</bool>
     <java-symbol type="bool" name="config_enabled_mt_sms_polling" />
@@ -472,10 +483,13 @@
     <integer name="config_mt_sms_polling_throttle_millis">300000</integer>
     <java-symbol type="integer" name="config_mt_sms_polling_throttle_millis" />
 
-
     <!-- The receiver class of the intent that hidden menu sends to start satellite non-emergency mode -->
     <string name="config_satellite_carrier_roaming_non_emergency_session_class" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_carrier_roaming_non_emergency_session_class" />
 
+    <!-- Whether to show the system notification to users whenever there is a change
+     in the satellite availability state at the current location. -->
+    <bool name="config_satellite_should_notify_availability">true</bool>
+    <java-symbol type="bool" name="config_satellite_should_notify_availability" />
 
 </resources>

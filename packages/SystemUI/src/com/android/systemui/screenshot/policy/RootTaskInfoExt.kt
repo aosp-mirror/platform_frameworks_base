@@ -20,7 +20,7 @@ import android.app.ActivityTaskManager.RootTaskInfo
 import com.android.systemui.screenshot.data.model.ChildTaskModel
 
 /** The child tasks of A RootTaskInfo as [ChildTaskModel] in top-down (z-index ascending) order. */
-internal fun RootTaskInfo.childTasksTopDown(): Sequence<ChildTaskModel> {
+fun RootTaskInfo.childTasksTopDown(): Sequence<ChildTaskModel> {
     return ((childTaskIds.size - 1) downTo 0).asSequence().map { index ->
         ChildTaskModel(
             childTaskIds[index],

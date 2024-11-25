@@ -33,6 +33,7 @@ import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.VersionedPackage;
+import android.content.pm.parsing.PackageLite;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
@@ -83,6 +84,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
     private static final boolean DEBUG_SHARED_LIBRARIES = false;
 
     private static final String LIBRARY_TYPE_SDK = "sdk";
+    private static final String LIBRARY_TYPE_STATIC = "static shared";
 
     /**
      * Apps targeting Android S and above need to declare dependencies to the public native
@@ -926,18 +928,19 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         if (!pkg.getUsesLibraries().isEmpty()) {
             usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesLibraries(), null, null, null,
                     pkg.getPackageName(), "shared", true, pkg.getTargetSdkVersion(), null,
-                    availablePackages, newLibraries);
+                    availablePackages, newLibraries, null);
         }
         if (!pkg.getUsesStaticLibraries().isEmpty()) {
             usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesStaticLibraries(),
                     pkg.getUsesStaticLibrariesVersions(), pkg.getUsesStaticLibrariesCertDigests(),
-                    null, pkg.getPackageName(), "static shared", true,
-                    pkg.getTargetSdkVersion(), usesLibraryInfos, availablePackages, newLibraries);
+                    null, pkg.getPackageName(), LIBRARY_TYPE_STATIC, true,
+                    pkg.getTargetSdkVersion(), usesLibraryInfos, availablePackages, newLibraries,
+                    null);
         }
         if (!pkg.getUsesOptionalLibraries().isEmpty()) {
             usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesOptionalLibraries(), null, null,
                     null, pkg.getPackageName(), "shared", false, pkg.getTargetSdkVersion(),
-                    usesLibraryInfos, availablePackages, newLibraries);
+                    usesLibraryInfos, availablePackages, newLibraries, null);
         }
         if (platformCompat.isChangeEnabledInternal(ENFORCE_NATIVE_SHARED_LIBRARY_DEPENDENCIES,
                 pkg.getPackageName(), pkg.getTargetSdkVersion())) {
@@ -945,13 +948,13 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                 usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesNativeLibraries(), null,
                         null, null, pkg.getPackageName(), "native shared", true,
                         pkg.getTargetSdkVersion(), usesLibraryInfos, availablePackages,
-                        newLibraries);
+                        newLibraries, null);
             }
             if (!pkg.getUsesOptionalNativeLibraries().isEmpty()) {
                 usesLibraryInfos = collectSharedLibraryInfos(pkg.getUsesOptionalNativeLibraries(),
                         null, null, null, pkg.getPackageName(), "native shared", false,
                         pkg.getTargetSdkVersion(), usesLibraryInfos, availablePackages,
-                        newLibraries);
+                        newLibraries, null);
             }
         }
         if (!pkg.getUsesSdkLibraries().isEmpty()) {
@@ -961,9 +964,32 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     pkg.getUsesSdkLibrariesVersionsMajor(), pkg.getUsesSdkLibrariesCertDigests(),
                     pkg.getUsesSdkLibrariesOptional(),
                     pkg.getPackageName(), LIBRARY_TYPE_SDK, required, pkg.getTargetSdkVersion(),
-                    usesLibraryInfos, availablePackages, newLibraries);
+                    usesLibraryInfos, availablePackages, newLibraries, null);
         }
         return usesLibraryInfos;
+    }
+
+    List<SharedLibraryInfo> collectMissingSharedLibraryInfos(PackageLite pkgLite)
+            throws PackageManagerException {
+        ArrayList<SharedLibraryInfo> missingSharedLibrary = new ArrayList<>();
+        synchronized (mPm.mLock) {
+            collectSharedLibraryInfos(pkgLite.getUsesSdkLibraries(),
+                    pkgLite.getUsesSdkLibrariesVersionsMajor(),
+                    pkgLite.getUsesSdkLibrariesCertDigests(),
+                    /*libsOptional=*/ null, pkgLite.getPackageName(), LIBRARY_TYPE_SDK,
+                    /*required=*/ true, pkgLite.getTargetSdk(),
+                    /*outUsedLibraries=*/ null, mPm.mPackages, /*newLibraries=*/ null,
+                    missingSharedLibrary);
+
+            collectSharedLibraryInfos(pkgLite.getUsesStaticLibraries(),
+                    pkgLite.getUsesStaticLibrariesVersions(),
+                    pkgLite.getUsesStaticLibrariesCertDigests(),
+                    /*libsOptional=*/ null, pkgLite.getPackageName(), LIBRARY_TYPE_STATIC,
+                    /*required=*/ true, pkgLite.getTargetSdk(),
+                    /*outUsedLibraries=*/ null, mPm.mPackages, /*newLibraries=*/ null,
+                    missingSharedLibrary);
+        }
+        return missingSharedLibrary;
     }
 
     private ArrayList<SharedLibraryInfo> collectSharedLibraryInfos(
@@ -973,7 +999,8 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
             @NonNull String packageName, @NonNull String libraryType, boolean required,
             int targetSdk, @Nullable ArrayList<SharedLibraryInfo> outUsedLibraries,
             @NonNull final Map<String, AndroidPackage> availablePackages,
-            @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries)
+            @Nullable final Map<String, WatchedLongSparseArray<SharedLibraryInfo>> newLibraries,
+            @Nullable final List<SharedLibraryInfo> outMissingSharedLibraryInfos)
             throws PackageManagerException {
         final int libCount = requestedLibraries.size();
         for (int i = 0; i < libCount; i++) {
@@ -986,16 +1013,34 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                         libName, libVersion, mSharedLibraries, newLibraries);
             }
             if (libraryInfo == null) {
-                // Only allow app be installed if the app specifies the sdk-library dependency is
-                // optional
-                if (required || (LIBRARY_TYPE_SDK.equals(libraryType) && (libsOptional != null
-                        && !libsOptional[i]))) {
-                    throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                            "Package " + packageName + " requires unavailable " + libraryType
-                                    + " library " + libName + "; failing!");
-                } else if (DEBUG_SHARED_LIBRARIES) {
-                    Slog.i(TAG, "Package " + packageName + " desires unavailable " + libraryType
-                            + " library " + libName + "; ignoring!");
+                if (required) {
+                    boolean isSdkOrStatic = libraryType.equals(LIBRARY_TYPE_SDK)
+                            || libraryType.equals(LIBRARY_TYPE_STATIC);
+                    if (isSdkOrStatic && outMissingSharedLibraryInfos != null) {
+                        // If Dependency Installation is supported, try that instead of failing.
+                        final List<String> libCertDigests = Arrays.asList(requiredCertDigests[i]);
+                        SharedLibraryInfo missingLibrary = new SharedLibraryInfo(
+                                libName, libVersion, SharedLibraryInfo.TYPE_SDK_PACKAGE,
+                                libCertDigests
+                        );
+                        outMissingSharedLibraryInfos.add(missingLibrary);
+                    } else {
+                        throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                                "Package " + packageName + " requires unavailable " + libraryType
+                                + " library " + libName + "; failing!");
+                    }
+                } else {
+                    // Only allow app be installed if the app specifies the sdk-library
+                    // dependency is optional
+                    boolean isOptional = libsOptional != null && libsOptional[i];
+                    if (LIBRARY_TYPE_SDK.equals(libraryType) && !isOptional) {
+                        throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                                "Package " + packageName + " requires unavailable " + libraryType
+                                + " library " + libName + "; failing!");
+                    } else if (DEBUG_SHARED_LIBRARIES) {
+                        Slog.i(TAG, "Package " + packageName + " desires unavailable " + libraryType
+                                + " library " + libName + "; ignoring!");
+                    }
                 }
             } else {
                 if (requiredVersions != null && requiredCertDigests != null) {

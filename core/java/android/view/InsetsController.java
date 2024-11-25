@@ -1344,6 +1344,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             boolean fromPredictiveBack) {
         final boolean visible = layoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 
+        if (Flags.refactorInsetsController() && !fromPredictiveBack && !visible
+                && (types & ime()) != 0 && (mRequestedVisibleTypes & ime()) != 0) {
+            // Clear IME back callbacks if a IME hide animation is requested
+            mHost.getInputMethodManager().getImeOnBackInvokedDispatcher().preliminaryClear();
+        }
         // Basically, we accept the requested visibilities from the upstream callers...
         setRequestedVisibleTypes(visible ? types : 0, types);
 
@@ -1905,7 +1910,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mImeSourceConsumer.onWindowFocusLost();
     }
 
-    @VisibleForTesting
+    /** Returns the current {@link AnimationType} of an {@link InsetsType}. */
+    @VisibleForTesting(visibility = PACKAGE)
     public @AnimationType int getAnimationType(@InsetsType int type) {
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             InsetsAnimationControlRunner control = mRunningAnimations.get(i).runner;
@@ -1921,6 +1927,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         final @InsetsType int requestedVisibleTypes =
                 (mRequestedVisibleTypes & ~mask) | (visibleTypes & mask);
         if (mRequestedVisibleTypes != requestedVisibleTypes) {
+            if (Flags.refactorInsetsController() && (mRequestedVisibleTypes & ime()) == 0
+                    && (requestedVisibleTypes & ime()) != 0) {
+                // In case the IME back callbacks have been preliminarily cleared before, let's
+                // reregister them. This can happen if an IME hide animation was interrupted and the
+                // IME is requested to be shown again.
+                getHost().getInputMethodManager().getImeOnBackInvokedDispatcher()
+                        .undoPreliminaryClear();
+            }
             ProtoLog.d(IME_INSETS_CONTROLLER, "Setting requestedVisibleTypes to %d (was %d)",
                     requestedVisibleTypes, mRequestedVisibleTypes);
             mRequestedVisibleTypes = requestedVisibleTypes;

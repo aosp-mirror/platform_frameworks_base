@@ -120,6 +120,11 @@ public interface QSTile {
      */
     boolean isListening();
 
+    /**
+     * Return this tile's {@link TileDetailsViewModel} to be used to render the TileDetailsView.
+     */
+    default TileDetailsViewModel getDetailsViewModel() { return null; }
+
     @ProvidesInterface(version = Callback.VERSION)
     interface Callback {
         static final int VERSION = 2;

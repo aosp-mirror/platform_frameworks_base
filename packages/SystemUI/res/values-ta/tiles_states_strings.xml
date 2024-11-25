@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"முடக்கப்பட்டுள்ளது"</item>
     <item msgid="3028994095749238254">"இயக்கப்பட்டுள்ளது"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"கிடைக்கவில்லை"</item>
+    <item msgid="6419996398343291862">"முடக்கப்பட்டுள்ளது"</item>
+    <item msgid="5908720590832378783">"இயக்கப்பட்டுள்ளது"</item>
+  </string-array>
 </resources>

@@ -22,13 +22,16 @@ import androidx.annotation.IntDef
 import com.android.settingslib.graph.proto.PreferenceValueProto
 import com.android.settingslib.ipc.ApiDescriptor
 import com.android.settingslib.ipc.ApiHandler
+import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.IntMessageCodec
 import com.android.settingslib.ipc.MessageCodec
 import com.android.settingslib.metadata.BooleanValue
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceAvailabilityProvider
+import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceRestrictionProvider
 import com.android.settingslib.metadata.PreferenceScreenRegistry
+import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.metadata.ReadWritePermit
 
 /** Request to set preference value. */
@@ -43,7 +46,11 @@ data class PreferenceSetterRequest(
     PreferenceSetterResult.OK,
     PreferenceSetterResult.UNSUPPORTED,
     PreferenceSetterResult.DISABLED,
+    PreferenceSetterResult.RESTRICTED,
     PreferenceSetterResult.UNAVAILABLE,
+    PreferenceSetterResult.REQUIRE_APP_PERMISSION,
+    PreferenceSetterResult.REQUIRE_USER_AGREEMENT,
+    PreferenceSetterResult.DISALLOW,
     PreferenceSetterResult.INVALID_REQUEST,
     PreferenceSetterResult.INTERNAL_ERROR,
 )
@@ -85,14 +92,17 @@ class PreferenceSetterApiDescriptor(override val id: Int) :
 }
 
 /** Preference setter API implementation. */
-class PreferenceSetterApiHandler(override val id: Int) : ApiHandler<PreferenceSetterRequest, Int> {
+class PreferenceSetterApiHandler(
+    override val id: Int,
+    private val permissionChecker: ApiPermissionChecker<PreferenceSetterRequest>,
+) : ApiHandler<PreferenceSetterRequest, Int> {
 
     override fun hasPermission(
         application: Application,
         myUid: Int,
         callingUid: Int,
         request: PreferenceSetterRequest,
-    ): Boolean = true
+    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
 
     override suspend fun invoke(
         application: Application,
@@ -114,26 +124,38 @@ class PreferenceSetterApiHandler(override val id: Int) : ApiHandler<PreferenceSe
         if (metadata is PreferenceAvailabilityProvider && !metadata.isAvailable(application)) {
             return PreferenceSetterResult.UNAVAILABLE
         }
+
+        fun <T> PreferenceMetadata.checkWritePermit(value: T): Int {
+            @Suppress("UNCHECKED_CAST") val preference = (this as PersistentPreference<T>)
+            return when (preference.getWritePermit(application, value, myUid, callingUid)) {
+                ReadWritePermit.ALLOW -> PreferenceSetterResult.OK
+                ReadWritePermit.DISALLOW -> PreferenceSetterResult.DISALLOW
+                ReadWritePermit.REQUIRE_APP_PERMISSION ->
+                    PreferenceSetterResult.REQUIRE_APP_PERMISSION
+                ReadWritePermit.REQUIRE_USER_AGREEMENT ->
+                    PreferenceSetterResult.REQUIRE_USER_AGREEMENT
+                else -> PreferenceSetterResult.INTERNAL_ERROR
+            }
+        }
+
         val storage = metadata.storage(application)
         val value = request.value
         try {
             if (value.hasBooleanValue()) {
                 if (metadata !is BooleanValue) return PreferenceSetterResult.INVALID_REQUEST
                 val booleanValue = value.booleanValue
-                @Suppress("UNCHECKED_CAST")
-                val booleanPreference = metadata as PersistentPreference<Boolean>
-                when (
-                    booleanPreference.getWritePermit(application, booleanValue, myUid, callingUid)
-                ) {
-                    ReadWritePermit.ALLOW -> {}
-                    ReadWritePermit.DISALLOW -> return PreferenceSetterResult.DISALLOW
-                    ReadWritePermit.REQUIRE_APP_PERMISSION ->
-                        return PreferenceSetterResult.REQUIRE_APP_PERMISSION
-                    ReadWritePermit.REQUIRE_USER_AGREEMENT ->
-                        return PreferenceSetterResult.REQUIRE_USER_AGREEMENT
-                    else -> return PreferenceSetterResult.INTERNAL_ERROR
-                }
+                val resultCode = metadata.checkWritePermit(booleanValue)
+                if (resultCode != PreferenceSetterResult.OK) return resultCode
                 storage.setValue(key, Boolean::class.javaObjectType, booleanValue)
+                return PreferenceSetterResult.OK
+            } else if (value.hasIntValue()) {
+                val intValue = value.intValue
+                val resultCode = metadata.checkWritePermit(intValue)
+                if (resultCode != PreferenceSetterResult.OK) return resultCode
+                if (metadata is RangeValue && !metadata.isValidValue(application, intValue)) {
+                    return PreferenceSetterResult.INVALID_REQUEST
+                }
+                storage.setValue(key, Int::class.javaObjectType, intValue)
                 return PreferenceSetterResult.OK
             }
         } catch (e: Exception) {

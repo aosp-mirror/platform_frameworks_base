@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"அருகிலுள்ள அல்ட்ரா-வைடுபேண்ட் சாதனங்களுக்கிடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"அருகிலுள்ள வைஃபை சாதனங்களுடன் தொடர்பு கொள்ளுதல்"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"அருகிலுள்ள வைஃபை சாதனங்களைத் தெரியப்படுத்தவும் இணைக்கவும் இருப்பிடத்தைத் தீர்மானிக்கவும் இது ஆப்ஸை அனுமதிக்கும்"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"அருகிலுள்ள சாதனங்களுக்கான தூரத்தைத் தீர்மானித்தல்"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"அருகிலுள்ள சாதனங்களுக்கு இடையிலான தூரத்தைத் தீர்மானிக்க ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்கள்"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
@@ -1937,13 +1939,15 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"வார இரவு"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"வார இறுதி"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"நிகழ்வு"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"உறக்கத்தில்"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"உறங்குதல்"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"தொந்தரவு செய்ய வேண்டாம் (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"நிர்வகிப்பது: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ஆன்"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ஆஃப்"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> முதல் <xliff:g id="END">%2$s</xliff:g> வரை"</string>
+    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
     <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ஏதேனும் கேலெண்டர்"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> சில ஒலிகளை முடக்குகிறது"</string>
@@ -2426,15 +2430,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் மெசேஜ்களை அனுப்பலாம், பெறலாம்"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ஆப்ஸைத் திறக்கவும்"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"நெட்வொர்க்கைத் தானாகத் தேர்ந்தெடு\" என்பதை இயக்குங்கள்"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"அமைப்புகளில் \"நெட்வொர்க்கைத் தானாகத் தேர்ந்தெடு\" என்பதை இயக்கினால் செயற்கைக்கோள் மூலம் இயங்கும் நெட்வொர்க்கை உங்கள் மொபைல் கண்டறிய முடியும்"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"இயக்கு"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"பின்செல்"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"நிலுவையிலுள்ளது..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"சாட்டிலைட் SOS அம்சம் இப்போது கிடைக்கிறது"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"மொபைல்/வைஃபை நெட்வொர்க் இல்லையென்றால், அவசரகால சேவைகளுக்கு மெசேஜ் அனுப்பலாம். Google Messages உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக இருக்க வேண்டும்."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"சாட்டிலைட் SOS ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"இந்தச் சாதனத்தில் சாட்டிலைட் SOS ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"சாட்டிலைட் SOS அமைக்கப்படவில்லை"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"இணையத்துடன் இணைக்கப்பட்டிருப்பதை உறுதிசெய்துகொண்டு மீண்டும் அமைக்க முயலுங்கள்"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"சாட்டிலைட் SOS கிடைக்கவில்லை"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"இந்த நாடு/பிராந்தியத்தில் சாட்டிலைட் SOS கிடைக்கவில்லை"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"சாட்டிலைட் SOS அமைக்கப்படவில்லை"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"சாட்டிலைட் மூலம் மெசேஜ் செய்ய, Google Messages ஆப்ஸை உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக அமையுங்கள்"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"சாட்டிலைட் SOS கிடைக்கவில்லை"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"இந்த நாட்டிலோ பிராந்தியத்திலோ சாட்டிலைட் SOS கிடைக்கிறதா எனப் பார்க்க இருப்பிட அமைப்புகளை இயக்குங்கள்"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"சாட்டிலைட் மெசேஜிங் கிடைக்கிறது"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"மொபைல்/வைஃபை நெட்வொர்க் இல்லையென்றால் சாட்டிலைட் மூலம் மெசேஜ் அனுப்பலாம். Google Messages உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக இருக்க வேண்டும்."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"சாட்டிலைட் மெசேஜிங் ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"இந்தச் சாதனத்தில் சாட்டிலைட் மெசேஜிங் ஆதரிக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"சாட்டிலைட் மெசேஜிங் அமைக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"இணையத்துடன் இணைக்கப்பட்டிருப்பதை உறுதிசெய்துகொண்டு மீண்டும் அமைக்க முயலுங்கள்"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"சாட்டிலைட் மெசேஜிங் கிடைக்கவில்லை"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"இந்த நாடு/பிராந்தியத்தில் சாட்டிலைட் மெசேஜிங் கிடைக்கவில்லை"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"சாட்டிலைட் மெசேஜிங் அமைக்கப்படவில்லை"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"சாட்டிலைட் மூலம் மெசேஜ் செய்ய, Google Messages ஆப்ஸை உங்கள் இயல்புநிலை மெசேஜிங் ஆப்ஸாக அமையுங்கள்"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"சாட்டிலைட் மெசேஜிங் கிடைக்கவில்லை"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"இந்த நாட்டிலோ பிராந்தியத்திலோ சாட்டிலைட் மெசேஜிங் கிடைக்கிறதா எனப் பார்க்க இருப்பிட அமைப்புகளை இயக்குங்கள்"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>ஐ இனி அடையாளம் காண முடியாது."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ஆகியவற்றை இனி அடையாளம் காண முடியாது."</string>

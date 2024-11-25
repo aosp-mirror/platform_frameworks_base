@@ -199,6 +199,21 @@
     <!-- Displayed to confirm to the user that caller ID will not be restricted on the next call or in general. -->
     <string name="CLIRDefaultOffNextCallOff">Caller ID defaults to not restricted. Next call: Not restricted</string>
 
+    <!-- Message displayed in dialog when APK is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_warning">This app isn’t 16 KB compatible. APK alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; </string>
+
+    <!-- Message displayed in dialog when ELF is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_elf_warning">This app isn’t 16 KB compatible. ELF alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
+    <!-- Message displayed in dialog when APK and ELF are not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_and_elf_warning">This app isn’t 16 KB compatible. APK and ELF alignment checks failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
 
     <!-- Displayed to tell the user that caller ID is not provisioned for their SIM. -->
     <string name="serviceNotProvisioned">Service not provisioned.</string>
@@ -1765,6 +1780,11 @@
     <string name="permlab_nearby_wifi_devices">interact with nearby Wi\u2011Fi devices</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=140]-->
     <string name="permdesc_nearby_wifi_devices">Allows the app to advertise, connect, and determine the relative position of nearby Wi\u2011Fi devices</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_ranging">determine relative position between nearby devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_ranging">Allow the app to determine relative position between nearby devices</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
@@ -5352,6 +5372,8 @@
     <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] General template for a start - end range in a text summary, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_summary_range_words"><xliff:g id="start" example="Sunday">%1$s</xliff:g> to <xliff:g id="end" example="Thursday">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=NONE] General template for combining a days of week start-end range with a time-based start-end range, for example: "Sun-Thurs, 10:00 PM - 7:00 AM" -->
+    <string name="zen_mode_trigger_summary_combined"><xliff:g id="days" example="Sat-Thurs">%1$s</xliff:g>,\u0020<xliff:g id="times" example="10:00 PM - 7:00 AM">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
 
@@ -6522,6 +6544,54 @@ ul.</string>
     <string name="satellite_manual_selection_state_popup_cancel">Go back</string>
     <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
     <string name="unarchival_session_app_label">Pending...</string>
+    <!-- Notification title when satellite service is available. -->
+    <string name="satellite_sos_available_notification_title">Satellite SOS is now available</string>
+    <!-- Notification summary when satellite service is available. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_available_notification_summary">You can message emergency services if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app.</string>
+    <!-- Notification title when satellite service is not supported by device. -->
+    <string name="satellite_sos_not_supported_notification_title">Satellite SOS isn\'t supported</string>
+    <!-- Notification summary when satellite service is not supported by device. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_supported_notification_summary">Satellite SOS isn\'t supported on this device</string>
+    <!-- Notification title when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_provisioned_notification_title">Satellite SOS isn\'t set up</string>
+    <!-- Notification summary when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_provisioned_notification_summary">Make sure you\'re connected to the internet and try setup again</string>
+    <!-- Notification title when satellite service is not allowed at current location. -->
+    <string name="satellite_sos_not_in_allowed_region_notification_title">Satellite SOS isn\'t available</string>
+    <!-- Notification summary when satellite service is not allowed at current location. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_not_in_allowed_region_notification_summary">Satellite SOS isn\'t available in this country or region</string>
+    <!-- Notification title when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title">Satellite SOS not set up</string>
+    <!-- Notification summary when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary">To message by satellite, set Google Messages as your default messaging app</string>
+    <!-- Notification title when location settings is disabled. -->
+    <string name="satellite_sos_location_disabled_notification_title">Satellite SOS isn\'t available</string>
+    <!-- Notification summary when location settings is disabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_sos_location_disabled_notification_summary">To check if satellite SOS is available in this country or region, turn on location settings</string>
+    <!-- Notification title when satellite service is available. -->
+    <string name="satellite_messaging_available_notification_title">Satellite messaging available</string>
+    <!-- Notification summary when satellite service is available. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_available_notification_summary">You can message by satellite if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app.</string>
+    <!-- Notification title when satellite service is not supported by device. -->
+    <string name="satellite_messaging_not_supported_notification_title">Satellite messaging not supported</string>
+    <!-- Notification summary when satellite service is not supported by device. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_supported_notification_summary">Satellite messaging isn\'t supported on this device</string>
+    <!-- Notification title when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_provisioned_notification_title">Satellite messaging not set up</string>
+    <!-- Notification summary when satellite service is not provisioned. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_provisioned_notification_summary">Make sure you\'re connected to the internet and try setup again</string>
+    <!-- Notification title when satellite service is not allowed at current location. -->
+    <string name="satellite_messaging_not_in_allowed_region_notification_title">Satellite messaging not available</string>
+    <!-- Notification summary when satellite service is not allowed at current location. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary">Satellite messaging isn\'t available in this country or region</string>
+    <!-- Notification title when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title">Satellite messaging not set up</string>
+    <!-- Notification summary when default messaging app does not support satellite. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary">To message by satellite, set Google Messages as your default messaging app</string>
+    <!-- Notification title when location settings is disabled. -->
+    <string name="satellite_messaging_location_disabled_notification_title">Satellite messaging not available</string>
+    <!-- Notification summary when location settings is disabled. [CHAR LIMIT=NONE] -->
+    <string name="satellite_messaging_location_disabled_notification_summary">To check if satellite messaging is available in this country or region, turn on location settings</string>
 
     <!-- Fingerprint dangling notification title -->
     <string name="fingerprint_dangling_notification_title">Set up Fingerprint Unlock again</string>

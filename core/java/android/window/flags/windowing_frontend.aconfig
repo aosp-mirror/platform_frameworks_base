@@ -76,6 +76,14 @@ flag {
 }
 
 flag {
+  name: "disable_opt_out_edge_to_edge"
+  namespace: "windowing_frontend"
+  description: "Deprecate and disable windowOptOutEdgeToEdgeEnforcement"
+  bug: "377864165"
+  is_fixed_read_only: true
+}
+
+flag {
   name: "keyguard_going_away_timeout"
   namespace: "windowing_frontend"
   description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
@@ -152,12 +160,21 @@ flag {
 }
 
 flag {
-  name: "delegate_unhandled_drags"
-  is_exported: true
-  namespace: "multitasking"
-  description: "Enables delegating unhandled drags to SystemUI"
-  bug: "320797628"
-  is_fixed_read_only: true
+    name: "delegate_unhandled_drags"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables delegating unhandled drags to SystemUI"
+    bug: "320797628"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "supports_drag_assistant_to_multiwindow"
+    is_exported: true
+    namespace: "multitasking"
+    description: "Enables support for dragging the assistant into multiwindow"
+    bug: "371206207"
+    is_fixed_read_only: true
 }
 
 flag {
@@ -180,6 +197,13 @@ flag {
   namespace: "windowing_frontend"
   description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
   bug: "357141415"
+}
+
+flag {
+  name: "show_app_handle_large_screens"
+  namespace: "windowing_frontend"
+  description: "Show the app handle and the app menu also on large screens that don't enable desktop mode"
+  bug: "377689543"
 }
 
 flag {
@@ -254,6 +278,16 @@ flag {
   description: "The aspect ratio should always match when drawing snapshot"
   bug: "341020277"
   is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "system_ui_post_animation_end"
+  namespace: "windowing_frontend"
+  description: "Run AnimatorListener#onAnimationEnd on next frame for SystemUI"
+  bug: "300035126"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -361,6 +395,17 @@ flag {
 }
 
 flag {
+  name: "defer_predictive_animation_if_no_snapshot"
+  namespace: "windowing_frontend"
+  description: "If no snapshot for previous window, start animation until the client has draw."
+  bug: "374621014"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "disallow_app_progress_embedded_window"
   namespace: "windowing_frontend"
   description: "Pilfer pointers when app transfer input gesture to embedded window."
@@ -369,4 +414,38 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "predictive_back_system_override_callback"
+    namespace: "windowing_frontend"
+    description: "Provide pre-make predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
+}
+
+flag {
+  name: "record_task_snapshots_before_shutdown"
+  namespace: "windowing_frontend"
+  description: "Record task snapshots before shutdown"
+  bug: "376821232"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "predictive_back_three_button_nav"
+    namespace: "systemui"
+    description: "Enable Predictive Back Animation for 3-button-nav"
+    bug: "373544911"
+}
+
+flag {
+    name: "predictive_back_default_enable_sdk_36"
+    namespace: "systemui"
+    description: "Enable Predictive Back by default with targetSdk>=36"
+    is_fixed_read_only: true
+    bug: "376407910"
 }

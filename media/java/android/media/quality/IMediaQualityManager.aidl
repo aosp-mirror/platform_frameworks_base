@@ -21,6 +21,7 @@ import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
 import android.media.quality.ParamCapability;
+import android.media.quality.PictureProfileHandle;
 import android.media.quality.PictureProfile;
 import android.media.quality.SoundProfile;
 
@@ -30,20 +31,25 @@ import android.media.quality.SoundProfile;
  */
 interface IMediaQualityManager {
     PictureProfile createPictureProfile(in PictureProfile pp);
-    void updatePictureProfile(in long id, in PictureProfile pp);
-    void removePictureProfile(in long id);
-    PictureProfile getPictureProfileById(in long id);
+    void updatePictureProfile(in String id, in PictureProfile pp);
+    void removePictureProfile(in String id);
+    PictureProfile getPictureProfile(in int type, in String name);
     List<PictureProfile> getPictureProfilesByPackage(in String packageName);
     List<PictureProfile> getAvailablePictureProfiles();
-    List<PictureProfile> getAllPictureProfiles();
+    List<String> getPictureProfilePackageNames();
+    List<String> getPictureProfileAllowList();
+    void setPictureProfileAllowList(in List<String> packages);
+    PictureProfileHandle getPictureProfileHandle(in String id);
 
     SoundProfile createSoundProfile(in SoundProfile pp);
-    void updateSoundProfile(in long id, in SoundProfile pp);
-    void removeSoundProfile(in long id);
-    SoundProfile getSoundProfileById(in long id);
+    void updateSoundProfile(in String id, in SoundProfile pp);
+    void removeSoundProfile(in String id);
+    SoundProfile getSoundProfile(in int type, in String name);
     List<SoundProfile> getSoundProfilesByPackage(in String packageName);
     List<SoundProfile> getAvailableSoundProfiles();
-    List<SoundProfile> getAllSoundProfiles();
+    List<String> getSoundProfilePackageNames();
+    List<String> getSoundProfileAllowList();
+    void setSoundProfileAllowList(in List<String> packages);
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
@@ -61,4 +67,5 @@ interface IMediaQualityManager {
 
     void setAmbientBacklightSettings(in AmbientBacklightSettings settings);
     void setAmbientBacklightEnabled(in boolean enabled);
+    boolean isAmbientBacklightEnabled();
 }

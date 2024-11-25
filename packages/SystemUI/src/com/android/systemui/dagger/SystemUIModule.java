@@ -32,6 +32,7 @@ import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.activity.ActivityManagerModule;
 import com.android.systemui.ambient.dagger.AmbientModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
@@ -48,7 +49,8 @@ import com.android.systemui.brightness.dagger.ScreenBrightnessModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.data.CommonDataLayerModule;
-import com.android.systemui.common.ui.ConfigurationStateModule;
+import com.android.systemui.common.ui.ConfigurationModule;
+import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryModule;
 import com.android.systemui.common.usagestats.data.CommonUsageStatsDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
@@ -99,7 +101,7 @@ import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recordissue.RecordIssueModule;
-import com.android.systemui.retail.dagger.RetailModeModule;
+import com.android.systemui.retail.RetailModeModule;
 import com.android.systemui.scene.shared.model.SceneContainerConfig;
 import com.android.systemui.scene.shared.model.SceneDataSource;
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator;
@@ -139,7 +141,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ConfigurationControllerModule;
 import com.android.systemui.statusbar.phone.LetterboxModule;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PolicyModule;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
@@ -197,6 +199,7 @@ import javax.inject.Named;
  * may not appreciate that.
  */
 @Module(includes = {
+        ActivityManagerModule.class,
         AmbientModule.class,
         AppOpsModule.class,
         AssistModule.class,
@@ -211,7 +214,8 @@ import javax.inject.Named;
         ClockRegistryModule.class,
         CommunalModule.class,
         CommonDataLayerModule.class,
-        ConfigurationStateModule.class,
+        ConfigurationModule.class,
+        ConfigurationRepositoryModule.class,
         CommonUsageStatsDataLayerModule.class,
         ConfigurationControllerModule.class,
         ConnectivityModule.class,

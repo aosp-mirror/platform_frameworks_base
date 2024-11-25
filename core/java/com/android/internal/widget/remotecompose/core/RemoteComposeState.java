@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
 import com.android.internal.widget.remotecompose.core.operations.utilities.CollectionsAccess;
 import com.android.internal.widget.remotecompose.core.operations.utilities.DataMap;
@@ -46,14 +49,15 @@ public class RemoteComposeState implements CollectionsAccess {
     private final IntMap<Object> mObjectMap = new IntMap<>();
 
     private final boolean[] mColorOverride = new boolean[MAX_COLORS];
-    private final IntMap<ArrayAccess> mCollectionMap = new IntMap<>();
+    @NonNull private final IntMap<ArrayAccess> mCollectionMap = new IntMap<>();
 
     private final boolean[] mDataOverride = new boolean[MAX_DATA];
     private final boolean[] mIntegerOverride = new boolean[MAX_DATA];
+    private final boolean[] mFloatOverride = new boolean[MAX_DATA];
 
     private int mNextId = START_ID;
-    private int[] mIdMaps = new int[] {START_ID, NanMap.START_VAR, NanMap.START_ARRAY};
-    private RemoteContext mRemoteContext = null;
+    @NonNull private int[] mIdMaps = new int[] {START_ID, NanMap.START_VAR, NanMap.START_ARRAY};
+    @Nullable private RemoteContext mRemoteContext = null;
 
     /**
      * Get Object based on id. The system will cache things like bitmaps Paths etc. They can be
@@ -62,6 +66,7 @@ public class RemoteComposeState implements CollectionsAccess {
      * @param id
      * @return
      */
+    @Nullable
     public Object getFromId(int id) {
         return mIntDataMap.get(id);
     }
@@ -77,7 +82,7 @@ public class RemoteComposeState implements CollectionsAccess {
     }
 
     /** Return the id of an item from the cache. */
-    public int dataGetId(Object data) {
+    public int dataGetId(@NonNull Object data) {
         Integer res = mDataIntMap.get(data);
         if (res == null) {
             return -1;
@@ -89,7 +94,7 @@ public class RemoteComposeState implements CollectionsAccess {
      * Add an item to the cache. Generates an id for the item and adds it to the cache based on that
      * id.
      */
-    public int cacheData(Object item) {
+    public int cacheData(@NonNull Object item) {
         int id = nextId();
         mDataIntMap.put(item, id);
         mIntDataMap.put(id, item);
@@ -100,7 +105,7 @@ public class RemoteComposeState implements CollectionsAccess {
      * Add an item to the cache. Generates an id for the item and adds it to the cache based on that
      * id.
      */
-    public int cacheData(Object item, int type) {
+    public int cacheData(@NonNull Object item, int type) {
         int id = nextId(type);
         mDataIntMap.put(item, id);
         mIntDataMap.put(id, item);
@@ -108,13 +113,13 @@ public class RemoteComposeState implements CollectionsAccess {
     }
 
     /** Insert an item in the cache */
-    public void cacheData(int id, Object item) {
+    public void cacheData(int id, @NonNull Object item) {
         mDataIntMap.put(item, id);
         mIntDataMap.put(id, item);
     }
 
     /** Insert an item in the cache */
-    public void updateData(int id, Object item) {
+    public void updateData(int id, @NonNull Object item) {
         if (!mDataOverride[id]) {
             Object previous = mIntDataMap.get(id);
             if (previous != item) {
@@ -126,13 +131,23 @@ public class RemoteComposeState implements CollectionsAccess {
         }
     }
 
+    private final IntMap<float[]> mPathData = new IntMap<>();
+
+    public void putPathData(int id, float[] data) {
+        mPathData.put(id, data);
+    }
+
+    public float[] getPathData(int id) {
+        return mPathData.get(id);
+    }
+
     /**
      * Adds a data Override.
      *
      * @param id
      * @param item the new value
      */
-    public void overrideData(int id, Object item) {
+    public void overrideData(int id, @NonNull Object item) {
         Object previous = mIntDataMap.get(id);
         if (previous != item) {
             mDataIntMap.remove(previous);
@@ -158,10 +173,28 @@ public class RemoteComposeState implements CollectionsAccess {
 
     /** Insert an float item in the cache */
     public void updateFloat(int id, float value) {
+        if (!mFloatOverride[id]) {
+            float previous = mFloatMap.get(id);
+            if (previous != value) {
+                mFloatMap.put(id, value);
+                mIntegerMap.put(id, (int) value);
+                updateListeners(id);
+            }
+        }
+    }
+
+    /**
+     * Adds a float Override.
+     *
+     * @param id
+     * @param value the new value
+     */
+    public void overrideFloat(int id, float value) {
         float previous = mFloatMap.get(id);
         if (previous != value) {
             mFloatMap.put(id, value);
             mIntegerMap.put(id, (int) value);
+            mFloatOverride[id] = true;
             updateListeners(id);
         }
     }
@@ -294,6 +327,16 @@ public class RemoteComposeState implements CollectionsAccess {
     }
 
     /**
+     * Clear the float override
+     *
+     * @param id the float id to clear
+     */
+    public void clearFloatOverride(int id) {
+        mFloatOverride[id] = false;
+        updateListeners(id);
+    }
+
+    /**
      * Method to determine if a cached value has been written to the documents WireBuffer based on
      * its id.
      */
@@ -322,7 +365,8 @@ public class RemoteComposeState implements CollectionsAccess {
     }
 
     /**
-     * Get the next available id
+     * Get the next available id 0 is normal (float,int,String,color) 1 is VARIABLES 2 is
+     * collections
      *
      * @return
      */
@@ -342,10 +386,10 @@ public class RemoteComposeState implements CollectionsAccess {
         mNextId = id;
     }
 
-    IntMap<ArrayList<VariableSupport>> mVarListeners = new IntMap<>();
-    ArrayList<VariableSupport> mAllVarListeners = new ArrayList<>();
+    @NonNull IntMap<ArrayList<VariableSupport>> mVarListeners = new IntMap<>();
+    @NonNull ArrayList<VariableSupport> mAllVarListeners = new ArrayList<>();
 
-    private void add(int id, VariableSupport variableSupport) {
+    private void add(int id, @NonNull VariableSupport variableSupport) {
         ArrayList<VariableSupport> v = mVarListeners.get(id);
         if (v == null) {
             v = new ArrayList<VariableSupport>();
@@ -361,8 +405,18 @@ public class RemoteComposeState implements CollectionsAccess {
      * @param id
      * @param variableSupport
      */
-    public void listenToVar(int id, VariableSupport variableSupport) {
+    public void listenToVar(int id, @NonNull VariableSupport variableSupport) {
         add(id, variableSupport);
+    }
+
+    /**
+     * Is any command listening to this variable
+     *
+     * @param id
+     * @return
+     */
+    public boolean hasListener(int id) {
+        return mVarListeners.get(id) != null;
     }
 
     /**
@@ -371,7 +425,7 @@ public class RemoteComposeState implements CollectionsAccess {
      * @param context
      * @return
      */
-    public int getOpsToUpdate(RemoteContext context) {
+    public int getOpsToUpdate(@NonNull RemoteContext context) {
         for (VariableSupport vs : mAllVarListeners) {
             vs.updateVariables(context);
         }
@@ -405,18 +459,18 @@ public class RemoteComposeState implements CollectionsAccess {
         updateFloat(RemoteContext.ID_WINDOW_HEIGHT, height);
     }
 
-    public void addCollection(int id, ArrayAccess collection) {
+    public void addCollection(int id, @NonNull ArrayAccess collection) {
         mCollectionMap.put(id & 0xFFFFF, collection);
     }
 
     @Override
     public float getFloatValue(int id, int index) {
-        return mCollectionMap.get(id & 0xFFFFF).getFloatValue(index);
+        return mCollectionMap.get(id & 0xFFFFF).getFloatValue(index); // TODO: potential npe
     }
 
     @Override
-    public float[] getFloats(int id) {
-        return mCollectionMap.get(id & 0xFFFFF).getFloats();
+    public @Nullable float[] getFloats(int id) {
+        return mCollectionMap.get(id & 0xFFFFF).getFloats(); // TODO: potential npe
     }
 
     @Override
@@ -424,11 +478,11 @@ public class RemoteComposeState implements CollectionsAccess {
         return mCollectionMap.get(id & 0xFFFFF).getId(index);
     }
 
-    public void putDataMap(int id, DataMap map) {
+    public void putDataMap(int id, @NonNull DataMap map) {
         mDataMapMap.put(id, map);
     }
 
-    public DataMap getDataMap(int id) {
+    public @Nullable DataMap getDataMap(int id) {
         return mDataMapMap.get(id);
     }
 
@@ -437,15 +491,15 @@ public class RemoteComposeState implements CollectionsAccess {
         return mCollectionMap.get(id & 0xFFFFF).getLength();
     }
 
-    public void setContext(RemoteContext context) {
+    public void setContext(@NonNull RemoteContext context) {
         mRemoteContext = context;
     }
 
-    public void updateObject(int id, Object value) {
+    public void updateObject(int id, @NonNull Object value) {
         mObjectMap.put(id, value);
     }
 
-    public Object getObject(int id) {
+    public @Nullable Object getObject(int id) {
         return mObjectMap.get(id);
     }
 }

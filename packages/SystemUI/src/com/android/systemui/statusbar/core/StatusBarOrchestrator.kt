@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.core
 
 import android.view.Display
 import android.view.View
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -46,12 +48,12 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.util.Optional
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Class responsible for managing the lifecycle and state of the status bar.
@@ -68,9 +70,10 @@ constructor(
     @Assisted private val statusBarModeRepository: StatusBarModePerDisplayRepository,
     @Assisted private val statusBarInitializer: StatusBarInitializer,
     @Assisted private val statusBarWindowController: StatusBarWindowController,
+    @Main private val mainContext: CoroutineContext,
+    @Assisted private val autoHideController: AutoHideController,
     private val demoModeController: DemoModeController,
     private val pluginDependencyProvider: PluginDependencyProvider,
-    private val autoHideController: AutoHideController,
     private val remoteInputManager: NotificationRemoteInputManager,
     private val notificationShadeWindowViewControllerLazy:
         Lazy<NotificationShadeWindowViewController>,
@@ -141,7 +144,8 @@ constructor(
     override fun start() {
         StatusBarConnectedDisplays.assertInNewMode()
         coroutineScope
-            .launch {
+            // Perform animations on the main thread to prevent crashes.
+            .launch(context = mainContext) {
                 dumpManager.registerCriticalDumpable(dumpableName, this@StatusBarOrchestrator)
                 launch {
                     controllerAndBouncerShowing.collect { (controller, bouncerShowing) ->
@@ -206,10 +210,6 @@ constructor(
     }
 
     private fun setUpAutoHide() {
-        if (displayId != Display.DEFAULT_DISPLAY) {
-            return
-        }
-        // TODO(b/373309973): per display implementation of auto hide controller
         autoHideController.setStatusBar(
             object : AutoHideUiElement {
                 override fun synchronizeState() {}
@@ -237,10 +237,7 @@ constructor(
         if (!demoModeController.isInDemoMode) {
             barTransitions.transitionTo(barMode.toTransitionModeInt(), animate)
         }
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            // TODO(b/373309973): per display implementation of auto hide controller
-            autoHideController.touchAutoHide()
-        }
+        autoHideController.touchAutoHide()
     }
 
     private fun updateBubblesVisibility(statusBarVisible: Boolean) {
@@ -284,6 +281,7 @@ constructor(
             statusBarModeRepository: StatusBarModePerDisplayRepository,
             statusBarInitializer: StatusBarInitializer,
             statusBarWindowController: StatusBarWindowController,
+            autoHideController: AutoHideController,
         ): StatusBarOrchestrator
     }
 }

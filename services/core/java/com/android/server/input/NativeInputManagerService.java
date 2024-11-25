@@ -98,6 +98,8 @@ interface NativeInputManagerService {
 
     void toggleCapsLock(int deviceId);
 
+    void resetLockedModifierState();
+
     void displayRemoved(int displayId);
 
     void setInputDispatchMode(boolean enabled, boolean frozen);
@@ -142,6 +144,8 @@ interface NativeInputManagerService {
     void setShouldNotifyTouchpadHardwareState(boolean enabled);
 
     void setTouchpadRightClickZoneEnabled(boolean enabled);
+
+    void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
 
@@ -368,6 +372,9 @@ interface NativeInputManagerService {
         public native void toggleCapsLock(int deviceId);
 
         @Override
+        public native void resetLockedModifierState();
+
+        @Override
         public native void displayRemoved(int displayId);
 
         @Override
@@ -425,6 +432,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);

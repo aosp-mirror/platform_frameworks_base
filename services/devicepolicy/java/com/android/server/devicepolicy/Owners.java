@@ -682,6 +682,32 @@ class Owners {
         }
     }
 
+    void markMemoryTaggingMigrated() {
+        synchronized (mData) {
+            mData.mMemoryTaggingMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isMemoryTaggingMigrated() {
+        synchronized (mData) {
+            return mData.mMemoryTaggingMigrated;
+        }
+    }
+
+    void markSetKeyguardDisabledFeaturesMigrated() {
+        synchronized (mData) {
+            mData.mSetKeyguardDisabledFeaturesMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isSetKeyguardDisabledFeaturesMigrated() {
+        synchronized (mData) {
+            return mData.mSetKeyguardDisabledFeaturesMigrated;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

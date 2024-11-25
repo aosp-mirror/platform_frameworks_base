@@ -26,9 +26,9 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderComponent
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSlidersViewModel
 import javax.inject.Inject
-import kotlin.math.abs
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -39,9 +39,10 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
 
     fun bind(view: View) {
         with(view) {
-            val volumeDialog: View = requireViewById(R.id.volume_dialog)
             val floatingSlidersContainer: ViewGroup =
                 requireViewById(R.id.volume_dialog_floating_sliders_container)
+            val mainSliderContainer: View =
+                requireViewById(R.id.volume_dialog_main_slider_container)
             repeatWhenAttached {
                 viewModel(
                     traceName = "VolumeDialogSlidersViewBinder",
@@ -50,21 +51,28 @@ constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) 
                 ) { viewModel ->
                     viewModel.sliders
                         .onEach { uiModel ->
-                            uiModel.sliderViewBinder.bind(volumeDialog)
+                            uiModel.sliderComponent.bindSlider(mainSliderContainer)
 
-                            val floatingSliderViewBinders = uiModel.floatingSliderViewBinders
+                            val floatingSliderViewBinders = uiModel.floatingSliderComponent
                             floatingSlidersContainer.ensureChildCount(
                                 viewLayoutId = R.layout.volume_dialog_slider_floating,
                                 count = floatingSliderViewBinders.size,
                             )
-                            floatingSliderViewBinders.fastForEachIndexed { index, viewBinder ->
-                                viewBinder.bind(floatingSlidersContainer.getChildAt(index))
+                            floatingSliderViewBinders.fastForEachIndexed { index, sliderComponent ->
+                                sliderComponent.bindSlider(
+                                    floatingSlidersContainer.getChildAt(index)
+                                )
                             }
                         }
                         .launchIn(this)
                 }
             }
         }
+    }
+
+    private fun VolumeDialogSliderComponent.bindSlider(sliderContainer: View) {
+        sliderViewBinder().bind(sliderContainer)
+        sliderTouchesViewBinder().bind(sliderContainer)
     }
 }
 
@@ -76,7 +84,7 @@ private fun ViewGroup.ensureChildCount(@LayoutRes viewLayoutId: Int, count: Int)
         }
         childCountDelta < 0 -> {
             val inflater = LayoutInflater.from(context)
-            repeat(abs(childCountDelta)) { inflater.inflate(viewLayoutId, this, true) }
+            repeat(-childCountDelta) { inflater.inflate(viewLayoutId, this, true) }
         }
     }
 }

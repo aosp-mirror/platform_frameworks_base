@@ -65,6 +65,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -347,7 +348,8 @@ public class BinaryTransparencyService extends SystemService {
                         + " packages after considering preloads");
             }
 
-            if (CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
+            if (!android.app.Flags.backgroundInstallControlCallbackApi()
+                    && CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
                 // lastly measure all newly installed MBAs
                 List<IBinaryTransparencyService.AppInfo> allMbaInfo =
                         collectAllSilentInstalledMbaInfo(packagesMeasured);
@@ -1158,6 +1160,49 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     /**
+     * Receive callbacks from BIC to write silently installed apps to log
+     *
+     * TODO: Add a host test for testing registration and callback of BicCallbackHandler
+     *  b/380002484
+     */
+    static class BicCallbackHandler extends IRemoteCallback.Stub {
+        private static final String BIC_CALLBACK_HANDLER_TAG =
+                "BTS.BicCallbackHandler";
+        private final BinaryTransparencyServiceImpl mServiceImpl;
+        static final String FLAGGED_PACKAGE_NAME_KEY = "packageName";
+
+        BicCallbackHandler(BinaryTransparencyServiceImpl impl) {
+            mServiceImpl = impl;
+        }
+
+        @Override
+        public void sendResult(Bundle data) {
+            String packageName = data.getString(FLAGGED_PACKAGE_NAME_KEY);
+            if (packageName == null) return;
+            if (DEBUG) {
+                Slog.d(BIC_CALLBACK_HANDLER_TAG, "background install event detected for "
+                        + packageName);
+            }
+
+            PackageState packageState = LocalServices.getService(PackageManagerInternal.class)
+                    .getPackageStateInternal(packageName);
+            if (packageState == null) {
+                Slog.w(TAG, "Package state is unavailable, ignoring the package "
+                        + packageName);
+                return;
+            }
+            if (packageState.isUpdatedSystemApp()) {
+                return;
+            }
+            List<IBinaryTransparencyService.AppInfo> mbaInfo = mServiceImpl.collectAppInfo(
+                    packageState, MBA_STATUS_NEW_INSTALL);
+            for (IBinaryTransparencyService.AppInfo appInfo : mbaInfo) {
+                mServiceImpl.writeAppInfoToLog(appInfo);
+            }
+        }
+    };
+
+    /**
      * Called when the system service should publish a binder service using
      * {@link #publishBinderService(String, IBinder).}
      */
@@ -1534,6 +1579,29 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
+    private void registerBicCallback() {
+        if(!com.android.server.flags.Flags.optionalBackgroundInstallControl()) {
+            Slog.d(TAG, "BICS is disabled for this device, skipping registration.");
+            return;
+        }
+        IBackgroundInstallControlService iBics =
+                IBackgroundInstallControlService.Stub.asInterface(
+                        ServiceManager.getService(
+                                Context.BACKGROUND_INSTALL_CONTROL_SERVICE));
+        if(iBics == null) {
+            Slog.e(TAG, "Failed to register BackgroundInstallControl callback, either "
+                + "background install control service does not exist or disabled on this "
+                + "build.");
+            return;
+        }
+        try {
+            iBics.registerBackgroundInstallCallback(
+                    new BicCallbackHandler(mServiceImpl));
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register BackgroundInstallControl callback.");
+        }
+    }
+
     private boolean isPackagePreloaded(String packageName) {
         PackageManager pm = mContext.getPackageManager();
         try {
@@ -1596,6 +1664,10 @@ public class BinaryTransparencyService extends SystemService {
     private void registerAllPackageUpdateObservers() {
         registerApkAndNonStagedApexUpdateListener();
         registerStagedApexUpdateObserver();
+        if (android.app.Flags.backgroundInstallControlCallbackApi()
+                && CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
+            registerBicCallback();
+        }
     }
 
     private String translateContentDigestAlgorithmIdToString(int algorithmId) {

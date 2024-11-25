@@ -85,6 +85,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
 import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SCAN_UPDATE_SIGNATURE;
 import static com.android.server.pm.PackageManagerService.TAG;
+import static com.android.server.pm.PackageManagerService.WATCHDOG_TIMEOUT;
 import static com.android.server.pm.PackageManagerServiceUtils.comparePackageSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
@@ -133,9 +134,11 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -174,7 +177,6 @@ import com.android.internal.util.CollectionUtils;
 import com.android.server.EventLogTags;
 import com.android.server.SystemConfig;
 import com.android.server.criticalevents.CriticalEventLog;
-import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -210,6 +212,10 @@ import java.util.concurrent.ExecutorService;
 
 
 final class InstallPackageHelper {
+    // One minute over PM WATCHDOG_TIMEOUT
+    private static final long WAKELOCK_TIMEOUT_MS = WATCHDOG_TIMEOUT + 1000 * 60;
+    private static final String INSTALLER_WAKE_LOCK_TAG = "installer:packages";
+
     private final PackageManagerService mPm;
     private final AppDataHelper mAppDataHelper;
     private final BroadcastHelper mBroadcastHelper;
@@ -218,20 +224,24 @@ final class InstallPackageHelper {
     private final IncrementalManager mIncrementalManager;
     private final ApexManager mApexManager;
     private final DexManager mDexManager;
-    private final ArtManagerService mArtManagerService;
     private final Context mContext;
-    private final PackageDexOptimizer mPackageDexOptimizer;
     private final PackageAbiHelper mPackageAbiHelper;
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageManagerServiceInjector mInjector;
     private final UpdateOwnershipHelper mUpdateOwnershipHelper;
+    private final InstallDependencyHelper mInstallDependencyHelper;
+
+    private final Object mInternalLock = new Object();
+    @GuardedBy("mInternalLock")
+    private PowerManager.WakeLock mInstallingWakeLock;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm,
                          AppDataHelper appDataHelper,
                          RemovePackageHelper removePackageHelper,
                          DeletePackageHelper deletePackageHelper,
-                         BroadcastHelper broadcastHelper) {
+                         BroadcastHelper broadcastHelper,
+                         InstallDependencyHelper installDependencyHelper) {
         mPm = pm;
         mInjector = pm.mInjector;
         mAppDataHelper = appDataHelper;
@@ -241,12 +251,11 @@ final class InstallPackageHelper {
         mIncrementalManager = pm.mInjector.getIncrementalManager();
         mApexManager = pm.mInjector.getApexManager();
         mDexManager = pm.mInjector.getDexManager();
-        mArtManagerService = pm.mInjector.getArtManagerService();
         mContext = pm.mInjector.getContext();
-        mPackageDexOptimizer = pm.mInjector.getPackageDexOptimizer();
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
         mUpdateOwnershipHelper = pm.mInjector.getUpdateOwnershipHelper();
+        mInstallDependencyHelper = installDependencyHelper;
     }
 
     /**
@@ -1013,6 +1022,7 @@ final class InstallPackageHelper {
         boolean success = false;
         final Map<String, Boolean> createdAppId = new ArrayMap<>(requests.size());
         final Map<String, Settings.VersionInfo> versionInfos = new ArrayMap<>(requests.size());
+        final long acquireTime = acquireWakeLock(requests.size());
         try {
             CriticalEventLog.getInstance().logInstallPackagesStarted();
             if (prepareInstallPackages(requests)
@@ -1022,17 +1032,59 @@ final class InstallPackageHelper {
                 if (reconciledPackages == null) {
                     return;
                 }
-                if (Flags.improveInstallFreeze()) {
-                    prepPerformDexoptIfNeeded(reconciledPackages);
-                }
-                if (renameAndUpdatePaths(requests)
-                        && commitInstallPackages(reconciledPackages)) {
-                    success = true;
+                if (renameAndUpdatePaths(requests)) {
+                    // rename before dexopt because art will encoded the path in the odex/vdex file
+                    if (Flags.improveInstallFreeze()) {
+                        prepPerformDexoptIfNeeded(reconciledPackages);
+                    }
+                    if (commitInstallPackages(reconciledPackages)) {
+                        success = true;
+                    }
                 }
             }
         } finally {
             completeInstallProcess(requests, createdAppId, success);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            releaseWakeLock(acquireTime, requests.size());
+        }
+    }
+
+    private long acquireWakeLock(int count) {
+        if (!mPm.isSystemReady()) {
+            return -1;
+        }
+        synchronized (mInternalLock) {
+            if (mInstallingWakeLock == null) {
+                PowerManager pwm = mContext.getSystemService(PowerManager.class);
+                if (pwm != null) {
+                    mInstallingWakeLock = pwm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                            INSTALLER_WAKE_LOCK_TAG);
+                } else {
+                    Slog.w(TAG, "Unable to obtain power manager while obtaining wake lock");
+                    return -1;
+                }
+            }
+
+            mInstallingWakeLock.acquire(WAKELOCK_TIMEOUT_MS * count);
+            return SystemClock.elapsedRealtime();
+        }
+    }
+
+    private void releaseWakeLock(final long acquireTime, int count) {
+        if (acquireTime < 0) {
+            return;
+        }
+        synchronized (mInternalLock) {
+            try {
+                if (mInstallingWakeLock == null) {
+                    return;
+                }
+                if (mInstallingWakeLock.isHeld()) {
+                    mInstallingWakeLock.release();
+                }
+            } catch (RuntimeException e) {
+                Slog.wtf(TAG, "Error while releasing installer lock", e);
+            }
         }
     }
 
@@ -1314,6 +1366,10 @@ final class InstallPackageHelper {
                     request.setReturnCode(PackageManager.INSTALL_UNKNOWN);
                 }
             }
+        }
+
+        for (InstallRequest request : requests) {
+            mInstallDependencyHelper.notifySessionComplete(request.getSessionId(), success);
         }
     }
 

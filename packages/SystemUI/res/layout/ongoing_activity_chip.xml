@@ -55,9 +55,14 @@
         />
 
         <!-- Shows generic text. -->
+        <!-- Since there's so little room in the status bar chip area, don't ellipsize the text and
+             instead just fade it out a bit at the end. -->
         <TextView
             android:id="@+id/ongoing_activity_chip_text"
             style="@style/StatusBar.Chip.Text"
+            android:ellipsize="none"
+            android:requiresFadingEdge="horizontal"
+            android:fadingEdgeLength="@dimen/ongoing_activity_chip_text_fading_edge_length"
             android:visibility="gone"
             />
 

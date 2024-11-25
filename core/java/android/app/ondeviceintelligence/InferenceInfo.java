@@ -16,6 +16,12 @@
 
 package android.app.ondeviceintelligence;
 
+import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE;
+
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -25,7 +31,9 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class InferenceInfo implements Parcelable {
+@SystemApi
+@FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+public final class InferenceInfo implements Parcelable {
 
     /**
      * Uid for the caller app.
@@ -55,7 +63,7 @@ public class InferenceInfo implements Parcelable {
      * @param endTimeMs       Inference end time (milliseconds from the epoch time).
      * @param suspendedTimeMs Suspended time in milliseconds.
      */
-    public InferenceInfo(int uid, long startTimeMs, long endTimeMs,
+    InferenceInfo(int uid, long startTimeMs, long endTimeMs,
             long suspendedTimeMs) {
         this.uid = uid;
         this.startTimeMs = startTimeMs;
@@ -68,7 +76,7 @@ public class InferenceInfo implements Parcelable {
      *
      * @param in The Parcel to read the object's data from.
      */
-    protected InferenceInfo(Parcel in) {
+    private InferenceInfo(@NonNull Parcel in) {
         uid = in.readInt();
         startTimeMs = in.readLong();
         endTimeMs = in.readLong();
@@ -79,11 +87,11 @@ public class InferenceInfo implements Parcelable {
     /**
      * Writes the object's data to the provided Parcel.
      *
-     * @param dest The Parcel to write the object's data to.
+     * @param dest  The Parcel to write the object's data to.
      * @param flags Additional flags about how the object should be written.
      */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(uid);
         dest.writeLong(startTimeMs);
         dest.writeLong(endTimeMs);
@@ -104,7 +112,8 @@ public class InferenceInfo implements Parcelable {
      *
      * @return the inference start time in milliseconds from the epoch time.
      */
-    public long getStartTimeMs() {
+    @CurrentTimeMillisLong
+    public long getStartTimeMillis() {
         return startTimeMs;
     }
 
@@ -113,7 +122,8 @@ public class InferenceInfo implements Parcelable {
      *
      * @return the inference end time in milliseconds from the epoch time.
      */
-    public long getEndTimeMs() {
+    @CurrentTimeMillisLong
+    public long getEndTimeMillis() {
         return endTimeMs;
     }
 
@@ -122,7 +132,8 @@ public class InferenceInfo implements Parcelable {
      *
      * @return the suspended time in milliseconds.
      */
-    public long getSuspendedTimeMs() {
+    @CurrentTimeMillisLong
+    public long getSuspendedTimeMillis() {
         return suspendedTimeMs;
     }
 
@@ -148,21 +159,19 @@ public class InferenceInfo implements Parcelable {
     /**
      * Builder class for creating instances of {@link InferenceInfo}.
      */
-    public static class Builder {
-        private int uid;
+    public static final class Builder {
+        private final int uid;
         private long startTimeMs;
         private long endTimeMs;
         private long suspendedTimeMs;
 
         /**
-         * Sets the UID for the caller app.
+         * Provides a builder instance to create a InferenceInfo for given caller uid.
          *
-         * @param uid the UID for the caller app.
-         * @return the Builder instance.
+         * @param uid the caller uid associated with the inference info.
          */
-        public Builder setUid(int uid) {
+        public Builder(int uid) {
             this.uid = uid;
-            return this;
         }
 
         /**
@@ -171,7 +180,7 @@ public class InferenceInfo implements Parcelable {
          * @param startTimeMs the inference start time in milliseconds from the epoch time.
          * @return the Builder instance.
          */
-        public Builder setStartTimeMs(long startTimeMs) {
+        public @NonNull Builder setStartTimeMillis(@CurrentTimeMillisLong long startTimeMs) {
             this.startTimeMs = startTimeMs;
             return this;
         }
@@ -182,7 +191,7 @@ public class InferenceInfo implements Parcelable {
          * @param endTimeMs the inference end time in milliseconds from the epoch time.
          * @return the Builder instance.
          */
-        public Builder setEndTimeMs(long endTimeMs) {
+        public @NonNull Builder setEndTimeMillis(@CurrentTimeMillisLong long endTimeMs) {
             this.endTimeMs = endTimeMs;
             return this;
         }
@@ -193,7 +202,7 @@ public class InferenceInfo implements Parcelable {
          * @param suspendedTimeMs the suspended time in milliseconds.
          * @return the Builder instance.
          */
-        public Builder setSuspendedTimeMs(long suspendedTimeMs) {
+        public @NonNull Builder setSuspendedTimeMillis(@CurrentTimeMillisLong long suspendedTimeMs) {
             this.suspendedTimeMs = suspendedTimeMs;
             return this;
         }
@@ -203,7 +212,7 @@ public class InferenceInfo implements Parcelable {
          *
          * @return an instance of {@link InferenceInfo}.
          */
-        public InferenceInfo build() {
+        public @NonNull InferenceInfo build() {
             return new InferenceInfo(uid, startTimeMs, endTimeMs,
                     suspendedTimeMs);
         }

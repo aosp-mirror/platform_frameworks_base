@@ -100,21 +100,22 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // isLeashReadyForDispatching (used to dispatch the leash of the control) is
             // depending on mGivenInsetsReady. Therefore, triggering notifyControlChanged here
             // again, so that the control with leash can be eventually dispatched
-            if (!mGivenInsetsReady && mServerVisible && !givenInsetsPending) {
+            if (!mGivenInsetsReady && isServerVisible() && !givenInsetsPending) {
                 mGivenInsetsReady = true;
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStateController.notifyControlChanged(mControlTarget, this);
                 setImeShowing(true);
-            } else if (wasServerVisible && mServerVisible && mGivenInsetsReady
+            } else if (wasServerVisible && isServerVisible() && mGivenInsetsReady
                     && givenInsetsPending) {
                 // If the server visibility didn't change (still visible), and mGivenInsetsReady
                 // is set, we won't call into notifyControlChanged. Therefore, we can reset the
                 // statsToken, if available.
+                ProtoLog.d(WM_DEBUG_IME, "onPostLayout cancel statsToken, ws=%s", ws);
                 ImeTracker.forLogging().onCancelled(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
-            } else if (wasServerVisible && !mServerVisible) {
+            } else if (wasServerVisible && !isServerVisible()) {
                 setImeShowing(false);
             }
         }
@@ -134,11 +135,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     @Override
     protected boolean isLeashReadyForDispatching() {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // We should only dispatch the leash, if the following conditions are fulfilled:
+            // 1. parent isLeashReadyForDispatching, 2. mGivenInsetsReady (means there are no
+            // givenInsetsPending), 3. the IME surface is drawn, 4. either the IME is
+            // serverVisible (the unfrozen state)
             final WindowState ws =
                     mWindowContainer != null ? mWindowContainer.asWindowState() : null;
             final boolean isDrawn = ws != null && ws.isDrawn();
             return super.isLeashReadyForDispatching()
-                    && mServerVisible && isDrawn && mGivenInsetsReady;
+                    && isServerVisible() && isDrawn && mGivenInsetsReady;
         } else {
             return super.isLeashReadyForDispatching();
         }
@@ -170,9 +175,13 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             if (control != null && control.getLeash() != null) {
                 ImeTracker.Token statsToken = getAndClearStatsToken();
-                ImeTracker.forLogging().onProgress(statsToken,
-                        ImeTracker.PHASE_WM_GET_CONTROL_WITH_LEASH);
-                control.setImeStatsToken(statsToken);
+                if (statsToken == null) {
+                    ProtoLog.d(WM_DEBUG_IME, "IME getControl without statsToken");
+                } else {
+                    ImeTracker.forLogging().onProgress(statsToken,
+                            ImeTracker.PHASE_WM_GET_CONTROL_WITH_LEASH);
+                    control.setImeStatsToken(statsToken);
+                }
             }
         }
         return control;
@@ -254,7 +263,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // Refer WindowState#getImeControlTarget().
             target = target.getWindow().getImeControlTarget();
         }
-        // TODO(b/329229469) make sure that the statsToken of all callers is non-null (currently
+        // TODO(b/353463205) make sure that the statsToken of all callers is non-null (currently
         //  not the case)
         super.updateControlForTarget(target, force, statsToken);
         if (Flags.refactorInsetsController()) {
@@ -290,12 +299,14 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
         changed |= mDisplayContent.onImeInsetsClientVisibilityUpdate();
         if (Flags.refactorInsetsController()) {
             if (changed) {
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY);
                 invokeOnImeRequestedChangedListener(mDisplayContent.getImeInputTarget(),
                         statsToken);
             } else {
-                // TODO(b/329229469) change phase and check cancelled / failed
+                // TODO(b/353463205) check cancelled / failed
                 ImeTracker.forLogging().onCancelled(statsToken,
-                        ImeTracker.PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES);
+                        ImeTracker.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY);
             }
         }
         return changed;
@@ -335,12 +346,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
                 controlTarget.setImeInputTargetRequestedVisibility(imeVisible);
+                // not all virtual displays have an ImeInsetsSourceProvider, so it is not
+                // guaranteed that the IME will be started when the control target reports its
+                // requested visibility back. Thus, invoking the listener here.
+                invokeOnImeRequestedChangedListener(imeInsetsTarget, statsToken);
             } else {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_SET_REMOTE_TARGET_IME_VISIBILITY);
             }
         }
-        invokeOnImeRequestedChangedListener(imeInsetsTarget, statsToken);
     }
 
     // TODO(b/353463205) check callers to see if we can make statsToken @NonNull
@@ -460,7 +474,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // This can later become ready, so we don't want to cancel the pending request here.
             return;
         }
-        // TODO(b/329229469) check if this is still triggered, as we don't go into STATE_SHOW_IME
+        // TODO(b/353463205) check if this is still triggered, as we don't go into STATE_SHOW_IME
         //  (DefaultImeVisibilityApplier)
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             // The IME is drawn, so call into {@link WindowState#notifyInsetsControlChanged}

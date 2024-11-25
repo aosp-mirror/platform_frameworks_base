@@ -164,41 +164,46 @@ final class AppCompatUtils {
 
         appCompatTaskInfo.setIsFromLetterboxDoubleTap(reachabilityOverrides.isFromDoubleTap());
 
-        final Rect bounds = top.getBounds();
-        final Rect appBounds = getAppBounds(top);
-        appCompatTaskInfo.topActivityLetterboxWidth = bounds.width();
-        appCompatTaskInfo.topActivityLetterboxHeight = bounds.height();
-        appCompatTaskInfo.topActivityLetterboxAppWidth = appBounds.width();
-        appCompatTaskInfo.topActivityLetterboxAppHeight = appBounds.height();
+        final boolean isTopActivityLetterboxed = top.areBoundsLetterboxed();
+        appCompatTaskInfo.setTopActivityLetterboxed(isTopActivityLetterboxed);
+        if (isTopActivityLetterboxed) {
+            final Rect bounds = top.getBounds();
+            final Rect appBounds = getAppBounds(top);
+            appCompatTaskInfo.topActivityLetterboxWidth = bounds.width();
+            appCompatTaskInfo.topActivityLetterboxHeight = bounds.height();
+            appCompatTaskInfo.topActivityLetterboxAppWidth = appBounds.width();
+            appCompatTaskInfo.topActivityLetterboxAppHeight = appBounds.height();
 
-        // We need to consider if letterboxed or pillarboxed.
-        // TODO(b/336807329) Encapsulate reachability logic
-        appCompatTaskInfo.setLetterboxDoubleTapEnabled(reachabilityOverrides
-                .isLetterboxDoubleTapEducationEnabled());
-        if (appCompatTaskInfo.isLetterboxDoubleTapEnabled()) {
-            if (appCompatTaskInfo.isTopActivityPillarboxed()) {
-                if (reachabilityOverrides.allowHorizontalReachabilityForThinLetterbox()) {
-                    // Pillarboxed.
-                    appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
-                            reachabilityOverrides.getLetterboxPositionForHorizontalReachability();
+            // We need to consider if letterboxed or pillarboxed.
+            // TODO(b/336807329) Encapsulate reachability logic
+            appCompatTaskInfo.setLetterboxDoubleTapEnabled(reachabilityOverrides
+                    .isLetterboxDoubleTapEducationEnabled());
+            if (appCompatTaskInfo.isLetterboxDoubleTapEnabled()) {
+                if (appCompatTaskInfo.isTopActivityPillarboxShaped()) {
+                    if (reachabilityOverrides.allowHorizontalReachabilityForThinLetterbox()) {
+                        // Pillarboxed.
+                        appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
+                                reachabilityOverrides
+                                        .getLetterboxPositionForHorizontalReachability();
+                    } else {
+                        appCompatTaskInfo.setLetterboxDoubleTapEnabled(false);
+                    }
                 } else {
-                    appCompatTaskInfo.setLetterboxDoubleTapEnabled(false);
-                }
-            } else {
-                if (reachabilityOverrides.allowVerticalReachabilityForThinLetterbox()) {
-                    // Letterboxed.
-                    appCompatTaskInfo.topActivityLetterboxVerticalPosition =
-                            reachabilityOverrides.getLetterboxPositionForVerticalReachability();
-                } else {
-                    appCompatTaskInfo.setLetterboxDoubleTapEnabled(false);
+                    if (reachabilityOverrides.allowVerticalReachabilityForThinLetterbox()) {
+                        // Letterboxed.
+                        appCompatTaskInfo.topActivityLetterboxVerticalPosition =
+                                reachabilityOverrides.getLetterboxPositionForVerticalReachability();
+                    } else {
+                        appCompatTaskInfo.setLetterboxDoubleTapEnabled(false);
+                    }
                 }
             }
         }
+
         final boolean eligibleForAspectRatioButton =
                 !info.isTopActivityTransparent && !appCompatTaskInfo.isTopActivityInSizeCompat()
                         && aspectRatioOverrides.shouldEnableUserAspectRatioSettings();
         appCompatTaskInfo.setEligibleForUserAspectRatioButton(eligibleForAspectRatioButton);
-        appCompatTaskInfo.setTopActivityLetterboxed(top.areBoundsLetterboxed());
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode =
                 AppCompatCameraPolicy.getCameraCompatFreeformMode(top);
         appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController

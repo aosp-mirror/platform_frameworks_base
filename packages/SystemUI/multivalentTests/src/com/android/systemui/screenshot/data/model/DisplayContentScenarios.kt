@@ -18,6 +18,8 @@ package com.android.systemui.screenshot.data.model
 
 import android.content.ComponentName
 import android.graphics.Rect
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FREEFORM_FULL_SCREEN
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FREEFORM_MAXIMIZED
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FREE_FORM
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.FULL_SCREEN
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.Bounds.PIP
@@ -153,11 +155,23 @@ object DisplayContentScenarios {
     fun freeFormApps(
         vararg tasks: TaskSpec,
         focusedTaskId: Int,
+        maximizedTaskId: Int = -1,
         shadeExpanded: Boolean = false,
     ): DisplayContentModel {
         val freeFormTasks =
             tasks
-                .map { freeForm(it) }
+                .map {
+                    freeForm(
+                        task = it,
+                        bounds =
+                            if (it.taskId == maximizedTaskId) {
+                                FREEFORM_MAXIMIZED
+                            } else {
+                                FREE_FORM
+                            },
+                        maxBounds = FREEFORM_FULL_SCREEN,
+                    )
+                }
                 // Root tasks are ordered top-down in List<RootTaskInfo>.
                 // Sort 'focusedTaskId' last (Boolean natural ordering: [false, true])
                 .sortedBy { it.childTaskIds[0] != focusedTaskId }
@@ -180,9 +194,9 @@ object DisplayContentScenarios {
         val PIP = Rect(440, 1458, 1038, 1794)
         val SPLIT_TOP = Rect(0, 0, 1080, 1187)
         val SPLIT_BOTTOM = Rect(0, 1213, 1080, 2400)
-        val FREE_FORM = Rect(119, 332, 1000, 1367)
 
         // "Tablet" size
+        val FREE_FORM = Rect(119, 332, 1000, 1367)
         val FREEFORM_FULL_SCREEN = Rect(0, 0, 2560, 1600)
         val FREEFORM_MAXIMIZED = Rect(0, 48, 2560, 1480)
         val FREEFORM_SPLIT_LEFT = Rect(0, 0, 1270, 1600)
@@ -301,11 +315,12 @@ object DisplayContentScenarios {
             }
 
         /** An activity in FreeForm mode */
-        fun freeForm(task: TaskSpec, bounds: Rect = FREE_FORM) =
+        fun freeForm(task: TaskSpec, bounds: Rect = FREE_FORM, maxBounds: Rect = bounds) =
             newRootTaskInfo(
                 taskId = task.taskId,
                 userId = task.userId,
                 bounds = bounds,
+                maxBounds = maxBounds,
                 windowingMode = WindowingMode.Freeform,
                 topActivity = ComponentName.unflattenFromString(task.name),
             ) {

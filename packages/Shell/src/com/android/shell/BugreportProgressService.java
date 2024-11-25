@@ -153,6 +153,10 @@ public class BugreportProgressService extends Service {
     static final String INTENT_BUGREPORT_FINISHED =
             "com.android.internal.intent.action.BUGREPORT_FINISHED";
 
+    // Intent sent to notify external apps that bugreport aborted due to error.
+    static final String INTENT_BUGREPORT_ABORTED =
+            "com.android.internal.intent.action.BUGREPORT_ABORTED";
+
     // Internal intents used on notification actions.
     static final String INTENT_BUGREPORT_CANCEL = "android.intent.action.BUGREPORT_CANCEL";
     static final String INTENT_BUGREPORT_SHARE = "android.intent.action.BUGREPORT_SHARE";
@@ -174,6 +178,8 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_INFO = "android.intent.extra.INFO";
     static final String EXTRA_EXTRA_ATTACHMENT_URIS =
             "android.intent.extra.EXTRA_ATTACHMENT_URIS";
+    static final String EXTRA_ABORTED_ERROR_CODE =
+            "android.intent.extra.EXTRA_ABORTED_ERROR_CODE";
 
     private static final ThreadFactory sBugreportManagerCallbackThreadFactory =
             new ThreadFactory() {
@@ -353,7 +359,7 @@ public class BugreportProgressService extends Service {
     public void onDestroy() {
         mServiceHandler.getLooper().quit();
         mScreenshotHandler.getLooper().quit();
-        mBugreportSingleThreadExecutor.close();
+        mBugreportSingleThreadExecutor.shutdown();
         super.onDestroy();
     }
 
@@ -404,6 +410,7 @@ public class BugreportProgressService extends Service {
         @Override
         public void onError(@BugreportErrorCode int errorCode) {
             synchronized (mLock) {
+                sendBugreportAbortedBroadcastLocked(errorCode);
                 stopProgressLocked(mInfo.id);
                 mInfo.deleteEmptyFiles();
             }
@@ -459,6 +466,13 @@ public class BugreportProgressService extends Service {
                 mContext.sendBroadcast(intent, android.Manifest.permission.DUMP);
                 onBugreportFinished(mInfo);
             }
+        }
+
+        @GuardedBy("mLock")
+        private void sendBugreportAbortedBroadcastLocked(@BugreportErrorCode int errorCode) {
+            final Intent intent = new Intent(INTENT_BUGREPORT_ABORTED);
+            intent.putExtra(EXTRA_ABORTED_ERROR_CODE, errorCode);
+            mContext.sendBroadcast(intent, android.Manifest.permission.DUMP);
         }
     }
 

@@ -33,6 +33,7 @@ import android.media.RingtoneManager;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.BatteryStats;
+import android.os.BatteryStatsInternal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IWakeLockCallback;
@@ -48,6 +49,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
@@ -66,10 +68,12 @@ import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.power.FrameworkStatsLogger.WakelockEventType;
 import com.android.server.power.feature.PowerManagerFlags;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -195,6 +199,9 @@ public class Notifier {
 
     private final PowerManagerFlags mFlags;
 
+    private final BatteryStatsInternal mBatteryStatsInternal;
+    private final FrameworkStatsLogger mFrameworkStatsLogger;
+
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
             FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
@@ -241,6 +248,14 @@ public class Notifier {
         } catch (RemoteException ex) { }
         FrameworkStatsLog.write(FrameworkStatsLog.INTERACTIVE_STATE_CHANGED,
                 FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__ON);
+
+        if (mFlags.isMoveWscLoggingToNotifierEnabled()) {
+            mBatteryStatsInternal = mInjector.getBatteryStatsInternal();
+            mFrameworkStatsLogger = mInjector.getFrameworkStatsLogger();
+        } else {
+            mBatteryStatsInternal = null;
+            mFrameworkStatsLogger = null;
+        }
     }
 
     /**
@@ -277,6 +292,7 @@ public class Notifier {
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
+        logWakelockStateChanged(flags, tag, ownerUid, workSource, WakelockEventType.ACQUIRE);
         notifyWakeLockListener(callback, tag, true, ownerUid, ownerPid, flags, workSource,
                 packageName, historyTag);
         if (!mFlags.improveWakelockLatency()) {
@@ -380,6 +396,10 @@ public class Notifier {
                         + ", workSource=" + newWorkSource);
             }
 
+            logWakelockStateChanged(flags, tag, ownerUid, workSource, WakelockEventType.RELEASE);
+            logWakelockStateChanged(
+                    newFlags, newTag, newOwnerUid, newWorkSource, WakelockEventType.ACQUIRE);
+
             final boolean unimportantForLogging = newOwnerUid == Process.SYSTEM_UID
                     && (newFlags & PowerManager.UNIMPORTANT_FOR_LOGGING) != 0;
             try {
@@ -425,6 +445,7 @@ public class Notifier {
                     + ", ownerUid=" + ownerUid + ", ownerPid=" + ownerPid
                     + ", workSource=" + workSource);
         }
+        logWakelockStateChanged(flags, tag, ownerUid, workSource, WakelockEventType.RELEASE);
         notifyWakeLockListener(callback, tag, false, ownerUid, ownerPid, flags, workSource,
                 packageName, historyTag);
         if (!mFlags.improveWakelockLatency()) {
@@ -1258,6 +1279,44 @@ public class Notifier {
         }
     }
 
+    private void logWakelockStateChanged(
+            int flags,
+            String tag,
+            int ownerUid,
+            WorkSource workSource,
+            WakelockEventType eventType) {
+        if (mBatteryStatsInternal == null) {
+            return;
+        }
+        final int type = flags & PowerManager.WAKE_LOCK_LEVEL_MASK;
+        if (workSource == null || workSource.isEmpty()) {
+            final int mappedUid = mBatteryStatsInternal.getOwnerUid(ownerUid);
+            mFrameworkStatsLogger.wakelockStateChanged(mappedUid, tag, type, eventType);
+        } else {
+            for (int i = 0; i < workSource.size(); ++i) {
+                final int mappedUid = mBatteryStatsInternal.getOwnerUid(workSource.getUid(i));
+                mFrameworkStatsLogger.wakelockStateChanged(mappedUid, tag, type, eventType);
+            }
+
+            List<WorkChain> workChains = workSource.getWorkChains();
+            if (workChains != null) {
+                for (WorkChain workChain : workChains) {
+                    WorkChain mappedWorkChain = new WorkChain();
+                    // Cache getUids() and getTags() because they make an arraycopy.
+                    int[] uids = workChain.getUids();
+                    String[] tags = workChain.getTags();
+
+                    for (int i = 0; i < workChain.getSize(); ++i) {
+                        final int mappedUid = mBatteryStatsInternal.getOwnerUid(uids[i]);
+                        mappedWorkChain.addNode(mappedUid, tags[i]);
+                    }
+                    mFrameworkStatsLogger.wakelockStateChanged(
+                            tag, mappedWorkChain, type, eventType);
+                }
+            }
+        }
+    }
+
     public interface Injector {
         /**
          * Gets the current time in millis
@@ -1273,9 +1332,15 @@ public class Notifier {
          * Gets the AppOpsManager system service
          */
         AppOpsManager getAppOpsManager(Context context);
+
+        /** Gets the BatteryStatsInternal object */
+        BatteryStatsInternal getBatteryStatsInternal();
+
+        /** Get the FrameworkStatsLogger object */
+        FrameworkStatsLogger getFrameworkStatsLogger();
     }
 
-    static class RealInjector implements Injector {
+    class RealInjector implements Injector {
         @Override
         public long currentTimeMillis() {
             return System.currentTimeMillis();
@@ -1289,6 +1354,16 @@ public class Notifier {
         @Override
         public AppOpsManager getAppOpsManager(Context context) {
             return context.getSystemService(AppOpsManager.class);
+        }
+
+        @Override
+        public BatteryStatsInternal getBatteryStatsInternal() {
+            return LocalServices.getService(BatteryStatsInternal.class);
+        }
+
+        @Override
+        public FrameworkStatsLogger getFrameworkStatsLogger() {
+            return new FrameworkStatsLogger();
         }
     }
 }

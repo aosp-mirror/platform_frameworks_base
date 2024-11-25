@@ -16,6 +16,8 @@
 
 package android.media.tv;
 
+import static android.media.tv.flags.Flags.tifExtensionStandardization;
+
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -159,6 +161,11 @@ public abstract class TvInputService extends Service {
             new RemoteCallbackList<>();
 
     private TvInputManager mTvInputManager;
+    /**
+     * @hide
+     */
+    protected TvInputServiceExtensionManager mTvInputServiceExtensionManager =
+            new TvInputServiceExtensionManager();
 
     @Override
     public final IBinder onBind(Intent intent) {
@@ -211,12 +218,23 @@ public abstract class TvInputService extends Service {
             }
 
             @Override
-            public List<String>  getAvailableExtensionInterfaceNames() {
-                return TvInputService.this.getAvailableExtensionInterfaceNames();
+            public List<String> getAvailableExtensionInterfaceNames() {
+                List<String> extensionNames =
+                        TvInputService.this.getAvailableExtensionInterfaceNames();
+                if (tifExtensionStandardization()) {
+                    extensionNames.addAll(
+                            TvInputServiceExtensionManager.getStandardExtensionInterfaceNames());
+                }
+                return extensionNames;
             }
 
             @Override
             public IBinder getExtensionInterface(String name) {
+                if (tifExtensionStandardization() && name != null) {
+                    if (TvInputServiceExtensionManager.checkIsStandardizedInterfaces(name)) {
+                        return mTvInputServiceExtensionManager.getExtensionIBinder(name);
+                    }
+                }
                 return TvInputService.this.getExtensionInterface(name);
             }
 

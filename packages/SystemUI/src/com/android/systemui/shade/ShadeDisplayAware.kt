@@ -29,5 +29,13 @@ import javax.inject.Qualifier
  * `ConfigurationController`) will be dynamically updated to reflect the current display's
  * configuration. This ensures consistent rendering even when the shade window is moved to an
  * external display.
+ *
+ * Note that in SystemUI, Currently, the shade window includes the lockscreen, quick settings, the
+ * notification stack, AOD, Bouncer, Glancable hub, and potentially other components that have been
+ * introduced after this comment is written.
+ *
+ * TODO: b/378016985 - The usage of this annotation in the relevant packages will be enforced by a
+ *   presubmit linter that will highlight instances of the global instances used in shade window
+ *   classes.
  */
 @Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class ShadeDisplayAware

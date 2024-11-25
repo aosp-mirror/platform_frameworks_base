@@ -17,6 +17,8 @@
 package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import android.graphics.drawable.Animatable
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
@@ -30,10 +32,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -63,13 +65,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.modifiers.size
 import com.android.compose.modifiers.thenIf
+import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.SideIconHeight
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.SideIconWidth
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
 import com.android.systemui.qs.panels.ui.viewmodel.AccessibilityUiState
+import com.android.systemui.qs.ui.compose.borderOnFocus
 import com.android.systemui.res.R
 
 private const val TEST_TAG_TOGGLE = "qs_tile_toggle_target"
@@ -79,10 +85,11 @@ fun LargeTileContent(
     label: String,
     secondaryLabel: String?,
     icon: Icon,
+    sideDrawable: Drawable?,
     colors: TileColors,
     squishiness: () -> Float,
     accessibilityUiState: AccessibilityUiState? = null,
-    iconShape: Shape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
+    iconShape: RoundedCornerShape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
     toggleClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
@@ -94,10 +101,12 @@ fun LargeTileContent(
         val longPressLabel = longPressLabel().takeIf { onLongClick != null }
         val animatedBackgroundColor by
             animateColorAsState(colors.iconBackground, label = "QSTileDualTargetBackgroundColor")
+        val focusBorderColor = MaterialTheme.colorScheme.secondary
         Box(
             modifier =
                 Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClick != null) {
-                    Modifier.clip(iconShape)
+                    Modifier.borderOnFocus(color = focusBorderColor, iconShape.topEnd)
+                        .clip(iconShape)
                         .verticalSquish(squishiness)
                         .drawBehind { drawRect(animatedBackgroundColor) }
                         .combinedClickable(
@@ -135,6 +144,14 @@ fun LargeTileContent(
             colors = colors,
             accessibilityUiState = accessibilityUiState,
         )
+
+        if (sideDrawable != null) {
+            Image(
+                painter = rememberDrawablePainter(sideDrawable),
+                contentDescription = null,
+                modifier = Modifier.width(SideIconWidth).height(SideIconHeight),
+            )
+        }
     }
 }
 
@@ -194,32 +211,50 @@ fun SmallTileContent(
                 is Icon.Resource -> context.getDrawable(icon.res)
             }
         }
-    if (loadedDrawable !is Animatable) {
-        Icon(icon = icon, tint = animatedColor, modifier = iconModifier)
-    } else if (icon is Icon.Resource) {
-        val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
+    if (loadedDrawable is Animatable) {
         val painter =
-            key(icon) {
-                if (animateToEnd) {
-                    rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
-                } else {
-                    var atEnd by remember(icon.res) { mutableStateOf(false) }
-                    LaunchedEffect(key1 = icon.res) { atEnd = true }
-                    rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = atEnd)
+            when (icon) {
+                is Icon.Resource -> {
+                    val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
+                    key(icon) {
+                        if (animateToEnd) {
+                            rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
+                        } else {
+                            var atEnd by remember(icon.res) { mutableStateOf(false) }
+                            LaunchedEffect(key1 = icon.res) { atEnd = true }
+                            rememberAnimatedVectorPainter(
+                                animatedImageVector = image,
+                                atEnd = atEnd,
+                            )
+                        }
+                    }
+                }
+                is Icon.Loaded -> {
+                    LaunchedEffect(loadedDrawable) {
+                        if (loadedDrawable is AnimatedVectorDrawable) {
+                            loadedDrawable.forceAnimationOnUI()
+                        }
+                    }
+                    rememberDrawablePainter(loadedDrawable)
                 }
             }
+
         Image(
             painter = painter,
             contentDescription = icon.contentDescription?.load(),
             colorFilter = ColorFilter.tint(color = animatedColor),
             modifier = iconModifier,
         )
+    } else {
+        Icon(icon = icon, tint = animatedColor, modifier = iconModifier)
     }
 }
 
 object CommonTileDefaults {
     val IconSize = 32.dp
     val LargeTileIconSize = 28.dp
+    val SideIconWidth = 32.dp
+    val SideIconHeight = 20.dp
     val ToggleTargetSize = 56.dp
     val TileHeight = 72.dp
     val TilePadding = 8.dp

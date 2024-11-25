@@ -1849,6 +1849,10 @@
         <item>-1</item>
     </integer-array>
 
+     <!-- Specifies the delay in milliseconds after the last user input before turning off the
+          keyboard backlight.
+    -->
+    <integer name="config_keyboardBacklightTimeoutMs">30000</integer>
     <!-- An array describing the screen's backlight values corresponding to the brightness
          values in the config_screenBrightnessNits array.
 
@@ -2727,6 +2731,8 @@
     </string-array>
     <!-- The list of supported dream complications -->
     <integer-array name="config_supportedDreamComplications">
+        <!-- COMPLICATION_TYPE_TIME -->
+        <item>1</item>
     </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
@@ -2772,6 +2778,9 @@
          Matched against ComponentName#flattenToString() for dream components.
          If empty, logs "other" for all. -->
     <string-array name="config_loggable_dream_prefixes"></string-array>
+
+    <!-- Whether to enable glanceable hub features on this device. -->
+    <bool name="config_glanceableHubEnabled">false</bool>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -3086,6 +3095,12 @@
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
+
+    <!-- Indicates the boot strategy in Headless System User Mode (HSUM)
+         This config has no effect if the device is not in HSUM.
+         0 (Default) : boot to the previous foreground user if there is one, otherwise the first switchable user.
+         1 : boot to the first switchable full user for initial boot (unprovisioned device), else to the headless system user, i.e. user 0. -->
+    <integer name="config_hsumBootStrategy">0</integer>
 
     <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
          system will be booted with the headless system user, or user 0. It has no effect if device
@@ -4195,9 +4210,17 @@
          must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
 
+    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
+    <bool name="config_doubleTapPowerGestureEnabled">true</bool>
     <!-- Allow the gesture to double tap the power button twice to start the camera while the device
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
+    <!-- Allow the gesture to double tap the power button twice to launch the wallet. -->
+    <bool name="config_walletDoubleTapPowerGestureEnabled">true</bool>
+    <!-- Default target action for double tap of the power button gesture.
+         0: Launch camera
+         1: Launch wallet -->
+    <integer name="config_defaultDoubleTapPowerGestureAction">0</integer>
 
     <!-- Allow the gesture to quick tap the power button multiple times to start the emergency sos
          experience while the device is non-interactive. -->
@@ -4589,6 +4612,11 @@
          without explicit consent of the user. If no accessibility service with the specified name
          exists on the device, the accessibility shortcut will be disabled by default. -->
     <string name="config_defaultAccessibilityService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the default select to speak service to be
+         enabled by the accessibility keyboard shortcut. If the service with the specified component
+         name is not preinstalled then this shortcut will do nothing. -->
+    <string name="config_defaultSelectToSpeakService" translatable="false"></string>
 
     <!-- URI for default Accessibility notification sound when to enable accessibility shortcut. -->
     <string name="config_defaultAccessibilityNotificationSound" translatable="false"></string>
@@ -5883,6 +5911,11 @@
         <!-- <item>com.android.settings</item> -->
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         SET_DEFAULT_ACCOUNT_FOR_CONTACTS permissions. The digest should be computed over the DER
+         encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_setContactsDefaultAccountKnownSigners">
+    </string-array>
 
     <!-- Class name of the custom country detector to be used. -->
     <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
@@ -5972,6 +6005,12 @@
 
     <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
     <bool name="config_showUserSwitcherByDefault">false</bool>
+
+    <!-- If true, user can change state of multiuser switcher. -->
+    <bool name="config_allowChangeUserSwitcherEnabled">true</bool>
+
+    <!-- If true, multiuser switcher would be automatically enabled when second user is created on the device. -->
+    <bool name="config_enableUserSwitcherUponUserCreation">true</bool>
 
     <!-- Set to true to make assistant show in front of the dream/screensaver. -->
     <bool name="config_assistantOnTopOfDream">false</bool>
@@ -6552,7 +6591,7 @@
     </string-array>
 
     <!-- the number of the max cached processes in the system. -->
-    <integer name="config_customizedMaxCachedProcesses">32</integer>
+    <integer name="config_customizedMaxCachedProcesses">1024</integer>
 
     <!-- Whether this device should support taking app snapshots on closure -->
     <bool name="config_disableTaskSnapshots">false</bool>
@@ -6994,6 +7033,15 @@
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for backing up HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_backupHealthConnectDataAndSettingsKnownSigners"/>
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for restoring HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_restoreHealthConnectDataAndSettingsKnownSigners"/>
+
     <!-- Package name of Health Connect data migrator application.  -->
     <string name="config_healthConnectMigratorPackageName"></string>
 
@@ -7147,6 +7195,10 @@
          screen. -->
     <bool name="config_dragToMaximizeInDesktopMode">false</bool>
 
+    <!-- Whether showing the app handle is supported on this device.
+         If config_isDesktopModeSupported, then this has no effect -->
+    <bool name="config_enableAppHandle">false</bool>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7188,9 +7240,18 @@
     <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
     <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 
-    <!-- The name of the service for forensic backup transport. -->
-    <string name="config_forensicBackupTransport" translatable="false"></string>
+    <!-- The name of the service for intrusion detection event transport. -->
+    <string name="config_intrusionDetectionEventTransport" translatable="false"></string>
 
     <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
     <bool name="config_screen_off_udfps_enabled">false</bool>
+
+    <!-- The name of the system package that will hold the dependency installer role. -->
+    <string name="config_systemDependencyInstaller" translatable="false" />
+
+    <!-- Whether allow normal brightness when doze policy can be requested. When this is false,
+        brightness follows the display state i.e. ON means bright, DOZE means dim. If true,
+        POLICY_DOZE can also dim the screen unless parameter useNormalBrightnessForDoze of
+        DreamService#setDozeScreenState requests an exception. -->
+    <bool name="config_allowNormalBrightnessForDozePolicy">false</bool>
 </resources>

@@ -23,6 +23,8 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.statusbar.events.data.repository.SystemStatusEventAnimationRepository
+import com.android.systemui.statusbar.events.data.repository.SystemStatusEventAnimationRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -83,6 +85,11 @@ abstract class StatusBarPipelineModule {
 
     @Binds
     abstract fun connectivityRepository(impl: ConnectivityRepositoryImpl): ConnectivityRepository
+
+    @Binds
+    abstract fun systemStatusEventAnimationRepository(
+        impl: SystemStatusEventAnimationRepositoryImpl
+    ): SystemStatusEventAnimationRepository
 
     @Binds
     abstract fun realDeviceBasedSatelliteRepository(

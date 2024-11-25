@@ -32,12 +32,12 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.statusbar.NotificationPresenter
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.init.NotificationsController
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -69,7 +69,7 @@ class WindowRootViewVisibilityInteractorTest : SysuiTestCase() {
     private val notificationPresenter = mock<NotificationPresenter>()
     private val notificationsController = mock<NotificationsController>()
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor
-    private val activeNotificationsRepository = ActiveNotificationListRepository()
+    private val activeNotificationsRepository = kosmos.activeNotificationListRepository
     private val activeNotificationsInteractor =
         ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher)
 

@@ -20,7 +20,9 @@ import com.android.compose.animation.scene.TransitionBuilder
 import com.android.systemui.qs.composefragment.SceneKeys
 import com.android.systemui.qs.shared.ui.ElementKeys
 
-fun TransitionBuilder.quickQuickSettingsToQuickSettings(inFirstPage: () -> Boolean = { true }) {
+fun TransitionBuilder.quickQuickSettingsToQuickSettings(
+    animateTilesExpansion: () -> Boolean = { true }
+) {
 
     fractionRange(start = 0.5f) { fade(ElementKeys.QuickSettingsContent) }
 
@@ -28,7 +30,7 @@ fun TransitionBuilder.quickQuickSettingsToQuickSettings(inFirstPage: () -> Boole
 
     anchoredTranslate(ElementKeys.QuickSettingsContent, ElementKeys.GridAnchor)
 
-    sharedElement(ElementKeys.TileElementMatcher, enabled = inFirstPage())
+    sharedElement(ElementKeys.TileElementMatcher, enabled = animateTilesExpansion())
 
     // This will animate between 0f (QQS) and 0.6, fading in the QQS tiles when coming back
     // from non first page QS. The QS content ends fading out at 0.5f, so there's a brief

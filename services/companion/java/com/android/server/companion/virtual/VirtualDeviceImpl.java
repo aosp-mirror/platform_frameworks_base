@@ -44,7 +44,6 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.compat.CompatChanges;
 import android.companion.AssociationInfo;
-import android.companion.AssociationRequest;
 import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
@@ -155,9 +154,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
     private static final String PERSISTENT_ID_PREFIX_CDM_ASSOCIATION = "companion:";
-
-    private static final List<String> DEVICE_PROFILES_ALLOWING_MIRROR_DISPLAYS = List.of(
-            AssociationRequest.DEVICE_PROFILE_APP_STREAMING);
 
     /**
      * Timeout until {@link #launchPendingIntent} stops waiting for an activity to be launched.
@@ -1352,11 +1348,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return hasCustomAudioInputSupportInternal();
     }
 
-    @Override
-    public boolean canCreateMirrorDisplays() {
-        return DEVICE_PROFILES_ALLOWING_MIRROR_DISPLAYS.contains(getDeviceProfile());
-    }
-
     private boolean hasCustomAudioInputSupportInternal() {
         if (!Flags.vdmPublicApis()) {
             return false;
@@ -1465,28 +1456,28 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public int createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
             @NonNull IVirtualDisplayCallback callback) {
         checkCallerIsDeviceOwner();
+
+        int displayId;
+        boolean showPointer;
+        boolean isTrustedDisplay;
         GenericWindowPolicyController gwpc;
         synchronized (mVirtualDeviceLock) {
             gwpc = createWindowPolicyControllerLocked(virtualDisplayConfig.getDisplayCategories());
-        }
-        int displayId;
-        displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig, callback,
-                this, gwpc, mOwnerPackageName);
-        boolean isMirrorDisplay =
-                mDisplayManagerInternal.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
-        gwpc.setDisplayId(displayId, isMirrorDisplay);
-        boolean isTrustedDisplay =
-                (mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
-                        == Display.FLAG_TRUSTED;
-        if (!isTrustedDisplay) {
-            if (getDevicePolicy(POLICY_TYPE_CLIPBOARD) != DEVICE_POLICY_DEFAULT) {
-                throw new SecurityException("All displays must be trusted for devices with custom"
-                        + "clipboard policy.");
+            displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig,
+                    callback, this, gwpc, mOwnerPackageName);
+            boolean isMirrorDisplay =
+                    mDisplayManagerInternal.getDisplayIdToMirror(displayId)
+                            != Display.INVALID_DISPLAY;
+            gwpc.setDisplayId(displayId, isMirrorDisplay);
+            isTrustedDisplay =
+                    (mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
+                            == Display.FLAG_TRUSTED;
+            if (!isTrustedDisplay
+                    && getDevicePolicy(POLICY_TYPE_CLIPBOARD) != DEVICE_POLICY_DEFAULT) {
+                throw new SecurityException("All displays must be trusted for devices with "
+                        + "custom clipboard policy.");
             }
-        }
 
-        boolean showPointer;
-        synchronized (mVirtualDeviceLock) {
             if (mVirtualDisplays.contains(displayId)) {
                 gwpc.unregisterRunningAppsChangedListener(this);
                 throw new IllegalStateException(
@@ -1523,6 +1514,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     private PowerManager.WakeLock createAndAcquireWakeLockForDisplay(int displayId) {
+        if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()) {
+            return null;
+        }
         final long token = Binder.clearCallingIdentity();
         try {
             PowerManager powerManager = mContext.getSystemService(PowerManager.class);
@@ -1679,6 +1673,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     int getOwnerUid() {
         return mOwnerUid;
+    }
+
+    long getDimDurationMillis() {
+        return mParams.getDimDuration().toMillis();
+    }
+
+    long getScreenOffTimeoutMillis() {
+        return mParams.getScreenOffTimeout().toMillis();
     }
 
     @Override  // Binder call

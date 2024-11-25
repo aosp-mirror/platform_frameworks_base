@@ -3878,7 +3878,11 @@ public class UserManager {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS,
             Manifest.permission.QUERY_USERS})
+    @CachedProperty(api = "user_manager_user_data")
     public UserInfo getUserInfo(@UserIdInt int userId) {
+        if (android.multiuser.Flags.cacheUserInfoReadOnly()) {
+            return UserManagerCache.getUserInfo(mService::getUserInfo, userId);
+        }
         try {
             return mService.getUserInfo(userId);
         } catch (RemoteException re) {
@@ -3928,9 +3932,9 @@ public class UserManager {
 
         final int callingUid = Binder.getCallingUid();
         final int processUid = Process.myUid();
-        if (Build.isDebuggable() && callingUid != processUid) {
-            Log.w(TAG, "Uid " + processUid + " is fetching a copy of UserProperties on"
-                            + " behalf of callingUid " + callingUid + ". Possibly"
+        if (processUid == Process.SYSTEM_UID && callingUid != processUid) {
+            Log.w(TAG, "The System (uid " + processUid + ") is fetching a copy of"
+                            + " UserProperties on behalf of callingUid " + callingUid + ". Possibly"
                             + " it should carefully first clearCallingIdentity or perhaps use"
                             + " UserManagerInternal.getUserProperties() instead?",
                     new Throwable());
@@ -5308,7 +5312,13 @@ public class UserManager {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS,
             Manifest.permission.QUERY_USERS}, conditional = true)
+    @CachedProperty(api = "user_manager_user_data")
     public List<UserInfo> getProfiles(@UserIdInt int userId) {
+        if (android.multiuser.Flags.cacheProfilesReadOnly()) {
+            return UserManagerCache.getProfiles(
+                    (Integer userIdentifier) -> mService.getProfiles(userIdentifier, false),
+                    userId);
+        }
         try {
             return mService.getProfiles(userId, false /* enabledOnly */);
         } catch (RemoteException re) {
@@ -6480,6 +6490,19 @@ public class UserManager {
     public static final void invalidateOnUserInfoFlagChange(@UserInfoFlag int flags) {
         if ((flags & UserInfo.FLAG_DISABLED) > 0) {
             invalidateEnabledProfileIds();
+        }
+    }
+
+    /**
+     * This method is used to invalidate caches, when UserManagerService.mUsers
+     * {@link UserManagerService.UserData} is modified, including changes to {@link UserInfo}.
+     * In practice we determine modification by when that data is persisted, or scheduled to be
+     * presisted, to xml.
+     * @hide
+     */
+    public static final void invalidateCacheOnUserDataChanged() {
+        if (android.multiuser.Flags.cacheProfilesReadOnly()) {
+            UserManagerCache.invalidateProfiles();
         }
     }
 

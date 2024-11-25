@@ -21,3 +21,10 @@ flag {
        purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "adjust_default_bucket_elevation_params"
+    namespace: "backstage_power"
+    description: "Adjust the default bucket evaluation parameters"
+    bug: "379909479"
+}

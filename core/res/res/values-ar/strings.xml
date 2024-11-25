@@ -616,6 +616,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة التي تستخدم النطاق الواسع جدًا."</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏التفاعل مع أجهزة Wi‑Fi المجاورة"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏للسماح للتطبيق بعرض الإعلانات والاتصال بالأجهزة الأخرى وتحديد الموقع النسبي لأجهزة Wi-Fi المجاورة."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"تحديد الموضع النسبي بين الأجهزة المجاورة"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"يسمح هذا الإذن للتطبيق بتحديد الموضع النسبي بين الأجهزة المجاورة"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
@@ -1942,12 +1944,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"نهاية الأسبوع"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"حدث"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"النوم"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"عدم الإزعاج (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"تحت إدارة \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"مفعَّل"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"غير مفعَّل"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"من <xliff:g id="START">%1$s</xliff:g> إلى <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"من <xliff:g id="START">%1$s</xliff:g> إلى <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
     <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"أي تقويم"</string>
     <string name="muted_by" msgid="91464083490094950">"يعمل <xliff:g id="THIRD_PARTY">%1$s</xliff:g> على كتم بعض الأصوات."</string>
@@ -2430,15 +2434,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏يمكنك إرسال الرسائل واستلامها بدون شبكة الجوّال أو شبكة Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"فتح تطبيق \"الرسائل\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"طريقة العمل"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"تفعيل الإعداد \"اختيار الشبكة تلقائيًا\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"يمكنك تفعيل الإعداد \"اختيار الشبكة تلقائيًا\" من خلال \"الإعدادات\" لكي يتمكّن هاتفك من العثور على شبكة تعمل مع القمر الصناعي"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"تفعيل"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"رجوع"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"بانتظار الإزالة من الأرشيف…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"تتوفّر الآن ميزة \"اتصالات طوارئ بالقمر الصناعي\""</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"‏يمكنك مراسلة خدمات الطوارئ في حال عدم توفّر شبكة جوّال أو شبكة Wi-Fi. ولإجراء ذلك، يجب ضبط تطبيق \"رسائل Google\" ليصبح تطبيق المراسلة التلقائي."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ميزة \"اتصالات طوارئ بالقمر الصناعي\" غير متاحة"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ميزة \"اتصالات طوارئ بالقمر الصناعي\" غير متاحة على هذا الجهاز"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"لم يتم ضبط إعدادات ميزة \"اتصالات طوارئ بالقمر الصناعي\""</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"يُرجى التأكّد من أنّ جهازك متصل بالإنترنت ومحاولة ضبط الميزة مرة أخرى"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ميزة \"اتصالات طوارئ بالقمر الصناعي\" غير متوفّرة"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"لا تتوفّر ميزة \"اتصالات طوارئ بالقمر الصناعي\" في هذا البلد أو هذه المنطقة"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"لم يتم ضبط إعدادات ميزة \"اتصالات طوارئ بالقمر الصناعي\""</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"‏للمراسلة عبر القمر الصناعي، عليك ضبط تطبيق \"رسائل Google\" ليصبح تطبيق المراسلة التلقائي"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ميزة \"اتصالات طوارئ بالقمر الصناعي\" غير متوفّرة"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"لمعرفة ما إذا كانت ميزة \"اتصالات طوارئ بالقمر الصناعي\" متاحة في هذا البلد أو هذه المنطقة، فعِّل إعدادات الموقع الجغرافي"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ميزة \"المراسلة عبر القمر الاصطناعي\" متاحة"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"‏يمكنك إرسال رسائل عبر القمر الصناعي في حال عدم توفّر شبكة جوّال أو شبكة Wi-Fi. ولإجراء ذلك، يجب ضبط تطبيق \"رسائل Google\" ليصبح تطبيق المراسلة التلقائي."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ميزة \"المراسلة عبر القمر الاصطناعي\" غير متاحة"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ميزة \"المراسلة عبر القمر الاصطناعي\" غير متاحة على هذا الجهاز"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"لم يتم ضبط إعدادات ميزة \"المراسلة عبر القمر الاصطناعي\""</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"يُرجى التأكّد من أنّ جهازك متصل بالإنترنت ومحاولة ضبط الميزة مرة أخرى"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"ميزة \"المراسلة عبر القمر الاصطناعي\" غير متاحة"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"لا تتوفّر ميزة \"المراسلة عبر القمر الاصطناعي\" في هذا البلد أو هذه المنطقة"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"لم يتم ضبط إعدادات ميزة \"المراسلة عبر القمر الاصطناعي\""</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"‏للمراسلة عبر القمر الصناعي، عليك ضبط تطبيق \"رسائل Google\" ليصبح تطبيق المراسلة التلقائي"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"ميزة \"المراسلة عبر القمر الاصطناعي\" غير متاحة"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"لمعرفة ما إذا كانت ميزة \"المراسلة عبر القمر الاصطناعي\" متاحة في هذا البلد أو هذه المنطقة، فعِّل إعدادات الموقع الجغرافي"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"إعادة إعداد ميزة \"فتح الجهاز ببصمة الإصبع\""</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT">%s</xliff:g>\"."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"لا يمكن بعد الآن التعرّف على \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" و\"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\"."</string>

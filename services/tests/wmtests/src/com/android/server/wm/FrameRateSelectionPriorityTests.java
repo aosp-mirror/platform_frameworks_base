@@ -25,7 +25,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -70,7 +69,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     private static final FrameRateVote FRAME_RATE_VOTE_60_PREFERRED =
             new FrameRateVote(60, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
                     SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-
+    private static final float HI_REFRESH_RATE = 90;
+    private static final float MID_REFRESH_RATE = 70;
+    private static final float LOW_REFRESH_RATE = 60;
     WindowState createWindow(String name) {
         WindowState window = createWindow(null, TYPE_APPLICATION, name);
         when(window.mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType())
@@ -83,14 +84,16 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         DisplayInfo di = new DisplayInfo(mDisplayInfo);
         Mode defaultMode = di.getDefaultMode();
         Mode hiMode = new Mode(1,
-                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 90);
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), HI_REFRESH_RATE);
         Mode midMode = new Mode(2,
-                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 70);
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), MID_REFRESH_RATE);
         Mode lowMode = new Mode(LOW_MODE_ID,
-                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 60);
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), LOW_REFRESH_RATE);
 
         di.supportedModes = new Mode[] { hiMode, midMode };
         di.appsSupportedModes = new Mode[] { hiMode, midMode, lowMode };
+        di.supportedRefreshRates = new float[] {HI_REFRESH_RATE, MID_REFRESH_RATE,
+                LOW_REFRESH_RATE};
         di.defaultModeId = 1;
         mRefreshRatePolicy = new RefreshRatePolicy(mWm, di, mDenylist);
         when(mDisplayPolicy.getRefreshRatePolicy()).thenReturn(mRefreshRatePolicy);
@@ -190,14 +193,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 eq(appWindow.getSurfaceControl()), anyFloat(),
                 eq(Surface.FRAME_RATE_COMPATIBILITY_EXACT), eq(Surface.CHANGE_FRAME_RATE_ALWAYS));
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 
     @Test
@@ -226,14 +224,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 eq(appWindow.getSurfaceControl()), anyFloat(),
                 eq(Surface.FRAME_RATE_COMPATIBILITY_EXACT), eq(Surface.CHANGE_FRAME_RATE_ALWAYS));
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 
     @Test
@@ -288,14 +281,9 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 appWindow.getSurfaceControl(), 60,
                 Surface.FRAME_RATE_COMPATIBILITY_EXACT, Surface.CHANGE_FRAME_RATE_ALWAYS);
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 
     @Test
@@ -352,13 +340,8 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         verify(appWindow.getPendingTransaction(), times(1)).setFrameRate(
                 appWindow.getSurfaceControl(), 60,
                 Surface.FRAME_RATE_COMPATIBILITY_DEFAULT, Surface.CHANGE_FRAME_RATE_ALWAYS);
-        if (explicitRefreshRateHints()) {
-            verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
-                    appWindow.getSurfaceControl(),
-                    SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-        } else {
-            verify(appWindow.getPendingTransaction(), never()).setFrameRateSelectionStrategy(
-                    any(SurfaceControl.class), anyInt());
-        }
+        verify(appWindow.getPendingTransaction(), times(1)).setFrameRateSelectionStrategy(
+                appWindow.getSurfaceControl(),
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
 }

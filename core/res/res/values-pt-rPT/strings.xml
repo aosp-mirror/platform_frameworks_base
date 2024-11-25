@@ -613,6 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permita que a app determine a posição relativa entre os dispositivos de banda ultralarga próximos"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagir com dispositivos Wi‑Fi próximos"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite que a app anuncie, estabeleça ligação e determine a posição relativa de dispositivos Wi‑Fi próximos"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"determinar a posição relativa entre disp. próximos"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permita que a app determine a posição relativa entre os dispositivos próximos"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informações de serviços de pagamento com NFC preferenciais"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a app obtenha informações de serviços de pagamento com NFC preferenciais, como apoios registados e destino da rota."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlo Near Field Communication"</string>
@@ -1939,12 +1941,15 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormir"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Não incomodar (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gerido por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ativada"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
+    <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualquer calendário"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está a desativar alguns sons."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Existe um problema interno no seu dispositivo e pode ficar instável até efetuar uma reposição de dados de fábrica."</string>
@@ -2431,6 +2436,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Ativar"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Retroceder"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendente…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"O Satélite SOS já está disponível"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Pode enviar mensagens aos serviços de emergência se não tiver uma rede móvel nem Wi-Fi. A app Mensagens Google tem de ser a sua app de mensagens predefinida."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"O Satélite SOS não é compatível"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"O Satélite SOS não é compatível com este dispositivo"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"O Satélite SOS não está configurado"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Certifique-se de que tem ligação à Internet e tente configurar novamente"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"O Satélite SOS não está disponível"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"O Satélite SOS não está disponível neste país ou região"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satélite SOS não configurado"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Para enviar mensagens por satélite, defina a app Mensagens Google como a sua app de mensagens predefinida"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"O Satélite SOS não está disponível"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Para verificar se o Satélite SOS está disponível neste país ou região, ative as definições de localização"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Mensagens por satélite disponíveis"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Pode enviar mensagens por satélite se não tiver uma rede móvel nem Wi-Fi. A app Mensagens Google tem de ser a sua app de mensagens predefinida."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"As mensagens por satélite não são compatíveis"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"As mensagens por satélite não são compatíveis com este dispositivo"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Mensagens por satélite não configuradas"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Certifique-se de que tem ligação à Internet e tente configurar novamente"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Mensagens por satélite não disponíveis"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"As mensagens por satélite não estão disponíveis neste país ou região"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Mensagens por satélite não configuradas"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Para enviar mensagens por satélite, defina a app Mensagens Google como a sua app de mensagens predefinida"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Mensagens por satélite não disponíveis"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Para verificar se as mensagens por satélite estão disponíveis neste país ou região, ative as definições de localização"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configure o Desbloqueio por impressão digital novamente"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Já não é possível reconhecer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Já não é possível reconhecer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>

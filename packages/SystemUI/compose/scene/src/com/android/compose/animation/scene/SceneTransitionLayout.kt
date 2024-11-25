@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -404,9 +405,11 @@ data object Back : UserAction() {
 }
 
 /** The user swiped on the container. */
-data class Swipe(
+data class Swipe
+private constructor(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
+    val pointersType: PointerType? = null,
     val fromSource: SwipeSource? = null,
 ) : UserAction() {
     companion object {
@@ -416,12 +419,49 @@ data class Swipe(
         val Down = Swipe(SwipeDirection.Down)
         val Start = Swipe(SwipeDirection.Start)
         val End = Swipe(SwipeDirection.End)
+
+        fun Left(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Left, pointerCount, pointersType, fromSource)
+
+        fun Up(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Up, pointerCount, pointersType, fromSource)
+
+        fun Right(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Right, pointerCount, pointersType, fromSource)
+
+        fun Down(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Down, pointerCount, pointersType, fromSource)
+
+        fun Start(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Start, pointerCount, pointersType, fromSource)
+
+        fun End(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.End, pointerCount, pointersType, fromSource)
     }
 
     override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {
         return Resolved(
             direction = direction.resolve(layoutDirection),
             pointerCount = pointerCount,
+            pointersType = pointersType,
             fromSource = fromSource?.resolve(layoutDirection),
         )
     }
@@ -431,6 +471,7 @@ data class Swipe(
         val direction: SwipeDirection.Resolved,
         val pointerCount: Int,
         val fromSource: SwipeSource.Resolved?,
+        val pointersType: PointerType?,
     ) : UserAction.Resolved()
 }
 
@@ -596,8 +637,8 @@ sealed class UserActionResult(
 
 fun interface UserActionDistance {
     /**
-     * Return the **absolute** distance of the user action given the size of the scene we are
-     * animating from and the [orientation].
+     * Return the **absolute** distance of the user action when going from [fromContent] to
+     * [toContent] in the given [orientation].
      *
      * Note: This function will be called for each drag event until it returns a value > 0f. This
      * for instance allows you to return 0f or a negative value until the first layout pass of a
@@ -605,7 +646,8 @@ fun interface UserActionDistance {
      * transitioning to when computing this absolute distance.
      */
     fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float
 }
@@ -615,7 +657,8 @@ interface UserActionDistanceScope : Density, ElementStateScope
 /** The user action has a fixed [absoluteDistance]. */
 class FixedDistance(private val distance: Dp) : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float = distance.toPx()
 }

@@ -79,6 +79,7 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
 
         InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .adoptShellPermissionIdentity(Manifest.permission.WRITE_DEVICE_CONFIG,
+                        Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG,
                         Manifest.permission.READ_DEVICE_CONFIG);
 
         Identity identity = new Identity();

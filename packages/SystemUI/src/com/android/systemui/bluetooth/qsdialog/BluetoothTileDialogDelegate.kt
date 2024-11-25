@@ -100,7 +100,7 @@ internal constructor(
             initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
             cachedContentHeight: Int,
             dialogCallback: BluetoothTileDialogCallback,
-            dimissListener: Runnable
+            dimissListener: Runnable,
         ): BluetoothTileDialogDelegate
     }
 
@@ -135,7 +135,7 @@ internal constructor(
                 object : AccessibilityDelegate() {
                     override fun onInitializeAccessibilityNodeInfo(
                         host: View,
-                        info: AccessibilityNodeInfo
+                        info: AccessibilityNodeInfo,
                     ) {
                         super.onInitializeAccessibilityNodeInfo(host, info)
                         info.addAction(
@@ -144,7 +144,7 @@ internal constructor(
                                 context.getString(
                                     R.string
                                         .quick_settings_bluetooth_audio_sharing_button_accessibility
-                                )
+                                ),
                             )
                         )
                     }
@@ -180,7 +180,7 @@ internal constructor(
         dialog: SystemUIDialog,
         deviceItem: List<DeviceItem>,
         showSeeAll: Boolean,
-        showPairNewDevice: Boolean
+        showPairNewDevice: Boolean,
     ) {
         withContext(mainDispatcher) {
             val start = systemClock.elapsedRealtime()
@@ -207,7 +207,7 @@ internal constructor(
     internal fun onBluetoothStateUpdated(
         dialog: SystemUIDialog,
         isEnabled: Boolean,
-        uiProperties: BluetoothTileDialogViewModel.UiProperties
+        uiProperties: BluetoothTileDialogViewModel.UiProperties,
     ) {
         getToggleView(dialog).apply {
             isChecked = isEnabled
@@ -221,7 +221,7 @@ internal constructor(
     internal fun onBluetoothAutoOnUpdated(
         dialog: SystemUIDialog,
         isEnabled: Boolean,
-        @StringRes infoResId: Int
+        @StringRes infoResId: Int,
     ) {
         getAutoOnToggle(dialog).isChecked = isEnabled
         getAutoOnToggleInfoTextView(dialog).text = dialog.context.getString(infoResId)
@@ -231,7 +231,7 @@ internal constructor(
         dialog: SystemUIDialog,
         visibility: Int,
         label: String?,
-        isActive: Boolean
+        isActive: Boolean,
     ) {
         getAudioSharingButtonView(dialog).apply {
             this.visibility = visibility
@@ -339,14 +339,14 @@ internal constructor(
             object : DiffUtil.ItemCallback<DeviceItem>() {
                 override fun areItemsTheSame(
                     deviceItem1: DeviceItem,
-                    deviceItem2: DeviceItem
+                    deviceItem2: DeviceItem,
                 ): Boolean {
                     return deviceItem1.cachedBluetoothDevice == deviceItem2.cachedBluetoothDevice
                 }
 
                 override fun areContentsTheSame(
                     deviceItem1: DeviceItem,
-                    deviceItem2: DeviceItem
+                    deviceItem2: DeviceItem,
                 ): Boolean {
                     return deviceItem1.type == deviceItem2.type &&
                         deviceItem1.cachedBluetoothDevice == deviceItem2.cachedBluetoothDevice &&
@@ -394,7 +394,7 @@ internal constructor(
 
             internal fun bind(
                 item: DeviceItem,
-                deviceItemOnClickCallback: BluetoothTileDialogCallback
+                deviceItemOnClickCallback: BluetoothTileDialogCallback,
             ) {
                 container.apply {
                     isEnabled = item.isEnabled
@@ -409,14 +409,14 @@ internal constructor(
                         com.android.settingslib.Utils.getColorAttr(
                                 context,
                                 if (item.isActive) InternalR.attr.materialColorOnPrimaryContainer
-                                else InternalR.attr.materialColorOnSurface
+                                else InternalR.attr.materialColorOnSurface,
                             )
                             .defaultColor
 
                     // update icons
                     iconView.apply {
                         item.iconWithDescription?.let {
-                            setImageDrawable(it.first.apply { mutate()?.setTint(tintColor) })
+                            setImageDrawable(it.first)
                             contentDescription = it.second
                         }
                     }
@@ -427,25 +427,25 @@ internal constructor(
 
                     // update text styles
                     nameView.setTextAppearance(
-                        if (item.isActive) R.style.BluetoothTileDialog_DeviceName_Active
-                        else R.style.BluetoothTileDialog_DeviceName
+                        if (item.isActive) R.style.TextAppearance_BluetoothTileDialog_Active
+                        else R.style.TextAppearance_BluetoothTileDialog
                     )
                     summaryView.setTextAppearance(
-                        if (item.isActive) R.style.BluetoothTileDialog_DeviceSummary_Active
-                        else R.style.BluetoothTileDialog_DeviceSummary
+                        if (item.isActive) R.style.TextAppearance_BluetoothTileDialog_Active
+                        else R.style.TextAppearance_BluetoothTileDialog
                     )
 
                     accessibilityDelegate =
                         object : AccessibilityDelegate() {
                             override fun onInitializeAccessibilityNodeInfo(
                                 host: View,
-                                info: AccessibilityNodeInfo
+                                info: AccessibilityNodeInfo,
                             ) {
                                 super.onInitializeAccessibilityNodeInfo(host, info)
                                 info.addAction(
                                     AccessibilityAction(
                                         AccessibilityAction.ACTION_CLICK.id,
-                                        item.actionAccessibilityLabel
+                                        item.actionAccessibilityLabel,
                                     )
                                 )
                             }

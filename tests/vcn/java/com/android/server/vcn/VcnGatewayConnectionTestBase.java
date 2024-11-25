@@ -222,7 +222,6 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mTestLooper.getLooper()).when(mVcnContext).getLooper();
         doReturn(mVcnNetworkProvider).when(mVcnContext).getVcnNetworkProvider();
         doReturn(mFeatureFlags).when(mVcnContext).getFeatureFlags();
-        doReturn(true).when(mVcnContext).isFlagSafeModeTimeoutConfigEnabled();
 
         doReturn(mUnderlyingNetworkController)
                 .when(mDeps)

@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
@@ -37,13 +40,17 @@ import java.time.ZoneOffset;
  * <p>We also contain a PaintContext, so that any operation can draw as needed.
  */
 public abstract class RemoteContext {
-    protected CoreDocument mDocument;
-    public RemoteComposeState mRemoteComposeState;
+    protected @NonNull CoreDocument mDocument =
+            new CoreDocument(); // todo: is this a valid way to initialize? bbade@
+    public @NonNull RemoteComposeState mRemoteComposeState =
+            new RemoteComposeState(); // todo, is this a valid use of RemoteComposeState -- bbade@
     long mStart = System.nanoTime(); // todo This should be set at a hi level
-    protected PaintContext mPaintContext = null;
-    ContextMode mMode = ContextMode.UNSET;
+    @Nullable protected PaintContext mPaintContext = null;
+    protected float mDensity = 2.75f;
 
-    boolean mDebug = false;
+    @NonNull ContextMode mMode = ContextMode.UNSET;
+
+    int mDebug = 0;
 
     private int mTheme = Theme.UNSPECIFIED;
 
@@ -53,8 +60,18 @@ public abstract class RemoteContext {
 
     private boolean mAnimate = true;
 
-    public Component lastComponent;
+    public @Nullable Component mLastComponent;
     public long currentTime = 0L;
+
+    public float getDensity() {
+        return mDensity;
+    }
+
+    public void setDensity(float density) {
+        if (density > 0) {
+            mDensity = density;
+        }
+    }
 
     public boolean isAnimationEnabled() {
         return mAnimate;
@@ -69,17 +86,25 @@ public abstract class RemoteContext {
      *
      * @return the CollectionsAccess implementation
      */
-    public CollectionsAccess getCollectionsAccess() {
+    public @Nullable CollectionsAccess getCollectionsAccess() {
         return mRemoteComposeState;
     }
 
     /**
      * Load a path under an id. Paths can be use in clip drawPath and drawTweenPath
      *
-     * @param instanceId
-     * @param floatPath
+     * @param instanceId the id to save this path under
+     * @param floatPath the path as a float array
      */
-    public abstract void loadPathData(int instanceId, float[] floatPath);
+    public abstract void loadPathData(int instanceId, @NonNull float[] floatPath);
+
+    /**
+     * Load a path under an id. Paths can be use in clip drawPath and drawTweenPath
+     *
+     * @param instanceId
+     * @return the a
+     */
+    public abstract @Nullable float[] getPathData(int instanceId);
 
     /**
      * Associate a name with a give id.
@@ -88,7 +113,7 @@ public abstract class RemoteContext {
      * @param varId the id (color,integer,float etc.)
      * @param varType thetype
      */
-    public abstract void loadVariableName(String varName, int varId, int varType);
+    public abstract void loadVariableName(@NonNull String varName, int varId, int varType);
 
     /**
      * Save a color under a given id
@@ -123,7 +148,7 @@ public abstract class RemoteContext {
      * @param colorName the name of the color to override
      * @param color Override the default color
      */
-    public abstract void setNamedColorOverride(String colorName, int color);
+    public abstract void setNamedColorOverride(@NonNull String colorName, int color);
 
     /**
      * Set the value of a named String. This overrides the string in the document
@@ -131,7 +156,7 @@ public abstract class RemoteContext {
      * @param stringName the name of the string to override
      * @param value Override the default string
      */
-    public abstract void setNamedStringOverride(String stringName, String value);
+    public abstract void setNamedStringOverride(@NonNull String stringName, @NonNull String value);
 
     /**
      * Allows to clear a named String.
@@ -140,7 +165,7 @@ public abstract class RemoteContext {
      *
      * @param stringName the name of the string to override
      */
-    public abstract void clearNamedStringOverride(String stringName);
+    public abstract void clearNamedStringOverride(@NonNull String stringName);
 
     /**
      * Set the value of a named Integer. This overrides the integer in the document
@@ -148,7 +173,7 @@ public abstract class RemoteContext {
      * @param integerName the name of the integer to override
      * @param value Override the default integer
      */
-    public abstract void setNamedIntegerOverride(String integerName, int value);
+    public abstract void setNamedIntegerOverride(@NonNull String integerName, int value);
 
     /**
      * Allows to clear a named Integer.
@@ -157,7 +182,7 @@ public abstract class RemoteContext {
      *
      * @param integerName the name of the integer to override
      */
-    public abstract void clearNamedIntegerOverride(String integerName);
+    public abstract void clearNamedIntegerOverride(@NonNull String integerName);
 
     /**
      * Support Collections by registering this collection
@@ -165,19 +190,29 @@ public abstract class RemoteContext {
      * @param id id of the collection
      * @param collection the collection under this id
      */
-    public abstract void addCollection(int id, ArrayAccess collection);
+    public abstract void addCollection(int id, @NonNull ArrayAccess collection);
 
-    public abstract void putDataMap(int id, DataMap map);
+    public abstract void putDataMap(int id, @NonNull DataMap map);
 
-    public abstract DataMap getDataMap(int id);
+    public abstract @Nullable DataMap getDataMap(int id);
 
-    public abstract void runAction(int id, String metadata);
+    public abstract void runAction(int id, @NonNull String metadata);
 
-    public abstract void runNamedAction(int textId);
+    // TODO: we might add an interface to group all valid parameter types
+    public abstract void runNamedAction(int textId, Object value);
 
-    public abstract void putObject(int mId, Object command);
+    public abstract void putObject(int mId, @NonNull Object command);
 
-    public abstract Object getObject(int mId);
+    public abstract @Nullable Object getObject(int mId);
+
+    public void addTouchListener(TouchListener touchExpression) {}
+
+    /**
+     * Vibrate the device
+     *
+     * @param type 0 = none, 1-21 ,see HapticFeedbackConstants
+     */
+    public abstract void hapticEffect(int type);
 
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
@@ -198,35 +233,40 @@ public abstract class RemoteContext {
         this.mTheme = theme;
     }
 
-    public ContextMode getMode() {
+    public @NonNull ContextMode getMode() {
         return mMode;
     }
 
-    public void setMode(ContextMode mode) {
+    public void setMode(@NonNull ContextMode mode) {
         this.mMode = mode;
     }
 
+    @Nullable
     public PaintContext getPaintContext() {
         return mPaintContext;
     }
 
-    public void setPaintContext(PaintContext paintContext) {
+    public void setPaintContext(@NonNull PaintContext paintContext) {
         this.mPaintContext = paintContext;
     }
 
-    public CoreDocument getDocument() {
+    public @Nullable CoreDocument getDocument() {
         return mDocument;
     }
 
     public boolean isDebug() {
-        return mDebug;
+        return mDebug == 1;
     }
 
-    public void setDebug(boolean debug) {
+    public boolean isVisualDebug() {
+        return mDebug == 2;
+    }
+
+    public void setDebug(int debug) {
         this.mDebug = debug;
     }
 
-    public void setDocument(CoreDocument document) {
+    public void setDocument(@NonNull CoreDocument document) {
         this.mDocument = document;
     }
 
@@ -283,11 +323,14 @@ public abstract class RemoteContext {
      * Save a bitmap under an imageId
      *
      * @param imageId the id of the image
+     * @param encoding how the data is encoded 0 = png, 1 = raw, 2 = url
+     * @param type the type of the data 0 = RGBA 8888, 1 = 888, 2 = 8 gray
      * @param width the width of the image
      * @param height the height of the image
      * @param bitmap the bytes that represent the image
      */
-    public abstract void loadBitmap(int imageId, int width, int height, byte[] bitmap);
+    public abstract void loadBitmap(
+            int imageId, short encoding, short type, int width, int height, @NonNull byte[] bitmap);
 
     /**
      * Save a string under a given id
@@ -295,7 +338,7 @@ public abstract class RemoteContext {
      * @param id the id of the string
      * @param text the value to set
      */
-    public abstract void loadText(int id, String text);
+    public abstract void loadText(int id, @NonNull String text);
 
     /**
      * Get a string given an id
@@ -303,7 +346,7 @@ public abstract class RemoteContext {
      * @param id the id of the string
      * @return
      */
-    public abstract String getText(int id);
+    public abstract @Nullable String getText(int id);
 
     /**
      * Load a float
@@ -314,6 +357,14 @@ public abstract class RemoteContext {
     public abstract void loadFloat(int id, float value);
 
     /**
+     * Override an existing float value
+     *
+     * @param id
+     * @param value
+     */
+    public abstract void overrideFloat(int id, float value);
+
+    /**
      * Load a integer
      *
      * @param id id of the integer
@@ -321,17 +372,29 @@ public abstract class RemoteContext {
      */
     public abstract void loadInteger(int id, int value);
 
+    /**
+     * Override an existing int value
+     *
+     * @param id
+     * @param value
+     */
     public abstract void overrideInteger(int id, int value);
 
+    /**
+     * Override an existing text value
+     *
+     * @param id
+     * @param valueId
+     */
     public abstract void overrideText(int id, int valueId);
 
     /**
-     * Load an animated float associated with an id Todo: Remove?
+     * Load an animated float associated with an id Todo: Remove? cc @hoford
      *
      * @param id the id of the float
      * @param animatedFloat The animated float
      */
-    public abstract void loadAnimatedFloat(int id, FloatExpression animatedFloat);
+    public abstract void loadAnimatedFloat(int id, @NonNull FloatExpression animatedFloat);
 
     /**
      * Save a shader under and ID
@@ -339,7 +402,7 @@ public abstract class RemoteContext {
      * @param id the id of the Shader
      * @param value the shader
      */
-    public abstract void loadShader(int id, ShaderData value);
+    public abstract void loadShader(int id, @NonNull ShaderData value);
 
     /**
      * Get a float given an id
@@ -371,7 +434,7 @@ public abstract class RemoteContext {
      * @param id track when this id changes value
      * @param variableSupport call back when value changes
      */
-    public abstract void listensTo(int id, VariableSupport variableSupport);
+    public abstract void listensTo(int id, @NonNull VariableSupport variableSupport);
 
     /**
      * Notify commands with variables have changed
@@ -386,6 +449,7 @@ public abstract class RemoteContext {
      * @param id get a shader given the id
      * @return The shader
      */
+    @Nullable
     public abstract ShaderData getShader(int id);
 
     public static final int ID_CONTINUOUS_SEC = 1;
@@ -400,6 +464,29 @@ public abstract class RemoteContext {
     public static final int ID_OFFSET_TO_UTC = 10;
     public static final int ID_WEEK_DAY = 11;
     public static final int ID_DAY_OF_MONTH = 12;
+    public static final int ID_TOUCH_POS_X = 13;
+    public static final int ID_TOUCH_POS_Y = 14;
+
+    public static final int ID_TOUCH_VEL_X = 15;
+    public static final int ID_TOUCH_VEL_Y = 16;
+
+    public static final int ID_ACCELERATION_X = 17;
+    public static final int ID_ACCELERATION_Y = 18;
+    public static final int ID_ACCELERATION_Z = 19;
+
+    public static final int ID_GYRO_ROT_X = 20;
+    public static final int ID_GYRO_ROT_Y = 21;
+    public static final int ID_GYRO_ROT_Z = 22;
+
+    public static final int ID_MAGNETIC_X = 23;
+    public static final int ID_MAGNETIC_Y = 24;
+    public static final int ID_MAGNETIC_Z = 25;
+
+    public static final int ID_LIGHT = 26;
+
+    public static final int ID_DENSITY = 27;
+
+    public static final float FLOAT_DENSITY = Utils.asNan(ID_DENSITY);
 
     /** CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600 */
     public static final float FLOAT_CONTINUOUS_SEC = Utils.asNan(ID_CONTINUOUS_SEC);
@@ -426,8 +513,51 @@ public abstract class RemoteContext {
     public static final float FLOAT_WINDOW_HEIGHT = Utils.asNan(ID_WINDOW_HEIGHT);
     public static final float FLOAT_COMPONENT_WIDTH = Utils.asNan(ID_COMPONENT_WIDTH);
     public static final float FLOAT_COMPONENT_HEIGHT = Utils.asNan(ID_COMPONENT_HEIGHT);
-    // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
+
+    /** ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f) */
     public static final float FLOAT_OFFSET_TO_UTC = Utils.asNan(ID_OFFSET_TO_UTC);
+
+    /** TOUCH_POS_X is the x position of the touch */
+    public static final float FLOAT_TOUCH_POS_X = Utils.asNan(ID_TOUCH_POS_X);
+
+    /** TOUCH_POS_Y is the y position of the touch */
+    public static final float FLOAT_TOUCH_POS_Y = Utils.asNan(ID_TOUCH_POS_Y);
+
+    /** TOUCH_VEL_X is the x velocity of the touch */
+    public static final float FLOAT_TOUCH_VEL_X = Utils.asNan(ID_TOUCH_VEL_X);
+
+    /** TOUCH_VEL_Y is the x velocity of the touch */
+    public static final float FLOAT_TOUCH_VEL_Y = Utils.asNan(ID_TOUCH_VEL_Y);
+
+    /** X acceleration sensor value in M/s^2 */
+    public static final float FLOAT_ACCELERATION_X = Utils.asNan(ID_ACCELERATION_X);
+
+    /** Y acceleration sensor value in M/s^2 */
+    public static final float FLOAT_ACCELERATION_Y = Utils.asNan(ID_ACCELERATION_Y);
+
+    /** Z acceleration sensor value in M/s^2 */
+    public static final float FLOAT_ACCELERATION_Z = Utils.asNan(ID_ACCELERATION_Z);
+
+    /** X Gyroscope rotation rate sensor value in radians/second */
+    public static final float FLOAT_GYRO_ROT_X = Utils.asNan(ID_GYRO_ROT_X);
+
+    /** Y Gyroscope rotation rate sensor value in radians/second */
+    public static final float FLOAT_GYRO_ROT_Y = Utils.asNan(ID_GYRO_ROT_Y);
+
+    /** Z Gyroscope rotation rate sensor value in radians/second */
+    public static final float FLOAT_GYRO_ROT_Z = Utils.asNan(ID_GYRO_ROT_Z);
+
+    /** Ambient magnetic field in X. sensor value in micro-Tesla (uT) */
+    public static final float FLOAT_MAGNETIC_X = Utils.asNan(ID_MAGNETIC_X);
+
+    /** Ambient magnetic field in Y. sensor value in micro-Tesla (uT) */
+    public static final float FLOAT_MAGNETIC_Y = Utils.asNan(ID_MAGNETIC_Y);
+
+    /** Ambient magnetic field in Z. sensor value in micro-Tesla (uT) */
+    public static final float FLOAT_MAGNETIC_Z = Utils.asNan(ID_MAGNETIC_Z);
+
+    /** Ambient light level in SI lux */
+    public static final float FLOAT_LIGHT = Utils.asNan(ID_LIGHT);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling

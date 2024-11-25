@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.data.repository
 
 import android.app.ActivityManager
+import android.media.projection.StopReason
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -28,7 +29,7 @@ class FakeMediaProjectionRepository : MediaProjectionRepository {
 
     var stopProjectingInvoked = false
 
-    override suspend fun stopProjecting() {
+    override suspend fun stopProjecting(@StopReason stopReason: Int) {
         stopProjectingInvoked = true
     }
 }

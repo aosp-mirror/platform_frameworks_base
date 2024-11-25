@@ -613,6 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que la app determine la posición relativa con dispositivos Ultra Wideband cercanos"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interactuar con dispositivos Wi-Fi cercanos"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite que la app muestre anuncios, se conecte y determine la posición relativa de los dispositivos Wi-Fi cercanos"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"determinar posición relativa entre disp. cercanos"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permite que la app determine la posición relativa con dispositivos cercanos"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información sobre servicio de pago NFC preferido"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la app reciba información del servicio de pago NFC preferido, como el servicio de asistencia registrado y el destino de la ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar la Transmisión de datos en proximidad"</string>
@@ -1938,13 +1940,15 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noche, en la semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormir"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sueño"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"No interrumpir (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Administradas por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activado"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivado"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"De <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
     <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Cualquier calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> silencia algunos sonidos"</string>
@@ -2427,15 +2431,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envía y recibe mensajes sin una red móvil ni Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Activa \"Seleccionar red de forma automática\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Activa \"Seleccionar red de forma automática\" en la configuración para que tu teléfono pueda encontrar una red que funcione con satélite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Activar"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Atrás"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pendiente…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"La función SOS por satélite ya está disponible"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Puedes enviar mensajes a los servicios de emergencia si no hay una red móvil o Wi-Fi. Tu app de mensajería predeterminada debe ser Mensajes de Google."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"No se admite la función SOS por satélite"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Este dispositivo no admite la función SOS por satélite"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"No se configuró la función SOS por satélite"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Asegúrate de tener conexión a Internet y vuelve a intentar la configuración"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"La función SOS por satélite no está disponible"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"La función SOS por satélite no está disponible en este país o región"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"No se configuró la función SOS por satélite"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Para enviar mensajes por satélite, establece Mensajes de Google como tu app de mensajería predeterminada"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"La función SOS por satélite no está disponible"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Para verificar si la función SOS por satélite está disponible en este país o región, activa la configuración de ubicación"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"La Mensajería satelital está disponible"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Puedes enviar mensajes por satélite si no hay una red móvil o Wi-Fi. Tu app de mensajería predeterminada debe ser Mensajes de Google."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"No se admite la Mensajería satelital"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Este dispositivo no admite la Mensajería satelital"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"No se configuró la Mensajería satelital"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Asegúrate de tener conexión a Internet y vuelve a intentar la configuración"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"La Mensajería satelital no disponible"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"La Mensajería satelital no está disponible en este país o región"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"No se configuró la Mensajería satelital"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Para enviar mensajes por satélite, establece Mensajes de Google como tu app de mensajería predeterminada"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"La Mensajería satelital no disponible"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Para verificar si la Mensajería satelital está disponible en este país o región, activa la configuración de ubicación"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vuelve a configurar el Desbloqueo con huellas dactilares"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Ya no se puede reconocer <xliff:g id="FINGERPRINT">%s</xliff:g>."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Ya no se pueden reconocer <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> y <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>."</string>
@@ -2445,7 +2469,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ya no se puede reconocer tu modelo de rostro. Vuelve a configurar el Desbloqueo facial."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configurar"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ahora no"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarma para: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarma para <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Cambiar de usuario"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Silenciar"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Presiona para silenciar el sonido"</string>

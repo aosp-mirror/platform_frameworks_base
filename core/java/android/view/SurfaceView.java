@@ -932,7 +932,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     /**
      * Sets the desired amount of HDR headroom to be used when HDR content is presented on this
-     * SurfaceView.
+     * SurfaceView. This is expressed as the ratio of maximum HDR white point over the SDR
+     * white point, not as absolute nits.
      *
      * <p>By default the system will choose an amount of HDR headroom that is appropriate
      * for the underlying device capabilities & bit-depth of the panel. However, for some types
@@ -945,6 +946,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * of factors such as ambient conditions, display capabilities, or bit-depth limitations.
      * See {@link Display#getHdrSdrRatio()} for more information as well as how to query the
      * current value.</p>
+     *
+     * <p>Note: This API operates independently of both the
+     * {@link Window#setColorMode Widow color mode} and the
+     * {@link Window#setDesiredHdrHeadroom Window desiredHdrHeadroom}</p>
      *
      * @param desiredHeadroom The amount of HDR headroom that is desired. Must be >= 1.0 (no HDR)
      *                        and <= 10,000.0. Passing 0.0 will reset to the default, automatically

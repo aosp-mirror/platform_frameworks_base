@@ -2118,7 +2118,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mBroadcastHelper);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper, mRemovePackageHelper,
-                mDeletePackageHelper, mBroadcastHelper);
+                mDeletePackageHelper, mBroadcastHelper,
+                injector.getPackageInstallerService().getInstallDependencyHelper());
 
         mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
                 mInjector.getUserManagerInternal(), mDeletePackageHelper);
@@ -4421,7 +4422,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mPendingBroadcasts.remove(userId);
             mAppsFilter.onUserDeleted(snapshotComputer(), userId);
             mPermissionManager.onUserRemoved(userId);
-            mInstallerService.onUserRemoved(userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
@@ -4472,7 +4472,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mLegacyPermissionManager.grantDefaultPermissions(userId);
             mPermissionManager.setDefaultPermissionGrantFingerprint(Build.FINGERPRINT, userId);
             mDomainVerificationManager.clearUser(userId);
-            mInstallerService.onUserAdded(userId);
         }
     }
 
@@ -5876,6 +5875,67 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     userId, callingPackage);
         }
 
+        @Override
+        public void setPageSizeAppCompatFlagsSettingsOverride(String packageName, boolean enabled) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            int settingsMode = enabled
+                    ? ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_SETTINGS_OVERRIDE_ENABLED
+                    : ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_SETTINGS_OVERRIDE_DISABLED;
+            PackageStateMutator.Result result =
+                    commitPackageStateMutation(
+                            null,
+                            packageName,
+                            packageState ->
+                                    packageState
+                                            .setPageSizeAppCompatFlags(settingsMode));
+            if (result.isSpecificPackageNull()) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            scheduleWriteSettings();
+        }
+
+        @Override
+        public boolean isPageSizeCompatEnabled(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int userId = UserHandle.getCallingUserId();
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            PackageStateInternal packageState =
+                    snapshotComputer().getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+
+            return packageState == null ? false : packageState.isPageSizeAppCompatEnabled();
+        }
+
+        @Override
+        public String getPageSizeCompatWarningMessage(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int userId = UserHandle.getCallingUserId();
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            PackageStateInternal packageState =
+                    snapshotComputer().getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+
+            return packageState == null
+                    ? null
+                    : packageState.getPageSizeCompatWarningMessage(mContext);
+        }
+
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USERS)
         @Override
         public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
@@ -6577,6 +6637,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             // Only return the result if the agent is installed and enabled on the target user
             return agent;
+        }
+
+        @Override
+        @NonNull
+        public List<String> getAllApexDirectories() {
+            PackageManagerServiceUtils.enforceSystemOrRoot(
+                    "getAllApexDirectories can only be called by system or root");
+            List<String> apexDirectories = new ArrayList<>();
+            List<ApexManager.ActiveApexInfo> apexes = mApexManager.getActiveApexInfos();
+            for (int i = 0; i < apexes.size(); i++) {
+                ApexManager.ActiveApexInfo apex = apexes.get(i);
+                apexDirectories.add(apex.apexDirectory.getAbsolutePath());
+            }
+            return apexDirectories;
         }
 
         @Override

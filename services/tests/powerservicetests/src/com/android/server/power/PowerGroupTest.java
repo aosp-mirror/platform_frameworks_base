@@ -49,17 +49,23 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.Display;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.LatencyTracker;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.power.feature.PowerManagerFlags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -73,6 +79,9 @@ import org.mockito.MockitoAnnotations;
 public class PowerGroupTest {
 
     private static final int GROUP_ID = 0;
+    private static final int NON_DEFAULT_GROUP_ID = 1;
+    private static final int NON_DEFAULT_DISPLAY_ID = 2;
+    private static final int VIRTUAL_DEVICE_ID = 3;
     private static final int UID = 11;
     private static final long TIMESTAMP_CREATE = 1;
     private static final long TIMESTAMP1 = 999;
@@ -87,10 +96,16 @@ public class PowerGroupTest {
     private static final LatencyTracker LATENCY_TRACKER = LatencyTracker.getInstance(
             InstrumentationRegistry.getInstrumentation().getContext());
 
+    private static final long DEFAULT_TIMEOUT = 1234L;
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private PowerGroup mPowerGroup;
     @Mock private PowerGroup.PowerGroupListener mWakefulnessCallbackMock;
     @Mock private Notifier mNotifier;
     @Mock private DisplayManagerInternal mDisplayManagerInternal;
+    @Mock private VirtualDeviceManagerInternal mVirtualDeviceManagerInternal;
     @Mock private PowerManagerFlags mFeatureFlags;
 
 
@@ -739,5 +754,112 @@ public class PowerGroupTest {
         assertThat(displayPowerRequest.lowPowerMode).isEqualTo(batterySaverEnabled);
         assertThat(displayPowerRequest.screenLowPowerBrightnessFactor).isWithin(PRECISION).of(
                 brightnessFactor);
+    }
+
+    @Test
+    public void testTimeoutsOverride_defaultGroup_noOverride() {
+        assertThat(mPowerGroup.getScreenDimDurationOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(DEFAULT_TIMEOUT);
+        assertThat(mPowerGroup.getScreenOffTimeoutOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(DEFAULT_TIMEOUT);
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    @Test
+    public void testTimeoutsOverride_noVdm_noOverride() {
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+        LocalServices.addService(VirtualDeviceManagerInternal.class, null);
+
+        mPowerGroup = new PowerGroup(NON_DEFAULT_GROUP_ID, mWakefulnessCallbackMock, mNotifier,
+                mDisplayManagerInternal, WAKEFULNESS_AWAKE, /* ready= */ true,
+                /* supportsSandman= */ true, TIMESTAMP_CREATE, mFeatureFlags);
+
+        assertThat(mPowerGroup.getScreenDimDurationOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(DEFAULT_TIMEOUT);
+        assertThat(mPowerGroup.getScreenOffTimeoutOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(DEFAULT_TIMEOUT);
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    @Test
+    public void testTimeoutsOverride_notValidVirtualDeviceId_noOverride() {
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+        LocalServices.addService(VirtualDeviceManagerInternal.class, mVirtualDeviceManagerInternal);
+
+        when(mDisplayManagerInternal.getDisplayIdsForGroup(NON_DEFAULT_GROUP_ID))
+                .thenReturn(new int[] {NON_DEFAULT_DISPLAY_ID});
+        when(mVirtualDeviceManagerInternal.getDeviceIdForDisplayId(NON_DEFAULT_DISPLAY_ID))
+                .thenReturn(Context.DEVICE_ID_DEFAULT);
+        when(mVirtualDeviceManagerInternal.isValidVirtualDeviceId(Context.DEVICE_ID_DEFAULT))
+                .thenReturn(false);
+
+        mPowerGroup = new PowerGroup(NON_DEFAULT_GROUP_ID, mWakefulnessCallbackMock, mNotifier,
+                mDisplayManagerInternal, WAKEFULNESS_AWAKE, /* ready= */ true,
+                /* supportsSandman= */ true, TIMESTAMP_CREATE, mFeatureFlags);
+
+        assertThat(mPowerGroup.getScreenDimDurationOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(DEFAULT_TIMEOUT);
+        assertThat(mPowerGroup.getScreenOffTimeoutOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(DEFAULT_TIMEOUT);
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    @Test
+    public void testTimeoutsOverride_validVirtualDeviceId_timeoutsAreOverridden() {
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+        LocalServices.addService(VirtualDeviceManagerInternal.class, mVirtualDeviceManagerInternal);
+
+        final long dimDurationOverride = DEFAULT_TIMEOUT * 3;
+        final long screenOffTimeoutOverride = DEFAULT_TIMEOUT * 5;
+
+        when(mDisplayManagerInternal.getDisplayIdsForGroup(NON_DEFAULT_GROUP_ID))
+                .thenReturn(new int[] {NON_DEFAULT_DISPLAY_ID});
+        when(mVirtualDeviceManagerInternal.getDeviceIdForDisplayId(NON_DEFAULT_DISPLAY_ID))
+                .thenReturn(VIRTUAL_DEVICE_ID);
+        when(mVirtualDeviceManagerInternal.isValidVirtualDeviceId(VIRTUAL_DEVICE_ID))
+                .thenReturn(true);
+        when(mVirtualDeviceManagerInternal.getDimDurationMillisForDeviceId(VIRTUAL_DEVICE_ID))
+                .thenReturn(dimDurationOverride);
+        when(mVirtualDeviceManagerInternal.getScreenOffTimeoutMillisForDeviceId(VIRTUAL_DEVICE_ID))
+                .thenReturn(screenOffTimeoutOverride);
+
+        mPowerGroup = new PowerGroup(NON_DEFAULT_GROUP_ID, mWakefulnessCallbackMock, mNotifier,
+                mDisplayManagerInternal, WAKEFULNESS_AWAKE, /* ready= */ true,
+                /* supportsSandman= */ true, TIMESTAMP_CREATE, mFeatureFlags);
+
+        assertThat(mPowerGroup.getScreenDimDurationOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(dimDurationOverride);
+        assertThat(mPowerGroup.getScreenOffTimeoutOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(screenOffTimeoutOverride);
+    }
+
+    @EnableFlags(android.companion.virtualdevice.flags.Flags.FLAG_DEVICE_AWARE_DISPLAY_POWER)
+    @Test
+    public void testTimeoutsOverrides_dimDurationIsCapped() {
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+        LocalServices.addService(VirtualDeviceManagerInternal.class, mVirtualDeviceManagerInternal);
+
+        final long dimDurationOverride = DEFAULT_TIMEOUT * 5;
+        final long screenOffTimeoutOverride = DEFAULT_TIMEOUT * 3;
+
+        when(mDisplayManagerInternal.getDisplayIdsForGroup(NON_DEFAULT_GROUP_ID))
+                .thenReturn(new int[] {NON_DEFAULT_DISPLAY_ID});
+        when(mVirtualDeviceManagerInternal.getDeviceIdForDisplayId(NON_DEFAULT_DISPLAY_ID))
+                .thenReturn(VIRTUAL_DEVICE_ID);
+        when(mVirtualDeviceManagerInternal.isValidVirtualDeviceId(VIRTUAL_DEVICE_ID))
+                .thenReturn(true);
+        when(mVirtualDeviceManagerInternal.getDimDurationMillisForDeviceId(VIRTUAL_DEVICE_ID))
+                .thenReturn(dimDurationOverride);
+        when(mVirtualDeviceManagerInternal.getScreenOffTimeoutMillisForDeviceId(VIRTUAL_DEVICE_ID))
+                .thenReturn(screenOffTimeoutOverride);
+
+        mPowerGroup = new PowerGroup(NON_DEFAULT_GROUP_ID, mWakefulnessCallbackMock, mNotifier,
+                mDisplayManagerInternal, WAKEFULNESS_AWAKE, /* ready= */ true,
+                /* supportsSandman= */ true, TIMESTAMP_CREATE, mFeatureFlags);
+
+        assertThat(mPowerGroup.getScreenDimDurationOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(screenOffTimeoutOverride);
+        assertThat(mPowerGroup.getScreenOffTimeoutOverrideLocked(DEFAULT_TIMEOUT))
+                .isEqualTo(screenOffTimeoutOverride);
     }
 }

@@ -55,7 +55,10 @@ interface AudioSharingModule {
             settingsLibAudioSharingRepository: SettingsLibAudioSharingRepository,
             @Background backgroundDispatcher: CoroutineDispatcher,
         ): AudioSharingRepository =
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 AudioSharingRepositoryImpl(
                     localBluetoothManager,
                     settingsLibAudioSharingRepository,
@@ -72,7 +75,10 @@ interface AudioSharingModule {
             impl: Lazy<AudioSharingInteractorImpl>,
             emptyImpl: Lazy<AudioSharingInteractorEmptyImpl>,
         ): AudioSharingInteractor =
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 impl.get()
             } else {
                 emptyImpl.get()
@@ -85,7 +91,10 @@ interface AudioSharingModule {
             audioSharingImpl: Lazy<AudioSharingDeviceItemActionInteractorImpl>,
             impl: Lazy<DeviceItemActionInteractorImpl>,
         ): DeviceItemActionInteractor =
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 audioSharingImpl.get()
             } else {
                 impl.get()
@@ -97,7 +106,10 @@ interface AudioSharingModule {
             localBluetoothManager: LocalBluetoothManager?
         ): List<DeviceItemFactory> = buildList {
             add(ActiveMediaDeviceItemFactory())
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 add(AudioSharingMediaDeviceItemFactory(localBluetoothManager))
                 add(AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager))
             }
@@ -112,7 +124,10 @@ interface AudioSharingModule {
             localBluetoothManager: LocalBluetoothManager?
         ): List<DeviceItemType> = buildList {
             add(DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 add(DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE)
                 add(DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE)
             }

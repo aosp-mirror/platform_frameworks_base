@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.core
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
 import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
 
 val Kosmos.fakeStatusBarInitializer by Kosmos.Fixture { FakeStatusBarInitializer() }
@@ -37,6 +38,7 @@ val Kosmos.multiDisplayStatusBarInitializerStore by
             displayRepository,
             fakeStatusBarInitializerFactory,
             fakeStatusBarWindowControllerStore,
+            fakeStatusBarModeRepository,
         )
     }
 

@@ -15,12 +15,15 @@
  */
 package com.android.server.wm;
 
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY;
+
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
 
 import java.io.PrintWriter;
+import java.util.function.BooleanSupplier;
 
 /**
  * Allows the interaction with all the app compat policies and configurations
@@ -47,6 +50,8 @@ class AppCompatController {
     private final AppCompatLetterboxPolicy mAppCompatLetterboxPolicy;
     @NonNull
     private final AppCompatSizeCompatModePolicy mAppCompatSizeCompatModePolicy;
+    @NonNull
+    final BooleanSupplier mAllowRestrictedResizability;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
@@ -70,6 +75,27 @@ class AppCompatController {
                 mAppCompatOverrides, mTransparentPolicy, wmService.mAppCompatConfiguration);
         mAppCompatSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(mActivityRecord,
                 mAppCompatOverrides);
+        mAllowRestrictedResizability = AppCompatUtils.asLazy(() -> {
+            // Application level.
+            try {
+                if (packageManager.getProperty(PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
+                        mActivityRecord.packageName).getBoolean()) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // Fall through.
+            }
+            // Activity level.
+            try {
+                return packageManager.getPropertyAsUser(
+                        PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
+                        mActivityRecord.mActivityComponent.getPackageName(),
+                        mActivityRecord.mActivityComponent.getClassName(),
+                        mActivityRecord.mUserId).getBoolean();
+            } catch (PackageManager.NameNotFoundException e) {
+                return false;
+            }
+        });
     }
 
     @NonNull

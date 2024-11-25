@@ -1735,9 +1735,9 @@ public class DisplayPolicy {
         }
 
         // Show IME over the keyguard if the target allows it.
-        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisible()
-                && win.mIsImWindow && (imeTarget.canShowWhenLocked()
-                        || !imeTarget.canBeHiddenByKeyguard());
+        final boolean showImeOverKeyguard =
+                imeTarget != null && win.mIsImWindow && imeTarget.isDisplayed() && (
+                        imeTarget.canShowWhenLocked() || !imeTarget.canBeHiddenByKeyguard());
         if (showImeOverKeyguard) {
             return false;
         }
@@ -3053,7 +3053,7 @@ public class DisplayPolicy {
             @InsetsType int insetsType) {
         for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
             final InsetsSource source = insetsState.sourceAt(i);
-            if ((source.getType() & insetsType) == 0 || !source.isVisible()) {
+            if ((source.getType() & insetsType) == 0) {
                 continue;
             }
             if (Rect.intersects(bounds, source.getFrame())) {

@@ -314,7 +314,7 @@ public class FullBackupEngine {
                 Slog.d(TAG, "Binding to full backup agent : " + mPkg.packageName);
             }
             mAgent =
-                    backupManagerService.bindToAgentSynchronous(
+                    backupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
                             mPkg.applicationInfo, ApplicationThreadConstants.BACKUP_MODE_FULL,
                             mBackupEligibilityRules.getBackupDestination());
         }

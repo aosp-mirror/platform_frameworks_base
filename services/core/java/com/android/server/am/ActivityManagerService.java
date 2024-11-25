@@ -131,6 +131,9 @@ import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.security.Flags.preventIntentRedirect;
+import static android.security.Flags.preventIntentRedirectCollectNestedKeysOnServerIfNotCollected;
+import static android.security.Flags.preventIntentRedirectShowToast;
+import static android.security.Flags.preventIntentRedirectThrowExceptionIfNestedKeysNotCollected;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -337,6 +340,8 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.ProfilingServiceHelper;
+import android.os.ProfilingTrigger;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -385,6 +390,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManagerInternal;
+import android.widget.Toast;
 
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
@@ -435,6 +441,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
+import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
@@ -665,6 +672,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * will be equivalent to the {@link #mGlobalLock}.
      */
     private static final boolean ENABLE_PROC_LOCK = true;
+
+    private static final int DEFAULT_INTENT_CREATOR_UID = -1;
 
     /**
      * The lock for process management.
@@ -1089,7 +1098,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void onReportFullyDrawn(long id, long timestampNanos) {
-            mProcessList.getAppStartInfoTracker().onActivityReportFullyDrawn(id, timestampNanos);
+            ApplicationStartInfo startInfo = mProcessList.getAppStartInfoTracker()
+                    .onActivityReportFullyDrawn(id, timestampNanos);
+
+            if (android.os.profiling.Flags.systemTriggeredProfilingNew()
+                    && startInfo != null
+                    && startInfo.getStartType() == ApplicationStartInfo.START_TYPE_COLD
+                    && startInfo.getPackageName() != null) {
+                ProfilingServiceHelper.getInstance().onProfilingTriggerOccurred(
+                        startInfo.getRealUid(),
+                        startInfo.getPackageName(),
+                        ProfilingTrigger.TRIGGER_TYPE_APP_FULLY_DRAWN);
+            }
         }
     };
 
@@ -4478,16 +4498,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, "Unattached app died before backup, skipping");
                 final int userId = app.userId;
                 final String packageName = app.info.packageName;
-                mHandler.post(new Runnable() {
-                @Override
-                    public void run() {
-                        try {
-                            IBackupManager bm = IBackupManager.Stub.asInterface(
-                                    ServiceManager.getService(Context.BACKUP_SERVICE));
-                            bm.agentDisconnectedForUser(userId, packageName);
-                        } catch (RemoteException e) {
-                            // Can't happen; the backup manager is local
-                        }
+                mHandler.post(() -> {
+                    try {
+                        getBackupManager().agentDisconnectedForUser(userId, packageName);
+                    } catch (RemoteException e) {
+                        // Can't happen; the backup manager is local
                     }
                 });
             }
@@ -4658,7 +4673,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (backupTarget != null && backupTarget.appInfo.packageName.equals(processName)) {
                 isRestrictedBackupMode = backupTarget.appInfo.uid >= FIRST_APPLICATION_UID
                         && ((backupTarget.backupMode == BackupRecord.RESTORE_FULL)
-                                || (backupTarget.backupMode == BackupRecord.BACKUP_FULL));
+                        || (backupTarget.backupMode == BackupRecord.BACKUP_FULL))
+                        && backupTarget.useRestrictedMode;
             }
 
             final ActiveInstrumentation instr = app.getActiveInstrumentation();
@@ -5155,6 +5171,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
+
                 String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
@@ -11332,7 +11353,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.println("  mFgsStartTempAllowList:");
             final long currentTimeNow = System.currentTimeMillis();
-            final long elapsedRealtimeNow = SystemClock.elapsedRealtime();
+            final long tempAllowlistCurrentTime =
+                    com.android.server.deviceidle.Flags.useCpuTimeForTempAllowlist()
+                            ? SystemClock.uptimeMillis() : SystemClock.elapsedRealtime();
             mFgsStartTempAllowList.forEach((uid, entry) -> {
                 pw.print("    " + UserHandle.formatUid(uid) + ": ");
                 entry.second.dump(pw);
@@ -11340,7 +11363,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Convert entry.mExpirationTime, which is an elapsed time since boot,
                 // to a time since epoch (i.e. System.currentTimeMillis()-based time.)
                 final long expirationInCurrentTime =
-                        currentTimeNow - elapsedRealtimeNow + entry.first;
+                        currentTimeNow - tempAllowlistCurrentTime + entry.first;
                 TimeUtils.dumpTimeWithDelta(pw, expirationInCurrentTime, currentTimeNow);
                 pw.println();
             });
@@ -13477,16 +13500,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (backupTarget != null && pid == backupTarget.app.getPid()) {
             if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG_CLEANUP, "App "
                     + backupTarget.appInfo + " died during backup");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        IBackupManager bm = IBackupManager.Stub.asInterface(
-                                ServiceManager.getService(Context.BACKUP_SERVICE));
-                        bm.agentDisconnectedForUser(app.userId, app.info.packageName);
-                    } catch (RemoteException e) {
-                        // can't happen; backup manager is local
-                    }
+            mHandler.post(() -> {
+                try {
+                    getBackupManager().agentDisconnectedForUser(app.userId, app.info.packageName);
+                } catch (RemoteException e) {
+                    // can't happen; backup manager is local
                 }
             });
         }
@@ -13989,7 +14007,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // instantiated.  The backup agent will invoke backupAgentCreated() on the
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
-            @BackupDestination int backupDestination) {
+            @BackupDestination int backupDestination, boolean useRestrictedMode) {
         long startTimeNs = SystemClock.uptimeNanos();
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
@@ -14074,7 +14092,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + app.packageName + ": " + e);
             }
 
-            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination);
+            BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination,
+                    useRestrictedMode);
             ComponentName hostingName =
                     (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
                             || backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE)
@@ -14100,8 +14119,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // process, etc, then mark it as being in full backup so that certain calls to the
             // process can be blocked. This is not reset to false anywhere because we kill the
             // process after the full backup is done and the ProcessRecord will vaporize anyway.
-            if (UserHandle.isApp(app.uid) &&
-                    backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL) {
+            if (UserHandle.isApp(app.uid)
+                    && backupMode == ApplicationThreadConstants.BACKUP_MODE_FULL
+                    && r.useRestrictedMode) {
                 proc.setInFullBackup(true);
             }
             r.app = proc;
@@ -14199,9 +14219,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long oldIdent = Binder.clearCallingIdentity();
         try {
-            IBackupManager bm = IBackupManager.Stub.asInterface(
-                    ServiceManager.getService(Context.BACKUP_SERVICE));
-            bm.agentConnectedForUser(userId, agentPackageName, agent);
+            getBackupManager().agentConnectedForUser(userId, agentPackageName, agent);
         } catch (RemoteException e) {
             // can't happen; the backup manager service is local
         } catch (Exception e) {
@@ -17911,6 +17929,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void notifyActiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyActiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
+        public void notifyInactiveMediaForegroundService(@NonNull String packageName,
+                @UserIdInt int userId, int notificationId) {
+            synchronized (ActivityManagerService.this) {
+                mServices.notifyInactiveMediaForegroundServiceLocked(packageName, userId,
+                        notificationId);
+            }
+        }
+
+        @Override
         public ArraySet<String> getClientPackages(String servicePackageName) {
             synchronized (ActivityManagerService.this) {
                 return mServices.getClientPackagesLocked(servicePackageName);
@@ -17991,14 +18027,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
                 int userId) {
-            // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
-            if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
-                throw new IllegalArgumentException("Unsupported userId");
-            }
-
-            mUserController.handleIncomingUser(pid, uid, userId, true,
-                    ALLOW_NON_FULL, "addStartInfoTimestampSystem", null);
-
             addStartInfoTimestampInternal(key, timestampNs, userId, uid);
         }
 
@@ -19066,8 +19094,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean enableFgsNotificationRateLimit(boolean enable) {
-        enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
-                "enableFgsNotificationRateLimit");
+        if (android.security.Flags.protectDeviceConfigFlags()) {
+            enforceCallingHasAtLeastOnePermission("enableFgsNotificationRateLimit",
+                    permission.WRITE_DEVICE_CONFIG, permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
+        } else {
+            enforceCallingPermission(permission.WRITE_DEVICE_CONFIG,
+                    "enableFgsNotificationRateLimit");
+        }
         synchronized (this) {
             return mServices.enableFgsNotificationRateLimitLocked(enable);
         }
@@ -19286,37 +19319,61 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
         if (!preventIntentRedirect()) return;
+        if (intent == null) return;
 
-        if (intent == null || intent.getExtraIntentKeys() == null) return;
-        for (String key : intent.getExtraIntentKeys()) {
-            try {
-                Intent extraIntent = intent.getParcelableExtra(key, Intent.class);
-                if (extraIntent == null) {
-                    Slog.w(TAG, "The key {" + key
-                            + "} does not correspond to an intent in the extra bundle.");
-                    continue;
-                }
-                IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent,
-                        creatorPackage);
-                if (creatorToken != null) {
-                    extraIntent.setCreatorToken(creatorToken);
-                    Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
-                            + creatorPackage + "; intent: " + intent);
-                    FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED,
-                            creatorToken.getCreatorUid());
-                }
-            } catch (Exception e) {
-                Slog.wtf(TAG,
-                        "Something went wrong when trying to add creator token for embedded "
-                                + "intents of intent: ."
-                                + intent, e);
+        if ((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0) {
+            Slog.wtf(TAG,
+                    "[IntentRedirect] The intent does not have its nested keys collected as a "
+                            + "preparation for creating intent creator tokens. Intent: "
+                            + intent + "; creatorPackage: " + creatorPackage);
+            if (preventIntentRedirectShowToast()) {
+                UiThread.getHandler().post(
+                        () -> Toast.makeText(mContext,
+                                "Nested keys not collected. go/report-bug-intentRedir to report a"
+                                        + " bug", Toast.LENGTH_LONG).show());
+            }
+            if (preventIntentRedirectThrowExceptionIfNestedKeysNotCollected()) {
+                // this flag will be internal only, not ramped to public.
+                throw new SecurityException(
+                        "The intent does not have its nested keys collected as a preparation for "
+                                + "creating intent creator tokens. Intent: "
+                                + intent + "; creatorPackage: " + creatorPackage);
+            }
+            if (preventIntentRedirectCollectNestedKeysOnServerIfNotCollected()) {
+                // this flag will be ramped to public.
+                intent.collectExtraIntentKeys();
             }
         }
+
+        String targetPackage = intent.getComponent() != null
+                ? intent.getComponent().getPackageName()
+                : intent.getPackage();
+        final boolean isCreatorSameAsTarget = creatorPackage != null && creatorPackage.equals(
+                targetPackage);
+        final boolean noExtraIntentKeys =
+                intent.getExtraIntentKeys() == null || intent.getExtraIntentKeys().isEmpty();
+        final int creatorUid = noExtraIntentKeys ? DEFAULT_INTENT_CREATOR_UID : Binder.getCallingUid();
+
+        intent.forEachNestedCreatorToken(extraIntent -> {
+            if (isCreatorSameAsTarget) {
+                FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED, creatorUid, true);
+                return;
+            }
+            IntentCreatorToken creatorToken = createIntentCreatorToken(extraIntent, creatorUid,
+                    creatorPackage);
+            if (creatorToken != null) {
+                extraIntent.setCreatorToken(creatorToken);
+                // TODO remove Slog.wtf once proven FrameworkStatsLog works. b/375396329
+                Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
+                        + creatorPackage + "; intent: " + extraIntent);
+                FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED, creatorUid, false);
+            }
+        });
     }
 
-    private IntentCreatorToken createIntentCreatorToken(Intent intent, String creatorPackage) {
+    private IntentCreatorToken createIntentCreatorToken(Intent intent, int creatorUid,
+            String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
-        int creatorUid = getCallingUid();
         IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);
         IntentCreatorToken token;
         synchronized (sIntentCreatorTokenCache) {
@@ -19329,5 +19386,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         return token;
+    }
+
+    private IBackupManager getBackupManager() {
+        return IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
     }
 }

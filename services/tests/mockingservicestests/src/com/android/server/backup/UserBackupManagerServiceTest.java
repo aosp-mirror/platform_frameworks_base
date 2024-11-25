@@ -21,38 +21,38 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
+import android.app.IActivityManager;
 import android.app.backup.BackupAgent;
-import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.FeatureFlagUtils;
 import android.util.KeyValueListParser;
 
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.internal.BackupHandler;
@@ -64,11 +64,11 @@ import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 
-import com.google.common.collect.ImmutableSet;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -77,7 +77,6 @@ import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.IntConsumer;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -85,8 +84,12 @@ public class UserBackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package1";
     private static final String[] TEST_PACKAGES = new String[] { TEST_PACKAGE };
     private static final String TEST_TRANSPORT = "transport";
-    private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 100;
     @UserIdInt private static final int USER_ID = 0;
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
     @Mock IBackupObserver mBackupObserver;
@@ -99,10 +102,14 @@ public class UserBackupManagerServiceTest {
     @Mock JobScheduler mJobScheduler;
     @Mock BackupHandler mBackupHandler;
     @Mock BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
+    @Mock IActivityManager mActivityManager;
+    @Mock
+    ActivityManagerInternal mActivityManagerInternal;
 
     private TestableContext mContext;
     private MockitoSession mSession;
     private TestBackupService mService;
+    private ApplicationInfo mTestPackageApplicationInfo;
 
     @Before
     public void setUp() throws Exception {
@@ -120,12 +127,14 @@ public class UserBackupManagerServiceTest {
         mContext.getTestablePermissions().setPermission(android.Manifest.permission.BACKUP,
                 PackageManager.PERMISSION_GRANTED);
 
-        mService = new TestBackupService(mContext, mPackageManager, mOperationStorage,
-                mTransportManager, mBackupHandler);
+        mService = new TestBackupService();
         mService.setEnabled(true);
         mService.setSetupComplete(true);
         mService.enqueueFullBackup("com.test.backup.app", /* lastBackedUp= */ 0);
-        }
+
+        mTestPackageApplicationInfo = new ApplicationInfo();
+        mTestPackageApplicationInfo.packageName = TEST_PACKAGE;
+    }
 
     @After
     public void tearDown() {
@@ -256,33 +265,6 @@ public class UserBackupManagerServiceTest {
     }
 
     @Test
-    @FlakyTest
-    public void testAgentDisconnected_cancelsCurrentOperations() throws Exception {
-        when(mOperationStorage.operationTokensForPackage(eq("com.android.foo"))).thenReturn(
-                ImmutableSet.of(123, 456, 789)
-        );
-
-        mService.agentDisconnected("com.android.foo");
-
-        mService.waitForAsyncOperation();
-        verify(mOperationStorage).cancelOperation(eq(123), eq(true), any(IntConsumer.class));
-        verify(mOperationStorage).cancelOperation(eq(456), eq(true), any());
-        verify(mOperationStorage).cancelOperation(eq(789), eq(true), any());
-    }
-
-    @Test
-    public void testAgentDisconnected_unknownPackageName_cancelsNothing() throws Exception {
-        when(mOperationStorage.operationTokensForPackage(eq("com.android.foo"))).thenReturn(
-                ImmutableSet.of()
-        );
-
-        mService.agentDisconnected("com.android.foo");
-
-        verify(mOperationStorage, never())
-                .cancelOperation(anyInt(), anyBoolean(), any(IntConsumer.class));
-    }
-
-    @Test
     public void testReportDelayedRestoreResult_sendsLogsToMonitor() throws Exception {
         PackageInfo packageInfo = getPackageInfo(TEST_PACKAGE);
         when(mPackageManager.getPackageInfoAsUser(anyString(),
@@ -298,9 +280,8 @@ public class UserBackupManagerServiceTest {
                 new DataTypeResult(/* dataType */ "type_2"));
         mService.reportDelayedRestoreResult(TEST_PACKAGE, results);
 
-
         verify(mBackupManagerMonitorEventSender).sendAgentLoggingResults(
-                eq(packageInfo), eq(results), eq(BackupAnnotations.OperationType.RESTORE));
+                eq(packageInfo), eq(results), eq(OperationType.RESTORE));
     }
 
     private static PackageInfo getPackageInfo(String packageName) {
@@ -314,13 +295,9 @@ public class UserBackupManagerServiceTest {
         boolean isEnabledStatePersisted = false;
         boolean shouldUseNewBackupEligibilityRules = false;
 
-        private volatile Thread mWorkerThread = null;
-
-        TestBackupService(Context context, PackageManager packageManager,
-                LifecycleOperationStorage operationStorage, TransportManager transportManager,
-                BackupHandler backupHandler) {
-            super(context, packageManager, operationStorage, transportManager, backupHandler,
-                    createConstants(context));
+        TestBackupService() {
+            super(mContext, mPackageManager, mOperationStorage, mTransportManager, mBackupHandler,
+                    createConstants(mContext), mActivityManager, mActivityManagerInternal);
         }
 
         private static BackupManagerConstants createConstants(Context context) {
@@ -352,26 +329,8 @@ public class UserBackupManagerServiceTest {
         }
 
         @Override
-        Thread getThreadForAsyncOperation(String operationName, Runnable operation) {
-            mWorkerThread = super.getThreadForAsyncOperation(operationName, operation);
-            return mWorkerThread;
-        }
-
-        @Override
         BackupManagerMonitorEventSender getBMMEventSender(IBackupManagerMonitor monitor) {
             return mBackupManagerMonitorEventSender;
-        }
-
-        private void waitForAsyncOperation() {
-            if (mWorkerThread == null) {
-                return;
-            }
-
-            try {
-                mWorkerThread.join(/* millis */ WORKER_THREAD_TIMEOUT_MILLISECONDS);
-            } catch (InterruptedException e) {
-                fail("Failed waiting for worker thread to complete: " + e.getMessage());
-            }
         }
     }
 }

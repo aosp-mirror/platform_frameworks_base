@@ -36,7 +36,6 @@ import android.app.Dialog;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.app.WallpaperManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -138,6 +137,7 @@ import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.user.domain.interactor.UserLogoutInteractor;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -197,7 +197,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
     private final AudioManager mAudioManager;
-    private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
     private final SelectedUserInteractor mSelectedUserInteractor;
     private final TelephonyListenerManager mTelephonyListenerManager;
@@ -260,6 +259,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final ShadeController mShadeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
+    private final UserLogoutInteractor mLogoutInteractor;
     private final GlobalActionsInteractor mInteractor;
 
     @VisibleForTesting
@@ -344,7 +344,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             Context context,
             GlobalActionsManager windowManagerFuncs,
             AudioManager audioManager,
-            DevicePolicyManager devicePolicyManager,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
             TelephonyListenerManager telephonyListenerManager,
@@ -376,11 +375,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DialogTransitionAnimator dialogTransitionAnimator,
             SelectedUserInteractor selectedUserInteractor,
+            UserLogoutInteractor logoutInteractor,
             GlobalActionsInteractor interactor) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
-        mDevicePolicyManager = devicePolicyManager;
         mLockPatternUtils = lockPatternUtils;
         mTelephonyListenerManager = telephonyListenerManager;
         mKeyguardStateController = keyguardStateController;
@@ -412,6 +411,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogTransitionAnimator = dialogTransitionAnimator;
         mSelectedUserInteractor = selectedUserInteractor;
+        mLogoutInteractor = logoutInteractor;
         mInteractor = interactor;
 
         // receive broadcasts
@@ -639,12 +639,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
                 addIfShouldShowAction(tempActions, new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
-                // TODO(b/206032495): should call mDevicePolicyManager.getLogoutUserId() instead of
-                // hardcode it to USER_SYSTEM so it properly supports headless system user mode
-                // (and then call mDevicePolicyManager.clearLogoutUser() after switched)
-                if (mDevicePolicyManager.isLogoutEnabled()
-                        && currentUser.get() != null
-                        && currentUser.get().id != UserHandle.USER_SYSTEM) {
+                if (mLogoutInteractor.isLogoutEnabled().getValue()) {
                     addIfShouldShowAction(tempActions, new LogoutAction());
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
@@ -1134,7 +1129,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             // Add a little delay before executing, to give the dialog a chance to go away before
             // switching user
             mHandler.postDelayed(() -> {
-                mDevicePolicyManager.logoutUser();
+                mLogoutInteractor.logOut();
             }, mDialogPressDelay);
         }
     }

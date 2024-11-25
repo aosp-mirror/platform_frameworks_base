@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QQS
 import com.android.systemui.qs.panels.domain.interactor.QuickQuickSettingsRowInteractor
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.shared.model.splitInRowsSequence
@@ -36,25 +37,43 @@ class QuickQuickSettingsViewModel
 @AssistedInject
 constructor(
     tilesInteractor: CurrentTilesInteractor,
-    private val qsColumnsViewModel: QSColumnsViewModel,
+    qsColumnsViewModelFactory: QSColumnsViewModel.Factory,
     quickQuickSettingsRowInteractor: QuickQuickSettingsRowInteractor,
+    mediaInRowInLandscapeViewModelFactory: MediaInRowInLandscapeViewModel.Factory,
     val squishinessViewModel: TileSquishinessViewModel,
     iconTilesViewModel: IconTilesViewModel,
     val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
 ) : ExclusiveActivatable() {
 
     private val hydrator = Hydrator("QuickQuickSettingsViewModel")
+    private val qsColumnsViewModel = qsColumnsViewModelFactory.create(LOCATION_QQS)
+    private val mediaInRowViewModel = mediaInRowInLandscapeViewModelFactory.create(LOCATION_QQS)
 
-    val columns by qsColumnsViewModel.columns
+    val columns: Int
+        get() = qsColumnsViewModel.columns
 
     private val largeTiles by
         hydrator.hydratedStateOf(traceName = "largeTiles", source = iconTilesViewModel.largeTiles)
 
-    private val rows by
+    private val rows: Int
+        get() =
+            if (mediaInRowViewModel.shouldMediaShowInRow) {
+                rowsWithoutMedia * 2
+            } else {
+                rowsWithoutMedia
+            }
+
+    private val rowsWithoutMedia by
         hydrator.hydratedStateOf(
-            traceName = "rows",
+            traceName = "rowsWithoutMedia",
             initialValue = quickQuickSettingsRowInteractor.defaultRows,
             source = quickQuickSettingsRowInteractor.rows,
+        )
+
+    private val largeTilesSpan by
+        hydrator.hydratedStateOf(
+            traceName = "largeTilesSpan",
+            source = iconTilesViewModel.largeTilesSpan,
         )
 
     private val currentTiles by
@@ -62,17 +81,15 @@ constructor(
 
     val tileViewModels by derivedStateOf {
         currentTiles
-            .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width) }
+            .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width()) }
             .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
     }
-
-    private val TileSpec.width: Int
-        get() = if (largeTiles.contains(this)) 2 else 1
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { hydrator.activate() }
             launch { qsColumnsViewModel.activate() }
+            launch { mediaInRowViewModel.activate() }
             awaitCancellation()
         }
     }
@@ -81,4 +98,6 @@ constructor(
     interface Factory {
         fun create(): QuickQuickSettingsViewModel
     }
+
+    private fun TileSpec.width(): Int = if (largeTiles.contains(this)) largeTilesSpan else 1
 }

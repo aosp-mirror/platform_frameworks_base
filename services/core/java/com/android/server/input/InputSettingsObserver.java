@@ -117,7 +117,10 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_STROKE_STYLE),
                         (reason) -> updatePointerStrokeStyleFromSettings()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SCALE),
-                        (reason) -> updatePointerScaleFromSettings()));
+                        (reason) -> updatePointerScaleFromSettings()),
+                Map.entry(Settings.System.getUriFor(
+                                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION),
+                        (reason) -> updateTouchpadThreeFingerTapShortcutEnabled()));
     }
 
     /**
@@ -203,6 +206,11 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadRightClickZoneEnabled() {
         mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
+    }
+
+    private void updateTouchpadThreeFingerTapShortcutEnabled() {
+        mNative.setTouchpadThreeFingerTapShortcutEnabled(
+                InputSettings.useTouchpadThreeFingerTapShortcut(mContext));
     }
 
     private void updateShowTouches() {

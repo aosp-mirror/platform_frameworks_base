@@ -25,10 +25,13 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -48,10 +51,12 @@ public class PipScheduler {
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
     private PipTransitionController mPipTransitionController;
-    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+    private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
 
     @Nullable private Runnable mUpdateMovementBoundsRunnable;
+
+    private PipAlphaAnimatorSupplier mPipAlphaAnimatorSupplier;
 
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
@@ -64,10 +69,7 @@ public class PipScheduler {
 
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
-    }
-
-    ShellExecutor getMainExecutor() {
-        return mMainExecutor;
+        mPipAlphaAnimatorSupplier = PipAlphaAnimator::new;
     }
 
     void setPipTransitionController(PipTransitionController pipTransitionController) {
@@ -76,27 +78,29 @@ public class PipScheduler {
 
     @Nullable
     private WindowContainerTransaction getExitPipViaExpandTransaction() {
-        if (mPipTransitionState.mPipTaskToken == null) {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // final expanded bounds to be inherited from the parent
-        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
+        wct.setBounds(pipTaskToken, null);
         // if we are hitting a multi-activity case
         // windowing mode change will reparent to original host task
-        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setWindowingMode(pipTaskToken, WINDOWING_MODE_UNDEFINED);
         return wct;
     }
 
     @Nullable
     private WindowContainerTransaction getRemovePipTransaction() {
-        if (mPipTransitionState.mPipTaskToken == null) {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
-        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
-        wct.reorder(mPipTransitionState.mPipTaskToken, false);
+        wct.setBounds(pipTaskToken, null);
+        wct.setWindowingMode(pipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.reorder(pipTaskToken, false);
         return wct;
     }
 
@@ -117,8 +121,8 @@ public class PipScheduler {
     /** Runs remove PiP animation and schedules remove PiP transition after the animation ends. */
     public void removePipAfterAnimation() {
         SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        PipAlphaAnimator animator = new PipAlphaAnimator(mContext,
-                mPipTransitionState.mPinnedTaskLeash, tx, PipAlphaAnimator.FADE_OUT);
+        PipAlphaAnimator animator = mPipAlphaAnimatorSupplier.get(mContext,
+                mPipTransitionState.getPinnedTaskLeash(), tx, PipAlphaAnimator.FADE_OUT);
         animator.setAnimationEndCallback(this::scheduleRemovePipImmediately);
         animator.start();
     }
@@ -159,13 +163,14 @@ public class PipScheduler {
      *                    for running the animator will get this as an extra.
      */
     public void scheduleAnimateResizePip(Rect toBounds, boolean configAtEnd, int duration) {
-        if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
+        WindowContainerToken pipTaskToken = mPipTransitionState.getPipTaskToken();
+        if (pipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+        wct.setBounds(pipTaskToken, toBounds);
         if (configAtEnd) {
-            wct.deferConfigToTransitionEnd(mPipTransitionState.mPipTaskToken);
+            wct.deferConfigToTransitionEnd(pipTaskToken);
         }
         mPipTransitionController.startResizeTransition(wct, duration);
     }
@@ -203,8 +208,8 @@ public class PipScheduler {
                     "%s: Attempted to user resize PIP to empty bounds, aborting.", TAG);
             return;
         }
-        SurfaceControl leash = mPipTransitionState.mPinnedTaskLeash;
-        final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+        SurfaceControl leash = mPipTransitionState.getPinnedTaskLeash();
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
 
         Matrix transformTensor = new Matrix();
         final float[] mMatrixTmp = new float[9];
@@ -218,7 +223,7 @@ public class PipScheduler {
         tx.apply();
     }
 
-    void setUpdateMovementBoundsRunnable(Runnable updateMovementBoundsRunnable) {
+    void setUpdateMovementBoundsRunnable(@Nullable Runnable updateMovementBoundsRunnable) {
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
     }
 
@@ -234,5 +239,24 @@ public class PipScheduler {
         }
         mPipBoundsState.setBounds(newBounds);
         maybeUpdateMovementBounds();
+    }
+
+    @VisibleForTesting
+    void setSurfaceControlTransactionFactory(
+            @NonNull PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
+    }
+
+    @VisibleForTesting
+    interface PipAlphaAnimatorSupplier {
+        PipAlphaAnimator get(@NonNull Context context,
+                SurfaceControl leash,
+                SurfaceControl.Transaction tx,
+                @PipAlphaAnimator.Fade int direction);
+    }
+
+    @VisibleForTesting
+    void setPipAlphaAnimatorSupplier(@NonNull PipAlphaAnimatorSupplier supplier) {
+        mPipAlphaAnimatorSupplier = supplier;
     }
 }

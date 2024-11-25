@@ -29,6 +29,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,7 +53,8 @@ class PriorityNestedScrollConnectionTest {
         object : FlingBehavior {
             override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
                 scrollBy(initialVelocity)
-                return initialVelocity / 2f
+                // returns the remaining velocity: 1/3 remained + 2/3 consumed
+                return initialVelocity / 3f
             }
         }
 
@@ -205,11 +208,13 @@ class PriorityNestedScrollConnectionTest {
 
         val consumed = scrollConnection.onPreFling(available = Velocity(2f, 2f))
 
-        assertThat(lastStop).isEqualTo(2f)
+        val initialVelocity = 2f
+        assertThat(lastStop).isEqualTo(initialVelocity)
         // flingToScroll should try to scroll the content, customFlingBehavior uses the velocity.
         assertThat(lastScroll).isEqualTo(2f)
-        // customFlingBehavior returns half of the vertical velocity.
-        assertThat(consumed).isEqualTo(Velocity(0f, 1f))
+        val remainingVelocity = initialVelocity / 3f
+        // customFlingBehavior returns 2/3 of the vertical velocity.
+        assertThat(consumed).isEqualTo(Velocity(0f, initialVelocity - remainingVelocity))
     }
 
     @Test
@@ -261,5 +266,17 @@ class PriorityNestedScrollConnectionTest {
 
         scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
         assertThat(isStarted).isEqualTo(true)
+    }
+
+    @Test
+    fun handleMultipleOnPreFlingCalls() = runTest {
+        startPriorityModePostScroll()
+
+        coroutineScope {
+            launch { scrollConnection.onPreFling(available = Velocity.Zero) }
+            launch { scrollConnection.onPreFling(available = Velocity.Zero) }
+        }
+
+        assertThat(lastStop).isEqualTo(0f)
     }
 }

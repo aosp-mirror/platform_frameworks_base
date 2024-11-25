@@ -50,8 +50,11 @@ import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
+import com.android.compose.animation.scene.transformation.InterpolatedPropertyTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
+import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.drawInContainer
 import com.android.compose.ui.util.lerp
@@ -187,6 +190,7 @@ private fun Modifier.maybeElevateInContent(
                 state.transformationSpec
                     .transformations(key, content.key)
                     .shared
+                    ?.transformation
                     ?.elevateInContent == content.key &&
                 isSharedElement(stateByContent, state) &&
                 isSharedElementEnabled(key, state) &&
@@ -346,8 +350,7 @@ internal class ElementNode(
             val placeInThisContent =
                 elementContentWhenIdle(
                     layoutImpl,
-                    currentState.currentScene,
-                    currentState.currentOverlays,
+                    currentState,
                     isInContent = { it in element.stateByContent },
                 ) == content.key
 
@@ -635,20 +638,11 @@ internal inline fun elementState(
 
 internal inline fun elementContentWhenIdle(
     layoutImpl: SceneTransitionLayoutImpl,
-    idle: TransitionState.Idle,
+    currentState: TransitionState,
     isInContent: (ContentKey) -> Boolean,
 ): ContentKey {
-    val currentScene = idle.currentScene
-    val overlays = idle.currentOverlays
-    return elementContentWhenIdle(layoutImpl, currentScene, overlays, isInContent)
-}
-
-private inline fun elementContentWhenIdle(
-    layoutImpl: SceneTransitionLayoutImpl,
-    currentScene: SceneKey,
-    overlays: Set<OverlayKey>,
-    isInContent: (ContentKey) -> Boolean,
-): ContentKey {
+    val currentScene = currentState.currentScene
+    val overlays = currentState.currentOverlays
     if (overlays.isEmpty()) {
         return currentScene
     }
@@ -691,8 +685,8 @@ private fun prepareInterruption(
     val fromState = updateStateInContent(transition.fromContent)
     val toState = updateStateInContent(transition.toContent)
 
-    reconcileStates(element, previousTransition)
-    reconcileStates(element, transition)
+    val previousUniqueState = reconcileStates(element, previousTransition, previousState = null)
+    reconcileStates(element, transition, previousState = previousUniqueState)
 
     // Remove the interruption values to all contents but the content(s) where the element will be
     // placed, to make sure that interruption deltas are computed only right after this interruption
@@ -719,12 +713,32 @@ private fun prepareInterruption(
 /**
  * Reconcile the state of [element] in the formContent and toContent of [transition] so that the
  * values before interruption have their expected values, taking shared transitions into account.
+ *
+ * @return the unique state this element had during [transition], `null` if it had multiple
+ *   different states (i.e. the shared animation was disabled).
  */
-private fun reconcileStates(element: Element, transition: TransitionState.Transition) {
-    val fromContentState = element.stateByContent[transition.fromContent] ?: return
-    val toContentState = element.stateByContent[transition.toContent] ?: return
+private fun reconcileStates(
+    element: Element,
+    transition: TransitionState.Transition,
+    previousState: Element.State?,
+): Element.State? {
+    fun reconcileWithPreviousState(state: Element.State) {
+        if (previousState != null && state.offsetBeforeInterruption == Offset.Unspecified) {
+            state.updateValuesBeforeInterruption(previousState)
+        }
+    }
+
+    val fromContentState = element.stateByContent[transition.fromContent]
+    val toContentState = element.stateByContent[transition.toContent]
+
+    if (fromContentState == null || toContentState == null) {
+        return (fromContentState ?: toContentState)
+            ?.also { reconcileWithPreviousState(it) }
+            ?.takeIf { it.offsetBeforeInterruption != Offset.Unspecified }
+    }
+
     if (!isSharedElementEnabled(element.key, transition)) {
-        return
+        return null
     }
 
     if (
@@ -733,13 +747,19 @@ private fun reconcileStates(element: Element, transition: TransitionState.Transi
     ) {
         // Element is shared and placed in fromContent only.
         toContentState.updateValuesBeforeInterruption(fromContentState)
-    } else if (
+        return fromContentState
+    }
+
+    if (
         toContentState.offsetBeforeInterruption != Offset.Unspecified &&
             fromContentState.offsetBeforeInterruption == Offset.Unspecified
     ) {
         // Element is shared and placed in toContent only.
         fromContentState.updateValuesBeforeInterruption(toContentState)
+        return toContentState
     }
+
+    return null
 }
 
 private fun Element.State.selfUpdateValuesBeforeInterruption() {
@@ -901,7 +921,7 @@ private fun shouldPlaceElement(
     }
 
     val sharedTransformation = sharedElementTransformation(element.key, transition)
-    if (sharedTransformation?.enabled == false) {
+    if (sharedTransformation?.transformation?.enabled == false) {
         return true
     }
 
@@ -954,13 +974,13 @@ private fun isSharedElementEnabled(
     element: ElementKey,
     transition: TransitionState.Transition,
 ): Boolean {
-    return sharedElementTransformation(element, transition)?.enabled ?: true
+    return sharedElementTransformation(element, transition)?.transformation?.enabled ?: true
 }
 
 internal fun sharedElementTransformation(
     element: ElementKey,
     transition: TransitionState.Transition,
-): SharedElementTransformation? {
+): TransformationWithRange<SharedElementTransformation>? {
     val transformationSpec = transition.transformationSpec
     val sharedInFromContent =
         transformationSpec.transformations(element, transition.fromContent).shared
@@ -1244,7 +1264,7 @@ private inline fun <T> computeValue(
     element: Element,
     transition: TransitionState.Transition?,
     contentValue: (Element.State) -> T,
-    transformation: (ElementTransformations) -> PropertyTransformation<T>?,
+    transformation: (ElementTransformations) -> TransformationWithRange<PropertyTransformation<T>>?,
     currentValue: () -> T,
     isSpecified: (T) -> Boolean,
     lerp: (T, T, Float) -> T,
@@ -1280,7 +1300,14 @@ private inline fun <T> computeValue(
                 checkNotNull(if (currentContent == toContent) toState else fromState)
             val idleValue = contentValue(overscrollState)
             val targetValue =
-                with(propertySpec) {
+                with(
+                    propertySpec.transformation.requireInterpolatedTransformation(
+                        element,
+                        transition,
+                    ) {
+                        "Custom transformations in overscroll specs should not be possible"
+                    }
+                ) {
                     layoutImpl.propertyTransformationScope.transform(
                         currentContent,
                         element.key,
@@ -1362,7 +1389,7 @@ private inline fun <T> computeValue(
     // fromContent or toContent during interruptions.
     val content = contentState.content
 
-    val transformation =
+    val transformationWithRange =
         transformation(transition.transformationSpec.transformations(element.key, content))
 
     val previewTransformation =
@@ -1375,7 +1402,14 @@ private inline fun <T> computeValue(
         val idleValue = contentValue(contentState)
         val isEntering = content == toContent
         val previewTargetValue =
-            with(previewTransformation) {
+            with(
+                previewTransformation.transformation.requireInterpolatedTransformation(
+                    element,
+                    transition,
+                ) {
+                    "Custom transformations in preview specs should not be possible"
+                }
+            ) {
                 layoutImpl.propertyTransformationScope.transform(
                     content,
                     element.key,
@@ -1385,8 +1419,15 @@ private inline fun <T> computeValue(
             }
 
         val targetValueOrNull =
-            transformation?.let { transformation ->
-                with(transformation) {
+            transformationWithRange?.let { transformation ->
+                with(
+                    transformation.transformation.requireInterpolatedTransformation(
+                        element,
+                        transition,
+                    ) {
+                        "Custom transformations are not allowed for properties with a preview"
+                    }
+                ) {
                     layoutImpl.propertyTransformationScope.transform(
                         content,
                         element.key,
@@ -1433,7 +1474,7 @@ private inline fun <T> computeValue(
             lerp(
                 lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress),
                 idleValue,
-                transformation?.range?.progress(transition.progress) ?: transition.progress,
+                transformationWithRange?.range?.progress(transition.progress) ?: transition.progress,
             )
         } else {
             if (targetValueOrNull == null) {
@@ -1446,17 +1487,34 @@ private inline fun <T> computeValue(
                 lerp(
                     lerp(idleValue, previewTargetValue, previewRangeProgress),
                     targetValueOrNull,
-                    transformation.range?.progress(transition.progress) ?: transition.progress,
+                    transformationWithRange.range?.progress(transition.progress)
+                        ?: transition.progress,
                 )
             }
         }
     }
 
-    if (transformation == null) {
+    if (transformationWithRange == null) {
         // If there is no transformation explicitly associated to this element value, let's use
         // the value given by the system (like the current position and size given by the layout
         // pass).
         return currentValue()
+    }
+
+    val transformation = transformationWithRange.transformation
+    when (transformation) {
+        is CustomPropertyTransformation ->
+            return with(transformation) {
+                layoutImpl.propertyTransformationScope.transform(
+                    content,
+                    element.key,
+                    transition,
+                    transition.coroutineScope,
+                )
+            }
+        is InterpolatedPropertyTransformation -> {
+            /* continue */
+        }
     }
 
     val idleValue = contentValue(contentState)
@@ -1478,7 +1536,7 @@ private inline fun <T> computeValue(
 
     val progress = transition.progress
     // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range.
-    val rangeProgress = transformation.range?.progress(progress) ?: progress
+    val rangeProgress = transformationWithRange.range?.progress(progress) ?: progress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
     val isEntering =
@@ -1492,6 +1550,22 @@ private inline fun <T> computeValue(
         lerp(targetValue, idleValue, rangeProgress)
     } else {
         lerp(idleValue, targetValue, rangeProgress)
+    }
+}
+
+private inline fun <T> PropertyTransformation<T>.requireInterpolatedTransformation(
+    element: Element,
+    transition: TransitionState.Transition,
+    errorMessage: () -> String,
+): InterpolatedPropertyTransformation<T> {
+    return when (this) {
+        is InterpolatedPropertyTransformation -> this
+        is CustomPropertyTransformation -> {
+            val elem = element.key.debugName
+            val fromContent = transition.fromContent
+            val toContent = transition.toContent
+            error("${errorMessage()} (element=$elem fromContent=$fromContent toContent=$toContent)")
+        }
     }
 }
 

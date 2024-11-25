@@ -39,6 +39,8 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -91,7 +93,7 @@ public abstract class PlayerBase {
     @GuardedBy("mLock")
     private float mVolMultiplier = 1.0f;
     @GuardedBy("mLock")
-    private int mDeviceId;
+    private @NonNull int[] mDeviceIds = AudioPlaybackConfiguration.PLAYER_DEVICEIDS_INVALID;
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
@@ -158,35 +160,36 @@ public abstract class PlayerBase {
         }
     }
 
-    void baseUpdateDeviceId(@Nullable AudioDeviceInfo deviceInfo) {
-        int deviceId = 0;
-        if (deviceInfo != null) {
-            deviceId = deviceInfo.getId();
+    void baseUpdateDeviceIds(@NonNull List<AudioDeviceInfo> deviceInfos) {
+        int[] deviceIds = new int[deviceInfos.size()];
+        for (int i = 0; i < deviceInfos.size(); i++) {
+            deviceIds[i] = deviceInfos.get(i).getId();
         }
+
         int piid;
         synchronized (mLock) {
             piid = mPlayerIId;
-            mDeviceId = deviceId;
+            mDeviceIds = deviceIds;
         }
         try {
             getService().playerEvent(piid,
-                    AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID, deviceId);
+                    AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID, deviceIds);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, "
-                    + deviceId
+                    + Arrays.toString(deviceIds)
                     + " device id will not be tracked for piid=" + piid, e);
         }
     }
 
-    private void updateState(int state, int deviceId) {
+    private void updateState(int state, @NonNull int[] deviceIds) {
         final int piid;
         synchronized (mLock) {
             mState = state;
             piid = mPlayerIId;
-            mDeviceId = deviceId;
+            mDeviceIds = deviceIds;
         }
         try {
-            getService().playerEvent(piid, state, deviceId);
+            getService().playerEvent(piid, state, deviceIds);
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, "
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerState(state)
@@ -194,11 +197,12 @@ public abstract class PlayerBase {
         }
     }
 
-    void baseStart(int deviceId) {
+    void baseStart(@NonNull int[] deviceIds) {
         if (DEBUG) {
-            Log.v(TAG, "baseStart() piid=" + mPlayerIId + " deviceId=" + deviceId);
+            Log.v(TAG, "baseStart() piid=" + mPlayerIId + " deviceId="
+                    + Arrays.toString(deviceIds));
         }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED, deviceId);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED, deviceIds);
     }
 
     void baseSetStartDelayMs(int delayMs) {
@@ -215,12 +219,12 @@ public abstract class PlayerBase {
 
     void basePause() {
         if (DEBUG) { Log.v(TAG, "basePause() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED, 0);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED, new int[0]);
     }
 
     void baseStop() {
         if (DEBUG) { Log.v(TAG, "baseStop() piid=" + mPlayerIId); }
-        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED, 0);
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED, new int[0]);
     }
 
     void baseSetPan(float pan) {

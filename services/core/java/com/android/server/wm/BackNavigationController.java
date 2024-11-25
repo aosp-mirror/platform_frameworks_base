@@ -26,6 +26,8 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_FINISH_AND_REMOVE_TASK;
+import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_UNDEFINED;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_BACK_PREVIEW;
 import static com.android.server.wm.BackNavigationProto.ANIMATION_IN_PROGRESS;
@@ -60,6 +62,7 @@ import android.window.BackNavigationInfo;
 import android.window.IBackAnimationFinishedCallback;
 import android.window.IWindowlessStartingSurfaceCallback;
 import android.window.OnBackInvokedCallbackInfo;
+import android.window.SystemOverrideOnBackInvokedCallback;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -226,10 +229,19 @@ class BackNavigationController {
                     && callbackInfo.isAnimationCallback());
             mNavigationMonitor.startMonitor(window, navigationObserver);
 
+            int requestOverride = callbackInfo.getOverrideBehavior();
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
                             + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
                     currentTask, currentActivity, callbackInfo, window);
-
+            if (requestOverride == OVERRIDE_FINISH_AND_REMOVE_TASK) {
+                final ActivityRecord rootR = currentTask != null ? currentTask.getRootActivity()
+                        : null;
+                if (currentActivity != null && rootR != currentActivity) {
+                    // The top activity is not root activity, the activity cannot remove task when
+                    // finishAndRemoveTask called.
+                    requestOverride = OVERRIDE_UNDEFINED;
+                }
+            }
             // Clear the pointer down outside focus if any.
             mWindowManagerService.clearPointerDownOutsideFocusRunnable();
 
@@ -274,7 +286,8 @@ class BackNavigationController {
             } else if (hasTranslucentActivity(currentActivity, prevActivities)) {
                 // skip if one of participant activity is translucent
                 backType = BackNavigationInfo.TYPE_CALLBACK;
-            } else if (prevActivities.size() > 0) {
+            } else if (prevActivities.size() > 0
+                    && requestOverride == SystemOverrideOnBackInvokedCallback.OVERRIDE_UNDEFINED) {
                 if ((!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities))
                         && isAllActivitiesCreated(prevActivities)) {
                     // We have another Activity in the same currentTask to go to
@@ -1025,6 +1038,12 @@ class BackNavigationController {
             return;
         }
 
+        if (mWindowManagerService.mRoot.mTransitionController.isCollecting()) {
+            Slog.v(TAG, "Skip predictive back transition, another transition is collecting");
+            cancelPendingAnimation();
+            return;
+        }
+
         // Ensure the final animation targets which hidden by transition could be visible.
         for (int i = 0; i < targets.size(); i++) {
             final WindowContainer wc = targets.get(i).mContainer;
@@ -1053,6 +1072,7 @@ class BackNavigationController {
             Slog.e(TAG, "Remote animation gone", e);
         }
         mPendingAnimationBuilder = null;
+        mNavigationMonitor.stopMonitorTransition();
     }
 
     /**
@@ -1550,6 +1570,9 @@ class BackNavigationController {
             }
 
             void createStartingSurface(@Nullable TaskSnapshot snapshot) {
+                if (Flags.deferPredictiveAnimationIfNoSnapshot() && snapshot == null) {
+                    return;
+                }
                 if (mAdaptors[0].mSwitchType == DIALOG_CLOSE) {
                     return;
                 }

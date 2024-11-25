@@ -183,6 +183,8 @@ public final class DisplayBrightnessStrategySelectorTest {
         when(mContext.getContentResolver()).thenReturn(contentResolver);
         when(mContext.getResources()).thenReturn(mResources);
         when(mInvalidBrightnessStrategy.getName()).thenReturn("InvalidBrightnessStrategy");
+        when(mOverrideBrightnessStrategy.getWindowManagerBrightnessOverride())
+                .thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
         mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
                 mInjector, DISPLAY_ID, mDisplayManagerFlags);
 
@@ -205,7 +207,8 @@ public final class DisplayBrightnessStrategySelectorTest {
 
     @Test
     public void selectStrategyWhenValid_useNormalBrightnessForDozeTrue_doNotSelectsDozeStrategy() {
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
         DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
@@ -276,6 +279,20 @@ public final class DisplayBrightnessStrategySelectorTest {
                 DisplayManagerInternal.DisplayPowerRequest.class);
         displayPowerRequest.screenBrightnessOverride = 0.4f;
         when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
+        assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
+                        new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
+                                0.1f, false, mDisplayOffloadSession,
+                                STYLUS_IS_NOT_BEING_USED, /* isBedtimeModeWearEnabled= */ false)),
+                mOverrideBrightnessStrategy);
+    }
+
+    @Test
+    public void selectStrategySelectsOverrideStrategyWhenWindowManagerOverrideIsValid() {
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        displayPowerRequest.screenBrightnessOverride = Float.NaN;
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(Float.NaN);
+        when(mOverrideBrightnessStrategy.getWindowManagerBrightnessOverride()).thenReturn(0.4f);
         assertEquals(mDisplayBrightnessStrategySelector.selectStrategy(
                         new StrategySelectionRequest(displayPowerRequest, Display.STATE_ON,
                                 0.1f, false, mDisplayOffloadSession,

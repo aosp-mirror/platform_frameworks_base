@@ -61,6 +61,7 @@ stubs_defaults {
         ":framework-bluetooth-sources",
         ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
+        ":framework-healthfitness-sources",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
         ":framework-nfc-updatable-sources",
@@ -129,7 +130,7 @@ droidstubs {
 droidstubs {
     name: "framework-doc-stubs",
     defaults: ["android-non-updatable-doc-stubs-defaults"],
-    srcs: [":all-modules-public-stubs-source"],
+    srcs: [":all-modules-public-stubs-source-exportable"],
     api_levels_module: "api_versions_public",
     aidl: {
         include_dirs: [

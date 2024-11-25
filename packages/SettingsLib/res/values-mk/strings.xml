@@ -235,9 +235,9 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Изберете профил"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Лично"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Личен"</string>
     <string name="category_work" msgid="4014193632325996115">"Работа"</string>
-    <string name="category_private" msgid="4244892185452788977">"Приватно"</string>
+    <string name="category_private" msgid="4244892185452788977">"Приватен"</string>
     <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Програмерски опции"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Овозможете ги програмерските опции"</string>
@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Овозможи апликација на терминал што овозможува локален пристап кон школка."</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Програмерска околина на Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Извршување Linux-терминал на Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Експериментално) Вклучете го Linux-терминалот на Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ако го оневозможите, податоците за Linux-терминалот ќе се избришат"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка со HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Постави однесување на проверка на HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отстранување грешки"</string>
@@ -585,12 +586,15 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Овој телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Овој таблет"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Овој компјуер (внатрешен)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
+    <!-- no translation found for media_transfer_this_device_name_tv (8508713779441163887) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док со звучник"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Надворешен уред"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Поврзан уред"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Овој телефон"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Аналогно"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не може да се пушти на уредов"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надградете ја сметката за да се префрлите"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Не може да се пуштаат преземања тука"</string>
@@ -603,9 +607,10 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Поврзано преку ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Поврзано преку eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Стандарден излез на телевизор"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Излез за HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Внатрешни звучници"</string>
+    <!-- no translation found for tv_media_transfer_internal_speakers (4662765121700213785) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_hdmi_title (6715658310934507444) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем со поврзување. Исклучете го уредот и повторно вклучете го"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичен аудиоуред"</string>
     <string name="help_label" msgid="3528360748637781274">"Помош и повратни информации"</string>

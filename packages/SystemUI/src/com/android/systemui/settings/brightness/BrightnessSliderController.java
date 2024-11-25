@@ -16,6 +16,7 @@
 
 package com.android.systemui.settings.brightness;
 
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ import com.android.systemui.haptics.slider.HapticSliderViewBinder;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
+import com.android.systemui.settings.brightness.ui.BrightnessWarningToast;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
@@ -68,6 +70,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     private final HapticSliderPlugin mBrightnessSliderHapticPlugin;
     private final ActivityStarter mActivityStarter;
 
+    private final BrightnessWarningToast mBrightnessWarningToast;
+
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -90,12 +94,14 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             FalsingManager falsingManager,
             UiEventLogger uiEventLogger,
             HapticSliderPlugin brightnessSliderHapticPlugin,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            BrightnessWarningToast brightnessWarningToast) {
         super(brightnessSliderView);
         mFalsingManager = falsingManager;
         mUiEventLogger = uiEventLogger;
         mBrightnessSliderHapticPlugin = brightnessSliderHapticPlugin;
         mActivityStarter = activityStarter;
+        mBrightnessWarningToast = brightnessWarningToast;
     }
 
     /**
@@ -225,6 +231,14 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     }
 
     @Override
+    public void showToast(@StringRes int resId) {
+        if (mBrightnessWarningToast.isToastActive()) {
+            return;
+        }
+        mBrightnessWarningToast.show(mView.getContext(), resId);
+    }
+
+    @Override
     public boolean isVisible() {
         // this should be called rarely - once or twice per slider's value change, but not for
         // every value change when user slides finger - only the final one.
@@ -286,6 +300,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         private final SystemClock mSystemClock;
         private final ActivityStarter mActivityStarter;
         private final MSDLPlayer mMSDLPlayer;
+        private final BrightnessWarningToast mBrightnessWarningToast;
 
         @Inject
         public Factory(
@@ -294,7 +309,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
                 VibratorHelper vibratorHelper,
                 MSDLPlayer msdlPlayer,
                 SystemClock clock,
-                ActivityStarter activityStarter
+                ActivityStarter activityStarter,
+                BrightnessWarningToast brightnessWarningToast
         ) {
             mFalsingManager = falsingManager;
             mUiEventLogger = uiEventLogger;
@@ -302,6 +318,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             mSystemClock = clock;
             mActivityStarter = activityStarter;
             mMSDLPlayer = msdlPlayer;
+            mBrightnessWarningToast = brightnessWarningToast;
         }
 
         /**
@@ -323,8 +340,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
                     mSystemClock,
                     new HapticSlider.SeekBar(root.requireViewById(R.id.slider)));
             HapticSliderViewBinder.bind(viewRoot, plugin);
-            return new BrightnessSliderController(
-                    root, mFalsingManager, mUiEventLogger, plugin, mActivityStarter);
+            return new BrightnessSliderController(root, mFalsingManager, mUiEventLogger, plugin,
+                    mActivityStarter, mBrightnessWarningToast);
         }
 
         /** Get the layout to inflate based on what slider to use */

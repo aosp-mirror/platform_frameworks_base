@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /** Support Animation of the FloatExpression */
 public class FloatAnimation extends Easing {
     float[] mSpec;
@@ -31,6 +34,7 @@ public class FloatAnimation extends Easing {
     //    private float mScale = 1;
     float mOffset = 0;
 
+    @NonNull
     @Override
     public String toString() {
 
@@ -53,13 +57,17 @@ public class FloatAnimation extends Easing {
         mEasingCurve = new CubicEasing(mType);
     }
 
-    public FloatAnimation(float... description) {
+    public FloatAnimation(@NonNull float... description) {
         mType = CUBIC_STANDARD;
         setAnimationDescription(description);
     }
 
     public FloatAnimation(
-            int type, float duration, float[] description, float initialValue, float wrap) {
+            int type,
+            float duration,
+            @Nullable float[] description,
+            float initialValue,
+            float wrap) {
         mType = CUBIC_STANDARD;
         setAnimationDescription(packToFloatArray(duration, type, description, initialValue, wrap));
     }
@@ -73,8 +81,8 @@ public class FloatAnimation extends Easing {
      * @param initialValue
      * @return
      */
-    public static float[] packToFloatArray(
-            float duration, int type, float[] spec, float initialValue, float wrap) {
+    public static @NonNull float[] packToFloatArray(
+            float duration, int type, @Nullable float[] spec, float initialValue, float wrap) {
         int count = 0;
 
         if (!Float.isNaN(initialValue)) {
@@ -129,11 +137,95 @@ public class FloatAnimation extends Easing {
     }
 
     /**
+     * Useful to debug the packed form of an animation string
+     *
+     * @param description
+     * @return
+     */
+    public static String unpackAnimationToString(float[] description) {
+        float[] mSpec = description;
+        float mDuration = (mSpec.length == 0) ? 1 : mSpec[0];
+        int len = 0;
+        int type = 0;
+        float wrapValue = Float.NaN;
+        float initialValue = Float.NaN;
+        if (mSpec.length > 1) {
+            int num_type = Float.floatToRawIntBits(mSpec[1]);
+            type = num_type & 0xFF;
+            boolean wrap = ((num_type >> 8) & 0x1) > 0;
+            boolean init = ((num_type >> 8) & 0x2) > 0;
+            len = (num_type >> 16) & 0xFFFF;
+            int off = 2 + len;
+            if (init) {
+                initialValue = mSpec[off++];
+            }
+            if (wrap) {
+                wrapValue = mSpec[off];
+            }
+        }
+        float[] params = description;
+        int offset = 2;
+
+        String typeStr = "";
+        switch (type) {
+            case CUBIC_STANDARD:
+                typeStr = "CUBIC_STANDARD";
+                break;
+            case CUBIC_ACCELERATE:
+                typeStr = "CUBIC_ACCELERATE";
+                break;
+            case CUBIC_DECELERATE:
+                typeStr = "CUBIC_DECELERATE";
+                break;
+            case CUBIC_LINEAR:
+                typeStr = "CUBIC_LINEAR";
+                break;
+            case CUBIC_ANTICIPATE:
+                typeStr = "CUBIC_ANTICIPATE";
+                break;
+            case CUBIC_OVERSHOOT:
+                typeStr = "CUBIC_OVERSHOOT";
+
+                break;
+            case CUBIC_CUSTOM:
+                typeStr = "CUBIC_CUSTOM (";
+                typeStr += params[offset + 0] + " ";
+                typeStr += params[offset + 1] + " ";
+                typeStr += params[offset + 2] + " ";
+                typeStr += params[offset + 3] + " )";
+                break;
+            case EASE_OUT_BOUNCE:
+                typeStr = "EASE_OUT_BOUNCE";
+
+                break;
+            case EASE_OUT_ELASTIC:
+                typeStr = "EASE_OUT_ELASTIC";
+                break;
+            case SPLINE_CUSTOM:
+                typeStr = "SPLINE_CUSTOM (";
+                for (int i = offset; i < offset + len; i++) {
+                    typeStr += params[i] + " ";
+                }
+                typeStr += ")";
+                break;
+        }
+
+        String str = mDuration + " " + typeStr;
+        if (!Float.isNaN(initialValue)) {
+            str += " init =" + initialValue;
+        }
+        if (!Float.isNaN(wrapValue)) {
+            str += " wrap =" + wrapValue;
+        }
+        return str;
+    }
+
+    /**
      * Create an animation based on a float encoding of the animation
      *
      * @param description
      */
-    public void setAnimationDescription(float[] description) {
+    public void setAnimationDescription(@NonNull float[] description) {
         mSpec = description;
         mDuration = (mSpec.length == 0) ? 1 : mSpec[0];
         int len = 0;
@@ -154,7 +246,7 @@ public class FloatAnimation extends Easing {
         create(mType, description, 2, len);
     }
 
-    private void create(int type, float[] params, int offset, int len) {
+    private void create(int type, @Nullable float[] params, int offset, int len) {
         switch (type) {
             case CUBIC_STANDARD:
             case CUBIC_ACCELERATE:
@@ -208,21 +300,43 @@ public class FloatAnimation extends Easing {
         setScaleOffset();
     }
 
+    private static float wrap(float wrap, float value) {
+        value = value % wrap;
+        if (value < 0) {
+            value += wrap;
+        }
+        return value;
+    }
+
+    float wrapDistance(float wrap, float from, float to) {
+        float delta = (to - from) % 360;
+        if (delta < -wrap / 2) {
+            delta += wrap;
+        } else if (delta > wrap / 2) {
+            delta -= wrap;
+        }
+        return delta;
+    }
+
     /**
      * Set the target value to interpolate to
      *
      * @param value
      */
     public void setTargetValue(float value) {
-        if (Float.isNaN(mWrap)) {
-            mTargetValue = value;
-        } else {
-            if (Math.abs((value % mWrap) + mWrap - mInitialValue)
-                    < Math.abs((value % mWrap) - mInitialValue)) {
-                mTargetValue = (value % mWrap) + mWrap;
+        mTargetValue = value;
+        if (!Float.isNaN(mWrap)) {
+            mInitialValue = wrap(mWrap, mInitialValue);
+            mTargetValue = wrap(mWrap, mTargetValue);
+            if (Float.isNaN(mInitialValue)) {
+                mInitialValue = mTargetValue;
+            }
 
-            } else {
-                mTargetValue = value % mWrap;
+            float dist = wrapDistance(mWrap, mInitialValue, mTargetValue);
+            if ((dist > 0) && (mTargetValue < mInitialValue)) {
+                mTargetValue += mWrap;
+            } else if ((dist < 0) && (mTargetValue > mInitialValue)) {
+                mTargetValue -= mWrap;
             }
         }
         setScaleOffset();

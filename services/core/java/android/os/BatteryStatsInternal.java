@@ -132,4 +132,7 @@ public abstract class BatteryStatsInternal {
      * @param uids the uids of all apps that have any alarm in this batch.
      */
     public abstract void noteWakingAlarmBatch(long elapsedMillis, int... uids);
+
+    /** See PowerStatsUidResolver.mapUid(). */
+    public abstract int getOwnerUid(int uid);
 }

@@ -31,8 +31,7 @@ public:
     JNIDeviceCallback(JNIEnv* env, jobject thiz, jobject weak_thiz, jmethodID postEventFromNative);
     ~JNIDeviceCallback();
 
-    virtual void onAudioDeviceUpdate(audio_io_handle_t audioIo,
-                                     audio_port_handle_t deviceId);
+    virtual void onAudioDeviceUpdate(audio_io_handle_t audioIo, const DeviceIdVector& deviceIds);
 
 private:
     void sendEvent(int event);

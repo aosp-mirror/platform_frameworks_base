@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.dagger
 
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsModule
 import com.android.systemui.statusbar.notification.row.NotificationRowModule
 import dagger.Module
 
@@ -23,5 +24,12 @@ import dagger.Module
  * A module that includes the standard notifications classes that most SysUI variants need. Variants
  * are free to not include this module and instead write a custom notifications module.
  */
-@Module(includes = [NotificationsModule::class, NotificationRowModule::class])
+@Module(
+    includes =
+        [
+            NotificationsModule::class,
+            NotificationRowModule::class,
+            PromotedNotificationsModule::class,
+        ]
+)
 object ReferenceNotificationsModule

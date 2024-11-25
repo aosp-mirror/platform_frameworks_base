@@ -20,8 +20,10 @@ import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentSender
 import android.os.IBinder
 import android.os.RemoteCallbackList
+import android.os.RemoteException
 import android.os.UserHandle
 import android.widget.RemoteViews
 import androidx.lifecycle.LifecycleService
@@ -29,11 +31,13 @@ import androidx.lifecycle.lifecycleScope
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IAppWidgetHostListener
+import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IConfigureWidgetCallback
 import com.android.systemui.communal.widgets.IGlanceableHubWidgetManagerService.IGlanceableHubWidgetsListener
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
 import javax.inject.Inject
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -98,7 +102,15 @@ constructor(
 
         val job =
             widgetRepository.communalWidgets
-                .onEach { widgets -> listener.onWidgetsUpdated(widgets) }
+                .onEach { widgets ->
+                    try {
+                        listener.onWidgetsUpdated(widgets)
+                    } catch (e: RemoteException) {
+                        logger.e({ "Error pushing widget update: $str1" }) {
+                            str1 = e.localizedMessage
+                        }
+                    }
+                }
                 .launchIn(lifecycleScope)
         widgetListenersRegistry.register(listener, job)
     }
@@ -122,7 +134,12 @@ constructor(
         appWidgetHost.setListener(appWidgetId, createListener(listener))
     }
 
-    private fun addWidgetInternal(provider: ComponentName?, user: UserHandle?, rank: Int) {
+    private fun addWidgetInternal(
+        provider: ComponentName?,
+        user: UserHandle?,
+        rank: Int,
+        callback: IConfigureWidgetCallback?,
+    ) {
         if (provider == null) {
             throw IllegalStateException("Provider cannot be null")
         }
@@ -131,8 +148,29 @@ constructor(
             throw IllegalStateException("User cannot be null")
         }
 
-        // TODO(b/375036327): Add support for widget configuration
-        widgetRepository.addWidget(provider, user, rank, configurator = null)
+        val configurator =
+            callback?.let {
+                WidgetConfigurator { appWidgetId ->
+                    try {
+                        val result = CompletableDeferred<Boolean>()
+                        val resultReceiver =
+                            object : IConfigureWidgetCallback.IResultReceiver.Stub() {
+                                override fun onResult(success: Boolean) {
+                                    result.complete(success)
+                                }
+                            }
+
+                        callback.onConfigureWidget(appWidgetId, resultReceiver)
+                        result.await()
+                    } catch (e: RemoteException) {
+                        logger.e({ "Error configuring widget: $str1" }) {
+                            str1 = e.localizedMessage
+                        }
+                        false
+                    }
+                }
+            }
+        widgetRepository.addWidget(provider, user, rank, configurator)
     }
 
     private fun deleteWidgetInternal(appWidgetId: Int) {
@@ -168,22 +206,55 @@ constructor(
         widgetRepository.resizeWidget(appWidgetId, spanY, appWidgetIds.zip(ranks).toMap())
     }
 
+    private fun getIntentSenderForConfigureActivityInternal(appWidgetId: Int): IntentSender? {
+        return try {
+            appWidgetHost.getIntentSenderForConfigureActivity(appWidgetId, /* intentFlags= */ 0)
+        } catch (e: IntentSender.SendIntentException) {
+            logger.e({ "Error getting intent sender for configure activity" }) {
+                str1 = e.localizedMessage
+            }
+            null
+        }
+    }
+
     private fun createListener(listener: IAppWidgetHostListener): AppWidgetHostListener {
         return object : AppWidgetHostListener {
             override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-                listener.onUpdateProviderInfo(appWidget)
+                try {
+                    listener.onUpdateProviderInfo(appWidget)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error pushing on update provider info: $str1" }) {
+                        str1 = e.localizedMessage
+                    }
+                }
             }
 
             override fun updateAppWidget(views: RemoteViews?) {
-                listener.updateAppWidget(views)
+                try {
+                    listener.updateAppWidget(views)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error updating app widget: $str1" }) { str1 = e.localizedMessage }
+                }
             }
 
             override fun updateAppWidgetDeferred(packageName: String?, appWidgetId: Int) {
-                listener.updateAppWidgetDeferred(packageName, appWidgetId)
+                try {
+                    listener.updateAppWidgetDeferred(packageName, appWidgetId)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error updating app widget deferred: $str1" }) {
+                        str1 = e.localizedMessage
+                    }
+                }
             }
 
             override fun onViewDataChanged(viewId: Int) {
-                listener.onViewDataChanged(viewId)
+                try {
+                    listener.onViewDataChanged(viewId)
+                } catch (e: RemoteException) {
+                    logger.e({ "Error pushing on view data changed: $str1" }) {
+                        str1 = e.localizedMessage
+                    }
+                }
             }
         }
     }
@@ -219,11 +290,16 @@ constructor(
             }
         }
 
-        override fun addWidget(provider: ComponentName?, user: UserHandle?, rank: Int) {
+        override fun addWidget(
+            provider: ComponentName?,
+            user: UserHandle?,
+            rank: Int,
+            callback: IConfigureWidgetCallback?,
+        ) {
             val iden = clearCallingIdentity()
 
             try {
-                addWidgetInternal(provider, user, rank)
+                addWidgetInternal(provider, user, rank, callback)
             } finally {
                 restoreCallingIdentity(iden)
             }
@@ -259,6 +335,16 @@ constructor(
 
             try {
                 resizeWidgetInternal(appWidgetId, spanY, appWidgetIds, ranks)
+            } finally {
+                restoreCallingIdentity(iden)
+            }
+        }
+
+        override fun getIntentSenderForConfigureActivity(appWidgetId: Int): IntentSender? {
+            val iden = clearCallingIdentity()
+
+            try {
+                return getIntentSenderForConfigureActivityInternal(appWidgetId)
             } finally {
                 restoreCallingIdentity(iden)
             }

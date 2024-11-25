@@ -56,6 +56,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInterac
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.media.controls.ui.controller.mediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.testKosmos
@@ -133,6 +134,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
                 accessibilityManager,
                 packageManager,
                 WIDGET_PICKER_PACKAGE_NAME,
+                kosmos.mediaCarouselController,
             )
     }
 
@@ -170,16 +172,16 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun selectedKey_onReorderWidgets_isCleared() =
+    fun selectedKey_onReorderWidgets_isSet() =
         testScope.runTest {
             val selectedKey by collectLastValue(underTest.selectedKey)
 
-            val key = CommunalContentModel.KEY.widget(123)
-            underTest.setSelectedKey(key)
-            assertThat(selectedKey).isEqualTo(key)
-
-            underTest.onReorderWidgetStart()
+            underTest.setSelectedKey(null)
             assertThat(selectedKey).isNull()
+
+            val key = CommunalContentModel.KEY.widget(123)
+            underTest.onReorderWidgetStart(key)
+            assertThat(selectedKey).isEqualTo(key)
         }
 
     @Test
@@ -232,7 +234,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
     @Test
     fun reorderWidget_uiEventLogging_start() {
-        underTest.onReorderWidgetStart()
+        underTest.onReorderWidgetStart(CommunalContentModel.KEY.widget(123))
         verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
     }
 
@@ -352,6 +354,32 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         assertThat(event.eventType).isEqualTo(AccessibilityEvent.TYPE_ANNOUNCEMENT)
         assertThat(event.contentDescription).isEqualTo("Test Clock widget added to lock screen")
     }
+
+    @Test
+    fun onResizeWidget_logsMetrics() =
+        testScope.runTest {
+            val appWidgetId = 123
+            val spanY = 2
+            val widgetIdToRankMap = mapOf(appWidgetId to 1)
+            val componentName = ComponentName("test.package", "TestWidget")
+            val rank = 1
+
+            underTest.onResizeWidget(
+                appWidgetId = appWidgetId,
+                spanY = spanY,
+                widgetIdToRankMap = widgetIdToRankMap,
+                componentName = componentName,
+                rank = rank,
+            )
+
+            verify(communalInteractor).resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+            verify(metricsLogger)
+                .logResizeWidget(
+                    componentName = componentName.flattenToString(),
+                    rank = rank,
+                    spanY = spanY,
+                )
+        }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationCompat
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -33,15 +34,15 @@ import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSched
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_KEY
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_BOTH
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEY
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_ALL
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEY
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEYBOARD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.merge
 
 /** When the scheduler is due, show a notification to launch tutorial */
 @SysUISingleton
@@ -56,7 +57,11 @@ constructor(
 ) {
     fun start() {
         backgroundScope.launch {
-            tutorialSchedulerInteractor.tutorials.collect { showNotification(it) }
+            merge(
+                    tutorialSchedulerInteractor.tutorials,
+                    tutorialSchedulerInteractor.commandTutorials,
+                )
+                .collect { showNotification(it) }
         }
     }
 
@@ -103,7 +108,7 @@ constructor(
     private fun createPendingIntent(tutorialType: String): PendingIntent {
         val intent =
             Intent(context, KeyboardTouchpadTutorialActivity::class.java).apply {
-                putExtra(INTENT_TUTORIAL_TYPE_KEY, tutorialType)
+                putExtra(INTENT_TUTORIAL_SCOPE_KEY, tutorialType)
                 putExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY, INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
@@ -123,13 +128,13 @@ constructor(
                 NotificationInfo(
                     context.getString(R.string.launch_keyboard_tutorial_notification_title),
                     context.getString(R.string.launch_keyboard_tutorial_notification_content),
-                    INTENT_TUTORIAL_TYPE_KEYBOARD,
+                    INTENT_TUTORIAL_SCOPE_KEYBOARD,
                 )
             TutorialType.TOUCHPAD ->
                 NotificationInfo(
                     context.getString(R.string.launch_touchpad_tutorial_notification_title),
                     context.getString(R.string.launch_touchpad_tutorial_notification_content),
-                    INTENT_TUTORIAL_TYPE_TOUCHPAD,
+                    INTENT_TUTORIAL_SCOPE_TOUCHPAD,
                 )
             TutorialType.BOTH ->
                 NotificationInfo(
@@ -139,7 +144,7 @@ constructor(
                     context.getString(
                         R.string.launch_keyboard_touchpad_tutorial_notification_content
                     ),
-                    INTENT_TUTORIAL_TYPE_BOTH,
+                    INTENT_TUTORIAL_SCOPE_ALL,
                 )
             TutorialType.NONE -> null
         }

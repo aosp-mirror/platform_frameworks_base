@@ -34,6 +34,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
+import static com.android.settingslib.flags.Flags.audioSharingDeveloperOption;
 import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
@@ -121,9 +122,9 @@ import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.slider.HapticSlider;
+import com.android.systemui.haptics.slider.HapticSliderPlugin;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
 import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig;
-import com.android.systemui.haptics.slider.HapticSliderPlugin;
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig;
 import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialog;
@@ -1685,10 +1686,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             }
 
             // Always show the stream for audio sharing if it exists.
-            if (volumeDialogAudioSharingFix()
+            if ((volumeDialogAudioSharingFix() || audioSharingDeveloperOption())
                     && row.ss != null
                     && mContext.getString(R.string.audio_sharing_description)
-                            .equals(row.ss.remoteLabel)) {
+                    .equals(row.ss.remoteLabel)) {
                 return true;
             }
 
@@ -1894,9 +1895,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             if (!ss.dynamic) continue;
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
-                if (volumeDialogAudioSharingFix()
-                        && mContext.getString(R.string.audio_sharing_description)
-                                .equals(ss.remoteLabel)) {
+                if ((volumeDialogAudioSharingFix() || audioSharingDeveloperOption())
+                        && (mContext.getString(R.string.audio_sharing_description)
+                        .equals(ss.remoteLabel))) {
                     addRow(
                             stream,
                             R.drawable.ic_volume_media_bt,

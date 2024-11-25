@@ -3313,6 +3313,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.getBaseRevisionCode() != 0) {
             serializer.attributeInt(null, "baseRevisionCode", pkg.getBaseRevisionCode());
         }
+        if (pkg.getPageSizeAppCompatFlags()
+                != ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED) {
+            serializer.attributeInt(null, "pageSizeCompat", pkg.getPageSizeAppCompatFlags());
+        }
+
         serializer.attributeFloat(null, "loadingProgress", pkg.getLoadingProgress());
         serializer.attributeLongHex(null, "loadingCompletedTime", pkg.getLoadingCompletedTime());
 
@@ -4129,6 +4134,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         boolean isScannedAsStoppedSystemApp = false;
         boolean isSdkLibrary = false;
         int baseRevisionCode = 0;
+        int PageSizeCompat = 0;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -4175,6 +4181,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             appMetadataSource = parser.getAttributeInt(null, "appMetadataSource",
                     PackageManager.APP_METADATA_SOURCE_UNKNOWN);
             baseRevisionCode = parser.getAttributeInt(null, "baseRevisionCode", 0);
+            PageSizeCompat = parser.getAttributeInt(null, "pageSizeCompat",
+                    ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED);
 
             isScannedAsStoppedSystemApp = parser.getAttributeBoolean(null,
                 "scannedAsStoppedSystemApp", false);
@@ -4330,7 +4338,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setTargetSdkVersion(targetSdkVersion)
                     .setBaseRevisionCode(baseRevisionCode)
                     .setRestrictUpdateHash(restrictUpdateHash)
-                    .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp);
+                    .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp)
+                    .setPageSizeAppCompatFlags(PageSizeCompat);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -5210,6 +5219,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             if (ps.isForceQueryableOverride()) {
                 pw.print(" (override=true)");
             }
+            pw.println();
+            pw.print(prefix);
+            pw.print("  pageSizeCompat=");
+            pw.print(ps.getPageSizeAppCompatFlags());
             pw.println();
             if (!ps.getPkg().getQueriesPackages().isEmpty()) {
                 pw.append(prefix).append("  queriesPackages=")

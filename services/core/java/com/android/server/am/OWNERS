@@ -63,6 +63,12 @@ per-file ProcessStateController.java = file:/OOM_ADJUSTER_OWNERS
 per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com
 per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNERS
 
+# Activity Security
+per-file ActivityManager* = file:/ACTIVITY_SECURITY_OWNERS
+
+# Aconfig Flags
+per-file flags.aconfig = yamasani@google.com, bills@google.com, nalini@google.com
+
 # Londoners
 michaelwr@google.com #{LAST_RESORT_SUGGESTION}
 narayan@google.com #{LAST_RESORT_SUGGESTION}

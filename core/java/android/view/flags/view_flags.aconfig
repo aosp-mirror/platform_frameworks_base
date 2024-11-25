@@ -133,3 +133,11 @@ flag {
     bug: "333417898"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "buffer_stuffing_recovery"
+    namespace: "window_surfaces"
+    description: "Recover from buffer stuffing when SurfaceFlinger misses a frame"
+    bug: "294922229"
+    is_fixed_read_only: true
+}

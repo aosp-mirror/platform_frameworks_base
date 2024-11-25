@@ -155,6 +155,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
+import com.android.systemui.shade.StatusBarLongPressGestureDetector;
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutListSearch;
@@ -174,8 +175,8 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
-import com.android.systemui.statusbar.core.StatusBarOrchestrator;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -197,7 +198,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -333,7 +334,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
-    @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock private ShadeTouchableRegionManager mShadeTouchableRegionManager;
     @Mock private PluginDependencyProvider mPluginDependencyProvider;
     @Mock private ExtensionController mExtensionController;
     @Mock private UserInfoControllerImpl mUserInfoControllerImpl;
@@ -371,7 +372,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
     @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     @Mock private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
-    @Mock private StatusBarOrchestrator mStatusBarOrchestrator;
+    @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -387,6 +388,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
             mKosmos.getBrightnessMirrorShowingInteractor();
+
+    private final StatusBarModePerDisplayRepository mStatusBarModePerDisplayRepository =
+            mKosmos.getStatusBarModePerDisplayRepository();
     private ScrimController mScrimController;
 
     @Before
@@ -506,7 +510,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         }
         mShadeController.setNotificationPresenter(mNotificationPresenter);
 
-        when(mOperatorNameViewControllerFactory.create(any()))
+        when(mOperatorNameViewControllerFactory.create(any(), any()))
                 .thenReturn(mOperatorNameViewController);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mUserTracker.getUserHandle()).thenReturn(
@@ -537,6 +541,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mAutoHideController,
                 new StatusBarInitializerImpl(
                         mStatusBarWindowController,
+                        mStatusBarModePerDisplayRepository,
                         mCollapsedStatusBarFragmentProvider,
                         mock(StatusBarRootFactory.class),
                         mock(HomeStatusBarComponent.Factory.class),
@@ -612,7 +617,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mKeyguardIndicationController,
                 mDemoModeController,
                 mNotificationShadeDepthControllerLazy,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
                 mBrightnessSliderFactory,
                 mScreenOffAnimationController,
                 mWallpaperController,

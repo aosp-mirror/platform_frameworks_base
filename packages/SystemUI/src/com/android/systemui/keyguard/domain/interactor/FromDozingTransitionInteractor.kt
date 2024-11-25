@@ -20,6 +20,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -41,7 +42,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromDozingTransitionInteractor
@@ -135,11 +135,22 @@ constructor(
 
                     if (!deviceEntryInteractor.isLockscreenEnabled()) {
                         if (!SceneContainerFlag.isEnabled) {
-                            startTransitionTo(KeyguardState.GONE)
+                            startTransitionTo(
+                                KeyguardState.GONE,
+                                ownerReason = "lockscreen not enabled",
+                            )
                         }
                     } else if (canDismissLockscreen() || isKeyguardGoingAway) {
                         if (!SceneContainerFlag.isEnabled) {
-                            startTransitionTo(KeyguardState.GONE)
+                            startTransitionTo(
+                                KeyguardState.GONE,
+                                ownerReason =
+                                    if (canDismissLockscreen()) {
+                                        "canDismissLockscreen()"
+                                    } else {
+                                        "isKeyguardGoingAway"
+                                    },
+                            )
                         }
                     } else if (primaryBouncerShowing) {
                         if (!SceneContainerFlag.isEnabled) {

@@ -18,11 +18,14 @@ package com.android.wm.shell.windowdecor.tiling
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.Binder
+import android.util.Size
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.RoundedCorner
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
@@ -46,7 +49,7 @@ import java.util.function.Supplier
  * when two tasks are tiled on left and right to resize them simultaneously.
  */
 class DesktopTilingDividerWindowManager(
-    private val config: Configuration,
+    config: Configuration,
     private val windowName: String,
     private val context: Context,
     private val leash: SurfaceControl,
@@ -59,7 +62,11 @@ class DesktopTilingDividerWindowManager(
     private lateinit var viewHost: SurfaceControlViewHost
     private var tilingDividerView: TilingDividerView? = null
     private var dividerShown = false
-    private var handleRegionWidth: Int = -1
+    private var handleRegionSize: Size =
+        Size(
+            context.resources.getDimensionPixelSize(R.dimen.split_divider_handle_region_width),
+            context.resources.getDimensionPixelSize(R.dimen.split_divider_handle_region_height),
+        )
     private var setTouchRegion = true
     private val maxRoundedCornerRadius = getMaxRoundedCornerRadius()
 
@@ -72,9 +79,62 @@ class DesktopTilingDividerWindowManager(
         rect.set(dividerBounds)
     }
 
-    /** Sets the touch region for the SurfaceControlViewHost. */
-    fun setTouchRegion(region: Rect) {
-        setTouchRegion(viewHost.windowToken.asBinder(), Region(region))
+    /**
+     * Sets the touch region for the SurfaceControlViewHost.
+     *
+     * The region includes the area around the handle (for accessibility), the divider itself and
+     * the rounded corners (to prevent click reaching windows behind).
+     */
+    fun setTouchRegion(handle: Rect, divider: Rect, cornerRadius: Float) {
+        val path = Path()
+        path.fillType = Path.FillType.WINDING
+        // The UI starts on the top-left corner, the region will be:
+        //
+        //      cornerLeft     cornerRight
+        // c1Top        +--------+
+        //              |corners |
+        // c1Bottom     +--+  +--+
+        //                 |  |
+        //       handleLeft|  |  handleRight
+        // handleTop  +----+  +----+
+        //            |  handle    |
+        // handleBot  +----+  +----+
+        //                 |  |
+        //                 |  |
+        // c2Top        +--+  +--+
+        //              |corners |
+        // c2Bottom     +--------+
+        val cornerLeft = 0f
+        val centerX = cornerRadius + divider.width() / 2f
+        val centerY = divider.height()
+        val cornerRight = divider.width() + 2 * cornerRadius
+        val handleLeft = centerX - handle.width() / 2f
+        val handleRight = handleLeft + handle.width()
+        val dividerLeft = centerY - divider.width() / 2f
+        val dividerRight = dividerLeft + divider.width()
+
+        val c1Top = 0f
+        val c1Bottom = cornerRadius
+        val handleTop = centerY - handle.height() / 2f
+        val handleBottom = handleTop + handle.height()
+        val c2Top = divider.height() - cornerRadius
+        val c2Bottom = divider.height().toFloat()
+
+        // Top corners
+        path.addRect(cornerLeft, c1Top, cornerRight, c1Bottom, Path.Direction.CCW)
+        // Bottom corners
+        path.addRect(cornerLeft, c1Top, cornerRight, c2Bottom, Path.Direction.CCW)
+        // Handle
+        path.addRect(handleLeft, handleTop, handleRight, handleBottom, Path.Direction.CCW)
+        // Divider
+        path.addRect(dividerLeft, c2Top, dividerRight, c2Bottom, Path.Direction.CCW)
+
+        val clip = Rect(handleLeft.toInt(), c1Top.toInt(), handleRight.toInt(), c2Bottom.toInt())
+
+        val region = Region()
+        region.setPath(path, Region(clip))
+
+        setTouchRegion(viewHost.windowToken.asBinder(), region)
     }
 
     /**
@@ -94,7 +154,7 @@ class DesktopTilingDividerWindowManager(
         surfaceControlViewHost.setView(dividerView, lp)
         val tmpDividerBounds = Rect()
         getDividerBounds(tmpDividerBounds)
-        dividerView.setup(this, tmpDividerBounds)
+        dividerView.setup(this, tmpDividerBounds, handleRegionSize)
         t.setRelativeLayer(leash, relativeLeash, 1)
             .setPosition(
                 leash,
@@ -110,7 +170,7 @@ class DesktopTilingDividerWindowManager(
         viewHost = surfaceControlViewHost
         dividerView.addOnLayoutChangeListener(this)
         tilingDividerView = dividerView
-        handleRegionWidth = dividerView.handleRegionWidth
+        updateTouchRegion()
     }
 
     /** Hides the divider bar. */
@@ -141,8 +201,9 @@ class DesktopTilingDividerWindowManager(
         t.setRelativeLayer(leash, relativeLeash, 1)
     }
 
-    override fun onDividerMoveStart(pos: Int) {
+    override fun onDividerMoveStart(pos: Int, motionEvent: MotionEvent) {
         setSlippery(false)
+        transitionHandler.onDividerHandleDragStart(motionEvent)
     }
 
     /**
@@ -161,20 +222,20 @@ class DesktopTilingDividerWindowManager(
      * Notifies the transition handler of tiling operations ending, which might result in resizing
      * WindowContainerTransactions if the sizes of the tiled tasks changed.
      */
-    override fun onDividerMovedEnd(pos: Int) {
+    override fun onDividerMovedEnd(pos: Int, motionEvent: MotionEvent) {
         setSlippery(true)
         val t = transactionSupplier.get()
         t.setPosition(leash, pos.toFloat() - maxRoundedCornerRadius, dividerBounds.top.toFloat())
         val dividerWidth = dividerBounds.width()
         dividerBounds.set(pos, dividerBounds.top, pos + dividerWidth, dividerBounds.bottom)
-        transitionHandler.onDividerHandleDragEnd(dividerBounds, t)
+        transitionHandler.onDividerHandleDragEnd(dividerBounds, t, motionEvent)
     }
 
     private fun getWindowManagerParams(): WindowManager.LayoutParams {
         val lp =
             WindowManager.LayoutParams(
-                dividerBounds.width() + 2 * maxRoundedCornerRadius,
-                dividerBounds.height(),
+                /* w= */ dividerBounds.width() + 2 * maxRoundedCornerRadius,
+                /* h= */ dividerBounds.height(),
                 TYPE_DOCK_DIVIDER,
                 FLAG_NOT_FOCUSABLE or
                     FLAG_NOT_TOUCH_MODAL or
@@ -213,11 +274,14 @@ class DesktopTilingDividerWindowManager(
     ) {
         if (!setTouchRegion) return
 
-        val startX = (dividerBounds.width() - handleRegionWidth) / 2
-        val startY = 0
-        val tempRect = Rect(startX, startY, startX + handleRegionWidth, dividerBounds.height())
-        setTouchRegion(tempRect)
+        updateTouchRegion()
         setTouchRegion = false
+    }
+
+    private fun updateTouchRegion() {
+        val startX = -handleRegionSize.width / 2
+        val handle = Rect(startX, 0, startX + handleRegionSize.width, dividerBounds.height())
+        setTouchRegion(handle, dividerBounds, maxRoundedCornerRadius.toFloat())
     }
 
     private fun setSlippery(slippery: Boolean) {

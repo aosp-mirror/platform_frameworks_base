@@ -193,6 +193,42 @@ public abstract class PackageManager {
             "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying whether the app should be put into the "restricted" backup mode when it's started
+     * for backup and restore operations.
+     *
+     * <p> See <a
+     * href="https://developer.android.com/identity/data/autobackup#ImplementingBackupAgent"> for
+     * information about restricted mode</a>.
+     *
+     * <p> Starting with Android 16 apps may not be started in restricted mode based on this
+     * property.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     *
+     * <p>If this property is set, the operating system will respect it for now (see Note below).
+     * If it's not set, the behavior depends on the SDK level that the app is targeting. For apps
+     * targeting SDK level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or lower, the
+     * property defaults to {@code true}. For apps targeting SDK level
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA} or higher, the operating system will make a
+     * decision dynamically.
+     *
+     * <p>Note: It's not recommended to set this property to {@code true} unless absolutely
+     * necessary. In a future Android version, this property may be deprecated in favor of removing
+     * restricted mode completely.
+     */
+    @FlaggedApi(com.android.server.backup.Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public static final String PROPERTY_USE_RESTRICTED_BACKUP_MODE =
+            "android.app.backup.PROPERTY_USE_RESTRICTED_BACKUP_MODE";
+
+    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *
@@ -292,6 +328,10 @@ public abstract class PackageManager {
      * <p>
      * The value of a property will only have a single type, as defined by
      * the property itself.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * In android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and earlier,
+     * the {@code equals} and {@code hashCode} methods for this class may not function as expected.
      */
     public static final class Property implements Parcelable {
         private static final int TYPE_BOOLEAN = 1;
@@ -523,6 +563,40 @@ public abstract class PackageManager {
                 return new Property[size];
             }
         };
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Property)) {
+                return false;
+            }
+            final Property property = (Property) obj;
+            return mType == property.mType &&
+                    Objects.equals(mName, property.mName) &&
+                    Objects.equals(mClassName, property.mClassName) &&
+                    Objects.equals(mPackageName, property.mPackageName) &&
+                    (mType == TYPE_BOOLEAN ? mBooleanValue == property.mBooleanValue :
+                     mType == TYPE_FLOAT ? Float.compare(mFloatValue, property.mFloatValue) == 0 :
+                     mType == TYPE_INTEGER ? mIntegerValue == property.mIntegerValue :
+                     mType == TYPE_RESOURCE ? mIntegerValue == property.mIntegerValue :
+                     mStringValue.equals(property.mStringValue));
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(mName, mType, mClassName, mPackageName);
+            if (mType == TYPE_BOOLEAN) {
+                result = 31 * result + (mBooleanValue ? 1 : 0);
+            } else if (mType == TYPE_FLOAT) {
+                result = 31 * result + Float.floatToIntBits(mFloatValue);
+            } else if (mType == TYPE_INTEGER) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_RESOURCE) {
+                result = 31 * result + mIntegerValue;
+            } else if (mType == TYPE_STRING) {
+                result = 31 * result + mStringValue.hashCode();
+            }
+            return result;
+        }
     }
 
     /**
@@ -729,7 +803,6 @@ public abstract class PackageManager {
                 inputSignatures = "private final @android.annotation.Nullable java.lang.String mPackageName\nprivate final @android.annotation.Nullable android.content.ComponentName mComponentName\nprivate final @android.content.pm.PackageManager.EnabledState int mEnabledState\nprivate final @android.content.pm.PackageManager.EnabledFlags int mEnabledFlags\npublic @android.annotation.NonNull java.lang.String getPackageName()\npublic @android.annotation.Nullable java.lang.String getClassName()\npublic  boolean isComponent()\nclass ComponentEnabledSetting extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false)")
         @Deprecated
         private void __metadata() {}
-
 
         //@formatter:on
         // End of generated code
@@ -3126,6 +3199,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of ranging with
+     * other devices using channel sounding via Bluetooth Low Energy radio.
+     */
+    @FlaggedApi(com.android.ranging.flags.Flags.FLAG_RANGING_CS_ENABLED)
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING =
+             "android.hardware.bluetooth_le.channel_sounding";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
      */
@@ -5098,25 +5181,6 @@ public abstract class PackageManager {
             "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
 
     /**
-     * Used by the system to query a {@link android.content.pm.verify.pkg.VerifierService} provider,
-     * which registers itself via an intent-filter handling this action.
-     *
-     * <p class="note">Only the system can bind to such a verifier service. This is protected by the
-     * {@link android.Manifest.permission#BIND_VERIFICATION_AGENT} permission. The verifier service
-     * app should protect the service by adding this permission in the service declaration in its
-     * manifest.
-     * <p>
-     * A verifier service must be a privileged app and hold the
-     * {@link android.Manifest.permission#VERIFICATION_AGENT} permission.
-     *
-     * @hide
-     */
-    @SystemApi
-    @FlaggedApi(android.content.pm.Flags.FLAG_VERIFICATION_SERVICE)
-    @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String ACTION_VERIFY_PACKAGE = "android.content.pm.action.VERIFY_PACKAGE";
-
-    /**
      * The names of the requested permissions.
      * <p>
      * <strong>Type:</strong> String[]
@@ -6664,6 +6728,11 @@ public abstract class PackageManager {
      * If the given permission already exists, the info you supply here
      * will be used to update it.
      *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
+     *
      * @param info Description of the permission to be added.
      *
      * @return Returns true if a new permission was created, false if an
@@ -6674,7 +6743,9 @@ public abstract class PackageManager {
      *
      * @see #removePermission(String)
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract boolean addPermission(@NonNull PermissionInfo info);
 
     /**
@@ -6683,8 +6754,15 @@ public abstract class PackageManager {
      * allowing it to return quicker and batch a series of adds at the
      * expense of no guarantee the added permission will be retained if
      * the device is rebooted before it is written.
+     *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract boolean addPermissionAsync(@NonNull PermissionInfo info);
 
     /**
@@ -6693,6 +6771,11 @@ public abstract class PackageManager {
      * -- you are only allowed to remove permissions that you are allowed
      * to add.
      *
+     * @deprecated Support for dynamic permissions is going to be removed, and apps that use dynamic
+     * permissions should declare their permissions statically inside their app manifest instead.
+     * This method will become a no-op in a future Android release and eventually be removed from
+     * the SDK.
+     *
      * @param permName The name of the permission to remove.
      *
      * @throws SecurityException if you are not allowed to remove the
@@ -6700,7 +6783,9 @@ public abstract class PackageManager {
      *
      * @see #addPermission(PermissionInfo)
      */
-    //@Deprecated
+    @SuppressWarnings("HiddenAbstractMethod")
+    @FlaggedApi(android.permission.flags.Flags.FLAG_PERMISSION_TREE_APIS_DEPRECATED)
+    @Deprecated
     public abstract void removePermission(@NonNull String permName);
 
     /**
@@ -10922,6 +11007,41 @@ public abstract class PackageManager {
     }
 
     /**
+     * Set the page compat mode override for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public void setPageSizeAppCompatFlagsSettingsOverride(@NonNull String packageName,
+            boolean enabled) {
+        throw new UnsupportedOperationException(
+                "setPageSizeAppCompatFlagsSettingsOverride not implemented in subclass");
+    }
+
+    /**
+     * Check whether page size app compat mode is enabled for given package
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public boolean isPageSizeCompatEnabled(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "isPageSizeCompatEnabled not implemented in subclass");
+    }
+
+    /**
+     * Get the page size app compat warning dialog to show at app launch time
+     *
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB)
+    public String getPageSizeCompatWarningMessage(@NonNull String packageName) {
+        throw new UnsupportedOperationException(
+                "getPageSizeCompatWarningMessage not implemented in subclass");
+    }
+
+     /**
      * Returns the harmful app warning string for the given app, or null if there is none set.
      *
      * @param packageName The full name of the desired package.

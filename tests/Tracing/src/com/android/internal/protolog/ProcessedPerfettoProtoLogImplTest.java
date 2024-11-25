@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ import android.tools.traces.io.ResultWriter;
 import android.tools.traces.monitors.PerfettoTraceMonitor;
 import android.tools.traces.protolog.ProtoLogTrace;
 import android.tracing.perfetto.DataSource;
+import android.tracing.perfetto.DataSourceParams;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -57,6 +59,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 import perfetto.protos.Protolog;
 import perfetto.protos.ProtologCommon;
@@ -93,14 +96,14 @@ public class ProcessedPerfettoProtoLogImplTest {
     );
 
     private static ProtoLogConfigurationService sProtoLogConfigurationService;
+    private static ProtoLogDataSource sTestDataSource;
     private static PerfettoProtoLogImpl sProtoLog;
     private static Protolog.ProtoLogViewerConfig.Builder sViewerConfigBuilder;
-    private static Runnable sCacheUpdater;
+    private static ProtoLogCacheUpdater sCacheUpdater;
 
     private static ProtoLogViewerConfigReader sReader;
 
-    public ProcessedPerfettoProtoLogImplTest() throws IOException {
-    }
+    public ProcessedPerfettoProtoLogImplTest() throws IOException { }
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -153,12 +156,18 @@ public class ProcessedPerfettoProtoLogImplTest {
                 .thenAnswer(it -> new AutoClosableProtoInputStream(
                         sViewerConfigBuilder.build().toByteArray()));
 
-        sCacheUpdater = () -> {};
+        sCacheUpdater = (instance) -> {};
         sReader = Mockito.spy(new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
+        sTestDataSource = new ProtoLogDataSource(TEST_PROTOLOG_DATASOURCE_NAME);
+        DataSourceParams params =
+                new DataSourceParams.Builder()
+                        .setBufferExhaustedPolicy(
+                                DataSourceParams
+                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
+                        .build();
+        sTestDataSource.register(params);
+        busyWaitForDataSourceRegistration(TEST_PROTOLOG_DATASOURCE_NAME);
 
-        final ProtoLogDataSourceBuilder dataSourceBuilder =
-                (onStart, onFlush, onStop) -> new ProtoLogDataSource(
-                        onStart, onFlush, onStop, TEST_PROTOLOG_DATASOURCE_NAME);
         final ViewerConfigFileTracer tracer = (dataSource, viewerConfigFilePath) -> {
             Utils.dumpViewerConfig(dataSource, () -> {
                 if (!viewerConfigFilePath.equals(MOCK_VIEWER_CONFIG_FILE)) {
@@ -169,14 +178,13 @@ public class ProcessedPerfettoProtoLogImplTest {
             });
         };
         sProtoLogConfigurationService =
-                new ProtoLogConfigurationServiceImpl(dataSourceBuilder, tracer);
+                new ProtoLogConfigurationServiceImpl(sTestDataSource, tracer);
 
-        sProtoLog = new ProcessedPerfettoProtoLogImpl(
+        sProtoLog = new ProcessedPerfettoProtoLogImpl(sTestDataSource,
                 MOCK_VIEWER_CONFIG_FILE, viewerConfigInputStreamProvider, sReader,
-                () -> sCacheUpdater.run(), TestProtoLogGroup.values(), dataSourceBuilder,
+                (instance) -> sCacheUpdater.update(instance), TestProtoLogGroup.values(),
                 sProtoLogConfigurationService);
-
-        busyWaitForDataSourceRegistration(TEST_PROTOLOG_DATASOURCE_NAME);
+        sProtoLog.enable();
     }
 
     @Before
@@ -604,7 +612,7 @@ public class ProcessedPerfettoProtoLogImplTest {
     @Test
     public void cacheIsUpdatedWhenTracesStartAndStop() {
         final AtomicInteger cacheUpdateCallCount = new AtomicInteger(0);
-        sCacheUpdater = cacheUpdateCallCount::incrementAndGet;
+        sCacheUpdater = (instance) -> cacheUpdateCallCount.incrementAndGet();
 
         PerfettoTraceMonitor traceMonitor1 = PerfettoTraceMonitor.newBuilder()
                 .enableProtoLog(true,
@@ -856,6 +864,39 @@ public class ProcessedPerfettoProtoLogImplTest {
                 .isEqualTo(LogLevel.ERROR);
         Truth.assertThat(protolog.messages.get(1).getMessage())
                 .isEqualTo("This message should also be logged 567");
+    }
+
+    @Test
+    public void enablesLogGroupAfterLoadingConfig() {
+        sProtoLog.stopLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
+
+        doAnswer((Answer<Void>) invocation -> {
+            // logToLogcat is still false before we laod the viewer config
+            Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
+            return null;
+        }).when(sReader).unloadViewerConfig(any(), any());
+
+        sProtoLog.startLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isTrue();
+    }
+
+    @Test
+    public void disablesLogGroupBeforeUnloadingConfig() {
+        sProtoLog.startLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isTrue();
+
+        doAnswer((Answer<Void>) invocation -> {
+            // Already set logToLogcat to false by the time we unload the config
+            Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
+            return null;
+        }).when(sReader).unloadViewerConfig(any(), any());
+        sProtoLog.stopLoggingToLogcat(
+                new String[] { TestProtoLogGroup.TEST_GROUP.name() }, (msg) -> {});
+        Truth.assertThat(TestProtoLogGroup.TEST_GROUP.isLogToLogcat()).isFalse();
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

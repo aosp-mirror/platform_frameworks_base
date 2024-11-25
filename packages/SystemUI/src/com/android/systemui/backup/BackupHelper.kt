@@ -36,6 +36,7 @@ import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
 import com.android.systemui.keyguard.domain.backup.KeyguardQuickAffordanceBackupHelper
 import com.android.systemui.people.widget.PeopleBackupHelper
+import com.android.systemui.qs.panels.domain.backup.QSPreferencesBackupHelper
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManagerImpl
 
@@ -58,9 +59,9 @@ open class BackupHelper : BackupAgentHelper() {
         private const val PEOPLE_TILES_BACKUP_KEY = "systemui.people.shared_preferences"
         private const val KEYGUARD_QUICK_AFFORDANCES_BACKUP_KEY =
             "systemui.keyguard.quickaffordance.shared_preferences"
-        private const val COMMUNAL_PREFS_BACKUP_KEY =
-            "systemui.communal.shared_preferences"
+        private const val COMMUNAL_PREFS_BACKUP_KEY = "systemui.communal.shared_preferences"
         private const val COMMUNAL_STATE_BACKUP_KEY = "systemui.communal_state"
+        private const val QS_PREFERENCES_BACKUP_KEY = "systemui.qs.shared_preferences"
         val controlsDataLock = Any()
         const val ACTION_RESTORE_FINISHED = "com.android.systemui.backup.RESTORE_FINISHED"
         const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
@@ -74,22 +75,20 @@ open class BackupHelper : BackupAgentHelper() {
         val keys = PeopleBackupHelper.getFilesToBackup()
         addHelper(
             PEOPLE_TILES_BACKUP_KEY,
-            PeopleBackupHelper(this, userHandle, keys.toTypedArray())
+            PeopleBackupHelper(this, userHandle, keys.toTypedArray()),
         )
         addHelper(
             KEYGUARD_QUICK_AFFORDANCES_BACKUP_KEY,
-            KeyguardQuickAffordanceBackupHelper(
-                context = this,
-                userId = userHandle.identifier,
-            ),
+            KeyguardQuickAffordanceBackupHelper(context = this, userId = userHandle.identifier),
+        )
+        addHelper(
+            QS_PREFERENCES_BACKUP_KEY,
+            QSPreferencesBackupHelper(context = this, userId = userHandle.identifier),
         )
         if (communalEnabled()) {
             addHelper(
                 COMMUNAL_PREFS_BACKUP_KEY,
-                CommunalPrefsBackupHelper(
-                    context = this,
-                    userId = userHandle.identifier,
-                )
+                CommunalPrefsBackupHelper(context = this, userId = userHandle.identifier),
             )
             addHelper(
                 COMMUNAL_STATE_BACKUP_KEY,
@@ -110,10 +109,7 @@ open class BackupHelper : BackupAgentHelper() {
     }
 
     private fun addControlsHelper(userId: Int) {
-        val file = UserFileManagerImpl.createFile(
-            userId = userId,
-            fileName = CONTROLS,
-        )
+        val file = UserFileManagerImpl.createFile(userId = userId, fileName = CONTROLS)
         // The map in mapOf is guaranteed to be order preserving
         val controlsMap = mapOf(file.getPath() to getPPControlsFile(this, userId))
         NoOverwriteFileBackupHelper(controlsDataLock, this, controlsMap).also {
@@ -134,6 +130,7 @@ open class BackupHelper : BackupAgentHelper() {
      * @property lock a lock to hold while backing up and restoring the files.
      * @property context the context of the [BackupAgent]
      * @property fileNamesAndPostProcess a map from the filenames to back up and the post processing
+     *
      * ```
      *                                   actions to take
      * ```
@@ -141,7 +138,7 @@ open class BackupHelper : BackupAgentHelper() {
     private class NoOverwriteFileBackupHelper(
         val lock: Any,
         val context: Context,
-        val fileNamesAndPostProcess: Map<String, () -> Unit>
+        val fileNamesAndPostProcess: Map<String, () -> Unit>,
     ) : FileBackupHelper(context, *fileNamesAndPostProcess.keys.toTypedArray()) {
 
         override fun restoreEntity(data: BackupDataInputStream) {
@@ -152,11 +149,12 @@ open class BackupHelper : BackupAgentHelper() {
                 return
             }
             synchronized(lock) {
-                traceSection("File restore: ${data.key}") {
-                    super.restoreEntity(data)
-                }
-                Log.d(TAG, "Finishing restore for ${data.key} for user ${context.userId}. " +
-                        "Starting postProcess.")
+                traceSection("File restore: ${data.key}") { super.restoreEntity(data) }
+                Log.d(
+                    TAG,
+                    "Finishing restore for ${data.key} for user ${context.userId}. " +
+                        "Starting postProcess.",
+                )
                 traceSection("Postprocess: ${data.key}") {
                     fileNamesAndPostProcess.get(data.key)?.invoke()
                 }
@@ -167,7 +165,7 @@ open class BackupHelper : BackupAgentHelper() {
         override fun performBackup(
             oldState: ParcelFileDescriptor?,
             data: BackupDataOutput?,
-            newState: ParcelFileDescriptor?
+            newState: ParcelFileDescriptor?,
         ) {
             synchronized(lock) { super.performBackup(oldState, data, newState) }
         }
@@ -176,15 +174,13 @@ open class BackupHelper : BackupAgentHelper() {
 
 private fun getPPControlsFile(context: Context, userId: Int): () -> Unit {
     return {
-        val file = UserFileManagerImpl.createFile(
-            userId = userId,
-            fileName = BackupHelper.CONTROLS,
-        )
+        val file = UserFileManagerImpl.createFile(userId = userId, fileName = BackupHelper.CONTROLS)
         if (file.exists()) {
-            val dest = UserFileManagerImpl.createFile(
-                userId = userId,
-                fileName = AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME,
-            )
+            val dest =
+                UserFileManagerImpl.createFile(
+                    userId = userId,
+                    fileName = AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME,
+                )
             file.copyTo(dest)
             val jobScheduler = context.getSystemService(JobScheduler::class.java)
             jobScheduler?.schedule(

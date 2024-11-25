@@ -18,7 +18,6 @@ package com.android.systemui.shared.clocks.view
 
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
-import com.android.systemui.shared.clocks.AssetLoader
 import com.android.systemui.shared.clocks.TextStyle
 
 interface SimpleDigitalClockView {
@@ -29,7 +28,7 @@ interface SimpleDigitalClockView {
     val textStyle: TextStyle
     @VisibleForTesting var isAnimationEnabled: Boolean
 
-    fun applyStyles(assets: AssetLoader, textStyle: TextStyle, aodStyle: TextStyle?)
+    fun applyStyles(textStyle: TextStyle, aodStyle: TextStyle?)
 
     fun applyTextSize(targetFontSizePx: Float?, constrainedByHeight: Boolean = false)
 

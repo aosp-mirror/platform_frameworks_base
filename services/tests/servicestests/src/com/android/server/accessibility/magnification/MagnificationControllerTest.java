@@ -19,8 +19,12 @@ package com.android.server.accessibility.magnification;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MAX_VALUE;
+import static com.android.internal.accessibility.common.MagnificationConstants.SCALE_MIN_VALUE;
 import static com.android.server.accessibility.AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID;
 import static com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,10 +57,6 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -78,7 +78,6 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
-import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,9 +95,6 @@ import org.mockito.stubbing.Answer;
  */
 @RunWith(AndroidJUnit4.class)
 public class MagnificationControllerTest {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     private static final int TEST_SERVICE_ID = 1;
@@ -657,6 +653,90 @@ public class MagnificationControllerTest {
 
         verify(mMagnificationConnectionManager).setScale(eq(TEST_DISPLAY), eq(newScale));
         verify(mMagnificationConnectionManager, never()).persistScale(eq(TEST_DISPLAY));
+    }
+
+    @Test
+    public void scaleMagnificationByStep_fullscreenMode_stepInAndOut() throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, 1.0f, false);
+        reset(mScreenMagnificationController);
+
+        // Verify the zoom scale factor increases by
+        // {@code MagnificationController.DefaultMagnificationScaleStepProvider
+        // .ZOOM_STEP_SCALE_FACTOR} and the center coordinates are
+        // unchanged (Float.NaN as values denotes unchanged center).
+        mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_IN);
+        verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY),
+                eq(MagnificationController
+                        .DefaultMagnificationScaleStepProvider.ZOOM_STEP_SCALE_FACTOR),
+                eq(Float.NaN), eq(Float.NaN), anyBoolean(), anyInt());
+
+        mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_OUT);
+        verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY),
+                eq(SCALE_MIN_VALUE), eq(Float.NaN), eq(Float.NaN), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void scaleMagnificationByStep_testMaxScaling() throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, SCALE_MIN_VALUE, false);
+        reset(mScreenMagnificationController);
+
+        float currentScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+        while (currentScale < SCALE_MAX_VALUE) {
+            assertThat(mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                    MagnificationController.ZOOM_DIRECTION_IN)).isTrue();
+            final float nextScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+            assertThat(nextScale).isGreaterThan(currentScale);
+            currentScale = nextScale;
+        }
+
+        assertThat(currentScale).isEqualTo(SCALE_MAX_VALUE);
+        assertThat(mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_IN)).isFalse();
+    }
+
+    @Test
+    public void scaleMagnificationByStep_testMinScaling() throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, SCALE_MAX_VALUE, false);
+        reset(mScreenMagnificationController);
+
+        float currentScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+        while (currentScale > SCALE_MIN_VALUE) {
+            assertThat(mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                    MagnificationController.ZOOM_DIRECTION_OUT)).isTrue();
+            final float nextScale = mScreenMagnificationController.getScale(TEST_DISPLAY);
+            assertThat(nextScale).isLessThan(currentScale);
+            currentScale = nextScale;
+        }
+
+        assertThat(currentScale).isEqualTo(SCALE_MIN_VALUE);
+        assertThat(mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_OUT)).isFalse();
+    }
+
+    @Test
+    public void scaleMagnificationByStep_windowedMode_stepInAndOut() throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+        mMagnificationController.onPerformScaleAction(TEST_DISPLAY, SCALE_MIN_VALUE, false);
+        reset(mMagnificationConnectionManager);
+
+        // Verify the zoom scale factor increases by
+        // {@code MagnificationController.DefaultMagnificationScaleStepProvider
+        // .ZOOM_STEP_SCALE_FACTOR}.
+        mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_IN);
+        verify(mMagnificationConnectionManager).setScale(eq(TEST_DISPLAY),
+                eq(MagnificationController
+                        .DefaultMagnificationScaleStepProvider.ZOOM_STEP_SCALE_FACTOR));
+
+        mMagnificationController.scaleMagnificationByStep(TEST_DISPLAY,
+                MagnificationController.ZOOM_DIRECTION_OUT);
+        verify(mMagnificationConnectionManager).setScale(eq(TEST_DISPLAY),
+                eq(SCALE_MIN_VALUE));
     }
 
     @Test
@@ -1277,23 +1357,11 @@ public class MagnificationControllerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
-    public void onFullscreenMagnificationActivationState_systemUiBorderFlagOn_notifyConnection() {
+    public void onFullscreenMagnificationActivationState_notifyConnection() {
         mMagnificationController.onFullScreenMagnificationActivationState(
                 TEST_DISPLAY, /* activated= */ true);
 
         verify(mMagnificationConnectionManager)
-                .onFullscreenMagnificationActivationChanged(TEST_DISPLAY, /* activated= */ true);
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
-    public void
-            onFullscreenMagnificationActivationState_systemUiBorderFlagOff_neverNotifyConnection() {
-        mMagnificationController.onFullScreenMagnificationActivationState(
-                TEST_DISPLAY, /* activated= */ true);
-
-        verify(mMagnificationConnectionManager, never())
                 .onFullscreenMagnificationActivationChanged(TEST_DISPLAY, /* activated= */ true);
     }
 

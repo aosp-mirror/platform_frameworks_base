@@ -20,6 +20,7 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -34,6 +35,7 @@ import android.window.TransitionInfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.pip.PipUtils;
@@ -45,60 +47,97 @@ import com.android.wm.shell.shared.pip.PipContentOverlay;
 /**
  * Animator that handles bounds animations for entering PIP.
  */
-public class PipEnterAnimator extends ValueAnimator
-        implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
+public class PipEnterAnimator extends ValueAnimator {
     @NonNull private final SurfaceControl mLeash;
     private final SurfaceControl.Transaction mStartTransaction;
     private final SurfaceControl.Transaction mFinishTransaction;
+
+    private final int mCornerRadius;
+    private final int mShadowRadius;
 
     // Bounds updated by the evaluator as animator is running.
     private final Rect mAnimatedRect = new Rect();
 
     private final RectEvaluator mRectEvaluator;
     private final Rect mEndBounds = new Rect();
-    @Nullable private final Rect mSourceRectHint;
     private final @Surface.Rotation int mRotation;
     @Nullable private Runnable mAnimationStartCallback;
     @Nullable private Runnable mAnimationEndCallback;
 
-    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+    private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
     Matrix mTransformTensor = new Matrix();
     final float[] mMatrixTmp = new float[9];
     @Nullable private PipContentOverlay mContentOverlay;
 
+    private PipAppIconOverlaySupplier mPipAppIconOverlaySupplier;
 
     // Internal state representing initial transform - cached to avoid recalculation.
     private final PointF mInitScale = new PointF();
     private final PointF mInitPos = new PointF();
     private final Rect mInitCrop = new Rect();
-    private final PointF mInitActivityScale = new PointF();
-    private final PointF mInitActivityPos = new PointF();
+
+    private final Animator.AnimatorListener mAnimatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationStart(Animator animation) {
+            super.onAnimationStart(animation);
+            if (mAnimationStartCallback != null) {
+                mAnimationStartCallback.run();
+            }
+            if (mStartTransaction != null) {
+                onEnterAnimationUpdate(0f /* fraction */, mStartTransaction);
+                mStartTransaction.apply();
+            }
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            if (mFinishTransaction != null) {
+                onEnterAnimationUpdate(1f /* fraction */, mFinishTransaction);
+            }
+            if (mAnimationEndCallback != null) {
+                mAnimationEndCallback.run();
+            }
+        }
+    };
+
+    private final AnimatorUpdateListener mAnimatorUpdateListener = new AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(@NonNull ValueAnimator animation) {
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            final float fraction = getAnimatedFraction();
+            onEnterAnimationUpdate(fraction, tx);
+            tx.apply();
+        }
+    };
 
     public PipEnterAnimator(Context context,
             @NonNull SurfaceControl leash,
             SurfaceControl.Transaction startTransaction,
             SurfaceControl.Transaction finishTransaction,
             @NonNull Rect endBounds,
-            @Nullable Rect sourceRectHint,
             @Surface.Rotation int rotation) {
         mLeash = leash;
         mStartTransaction = startTransaction;
         mFinishTransaction = finishTransaction;
         mRectEvaluator = new RectEvaluator(mAnimatedRect);
         mEndBounds.set(endBounds);
-        mSourceRectHint = sourceRectHint != null ? new Rect(sourceRectHint) : null;
         mRotation = rotation;
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
+        mPipAppIconOverlaySupplier = this::getAppIconOverlay;
 
         final int enterAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
+        mCornerRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        mShadowRadius = context.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius);
         setDuration(enterAnimationDuration);
         setFloatValues(0f, 1f);
         setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
-        addListener(this);
-        addUpdateListener(this);
+        addListener(mAnimatorListener);
+        addUpdateListener(mAnimatorUpdateListener);
     }
 
     public void setAnimationStartCallback(@NonNull Runnable runnable) {
@@ -107,35 +146,6 @@ public class PipEnterAnimator extends ValueAnimator
 
     public void setAnimationEndCallback(@NonNull Runnable runnable) {
         mAnimationEndCallback = runnable;
-    }
-
-    @Override
-    public void onAnimationStart(@NonNull Animator animation) {
-        if (mAnimationStartCallback != null) {
-            mAnimationStartCallback.run();
-        }
-        if (mStartTransaction != null) {
-            onEnterAnimationUpdate(0f /* fraction */, mStartTransaction);
-            mStartTransaction.apply();
-        }
-    }
-
-    @Override
-    public void onAnimationEnd(@NonNull Animator animation) {
-        if (mFinishTransaction != null) {
-            onEnterAnimationUpdate(1f /* fraction */, mFinishTransaction);
-        }
-        if (mAnimationEndCallback != null) {
-            mAnimationEndCallback.run();
-        }
-    }
-
-    @Override
-    public void onAnimationUpdate(@NonNull ValueAnimator animation) {
-        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
-        final float fraction = getAnimatedFraction();
-        onEnterAnimationUpdate(fraction, tx);
-        tx.apply();
     }
 
     /**
@@ -172,18 +182,12 @@ public class PipEnterAnimator extends ValueAnimator
         mTransformTensor.postRotate(degrees);
         tx.setMatrix(mLeash, mTransformTensor, mMatrixTmp);
 
+        tx.setCornerRadius(mLeash, mCornerRadius).setShadowRadius(mLeash, mShadowRadius);
+
         if (mContentOverlay != null) {
             mContentOverlay.onAnimationUpdate(tx, 1f / scaleX, fraction, mEndBounds);
         }
     }
-
-    // no-ops
-
-    @Override
-    public void onAnimationCancel(@NonNull Animator animation) {}
-
-    @Override
-    public void onAnimationRepeat(@NonNull Animator animation) {}
 
     /**
      * Caches the initial transform relevant values for the bounds enter animation.
@@ -201,18 +205,13 @@ public class PipEnterAnimator extends ValueAnimator
      */
     public void setAppIconContentOverlay(Context context, Rect appBounds, Rect destinationBounds,
             ActivityInfo activityInfo, int appIconSizePx) {
-        reattachAppIconOverlay(
-                new PipAppIconOverlay(context, appBounds, destinationBounds,
-                        new IconProvider(context).getIcon(activityInfo), appIconSizePx));
-    }
-
-    private void reattachAppIconOverlay(PipAppIconOverlay overlay) {
         final SurfaceControl.Transaction tx =
                 mSurfaceControlTransactionFactory.getTransaction();
         if (mContentOverlay != null) {
             mContentOverlay.detach(tx);
         }
-        mContentOverlay = overlay;
+        mContentOverlay = mPipAppIconOverlaySupplier.get(context, appBounds, destinationBounds,
+                activityInfo, appIconSizePx);
         mContentOverlay.attach(tx, mLeash);
     }
 
@@ -229,6 +228,13 @@ public class PipEnterAnimator extends ValueAnimator
         mContentOverlay = null;
     }
 
+    private PipAppIconOverlay getAppIconOverlay(
+            Context context, Rect appBounds, Rect destinationBounds,
+            ActivityInfo activityInfo, int iconSize) {
+        return new PipAppIconOverlay(context, appBounds, destinationBounds,
+                new IconProvider(context).getIcon(activityInfo), iconSize);
+    }
+
     /**
      * @return the app icon overlay leash; null if no overlay is attached.
      */
@@ -238,5 +244,22 @@ public class PipEnterAnimator extends ValueAnimator
             return null;
         }
         return mContentOverlay.getLeash();
+    }
+
+    @VisibleForTesting
+    void setSurfaceControlTransactionFactory(
+            @NonNull PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
+        mSurfaceControlTransactionFactory = factory;
+    }
+
+    @VisibleForTesting
+    interface PipAppIconOverlaySupplier {
+        PipAppIconOverlay get(Context context, Rect appBounds, Rect destinationBounds,
+                ActivityInfo activityInfo, int iconSize);
+    }
+
+    @VisibleForTesting
+    void setPipAppIconOverlaySupplier(@NonNull PipAppIconOverlaySupplier supplier) {
+        mPipAppIconOverlaySupplier = supplier;
     }
 }

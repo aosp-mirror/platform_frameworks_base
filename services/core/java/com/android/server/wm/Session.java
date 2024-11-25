@@ -706,6 +706,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
+                final Task task = win.getTask();
+                if (task != null) {
+                    task.dispatchTaskInfoChangedIfNeeded(/* forced= */ true);
+                }
             } else {
                 EmbeddedWindowController.EmbeddedWindow embeddedWindow = null;
                 if (android.view.inputmethod.Flags.refactorInsetsController()) {
@@ -715,7 +719,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 if (embeddedWindow != null) {
                     // If there is no WindowState for the IWindow, it could be still an
                     // EmbeddedWindow. Therefore, check the EmbeddedWindowController as well
-                    // TODO(b/329229469) Use different phase here
+                    // TODO(b/353463205) Use different phase here
                     ImeTracker.forLogging().onProgress(imeStatsToken,
                             ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
                     embeddedWindow.setRequestedVisibleTypes(
@@ -1005,6 +1009,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             } else {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT);
+            }
+        }
+    }
+
+    @Override
+    public void notifyInsetsAnimationRunningStateChanged(IWindow window, boolean running) {
+        synchronized (mService.mGlobalLock) {
+            final WindowState win = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (win != null) {
+                win.notifyInsetsAnimationRunningStateChanged(running);
             }
         }
     }

@@ -111,6 +111,7 @@ import android.os.RemoteException;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
@@ -881,7 +882,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (windowingMode > -1) {
             if (mService.isInLockTaskMode()
-                    && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+                    && WindowConfiguration.inMultiWindowMode(windowingMode)
+                    && !container.isEmbedded()) {
                 Slog.w(TAG, "Dropping unsupported request to set multi-window windowing mode"
                         + " during locked task mode.");
                 return effects;
@@ -1371,16 +1373,56 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: {
-                if (!chain.isFinishing()) break;
+                if (!com.android.wm.shell.Flags.enableShellTopTaskTracking()) {
+                    // Only allow restoring transient order when finishing a transition
+                    if (!chain.isFinishing()) break;
+                }
+                // Validate the container
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
-                if (container == null) break;
+                if (container == null) {
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "Restoring transient order: invalid container");
+                    break;
+                }
                 final Task thisTask = container.asActivityRecord() != null
                         ? container.asActivityRecord().getTask() : container.asTask();
-                if (thisTask == null) break;
-                final Task restoreAt = chain.mTransition.getTransientLaunchRestoreTarget(container);
-                if (restoreAt == null) break;
+                if (thisTask == null) {
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "Restoring transient order: invalid task");
+                    break;
+                }
+
+                // Find the task to restore behind
+                final Pair<Transition, Task> transientRestore =
+                        mTransitionController.getTransientLaunchTransitionAndTarget(container);
+                if (transientRestore == null) {
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "Restoring transient order: no restore task");
+                    break;
+                }
+                final Transition transientLaunchTransition = transientRestore.first;
+                final Task restoreAt = transientRestore.second;
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Restoring transient order: restoring behind task=%d", restoreAt.mTaskId);
+
+                // Restore the position of the given container behind the target task
                 final TaskDisplayArea taskDisplayArea = thisTask.getTaskDisplayArea();
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
+
+                if (com.android.wm.shell.Flags.enableShellTopTaskTracking()) {
+                    // Because we are in a transient launch transition, the requested visibility of
+                    // tasks does not actually change for the transient-hide tasks, but we do want
+                    // the restoration of these transient-hide tasks to top to be a part of this
+                    // finish transition
+                    final Transition collectingTransition =
+                            mTransitionController.getCollectingTransition();
+                    if (collectingTransition != null) {
+                        collectingTransition.updateChangesForRestoreTransientHideTasks(
+                                transientLaunchTransition);
+                    }
+                }
+
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
             case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: {

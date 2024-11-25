@@ -42,10 +42,11 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
     private final String mViewerConfigFilePath;
 
     public ProcessedPerfettoProtoLogImpl(
+            @NonNull ProtoLogDataSource datasource,
             @NonNull String viewerConfigFilePath,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
-        this(viewerConfigFilePath, new ViewerConfigInputStreamProvider() {
+        this(datasource, viewerConfigFilePath, new ViewerConfigInputStreamProvider() {
                     @NonNull
                     @Override
                     public AutoClosableProtoInputStream getInputStream() {
@@ -64,11 +65,12 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
 
     @VisibleForTesting
     public ProcessedPerfettoProtoLogImpl(
+            @NonNull ProtoLogDataSource datasource,
             @NonNull String viewerConfigFilePath,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
-        super(cacheUpdater, groups);
+        super(datasource, cacheUpdater, groups);
 
         this.mViewerConfigFilePath = viewerConfigFilePath;
 
@@ -80,15 +82,15 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
 
     @VisibleForTesting
     public ProcessedPerfettoProtoLogImpl(
+            @NonNull ProtoLogDataSource datasource,
             @NonNull String viewerConfigFilePath,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @NonNull ProtoLogViewerConfigReader viewerConfigReader,
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups,
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
             @Nullable IProtoLogConfigurationService configurationService)
             throws ServiceManager.ServiceNotFoundException {
-        super(cacheUpdater, groups, dataSourceBuilder, configurationService);
+        super(datasource, cacheUpdater, groups, configurationService);
 
         this.mViewerConfigFilePath = viewerConfigFilePath;
 
@@ -113,6 +115,10 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
      */
     @Override
     public int startLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
         mViewerConfigReader.loadViewerConfig(groups, logger);
         return super.startLoggingToLogcat(groups, logger);
     }
@@ -125,8 +131,19 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
      */
     @Override
     public int stopLoggingToLogcat(String[] groups, @NonNull ILogger logger) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
+        var status = super.stopLoggingToLogcat(groups, logger);
+
+        if (status != 0) {
+            throw new RuntimeException("Failed to stop logging to logcat");
+        }
+
+        // If we successfully disabled logging, unload the viewer config.
         mViewerConfigReader.unloadViewerConfig(groups, logger);
-        return super.stopLoggingToLogcat(groups, logger);
+        return status;
     }
 
     @Deprecated

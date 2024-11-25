@@ -20,6 +20,7 @@ import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -27,6 +28,7 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -35,7 +37,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.plus
 
 /** A class allowing Java classes to collect on Kotlin flows. */
 @SysUISingleton
@@ -63,6 +65,28 @@ class JavaAdapter @Inject constructor(@Application private val scope: CoroutineS
     ): StateFlow<T> {
         return flow.stateIn(scope, started, initialValue)
     }
+
+    /** Call suspend functions from Java */
+    fun <T, R> callSuspend(
+        suspendFunction: suspend (T) -> R,
+        arg: T,
+        onSuccess: (R) -> Unit,
+        onCancel: (CancellationException) -> Unit,
+        onFailure: (Throwable) -> Unit,
+    ): Job =
+        scope.launch {
+            val result =
+                try {
+                    suspendFunction(arg)
+                } catch (ex: CancellationException) {
+                    onCancel(ex)
+                    return@launch
+                } catch (ex: Throwable) {
+                    onFailure(ex)
+                    return@launch
+                }
+            onSuccess(result)
+        }
 }
 
 /**
@@ -100,6 +124,22 @@ fun <T> collectFlow(
     return lifecycle.coroutineScope.launch {
         lifecycle.repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
+}
+
+/**
+ * Collect information for the given [flow], calling [consumer] for each emitted event on the
+ * specified [collectContext].
+ *
+ * Collection will continue until the given [scope] is cancelled.
+ */
+@JvmOverloads
+fun <T> collectFlow(
+    scope: CoroutineScope,
+    collectContext: CoroutineContext = scope.coroutineContext,
+    flow: Flow<T>,
+    consumer: Consumer<T>,
+): Job {
+    return scope.plus(collectContext).launch { flow.collect { consumer.accept(it) } }
 }
 
 fun <A, B, R> combineFlows(flow1: Flow<A>, flow2: Flow<B>, bifunction: (A, B) -> R): Flow<R> {

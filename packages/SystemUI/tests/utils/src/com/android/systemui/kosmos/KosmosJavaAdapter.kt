@@ -51,6 +51,8 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.pulseExpansionInteractor
+import com.android.systemui.keyguard.ui.viewmodel.glanceableHubToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.lockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.power.data.repository.fakePowerRepository
@@ -68,13 +70,21 @@ import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
+import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import com.android.systemui.statusbar.phone.fakeAutoHideControllerStore
+import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.phone.scrimController
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.fakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.wifiInteractor
+import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.statusbar.ui.viewmodel.keyguardStatusBarViewModel
@@ -101,24 +111,29 @@ class KosmosJavaAdapter() {
     val testScope by lazy { kosmos.testScope }
     val fakeExecutor by lazy { kosmos.fakeExecutor }
     val fakeExecutorHandler by lazy { kosmos.fakeExecutorHandler }
+    val configurationController by lazy { kosmos.configurationController }
     val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     val configurationInteractor by lazy { kosmos.configurationInteractor }
     val bouncerRepository by lazy { kosmos.bouncerRepository }
     val communalRepository by lazy { kosmos.fakeCommunalSceneRepository }
     val communalTransitionViewModel by lazy { kosmos.communalTransitionViewModel }
+    val activeNotificationsInteractor by lazy { kosmos.activeNotificationsInteractor }
     val headsUpNotificationInteractor by lazy { kosmos.headsUpNotificationInteractor }
     val seenNotificationsInteractor by lazy { kosmos.seenNotificationsInteractor }
     val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     val keyguardBouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
+    val keyguardBypassController by lazy { kosmos.keyguardBypassController }
     val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     val keyguardTransitionInteractor by lazy { kosmos.keyguardTransitionInteractor }
     val keyguardStatusBarViewModel by lazy { kosmos.keyguardStatusBarViewModel }
     val powerRepository by lazy { kosmos.fakePowerRepository }
     val clock by lazy { kosmos.systemClock }
-    val mobileConnectionsRepository by lazy { kosmos.fakeMobileConnectionsRepository }
+    val mobileConnectionsRepository by lazy { kosmos.mobileConnectionsRepository }
     val simBouncerInteractor by lazy { kosmos.simBouncerInteractor }
     val statusBarStateController by lazy { kosmos.statusBarStateController }
+    val statusBarModePerDisplayRepository by lazy { kosmos.fakeStatusBarModePerDisplayRepository }
+    val autoHideControllerStore by lazy { kosmos.fakeAutoHideControllerStore }
     val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
     val fakeSceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     val sceneInteractor by lazy { kosmos.sceneInteractor }
@@ -152,6 +167,7 @@ class KosmosJavaAdapter() {
     val shadeRepository by lazy { kosmos.shadeRepository }
     val shadeInteractor by lazy { kosmos.shadeInteractor }
     val notificationShadeWindowModel by lazy { kosmos.notificationShadeWindowModel }
+    val visualStabilityProvider by lazy { kosmos.visualStabilityProvider }
     val wifiInteractor by lazy { kosmos.wifiInteractor }
     val fakeWifiRepository by lazy { kosmos.fakeWifiRepository }
     val volumeDialogInteractor by lazy { kosmos.volumeDialogInteractor }
@@ -164,4 +180,13 @@ class KosmosJavaAdapter() {
     val msdlPlayer by lazy { kosmos.fakeMSDLPlayer }
     val shadeModeInteractor by lazy { kosmos.shadeModeInteractor }
     val bouncerHapticHelper by lazy { kosmos.bouncerHapticPlayer }
+
+    val glanceableHubToLockscreenTransitionViewModel by lazy {
+        kosmos.glanceableHubToLockscreenTransitionViewModel
+    }
+    val lockscreenToGlanceableHubTransitionViewModel by lazy {
+        kosmos.lockscreenToGlanceableHubTransitionViewModel
+    }
+    val disableFlagsInteractor by lazy { kosmos.disableFlagsInteractor }
+    val fakeDisableFlagsRepository by lazy { kosmos.fakeDisableFlagsRepository }
 }

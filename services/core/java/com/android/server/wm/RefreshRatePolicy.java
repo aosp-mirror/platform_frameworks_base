@@ -19,8 +19,6 @@ package com.android.server.wm;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY;
 
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
-
 import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.Display.Mode;
@@ -60,7 +58,6 @@ class RefreshRatePolicy {
     }
 
     private final DisplayInfo mDisplayInfo;
-    private final Mode mDefaultMode;
     private final Mode mLowRefreshRateMode;
     private final PackageRefreshRate mNonHighRefreshRatePackages = new PackageRefreshRate();
     private final HighRefreshRateDenylist mHighRefreshRateDenylist;
@@ -92,8 +89,7 @@ class RefreshRatePolicy {
     RefreshRatePolicy(WindowManagerService wmService, DisplayInfo displayInfo,
             HighRefreshRateDenylist denylist) {
         mDisplayInfo = displayInfo;
-        mDefaultMode = displayInfo.getDefaultMode();
-        mLowRefreshRateMode = findLowRefreshRateMode(displayInfo, mDefaultMode);
+        mLowRefreshRateMode = findLowRefreshRateMode(displayInfo);
         mHighRefreshRateDenylist = denylist;
         mWmService = wmService;
     }
@@ -102,7 +98,8 @@ class RefreshRatePolicy {
      * Finds the mode id with the lowest refresh rate which is >= 60hz and same resolution as the
      * default mode.
      */
-    private Mode findLowRefreshRateMode(DisplayInfo displayInfo, Mode defaultMode) {
+    private Mode findLowRefreshRateMode(DisplayInfo displayInfo) {
+        final Mode defaultMode = displayInfo.getDefaultMode();
         float[] refreshRates = displayInfo.getDefaultRefreshRates();
         float bestRefreshRate = defaultMode.getRefreshRate();
         mMinSupportedRefreshRate = bestRefreshRate;
@@ -135,33 +132,6 @@ class RefreshRatePolicy {
             // Unspecified, use default mode.
             return 0;
         }
-
-        // If app is animating, it's not able to control refresh rate because we want the animation
-        // to run in default refresh rate. But if the display size of default mode is different
-        // from the using preferred mode, then still keep the preferred mode to avoid disturbing
-        // the animation.
-        if (!explicitRefreshRateHints() && w.isAnimationRunningSelfOrParent()) {
-            Display.Mode preferredMode = null;
-            for (Display.Mode mode : mDisplayInfo.supportedModes) {
-                if (preferredDisplayModeId == mode.getModeId()) {
-                    preferredMode = mode;
-                    break;
-                }
-            }
-            if (preferredMode != null) {
-                final int pW = preferredMode.getPhysicalWidth();
-                final int pH = preferredMode.getPhysicalHeight();
-                if ((pW != mDefaultMode.getPhysicalWidth()
-                        || pH != mDefaultMode.getPhysicalHeight())
-                        && pW == mDisplayInfo.getNaturalWidth()
-                        && pH == mDisplayInfo.getNaturalHeight()) {
-                    // Prefer not to change display size when animating.
-                    return preferredDisplayModeId;
-                }
-            }
-            return 0;
-        }
-
         return preferredDisplayModeId;
     }
 
@@ -264,9 +234,9 @@ class RefreshRatePolicy {
             return w.mFrameRateVote.reset();
         }
 
-        // If app is animating, it's not able to control refresh rate because we want the animation
-        // to run in default refresh rate.
-        if (!explicitRefreshRateHints() && w.isAnimationRunningSelfOrParent()) {
+        // If insets animation is running, do not convey the preferred app refresh rate to let VRI
+        // to control the refresh rate.
+        if (w.isInsetsAnimationRunning()) {
             return w.mFrameRateVote.reset();
         }
 
@@ -308,7 +278,7 @@ class RefreshRatePolicy {
     float getPreferredMinRefreshRate(WindowState w) {
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimationRunningSelfOrParent()) {
+        if (w.isAnimationRunningSelfOrParent() || w.isInsetsAnimationRunning()) {
             return 0;
         }
 
@@ -331,7 +301,7 @@ class RefreshRatePolicy {
     float getPreferredMaxRefreshRate(WindowState w) {
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimationRunningSelfOrParent()) {
+        if (w.isAnimationRunningSelfOrParent() || w.isInsetsAnimationRunning()) {
             return 0;
         }
 

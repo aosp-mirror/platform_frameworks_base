@@ -46,11 +46,13 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
     private static final String TAG = KeyboardLedController.class.getSimpleName();
     private static final int MSG_UPDATE_EXISTING_DEVICES = 1;
     private static final int MSG_UPDATE_MIC_MUTE_LED_STATE = 2;
+    private static final int MSG_UPDATE_AUDIO_MUTE_LED_STATE = 3;
 
     private final Context mContext;
     private final Handler mHandler;
     private final NativeInputManagerService mNative;
     private final SparseArray<InputDevice> mKeyboardsWithMicMuteLed = new SparseArray<>();
+    private final SparseArray<InputDevice> mKeyboardsWithVolumeMuteLed = new SparseArray<>();
     @NonNull
     private InputManager mInputManager;
     @NonNull
@@ -65,6 +67,17 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
                     mHandler.sendMessage(msg);
                 }
             };
+
+    private BroadcastReceiver mVolumeMuteIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+                Message msg = Message.obtain(mHandler, MSG_UPDATE_AUDIO_MUTE_LED_STATE);
+                mHandler.sendMessage(msg);
+            }
+        }
+    };
 
     KeyboardLedController(Context context, Looper looper,
             NativeInputManagerService nativeService) {
@@ -82,6 +95,9 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
                 return true;
             case MSG_UPDATE_MIC_MUTE_LED_STATE:
                 updateMicMuteLedState();
+                return true;
+            case MSG_UPDATE_AUDIO_MUTE_LED_STATE:
+                updateVolumeMuteLedState();
                 return true;
         }
         return false;
@@ -105,9 +121,34 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
         }
     }
 
+    private void updateVolumeMuteLedState() {
+        int color = mAudioManager.isStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE)
+                ? Color.WHITE : Color.TRANSPARENT;
+        for (int i = 0; i < mKeyboardsWithVolumeMuteLed.size(); i++) {
+            InputDevice device = mKeyboardsWithVolumeMuteLed.valueAt(i);
+            if (device != null) {
+                int deviceId = device.getId();
+                Light light = getKeyboardVolumeMuteLight(device);
+                if (light != null) {
+                    mNative.setLightColor(deviceId, light.getId(), color);
+                }
+            }
+        }
+    }
+
     private Light getKeyboardMicMuteLight(InputDevice device) {
         for (Light light : device.getLightsManager().getLights()) {
             if (light.getType() == Light.LIGHT_TYPE_KEYBOARD_MIC_MUTE
+                    && light.hasBrightnessControl()) {
+                return light;
+            }
+        }
+        return null;
+    }
+
+    private Light getKeyboardVolumeMuteLight(InputDevice device) {
+        for (Light light : device.getLightsManager().getLights()) {
+            if (light.getType() == Light.LIGHT_TYPE_KEYBOARD_VOLUME_MUTE
                     && light.hasBrightnessControl()) {
                 return light;
             }
@@ -131,6 +172,12 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
                 new IntentFilter(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED),
                 null,
                 mHandler);
+        mContext.registerReceiverAsUser(
+                mVolumeMuteIntentReceiver,
+                UserHandle.ALL,
+                new IntentFilter(AudioManager.STREAM_MUTE_CHANGED_ACTION),
+                null,
+                mHandler);
     }
 
     @Override
@@ -141,6 +188,7 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
     @Override
     public void onInputDeviceRemoved(int deviceId) {
         mKeyboardsWithMicMuteLed.remove(deviceId);
+        mKeyboardsWithVolumeMuteLed.remove(deviceId);
     }
 
     @Override
@@ -154,6 +202,11 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
             Message msg = Message.obtain(mHandler, MSG_UPDATE_MIC_MUTE_LED_STATE);
             mHandler.sendMessage(msg);
         }
+        if (getKeyboardVolumeMuteLight(inputDevice) != null) {
+            mKeyboardsWithVolumeMuteLed.put(deviceId, inputDevice);
+            Message msg = Message.obtain(mHandler, MSG_UPDATE_AUDIO_MUTE_LED_STATE);
+            mHandler.sendMessage(msg);
+        }
     }
 
     /** Dump the diagnostic information */
@@ -165,6 +218,15 @@ public final class KeyboardLedController implements InputManager.InputDeviceList
             InputDevice inputDevice = mKeyboardsWithMicMuteLed.valueAt(i);
             ipw.println(i + " " + inputDevice.getName() + ": "
                     + getKeyboardMicMuteLight(inputDevice).toString());
+        }
+        ipw.decreaseIndent();
+        ipw.println(TAG + ": " + mKeyboardsWithVolumeMuteLed.size()
+                + " keyboard volume mute lights");
+        ipw.increaseIndent();
+        for (int i = 0; i < mKeyboardsWithVolumeMuteLed.size(); i++) {
+            InputDevice inputDevice = mKeyboardsWithVolumeMuteLed.valueAt(i);
+            ipw.println(i + " " + inputDevice.getName() + ": "
+                    + getKeyboardVolumeMuteLight(inputDevice).toString());
         }
         ipw.decreaseIndent();
     }

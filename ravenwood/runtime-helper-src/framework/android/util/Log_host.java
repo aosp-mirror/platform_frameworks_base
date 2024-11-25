@@ -18,6 +18,7 @@ package android.util;
 import android.util.Log.Level;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import java.io.PrintStream;
 
@@ -35,6 +36,9 @@ public class Log_host {
     }
 
     public static int println_native(int bufID, int priority, String tag, String msg) {
+        if (priority < Log.INFO && !RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING) {
+            return msg.length(); // No verbose logging.
+        }
         final String buffer;
         switch (bufID) {
             case Log.LOG_ID_MAIN: buffer = "main"; break;

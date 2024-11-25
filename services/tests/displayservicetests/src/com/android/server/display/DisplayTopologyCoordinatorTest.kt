@@ -16,6 +16,7 @@
 
 package com.android.server.display
 
+import android.hardware.display.DisplayTopology
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.DisplayInfo

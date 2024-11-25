@@ -17,8 +17,12 @@
 package com.android.systemui.volume.domain.interactor
 
 import android.bluetooth.BluetoothCsipSetCoordinator
+import android.content.Context
 import android.media.AudioManager.STREAM_MUSIC
 import androidx.annotation.IntRange
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.settingslib.bluetooth.BluetoothUtils
+import com.android.settingslib.flags.Flags
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MAX
 import com.android.settingslib.volume.data.repository.AudioSharingRepository.Companion.AUDIO_SHARING_VOLUME_MIN
@@ -38,7 +42,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 interface AudioSharingInteractor {
@@ -53,6 +56,8 @@ interface AudioSharingInteractor {
 
     /** Audio sharing secondary headset max volume. */
     val volumeMax: Int
+
+    suspend fun audioSharingVolumeBarAvailable(@Application context: Context): Boolean
 
     /** Set the volume of the secondary headset in audio sharing. */
     fun setStreamVolume(
@@ -78,7 +83,7 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundCoroutineContext: CoroutineContext,
     private val audioVolumeInteractor: AudioVolumeInteractor,
-    private val audioSharingRepository: AudioSharingRepository
+    private val audioSharingRepository: AudioSharingRepository,
 ) : AudioSharingInteractor {
     override val isInAudioSharing: Flow<Boolean> = audioSharingRepository.inAudioSharing
 
@@ -94,6 +99,12 @@ constructor(
     override val volumeMin: Int = AUDIO_SHARING_VOLUME_MIN
 
     override val volumeMax: Int = AUDIO_SHARING_VOLUME_MAX
+
+    override suspend fun audioSharingVolumeBarAvailable(@Application context: Context): Boolean =
+        withContext(backgroundCoroutineContext) {
+            (Flags.volumeDialogAudioSharingFix() && BluetoothUtils.isAudioSharingEnabled()) ||
+                BluetoothUtils.isAudioSharingPreviewEnabled(context.contentResolver)
+        }
 
     override fun setStreamVolume(
         @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())
@@ -140,6 +151,9 @@ class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingIntera
     override val volume: Flow<Int?> = emptyFlow()
     override val volumeMin: Int = EMPTY_VOLUME
     override val volumeMax: Int = EMPTY_VOLUME
+
+    override suspend fun audioSharingVolumeBarAvailable(@Application context: Context): Boolean =
+        false
 
     override fun setStreamVolume(
         @IntRange(from = AUDIO_SHARING_VOLUME_MIN.toLong(), to = AUDIO_SHARING_VOLUME_MAX.toLong())

@@ -158,6 +158,7 @@ java_library_static {
         "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V3-java",
         "app-compat-annotations",
+        "art_exported_aconfig_flags_lib",
         "framework-tethering.stubs.module_lib",
         "keepanno-annotations",
         "service-art.stubs.system_server",
@@ -187,7 +188,7 @@ java_library_static {
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
-        "android.hardware.health-V3-java", // AIDL
+        "android.hardware.health-V4-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
         "android.hardware.security.authgraph-V1-java",
@@ -237,9 +238,11 @@ java_library_static {
         "connectivity_flags_lib",
         "device_config_service_flags_java",
         "dreams_flags_lib",
+        "aconfig_flags_java",
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
         "locksettings_flags_lib",
+        "profiling_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
@@ -255,6 +258,13 @@ java_library_static {
             "FlaggedApi",
         ],
     },
+    jarjar_rules: ":services-jarjar-rules",
+    apex_available: ["//apex_available:platform"],
+}
+
+filegroup {
+    name: "services-jarjar-rules",
+    srcs: ["services-jarjar-rules.txt"],
 }
 
 java_genrule {

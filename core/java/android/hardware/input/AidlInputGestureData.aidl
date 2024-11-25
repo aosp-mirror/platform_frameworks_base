@@ -19,13 +19,29 @@ package android.hardware.input;
 /** @hide */
 @JavaDerive(equals=true)
 parcelable AidlInputGestureData {
-    int keycode;
-    int modifierState;
-    int gestureType;
+    Trigger trigger;
 
-    // App launch parameters: Only set if gestureType is KEY_GESTURE_TYPE_LAUNCH_APPLICATION
+    int gestureType;
+    // App launch parameters (Only set if gestureType is LAUNCH_APPLICATION)
     String appLaunchCategory;
     String appLaunchRole;
     String appLaunchPackageName;
     String appLaunchClassName;
+
+    @JavaDerive(equals=true)
+    parcelable KeyTrigger {
+        int keycode;
+        int modifierState;
+    }
+
+    @JavaDerive(equals=true)
+    parcelable TouchpadGestureTrigger {
+        int gestureType;
+    }
+
+    @JavaDerive(equals=true)
+    union Trigger {
+        KeyTrigger key;
+        TouchpadGestureTrigger touchpadGesture;
+    }
 }

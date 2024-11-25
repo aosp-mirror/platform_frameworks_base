@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -85,7 +84,7 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
             throw new XmlPullParserException("Invalid XML parser state");
         }
 
-        consumerBuilder.setConsumedPower(
+        consumerBuilder.addConsumedPower(
                 parser.getAttributeDouble(null, BatteryUsageStats.XML_ATTR_POWER));
 
         while (!(eventType == XmlPullParser.END_TAG && parser.getName().equals(
@@ -97,19 +96,6 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
                 }
             }
             eventType = parser.next();
-        }
-    }
-
-    void writePowerComponentModelProto(@NonNull ProtoOutputStream proto) {
-        for (int i = 0; i < POWER_COMPONENT_COUNT; i++) {
-            final int powerModel = getPowerModel(i);
-            if (powerModel == BatteryConsumer.POWER_MODEL_UNDEFINED) continue;
-
-            final long token = proto.start(BatteryUsageStatsAtomsProto.COMPONENT_MODELS);
-            proto.write(BatteryUsageStatsAtomsProto.PowerComponentModel.COMPONENT, i);
-            proto.write(BatteryUsageStatsAtomsProto.PowerComponentModel.POWER_MODEL,
-                    powerModelToProtoEnum(powerModel));
-            proto.end(token);
         }
     }
 
@@ -132,11 +118,19 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
         }
 
         /**
+         * Adds the total power included in this aggregate.
+         */
+        public Builder addConsumedPower(double consumedPowerMah) {
+            mData.putDouble(COLUMN_INDEX_CONSUMED_POWER,
+                    mData.getDouble(COLUMN_INDEX_CONSUMED_POWER) + consumedPowerMah);
+            return this;
+        }
+
+        /**
          * Adds power and usage duration from the supplied AggregateBatteryConsumer.
          */
         public void add(AggregateBatteryConsumer aggregateBatteryConsumer) {
-            setConsumedPower(mData.getDouble(COLUMN_INDEX_CONSUMED_POWER)
-                    + aggregateBatteryConsumer.getConsumedPower());
+            addConsumedPower(aggregateBatteryConsumer.getConsumedPower());
             mPowerComponentsBuilder.addPowerAndDuration(aggregateBatteryConsumer.mPowerComponents);
         }
 

@@ -16,56 +16,82 @@
 
 package com.android.systemui.qs.panels.ui.compose.selection
 
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
-import com.android.systemui.qs.panels.ui.compose.selection.ResizingDefaults.RESIZING_THRESHOLD
+import androidx.compose.runtime.remember
+import com.android.systemui.qs.panels.ui.compose.selection.ResizingState.ResizeOperation.FinalResizeOperation
+import com.android.systemui.qs.panels.ui.compose.selection.ResizingState.ResizeOperation.TemporaryResizeOperation
+import com.android.systemui.qs.pipeline.shared.TileSpec
 
-class ResizingState(private val widths: TileWidths, private val onResize: () -> Unit) {
-    /** Total drag offset of this resize operation. */
-    private var totalOffset by mutableFloatStateOf(0f)
+@Composable
+fun rememberResizingState(tileSpec: TileSpec, startsAsIcon: Boolean): ResizingState {
+    return remember(tileSpec) { ResizingState(tileSpec, startsAsIcon) }
+}
 
-    /** Width in pixels of the resizing tile. */
-    var width by mutableIntStateOf(widths.base)
+enum class QSDragAnchor {
+    Icon,
+    Large,
+}
 
-    /** Progression between icon (0) and large (1) sizes. */
-    val progression
-        get() = calculateProgression()
+class ResizingState(tileSpec: TileSpec, startsAsIcon: Boolean) {
+    val anchoredDraggableState =
+        AnchoredDraggableState(if (startsAsIcon) QSDragAnchor.Icon else QSDragAnchor.Large)
 
-    // Whether the tile is currently over the threshold and should be a large tile
-    private var passedThreshold: Boolean = passedThreshold(progression)
+    val bounds by derivedStateOf {
+        anchoredDraggableState.anchors.minPosition().takeIf { !it.isNaN() } to
+            anchoredDraggableState.anchors.maxPosition().takeIf { !it.isNaN() }
+    }
 
-    fun onDrag(offset: Float) {
-        totalOffset += offset
-        width = (widths.base + totalOffset).toInt().coerceIn(widths.min, widths.max)
+    val temporaryResizeOperation by derivedStateOf {
+        TemporaryResizeOperation(
+            tileSpec,
+            toIcon = anchoredDraggableState.currentValue == QSDragAnchor.Icon,
+        )
+    }
 
-        passedThreshold(progression).let {
-            // Resize if we went over the threshold
-            if (passedThreshold != it) {
-                passedThreshold = it
-                onResize()
+    val finalResizeOperation by derivedStateOf {
+        FinalResizeOperation(
+            tileSpec,
+            toIcon = anchoredDraggableState.settledValue == QSDragAnchor.Icon,
+        )
+    }
+
+    fun updateAnchors(min: Float, max: Float) {
+        anchoredDraggableState.updateAnchors(
+            DraggableAnchors {
+                QSDragAnchor.Icon at min
+                QSDragAnchor.Large at max
             }
-        }
+        )
     }
 
-    private fun passedThreshold(progression: Float): Boolean {
-        return progression >= RESIZING_THRESHOLD
+    suspend fun updateCurrentValue(isIcon: Boolean) {
+        anchoredDraggableState.animateTo(if (isIcon) QSDragAnchor.Icon else QSDragAnchor.Large)
     }
 
-    /** The progression of the resizing tile between an icon tile (0f) and a large tile (1f) */
-    private fun calculateProgression(): Float {
-        return ((width - widths.min) / (widths.max - widths.min).toFloat()).coerceIn(0f, 1f)
+    suspend fun toggleCurrentValue() {
+        val isIcon = anchoredDraggableState.currentValue == QSDragAnchor.Icon
+        updateCurrentValue(!isIcon)
     }
-}
 
-/** Holds the width of a tile as well as its min and max widths */
-data class TileWidths(val base: Int, val min: Int, val max: Int) {
-    init {
-        check(max > min) { "The max width needs to be larger than the min width." }
+    fun progress(): Float = anchoredDraggableState.progress(QSDragAnchor.Icon, QSDragAnchor.Large)
+
+    /**
+     * Represents a resizing operation for a tile.
+     *
+     * @property spec The tile's [TileSpec]
+     * @property toIcon The new size for the tile.
+     */
+    sealed class ResizeOperation private constructor(val spec: TileSpec, val toIcon: Boolean) {
+        /** A temporary resizing operation, used while a resizing movement is in motion. */
+        class TemporaryResizeOperation(spec: TileSpec, toIcon: Boolean) :
+            ResizeOperation(spec, toIcon)
+
+        /** A final resizing operation, used while a resizing movement is done. */
+        class FinalResizeOperation(spec: TileSpec, toIcon: Boolean) : ResizeOperation(spec, toIcon)
     }
-}
-
-private object ResizingDefaults {
-    const val RESIZING_THRESHOLD = .25f
 }

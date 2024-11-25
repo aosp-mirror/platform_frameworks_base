@@ -43,4 +43,8 @@ class FakeAudioSharingRepositoryLogger : AudioSharingLogger {
     override fun onSetDeviceVolumeRequested(volume: Int) {
         mutableLogs.add("onSetVolumeRequested volume=$volume")
     }
+
+    override fun onAudioSharingAvailabilityRequestedError(requestFrom: String, e: String) {
+        mutableLogs.add("onAudioSharingAvailabilityRequestedError, requestFrom=$requestFrom")
+    }
 }

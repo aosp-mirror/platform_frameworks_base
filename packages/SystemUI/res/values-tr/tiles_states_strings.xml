@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"Kapalı"</item>
     <item msgid="3028994095749238254">"Açık"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"Yok"</item>
+    <item msgid="6419996398343291862">"Kapalı"</item>
+    <item msgid="5908720590832378783">"Açık"</item>
+  </string-array>
 </resources>

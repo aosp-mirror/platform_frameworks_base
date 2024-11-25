@@ -45,13 +45,14 @@ import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.Clock;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
@@ -131,13 +132,13 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     @Test
     public void testShowinEntryUpdated() {
-        mRow.setPinned(true);
+        mRow.setPinnedStatus(PinnedStatus.PinnedBySystem);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mEntry);
         mHeadsUpAppearanceController.onHeadsUpPinned(mEntry);
         assertEquals(mRow.getEntry(), mHeadsUpStatusBarView.getShowingEntry());
 
-        mRow.setPinned(false);
+        mRow.setPinnedStatus(PinnedStatus.NotPinned);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         mHeadsUpAppearanceController.onHeadsUpUnPinned(mEntry);
         assertEquals(null, mHeadsUpStatusBarView.getShowingEntry());
@@ -145,13 +146,13 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     @Test
     public void testShownUpdated() {
-        mRow.setPinned(true);
+        mRow.setPinnedStatus(PinnedStatus.PinnedBySystem);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mEntry);
         mHeadsUpAppearanceController.onHeadsUpPinned(mEntry);
         assertTrue(mHeadsUpAppearanceController.isShown());
 
-        mRow.setPinned(false);
+        mRow.setPinnedStatus(PinnedStatus.NotPinned);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         mHeadsUpAppearanceController.onHeadsUpUnPinned(mEntry);
         Assert.assertFalse(mHeadsUpAppearanceController.isShown());
@@ -160,13 +161,13 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     @Test
     @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void testHeaderUpdated() {
-        mRow.setPinned(true);
+        mRow.setPinnedStatus(PinnedStatus.PinnedBySystem);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mEntry);
         mHeadsUpAppearanceController.onHeadsUpPinned(mEntry);
         assertEquals(mRow.getHeaderVisibleAmount(), 0.0f, 0.0f);
 
-        mRow.setPinned(false);
+        mRow.setPinnedStatus(PinnedStatus.NotPinned);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         mHeadsUpAppearanceController.onHeadsUpUnPinned(mEntry);
         assertEquals(mRow.getHeaderVisibleAmount(), 1.0f, 0.0f);
@@ -176,13 +177,13 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     public void testOperatorNameViewUpdated() {
         mHeadsUpAppearanceController.setAnimationsEnabled(false);
 
-        mRow.setPinned(true);
+        mRow.setPinnedStatus(PinnedStatus.PinnedBySystem);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         when(mHeadsUpManager.getTopEntry()).thenReturn(mEntry);
         mHeadsUpAppearanceController.onHeadsUpPinned(mEntry);
         assertEquals(View.INVISIBLE, mOperatorNameView.getVisibility());
 
-        mRow.setPinned(false);
+        mRow.setPinnedStatus(PinnedStatus.NotPinned);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         mHeadsUpAppearanceController.onHeadsUpUnPinned(mEntry);
         assertEquals(View.VISIBLE, mOperatorNameView.getVisibility());

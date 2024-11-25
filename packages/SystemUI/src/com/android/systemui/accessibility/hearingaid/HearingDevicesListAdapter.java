@@ -138,19 +138,18 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
 
             Pair<Drawable, String> iconPair = item.getIconWithDescription();
             if (iconPair != null) {
-                Drawable drawable = iconPair.getFirst().mutate();
-                drawable.setTint(tintColor);
+                Drawable drawable = iconPair.getFirst();
                 mIconView.setImageDrawable(drawable);
                 mIconView.setContentDescription(iconPair.getSecond());
             }
 
             mNameView.setTextAppearance(
-                    item.isActive() ? R.style.BluetoothTileDialog_DeviceName_Active
-                            : R.style.BluetoothTileDialog_DeviceName);
+                    item.isActive() ? R.style.TextAppearance_BluetoothTileDialog_Active
+                            : R.style.TextAppearance_BluetoothTileDialog);
             mNameView.setText(item.getDeviceName());
             mSummaryView.setTextAppearance(
-                    item.isActive() ? R.style.BluetoothTileDialog_DeviceSummary_Active
-                            : R.style.BluetoothTileDialog_DeviceSummary);
+                    item.isActive() ? R.style.TextAppearance_BluetoothTileDialog_Active
+                            : R.style.TextAppearance_BluetoothTileDialog);
             mSummaryView.setText(item.getConnectionSummary());
 
             mGearIcon.getDrawable().mutate().setTint(tintColor);

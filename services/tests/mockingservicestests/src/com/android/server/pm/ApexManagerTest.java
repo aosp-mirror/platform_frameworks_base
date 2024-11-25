@@ -134,7 +134,7 @@ public class ApexManagerTest {
         mMockSystem.system().validateFinalState();
         mInstallPackageHelper = new InstallPackageHelper(mPmService, mock(AppDataHelper.class),
                 mock(RemovePackageHelper.class), mock(DeletePackageHelper.class),
-                mock(BroadcastHelper.class));
+                mock(BroadcastHelper.class), mock(InstallDependencyHelper.class));
     }
 
     @NonNull

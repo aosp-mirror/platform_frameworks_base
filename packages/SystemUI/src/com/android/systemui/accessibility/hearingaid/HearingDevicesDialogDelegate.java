@@ -35,10 +35,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.Visibility;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -114,10 +113,9 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     private SystemUIDialog mDialog;
     private RecyclerView mDeviceList;
     private List<DeviceItem> mHearingDeviceItemList;
+    private View mPresetLayout;
     private Spinner mPresetSpinner;
-    private ArrayAdapter<String> mPresetInfoAdapter;
-    private Button mPairButton;
-    private LinearLayout mRelatedToolsContainer;
+    private HearingDevicesSpinnerAdapter mPresetInfoAdapter;
     private final HearingDevicesPresetsController.PresetCallback mPresetCallback =
             new HearingDevicesPresetsController.PresetCallback() {
                 @Override
@@ -245,7 +243,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                     mPresetsController.getAllPresetInfo();
             final int activePresetIndex = mPresetsController.getActivePresetIndex();
             refreshPresetInfoAdapter(presetInfos, activePresetIndex);
-            mPresetSpinner.setVisibility(
+            mPresetLayout.setVisibility(
                     (activeHearingDevice != null && activeHearingDevice.isConnectedHapClientDevice()
                             && !mPresetInfoAdapter.isEmpty()) ? VISIBLE : GONE);
         });
@@ -291,14 +289,13 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
 
         mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DIALOG_SHOW, mLaunchSourceId);
-        mPairButton = dialog.requireViewById(R.id.pair_new_device_button);
         mDeviceList = dialog.requireViewById(R.id.device_list);
+        mPresetLayout = dialog.requireViewById(R.id.preset_layout);
         mPresetSpinner = dialog.requireViewById(R.id.preset_spinner);
-        mRelatedToolsContainer = dialog.requireViewById(R.id.related_tools_container);
 
         setupDeviceListView(dialog);
         setupPresetSpinner(dialog);
-        setupPairNewDeviceButton(dialog, mShowPairNewDevice ? VISIBLE : GONE);
+        setupPairNewDeviceButton(dialog);
         if (com.android.systemui.Flags.hearingDevicesDialogRelatedTools()) {
             setupRelatedToolsView(dialog);
         }
@@ -353,11 +350,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                 mHearingDeviceItemList);
         mPresetsController.setHearingDeviceIfSupportHap(activeHearingDevice);
 
-        mPresetInfoAdapter = new ArrayAdapter<>(dialog.getContext(),
-                R.layout.hearing_devices_preset_spinner_selected,
-                R.id.hearing_devices_preset_option_text);
-        mPresetInfoAdapter.setDropDownViewResource(
-                R.layout.hearing_devices_preset_dropdown_item);
+        mPresetInfoAdapter = new HearingDevicesSpinnerAdapter(dialog.getContext());
         mPresetSpinner.setAdapter(mPresetInfoAdapter);
 
         // disable redundant Touch & Hold accessibility action for Switch Access
@@ -378,6 +371,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         mPresetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mPresetInfoAdapter.setSelected(position);
                 mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_PRESET_SELECT,
                         mLaunchSourceId);
                 mPresetsController.selectPreset(
@@ -389,14 +383,17 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                 // Do nothing
             }
         });
-        mPresetSpinner.setVisibility(
+        mPresetLayout.setVisibility(
                 (activeHearingDevice != null && activeHearingDevice.isConnectedHapClientDevice()
                         && !mPresetInfoAdapter.isEmpty()) ? VISIBLE : GONE);
     }
 
-    private void setupPairNewDeviceButton(SystemUIDialog dialog, @Visibility int visibility) {
-        if (visibility == VISIBLE) {
-            mPairButton.setOnClickListener(v -> {
+    private void setupPairNewDeviceButton(SystemUIDialog dialog) {
+        final Button pairButton = dialog.requireViewById(R.id.pair_new_device_button);
+
+        pairButton.setVisibility(mShowPairNewDevice ? VISIBLE : GONE);
+        if (mShowPairNewDevice) {
+            pairButton.setOnClickListener(v -> {
                 mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_PAIR, mLaunchSourceId);
                 dismissDialogIfExists();
                 final Intent intent = new Intent(Settings.ACTION_HEARING_DEVICE_PAIRING_SETTINGS);
@@ -404,12 +401,11 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                 mActivityStarter.postStartActivityDismissingKeyguard(intent, /* delay= */ 0,
                         mDialogTransitionAnimator.createActivityTransitionController(dialog));
             });
-        } else {
-            mPairButton.setVisibility(GONE);
         }
     }
 
     private void setupRelatedToolsView(SystemUIDialog dialog) {
+
         final Context context = dialog.getContext();
         final List<ToolItem> toolItemList = new ArrayList<>();
         final String[] toolNameArray;
@@ -430,15 +426,20 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         } catch (Resources.NotFoundException e) {
             Log.i(TAG, "No hearing devices related tool config resource");
         }
+
+        final View toolsLayout = dialog.requireViewById(R.id.tools_layout);
+        toolsLayout.setVisibility(toolItemList.isEmpty() ? GONE : VISIBLE);
+
+        final LinearLayout toolsContainer = dialog.requireViewById(R.id.tools_container);
         for (int i = 0; i < toolItemList.size(); i++) {
-            View view = createHearingToolView(context, toolItemList.get(i));
-            mRelatedToolsContainer.addView(view);
+            View view = createHearingToolView(context, toolItemList.get(i), toolsContainer);
+            toolsContainer.addView(view);
             if (i != toolItemList.size() - 1) {
                 final int spaceSize = context.getResources().getDimensionPixelSize(
                         R.dimen.hearing_devices_layout_margin);
                 Space space = new Space(context);
                 space.setLayoutParams(new LinearLayout.LayoutParams(spaceSize, 0));
-                mRelatedToolsContainer.addView(space);
+                toolsContainer.addView(space);
             }
         }
     }
@@ -453,6 +454,7 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
             for (int position = 0; position < size; position++) {
                 if (presetInfos.get(position).getIndex() == activePresetIndex) {
                     mPresetSpinner.setSelection(position, /* animate= */ false);
+                    mPresetInfoAdapter.setSelected(position);
                 }
             }
         }
@@ -493,9 +495,9 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
     }
 
     @NonNull
-    private View createHearingToolView(Context context, ToolItem item) {
-        View view = LayoutInflater.from(context).inflate(R.layout.hearing_tool_item,
-                mRelatedToolsContainer, false);
+    private View createHearingToolView(Context context, ToolItem item, ViewGroup container) {
+        View view = LayoutInflater.from(context).inflate(R.layout.hearing_tool_item, container,
+                false);
         ImageView icon = view.requireViewById(R.id.tool_icon);
         TextView text = view.requireViewById(R.id.tool_name);
         view.setContentDescription(item.getToolName());
