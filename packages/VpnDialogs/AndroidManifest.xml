@@ -41,6 +41,7 @@
         <activity android:name=".PlatformVpnConfirmDialog"
                   android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:noHistory="true"
+                  android:enableOnBackInvokedCallback="false"
                   android:excludeFromRecents="true"
                   android:exported="true">
         </activity>
