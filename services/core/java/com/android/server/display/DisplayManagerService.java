@@ -1681,7 +1681,12 @@ public final class DisplayManagerService extends SystemService {
         if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
             return checkCallingPermission(ADD_MIRROR_DISPLAY, "canCreateMirrorDisplays");
         }
-        return virtualDevice != null;
+        try {
+            return virtualDevice.canCreateMirrorDisplays();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to query virtual device for permissions", e);
+            return false;
+        }
     }
 
     private boolean canProjectVideo(IMediaProjection projection) {

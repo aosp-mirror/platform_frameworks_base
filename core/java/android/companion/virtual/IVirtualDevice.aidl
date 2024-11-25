@@ -90,6 +90,12 @@ interface IVirtualDevice {
      */
     boolean hasCustomAudioInputSupport();
 
+    /**
+     * Returns whether this device is allowed to create mirror displays.
+     */
+    boolean canCreateMirrorDisplays();
+
+    /*
     /*
      * Turns off all trusted non-mirror displays of the virtual device.
      */
