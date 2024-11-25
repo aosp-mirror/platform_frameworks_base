@@ -51,10 +51,7 @@ interface CustomizationProviderClient {
      * selected affordances on the slot will move the selected affordance to the newest location in
      * the slot.
      */
-    suspend fun insertSelection(
-        slotId: String,
-        affordanceId: String,
-    )
+    suspend fun insertSelection(slotId: String, affordanceId: String)
 
     /** Returns all available slots supported by the device. */
     suspend fun querySlots(): List<Slot>
@@ -100,15 +97,10 @@ interface CustomizationProviderClient {
     fun observeSelections(): Flow<List<Selection>>
 
     /** Unselects an affordance with the given ID from the slot with the given ID. */
-    suspend fun deleteSelection(
-        slotId: String,
-        affordanceId: String,
-    )
+    suspend fun deleteSelection(slotId: String, affordanceId: String)
 
     /** Unselects all affordances from the slot with the given ID. */
-    suspend fun deleteAllSelections(
-        slotId: String,
-    )
+    suspend fun deleteAllSelections(slotId: String)
 
     /** Returns a [Drawable] with the given ID, loaded from the system UI package. */
     suspend fun getAffordanceIcon(
@@ -200,10 +192,7 @@ class CustomizationProviderClientImpl(
     private val backgroundDispatcher: CoroutineDispatcher,
 ) : CustomizationProviderClient {
 
-    override suspend fun insertSelection(
-        slotId: String,
-        affordanceId: String,
-    ) {
+    override suspend fun insertSelection(slotId: String, affordanceId: String) {
         withContext(backgroundDispatcher) {
             context.contentResolver.insert(
                 Contract.LockScreenQuickAffordances.SelectionTable.URI,
@@ -211,9 +200,9 @@ class CustomizationProviderClientImpl(
                     put(Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID, slotId)
                     put(
                         Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID,
-                        affordanceId
+                        affordanceId,
                     )
-                }
+                },
             )
         }
     }
@@ -221,13 +210,7 @@ class CustomizationProviderClientImpl(
     override suspend fun querySlots(): List<CustomizationProviderClient.Slot> {
         return withContext(backgroundDispatcher) {
             context.contentResolver
-                .query(
-                    Contract.LockScreenQuickAffordances.SlotTable.URI,
-                    null,
-                    null,
-                    null,
-                    null,
-                )
+                .query(Contract.LockScreenQuickAffordances.SlotTable.URI, null, null, null, null)
                 ?.use { cursor ->
                     buildList {
                         val idColumnIndex =
@@ -252,42 +235,31 @@ class CustomizationProviderClientImpl(
                         }
                     }
                 }
-        }
-            ?: emptyList()
+        } ?: emptyList()
     }
 
     override suspend fun queryFlags(): List<CustomizationProviderClient.Flag> {
         return withContext(backgroundDispatcher) {
-            context.contentResolver
-                .query(
-                    Contract.FlagsTable.URI,
-                    null,
-                    null,
-                    null,
-                    null,
-                )
-                ?.use { cursor ->
-                    buildList {
-                        val nameColumnIndex =
-                            cursor.getColumnIndex(Contract.FlagsTable.Columns.NAME)
-                        val valueColumnIndex =
-                            cursor.getColumnIndex(Contract.FlagsTable.Columns.VALUE)
-                        if (nameColumnIndex == -1 || valueColumnIndex == -1) {
-                            return@buildList
-                        }
+            context.contentResolver.query(Contract.FlagsTable.URI, null, null, null, null)?.use {
+                cursor ->
+                buildList {
+                    val nameColumnIndex = cursor.getColumnIndex(Contract.FlagsTable.Columns.NAME)
+                    val valueColumnIndex = cursor.getColumnIndex(Contract.FlagsTable.Columns.VALUE)
+                    if (nameColumnIndex == -1 || valueColumnIndex == -1) {
+                        return@buildList
+                    }
 
-                        while (cursor.moveToNext()) {
-                            add(
-                                CustomizationProviderClient.Flag(
-                                    name = cursor.getString(nameColumnIndex),
-                                    value = cursor.getInt(valueColumnIndex) == 1,
-                                )
+                    while (cursor.moveToNext()) {
+                        add(
+                            CustomizationProviderClient.Flag(
+                                name = cursor.getString(nameColumnIndex),
+                                value = cursor.getInt(valueColumnIndex) == 1,
                             )
-                        }
+                        )
                     }
                 }
-        }
-            ?: emptyList()
+            }
+        } ?: emptyList()
     }
 
     override fun observeSlots(): Flow<List<CustomizationProviderClient.Slot>> {
@@ -375,22 +347,17 @@ class CustomizationProviderClientImpl(
                                     enablementActionIntent =
                                         cursor
                                             .getString(enablementActionIntentColumnIndex)
-                                            ?.toIntent(
-                                                affordanceId = affordanceId,
-                                            ),
+                                            ?.toIntent(affordanceId = affordanceId),
                                     configureIntent =
                                         cursor
                                             .getString(configureIntentColumnIndex)
-                                            ?.toIntent(
-                                                affordanceId = affordanceId,
-                                            ),
+                                            ?.toIntent(affordanceId = affordanceId),
                                 )
                             )
                         }
                     }
                 }
-        }
-            ?: emptyList()
+        } ?: emptyList()
     }
 
     override fun observeAffordances(): Flow<List<CustomizationProviderClient.Affordance>> {
@@ -444,8 +411,7 @@ class CustomizationProviderClientImpl(
                         }
                     }
                 }
-        }
-            ?: emptyList()
+        } ?: emptyList()
     }
 
     override fun observeSelections(): Flow<List<CustomizationProviderClient.Selection>> {
@@ -454,34 +420,24 @@ class CustomizationProviderClientImpl(
         }
     }
 
-    override suspend fun deleteSelection(
-        slotId: String,
-        affordanceId: String,
-    ) {
+    override suspend fun deleteSelection(slotId: String, affordanceId: String) {
         withContext(backgroundDispatcher) {
             context.contentResolver.delete(
                 Contract.LockScreenQuickAffordances.SelectionTable.URI,
                 "${Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID} = ? AND" +
                     " ${Contract.LockScreenQuickAffordances.SelectionTable.Columns.AFFORDANCE_ID}" +
                     " = ?",
-                arrayOf(
-                    slotId,
-                    affordanceId,
-                ),
+                arrayOf(slotId, affordanceId),
             )
         }
     }
 
-    override suspend fun deleteAllSelections(
-        slotId: String,
-    ) {
+    override suspend fun deleteAllSelections(slotId: String) {
         withContext(backgroundDispatcher) {
             context.contentResolver.delete(
                 Contract.LockScreenQuickAffordances.SelectionTable.URI,
                 Contract.LockScreenQuickAffordances.SelectionTable.Columns.SLOT_ID,
-                arrayOf(
-                    slotId,
-                ),
+                arrayOf(slotId),
             )
         }
     }
@@ -499,9 +455,7 @@ class CustomizationProviderClientImpl(
         }
     }
 
-    private fun observeUri(
-        uri: Uri,
-    ): Flow<Unit> {
+    private fun observeUri(uri: Uri): Flow<Unit> {
         return callbackFlow {
                 val observer =
                     object : ContentObserver(null) {
@@ -522,9 +476,7 @@ class CustomizationProviderClientImpl(
             .flowOn(backgroundDispatcher)
     }
 
-    private fun String.toIntent(
-        affordanceId: String,
-    ): Intent? {
+    private fun String.toIntent(affordanceId: String): Intent? {
         return try {
             Intent.parseUri(this, Intent.URI_INTENT_SCHEME)
         } catch (e: URISyntaxException) {

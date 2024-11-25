@@ -139,10 +139,7 @@ class FakeCustomizationProviderClient(
         }
     }
 
-    fun setFlag(
-        name: String,
-        value: Boolean,
-    ) {
+    fun setFlag(name: String, value: Boolean) {
         flags.value =
             flags.value.toMutableList().apply {
                 removeIf { it.name == name }
