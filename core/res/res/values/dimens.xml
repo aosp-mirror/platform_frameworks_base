@@ -255,6 +255,13 @@
      This represents 16dp for the left margin + 40dp for the icon + 16dp for the right margin -->
     <dimen name="notification_2025_content_margin_start">72dp</dimen>
 
+    <!-- The margin on the start of the media actions, selected to ensure that action icons which
+     are visually 12x12 in a 24x24 drawable will align correctly with the text.  This means that
+     stock media action icons will align, but icons may be visually up to 20x20 and remain in-spec,
+     in which case they will protrude into the start column slightly.
+     72dp (content margin) - 8dp (media action padding) - 6dp (visual padding within drawable) -->
+    <dimen name="notification_2025_media_actions_margin_start">58dp</dimen>
+
     <!-- The margin on the end of most content views (ignores the expander) -->
     <dimen name="notification_content_margin_end">16dp</dimen>
 
