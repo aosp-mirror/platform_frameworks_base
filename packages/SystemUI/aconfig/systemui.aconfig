@@ -156,13 +156,6 @@ flag {
 }
 
 flag {
-    name: "notifications_improved_hun_animation"
-    namespace: "systemui"
-    description: "Adds a translateY animation, and other improvements to match the motion specs of the HUN Intro + Outro animations."
-    bug: "243302608"
-}
-
-flag {
     name: "notification_content_alpha_optimization"
     namespace: "systemui"
     description: "Only reset alpha values of needed content views"
