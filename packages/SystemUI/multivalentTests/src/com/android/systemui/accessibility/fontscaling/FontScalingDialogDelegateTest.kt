@@ -28,7 +28,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
-import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener
 import com.android.systemui.model.SysUiState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
@@ -236,13 +235,13 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         dialog.show()
 
         val slider = dialog.findViewById<SeekBarWithIconButtonsView>(R.id.font_scaling_slider)!!
-        val changeListener = slider.onSeekBarWithIconButtonsChangeListener
+        val seekBarListener = slider.getSeekBarChangeListener()
 
         val seekBar: SeekBar = slider.findViewById(R.id.seekbar)!!
 
         // Default seekbar progress for font size is 1, simulate dragging to 0 without
         // releasing the finger.
-        changeListener.onStartTrackingTouch(seekBar)
+        seekBarListener.onStartTrackingTouch(seekBar)
         // Update seekbar progress. This will trigger onProgressChanged in the
         // OnSeekBarChangeListener and the seekbar could get updated progress value
         // in onStopTrackingTouch.
@@ -261,16 +260,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         assertThat(systemScale).isEqualTo(1.0f)
 
         // Simulate releasing the finger from the seekbar.
-        changeListener.onStopTrackingTouch(seekBar)
-        backgroundDelayableExecutor.runAllReady()
-        backgroundDelayableExecutor.advanceClockToNext()
-        backgroundDelayableExecutor.runAllReady()
-
-        // SeekBar interaction is finalized.
-        changeListener.onUserInteractionFinalized(
-            seekBar,
-            OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER,
-        )
+        seekBarListener.onStopTrackingTouch(seekBar)
         backgroundDelayableExecutor.runAllReady()
         backgroundDelayableExecutor.advanceClockToNext()
         backgroundDelayableExecutor.runAllReady()
