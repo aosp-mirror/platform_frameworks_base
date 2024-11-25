@@ -98,7 +98,11 @@ object MediaArtworkHelper {
     }
 
     /** Returns [ColorScheme] of media app given its [icon]. */
-    fun getColorScheme(icon: Drawable, tag: String, style: Style = Style.TONAL_SPOT): ColorScheme? {
+    fun getColorScheme(
+        icon: Drawable,
+        tag: String,
+        @Style.Type style: Int = Style.TONAL_SPOT,
+    ): ColorScheme? {
         return try {
             ColorScheme(WallpaperColors.fromDrawable(icon), true, style)
         } catch (e: PackageManager.NameNotFoundException) {
