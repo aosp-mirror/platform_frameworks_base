@@ -727,7 +727,8 @@ public class FullRestoreEngine extends RestoreEngine {
                     latch.await();
                 }
 
-                mBackupManagerService.tearDownAgentAndKill(app);
+                mBackupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                        app, /* allowKill= */ true);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Lost app trying to shut down");
             }

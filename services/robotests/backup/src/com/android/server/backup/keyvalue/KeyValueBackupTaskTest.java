@@ -865,7 +865,8 @@ public class KeyValueBackupTaskTest  {
         runTask(task);
 
         verify(mBackupManagerService).setWorkSource(null);
-        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)));
+        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)),
+                eq(false));
     }
 
     @Test
@@ -1101,7 +1102,8 @@ public class KeyValueBackupTaskTest  {
         runTask(task);
 
         verify(agentMock.agentBinder).fail(any());
-        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)));
+        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)),
+                eq(false));
     }
 
     @Test
@@ -1423,7 +1425,7 @@ public class KeyValueBackupTaskTest  {
         assertCleansUpFiles(mTransport, PM_PACKAGE);
         // We don't unbind PM
         verify(mBackupAgentConnectionManager, never()).unbindAgent(
-                argThat(applicationInfo(PM_PACKAGE)));
+                argThat(applicationInfo(PM_PACKAGE)), eq(false));
     }
 
     @Test
@@ -1445,7 +1447,7 @@ public class KeyValueBackupTaskTest  {
         runTask(task);
 
         verify(mBackupAgentConnectionManager, never()).unbindAgent(
-                argThat(applicationInfo(PM_PACKAGE)));
+                argThat(applicationInfo(PM_PACKAGE)), eq(false));
     }
 
     @Test
@@ -1651,7 +1653,7 @@ public class KeyValueBackupTaskTest  {
         InOrder inOrder = inOrder(agentMock.agent, mBackupAgentConnectionManager);
         inOrder.verify(agentMock.agent).onQuotaExceeded(anyLong(), eq(1234L));
         inOrder.verify(mBackupAgentConnectionManager).unbindAgent(
-                argThat(applicationInfo(PACKAGE_1)));
+                argThat(applicationInfo(PACKAGE_1)), eq(false));
     }
 
     @Test
@@ -2983,7 +2985,8 @@ public class KeyValueBackupTaskTest  {
 
     private void assertCleansUpFilesAndAgent(TransportData transport, PackageData packageData) {
         assertCleansUpFiles(transport, packageData);
-        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(packageData)));
+        verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(packageData)),
+                eq(false));
     }
 
     private void assertCleansUpFiles(TransportData transport, PackageData packageData) {
