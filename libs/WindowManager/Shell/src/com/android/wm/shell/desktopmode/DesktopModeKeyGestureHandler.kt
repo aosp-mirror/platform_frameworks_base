@@ -72,35 +72,41 @@ class DesktopModeKeyGestureHandler(
             KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW -> {
                 logV("Key gesture SNAP_LEFT_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
-                    desktopModeWindowDecorViewModel.get().onSnapResize(
-                        it.taskId,
-                        true,
-                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
-                        /* fromMenu= */ false
-                    )
+                    mainExecutor.execute {
+                        desktopModeWindowDecorViewModel.get().onSnapResize(
+                            it.taskId,
+                            true,
+                            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                            /* fromMenu= */ false
+                        )
+                    }
                 }
                 return true
             }
             KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW -> {
                 logV("Key gesture SNAP_RIGHT_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
-                    desktopModeWindowDecorViewModel.get().onSnapResize(
-                        it.taskId,
-                        false,
-                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
-                        /* fromMenu= */ false
-                    )
+                    mainExecutor.execute {
+                        desktopModeWindowDecorViewModel.get().onSnapResize(
+                            it.taskId,
+                            false,
+                            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                            /* fromMenu= */ false
+                        )
+                    }
                 }
                 return true
             }
             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW -> {
                 logV("Key gesture TOGGLE_MAXIMIZE_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
-                    desktopTasksController.get().toggleDesktopTaskSize(
-                        it,
-                        ResizeTrigger.MAXIMIZE_MENU,
-                        DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
-                    )
+                    mainExecutor.execute {
+                        desktopTasksController.get().toggleDesktopTaskSize(
+                            it,
+                            ResizeTrigger.MAXIMIZE_MENU,
+                            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+                        )
+                    }
                 }
                 return true
             }
