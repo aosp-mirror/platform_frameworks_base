@@ -5428,7 +5428,8 @@
     <permission android:name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to subscribe to keyguard locked (i.e., showing) state.
+    <!-- Allows an application to subscribe to device locked and keyguard locked (i.e., showing)
+        state.
          <p>Protection level: signature|role
          <p>Intended for use by ROLE_ASSISTANT and signature apps only.
     -->
