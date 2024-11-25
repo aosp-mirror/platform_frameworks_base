@@ -29,16 +29,18 @@
         android:layout_height="@dimen/notification_2025_single_line_face_pile_size"
         android:layout_marginEnd="8dp"
     >
-        <ImageView
+        <com.android.internal.widget.CachingIconView
             android:id="@*android:id/conversation_icon"
             android:layout_width="@dimen/notification_2025_single_line_avatar_size"
             android:layout_height="@dimen/notification_2025_single_line_avatar_size"
             android:layout_gravity="center_vertical|end"
+            android:background="@*android:drawable/notification_icon_circle"
+            android:clipToOutline="true"
         />
 
         <ViewStub
             android:id="@*android:id/conversation_face_pile"
-            android:layout="@*android:layout/conversation_face_pile_layout"
+            android:layout="@*android:layout/notification_2025_conversation_face_pile_layout"
             android:layout_width="@dimen/notification_2025_single_line_face_pile_size"
             android:layout_height="@dimen/notification_2025_single_line_face_pile_size"
             android:layout_gravity="center_vertical|end"
