@@ -1300,6 +1300,13 @@ flag {
 }
 
 flag {
+  name: "media_controls_ui_update"
+  namespace: "systemui"
+  description: "Enables media visuals update"
+  bug: "380053768"
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
