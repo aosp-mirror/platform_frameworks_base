@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.window.DesktopModeFlags
 import android.window.TransitionInfo
@@ -197,8 +198,9 @@ class DesktopMixedTransitionHandler(
             logW("Should have closing desktop task")
             return false
         }
-        if (isLastDesktopTask(closeChange)) {
-            // Dispatch close desktop task animation to the default transition handlers.
+        if (isWallpaperActivityClosing(info)) {
+            // If the wallpaper activity is closing then the desktop is closing, animate the closing
+            // desktop by dispatching to other transition handlers.
             return dispatchCloseLastDesktopTaskAnimation(
                 transition,
                 info,
@@ -419,10 +421,12 @@ class DesktopMixedTransitionHandler(
         ) != null
     }
 
-    private fun isLastDesktopTask(change: TransitionInfo.Change): Boolean =
-        change.taskInfo?.let {
-            desktopUserRepositories.getProfile(it.userId).getExpandedTaskCount(it.displayId) == 1
-        } ?: false
+    private fun isWallpaperActivityClosing(info: TransitionInfo) =
+        info.changes.any { change ->
+            change.mode == TRANSIT_CLOSE &&
+                change.taskInfo != null &&
+                DesktopWallpaperActivity.isWallpaperTask(change.taskInfo!!)
+        }
 
     private fun findCloseDesktopTaskChange(info: TransitionInfo): TransitionInfo.Change? {
         if (info.type != WindowManager.TRANSIT_CLOSE) return null
