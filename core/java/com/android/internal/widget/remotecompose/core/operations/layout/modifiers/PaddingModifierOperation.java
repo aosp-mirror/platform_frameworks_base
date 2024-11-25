@@ -32,7 +32,7 @@ import java.util.List;
  * Represents a padding modifier. Padding modifiers can be chained and will impact following
  * modifiers.
  */
-public class PaddingModifierOperation implements ModifierOperation {
+public class PaddingModifierOperation extends Operation implements ModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_PADDING;
     public static final String CLASS_NAME = "PaddingModifierOperation";
     float mLeft;
@@ -118,6 +118,11 @@ public class PaddingModifierOperation implements ModifierOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.MODIFIER_PADDING;
     }
@@ -131,6 +136,12 @@ public class PaddingModifierOperation implements ModifierOperation {
         buffer.writeFloat(bottom);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float left = buffer.readFloat();
         float top = buffer.readFloat();

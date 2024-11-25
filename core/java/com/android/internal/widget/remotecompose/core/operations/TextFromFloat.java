@@ -36,7 +36,7 @@ import java.util.List;
  * [command][textID][before,after][flags] before and after define number of digits before and after
  * the decimal point
  */
-public class TextFromFloat implements Operation, VariableSupport {
+public class TextFromFloat extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.TEXT_FROM_FLOAT;
     private static final String CLASS_NAME = "TextFromFloat";
     public int mTextId;
@@ -127,6 +127,11 @@ public class TextFromFloat implements Operation, VariableSupport {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -155,6 +160,12 @@ public class TextFromFloat implements Operation, VariableSupport {
         buffer.writeInt(flags);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
         float value = buffer.readFloat();
@@ -166,6 +177,11 @@ public class TextFromFloat implements Operation, VariableSupport {
         operations.add(new TextFromFloat(textId, value, pre, post, flags));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Draw text along path object")

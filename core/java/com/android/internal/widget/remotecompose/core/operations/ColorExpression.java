@@ -34,7 +34,7 @@ import java.util.List;
  * Operation to Colors Color modes mMode = 0 two colors and a tween mMode = 1 color1 is a colorID.
  * mMode = 2 color2 is a colorID. mMode = 3 color1 & color2 are ids mMode = 4 H S V mode
  */
-public class ColorExpression implements Operation, VariableSupport {
+public class ColorExpression extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.COLOR_EXPRESSIONS;
     private static final String CLASS_NAME = "ColorExpression";
     public int mId;
@@ -204,6 +204,11 @@ public class ColorExpression implements Operation, VariableSupport {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -228,6 +233,12 @@ public class ColorExpression implements Operation, VariableSupport {
         buffer.writeFloat(tween);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int mode = buffer.readInt();
@@ -238,6 +249,11 @@ public class ColorExpression implements Operation, VariableSupport {
         operations.add(new ColorExpression(id, mode, color1, color2, tween));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Color defined by an expression")

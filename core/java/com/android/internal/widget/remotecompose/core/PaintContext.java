@@ -157,6 +157,8 @@ public abstract class PaintContext {
     public abstract void drawTweenPath(
             int path1Id, int path2Id, float tween, float start, float stop);
 
+    public abstract void tweenPath(int out, int path1, int path2, float tween);
+
     /**
      * This applies changes to the current paint
      *

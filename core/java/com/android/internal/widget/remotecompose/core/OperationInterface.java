@@ -18,19 +18,19 @@ package com.android.internal.widget.remotecompose.core;
 import android.annotation.NonNull;
 
 /** Base interface for RemoteCompose operations */
-public abstract class Operation {
+public interface OperationInterface {
 
     /** add the operation to the buffer */
-    public abstract void write(@NonNull WireBuffer buffer);
+    void write(@NonNull WireBuffer buffer);
 
     /**
      * paint an operation
      *
      * @param context the paint context used to paint the operation
      */
-    public abstract void apply(@NonNull RemoteContext context);
+    void apply(@NonNull RemoteContext context);
 
     /** Debug utility to display an operation + indentation */
     @NonNull
-    public abstract String deepToString(@NonNull String indent);
+    String deepToString(@NonNull String indent);
 }
