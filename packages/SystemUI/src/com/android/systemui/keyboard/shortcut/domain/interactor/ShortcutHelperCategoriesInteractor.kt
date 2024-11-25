@@ -92,9 +92,7 @@ constructor(
             .groupBy { it.label }
             .entries
             .map { (commonLabel, groupedShortcuts) ->
-                Shortcut(
-                    label = commonLabel,
-                    icon = groupedShortcuts.firstOrNull()?.icon,
+                groupedShortcuts[0].copy(
                     commands = groupedShortcuts.flatMap { it.commands }.sortedBy { it.keys.size },
                     contentDescription =
                         toContentDescription(commonLabel, groupedShortcuts.flatMap { it.commands }),

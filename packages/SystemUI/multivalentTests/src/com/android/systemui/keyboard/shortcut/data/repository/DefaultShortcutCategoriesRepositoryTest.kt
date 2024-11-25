@@ -40,6 +40,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.recentAppsGroup
 import com.android.systemui.keyboard.shortcut.defaultShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
@@ -269,6 +272,31 @@ class DefaultShortcutCategoriesRepositoryTest : SysuiTestCase() {
                 )
             assertThat(systemCategory).isEqualTo(expectedCategory)
         }
+
+    @Test
+    fun categories_recentAppsSwitchShortcutsIsMarkedNonCustomizable() {
+        testScope.runTest {
+            helper.setImeShortcuts(emptyList())
+            fakeSystemSource.setGroups(emptyList())
+            fakeMultiTaskingSource.setGroups(recentAppsGroup)
+
+            helper.showFromActivity()
+            val categories by collectLastValue(repo.categories)
+
+            val cycleForwardThroughRecentAppsShortcut =
+                categories?.first { it.type == ShortcutCategoryType.MultiTasking }
+                    ?.subCategories?.first { it.label == recentAppsGroup.label }
+                    ?.shortcuts?.first { it.label == CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL }
+
+            val cycleBackThroughRecentAppsShortcut =
+                categories?.first { it.type == ShortcutCategoryType.MultiTasking }
+                    ?.subCategories?.first { it.label == recentAppsGroup.label }
+                    ?.shortcuts?.first { it.label == CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL }
+
+            assertThat(cycleForwardThroughRecentAppsShortcut?.isCustomizable).isFalse()
+            assertThat(cycleBackThroughRecentAppsShortcut?.isCustomizable).isFalse()
+        }
+    }
 
     private fun simpleSubCategory(vararg shortcuts: Shortcut) =
         ShortcutSubCategory(simpleGroupLabel, shortcuts.asList())
