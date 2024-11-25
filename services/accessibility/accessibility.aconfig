@@ -86,10 +86,17 @@ flag {
 }
 
 flag {
-  name: "enable_hardware_shortcut_disables_warning"
-  namespace: "accessibility"
-  description: "When the user purposely enables the hardware shortcut, preemptively disables the first-time warning message."
-  bug: "287065325"
+    name: "enable_hardware_shortcut_disables_warning"
+    namespace: "accessibility"
+    description: "When the user purposely enables the hardware shortcut, preemptively disables the first-time warning message."
+    bug: "287065325"
+}
+
+flag {
+    name: "enable_low_vision_hats"
+    namespace: "accessibility"
+    description: "Use HaTS for low vision feedback."
+    bug: "380346799"
 }
 
 flag {
