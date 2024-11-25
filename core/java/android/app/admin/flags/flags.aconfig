@@ -387,6 +387,7 @@ flag {
 
 flag {
   name: "split_create_managed_profile_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Split up existing create and provision managed profile API."
   bug: "375382324"
