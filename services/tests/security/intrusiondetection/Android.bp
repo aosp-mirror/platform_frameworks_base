@@ -19,6 +19,7 @@ android_test {
         "androidx.test.rules",
         "androidx.test.runner",
         "compatibility-device-util-axt",
+        "coretests-aidl",
         "frameworks-base-testutils",
         "junit",
         "platform-test-annotations",
