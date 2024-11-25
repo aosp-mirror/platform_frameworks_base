@@ -513,7 +513,7 @@ class DisplayTopologyTest {
         val nodes = rearrangeRects(
             RectF(0f, 0f, 150f, 100f),
             RectF(-150f, 0f, 0f, 100f),
-            RectF(0f,-100f, 150f, 0f),
+            RectF(0f, -100f, 150f, 0f),
             RectF(150f, 0f, 300f, 100f),
             RectF(0f, 100f, 150f, 200f),
         )
@@ -584,15 +584,15 @@ class DisplayTopologyTest {
     @Test
     fun rearrange_useLargerEdge() {
         val nodes = rearrangeRects(
-            //444111
-            //444111
-            //444111
-            //  000222
-            //  000222
-            //  000222
-            //    333
-            //    333
-            //    333
+            // 444111
+            // 444111
+            // 444111
+            //   000222
+            //   000222
+            //   000222
+            //     333
+            //     333
+            //     333
             RectF(20f, 30f, 50f, 60f),
             RectF(30f, 0f, 60f, 30f),
             RectF(50f, 30f, 80f, 60f),
@@ -617,24 +617,25 @@ class DisplayTopologyTest {
     @Test
     fun rearrange_closeGaps() {
         val nodes = rearrangeRects(
-            //000
-            //000 111
-            //000 111
-            //    111
+            // 000
+            // 000 111
+            // 000 111
+            //     111
             //
-            //        222
-            //        222
-            //        222
+            //         222
+            //         222
+            //         222
             RectF(0f, 0f, 30f, 30f),
             RectF(40f, 10f, 70f, 40f),
-            RectF(80.5f, 50f, 110f, 80f),  // left+=0.5 to cause a preference for TOP/BOTTOM attach
+            RectF(80.5f, 50f, 110f, 80f), // left+=0.5 to cause a preference for
+                                                            // TOP/BOTTOM attach
         )
 
         assertPositioning(
             nodes,
             // In the case of corner adjacency, we prefer a left/right attachment.
             Pair(POSITION_RIGHT, 10f),
-            Pair(POSITION_BOTTOM, 40.5f),  // TODO: fix implementation to remove this gap
+            Pair(POSITION_BOTTOM, 40.5f), // TODO: fix implementation to remove this gap
         )
 
         assertThat(nodes[0].children).containsExactly(nodes[1])
@@ -642,11 +643,65 @@ class DisplayTopologyTest {
         assertThat(nodes[2].children).isEmpty()
     }
 
+    @Test
+    fun copy() {
+        val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 200f,
+            /* height= */ 600f, /* position= */ 0, /* offset= */ 0f)
+
+        val display2 = DisplayTopology.TreeNode(/* displayId= */ 2, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 0f)
+        display1.addChild(display2)
+
+        val primaryDisplayId = 3
+        val display3 = DisplayTopology.TreeNode(primaryDisplayId, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 400f)
+        display1.addChild(display3)
+
+        val display4 = DisplayTopology.TreeNode(/* displayId= */ 4, /* width= */ 200f,
+            /* height= */ 600f, POSITION_RIGHT, /* offset= */ 0f)
+        display2.addChild(display4)
+
+        topology = DisplayTopology(display1, primaryDisplayId)
+        val copy = topology.copy()
+
+        assertThat(copy.primaryDisplayId).isEqualTo(primaryDisplayId)
+
+        val actualDisplay1 = copy.root!!
+        assertThat(actualDisplay1.displayId).isEqualTo(1)
+        assertThat(actualDisplay1.width).isEqualTo(200f)
+        assertThat(actualDisplay1.height).isEqualTo(600f)
+        assertThat(actualDisplay1.children).hasSize(2)
+
+        val actualDisplay2 = actualDisplay1.children[0]
+        assertThat(actualDisplay2.displayId).isEqualTo(2)
+        assertThat(actualDisplay2.width).isEqualTo(600f)
+        assertThat(actualDisplay2.height).isEqualTo(200f)
+        assertThat(actualDisplay2.position).isEqualTo(POSITION_RIGHT)
+        assertThat(actualDisplay2.offset).isEqualTo(0f)
+        assertThat(actualDisplay2.children).hasSize(1)
+
+        val actualDisplay3 = actualDisplay1.children[1]
+        assertThat(actualDisplay3.displayId).isEqualTo(3)
+        assertThat(actualDisplay3.width).isEqualTo(600f)
+        assertThat(actualDisplay3.height).isEqualTo(200f)
+        assertThat(actualDisplay3.position).isEqualTo(POSITION_RIGHT)
+        assertThat(actualDisplay3.offset).isEqualTo(400f)
+        assertThat(actualDisplay3.children).isEmpty()
+
+        val actualDisplay4 = actualDisplay2.children[0]
+        assertThat(actualDisplay4.displayId).isEqualTo(4)
+        assertThat(actualDisplay4.width).isEqualTo(200f)
+        assertThat(actualDisplay4.height).isEqualTo(600f)
+        assertThat(actualDisplay4.position).isEqualTo(POSITION_RIGHT)
+        assertThat(actualDisplay4.offset).isEqualTo(0f)
+        assertThat(actualDisplay4.children).isEmpty()
+    }
+
     /**
      * Runs the rearrange algorithm and returns the resulting tree as a list of nodes, with the
      * root at index 0. The number of nodes is inferred from the number of positions passed.
      */
-    private fun rearrangeRects(vararg pos : RectF) : List<DisplayTopology.TreeNode> {
+    private fun rearrangeRects(vararg pos: RectF): List<DisplayTopology.TreeNode> {
         // Generates a linear sequence of nodes in order in the List from root to leaf,
         // left-to-right. IDs are ascending from 0 to count - 1.
 
@@ -668,7 +723,7 @@ class DisplayTopologyTest {
     }
 
     private fun assertPositioning(
-            nodes : List<DisplayTopology.TreeNode>, vararg positions : Pair<Int, Float>) {
+            nodes: List<DisplayTopology.TreeNode>, vararg positions: Pair<Int, Float>) {
         assertThat(nodes.drop(1).map { Pair(it.position, it.offset )})
             .containsExactly(*positions)
             .inOrder()
