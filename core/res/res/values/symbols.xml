@@ -3480,6 +3480,7 @@
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
+  <java-symbol type="dimen" name="notification_2025_actions_margin_start"/>
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_actions_padding_start"/>
   <java-symbol type="dimen" name="notification_actions_collapsed_priority_width"/>

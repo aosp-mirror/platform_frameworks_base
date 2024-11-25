@@ -262,6 +262,12 @@
      72dp (content margin) - 8dp (media action padding) - 6dp (visual padding within drawable) -->
     <dimen name="notification_2025_media_actions_margin_start">58dp</dimen>
 
+    <!-- The margin on the start of notification actions (2025 redesign version), to align them to
+     the rest of the notification content. Note that this can be set to 0 if the actions would not
+     fit with it included.
+     72dp (content margin) - 12dp (action padding) - 4dp (button inset) -->
+    <dimen name="notification_2025_actions_margin_start">56dp</dimen>
+
     <!-- The margin on the end of most content views (ignores the expander) -->
     <dimen name="notification_content_margin_end">16dp</dimen>
 

@@ -6445,10 +6445,13 @@ public class Notification implements Parcelable
                 // Clear view padding to allow buttons to start on the left edge.
                 // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
                 big.setViewPadding(R.id.actions, 0, 0, 0, 0);
-                // Add an optional indent that will make buttons start at the correct column when
-                // there is enough space to do so (and fall back to the left edge if not).
-                big.setInt(R.id.actions, "setCollapsibleIndentDimen",
-                        R.dimen.call_notification_collapsible_indent);
+                if (!Flags.notificationsRedesignTemplates()) {
+                    // Add an optional indent that will make buttons start at the correct column
+                    // when there is enough space to do so (and fall back to the left edge if not).
+                    // This is handled directly in NotificationActionListLayout in the new design.
+                    big.setInt(R.id.actions, "setCollapsibleIndentDimen",
+                            R.dimen.call_notification_collapsible_indent);
+                }
                 if (evenlyDividedCallStyleActionLayout()) {
                     if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                         Log.d(TAG, "setting evenly divided mode on action list");
