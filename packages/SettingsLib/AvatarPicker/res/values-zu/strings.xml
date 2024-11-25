@@ -19,9 +19,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="user_image_choose_photo" msgid="5630717762469961028">"Khetha isithombe"</string>
     <string name="user_image_take_photo" msgid="3147097821937166738">"Thatha isithombe"</string>
-    <!-- no translation found for avatar_picker_title (7478146965334560463) -->
-    <skip />
+    <string name="avatar_picker_title" msgid="7478146965334560463">"Khetha isithombe sephrofayela"</string>
     <string name="default_user_icon_description" msgid="6018582161341388812">"Isithonjana somsebenzisi sokuzenzakalelayo"</string>
-    <!-- no translation found for done (3587741621903511576) -->
-    <skip />
+    <string name="done" msgid="3587741621903511576">"Kwenziwe"</string>
 </resources>
