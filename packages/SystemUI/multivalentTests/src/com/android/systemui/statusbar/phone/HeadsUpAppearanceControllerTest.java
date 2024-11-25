@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -35,7 +36,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeHeadsUpTracker;
@@ -87,7 +87,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     private CommandQueue mCommandQueue;
     private NotificationRoundnessManager mNotificationRoundnessManager;
-    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
 
     @Before
     public void setUp() throws Exception {
@@ -124,7 +123,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mNotificationRoundnessManager,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
-                mFeatureFlags,
                 mock(HeadsUpNotificationIconInteractor.class),
                 Optional.of(mOperatorNameView));
         mHeadsUpAppearanceController.setAppearFraction(0.0f, 0.0f);
@@ -141,7 +139,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mRow.setPinnedStatus(PinnedStatus.NotPinned);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         mHeadsUpAppearanceController.onHeadsUpUnPinned(mEntry);
-        assertEquals(null, mHeadsUpStatusBarView.getShowingEntry());
+        assertNull(mHeadsUpStatusBarView.getShowingEntry());
     }
 
     @Test
@@ -210,7 +208,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mNotificationRoundnessManager,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
-                mFeatureFlags, mock(HeadsUpNotificationIconInteractor.class),
+                mock(HeadsUpNotificationIconInteractor.class),
                 Optional.empty());
 
         assertEquals(expandedHeight, newController.mExpandedHeight, 0.0f);
@@ -227,7 +225,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mHeadsUpAppearanceController.onViewDetached();
 
         verify(mHeadsUpManager).removeListener(any());
-        verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
+        verify(mDarkIconDispatcher).removeDarkReceiver(any());
         verify(mShadeHeadsUpTracker).removeTrackingHeadsUpListener(any());
         verify(mShadeHeadsUpTracker).setHeadsUpAppearanceController(isNull());
         verify(mStackScrollerController).removeOnExpandedHeightChangedListener(any());
