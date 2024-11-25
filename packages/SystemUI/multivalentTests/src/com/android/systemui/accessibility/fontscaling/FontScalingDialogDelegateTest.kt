@@ -50,8 +50,8 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 private const val ON: Int = 1
 private const val OFF: Int = 0
@@ -103,7 +103,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
                     systemClock,
                     userTracker,
                     mainHandler,
-                    backgroundDelayableExecutor
+                    backgroundDelayableExecutor,
                 )
             )
 
@@ -116,7 +116,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
                 sysuiState,
                 fakeBroadcastDispatcher,
                 mDialogTransitionAnimator,
-                fontScalingDialogDelegate
+                fontScalingDialogDelegate,
             )
 
         whenever(dialogFactory.create(any(), any())).thenReturn(dialog)
@@ -132,7 +132,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             systemSettings.getFloatForUser(
                 Settings.System.FONT_SCALE,
                 /* def= */ 1.0f,
-                userTracker.userId
+                userTracker.userId,
             )
 
         assertThat(currentScale).isEqualTo(fontSizeValueArray[progress].toFloat())
@@ -163,7 +163,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             systemSettings.getFloatForUser(
                 Settings.System.FONT_SCALE,
                 /* def= */ 1.0f,
-                userTracker.userId
+                userTracker.userId,
             )
         assertThat(seekBar.getProgress()).isEqualTo(1)
         assertThat(currentScale).isEqualTo(fontSizeValueArray[1].toFloat())
@@ -194,7 +194,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             systemSettings.getFloatForUser(
                 Settings.System.FONT_SCALE,
                 /* def= */ 1.0f,
-                userTracker.userId
+                userTracker.userId,
             )
         assertThat(seekBar.getProgress()).isEqualTo(fontSizeValueArray.size - 2)
         assertThat(currentScale)
@@ -211,7 +211,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         secureSettings.putIntForUser(
             Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
             OFF,
-            userTracker.userId
+            userTracker.userId,
         )
 
         // Default seekbar progress for font size is 1, click start icon to decrease the progress
@@ -224,7 +224,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             secureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
                 /* def = */ OFF,
-                userTracker.userId
+                userTracker.userId,
             )
         assertThat(currentSettings).isEqualTo(ON)
 
@@ -256,7 +256,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             systemSettings.getFloatForUser(
                 Settings.System.FONT_SCALE,
                 /* def= */ 1.0f,
-                userTracker.userId
+                userTracker.userId,
             )
         assertThat(systemScale).isEqualTo(1.0f)
 
@@ -269,7 +269,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
         // SeekBar interaction is finalized.
         changeListener.onUserInteractionFinalized(
             seekBar,
-            OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER
+            OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER,
         )
         backgroundDelayableExecutor.runAllReady()
         backgroundDelayableExecutor.advanceClockToNext()
@@ -280,7 +280,7 @@ class FontScalingDialogDelegateTest : SysuiTestCase() {
             systemSettings.getFloatForUser(
                 Settings.System.FONT_SCALE,
                 /* def= */ 1.0f,
-                userTracker.userId
+                userTracker.userId,
             )
         assertThat(systemScale).isEqualTo(fontSizeValueArray[0].toFloat())
 
