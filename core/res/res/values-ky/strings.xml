@@ -656,8 +656,8 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Улантуу үчүн экрандын кулпусун киргизиңиз"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сенсорду катуу басыңыз"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2410176550915730974">"Манжа изи таанылган жок. Кайра аракет кылыңыз."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Манжа изинин сенсорун тазалап, кайра аракет кылыңыз"</string>
-    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сенсорду тазалап, кайра аракет кылыңыз"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Манжа изинин сенсорун тазалап, кайталап көрүңүз"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сенсорду тазалап, кайталап көрүңүз"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Сенсорду катуу басыңыз"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Манжа өтө жай жылды. Кайталап көрүңүз."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Башка манжа изин байкап көрүңүз"</string>
@@ -2390,7 +2390,7 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон жеткиликтүү"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгөттөлгөн"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Башка экранга чыгаруу мүмкүн эмес"</string>
-    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайра аракет кылыңыз"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Башка кабелди колдонуп, кайталап көрүңүз"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Түзмөгүңүз өтө ысып кетти жана ал муздамайынча башка экранга чыгара албайт"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Кош экран"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen күйүк"</string>

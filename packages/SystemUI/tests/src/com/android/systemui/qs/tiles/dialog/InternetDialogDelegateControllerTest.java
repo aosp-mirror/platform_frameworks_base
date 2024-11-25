@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -884,6 +885,34 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
         int subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
         assertThat(subId).isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+    }
+
+    @Test
+    public void getActiveAutoSwitchNonDdsSubId_registerCallbackForExistedSubId_notRegister() {
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
+
+        // Adds non DDS subId
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        doReturn(false).when(info).isOpportunistic();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+
+        // 1st time is onStart(), 2nd time is getActiveAutoSwitchNonDdsSubId()
+        verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size() == 2);
+
+        // Adds non DDS subId again
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        doReturn(false).when(info).isOpportunistic();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+
+        // Does not add due to cached subInfo in mSubIdTelephonyCallbackMap.
+        verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size() == 2);
     }
 
     @Test

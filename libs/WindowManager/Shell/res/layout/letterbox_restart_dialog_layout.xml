@@ -99,11 +99,11 @@
 
                 </LinearLayout>
 
-                <FrameLayout
+
+                <LinearLayout
                     android:minHeight="@dimen/letterbox_restart_dialog_button_height"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_gravity="end">
 
                     <Button
@@ -133,7 +133,7 @@
                         android:text="@string/letterbox_restart_restart"
                         android:contentDescription="@string/letterbox_restart_restart"/>
 
-                </FrameLayout>
+                </LinearLayout>
 
             </LinearLayout>
 

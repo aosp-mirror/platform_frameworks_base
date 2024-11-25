@@ -26,6 +26,7 @@ import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.qualifiers.UiBackground
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -34,6 +35,7 @@ class WidgetViewFactory
 @Inject
 constructor(
     @UiBackground private val uiBgContext: CoroutineContext,
+    @UiBackground private val uiBgExecutor: Executor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val interactionHandler: WidgetInteractionHandler,
     private val listenerFactory: AppWidgetHostListenerDelegate.Factory,
@@ -44,8 +46,11 @@ constructor(
         size: SizeF,
     ): CommunalAppWidgetHostView =
         withContext("$TAG#createWidget", uiBgContext) {
-            val view = CommunalAppWidgetHostView(context, interactionHandler)
-            view.setAppWidget(model.appWidgetId, model.providerInfo)
+            val view =
+                CommunalAppWidgetHostView(context, interactionHandler).apply {
+                    setExecutor(uiBgExecutor)
+                    setAppWidget(model.appWidgetId, model.providerInfo)
+                }
             // Instead of setting the view as the listener directly, we wrap the view in a delegate
             // which ensures the callbacks always get called on the main thread.
             appWidgetHost.setListener(model.appWidgetId, listenerFactory.create(view))

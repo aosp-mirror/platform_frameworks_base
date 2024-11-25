@@ -210,13 +210,18 @@ constructor(
                                 } else {
                                     TransitionState.RUNNING
                                 }
-                            transitionRepository.updateTransition(
-                                id,
-                                // This maps the shadeExpansion to a much faster curve, to match
-                                // the existing logic
-                                1f - MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
-                                nextState,
-                            )
+
+                            // startTransition below will issue the CANCELED directly
+                            if (nextState != TransitionState.CANCELED) {
+                                transitionRepository.updateTransition(
+                                    id,
+                                    // This maps the shadeExpansion to a much faster curve, to match
+                                    // the existing logic
+                                    1f -
+                                        MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
+                                    nextState,
+                                )
+                            }
 
                             if (
                                 nextState == TransitionState.CANCELED ||
@@ -234,11 +239,12 @@ constructor(
                                         ownerName = name,
                                         from = KeyguardState.PRIMARY_BOUNCER,
                                         to = KeyguardState.LOCKSCREEN,
+                                        modeOnCanceled = TransitionModeOnCanceled.REVERSE,
                                         animator =
                                             getDefaultAnimatorForTransitionsToState(
                                                     KeyguardState.LOCKSCREEN
                                                 )
-                                                .apply { duration = 0 },
+                                                .apply { duration = 100L },
                                     )
                                 )
                             }

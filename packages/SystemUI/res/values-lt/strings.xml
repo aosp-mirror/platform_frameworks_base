@@ -230,7 +230,7 @@
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Atrakinimo pagal veidą nustatymas"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Norint dar kartą nustatyti atrakinimą pagal veidą, dabartinis veido modelis bus ištrintas.\n\nTurite dar kartą nustatyti šią funkciją, kad galėtumėte atrakinti telefoną pagal veidą."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Nepavyko nustatyti atrakinimo pagal veidą. Eikite į skiltį „Nustatymai“ ir bandykite dar kartą."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Palieskite piršto antspaudo jutiklį"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Palieskite piršto atspaudo jutiklį"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Tęskite paspaudę atrakinimo piktogramą"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5542430577183894219">"Veidas neatpažintas. Naudokite piršto antspaudą."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Garsiakalbiai ir ekranai"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Siūlomi įrenginiai"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"Įvestis"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Išvestis"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Sustabdyti bendrinamą seansą norint perkelti mediją į kitą įrenginį"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Sustabdyti"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kaip veikia transliacija"</string>
@@ -1240,7 +1238,7 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Palieskite, kad sužinotumėte daugiau informacijos"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Nenustatyta signalų"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"įvesti ekrano užraktą"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Palieskite piršto antspaudo jutiklį. Tai yra trumpesnis mygtukas telefono šone"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Palieskite piršto atspaudo jutiklį. Tai yra trumpesnis mygtukas telefono šone"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Kontrolinio kodo jutiklis"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"nustatytumėte tapatybę"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"pasiektumėte įrenginį"</string>
@@ -1293,8 +1291,7 @@
     <string name="add" msgid="81036585205287996">"Pridėti"</string>
     <string name="manage_users" msgid="1823875311934643849">"Tvarkyti naudotojus"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Šio pranešimo vilkimas išskaidyto ekrano režimu nepalaikomas"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"Vietovė aktyvi"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"„Wi‑Fi“ ryšys nepasiekiamas"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioriteto režimas"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signalas nustatytas"</string>
@@ -1351,8 +1348,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Užrakinimo ekrano tinkinimas"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Atrakinę tinkinkite užrakinimo ekraną"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"„Wi-Fi“ ryšys nepasiekiamas"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"Vietovė aktyvi"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Fotoaparatas užblokuotas"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Fotoaparatas ir mikrofonas užblokuoti"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofonas užblokuotas"</string>
@@ -1400,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Sutraukimo piktograma"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Išskleidimo piktograma"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"arba"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Vilkimo rankenėlė"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Naršykite naudodamiesi klaviatūra"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Sužinokite apie sparčiuosius klavišus"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Naršykite naudodamiesi jutikline dalimi"</string>
@@ -1408,8 +1405,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Sužinokite jutiklinės dalies gestus, sparčiuosius klavišus ir kt."</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Grįžimo atgal gestas"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Pagrindinio ekrano gestas"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Peržiūrėti naujausias programas"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Atlikta"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Grįžti"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Jei norite grįžti, perbraukite kairėn arba dešinėn trimis pirštais bet kurioje jutiklinės dalies vietoje.\n\nTaip pat galite naudoti šį spartųjį klavišą: veiksmų klavišas + klavišas „Esc“."</string>
@@ -1419,14 +1415,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Jei norite bet kada pasiekti pagrindinį ekraną, perbraukite aukštyn trim pirštais iš ekrano apačios."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Šaunu!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Atlikote perėjimo į pagrindinį ekraną gestą."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Peržiūrėti naujausias programas"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Jutiklinėje dalyje perbraukite aukštyn trimis pirštais ir palaikykite."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Puiku!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Atlikote naujausių programų peržiūros gestą."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Veiksmų klavišas"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Jei norite pasiekti programas, paspauskite klaviatūros veiksmų klavišą."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Sveikiname!"</string>
@@ -1450,14 +1442,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Perbraukite aukštyn trimis pirštais ir palaikykite. Palieskite, kad sužinotumėte daugiau gestų."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Naudokite klaviatūrą, kad peržiūrėtumėte visas programas"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Bet kuriuo metu paspauskite veiksmų klavišą. Palieskite, kad sužinotumėte daugiau gestų."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Funkcija „Itin blanku“ dabar yra ryškumo šliaužiklio dalis"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Dabar galite padaryti ekraną itin blankų, dar labiau sumažindami ryškumo lygį.\n\nKadangi ši funkcija dabar yra ryškumo šliaužiklio dalis, funkcijos „Itin blanku“ spartieji klavišai bus pašalinti."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Pašalinti funkcijos „Itin blanku“ sparčiuosius klavišus"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Funkcijos „Itin blanku“ spartieji klavišai pašalinti"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Ryšiai"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Pritaikomumas"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Paslaugų programos"</string>

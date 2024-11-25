@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TO_OCCLUDED_DURATION
+import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_ALTERNATE_BOUNCER_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -28,18 +28,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Breaks down ALTERNATE_BOUNCER->OCCLUDED transition into discrete steps for corresponding views to
+ * Breaks down OCCLUDED->ALTERNATE_BOUNCER transition into discrete steps for corresponding views to
  * consume.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class AlternateBouncerToOccludedTransitionViewModel
+class OccludedToAlternateBouncerTransitionViewModel
 @Inject
 constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
-            duration = TO_OCCLUDED_DURATION,
-            edge = Edge.create(from = ALTERNATE_BOUNCER, to = OCCLUDED),
+            duration = TO_ALTERNATE_BOUNCER_DURATION,
+            edge = Edge.create(from = OCCLUDED, to = ALTERNATE_BOUNCER),
         )
 
     val lockscreenAlpha: Flow<Float> = transitionAnimation.immediatelyTransitionTo(0f)

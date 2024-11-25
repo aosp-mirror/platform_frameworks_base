@@ -16,6 +16,8 @@
 
 package android.media.projection;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
@@ -29,6 +31,7 @@ import android.hardware.display.VirtualDisplayConfig;
 import android.os.Build;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -70,6 +73,7 @@ public final class MediaProjection {
     private final DisplayManager mDisplayManager;
     @NonNull
     private final Map<Callback, CallbackRecord> mCallbacks = new ArrayMap<>();
+    private final int mDisplayId;
 
     /** @hide */
     public MediaProjection(Context context, IMediaProjection impl) {
@@ -88,6 +92,11 @@ public final class MediaProjection {
             throw new RuntimeException("Failed to start media projection", e);
         }
         mDisplayManager = displayManager;
+
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        mDisplayId = userManager.isVisibleBackgroundUsersSupported()
+                ? userManager.getMainDisplayIdAssignedToUser()
+                : DEFAULT_DISPLAY;
     }
 
     /**
@@ -156,6 +165,7 @@ public final class MediaProjection {
         if (surface != null) {
             builder.setSurface(surface);
         }
+        builder.setDisplayIdToMirror(mDisplayId);
         return createVirtualDisplay(builder, callback, handler);
     }
 
@@ -234,6 +244,7 @@ public final class MediaProjection {
         if (surface != null) {
             builder.setSurface(surface);
         }
+        builder.setDisplayIdToMirror(mDisplayId);
         return createVirtualDisplay(builder, callback, handler);
     }
 

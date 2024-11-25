@@ -241,7 +241,7 @@
     <string name="category_clone" msgid="1554511758987195974">"ಕ್ಲೋನ್"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ಡೆವಲಪರ್ ಆಯ್ಕೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="development_settings_summary" msgid="8718917813868735095">"ಅಪ್ಲಿಕೇಶನ್ ಅಭಿವೃದ್ಧಿಗಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="development_settings_summary" msgid="8718917813868735095">"ಆ್ಯಪ್‌ ಅಭಿವೃದ್ಧಿಗಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"ಈ ಬಳಕೆದಾರರಿಗೆ ಡೆವಲಪರ್‌ ಆಯ್ಕೆಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"ಟೆಥರಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಬಳಕೆದಾರರಿಗೆ ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -287,9 +287,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ಬೂಟ್‌ಲೋಡರ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ಎಚ್ಚರಿಕೆ: ಈ ಸೆಟ್ಟಿಂಗ್‌ ಆನ್‌ ಇರುವಾಗ ಈ ಸಾಧನದಲ್ಲಿ ಸಾಧನ ಸಂರಕ್ಷಣಾ ವೈಶಿಷ್ಟ್ಯಗಳು ಕಾರ್ಯ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"ಅಣಕು ಸ್ಥಳ ಅಪ್ಲಿಕೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"ಯಾವುದೇ ಅಣಕು ಸ್ಥಳ ಅಪ್ಲಿಕೇಶನ್ ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"ಅಣಕು ಸ್ಥಳ ಅಪ್ಲಿಕೇಶನ್: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"ಅಣಕು ಸ್ಥಳ ಆ್ಯಪ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"ಯಾವುದೇ ಅಣಕು ಸ್ಥಳ ಆ್ಯಪ್‌ ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"ಅಣಕು ಸ್ಥಳ ಆ್ಯಪ್‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ನೆಟ್‌ವರ್ಕಿಂಗ್"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ವೈರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣ"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi ವೆರ್ಬೋಸ್ ಲಾಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -356,17 +356,17 @@
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ಬ್ಲೂಟೂತ್ Gabeldorsche ವೈಶಿಷ್ಟ್ಯದ ಸ್ಟ್ಯಾಕ್‌ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ವರ್ಧಿತ ಸಂಪರ್ಕ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
-    <string name="enable_terminal_summary" msgid="2481074834856064500">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಅಪ್ಲಿಕೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="enable_terminal_summary" msgid="2481074834856064500">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಆ್ಯಪ್‌ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ಪರಿಶೀಲನಾ ನಡವಳಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
-    <string name="debug_app" msgid="8903350241392391766">"ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="debug_app" msgid="8903350241392391766">"ಡೀಬಗ್ ಆ್ಯಪ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"ಯಾವುದೇ ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಹೊಂದಿಸಿಲ್ಲ"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"ಅಪ್ಲಿಕೇಶನ್ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="no_application" msgid="9038334538870247690">"ಏನೂ ಇಲ್ಲ"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"ಡೀಬಗರ್‌‌ಗಾಗಿ ನಿರೀಕ್ಷಿಸಿ"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ಲಗತ್ತನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸುವ ಮೊದಲು ಡೀಬಗರ್‌‌ಗಾಗಿ ಡೀಬಗ್‌‌‌ ಮಾಡಿದ ಅಪ್ಲಿಕೇಶನ್‌‌ ಕಾಯುತ್ತದೆ"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ಲಗತ್ತನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸುವ ಮೊದಲು ಡೀಬಗರ್‌‌ಗಾಗಿ ಡೀಬಗ್‌‌‌ ಮಾಡಿದ ಆ್ಯಪ್‌ ಕಾಯುತ್ತದೆ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ಇನ್‌ಪುಟ್"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ಚಿತ್ರಣ"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ಹಾರ್ಡ್‌ವೇರ್‌ ವೇಗವರ್ಧಿತ ರೆಂಡರಿಂಗ್"</string>
@@ -425,11 +425,11 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ಬಳಕೆದಾರರು ಹೊರಹೋಗುತ್ತಿದ್ದಂತೆಯೇ ಚಟುವಟಿಕೆ ನಾಶಪಡಿಸು"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆ ಮಿತಿ"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"ಹಿನ್ನೆಲೆ ANR ಗಳನ್ನು ತೋರಿಸಿ"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"ಹಿನ್ನೆಲೆ ಆ್ಯಪ್‌ಗಳಿಗಾಗಿ ಆ್ಯಪ್‌ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತಿಲ್ಲ ಎಂಬ ಸಂಭಾಷಣೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ನೋಟಿಫಿಕೇಶನ್ ಎಚ್ಚರಿಕೆ ತೋರಿಸಿ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ಅಮಾನ್ಯ ಚಾನಲ್ ಅಧಿಸೂಚನೆಗಾಗಿ ಪರದೆಯಲ್ಲಿ ಎಚ್ಚರಿಕೆ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ಬಾಹ್ಯವಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಒತ್ತಾಯವಾಗಿ ಅನುಮತಿಸಿ"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳು ಯಾವುದೇ ಆಗಿದ್ದರೂ, ಬಾಹ್ಯ ಸಂಗ್ರಹಣೆಗೆ ಬರೆಯಲು ಯಾವುದೇ ಆ್ಯಪ್‌ ಅನ್ನು ಅರ್ಹಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಒತ್ತಾಯ ಮಾಡಿ"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ಮ್ಯಾನಿಫೆಸ್ಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಗಣಿಸದೇ, ಬಹು-ವಿಂಡೊಗೆ ಎಲ್ಲಾ ಚಟುವಟಿಕೆಗಳನ್ನು ಮರುಗಾತ್ರಗೊಳಿಸುವಂತೆ ಮಾಡಿ."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ಮುಕ್ತಸ್ವರೂಪದ ವಿಂಡೊಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -453,7 +453,7 @@
     <string name="inactive_apps_title" msgid="5372523625297212320">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"ನಿಷ್ಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"ಸಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="standby_bucket_summary" msgid="5128193447550429600">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಟ್ಯಾಂಡ್‌ಬೈ ಸ್ಥಿತಿ:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"ಆ್ಯಪ್‌ ಸ್ಟ್ಯಾಂಡ್‌ಬೈ ಸ್ಥಿತಿ:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="transcode_settings_title" msgid="2581975870429850549">"ಮೀಡಿಯಾ ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="transcode_user_control" msgid="6176368544817731314">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಡೀಫಾಲ್ಟ್‌ಗಳನ್ನು ಅತಿಕ್ರಮಿಸಿ"</string>
     <string name="transcode_enable_all" msgid="2411165920039166710">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ಇದೀಗ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ಈ ಕಂಪ್ಯೂಟರ್ (ಆಂತರಿಕ)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"ಮೈಕ್ರೊಫೋನ್‌ (ಆಂತರಿಕ)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ಈ ಬದಲಾವಣೆ ಅನ್ವಯವಾಗಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ರೀಬೂಟ್ ಮಾಡಬೇಕು. ಇದೀಗ ರೀಬೂಟ್ ಮಾಡಿ ಅಥವಾ ರದ್ದುಗೊಳಿಸಿ."</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ವೈಯರ್ ಹೊಂದಿರುವ ಹೆಡ್‌ಫೋನ್"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ಹೆಡ್‌ಫೋನ್"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB ಸ್ಪೀಕರ್"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ಮೈಕ್‌ ಜ್ಯಾಕ್‌"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB ಮೈಕ್‌"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ಆನ್ ಆಗಿದೆ"</string>

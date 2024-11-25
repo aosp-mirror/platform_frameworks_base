@@ -111,16 +111,26 @@ constructor(
      * If a new [loadMediaData] is issued while existing load is in progress, the existing (old)
      * load will be cancelled.
      */
-    suspend fun loadMediaData(key: String, sbn: StatusBarNotification): MediaDataLoaderResult? {
-        val loadMediaJob = backgroundScope.async { loadMediaDataInBackground(key, sbn) }
+    suspend fun loadMediaData(
+        key: String,
+        sbn: StatusBarNotification,
+        isConvertingToActive: Boolean = false,
+    ): MediaDataLoaderResult? {
+        val loadMediaJob =
+            backgroundScope.async { loadMediaDataInBackground(key, sbn, isConvertingToActive) }
         loadMediaJob.invokeOnCompletion {
             // We need to make sure we're removing THIS job after cancellation, not
             // a job that we created later.
             mediaProcessingJobs.remove(key, loadMediaJob)
         }
-        val existingJob = mediaProcessingJobs.put(key, loadMediaJob)
+        var existingJob: Job? = null
+        // Do not cancel loading jobs that convert resume players to active.
+        if (!isConvertingToActive) {
+            existingJob = mediaProcessingJobs.put(key, loadMediaJob)
+            existingJob?.cancel("New processing job incoming.")
+        }
         logD(TAG) { "Loading media data for $key... / existing job: $existingJob" }
-        existingJob?.cancel("New processing job incoming.")
+
         return loadMediaJob.await()
     }
 
@@ -129,12 +139,16 @@ constructor(
     private suspend fun loadMediaDataInBackground(
         key: String,
         sbn: StatusBarNotification,
+        isConvertingToActive: Boolean = false,
     ): MediaDataLoaderResult? =
         traceCoroutine("MediaDataLoader#loadMediaData") {
             // We have apps spamming us with quick notification updates which can cause
             // us to spend significant CPU time loading duplicate data. This debounces
             // those requests at the cost of a bit of latency.
-            delay(DEBOUNCE_DELAY_MS)
+            // No delay needed to load jobs converting resume players to active.
+            if (!isConvertingToActive) {
+                delay(DEBOUNCE_DELAY_MS)
+            }
 
             val token =
                 sbn.notification.extras.getParcelable(

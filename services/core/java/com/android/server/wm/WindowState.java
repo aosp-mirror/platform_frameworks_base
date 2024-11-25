@@ -1969,6 +1969,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isReadyForDisplay() {
         final boolean parentAndClientVisible = !isParentWindowHidden()
                 && mViewVisibility == View.VISIBLE;
+        // TODO(b/338426357): Remove this once the last target using legacy transitions is moved to
+        // shell transitions
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return mHasSurface && isVisibleByPolicy() && !mDestroying
+                    && ((parentAndClientVisible && mToken.isVisible())
+                    || isAnimating(TRANSITION | PARENTS));
+        }
         return mHasSurface && isVisibleByPolicy() && !mDestroying && mToken.isVisible()
                 && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
@@ -5203,7 +5210,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // but not window manager visible (!isVisibleNow()), it can still be the parent of the
             // dim, but can not create a new surface or continue a dim alone.
             Dimmer dimmer;
-            WindowContainer<?> geometryParent = task;
+            WindowContainer<?> geometryParent = null;
             if (Flags.useTasksDimOnly()) {
                 geometryParent = getDimParent();
                 dimmer = getDimController();

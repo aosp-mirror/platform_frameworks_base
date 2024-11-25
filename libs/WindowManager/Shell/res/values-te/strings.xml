@@ -126,8 +126,11 @@
     <string name="manage_windows_text" msgid="5567366688493093920">"విండోలను మేనేజ్ చేయండి"</string>
     <string name="close_text" msgid="4986518933445178928">"మూసివేయండి"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"మెనూను మూసివేయండి"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"మెనూను తెరవండి"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"మెనూను తెరవండి"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"స్క్రీన్ సైజ్‌ను పెంచండి"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"స్క్రీన్‌ను స్నాప్ చేయండి"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"ఈ యాప్ సైజ్‌ను మార్చడం సాధ్యపడదు"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"మ్యాగ్జిమైజ్ చేయండి"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"ఎడమ వైపున స్నాప్ చేయండి"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"కుడి వైపున స్నాప్ చేయండి"</string>
 </resources>
