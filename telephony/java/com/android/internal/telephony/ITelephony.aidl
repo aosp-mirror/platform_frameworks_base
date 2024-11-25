@@ -3168,7 +3168,7 @@ interface ITelephony {
      */
     boolean setSatelliteAccessControlOverlayConfigs(in boolean reset, in boolean isAllowed,
             in String s2CellFile, in long locationFreshDurationNanos,
-            in List<String> satelliteCountryCodes);
+            in List<String> satelliteCountryCodes, String satelliteAccessConfigurationFile);
 
     /**
      * This API can be used in only testing to override oem-enabled satellite provision status.
