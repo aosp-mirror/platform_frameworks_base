@@ -19,6 +19,7 @@ package android.hardware.contexthub;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 import android.hardware.location.ContextHubTransaction;
@@ -70,6 +71,7 @@ public class HubEndpointSession implements AutoCloseable {
      *     receiving the response for the message.
      */
     @NonNull
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public ContextHubTransaction<Void> sendMessage(@NonNull HubMessage message) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("Session is already closed.");
@@ -120,6 +122,7 @@ public class HubEndpointSession implements AutoCloseable {
      * <p>When this function is invoked, the messaging associated with this session is invalidated.
      * All futures messages targeted for this client are dropped.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void close() {
         if (!mIsClosed.getAndSet(true)) {
             mCloseGuard.close();

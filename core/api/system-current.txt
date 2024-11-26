@@ -5252,9 +5252,9 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
-    method public void close();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void close();
     method @Nullable public android.hardware.contexthub.HubServiceInfo getServiceInfo();
-    method @NonNull public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
