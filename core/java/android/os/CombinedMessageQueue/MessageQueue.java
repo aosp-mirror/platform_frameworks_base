@@ -30,6 +30,8 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.ravenwood.RavenwoodEnvironment;
+
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.FileDescriptor;
@@ -116,39 +118,58 @@ public final class MessageQueue {
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
-        if (sIsProcessAllowedToUseConcurrent == null) {
-            // Concurrent mode modifies behavior that is observable via reflection and is commonly
-            // used by tests.
-            // For now, we limit it to system processes to avoid breaking apps and their tests.
-            boolean useConcurrent = UserHandle.isCore(Process.myUid());
-
-            // Some platform tests run in system UIDs.
-            // Use this awful heuristic to detect them.
-            if (useConcurrent) {
-                final String processName = Process.myProcessName();
-                if (processName == null
-                        || processName.contains("test")
-                        || processName.contains("Test")) {
-                    useConcurrent = false;
-                }
-            }
-
-            // We can lift this restriction in the future after we've made it possible for test
-            // authors to test Looper and MessageQueue without resorting to reflection.
-
-            // Holdback study.
-            if (useConcurrent && Flags.messageQueueForceLegacy()) {
-                useConcurrent = false;
-            }
-
-            sIsProcessAllowedToUseConcurrent = useConcurrent;
-            mUseConcurrent = useConcurrent;
-        } else {
-            mUseConcurrent = sIsProcessAllowedToUseConcurrent;
-        }
-
+        initIsProcessAllowedToUseConcurrent();
+        mUseConcurrent = sIsProcessAllowedToUseConcurrent;
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
+    }
+
+    private static void initIsProcessAllowedToUseConcurrent() {
+        if (sIsProcessAllowedToUseConcurrent != null) {
+            return;
+        }
+
+        if (RavenwoodEnvironment.getInstance().isRunningOnRavenwood()) {
+            sIsProcessAllowedToUseConcurrent = false;
+            return;
+        }
+
+        final String processName = Process.myProcessName();
+        if (processName == null) {
+            // Assume that this is a host-side test and avoid concurrent mode for now.
+            sIsProcessAllowedToUseConcurrent = false;
+            return;
+        }
+
+        // Concurrent mode modifies behavior that is observable via reflection and is commonly
+        // used by tests.
+        // For now, we limit it to system processes to avoid breaking apps and their tests.
+        sIsProcessAllowedToUseConcurrent = UserHandle.isCore(Process.myUid());
+
+        if (sIsProcessAllowedToUseConcurrent) {
+            // Some platform tests run in core UIDs.
+            // Use this awful heuristic to detect them.
+            if (processName.contains("test") || processName.contains("Test")) {
+                sIsProcessAllowedToUseConcurrent = false;
+            }
+        } else {
+            // Also explicitly allow SystemUI processes.
+            // SystemUI doesn't run in a core UID, but we want to give it the performance boost,
+            // and we know that it's safe to use the concurrent implementation in SystemUI.
+            sIsProcessAllowedToUseConcurrent =
+                    processName.equals("com.android.systemui")
+                            || processName.startsWith("com.android.systemui:");
+            // On Android distributions where SystemUI has a different process name,
+            // the above condition may need to be adjusted accordingly.
+        }
+
+        // We can lift these restrictions in the future after we've made it possible for test
+        // authors to test Looper and MessageQueue without resorting to reflection.
+
+        // Holdback study.
+        if (sIsProcessAllowedToUseConcurrent && Flags.messageQueueForceLegacy()) {
+            sIsProcessAllowedToUseConcurrent = false;
+        }
     }
 
     @Override
