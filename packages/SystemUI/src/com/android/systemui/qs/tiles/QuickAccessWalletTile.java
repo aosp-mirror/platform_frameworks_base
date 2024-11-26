@@ -243,15 +243,15 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             }
             mSelectedCard = cards.get(selectedIndex);
             switch (mSelectedCard.getCardImage().getType()) {
-                case TYPE_URI:
-                case TYPE_URI_ADAPTIVE_BITMAP:
-                    mCardViewDrawable = null;
-                    break;
-                case TYPE_RESOURCE:
                 case TYPE_BITMAP:
                 case TYPE_ADAPTIVE_BITMAP:
-                case TYPE_DATA:
                     mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+                    break;
+                case TYPE_URI:
+                case TYPE_URI_ADAPTIVE_BITMAP:
+                case TYPE_RESOURCE:
+                case TYPE_DATA:
+                    mCardViewDrawable = null;
                     break;
                 default:
                     Log.e(TAG, "Unknown icon type: " + mSelectedCard.getCardImage().getType());
