@@ -73,9 +73,13 @@ public class DisplayManagerGlobalTest {
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
+    private static final long DISPLAY_CHANGE_EVENTS =
+            DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
+
     private static final long ALL_DISPLAY_EVENTS =
             DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
-            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+            | DISPLAY_CHANGE_EVENTS
             | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
 
     @Mock
@@ -127,7 +131,7 @@ public class DisplayManagerGlobalTest {
         final DisplayInfo newDisplayInfo = new DisplayInfo();
         newDisplayInfo.rotation++;
         doReturn(newDisplayInfo).when(mDisplayManager).getDisplayInfo(displayId);
-        callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+        callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_BASIC_CHANGED);
         waitForHandler();
         Mockito.verify(mDisplayListener).onDisplayChanged(eq(displayId));
         Mockito.verifyNoMoreInteractions(mDisplayListener);
@@ -186,8 +190,8 @@ public class DisplayManagerGlobalTest {
 
         mDisplayManagerGlobal.registerDisplayListener(mDisplayListener, mHandler,
                 ALL_DISPLAY_EVENTS
-                        & ~DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED, null);
-        callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+                        & ~DISPLAY_CHANGE_EVENTS, null);
+        callback.onDisplayEvent(displayId, DisplayManagerGlobal.EVENT_DISPLAY_BASIC_CHANGED);
         waitForHandler();
         Mockito.verifyZeroInteractions(mDisplayListener);
 
@@ -257,8 +261,7 @@ public class DisplayManagerGlobalTest {
                         | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
                 null /* packageName */);
         mDisplayManagerGlobal.registerDisplayListener(mDisplayListener2, mHandler,
-                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
-                null /* packageName */);
+                DISPLAY_CHANGE_EVENTS, null /* packageName */);
 
         mDisplayManagerGlobal.handleDisplayChangeFromWindowManager(321);
         waitForHandler();
@@ -304,8 +307,7 @@ public class DisplayManagerGlobalTest {
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
                 mDisplayManagerGlobal
                         .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_ADDED, 0));
-        assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
-                mDisplayManagerGlobal
+        assertEquals(DISPLAY_CHANGE_EVENTS, mDisplayManagerGlobal
                         .mapFlagsToInternalEventFlag(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, 0));
         assertEquals(DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
                 mDisplayManagerGlobal

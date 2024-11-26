@@ -81,7 +81,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     public static final int LOGICAL_DISPLAY_EVENT_BASE = 0;
     public static final int LOGICAL_DISPLAY_EVENT_ADDED = 1 << 0;
-    public static final int LOGICAL_DISPLAY_EVENT_CHANGED = 1 << 1;
+    public static final int LOGICAL_DISPLAY_EVENT_BASIC_CHANGED = 1 << 1;
     public static final int LOGICAL_DISPLAY_EVENT_REMOVED = 1 << 2;
     public static final int LOGICAL_DISPLAY_EVENT_SWAPPED = 1 << 3;
     public static final int LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED = 1 << 4;
@@ -172,9 +172,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     /**
      * Has an entry for every logical display that the rest of the system has been notified about.
-     * Any entry in here requires us to send a {@link  LOGICAL_DISPLAY_EVENT_REMOVED} event when it
-     * is deleted or {@link  LOGICAL_DISPLAY_EVENT_CHANGED} when it is changed. The values are any
-     * of the {@code UPDATE_STATE_*} constant types.
+     * The values are any of the {@code UPDATE_STATE_*} constant types.
      */
     private final SparseIntArray mUpdatedLogicalDisplays = new SparseIntArray();
 
@@ -811,7 +809,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             final boolean isCurrentlyEnabled = display.isEnabledLocked();
             int logicalDisplayEventMask = mLogicalDisplaysToUpdate
                     .get(displayId, LOGICAL_DISPLAY_EVENT_BASE);
-
+            boolean hasBasicInfoChanged =
+                    !mTempDisplayInfo.equals(newDisplayInfo, /* compareRefreshRate */ false);
             // The display is no longer valid and needs to be removed.
             if (!display.isValidLocked()) {
                 // Remove from group
@@ -863,19 +862,28 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 int event = isCurrentlyEnabled ? LOGICAL_DISPLAY_EVENT_ADDED :
                         LOGICAL_DISPLAY_EVENT_REMOVED;
                 logicalDisplayEventMask |= event;
-            } else if (wasDirty || !mTempDisplayInfo.equals(newDisplayInfo)) {
+            } else if (wasDirty) {
                 // If only the hdr/sdr ratio changed, then send just the event for that case
                 if ((diff == DisplayDeviceInfo.DIFF_HDR_SDR_RATIO)) {
                     logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_HDR_SDR_RATIO_CHANGED;
                 } else {
-                    logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_CHANGED;
+                    logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_BASIC_CHANGED
+                            | LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED
+                            | LOGICAL_DISPLAY_EVENT_STATE_CHANGED;
                 }
+            } else if (hasBasicInfoChanged
+                    || mTempDisplayInfo.getRefreshRate() != newDisplayInfo.getRefreshRate()) {
+                // If only the hdr/sdr ratio changed, then send just the event for that case
+                if ((diff == DisplayDeviceInfo.DIFF_HDR_SDR_RATIO)) {
+                    logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_HDR_SDR_RATIO_CHANGED;
+                } else {
 
-                if (mFlags.isDisplayListenerPerformanceImprovementsEnabled()) {
+                    if (hasBasicInfoChanged) {
+                        logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_BASIC_CHANGED;
+                    }
                     logicalDisplayEventMask
                             |= updateAndGetMaskForDisplayPropertyChanges(newDisplayInfo);
                 }
-
                 // The display is involved in a display layout transition
             } else if (updateState == UPDATE_STATE_TRANSITION) {
                 logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_DEVICE_STATE_TRANSITION;
@@ -891,7 +899,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 // things like display cutouts.
                 display.getNonOverrideDisplayInfoLocked(mTempDisplayInfo);
                 if (!mTempNonOverrideDisplayInfo.equals(mTempDisplayInfo)) {
-                    logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_CHANGED;
+                    logicalDisplayEventMask |= LOGICAL_DISPLAY_EVENT_BASIC_CHANGED
+                            | LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED;
                 }
             }
             mLogicalDisplaysToUpdate.put(displayId, logicalDisplayEventMask);
@@ -930,7 +939,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         if (mFlags.isConnectedDisplayManagementEnabled()) {
             sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_DISCONNECTED);
         }
-        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_CHANGED);
+        sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_BASIC_CHANGED);
         sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED);
         sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_STATE_CHANGED);
         sendUpdatesForDisplaysLocked(LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
@@ -962,7 +971,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             mask |= LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED;
         }
 
-        if (mTempDisplayInfo.state != newDisplayInfo.state) {
+        if (mFlags.isDisplayListenerPerformanceImprovementsEnabled()
+                && mTempDisplayInfo.state != newDisplayInfo.state) {
             mask |= LOGICAL_DISPLAY_EVENT_STATE_CHANGED;
         }
         return mask;
@@ -1357,8 +1367,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 return "added";
             case LOGICAL_DISPLAY_EVENT_DEVICE_STATE_TRANSITION:
                 return "transition";
-            case LOGICAL_DISPLAY_EVENT_CHANGED:
-                return "changed";
             case LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED:
                 return "framerate_override";
             case LOGICAL_DISPLAY_EVENT_SWAPPED:
@@ -1375,6 +1383,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 return "state_changed";
             case LOGICAL_DISPLAY_EVENT_REFRESH_RATE_CHANGED:
                 return "refresh_rate_changed";
+            case LOGICAL_DISPLAY_EVENT_BASIC_CHANGED:
+                return "basic_changed";
         }
         return null;
     }

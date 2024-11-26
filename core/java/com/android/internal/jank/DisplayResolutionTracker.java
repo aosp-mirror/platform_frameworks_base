@@ -148,8 +148,8 @@ public class DisplayResolutionTracker {
                 public void registerDisplayListener(DisplayManager.DisplayListener listener) {
                     manager.registerDisplayListener(listener, handler,
                             DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
-                                    | DisplayManagerGlobal
-                                            .INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
+                                    | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+                                    | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
                             ActivityThread.currentPackageName());
                 }
 
