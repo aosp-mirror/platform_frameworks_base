@@ -38,7 +38,7 @@ import java.util.List;
  * like injecting the width of the component int draw rect As well as supporting generalized
  * animation floats. The floats represent a RPN style calculator
  */
-public class IntegerExpression implements Operation, VariableSupport {
+public class IntegerExpression extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.INTEGER_EXPRESSION;
     private static final String CLASS_NAME = "IntegerExpression";
     public int mId;
@@ -141,6 +141,11 @@ public class IntegerExpression implements Operation, VariableSupport {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -163,6 +168,12 @@ public class IntegerExpression implements Operation, VariableSupport {
         }
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int mask = buffer.readInt();
@@ -178,6 +189,11 @@ public class IntegerExpression implements Operation, VariableSupport {
         operations.add(new IntegerExpression(id, mask, values));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Expression that computes an integer")

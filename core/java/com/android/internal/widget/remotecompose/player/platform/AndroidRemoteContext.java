@@ -60,9 +60,12 @@ class AndroidRemoteContext extends RemoteContext {
 
     @Override
     public void loadPathData(int instanceId, @NonNull float[] floatPath) {
-        if (!mRemoteComposeState.containsId(instanceId)) {
-            mRemoteComposeState.cacheData(instanceId, floatPath);
-        }
+        mRemoteComposeState.putPathData(instanceId, floatPath);
+    }
+
+    @Override
+    public float[] getPathData(int instanceId) {
+        return mRemoteComposeState.getPathData(instanceId);
     }
 
     static class VarName {
@@ -162,7 +165,7 @@ class AndroidRemoteContext extends RemoteContext {
      * @param type the type of the data 0 = RGBA 8888, 1 = 888, 2 = 8 gray
      * @param width with of image to be loaded largest dimension is 32767
      * @param height height of image to be loaded
-     * @param bitmap a byte array containing the image information
+     * @param data a byte array containing the image information
      * @oaram imageId the id of the image
      */
     @Override

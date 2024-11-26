@@ -64,7 +64,8 @@ class DomainVerifier private constructor(
 
     private val targetAssetCache = AssetLruCache()
 
-    fun collectHosts(packageNames: Iterable<String>): Iterable<Triple<UUID, String, String>> {
+    fun collectHosts(packageNames: Iterable<String>, statusFilter: (Int) -> Boolean):
+            Iterable<Triple<UUID, String, Iterable<String>>> {
         return packageNames.mapNotNull { packageName ->
             val (domainSetId, _, hostToStateMap) = try {
                 manager.getDomainVerificationInfo(packageName)
@@ -74,14 +75,13 @@ class DomainVerifier private constructor(
             } ?: return@mapNotNull null
 
             val hostsToRetry = hostToStateMap
-                .filterValues(VerifyStatus::shouldRetry)
+                .filterValues(statusFilter)
                 .takeIf { it.isNotEmpty() }
                 ?.map { it.key }
                 ?: return@mapNotNull null
 
-            hostsToRetry.map { Triple(domainSetId, packageName, it) }
+            Triple(domainSetId, packageName, hostsToRetry)
         }
-            .flatten()
     }
 
     suspend fun verifyHost(

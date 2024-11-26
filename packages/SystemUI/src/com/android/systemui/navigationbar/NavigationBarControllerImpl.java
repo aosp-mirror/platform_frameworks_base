@@ -56,7 +56,7 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.AutoHideControllerStore;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.Utils;
@@ -124,7 +124,7 @@ public class NavigationBarControllerImpl implements
             TaskbarDelegate taskbarDelegate,
             NavigationBarComponent.Factory navigationBarComponentFactory,
             DumpManager dumpManager,
-            AutoHideController autoHideController,
+            AutoHideControllerStore autoHideControllerStore,
             LightBarController lightBarController,
             TaskStackChangeListeners taskStackChangeListeners,
             Optional<Pip> pipOptional,
@@ -146,8 +146,9 @@ public class NavigationBarControllerImpl implements
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
-                dumpManager, autoHideController, lightBarController, pipOptional,
-                backAnimation.orElse(null), taskStackChangeListeners);
+                dumpManager, autoHideControllerStore.forDisplay(mContext.getDisplayId()),
+                lightBarController, pipOptional, backAnimation.orElse(null),
+                taskStackChangeListeners);
         mIsLargeScreen = isLargeScreen(mContext);
         mIsPhone = determineIfPhone(mContext, deviceStateManager);
         dumpManager.registerDumpable(this);

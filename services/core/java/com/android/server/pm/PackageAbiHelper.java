@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.ApplicationInfo;
 import android.util.ArraySet;
 import android.util.Pair;
 
@@ -28,6 +27,8 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
+
+
 
 // TODO: Move to .parsing sub-package
 @VisibleForTesting
@@ -76,23 +77,6 @@ public interface PackageAbiHelper {
     @Nullable
     String getAdjustedAbiForSharedUser(ArraySet<? extends PackageStateInternal> packagesForUser,
             AndroidPackage scannedPackage);
-
-    /**
-     * Checks alignment of APK and native libraries for 16KB device
-     *
-     * @param pkg AndroidPackage for which alignment check is being done
-     * @param libraryRoot directory for libraries
-     * @param nativeLibraryRootRequiresIsa use isa
-     * @param cpuAbiOverride ABI override mentioned in package
-     * @return {ApplicationInfo.PageSizeAppCompat} if successful or error code
-     *     which suggests undefined mode
-     */
-    @ApplicationInfo.PageSizeAppCompatFlags
-    int checkPackageAlignment(
-            AndroidPackage pkg,
-            String libraryRoot,
-            boolean nativeLibraryRootRequiresIsa,
-            String cpuAbiOverride);
 
     /**
      * The native library paths and related properties that should be set on a

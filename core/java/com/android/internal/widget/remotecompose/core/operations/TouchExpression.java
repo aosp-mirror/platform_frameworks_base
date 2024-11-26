@@ -42,12 +42,12 @@ import java.util.List;
  * touch behaviours. Including animating to Notched, positions. and tweaking the dynamics of the
  * animation.
  */
-public class TouchExpression implements Operation, VariableSupport, TouchListener {
+public class TouchExpression extends Operation implements VariableSupport, TouchListener {
     private static final int OP_CODE = Operations.TOUCH_EXPRESSION;
     private static final String CLASS_NAME = "TouchExpression";
     private float mDefValue;
     private float mOutDefValue;
-    public int mId;
+    private int mId;
     public float[] mSrcExp;
     int mMode = 1; // 0 = delta, 1 = absolute
     float mMax = 1;
@@ -56,11 +56,14 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
     float mOutMin = 1;
     float mValue = 0;
     boolean mUnmodified = true;
-    public float[] mPreCalcValue;
+    private float[] mPreCalcValue;
     private float mLastChange = Float.NaN;
     private float mLastCalculatedValue = Float.NaN;
     AnimatedFloatExpression mExp = new AnimatedFloatExpression();
+
+    /** The maximum number of floats in the expression */
     public static final int MAX_EXPRESSION_SIZE = 32;
+
     private VelocityEasing mEasyTouch = new VelocityEasing();
     private boolean mEasingToStop = false;
     private float mTouchUpTime = 0;
@@ -495,6 +498,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -505,6 +513,14 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
      * @param buffer The buffer to write to
      * @param id the id of the resulting float
      * @param value the float expression array
+     * @param min the minimum allowed value
+     * @param max the maximum allowed value
+     * @param velocityId the velocity id
+     * @param touchEffects the type touch effect
+     * @param exp the expression the maps touch drags to movement
+     * @param touchMode the touch mode e.g. notch modes
+     * @param touchSpec the spec of the touch modes
+     * @param easingSpec the spec of when the object comes to an easing
      */
     public static void apply(
             WireBuffer buffer,
@@ -549,7 +565,13 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         float startValue = buffer.readFloat();
         float min = buffer.readFloat();
@@ -594,6 +616,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
                         easingData));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Float expression")

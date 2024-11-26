@@ -409,10 +409,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         final int eventSource = event.getSource();
         final int displayId = event.getDisplayId();
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
-            if (!Flags.doNotResetKeyEventState()) {
-                state.reset();
-                clearEventStreamHandler(displayId, eventSource);
-            }
             if (DEBUG) {
                 Slog.d(TAG, "Not processing event " + event);
             }

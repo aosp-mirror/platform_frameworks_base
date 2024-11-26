@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -38,6 +39,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.pip2.phone.PhonePipMenuController;
 import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipMotionHelper;
@@ -128,8 +130,11 @@ public abstract class Pip2Module {
     static PipScheduler providePipScheduler(Context context,
             PipBoundsState pipBoundsState,
             @ShellMainThread ShellExecutor mainExecutor,
-            PipTransitionState pipTransitionState) {
-        return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState);
+            PipTransitionState pipTransitionState,
+            Optional<DesktopRepository> desktopRepositoryOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+        return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState,
+                desktopRepositoryOptional, rootTaskDisplayAreaOrganizer);
     }
 
     @WMSingleton

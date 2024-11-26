@@ -17,6 +17,7 @@
 package com.android.systemui.communal.data.repository
 
 import android.app.admin.devicePolicyManager
+import android.content.res.mainResources
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.kosmos.Kosmos
@@ -27,6 +28,7 @@ val Kosmos.communalSettingsRepository: CommunalSettingsRepository by
     Kosmos.Fixture {
         CommunalSettingsRepositoryImpl(
             bgDispatcher = testDispatcher,
+            resources = mainResources,
             featureFlagsClassic = featureFlagsClassic,
             secureSettings = fakeSettings,
             broadcastDispatcher = broadcastDispatcher,

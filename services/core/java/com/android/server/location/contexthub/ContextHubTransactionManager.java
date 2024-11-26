@@ -492,14 +492,21 @@ import java.util.concurrent.atomic.AtomicInteger;
     /* package */
     void onTransactionResponse(int transactionId, boolean success) {
         TransactionAcceptConditions conditions =
-                transaction -> transaction.getTransactionId() == transactionId;
+                transaction -> {
+                    if (transaction.getTransactionId() != transactionId) {
+                        Log.w(
+                                TAG,
+                                "Unexpected transaction: expected "
+                                        + transactionId
+                                        + ", received "
+                                        + transaction.getTransactionId());
+                        return false;
+                    }
+                    return true;
+                };
         ContextHubServiceTransaction transaction = getTransactionAndHandleNext(conditions);
         if (transaction == null) {
-            Log.w(TAG, "Received unexpected transaction response (expected ID = "
-                    + transactionId
-                    + ", received ID = "
-                    + transaction.getTransactionId()
-                    + ")");
+            Log.w(TAG, "Received unexpected transaction response");
             return;
         }
 
@@ -581,7 +588,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 transaction.getTransactionType() == ContextHubTransaction.TYPE_QUERY_NANOAPPS;
         ContextHubServiceTransaction transaction = getTransactionAndHandleNext(conditions);
         if (transaction == null) {
-            Log.w(TAG, "Received unexpected query response (expected " + transaction + ")");
+            Log.w(TAG, "Received unexpected query response");
             return;
         }
 
