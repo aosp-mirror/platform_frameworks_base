@@ -439,6 +439,498 @@ public class VibrationEffectXmlSerializationTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testWaveformEnvelopeEffect_allSucceed() throws Exception {
+        VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
+                .addControlPoint(0.2f, 80f, 10)
+                .addControlPoint(0.5f, 150f, 10)
+                .build();
+
+        String xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                        <control-point amplitude="0.5" frequencyHz="150.0" durationMs="10" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+
+        assertPublicApisParserSucceeds(xml, effect);
+        assertPublicApisSerializerSucceeds(effect, xml);
+        assertPublicApisRoundTrip(effect);
+        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisSerializerSucceeds(effect, xml);
+        assertHiddenApisRoundTrip(effect);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testWaveformEnvelopeEffectWithInitialFrequency_allSucceed() throws Exception {
+        VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(20)
+                .addControlPoint(0.2f, 80f, 10)
+                .addControlPoint(0.5f, 150f, 10)
+                .build();
+
+        String xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect initialFrequencyHz="20.0">
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                        <control-point amplitude="0.5" frequencyHz="150.0" durationMs="10" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+
+        assertPublicApisParserSucceeds(xml, effect);
+        assertPublicApisSerializerSucceeds(effect, xml);
+        assertPublicApisRoundTrip(effect);
+        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisSerializerSucceeds(effect, xml);
+        assertHiddenApisRoundTrip(effect);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testWaveformEnvelopeEffect_badXml_throwsException() throws IOException {
+        // Incomplete XML
+        assertParseElementFails("""
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                </vibration-effect>
+                """);
+        assertParseElementFails("""
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10">
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """);
+        assertParseElementFails("""
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                    </waveform-envelope-effect>
+                """);
+
+        // Bad vibration XML
+        assertParseElementFails("""
+                <vibration-effect>
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """);
+
+        // "waveform-envelope-effect" tag with invalid attributes
+        assertParseElementFails("""
+                <vibration-effect>
+                    <waveform-envelope-effect init_freq="20.0">
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testWaveformEnvelopeEffect_noControlPoints_allFail() throws IOException {
+        String xml = "<vibration-effect><waveform-envelope-effect/></vibration-effect>";
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = "<vibration-effect><waveform-envelope-effect> \n "
+                + "</waveform-envelope-effect></vibration-effect>";
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = "<vibration-effect><waveform-envelope-effect>invalid</waveform-envelope-effect"
+                + "></vibration-effect>";
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                    <control-point />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect initialFrequencyHz="20.0" />
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                <waveform-envelope-effect initialFrequencyHz="20.0"> \n </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect initialFrequencyHz="20.0">
+                    invalid
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect initialFrequencyHz="20.0">
+                    <control-point />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testWaveformEnvelopeEffect_badControlPointData_allFail() throws IOException {
+        String xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                    <control-point amplitude="-1" frequencyHz="80.0" durationMs="100" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                    <control-point amplitude="0.2" frequencyHz="0" durationMs="100" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect initialFrequencyHz="0">
+                    <control-point amplitude="0.2" frequencyHz="30" durationMs="100" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                    <control-point amplitude="0.2" frequencyHz="80.0" durationMs="0" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect>
+                    <control-point amplitude="0.2" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testWaveformEnvelopeEffect_featureFlagDisabled_allFail() throws Exception {
+        VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(20)
+                .addControlPoint(0.2f, 80f, 10)
+                .addControlPoint(0.5f, 150f, 10)
+                .build();
+
+        String xml = """
+                <vibration-effect>
+                    <waveform-envelope-effect initialFrequencyHz="20.0">
+                        <control-point amplitude="0.2" frequencyHz="80.0" durationMs="10" />
+                        <control-point amplitude="0.5" frequencyHz="150.0" durationMs="10" />
+                    </waveform-envelope-effect>
+                </vibration-effect>
+                """;
+
+        assertPublicApisParserFails(xml);
+        assertPublicApisSerializerFails(effect);
+        assertHiddenApisParserFails(xml);
+        assertHiddenApisSerializerFails(effect);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testBasicEnvelopeEffect_allSucceed() throws Exception {
+        VibrationEffect effect = new VibrationEffect.BasicEnvelopeBuilder()
+                .addControlPoint(0.2f, 0.5f, 10)
+                .addControlPoint(0.0f, 1f, 10)
+                .build();
+
+        String xml = """
+                <vibration-effect>
+                    <basic-envelope-effect>
+                        <control-point intensity="0.2" sharpness="0.5" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+
+        assertPublicApisParserSucceeds(xml, effect);
+        assertPublicApisSerializerSucceeds(effect, xml);
+        assertPublicApisRoundTrip(effect);
+        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisSerializerSucceeds(effect, xml);
+        assertHiddenApisRoundTrip(effect);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testBasicEnvelopeEffectWithInitialSharpness_allSucceed() throws Exception {
+        VibrationEffect effect = new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(0.3f)
+                .addControlPoint(0.2f, 0.5f, 10)
+                .addControlPoint(0.0f, 1f, 10)
+                .build();
+
+        String xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="0.3">
+                        <control-point intensity="0.2" sharpness="0.5" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+
+        assertPublicApisParserSucceeds(xml, effect);
+        assertPublicApisSerializerSucceeds(effect, xml);
+        assertPublicApisRoundTrip(effect);
+        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisSerializerSucceeds(effect, xml);
+        assertHiddenApisRoundTrip(effect);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testBasicEnvelopeEffect_badXml_throwsException() throws IOException {
+        // Incomplete XML
+        assertParseElementFails("""
+                <vibration-effect>
+                    <basic-envelope-effect>
+                        <control-point intensity="0.2" sharpness="0.8" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                </vibration-effect>
+                """);
+        assertParseElementFails("""
+                <vibration-effect>
+                    <basic-envelope-effect>
+                        <control-point intensity="0.2" sharpness="0.8" durationMs="10">
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """);
+        assertParseElementFails("""
+                <vibration-effect>
+                    <basic-envelope-effect>
+                        <control-point intensity="0.2" sharpness="0.8" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                """);
+
+        // Bad vibration XML
+        assertParseElementFails("""
+                <vibration-effect>
+                        <control-point intensity="0.2" sharpness="0.8" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """);
+
+        // "basic-envelope-effect" tag with invalid attributes
+        assertParseElementFails("""
+                <vibration-effect>
+                    <basic-envelope-effect init_sharp="20.0">
+                        <control-point intensity="0.2" sharpness="0.8" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testBasicEnvelopeEffect_noControlPoints_allFail() throws IOException {
+        String xml = "<vibration-effect><basic-envelope-effect/></vibration-effect>";
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = "<vibration-effect><basic-envelope-effect> \n "
+                + "</basic-envelope-effect></vibration-effect>";
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = "<vibration-effect><basic-envelope-effect>invalid</basic-envelope-effect"
+                + "></vibration-effect>";
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect>
+                    <control-point />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="0.2" />
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                <basic-envelope-effect initialSharpness="0.2"> \n </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="0.2">
+                    invalid
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="0.2">
+                    <control-point />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testBasicEnvelopeEffect_badControlPointData_allFail() throws IOException {
+        String xml = """
+                <vibration-effect>
+                    <basic-envelope-effect>
+                    <control-point intensity="-1" sharpness="0.8" durationMs="100" />
+                    <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect>
+                    <control-point intensity="0.2" sharpness="-1" durationMs="100" />
+                    <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="-1.0">
+                    <control-point intensity="0.2" sharpness="0.8" durationMs="0" />
+                    <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="2.0">
+                    <control-point intensity="0.2" sharpness="0.8" durationMs="0" />
+                    <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect>
+                    <control-point intensity="0.2" sharpness="0.8" durationMs="10" />
+                    <control-point intensity="0.5" sharpness="0.8" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+
+        xml = """
+                <vibration-effect>
+                    <basic-envelope-effect>
+                    <control-point intensity="0.2" />
+                    <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+        assertPublicApisParserFails(xml);
+        assertHiddenApisParserFails(xml);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testBasicEnvelopeEffect_featureFlagDisabled_allFail() throws Exception {
+        VibrationEffect effect = new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(0.3f)
+                .addControlPoint(0.2f, 0.5f, 10)
+                .addControlPoint(0.0f, 1f, 10)
+                .build();
+
+        String xml = """
+                <vibration-effect>
+                    <basic-envelope-effect initialSharpness="0.3">
+                        <control-point intensity="0.2" sharpness="0.5" durationMs="10" />
+                        <control-point intensity="0.0" sharpness="1.0" durationMs="10" />
+                    </basic-envelope-effect>
+                </vibration-effect>
+                """;
+
+        assertPublicApisParserFails(xml);
+        assertPublicApisSerializerFails(effect);
+
+        assertHiddenApisParserFails(xml);
+        assertHiddenApisSerializerFails(effect);
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
     public void testVendorEffect_allSucceed() throws Exception {
         PersistableBundle vendorData = new PersistableBundle();
