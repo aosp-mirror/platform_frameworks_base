@@ -2853,7 +2853,7 @@ class ElementTest {
         // Start an overscrollable transition driven by progress.
         var progress by mutableFloatStateOf(0f)
         val transition = transition(from = SceneA, to = SceneB, progress = { progress })
-        assertThat(transition).isInstanceOf(TransitionState.HasOverscrollProperties::class.java)
+        assertThat(transition).isInstanceOf(TransitionState.DirectionProperties::class.java)
         scope.launch { state.startTransition(transition) }
 
         // Reset the counters after the first animation frame.

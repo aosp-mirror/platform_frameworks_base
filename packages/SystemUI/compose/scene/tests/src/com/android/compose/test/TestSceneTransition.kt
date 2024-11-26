@@ -62,7 +62,7 @@ fun transition(
     replacedTransition: Transition? = null,
 ): TestSceneTransition {
     return object :
-        TestSceneTransition(from, to, replacedTransition), TransitionState.HasOverscrollProperties {
+        TestSceneTransition(from, to, replacedTransition), TransitionState.DirectionProperties {
         override val currentScene: SceneKey
             get() = current()
 

@@ -157,7 +157,7 @@ private class VerticalContainerRevealSizeTransformation(
         val idleSize = checkNotNull(element.targetSize(content))
         val userActionDistance = idleSize.height
         val progress =
-            when ((transition as? TransitionState.HasOverscrollProperties)?.bouncingContent) {
+            when ((transition as? TransitionState.DirectionProperties)?.bouncingContent) {
                 null -> transition.progressTo(content)
                 content -> 1f
                 else -> 0f
@@ -256,7 +256,7 @@ private class ContainerRevealAlphaTransformation(
 
     private fun targetAlpha(transition: TransitionState.Transition, content: ContentKey): Float {
         if (transition.isUserInputOngoing) {
-            if (transition !is TransitionState.HasOverscrollProperties) {
+            if (transition !is TransitionState.DirectionProperties) {
                 error(
                     "Unsupported transition driven by user input but that does not have " +
                         "overscroll properties: $transition"

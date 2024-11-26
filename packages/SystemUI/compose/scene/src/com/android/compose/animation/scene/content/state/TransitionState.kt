@@ -273,7 +273,7 @@ sealed interface TransitionState {
          * every time progress is changed.
          */
         private val _currentOverscrollSpec: State<OverscrollSpecImpl?>? =
-            if (this !is HasOverscrollProperties) {
+            if (this !is DirectionProperties) {
                 null
             } else {
                 derivedStateOf {
@@ -406,7 +406,7 @@ sealed interface TransitionState {
         /** Returns if the [progress] value of this transition can go beyond range `[0; 1]` */
         internal fun isWithinProgressRange(progress: Float): Boolean {
             // If the properties are missing we assume that every [Transition] can overscroll
-            if (this !is HasOverscrollProperties) return true
+            if (this !is DirectionProperties) return true
             // [OverscrollSpec] for the current scene, even if it hasn't started overscrolling yet.
             val specForCurrentScene =
                 when {
@@ -444,7 +444,7 @@ sealed interface TransitionState {
         }
     }
 
-    interface HasOverscrollProperties {
+    interface DirectionProperties {
         /**
          * The position of the [Transition.toContent].
          *
