@@ -283,7 +283,6 @@ LIBANDROID {
     ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
-    ASurfaceTransaction_setFrameRateParams; # introduced=36
     ASurfaceTransaction_clearFrameRate; # introduced=34
     ASurfaceTransaction_setFrameTimeline; # introduced=Tiramisu
     ASurfaceTransaction_setGeometry; # introduced=29
