@@ -242,10 +242,10 @@ constructor(
 
     private fun updateBubblesVisibility(statusBarVisible: Boolean) {
         if (displayId != Display.DEFAULT_DISPLAY) {
+            // Bubbles are currently only supported on the default display.
             return
         }
         bubblesOptional.ifPresent { bubbles: Bubbles ->
-            // TODO(b/373311537): per display implementation of Bubbles
             bubbles.onStatusBarVisibilityChanged(statusBarVisible)
         }
     }
