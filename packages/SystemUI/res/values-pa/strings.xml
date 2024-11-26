@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ਐਪ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ਪਹੁੰਚਯੋਗਤਾ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ਖੋਜ ਸੰਬੰਧੀ ਸ਼ਾਰਟਕੱਟ"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ਸ਼ਾਰਟਕੱਟ ਖੋਜੋ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ਪ੍ਰਤੀਕ ਨੂੰ ਸਮੇਟੋ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ਪ੍ਰਤੀਕ ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ਜਾਂ"</string>

@@ -298,7 +298,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"від’єднати"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активувати"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Автоматично ввімкнути завтра"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Такі функції, як швидкий обмін і \"Знайти пристрій\", використовують Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Такі функції, як \"Швидкий обмін\" і \"Знайти пристрій\", використовують Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth увімкнеться завтра вранці"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Поділитись аудіо"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Надсилання аудіо"</string>
@@ -792,8 +792,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Назад"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Перейти на головний екран"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Переглянути нещодавні додатки"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Перемикатися між нещодавніми додатками вперед"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Перемикатися між нещодавніми додатками назад"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Прокрутити вперед список нещодавніх додатків"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Прокрутити назад список нещодавніх додатків"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Відкрити список додатків"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Відкрити налаштування"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Відкрити додаток Асистент"</string>
@@ -803,7 +803,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Розділити екран і показувати поточний додаток праворуч"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Розділити екран і показувати поточний додаток ліворуч"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Перейти з розділення екрана на весь екран"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Під час розділення екрана перемикатися на додаток праворуч або внизу"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти до додатка праворуч або внизу на розділеному екрані"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Під час розділення екрана перемикатися на додаток ліворуч або вгорі"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Під час розділення екрана: замінити додаток іншим"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Метод введення"</string>

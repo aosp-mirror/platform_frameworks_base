@@ -392,7 +392,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"برای جفت کردن دستگاه جدید، کلیک کنید"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"پیش‌تنظیم به‌روزرسانی نشد"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"پیش‌تنظیم"</string>
-    <string name="live_caption_title" msgid="8916875614623730005">"زیرنویس ناشنوایان زنده"</string>
+    <string name="live_caption_title" msgid="8916875614623730005">"زیرنویس زنده ناشنوایان"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"میکروفون دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"دوربین دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"دوربین و میکروفون دستگاه لغو انسداد شود؟"</string>
@@ -592,7 +592,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
     <string name="sound_settings" msgid="8874581353127418308">"صدا و لرزش"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"تنظیمات"</string>
-    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"زیرنویس ناشنوایان زنده"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"زیرنویس زنده ناشنوایان"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"صدا به سطح ایمن‌تر کاهش یافت"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"صدای هدفون برای مدتی طولانی‌تر از حد توصیه‌شده بلند بوده است"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"صدای هدفون از حد ایمن برای این هفته فراتر رفته است"</string>
@@ -978,7 +978,7 @@
     <string name="privacy_type_location" msgid="7991481648444066703">"مکان"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"میکروفون"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"ضبط صفحه‌نمایش"</string>
-    <string name="music_controls_no_title" msgid="4166497066552290938">"بدون عنوان"</string>
+    <string name="music_controls_no_title" msgid="4166497066552290938">"بی‌عنوان"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"آماده‌به‌کار"</string>
     <string name="font_scaling_dialog_title" msgid="6273107303850248375">"اندازه قلم"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"کوچک‌تر کردن"</string>
@@ -1132,7 +1132,7 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف پخش محتوا"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"دستگاه‌های دردسترس برای خروجی صوتی."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"میزان صدا"</string>
-    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"‎%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"بلندگوها و نمایشگرها"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"دستگاه‌های پیشنهادی"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"جلسه مشترک برای انتقال رسانه به دستگاهی دیگر متوقف می‌شود"</string>

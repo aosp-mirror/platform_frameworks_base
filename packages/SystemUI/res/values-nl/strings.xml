@@ -1336,10 +1336,10 @@
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Systeem"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Invoer"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-snelkoppelingen"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-sneltoetsen"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Toegankelijkheid"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Sneltoetsen"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Snelkoppelingen voor zoekopdrachten"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sneltoetsen zoeken"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icoon voor samenvouwen"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icoon voor uitvouwen"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>

@@ -749,7 +749,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"วรรค"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"ลบถอยหลัง"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"เล่น/หยุดชั่วคราว"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"หยุด"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"ถัดไป"</string>
@@ -921,7 +921,7 @@
     <string name="tuner_menu" msgid="363690665924769420">"เมนู"</string>
     <string name="tuner_app" msgid="6949280415826686972">"แอป <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"การแจ้งเตือน"</string>
-    <string name="notification_channel_battery" msgid="9219995638046695106">"แบตเตอรี"</string>
+    <string name="notification_channel_battery" msgid="9219995638046695106">"แบตเตอรี่"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ภาพหน้าจอ"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"ตั้งค่า"</string>

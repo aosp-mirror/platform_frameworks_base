@@ -154,7 +154,7 @@
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Impossibile avviare la registrazione del problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualizzazione a schermo intero"</string>
     <string name="immersive_cling_description" msgid="2717426731830851921">"Per uscire, scorri verso il basso dalla parte superiore dello schermo"</string>
-    <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Ok"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Indietro"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
@@ -609,7 +609,7 @@
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Home"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Per sbloccare questa app, scorri verso l\'alto e tieni premuto"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No, grazie"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App bloccata"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App sbloccata"</string>
@@ -687,7 +687,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Il divertimento riservato a pochi eletti"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
-    <string name="got_it" msgid="477119182261892069">"OK"</string>
+    <string name="got_it" msgid="477119182261892069">"Ok"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Complimenti! L\'Ottimizzatore UI di sistema è stato aggiunto alle impostazioni."</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Rimuovi dalle impostazioni"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Vuoi rimuovere l\'Ottimizzatore UI di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>

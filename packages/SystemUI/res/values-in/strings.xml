@@ -98,7 +98,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Batas kiri <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Batas kanan <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Disimpan di <xliff:g id="APP">%1$s</xliff:g> di profil kerja"</string>
-    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Disimpan di <xliff:g id="APP">%1$s</xliff:g> di profil pribadi"</string>
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Disimpan di <xliff:g id="APP">%1$s</xliff:g> di profil privasi"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"File"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> mendeteksi screenshot ini."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan aplikasi terbuka lainnya mendeteksi screenshot ini."</string>
@@ -386,7 +386,7 @@
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode satu tangan"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Alat bantu dengar"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Aktif"</string>
-    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Terputus"</string>
+    <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Tidak terhubung"</string>
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Alat bantu dengar"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Sambungkan perangkat baru"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klik untuk menyambungkan perangkat baru"</string>
@@ -747,7 +747,7 @@
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Spasi"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
@@ -1124,7 +1124,7 @@
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 perangkat dipilih"</string>
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> perangkat dipilih"</string>
-    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(terputus)"</string>
+    <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(tidak terhubung)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Tidak dapat beralih. Ketuk untuk mencoba lagi."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Hubungkan perangkat"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Buka aplikasi untuk mentransmisikan sesi ini."</string>
@@ -1298,7 +1298,7 @@
     <string name="call_from_work_profile_text" msgid="2856337395968118274">"Organisasi Anda hanya mengizinkan menelepon dari aplikasi kerja"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Beralih ke profil kerja"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instal aplikasi telepon kerja"</string>
-    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Batalkan"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Batal"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Sesuaikan layar kunci"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Buka kunci untuk menyesuaikan layar kunci"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi tidak tersedia"</string>
@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Pintasan aplikasi"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Aksesibilitas"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Pintasan keyboard"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pintasan penelusuran"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Telusuri pintasan"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikon ciutkan"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikon luaskan"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
