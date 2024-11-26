@@ -77,13 +77,8 @@ class AppCompatController {
                 mAppCompatOverrides);
         mAllowRestrictedResizability = AppCompatUtils.asLazy(() -> {
             // Application level.
-            try {
-                if (packageManager.getProperty(PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
-                        mActivityRecord.packageName).getBoolean()) {
-                    return true;
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Fall through.
+            if (allowRestrictedResizability(packageManager, mActivityRecord.packageName)) {
+                return true;
             }
             // Activity level.
             try {
@@ -96,6 +91,15 @@ class AppCompatController {
                 return false;
             }
         });
+    }
+
+    static boolean allowRestrictedResizability(PackageManager pm, String packageName) {
+        try {
+            return pm.getProperty(PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY, packageName)
+                    .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     @NonNull
