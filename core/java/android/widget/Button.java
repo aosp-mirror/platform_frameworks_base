@@ -134,6 +134,7 @@ public class Button extends TextView {
         // 1. app target sdk is 36 or above.
         // 2. feature flag rolled-out.
         // 3. device is a watch.
+        // 4. button uses Theme.DeviceDefault.
         // getButtonDefaultStyleAttr and getButtonDefaultStyleRes works together to alter the UI
         // while considering the conditions above.
         // Their results are mutual exclusive. i.e. when conditions above are all true,
@@ -229,6 +230,7 @@ public class Button extends TextView {
 
     private static boolean useWearMaterial3Style(Context context) {
         return Flags.useWearMaterial3Ui() && CompatChanges.isChangeEnabled(WEAR_MATERIAL3_BUTTON)
-                && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+                && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                && context.getThemeResId() == com.android.internal.R.style.Theme_DeviceDefault;
     }
 }
