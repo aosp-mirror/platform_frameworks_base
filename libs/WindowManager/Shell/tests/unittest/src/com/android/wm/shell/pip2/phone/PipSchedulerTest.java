@@ -45,7 +45,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
-import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
@@ -83,7 +83,7 @@ public class PipSchedulerTest {
     @Mock private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory mMockFactory;
     @Mock private SurfaceControl.Transaction mMockTransaction;
     @Mock private PipAlphaAnimator mMockAlphaAnimator;
-    @Mock private Optional<DesktopRepository> mMockOptionalDesktopRepository;
+    @Mock private Optional<DesktopUserRepositories> mMockOptionalDesktopUserRepositories;
     @Mock private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     @Captor private ArgumentCaptor<Runnable> mRunnableArgumentCaptor;
@@ -102,7 +102,7 @@ public class PipSchedulerTest {
                 .thenReturn(mMockTransaction);
 
         mPipScheduler = new PipScheduler(mMockContext, mMockPipBoundsState, mMockMainExecutor,
-                mMockPipTransitionState, mMockOptionalDesktopRepository,
+                mMockPipTransitionState, mMockOptionalDesktopUserRepositories,
                 mRootTaskDisplayAreaOrganizer);
         mPipScheduler.setPipTransitionController(mMockPipTransitionController);
         mPipScheduler.setSurfaceControlTransactionFactory(mMockFactory);

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.ActivityManager
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.os.IBinder
@@ -43,7 +44,7 @@ import com.android.wm.shell.transition.Transitions
  */
 class DesktopTasksTransitionObserver(
     private val context: Context,
-    private val desktopRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
@@ -51,11 +52,13 @@ class DesktopTasksTransitionObserver(
 ) : Transitions.TransitionObserver {
 
     private var transitionToCloseWallpaper: IBinder? = null
+    private var currentProfileId: Int
 
     init {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(::onInit, this)
         }
+        currentProfileId = ActivityManager.getCurrentUser()
     }
 
     fun onInit() {
@@ -89,6 +92,7 @@ class DesktopTasksTransitionObserver(
             val taskInfo = change.taskInfo
             if (taskInfo == null || taskInfo.taskId == -1) continue
 
+            val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
             if (desktopRepository.isActiveTask(taskInfo.taskId) &&
                 taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) {
                 desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
@@ -105,7 +109,7 @@ class DesktopTasksTransitionObserver(
                 if (taskInfo == null || taskInfo.taskId == -1) {
                     continue
                 }
-
+                val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
                 val visibleTaskCount = desktopRepository.getVisibleTaskCount(taskInfo.displayId)
                 if (visibleTaskCount > 0 &&
                     change.mode == TRANSIT_TO_BACK &&
@@ -128,12 +132,13 @@ class DesktopTasksTransitionObserver(
             if (taskInfo == null || taskInfo.taskId == -1) {
                 continue
             }
-
+            val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
             if (desktopRepository.getVisibleTaskCount(taskInfo.displayId) == 1 &&
                 change.mode == TRANSIT_CLOSE &&
                 taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
                 desktopRepository.wallpaperActivityToken != null) {
                 transitionToCloseWallpaper = transition
+                currentProfileId = taskInfo.userId
             }
         }
     }
@@ -150,6 +155,7 @@ class DesktopTasksTransitionObserver(
         // TODO: b/332682201 Update repository state
         if (transitionToCloseWallpaper == transition) {
             // TODO: b/362469671 - Handle merging the animation when desktop is also closing.
+            val desktopRepository = desktopUserRepositories.getProfile(currentProfileId)
             desktopRepository.wallpaperActivityToken?.let { wallpaperActivityToken ->
                 transitions.startTransition(
                     TRANSIT_CLOSE,
@@ -167,6 +173,7 @@ class DesktopTasksTransitionObserver(
         info.changes.forEach { change ->
             change.taskInfo?.let { taskInfo ->
                 if (DesktopWallpaperActivity.isWallpaperTask(taskInfo)) {
+                    val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
                     when (change.mode) {
                         WindowManager.TRANSIT_OPEN -> {
                             desktopRepository.wallpaperActivityToken = taskInfo.token

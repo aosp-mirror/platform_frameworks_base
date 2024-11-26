@@ -39,7 +39,7 @@ class DesktopActivityOrientationChangeHandler(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val taskStackListener: TaskStackListenerImpl,
     private val resizeHandler: ToggleResizeDesktopTaskTransitionHandler,
-    private val taskRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
 ) {
 
     init {
@@ -81,7 +81,9 @@ class DesktopActivityOrientationChangeHandler(
     ) {
         if (!Flags.respectOrientationChangeForUnresizeable()) return
         val task = shellTaskOrganizer.getRunningTaskInfo(taskId) ?: return
-        if (!isDesktopModeShowing(task.displayId) || !task.isFreeform || task.isResizeable) return
+        val taskRepository = desktopUserRepositories.current
+        val isDesktopModeShowing = taskRepository.getVisibleTaskCount(task.displayId) > 0
+        if (!isDesktopModeShowing || !task.isFreeform || task.isResizeable) return
 
         val taskBounds = task.configuration.windowConfiguration.bounds
         val taskHeight = taskBounds.height()
@@ -106,7 +108,4 @@ class DesktopActivityOrientationChangeHandler(
             resizeHandler.startTransition(wct)
         }
     }
-
-    private fun isDesktopModeShowing(displayId: Int): Boolean =
-        taskRepository.getVisibleTaskCount(displayId) > 0
 }

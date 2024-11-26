@@ -49,7 +49,7 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback
 class DesktopMixedTransitionHandler(
     private val context: Context,
     private val transitions: Transitions,
-    private val desktopRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
     private val freeformTaskTransitionHandler: FreeformTaskTransitionHandler,
     private val closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler,
     private val desktopImmersiveController: DesktopImmersiveController,
@@ -405,7 +405,7 @@ class DesktopMixedTransitionHandler(
 
     private fun isLastDesktopTask(change: TransitionInfo.Change): Boolean =
         change.taskInfo?.let {
-            desktopRepository.getExpandedTaskCount(it.displayId) == 1
+            desktopUserRepositories.getProfile(it.userId).getExpandedTaskCount(it.displayId) == 1
         } ?: false
 
     private fun findCloseDesktopTaskChange(info: TransitionInfo): TransitionInfo.Change? {

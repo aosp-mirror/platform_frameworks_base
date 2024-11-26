@@ -50,7 +50,7 @@ import java.io.PrintWriter
 class DesktopImmersiveController(
     shellInit: ShellInit,
     private val transitions: Transitions,
-    private val desktopRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
     private val displayController: DisplayController,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val shellCommandHandler: ShellCommandHandler,
@@ -60,14 +60,14 @@ class DesktopImmersiveController(
     constructor(
         shellInit: ShellInit,
         transitions: Transitions,
-        desktopRepository: DesktopRepository,
+        desktopUserRepositories: DesktopUserRepositories,
         displayController: DisplayController,
         shellTaskOrganizer: ShellTaskOrganizer,
         shellCommandHandler: ShellCommandHandler,
     ) : this(
         shellInit,
         transitions,
-        desktopRepository,
+        desktopUserRepositories,
         displayController,
         shellTaskOrganizer,
         shellCommandHandler,
@@ -177,8 +177,9 @@ class DesktopImmersiveController(
         reason: ExitReason,
     ): ExitResult {
         if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
-        val immersiveTask = desktopRepository.getTaskInFullImmersiveState(displayId)
-            ?: return ExitResult.NoExit
+        val immersiveTask =
+            desktopUserRepositories.current.getTaskInFullImmersiveState(displayId)
+                ?: return ExitResult.NoExit
         if (immersiveTask == excludeTaskId) {
             return ExitResult.NoExit
         }
@@ -210,7 +211,7 @@ class DesktopImmersiveController(
         reason: ExitReason,
     ): ExitResult {
         if (!Flags.enableFullyImmersiveInDesktop()) return ExitResult.NoExit
-        if (desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
+        if (desktopUserRepositories.current.isTaskInFullImmersiveState(taskInfo.taskId)) {
             // A full immersive task is being minimized, make sure the immersive state is broken
             // (i.e. resize back to max bounds).
             wct.setBounds(taskInfo.token, getExitDestinationBounds(taskInfo))
@@ -377,6 +378,7 @@ class DesktopImmersiveController(
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
     ) {
+        val desktopRepository: DesktopRepository = desktopUserRepositories.current
         // Check if this is a pending external exit transition.
         val pendingExit = pendingExternalExitTransitions
             .firstOrNull { pendingExit -> pendingExit.transition == transition }
@@ -412,6 +414,7 @@ class DesktopImmersiveController(
             }
             val startBounds = immersiveChange.startAbsBounds
             logV("Direct move for task#%d in %s direction verified", state.taskId, state.direction)
+
             when (state.direction) {
                 Direction.ENTER -> {
                     desktopRepository.setTaskInFullImmersiveState(
@@ -484,7 +487,8 @@ class DesktopImmersiveController(
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
             ?: error("Expected non-null display layout for displayId: ${taskInfo.displayId}")
         return if (Flags.enableRestoreToPreviousSizeFromDesktopImmersive()) {
-            desktopRepository.removeBoundsBeforeFullImmersive(taskInfo.taskId)
+            desktopUserRepositories.current
+                    .removeBoundsBeforeFullImmersive(taskInfo.taskId)
                 ?: if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
                     calculateInitialBounds(displayLayout, taskInfo)
                 } else {
