@@ -192,6 +192,7 @@ import static com.android.systemui.shared.Flags.enableHomeDelay;
 
 import android.Manifest;
 import android.Manifest.permission;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
@@ -19228,6 +19229,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mKeyFields.mCreatorPackage;
         }
 
+        @VisibleForTesting
+        public @NonNull Key getKeyFields() {
+            return mKeyFields;
+        }
+
         public static boolean isValid(@NonNull Intent intent) {
             IBinder binder = intent.getCreatorToken();
             IntentCreatorToken token = null;
@@ -19271,9 +19277,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 this.mFlags = intent.getFlags() & Intent.IMMUTABLE_FLAGS;
                 ClipData clipData = intent.getClipData();
                 if (clipData != null) {
-                    this.mClipDataUris = new ArrayList<>(clipData.getItemCount());
-                    for (int i = 0; i < clipData.getItemCount(); i++) {
-                        this.mClipDataUris.add(clipData.getItemAt(i).getUri());
+                    clipData = clipData.cloneOnlyUriItems();
+                    if (clipData != null) {
+                        List<Uri> clipDataUris = new ArrayList<>();
+                        clipData.collectUris(clipDataUris);
+                        if (!clipDataUris.isEmpty()) {
+                            this.mClipDataUris = clipDataUris;
+                        }
                     }
                 }
             }
@@ -19375,11 +19385,34 @@ public class ActivityManagerService extends IActivityManager.Stub
             String creatorPackage) {
         if (IntentCreatorToken.isValid(intent)) return null;
         IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, creatorPackage, intent);
+        return createOrGetIntentCreatorToken(intent, key);
+    }
+
+    /**
+     * @hide
+     */
+    @EnforcePermission("android.permission.INTERACT_ACROSS_USERS_FULL")
+    public IBinder refreshIntentCreatorToken(Intent intent) {
+        refreshIntentCreatorToken_enforcePermission();
+        IBinder binder = intent.getCreatorToken();
+        if (binder instanceof IntentCreatorToken) {
+            IntentCreatorToken token = (IntentCreatorToken) binder;
+            IntentCreatorToken.Key key = new IntentCreatorToken.Key(token.getCreatorUid(),
+                    token.getCreatorPackage(), intent);
+            return createOrGetIntentCreatorToken(intent, key);
+
+        } else {
+            throw new IllegalArgumentException("intent does not contain a creator token.");
+        }
+    }
+
+    private static IntentCreatorToken createOrGetIntentCreatorToken(Intent intent,
+            IntentCreatorToken.Key key) {
         IntentCreatorToken token;
         synchronized (sIntentCreatorTokenCache) {
             WeakReference<IntentCreatorToken> ref = sIntentCreatorTokenCache.get(key);
             if (ref == null || ref.get() == null) {
-                token = new IntentCreatorToken(creatorUid, creatorPackage, intent);
+                token = new IntentCreatorToken(key.mCreatorUid, key.mCreatorPackage, intent);
                 sIntentCreatorTokenCache.put(key, token.mRef);
             } else {
                 token = ref.get();
