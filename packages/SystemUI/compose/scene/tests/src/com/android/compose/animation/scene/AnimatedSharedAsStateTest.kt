@@ -19,14 +19,12 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -444,59 +442,6 @@ class AnimatedSharedAsStateTest {
         assertThat(lastValues[bar]?.get(SceneB)).isNull()
         assertThat(lastValues[bar]?.get(SceneC)).isWithin(0.001f).of(7f)
         assertThat(lastValues[bar]?.get(SceneD)).isWithin(0.001f).of(7f)
-    }
-
-    @Test
-    fun animatedValueDoesNotOverscrollWhenOverscrollIsSpecified() {
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
-                    SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
-                )
-            }
-
-        val key = ValueKey("foo")
-        val lastValues = mutableMapOf<ContentKey, Float>()
-
-        @Composable
-        fun ContentScope.animateFloat(value: Float, key: ValueKey) {
-            val animatedValue = animateContentFloatAsState(value, key)
-            LaunchedEffect(animatedValue) {
-                snapshotFlow { animatedValue.value }.collect { lastValues[contentKey] = it }
-            }
-        }
-
-        val scope =
-            rule.setContentAndCreateMainScope {
-                SceneTransitionLayout(state) {
-                    scene(SceneA) { animateFloat(0f, key) }
-                    scene(SceneB) { animateFloat(100f, key) }
-                }
-            }
-
-        // Overscroll on A at -100%: value should be interpolated given that there is no overscroll
-        // defined for scene A.
-        var progress by mutableStateOf(-1f)
-        scope.launch {
-            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
-        }
-        rule.waitForIdle()
-        assertThat(lastValues[SceneA]).isWithin(0.001f).of(-100f)
-        assertThat(lastValues[SceneB]).isWithin(0.001f).of(-100f)
-
-        // Middle of the transition.
-        progress = 0.5f
-        rule.waitForIdle()
-        assertThat(lastValues[SceneA]).isWithin(0.001f).of(50f)
-        assertThat(lastValues[SceneB]).isWithin(0.001f).of(50f)
-
-        // Overscroll on B at 200%: value should not be interpolated given that there is an
-        // overscroll defined for scene B.
-        progress = 2f
-        rule.waitForIdle()
-        assertThat(lastValues[SceneA]).isWithin(0.001f).of(100f)
-        assertThat(lastValues[SceneB]).isWithin(0.001f).of(100f)
     }
 
     @Test

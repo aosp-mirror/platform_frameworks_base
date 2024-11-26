@@ -129,7 +129,7 @@ class NestedScrollToSceneTest {
         assertThat(transition).hasProgress(0.5f)
 
         scrollUp(percent = 1f)
-        assertThat(transition).hasProgress(1.5f)
+        assertThat(transition).hasProgress(1f)
     }
 
     @Test

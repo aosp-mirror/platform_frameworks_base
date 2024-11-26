@@ -35,9 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -735,46 +732,6 @@ class SwipeToSceneTest {
     }
 
     @Test
-    fun overscrollScopeExtendsDensity() {
-        val swipeDistance = 100.dp
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    SceneA,
-                    transitions {
-                        from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
-
-                        overscroll(SceneB, Orientation.Vertical) {
-                            progressConverter = ProgressConverter.linear()
-                            translate(TestElements.Foo, x = { 20.dp.toPx() }, y = { 30.dp.toPx() })
-                        }
-                    },
-                )
-            }
-        val layoutSize = 200.dp
-        var touchSlop = 0f
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
-                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    Box(Modifier.fillMaxSize())
-                }
-                scene(SceneB) { Box(Modifier.element(TestElements.Foo).fillMaxSize()) }
-            }
-        }
-
-        // Swipe down by twice the swipe distance so that we are at 100% overscrolling on scene B.
-        rule.onRoot().performTouchInput {
-            val middle = (layoutSize / 2).toPx()
-            down(Offset(middle, middle))
-            moveBy(Offset(0f, touchSlop + (swipeDistance * 2).toPx()), delayMillis = 1_000)
-        }
-
-        // Foo should be translated by (20dp, 30dp).
-        rule.onNode(isElement(TestElements.Foo)).assertPositionInRootIsEqualTo(20.dp, 30.dp)
-    }
-
-    @Test
     fun startEnd_ltrLayout() {
         val state =
             rule.runOnUiThread {
@@ -920,128 +877,6 @@ class SwipeToSceneTest {
         rule
             .onNode(isElement(SceneB.rootElementKey))
             .assertPositionInRootIsEqualTo(-layoutSize, 0.dp)
-    }
-
-    @Test
-    fun whenOverscrollIsDisabled_dragGestureShouldNotBeConsumed() {
-        val swipeDistance = 100.dp
-
-        var availableOnPostScroll = Float.MIN_VALUE
-        val connection =
-            object : NestedScrollConnection {
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset {
-                    availableOnPostScroll = available.y
-                    return super.onPostScroll(consumed, available, source)
-                }
-            }
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    SceneA,
-                    transitions {
-                        from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
-                        overscrollDisabled(SceneB, Orientation.Vertical)
-                    },
-                )
-            }
-        val layoutSize = 200.dp
-        var touchSlop = 0f
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(state, Modifier.size(layoutSize).nestedScroll(connection)) {
-                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
-                    Box(Modifier.fillMaxSize())
-                }
-                scene(SceneB) { Box(Modifier.element(TestElements.Foo).fillMaxSize()) }
-            }
-        }
-
-        // Swipe down by the swipe distance so that we are on scene B.
-        rule.onRoot().performTouchInput {
-            val middle = (layoutSize / 2).toPx()
-            down(Offset(middle, middle))
-            moveBy(Offset(0f, touchSlop + (swipeDistance).toPx()), delayMillis = 1_000)
-        }
-        val transition = state.currentTransition
-        assertThat(transition).isNotNull()
-        assertThat(transition!!.progress).isEqualTo(1f)
-        assertThat(availableOnPostScroll).isEqualTo(0f)
-
-        // Overscrolling on Scene B
-        val ovescrollPx = 100f
-        rule.onRoot().performTouchInput { moveBy(Offset(0f, ovescrollPx), delayMillis = 1_000) }
-        // Overscroll is disabled on Scene B
-        assertThat(transition.progress).isEqualTo(1f)
-        assertThat(availableOnPostScroll).isEqualTo(ovescrollPx)
-    }
-
-    @Test
-    fun scrollKeepPriorityEvenIfWeCanNoLongerScrollOnThatDirection() {
-        val swipeDistance = 100.dp
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    SceneA,
-                    transitions {
-                        from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
-                        from(SceneB, to = SceneC) { distance = FixedDistance(swipeDistance) }
-                        overscrollDisabled(SceneB, Orientation.Vertical)
-                    },
-                )
-            }
-        val layoutSize = 200.dp
-        var touchSlop = 0f
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
-                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB, Swipe.Right to SceneC)) {
-                    Box(
-                        Modifier.fillMaxSize()
-                            // A scrollable that does not consume the scroll gesture
-                            .scrollable(rememberScrollableState { 0f }, Orientation.Vertical)
-                    )
-                }
-                scene(SceneB, userActions = mapOf(Swipe.Right to SceneC)) {
-                    Box(Modifier.element(TestElements.Foo).fillMaxSize())
-                }
-                scene(SceneC) { Box(Modifier.fillMaxSize()) }
-            }
-        }
-
-        fun assertTransition(from: SceneKey, to: SceneKey, progress: Float) {
-            val transition = assertThat(state.transitionState).isSceneTransition()
-            assertThat(transition).hasFromScene(from)
-            assertThat(transition).hasToScene(to)
-            assertThat(transition.progress).isEqualTo(progress)
-        }
-
-        // Vertical scroll 100%
-        rule.onRoot().performTouchInput {
-            val middle = (layoutSize / 2).toPx()
-            down(Offset(middle, middle))
-            moveBy(Offset(0f, y = touchSlop + swipeDistance.toPx()), delayMillis = 1_000)
-        }
-        assertTransition(from = SceneA, to = SceneB, progress = 1f)
-
-        // Continue vertical scroll, should be ignored (overscrollDisabled)
-        rule.onRoot().performTouchInput { moveBy(Offset(0f, y = touchSlop), delayMillis = 1_000) }
-        assertTransition(from = SceneA, to = SceneB, progress = 1f)
-
-        // Horizontal scroll, should be ignored
-        rule.onRoot().performTouchInput {
-            moveBy(Offset(x = touchSlop + swipeDistance.toPx(), 0f), delayMillis = 1_000)
-        }
-        assertTransition(from = SceneA, to = SceneB, progress = 1f)
-
-        // Vertical scroll, in the opposite direction
-        rule.onRoot().performTouchInput {
-            moveBy(Offset(0f, -swipeDistance.toPx()), delayMillis = 1_000)
-        }
-        assertTransition(from = SceneA, to = SceneB, progress = 0f)
     }
 
     @Test

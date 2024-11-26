@@ -403,19 +403,13 @@ sealed interface TransitionState {
             toOverscrollSpec = toSpec
         }
 
-        /** Returns if the [progress] value of this transition can go beyond range `[0; 1]` */
+        /**
+         * Checks if the given [progress] value is within the valid range for this transition.
+         *
+         * The valid range is between 0f and 1f, inclusive.
+         */
         internal fun isWithinProgressRange(progress: Float): Boolean {
-            // If the properties are missing we assume that every [Transition] can overscroll
-            if (this !is DirectionProperties) return true
-            // [OverscrollSpec] for the current scene, even if it hasn't started overscrolling yet.
-            val specForCurrentScene =
-                when {
-                    progress <= 0f -> fromOverscrollSpec
-                    progress >= 1f -> toOverscrollSpec
-                    else -> null
-                } ?: return true
-
-            return specForCurrentScene.transformationSpec.transformationMatchers.isNotEmpty()
+            return progress >= 0f && progress <= 1f
         }
 
         internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {

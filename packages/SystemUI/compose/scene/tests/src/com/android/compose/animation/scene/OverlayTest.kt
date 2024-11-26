@@ -19,7 +19,6 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -745,18 +744,7 @@ class OverlayTest {
 
     @Test
     fun overscrollingOverlay_movableElementNotInOverlay() {
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
-                    SceneA,
-                    transitions {
-                        // Make OverlayA overscrollable.
-                        overscroll(OverlayA, orientation = Orientation.Horizontal) {
-                            translate(ElementKey("elementThatDoesNotExist"), x = 10.dp)
-                        }
-                    },
-                )
-            }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
 
         val key = MovableElementKey("Foo", contents = setOf(SceneA))
         val movableElementChildTag = "movableElementChildTag"

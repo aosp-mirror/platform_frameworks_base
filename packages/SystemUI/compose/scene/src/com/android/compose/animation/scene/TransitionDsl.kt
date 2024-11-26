@@ -20,9 +20,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.TransitionState
@@ -103,28 +101,6 @@ interface SceneTransitionsBuilder {
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
     )
-
-    /**
-     * Define the animation to be played when the [content] is overscrolled in the given
-     * [orientation].
-     *
-     * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
-     * [distance] down/right, -1f when moving in the opposite direction.
-     */
-    @Deprecated(
-        "Use verticalOverscrollEffect (or horizontalOverscrollEffect) directly from SceneScope."
-    )
-    fun overscroll(
-        content: ContentKey,
-        orientation: Orientation,
-        builder: OverscrollBuilder.() -> Unit,
-    )
-
-    /**
-     * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
-     * eventually consume the remaining gesture.
-     */
-    fun overscrollDisabled(content: ContentKey, orientation: Orientation)
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
@@ -226,35 +202,6 @@ interface TransitionBuilder : BaseTransitionBuilder {
      * of the transition from scene `Bar` to scene `Foo`.
      */
     fun reversed(builder: TransitionBuilder.() -> Unit)
-}
-
-@TransitionDsl
-interface OverscrollBuilder : BaseTransitionBuilder {
-    /**
-     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
-     * outputs the desired **overscroll progress value**.
-     *
-     * When the progress value is:
-     * - 0, the user is not overscrolling.
-     * - 1, the user overscrolled by exactly the [distance].
-     * - Greater than 1, the user overscrolled more than the [distance].
-     */
-    var progressConverter: ProgressConverter?
-
-    /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
-    fun translate(
-        matcher: ElementMatcher,
-        x: OverscrollScope.() -> Float = { 0f },
-        y: OverscrollScope.() -> Float = { 0f },
-    )
-}
-
-interface OverscrollScope : Density {
-    /**
-     * Return the absolute distance between fromScene and toScene, if available, otherwise
-     * [DistanceUnspecified].
-     */
-    val absoluteDistance: Float
 }
 
 /**

@@ -418,15 +418,11 @@ private class AnimatedStateImpl<T, Delta>(
             return fromValue
         }
 
-        val overscrollSpec = transition.currentOverscrollSpec
         val progress =
-            when {
-                overscrollSpec == null -> {
-                    if (canOverflow) transition.progress
-                    else transition.progress.fastCoerceIn(0f, 1f)
-                }
-                overscrollSpec.content == transition.toContent -> 1f
-                else -> 0f
+            if (canOverflow) {
+                transition.progress
+            } else {
+                transition.progress.fastCoerceIn(0f, 1f)
             }
 
         return sharedValue.type.lerp(fromValue, toValue, progress)

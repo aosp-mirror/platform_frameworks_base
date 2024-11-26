@@ -21,7 +21,6 @@ import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.unit.IntSize
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
@@ -29,7 +28,6 @@ import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
-import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformationScope
 import com.android.compose.animation.scene.transformation.TransformationMatcher
@@ -305,34 +303,6 @@ class TransitionDslTest {
                     .swipeSpec
             )
             .isSameInstanceAs(specFromAToC)
-    }
-
-    @Test
-    fun overscrollSpec() {
-        val transitions = transitions {
-            overscroll(SceneA, Orientation.Vertical) {
-                translate(TestElements.Bar, x = { 1f }, y = { 2f })
-            }
-        }
-
-        val overscrollSpec = transitions.overscrollSpecs.single()
-        val transformation =
-            overscrollSpec.transformationSpec.transformationMatchers.single().factory.create()
-        assertThat(transformation).isInstanceOf(OverscrollTranslate::class.java)
-    }
-
-    @Test
-    fun overscrollSpec_for_overscrollDisabled() {
-        val transitions = transitions { overscrollDisabled(SceneA, Orientation.Vertical) }
-        val overscrollSpec = transitions.overscrollSpecs.single()
-        assertThat(overscrollSpec.transformationSpec.transformationMatchers).isEmpty()
-    }
-
-    @Test
-    fun overscrollSpec_throwIfTransformationsIsEmpty() {
-        assertThrows(IllegalStateException::class.java) {
-            transitions { overscroll(SceneA, Orientation.Vertical) {} }
-        }
     }
 
     @Test
