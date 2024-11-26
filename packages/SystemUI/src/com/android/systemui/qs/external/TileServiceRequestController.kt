@@ -26,9 +26,11 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.statusbar.IAddTileResultCallback
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.external.ui.dialog.TileRequestDialogComposeDelegate
+import com.android.systemui.qs.flags.QsInCompose
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -40,50 +42,50 @@ import javax.inject.Inject
 
 private const val TAG = "TileServiceRequestController"
 
-/**
- * Controller to interface between [TileRequestDialog] and [QSHost].
- */
+/** Controller to interface between [TileRequestDialog] and [QSHost]. */
 class TileServiceRequestController(
-        private val qsHost: QSHost,
-        private val commandQueue: CommandQueue,
-        private val commandRegistry: CommandRegistry,
-        private val eventLogger: TileRequestDialogEventLogger,
-        private val iUriGrantsManager: IUriGrantsManager,
-        private val dialogCreator: () -> TileRequestDialog = { TileRequestDialog(qsHost.context) }
+    private val qsHost: QSHost,
+    private val commandQueue: CommandQueue,
+    private val commandRegistry: CommandRegistry,
+    private val eventLogger: TileRequestDialogEventLogger,
+    private val iUriGrantsManager: IUriGrantsManager,
+    private val tileRequestDialogComposeDelegateFactory: TileRequestDialogComposeDelegate.Factory,
+    private val dialogCreator: () -> TileRequestDialog = { TileRequestDialog(qsHost.context) },
 ) {
 
     companion object {
-        internal const val ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED
-        internal const val DONT_ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED
-        internal const val TILE_ALREADY_ADDED =
-                StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED
-        internal const val DISMISSED = StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED
+        const val ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED
+        const val DONT_ADD_TILE = StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED
+        const val TILE_ALREADY_ADDED =
+            StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED
+        const val DISMISSED = StatusBarManager.TILE_ADD_REQUEST_RESULT_DIALOG_DISMISSED
     }
 
     private var dialogCanceller: ((String) -> Unit)? = null
 
-    private val commandQueueCallback = object : CommandQueue.Callbacks {
-        override fun requestAddTile(
-            callingUid: Int,
-            componentName: ComponentName,
-            appName: CharSequence,
-            label: CharSequence,
-            icon: Icon,
-            callback: IAddTileResultCallback
-        ) {
-            requestTileAdd(callingUid, componentName, appName, label, icon) {
-                try {
-                    callback.onTileRequest(it)
-                } catch (e: RemoteException) {
-                    Log.e(TAG, "Couldn't respond to request", e)
+    private val commandQueueCallback =
+        object : CommandQueue.Callbacks {
+            override fun requestAddTile(
+                callingUid: Int,
+                componentName: ComponentName,
+                appName: CharSequence,
+                label: CharSequence,
+                icon: Icon,
+                callback: IAddTileResultCallback,
+            ) {
+                requestTileAdd(callingUid, componentName, appName, label, icon) {
+                    try {
+                        callback.onTileRequest(it)
+                    } catch (e: RemoteException) {
+                        Log.e(TAG, "Couldn't respond to request", e)
+                    }
                 }
             }
-        }
 
-        override fun cancelRequestAddTile(packageName: String) {
-            dialogCanceller?.invoke(packageName)
+            override fun cancelRequestAddTile(packageName: String) {
+                dialogCanceller?.invoke(packageName)
+            }
         }
-    }
 
     fun init() {
         commandRegistry.registerCommand("tile-service-add") { TileServiceRequestCommand() }
@@ -100,58 +102,87 @@ class TileServiceRequestController(
     }
 
     @VisibleForTesting
-    internal fun requestTileAdd(
+    fun requestTileAdd(
         callingUid: Int,
         componentName: ComponentName,
         appName: CharSequence,
         label: CharSequence,
         icon: Icon?,
-        callback: Consumer<Int>
-    ) {
+        callback: Consumer<Int>,
+    ): SystemUIDialog? {
         val instanceId = eventLogger.newInstanceId()
         val packageName = componentName.packageName
         if (isTileAlreadyAdded(componentName)) {
             callback.accept(TILE_ALREADY_ADDED)
             eventLogger.logTileAlreadyAdded(packageName, instanceId)
-            return
+            return null
         }
-        val dialogResponse = SingleShotConsumer<Int> { response ->
-            if (response == ADD_TILE) {
-                addTile(componentName)
-            }
-            dialogCanceller = null
-            eventLogger.logUserResponse(response, packageName, instanceId)
-            callback.accept(response)
-        }
-        val tileData = TileRequestDialog.TileData(
-                callingUid,
-                appName,
-                label,
-                icon,
-                componentName.packageName,
-        )
-        createDialog(tileData, dialogResponse).also { dialog ->
-            dialogCanceller = {
-                if (packageName == it) {
-                    dialog.cancel()
+        val dialogResponse =
+            SingleShotConsumer<Int> { response ->
+                if (response == ADD_TILE) {
+                    addTile(componentName)
                 }
                 dialogCanceller = null
+                eventLogger.logUserResponse(response, packageName, instanceId)
+                callback.accept(response)
             }
-        }.show()
-        eventLogger.logDialogShown(packageName, instanceId)
+        val tileData = TileData(callingUid, appName, label, icon, componentName.packageName)
+        return if (QsInCompose.isEnabled) {
+                createComposeDialog(tileData, dialogResponse)
+            } else {
+                createDialog(tileData, dialogResponse)
+            }
+            .also { dialog ->
+                dialogCanceller = {
+                    if (packageName == it) {
+                        dialog.cancel()
+                    }
+                    dialogCanceller = null
+                }
+                dialog.show()
+                eventLogger.logDialogShown(packageName, instanceId)
+            }
+    }
+
+    private fun createComposeDialog(
+        tileData: TileData,
+        responseHandler: SingleShotConsumer<Int>,
+    ): SystemUIDialog {
+        val dialogClickListener =
+            DialogInterface.OnClickListener { _, which ->
+                if (which == Dialog.BUTTON_POSITIVE) {
+                    responseHandler.accept(ADD_TILE)
+                } else {
+                    responseHandler.accept(DONT_ADD_TILE)
+                }
+            }
+        return tileRequestDialogComposeDelegateFactory
+            .create(dialogListener = dialogClickListener, tiledata = tileData)
+            .createDialog()
+            .apply {
+                setShowForAllUsers(true)
+                setCanceledOnTouchOutside(true)
+                setOnCancelListener { responseHandler.accept(DISMISSED) }
+                // We want this in case the dialog is dismissed without it being cancelled (for
+                // example
+                // by going home or locking the device). We use a SingleShotConsumer so the response
+                // is only sent once, with the first value.
+                setOnDismissListener { responseHandler.accept(DISMISSED) }
+            }
     }
 
     private fun createDialog(
-        tileData: TileRequestDialog.TileData,
-        responseHandler: SingleShotConsumer<Int>
+        tileData: TileData,
+        responseHandler: SingleShotConsumer<Int>,
     ): SystemUIDialog {
-        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
-            if (which == Dialog.BUTTON_POSITIVE) {
-                responseHandler.accept(ADD_TILE)
-            } else {
-                responseHandler.accept(DONT_ADD_TILE)
+        val dialogClickListener =
+            DialogInterface.OnClickListener { _, which ->
+                if (which == Dialog.BUTTON_POSITIVE) {
+                    responseHandler.accept(ADD_TILE)
+                } else {
+                    responseHandler.accept(DONT_ADD_TILE)
+                }
             }
-        }
         return dialogCreator().apply {
             setTileData(tileData, iUriGrantsManager)
             setShowForAllUsers(true)
@@ -173,19 +204,20 @@ class TileServiceRequestController(
 
     inner class TileServiceRequestCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            val componentName: ComponentName = ComponentName.unflattenFromString(args[0])
+            val componentName: ComponentName =
+                ComponentName.unflattenFromString(args[0])
                     ?: run {
                         Log.w(TAG, "Malformed componentName ${args[0]}")
                         return
                     }
-            requestTileAdd(0, componentName, args[1], args[2], null) {
-                Log.d(TAG, "Response: $it")
-            }
+            requestTileAdd(0, componentName, args[1], args[2], null) { Log.d(TAG, "Response: $it") }
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar tile-service-add " +
-                    "<componentName> <appName> <label>")
+            pw.println(
+                "Usage: adb shell cmd statusbar tile-service-add " +
+                    "<componentName> <appName> <label>"
+            )
         }
     }
 
@@ -200,18 +232,23 @@ class TileServiceRequestController(
     }
 
     @SysUISingleton
-    class Builder @Inject constructor(
+    class Builder
+    @Inject
+    constructor(
         private val commandQueue: CommandQueue,
         private val commandRegistry: CommandRegistry,
         private val iUriGrantsManager: IUriGrantsManager,
+        private val tileRequestDialogComposeDelegateFactory:
+            TileRequestDialogComposeDelegate.Factory,
     ) {
         fun create(qsHost: QSHost): TileServiceRequestController {
             return TileServiceRequestController(
-                    qsHost,
-                    commandQueue,
-                    commandRegistry,
-                    TileRequestDialogEventLogger(),
-                    iUriGrantsManager,
+                qsHost,
+                commandQueue,
+                commandRegistry,
+                TileRequestDialogEventLogger(),
+                iUriGrantsManager,
+                tileRequestDialogComposeDelegateFactory,
             )
         }
     }
