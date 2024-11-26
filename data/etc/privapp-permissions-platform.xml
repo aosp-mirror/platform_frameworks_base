@@ -607,8 +607,6 @@ applications that come with the platform
         <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
         <permission name="android.permission.READ_INTRUSION_DETECTION_STATE" />
         <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
-        <!-- Permissions required for CTS test - BugreportManagerTest -->
-        <permission name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
