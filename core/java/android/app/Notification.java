@@ -6764,19 +6764,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Construct a RemoteViews for the ambient version of the notification.
-         *
-         * @hide
-         */
-        public RemoteViews makeAmbientNotification() {
-            RemoteViews headsUpContentView = createHeadsUpContentView(false /* increasedHeight */);
-            if (headsUpContentView != null) {
-                return headsUpContentView;
-            }
-            return createContentView();
-        }
-
-        /**
          * Adapt the Notification header if this view is used as an expanded view.
          *
          * @hide
