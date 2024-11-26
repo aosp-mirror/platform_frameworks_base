@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"మరొక పరికరంలో పాస్-కీని క్రియేట్ చేయాలా?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"మరొక పరికరంలో పాస్‌వర్డ్‌ను సేవ్ చేయాలా?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"మరో పరికరంలో సైన్-ఇన్‌ని సేవ్ చేయాలా?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"మీ అన్ని సైన్-ఇన్ వివరాల కోసం <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>ను ఉపయోగించాలా?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"మీరు సైన్-ఇన్ చేసే సందర్భాలన్నిటికీ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>‌ను ఉపయోగించాలా?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ పాస్‌వర్డ్ మేనేజర్ మీకు సులభంగా సైన్ ఇన్ చేయడంలో సహాయపడటానికి మీ పాస్‌వర్డ్‌లు, పాస్-కీలను స్టోర్ చేస్తుంది"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ఆటోమేటిక్ సెట్టింగ్‌గా సెట్ చేయండి"</string>
     <string name="settings" msgid="6536394145760913145">"సెట్టింగ్‌లు"</string>
