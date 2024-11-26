@@ -11651,7 +11651,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>
             sApplicationInfoCache =
             new PropertyInvalidatedCache<ApplicationInfoQuery, ApplicationInfo>(
-                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE,
                     "getApplicationInfo") {
                 @Override
                 public ApplicationInfo recompute(ApplicationInfoQuery query) {
@@ -11680,18 +11680,6 @@ public abstract class PackageManager {
      */
     public static void disableApplicationInfoCache() {
         sApplicationInfoCache.disableLocal();
-    }
-
-    private static final PropertyInvalidatedCache.AutoCorker sCacheAutoCorker =
-            new PropertyInvalidatedCache.AutoCorker(PermissionManager.CACHE_KEY_PACKAGE_INFO);
-
-    /**
-     * Invalidate caches of package and permission information system-wide.
-     *
-     * @hide
-     */
-    public static void invalidatePackageInfoCache() {
-        sCacheAutoCorker.autoCork();
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache
@@ -11752,7 +11740,7 @@ public abstract class PackageManager {
     private static final PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>
             sPackageInfoCache =
             new PropertyInvalidatedCache<PackageInfoQuery, PackageInfo>(
-                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    2048, PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE,
                     "getPackageInfo") {
                 @Override
                 public PackageInfo recompute(PackageInfoQuery query) {
@@ -11784,17 +11772,40 @@ public abstract class PackageManager {
     /**
      * Inhibit package info cache invalidations when correct.
      *
-     * @hide */
+     * @hide
+     */
     public static void corkPackageInfoCache() {
-        PropertyInvalidatedCache.corkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+        sPackageInfoCache.corkInvalidations();
     }
 
     /**
      * Enable package info cache invalidations.
      *
-     * @hide */
+     * @hide
+     */
     public static void uncorkPackageInfoCache() {
-        PropertyInvalidatedCache.uncorkInvalidations(PermissionManager.CACHE_KEY_PACKAGE_INFO);
+        sPackageInfoCache.uncorkInvalidations();
+    }
+
+    // This auto-corker is obsolete once the separate permission notifications feature is
+    // committed.
+    private static final PropertyInvalidatedCache.AutoCorker sCacheAutoCorker =
+            PropertyInvalidatedCache.separatePermissionNotificationsEnabled()
+            ? null
+            : new PropertyInvalidatedCache
+                    .AutoCorker(PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE);
+
+    /**
+     * Invalidate caches of package and permission information system-wide.
+     *
+     * @hide
+     */
+    public static void invalidatePackageInfoCache() {
+        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+            sPackageInfoCache.invalidateCache();
+        } else {
+            sCacheAutoCorker.autoCork();
+        }
     }
 
     /**
