@@ -316,6 +316,31 @@ public class WalletScreenControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void queryCards_hasCards_showCarousel_invalidIconSource_noIcon() {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        Collections.singletonList(createWalletCardWithInvalidIcon(mContext)), 0);
+
+        mController.queryWalletCards();
+        mTestableLooper.processAllMessages();
+
+        verify(mWalletClient).getWalletCards(any(), any(), mCallbackCaptor.capture());
+
+        QuickAccessWalletClient.OnWalletCardsRetrievedCallback callback =
+                mCallbackCaptor.getValue();
+
+        assertEquals(mController, callback);
+
+        callback.onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        assertEquals(VISIBLE, mWalletView.getCardCarousel().getVisibility());
+        assertEquals(GONE, mWalletView.getEmptyStateView().getVisibility());
+        assertEquals(GONE, mWalletView.getErrorView().getVisibility());
+        assertEquals(null, mWalletView.getIcon().getDrawable());
+    }
+
+    @Test
     public void queryCards_noCards_showEmptyState() {
         GetWalletCardsResponse response = new GetWalletCardsResponse(Collections.EMPTY_LIST, 0);
 
@@ -507,6 +532,16 @@ public class WalletScreenControllerTest extends SysuiTestCase {
                 .build();
     }
 
+    private WalletCard createWalletCardWithInvalidIcon(Context context) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder(
+                CARD_ID_1, createIconWithInvalidSource(), "•••• 1234", pendingIntent)
+                .setCardIcon(createIconWithInvalidSource())
+                .setCardLabel("Hold to reader")
+                .build();
+    }
+
     private WalletCard createCrazyWalletCard(Context context, boolean hasLabel) {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -518,6 +553,10 @@ public class WalletScreenControllerTest extends SysuiTestCase {
 
     private static Icon createIcon() {
         return Icon.createWithBitmap(Bitmap.createBitmap(70, 44, Bitmap.Config.ARGB_8888));
+    }
+
+    private static Icon createIconWithInvalidSource() {
+        return Icon.createWithContentUri("content://media/external/images/media");
     }
 
     private WalletCardViewInfo createCardViewInfo(WalletCard walletCard) {
