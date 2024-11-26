@@ -136,6 +136,13 @@ abstract class PreferenceLifecycleContext(context: Context) : ContextWrapper(con
     /** Returns the preference widget object associated with given key. */
     abstract fun <T> findPreference(key: String): T?
 
+    /**
+     * Returns the preference widget object associated with given key.
+     *
+     * @throws NullPointerException if preference is not found
+     */
+    abstract fun <T : Any> requirePreference(key: String): T
+
     /** Notifies that preference state of given key is changed and updates preference widget UI. */
     abstract fun notifyPreferenceChange(key: String)
 
