@@ -63,7 +63,7 @@
     <string name="permission_nearby_devices" msgid="7530973297737123481">"जवळपासची डिव्हाइस"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"मीडिया आउटपुट बदला"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फोटो आणि मीडिया"</string>
-    <string name="permission_notifications" msgid="4099418516590632909">"सूचना"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"नोटिफिकेशन"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"ॲप्स"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"स्ट्रीमिंग"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"फोन कॉल करणे आणि ते व्यवस्थापित करणे"</string>
