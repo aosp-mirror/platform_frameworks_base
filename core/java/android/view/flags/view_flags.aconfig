@@ -116,6 +116,7 @@ flag {
     description: "Add a SurfaceView composition order control API."
     bug: "341021569"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -124,6 +125,7 @@ flag {
     description: "Add APIs to manage SurfacePackage of the parent SurfaceView."
     bug: "341021569"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {

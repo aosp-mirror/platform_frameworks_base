@@ -78,6 +78,7 @@ flag {
     description: "Prevent intent redirect attacks"
     bug: "361143368"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {

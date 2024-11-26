@@ -582,4 +582,5 @@ flag {
     namespace: "profile_experiences"
     description: "Add support for LauncherUserInfo configs"
     bug: "346553745"
+    is_exported: true
 }

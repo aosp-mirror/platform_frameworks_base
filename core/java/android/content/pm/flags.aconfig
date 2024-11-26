@@ -341,6 +341,7 @@ flag {
     description: "Feature flag to introduce a new way to change the launcher badging."
     bug: "364760703"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -357,6 +358,7 @@ flag {
     namespace: "package_manager_service"
     description: "Block app installations that specify an incompatible minor SDK version"
     bug: "377302905"
+    is_exported: true
 }
 
 flag {

@@ -213,6 +213,7 @@ flag {
     namespace: "permissions"
     description: "Enable getDeviceId API in OpEventProxyInfo"
     bug: "337340961"
+    is_exported: true
 }
 
 flag {
@@ -254,6 +255,7 @@ flag {
   namespace: "permissions"
   description: "New setOnOpNotedCallback API to allow subscribing to only sync ops."
   bug: "372910217"
+  is_exported: true
 }
 
 flag {

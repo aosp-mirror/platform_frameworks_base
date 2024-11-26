@@ -111,4 +111,5 @@ flag {
   namespace: "app_widgets"
   description: "Enable collection of widget engagement metrics"
   bug: "364655296"
+  is_exported: true
 }

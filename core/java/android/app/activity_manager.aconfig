@@ -164,4 +164,5 @@ flag {
      name: "app_start_info_component"
      description: "Control ApplicationStartInfo component field and API"
      bug: "362537357"
+     is_exported: true
 }

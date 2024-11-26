@@ -6,6 +6,7 @@ flag {
   namespace: "autofill"
   description: "Guards against new metrics definitions introduced in W"
   bug: "342676602"
+  is_exported: true
 }
 
 flag {

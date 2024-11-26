@@ -127,6 +127,7 @@ flag {
     description: "Feature flag to introduce new frame rate setting APIs on ViewGroup"
     bug: "335874198"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {

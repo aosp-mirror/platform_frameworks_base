@@ -294,6 +294,7 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app-to-web education"
     bug: "348205896"
+    is_exported: true
 }
 
 flag {

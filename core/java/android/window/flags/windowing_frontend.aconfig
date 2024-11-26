@@ -368,6 +368,7 @@ flag {
     description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
     is_fixed_read_only: true
     bug: "362938401"
+    is_exported: true
 }
 
 flag {
@@ -376,6 +377,7 @@ flag {
     description: "expose timestamp in BackEvent (API extension)"
     is_fixed_read_only: true
     bug: "362938401"
+    is_exported: true
 }
 
 flag {
@@ -384,6 +386,7 @@ flag {
     description: "EDGE_NONE swipeEdge option in BackEvent"
     is_fixed_read_only: true
     bug: "362938401"
+    is_exported: true
 }
 
 flag {
@@ -422,6 +425,7 @@ flag {
     description: "Provide pre-make predictive back API extension"
     is_fixed_read_only: true
     bug: "362938401"
+    is_exported: true
 }
 
 flag {

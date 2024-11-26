@@ -112,6 +112,7 @@ flag {
     namespace: "hardware_backed_security"
     description: "AFL feature"
     bug: "365994454"
+    is_exported: true
 }
 
 flag {
@@ -127,6 +128,7 @@ flag {
     namespace: "hardware_backed_security"
     description: "Feature flag for exposing KeyStore grant APIs"
     bug: "351158708"
+    is_exported: true
 }
 
 flag {
@@ -134,4 +136,5 @@ flag {
     namespace: "biometrics"
     description: "Feature flag for Secure Lockdown feature"
     bug: "373422357"
+    is_exported: true
 }
