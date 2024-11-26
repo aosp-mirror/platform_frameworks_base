@@ -34,6 +34,7 @@ import com.android.systemui.communal.shared.log.CommunalStatsLogProxyImpl
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelperImpl
+import com.android.systemui.communal.ui.compose.sceneTransitions
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.communal.util.CommunalColorsImpl
 import com.android.systemui.communal.widgets.CommunalWidgetModule
@@ -113,6 +114,7 @@ interface CommunalModule {
                 SceneContainerConfig(
                     sceneKeys = listOf(CommunalScenes.Blank, CommunalScenes.Communal),
                     initialSceneKey = CommunalScenes.Blank,
+                    transitions = sceneTransitions,
                     navigationDistances =
                         mapOf(CommunalScenes.Blank to 0, CommunalScenes.Communal to 1),
                 )
