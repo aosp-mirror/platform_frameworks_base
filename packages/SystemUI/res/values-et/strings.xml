@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Rakenduse otseteed"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Juurdepääsetavus"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Klaviatuuri otseteed"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Otsingu otseteed"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Otsige otseteid"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ahendamisikoon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Laiendamisikoon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"või"</string>

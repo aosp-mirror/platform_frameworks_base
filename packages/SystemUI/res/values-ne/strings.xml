@@ -73,7 +73,7 @@
     <string name="learn_more" msgid="4690632085667273811">"थप जान्नुहोस्"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रिनसट"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"एक्स्टेन्ड अनलक अफ गरिएको छ"</string>
-    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै छवि पठाइयो"</string>
+    <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै फोटो पठाइयो"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"कार्य प्रोफाइलमा स्क्रिनसट सेभ गरिँदै छ…"</string>
     <string name="screenshot_saving_private_profile" msgid="8934706048497093297">"निजी प्रोफाइलमा स्क्रिनसट सेभ गरिँदै छ"</string>
@@ -298,7 +298,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"एक्टिभेट गर्नुहोस्"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"भोलि स्वतः अन गर्नुहोस्"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"क्विक सेयर र Find My Device जस्ता सुविधाहरू प्रयोग गर्न ब्लुटुथ चाहिन्छ"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"क्विक सेयर र Find My Device जस्ता सुविधाहरू प्रयोग गर्न ब्लुटुथ अन गर्नु पर्ने हुन्छ"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ब्लुटुथ भोलि बिहान अन हुने छ"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"अडियो सेयर गर्नुहोस्"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"अडियो सेयर गरिँदै छ"</string>
@@ -749,7 +749,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"स्पेस"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"ब्याकस्पेस"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"प्ले गर्नुहोस्/पज गर्नुहोस्"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"रोक्नुहोस्"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"अर्को"</string>
@@ -787,7 +787,7 @@
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"एपहरू खोल्ने सर्टकटहरू देखाइँदै छ"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"हालको एपका लागि सर्टकटहरू देखाइँदै छ"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"सूचनाहरू हेर्नुहोस्"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"स्क्रिनसट खिच्नुहोस्"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"स्क्रिनसट लिनुहोस्"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"सर्टकटहरू देखाउनुहोस्"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"पछाडि जानुहोस्"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"होम स्क्रिनमा जानुहोस्"</string>
@@ -939,7 +939,7 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ अफ छ"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प अफ छ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"कुनै एपले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रिय गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>
@@ -1285,8 +1285,8 @@
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"स्क्रिनहरू बदल्ने हो?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"उच्च रिजोल्युसनको सेल्फी खिच्न पछाडिको क्यामेरा प्रयोग गर्नुहोस्"</string>
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रिजोल्युसनको सेल्फी खिच्न फोन फ्लिप गर्नुहोस्"</string>
-    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड गर्न मिल्ने डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
-    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड गर्न मिल्ने डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्डेबल डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्डेबल डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"फोल्ड गरिएको"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"अनफोल्ड गरिएको"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>

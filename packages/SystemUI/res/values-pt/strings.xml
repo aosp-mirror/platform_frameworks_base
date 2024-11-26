@@ -383,7 +383,7 @@
     <string name="performance" msgid="6552785217174378320">"Desempenho"</string>
     <string name="user_interface" msgid="3712869377953950887">"Interface do usuário"</string>
     <string name="thermal" msgid="6758074791325414831">"Temperatura"</string>
-    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo uma mão"</string>
+    <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Modo para uma mão"</string>
     <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Aparelhos auditivos"</string>
     <string name="quick_settings_hearing_devices_connected" msgid="6519069502397037781">"Ativos"</string>
     <string name="quick_settings_hearing_devices_disconnected" msgid="8907061223998176187">"Desconectados"</string>
@@ -747,7 +747,7 @@
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Voltar"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Espaço"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Barra de espaço"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Reproduzir/pausar"</string>
@@ -775,7 +775,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ou"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Limpar a consulta de pesquisa"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Atalhos do teclado"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Atalhos de pesquisa"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Pesquisar atalhos"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nenhum atalho encontrado"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
@@ -791,7 +791,7 @@
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Mostrar atalhos"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Voltar"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Ir para a tela inicial"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Conferir os apps recentes"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ver os apps recentes"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Avançar pela lista de apps recentes"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Voltar pela lista de apps recentes"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Abrir lista de apps"</string>
@@ -800,8 +800,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Tela de bloqueio"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Criar nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitarefas"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar a tela dividida com o aplicativo atual à direita"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar a tela dividida com o app atual à esquerda"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar a tela dividida com o app à direita"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar a tela dividida com o app à esquerda"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Mudar da tela dividida para a tela cheia"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Mudar para o app à direita ou abaixo ao usar a tela dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Mudar para o app à esquerda ou acima ao usar a tela dividida"</string>
@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Atalhos de apps"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Acessibilidade"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Atalhos do teclado"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Atalhos de pesquisa"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pesquisar atalhos"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícone \"Fechar\""</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícone \"Abrir\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>

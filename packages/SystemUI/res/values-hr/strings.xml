@@ -792,8 +792,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Natrag"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Otvaranje početnog zaslona"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Prikaz nedavnih aplikacija"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje unaprijed kroz nedavne aplikacije"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje unatrag kroz nedavne aplikacije"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Listajte nedavne aplikacije (prema naprijed)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Listajte nedavne aplikacije (unatrag)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje popisa aplikacija"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje asistenta"</string>
