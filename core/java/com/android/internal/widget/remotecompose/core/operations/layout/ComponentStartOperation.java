@@ -15,6 +15,4 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import com.android.internal.widget.remotecompose.core.Operation;
-
-public interface ComponentStartOperation extends Operation {}
+public interface ComponentStartOperation {}

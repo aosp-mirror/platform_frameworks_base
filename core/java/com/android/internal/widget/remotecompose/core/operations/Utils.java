@@ -19,32 +19,58 @@ import android.annotation.NonNull;
 
 /** Utilities to be used across all core operations */
 public class Utils {
+    /**
+     * Convert an integer id into a float
+     *
+     * @param v the integer id to convert
+     * @return the id as an float
+     */
     public static float asNan(int v) {
         return Float.intBitsToFloat(v | -0x800000);
     }
 
+    /**
+     * convert a float into an integer id
+     *
+     * @param value the float id to convert
+     * @return the id as an integer
+     */
     public static int idFromNan(float value) {
         int b = Float.floatToRawIntBits(value);
         return b & 0x3FFFFF;
     }
 
+    /**
+     * convert a long into an ID
+     *
+     * @param v the long to convert
+     * @return the id still as a long
+     */
     public static long idFromLong(long v) {
         return v - 0x100000000L;
     }
 
+    /**
+     * convert a float id and turn it into a string
+     *
+     * @param value float to convert
+     * @return string form of an id
+     */
     @NonNull
     public static String idStringFromNan(float value) {
         int b = Float.floatToRawIntBits(value) & 0x3FFFFF;
         return idString(b);
     }
 
+    /**
+     * print an id as a string
+     *
+     * @param b the id
+     * @return the id as a string
+     */
     @NonNull
     public static String idString(int b) {
         return (b > 0xFFFFF) ? "A_" + (b & 0xFFFFF) : "" + b;
-    }
-
-    public static float getActualValue(float lr) {
-        return 0;
     }
 
     /**

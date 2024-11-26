@@ -111,6 +111,12 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
         return Float.toString(v);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textID = buffer.readInt();
         float x = buffer.readFloat();
@@ -129,6 +135,11 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -161,6 +172,11 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
         buffer.writeInt(flags);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw text centered about an anchor point")

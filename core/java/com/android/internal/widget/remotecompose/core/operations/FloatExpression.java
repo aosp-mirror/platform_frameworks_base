@@ -42,7 +42,7 @@ import java.util.List;
  * like injecting the width of the component int draw rect As well as supporting generalized
  * animation floats. The floats represent a RPN style calculator
  */
-public class FloatExpression implements Operation, VariableSupport {
+public class FloatExpression extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.ANIMATED_FLOAT;
     private static final String CLASS_NAME = "FloatExpression";
     public int mId;
@@ -146,16 +146,19 @@ public class FloatExpression implements Operation, VariableSupport {
         if (Float.isNaN(mLastChange)) {
             mLastChange = t;
         }
-        if (mFloatAnimation != null) {
+        if (mFloatAnimation != null && !Float.isNaN(mLastCalculatedValue)) {
             float f = mFloatAnimation.get(t - mLastChange);
             context.loadFloat(mId, f);
         } else if (mSpring != null) {
             float f = mSpring.get(t - mLastChange);
             context.loadFloat(mId, f);
         } else {
-            context.loadFloat(
-                    mId,
-                    mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length));
+            float v =
+                    mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length);
+            if (mFloatAnimation != null) {
+                mFloatAnimation.setTargetValue(v);
+            }
+            context.loadFloat(mId, v);
         }
     }
 
@@ -207,6 +210,11 @@ public class FloatExpression implements Operation, VariableSupport {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -243,12 +251,18 @@ public class FloatExpression implements Operation, VariableSupport {
         }
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         int valueLen = len & 0xFFFF;
         if (valueLen > MAX_EXPRESSION_SIZE) {
-            throw new RuntimeException("Float expression to long");
+            throw new RuntimeException("Float expression too long");
         }
         int animLen = (len >> 16) & 0xFFFF;
         float[] values = new float[valueLen];
@@ -268,6 +282,11 @@ public class FloatExpression implements Operation, VariableSupport {
         operations.add(new FloatExpression(id, values, animation));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Float expression")

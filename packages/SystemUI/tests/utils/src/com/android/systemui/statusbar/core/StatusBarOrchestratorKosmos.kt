@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.data.repository.privacyDotWindowController
 import com.android.systemui.statusbar.data.repository.statusBarModeRepository
 import com.android.systemui.statusbar.mockNotificationRemoteInputManager
 import com.android.systemui.statusbar.phone.mockAutoHideController
+import com.android.systemui.statusbar.phone.multiDisplayAutoHideControllerStore
 import com.android.systemui.statusbar.window.data.repository.fakeStatusBarWindowStatePerDisplayRepository
 import com.android.systemui.statusbar.window.data.repository.statusBarWindowStateRepositoryStore
 import com.android.systemui.statusbar.window.fakeStatusBarWindowController
@@ -50,9 +51,9 @@ val Kosmos.statusBarOrchestrator by
             fakeStatusBarInitializer,
             fakeStatusBarWindowController,
             applicationCoroutineScope.coroutineContext,
+            mockAutoHideController,
             mockDemoModeController,
             mockPluginDependencyProvider,
-            mockAutoHideController,
             mockNotificationRemoteInputManager,
             { mockNotificationShadeWindowViewController },
             mockShadeSurface,
@@ -80,6 +81,7 @@ val Kosmos.multiDisplayStatusBarStarter by
             statusBarInitializerStore,
             statusBarWindowControllerStore,
             statusBarInitializerStore,
+            multiDisplayAutoHideControllerStore,
             privacyDotWindowControllerStore,
             lightBarControllerStore,
         )

@@ -33,6 +33,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraMetadataInfo;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
@@ -141,7 +142,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
          * android.hardware.camera2.impl.CameraMetadataNative,
          * android.hardware.camera2.CaptureResultExtras)
          */
-        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras,
+        public void onResultReceived(CameraMetadataInfo result, CaptureResultExtras resultExtras,
                 PhysicalCaptureResultInfo physicalResults[]) throws RemoteException {
             // TODO Auto-generated method stub
 
@@ -186,10 +187,14 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         }
     }
 
-    class IsMetadataNotEmpty implements ArgumentMatcher<CameraMetadataNative> {
+    class IsMetadataNotEmpty implements ArgumentMatcher<CameraMetadataInfo> {
         @Override
-        public boolean matches(CameraMetadataNative obj) {
-            return !obj.isEmpty();
+        public boolean matches(CameraMetadataInfo obj) {
+            if (obj.getTag() == CameraMetadataInfo.metadata) {
+                return !(obj.getMetadata().isEmpty());
+            } else {
+                return (obj.getFmqSize() != 0);
+            }
         }
     }
 

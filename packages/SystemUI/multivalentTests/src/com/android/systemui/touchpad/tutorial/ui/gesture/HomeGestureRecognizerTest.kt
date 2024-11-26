@@ -20,10 +20,12 @@ import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
+import com.android.systemui.touchpad.ui.gesture.fakeVelocityTracker
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -33,18 +35,36 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HomeGestureRecognizerTest : SysuiTestCase() {
 
+    companion object {
+        const val THRESHOLD_VELOCITY_PX_PER_MS = 1f
+        const val SLOW = THRESHOLD_VELOCITY_PX_PER_MS - 0.01f
+        const val FAST = THRESHOLD_VELOCITY_PX_PER_MS + 0.01f
+    }
+
     private var gestureState: GestureState = GestureState.NotStarted
+    private var velocityTracker = testKosmos().fakeVelocityTracker
     private val gestureRecognizer =
-        HomeGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
+        HomeGestureRecognizer(
+            gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
+            velocityThresholdPxPerMs = THRESHOLD_VELOCITY_PX_PER_MS,
+            velocityTracker = velocityTracker,
+        )
 
     @Before
     fun before() {
+        velocityTracker.setVelocity(Velocity(FAST))
         gestureRecognizer.addGestureStateCallback { gestureState = it }
     }
 
     @Test
     fun triggersGestureFinishedForThreeFingerGestureUp() {
         assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = Finished)
+    }
+
+    @Test
+    fun doesntTriggerGestureFinished_onGestureSpeedTooSlow() {
+        velocityTracker.setVelocity(Velocity(SLOW))
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = NotStarted)
     }
 
     @Test

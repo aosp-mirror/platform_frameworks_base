@@ -32,7 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Array
 import java.util.Arrays;
 import java.util.List;
 
-public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
+public class DataListFloat extends Operation implements VariableSupport, ArrayAccess {
     private static final int OP_CODE = Operations.FLOAT_LIST;
     private static final String CLASS_NAME = "IdListData";
     private final int mId;
@@ -79,6 +79,12 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         }
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
@@ -93,6 +99,11 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         operations.add(data);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("a list of Floats")

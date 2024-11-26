@@ -47,8 +47,10 @@ import static com.android.server.am.Flags.FLAG_AVOID_RESOLVING_TYPE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -105,6 +107,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IProgressListener;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -959,28 +962,37 @@ public class ActivityManagerServiceTest {
     @Test
     @SuppressWarnings("GuardedBy")
     public void testBroadcastStickyIntent_verifyTypeNotResolved() throws Exception {
-        final Intent intent = new Intent(TEST_ACTION1);
-        final Uri uri = new Uri.Builder()
-                .scheme(SCHEME_CONTENT)
-                .authority(TEST_AUTHORITY)
-                .path("green")
-                .build();
-        intent.setData(uri);
-        broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
-        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
-                StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
-                        TEST_MIME_TYPE));
-        when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().mockStatic(IpcDataCache.class).startMocking();
 
-        addUidRecord(TEST_UID, TEST_PACKAGE);
-        final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
-        final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
-        intentFilter.addDataType(TEST_MIME_TYPE);
-        final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
-                TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
-                Context.RECEIVER_EXPORTED);
-        assertNotNull(resultIntent);
-        verify(mContentResolver, never()).getType(any());
+        try {
+            final Intent intent = new Intent(TEST_ACTION1);
+            final Uri uri = new Uri.Builder()
+                    .scheme(SCHEME_CONTENT)
+                    .authority(TEST_AUTHORITY)
+                    .path("green")
+                    .build();
+            intent.setData(uri);
+            broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
+            assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
+                    StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                            TEST_MIME_TYPE));
+            when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+            ExtendedMockito.doNothing().when(
+                    () -> IpcDataCache.invalidateCache(anyString(), anyString()));
+
+            addUidRecord(TEST_UID, TEST_PACKAGE);
+            final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
+            final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
+            intentFilter.addDataType(TEST_MIME_TYPE);
+            final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
+                    TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
+                    Context.RECEIVER_EXPORTED);
+            assertNotNull(resultIntent);
+            verify(mContentResolver, never()).getType(any());
+        } finally {
+            mockitoSession.finishMocking();
+        }
     }
 
     @SuppressWarnings("GuardedBy")

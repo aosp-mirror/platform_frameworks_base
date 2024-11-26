@@ -29,6 +29,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL
+import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import android.widget.ImageView
 import com.android.systemui.res.R
@@ -83,6 +84,20 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         })
 
         gestureDetector.setIsLongpressEnabled(false)
+
+        // Extend the timeout on any accessibility event (e.g. voice access or explore-by-touch).
+        setAccessibilityDelegate(
+            object : AccessibilityDelegate() {
+                override fun onRequestSendAccessibilityEvent(
+                    host: ViewGroup,
+                    child: View,
+                    event: AccessibilityEvent,
+                ): Boolean {
+                    userInteractionCallback?.invoke()
+                    return super.onRequestSendAccessibilityEvent(host, child, event)
+                }
+            }
+        )
     }
 
     override fun onFinishInflate() {

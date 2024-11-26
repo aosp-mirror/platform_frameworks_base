@@ -55,7 +55,10 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixSkew;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
+import com.android.internal.widget.remotecompose.core.operations.PathAppend;
+import com.android.internal.widget.remotecompose.core.operations.PathCreate;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
+import com.android.internal.widget.remotecompose.core.operations.PathTween;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
@@ -178,6 +181,9 @@ public class Operations {
     public static final int TEXT_MEASURE = 155;
     public static final int TEXT_LENGTH = 156;
     public static final int TOUCH_EXPRESSION = 157;
+    public static final int PATH_TWEEN = 158;
+    public static final int PATH_CREATE = 159;
+    public static final int PATH_ADD = 160;
 
     ///////////////////////////////////////// ======================
 
@@ -353,5 +359,8 @@ public class Operations {
         map.put(TEXT_MEASURE, TextMeasure::read);
         map.put(TEXT_LENGTH, TextLength::read);
         map.put(TOUCH_EXPRESSION, TouchExpression::read);
+        map.put(PATH_TWEEN, PathTween::read);
+        map.put(PATH_CREATE, PathCreate::read);
+        map.put(PATH_ADD, PathAppend::read);
     }
 }

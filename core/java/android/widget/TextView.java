@@ -106,7 +106,6 @@ import android.os.Parcelable;
 import android.os.ParcelableParcel;
 import android.os.Process;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
@@ -9230,179 +9229,174 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "TextView.onDraw");
-        try {
-            restartMarqueeIfNeeded();
+        restartMarqueeIfNeeded();
 
-            // Draw the background for this view
-            super.onDraw(canvas);
+        // Draw the background for this view
+        super.onDraw(canvas);
 
-            final int compoundPaddingLeft = getCompoundPaddingLeft();
-            final int compoundPaddingTop = getCompoundPaddingTop();
-            final int compoundPaddingRight = getCompoundPaddingRight();
-            final int compoundPaddingBottom = getCompoundPaddingBottom();
-            final int scrollX = mScrollX;
-            final int scrollY = mScrollY;
-            final int right = mRight;
-            final int left = mLeft;
-            final int bottom = mBottom;
-            final int top = mTop;
-            final boolean isLayoutRtl = isLayoutRtl();
-            final int offset = getHorizontalOffsetForDrawables();
-            final int leftOffset = isLayoutRtl ? 0 : offset;
-            final int rightOffset = isLayoutRtl ? offset : 0;
+        final int compoundPaddingLeft = getCompoundPaddingLeft();
+        final int compoundPaddingTop = getCompoundPaddingTop();
+        final int compoundPaddingRight = getCompoundPaddingRight();
+        final int compoundPaddingBottom = getCompoundPaddingBottom();
+        final int scrollX = mScrollX;
+        final int scrollY = mScrollY;
+        final int right = mRight;
+        final int left = mLeft;
+        final int bottom = mBottom;
+        final int top = mTop;
+        final boolean isLayoutRtl = isLayoutRtl();
+        final int offset = getHorizontalOffsetForDrawables();
+        final int leftOffset = isLayoutRtl ? 0 : offset;
+        final int rightOffset = isLayoutRtl ? offset : 0;
 
-            final Drawables dr = mDrawables;
-            if (dr != null) {
-                /*
-                 * Compound, not extended, because the icon is not clipped
-                 * if the text height is smaller.
-                 */
+        final Drawables dr = mDrawables;
+        if (dr != null) {
+            /*
+             * Compound, not extended, because the icon is not clipped
+             * if the text height is smaller.
+             */
 
-                int vspace = bottom - top - compoundPaddingBottom - compoundPaddingTop;
-                int hspace = right - left - compoundPaddingRight - compoundPaddingLeft;
+            int vspace = bottom - top - compoundPaddingBottom - compoundPaddingTop;
+            int hspace = right - left - compoundPaddingRight - compoundPaddingLeft;
 
-                // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
-                // Make sure to update invalidateDrawable() when changing this code.
-                if (dr.mShowing[Drawables.LEFT] != null) {
-                    canvas.save();
-                    canvas.translate(scrollX + mPaddingLeft + leftOffset,
-                            scrollY + compoundPaddingTop + (vspace - dr.mDrawableHeightLeft) / 2);
-                    dr.mShowing[Drawables.LEFT].draw(canvas);
-                    canvas.restore();
-                }
-
-                // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
-                // Make sure to update invalidateDrawable() when changing this code.
-                if (dr.mShowing[Drawables.RIGHT] != null) {
-                    canvas.save();
-                    canvas.translate(scrollX + right - left - mPaddingRight
-                                    - dr.mDrawableSizeRight - rightOffset,
-                            scrollY + compoundPaddingTop + (vspace - dr.mDrawableHeightRight) / 2);
-                    dr.mShowing[Drawables.RIGHT].draw(canvas);
-                    canvas.restore();
-                }
-
-                // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
-                // Make sure to update invalidateDrawable() when changing this code.
-                if (dr.mShowing[Drawables.TOP] != null) {
-                    canvas.save();
-                    canvas.translate(scrollX + compoundPaddingLeft
-                            + (hspace - dr.mDrawableWidthTop) / 2, scrollY + mPaddingTop);
-                    dr.mShowing[Drawables.TOP].draw(canvas);
-                    canvas.restore();
-                }
-
-                // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
-                // Make sure to update invalidateDrawable() when changing this code.
-                if (dr.mShowing[Drawables.BOTTOM] != null) {
-                    canvas.save();
-                    canvas.translate(scrollX + compoundPaddingLeft
-                                    + (hspace - dr.mDrawableWidthBottom) / 2,
-                            scrollY + bottom - top - mPaddingBottom - dr.mDrawableSizeBottom);
-                    dr.mShowing[Drawables.BOTTOM].draw(canvas);
-                    canvas.restore();
-                }
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
+            if (dr.mShowing[Drawables.LEFT] != null) {
+                canvas.save();
+                canvas.translate(scrollX + mPaddingLeft + leftOffset,
+                        scrollY + compoundPaddingTop + (vspace - dr.mDrawableHeightLeft) / 2);
+                dr.mShowing[Drawables.LEFT].draw(canvas);
+                canvas.restore();
             }
 
-            int color = mCurTextColor;
-
-            if (mLayout == null) {
-                assumeLayout();
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
+            if (dr.mShowing[Drawables.RIGHT] != null) {
+                canvas.save();
+                canvas.translate(scrollX + right - left - mPaddingRight
+                        - dr.mDrawableSizeRight - rightOffset,
+                         scrollY + compoundPaddingTop + (vspace - dr.mDrawableHeightRight) / 2);
+                dr.mShowing[Drawables.RIGHT].draw(canvas);
+                canvas.restore();
             }
 
-            Layout layout = mLayout;
-
-            if (mHint != null && !mHideHint && mText.length() == 0) {
-                if (mHintTextColor != null) {
-                    color = mCurHintTextColor;
-                }
-
-                layout = mHintLayout;
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
+            if (dr.mShowing[Drawables.TOP] != null) {
+                canvas.save();
+                canvas.translate(scrollX + compoundPaddingLeft
+                        + (hspace - dr.mDrawableWidthTop) / 2, scrollY + mPaddingTop);
+                dr.mShowing[Drawables.TOP].draw(canvas);
+                canvas.restore();
             }
 
-            mTextPaint.setColor(color);
-            mTextPaint.drawableState = getDrawableState();
-
-            canvas.save();
-            /*  Would be faster if we didn't have to do this. Can we chop the
-                (displayable) text so that we don't need to do this ever?
-            */
-
-            int extendedPaddingTop = getExtendedPaddingTop();
-            int extendedPaddingBottom = getExtendedPaddingBottom();
-
-            final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
-            final int maxScrollY = mLayout.getHeight() - vspace;
-
-            float clipLeft = compoundPaddingLeft + scrollX;
-            float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
-            float clipRight = right - left - getCompoundPaddingRight() + scrollX;
-            float clipBottom = bottom - top + scrollY
-                    - ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
-
-            if (mShadowRadius != 0) {
-                clipLeft += Math.min(0, mShadowDx - mShadowRadius);
-                clipRight += Math.max(0, mShadowDx + mShadowRadius);
-
-                clipTop += Math.min(0, mShadowDy - mShadowRadius);
-                clipBottom += Math.max(0, mShadowDy + mShadowRadius);
+            // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
+            // Make sure to update invalidateDrawable() when changing this code.
+            if (dr.mShowing[Drawables.BOTTOM] != null) {
+                canvas.save();
+                canvas.translate(scrollX + compoundPaddingLeft
+                        + (hspace - dr.mDrawableWidthBottom) / 2,
+                         scrollY + bottom - top - mPaddingBottom - dr.mDrawableSizeBottom);
+                dr.mShowing[Drawables.BOTTOM].draw(canvas);
+                canvas.restore();
             }
-
-            canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
-
-            int voffsetText = 0;
-            int voffsetCursor = 0;
-
-            // translate in by our padding
-            /* shortcircuit calling getVerticaOffset() */
-            if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
-                voffsetText = getVerticalOffset(false);
-                voffsetCursor = getVerticalOffset(true);
-            }
-            canvas.translate(compoundPaddingLeft, extendedPaddingTop + voffsetText);
-
-            final int layoutDirection = getLayoutDirection();
-            final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-            if (isMarqueeFadeEnabled()) {
-                if (!mSingleLine && getLineCount() == 1 && canMarquee()
-                        && (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
-                    final int width = mRight - mLeft;
-                    final int padding = getCompoundPaddingLeft() + getCompoundPaddingRight();
-                    final float dx = mLayout.getLineRight(0) - (width - padding);
-                    canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
-                }
-
-                if (mMarquee != null && mMarquee.isRunning()) {
-                    final float dx = -mMarquee.getScroll();
-                    canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
-                }
-            }
-
-            final int cursorOffsetVertical = voffsetCursor - voffsetText;
-
-            maybeUpdateHighlightPaths();
-            // If there is a gesture preview highlight, then the selection or cursor is not drawn.
-            Path highlight = hasGesturePreviewHighlight() ? null : getUpdatedHighlightPath();
-            if (mEditor != null) {
-                mEditor.onDraw(canvas, layout, mHighlightPaths, mHighlightPaints, highlight,
-                        mHighlightPaint, cursorOffsetVertical);
-            } else {
-                layout.draw(canvas, mHighlightPaths, mHighlightPaints, highlight, mHighlightPaint,
-                        cursorOffsetVertical);
-            }
-
-            if (mMarquee != null && mMarquee.shouldDrawGhost()) {
-                final float dx = mMarquee.getGhostOffset();
-                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
-                layout.draw(canvas, mHighlightPaths, mHighlightPaints, highlight, mHighlightPaint,
-                        cursorOffsetVertical);
-            }
-
-            canvas.restore();
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
+
+        int color = mCurTextColor;
+
+        if (mLayout == null) {
+            assumeLayout();
+        }
+
+        Layout layout = mLayout;
+
+        if (mHint != null && !mHideHint && mText.length() == 0) {
+            if (mHintTextColor != null) {
+                color = mCurHintTextColor;
+            }
+
+            layout = mHintLayout;
+        }
+
+        mTextPaint.setColor(color);
+        mTextPaint.drawableState = getDrawableState();
+
+        canvas.save();
+        /*  Would be faster if we didn't have to do this. Can we chop the
+            (displayable) text so that we don't need to do this ever?
+        */
+
+        int extendedPaddingTop = getExtendedPaddingTop();
+        int extendedPaddingBottom = getExtendedPaddingBottom();
+
+        final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
+        final int maxScrollY = mLayout.getHeight() - vspace;
+
+        float clipLeft = compoundPaddingLeft + scrollX;
+        float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
+        float clipRight = right - left - getCompoundPaddingRight() + scrollX;
+        float clipBottom = bottom - top + scrollY
+                - ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
+
+        if (mShadowRadius != 0) {
+            clipLeft += Math.min(0, mShadowDx - mShadowRadius);
+            clipRight += Math.max(0, mShadowDx + mShadowRadius);
+
+            clipTop += Math.min(0, mShadowDy - mShadowRadius);
+            clipBottom += Math.max(0, mShadowDy + mShadowRadius);
+        }
+
+        canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
+
+        int voffsetText = 0;
+        int voffsetCursor = 0;
+
+        // translate in by our padding
+        /* shortcircuit calling getVerticaOffset() */
+        if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
+            voffsetText = getVerticalOffset(false);
+            voffsetCursor = getVerticalOffset(true);
+        }
+        canvas.translate(compoundPaddingLeft, extendedPaddingTop + voffsetText);
+
+        final int layoutDirection = getLayoutDirection();
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
+        if (isMarqueeFadeEnabled()) {
+            if (!mSingleLine && getLineCount() == 1 && canMarquee()
+                    && (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
+                final int width = mRight - mLeft;
+                final int padding = getCompoundPaddingLeft() + getCompoundPaddingRight();
+                final float dx = mLayout.getLineRight(0) - (width - padding);
+                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
+            }
+
+            if (mMarquee != null && mMarquee.isRunning()) {
+                final float dx = -mMarquee.getScroll();
+                canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
+            }
+        }
+
+        final int cursorOffsetVertical = voffsetCursor - voffsetText;
+
+        maybeUpdateHighlightPaths();
+        // If there is a gesture preview highlight, then the selection or cursor is not drawn.
+        Path highlight = hasGesturePreviewHighlight() ? null : getUpdatedHighlightPath();
+        if (mEditor != null) {
+            mEditor.onDraw(canvas, layout, mHighlightPaths, mHighlightPaints, highlight,
+                    mHighlightPaint, cursorOffsetVertical);
+        } else {
+            layout.draw(canvas, mHighlightPaths, mHighlightPaints, highlight, mHighlightPaint,
+                    cursorOffsetVertical);
+        }
+
+        if (mMarquee != null && mMarquee.shouldDrawGhost()) {
+            final float dx = mMarquee.getGhostOffset();
+            canvas.translate(layout.getParagraphDirection(0) * dx, 0.0f);
+            layout.draw(canvas, mHighlightPaths, mHighlightPaints, highlight, mHighlightPaint,
+                    cursorOffsetVertical);
+        }
+
+        canvas.restore();
     }
 
     @Override
@@ -11260,201 +11254,192 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "TextView.onMeasure");
-        try {
-            int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-            int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-            int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-            int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-            int width;
-            int height;
+        int width;
+        int height;
 
-            BoringLayout.Metrics boring = UNKNOWN_BORING;
-            BoringLayout.Metrics hintBoring = UNKNOWN_BORING;
+        BoringLayout.Metrics boring = UNKNOWN_BORING;
+        BoringLayout.Metrics hintBoring = UNKNOWN_BORING;
 
-            if (mTextDir == null) {
-                mTextDir = getTextDirectionHeuristic();
+        if (mTextDir == null) {
+            mTextDir = getTextDirectionHeuristic();
+        }
+
+        int des = -1;
+        boolean fromexisting = false;
+        final float widthLimit = (widthMode == MeasureSpec.AT_MOST)
+                ?  (float) widthSize : Float.MAX_VALUE;
+
+        if (widthMode == MeasureSpec.EXACTLY) {
+            // Parent has told us how big to be. So be it.
+            width = widthSize;
+        } else {
+            if (mLayout != null && mEllipsize == null) {
+                des = desired(mLayout, mUseBoundsForWidth);
             }
 
-            int des = -1;
-            boolean fromexisting = false;
-            final float widthLimit = (widthMode == MeasureSpec.AT_MOST)
-                    ? (float) widthSize : Float.MAX_VALUE;
-
-            if (widthMode == MeasureSpec.EXACTLY) {
-                // Parent has told us how big to be. So be it.
-                width = widthSize;
+            if (des < 0) {
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir,
+                        isFallbackLineSpacingForBoringLayout(), getResolvedMinimumFontMetrics(),
+                        mBoring);
+                if (boring != null) {
+                    mBoring = boring;
+                }
             } else {
-                if (mLayout != null && mEllipsize == null) {
-                    des = desired(mLayout, mUseBoundsForWidth);
-                }
+                fromexisting = true;
+            }
 
+            if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
-                    boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir,
-                            isFallbackLineSpacingForBoringLayout(), getResolvedMinimumFontMetrics(),
-                            mBoring);
-                    if (boring != null) {
-                        mBoring = boring;
-                    }
+                    des = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mTransformed, 0,
+                            mTransformed.length(), mTextPaint, mTextDir, widthLimit,
+                            mUseBoundsForWidth));
+                }
+                width = des;
+            } else {
+                if (mUseBoundsForWidth) {
+                    RectF bbox = boring.getDrawingBoundingBox();
+                    float rightMax = Math.max(bbox.right, boring.width);
+                    float leftMin = Math.min(bbox.left, 0);
+                    width = Math.max(boring.width, (int) Math.ceil(rightMax - leftMin));
                 } else {
-                    fromexisting = true;
+                    width = boring.width;
+                }
+            }
+
+            final Drawables dr = mDrawables;
+            if (dr != null) {
+                width = Math.max(width, dr.mDrawableWidthTop);
+                width = Math.max(width, dr.mDrawableWidthBottom);
+            }
+
+            if (mHint != null) {
+                int hintDes = -1;
+                int hintWidth;
+
+                if (mHintLayout != null && mEllipsize == null) {
+                    hintDes = desired(mHintLayout, mUseBoundsForWidth);
                 }
 
-                if (boring == null || boring == UNKNOWN_BORING) {
-                    if (des < 0) {
-                        des = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mTransformed, 0,
-                                mTransformed.length(), mTextPaint, mTextDir, widthLimit,
+                if (hintDes < 0) {
+                    hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
+                            isFallbackLineSpacingForBoringLayout(), getResolvedMinimumFontMetrics(),
+                            mHintBoring);
+                    if (hintBoring != null) {
+                        mHintBoring = hintBoring;
+                    }
+                }
+
+                if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
+                    if (hintDes < 0) {
+                        hintDes = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mHint, 0,
+                                mHint.length(), mTextPaint, mTextDir, widthLimit,
                                 mUseBoundsForWidth));
                     }
-                    width = des;
+                    hintWidth = hintDes;
                 } else {
-                    if (mUseBoundsForWidth) {
-                        RectF bbox = boring.getDrawingBoundingBox();
-                        float rightMax = Math.max(bbox.right, boring.width);
-                        float leftMin = Math.min(bbox.left, 0);
-                        width = Math.max(boring.width, (int) Math.ceil(rightMax - leftMin));
-                    } else {
-                        width = boring.width;
-                    }
+                    hintWidth = hintBoring.width;
                 }
 
-                final Drawables dr = mDrawables;
-                if (dr != null) {
-                    width = Math.max(width, dr.mDrawableWidthTop);
-                    width = Math.max(width, dr.mDrawableWidthBottom);
-                }
-
-                if (mHint != null) {
-                    int hintDes = -1;
-                    int hintWidth;
-
-                    if (mHintLayout != null && mEllipsize == null) {
-                        hintDes = desired(mHintLayout, mUseBoundsForWidth);
-                    }
-
-                    if (hintDes < 0) {
-                        hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
-                                isFallbackLineSpacingForBoringLayout(),
-                                getResolvedMinimumFontMetrics(),
-                                mHintBoring);
-                        if (hintBoring != null) {
-                            mHintBoring = hintBoring;
-                        }
-                    }
-
-                    if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
-                        if (hintDes < 0) {
-                            hintDes = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mHint, 0,
-                                    mHint.length(), mTextPaint, mTextDir, widthLimit,
-                                    mUseBoundsForWidth));
-                        }
-                        hintWidth = hintDes;
-                    } else {
-                        hintWidth = hintBoring.width;
-                    }
-
-                    if (hintWidth > width) {
-                        width = hintWidth;
-                    }
-                }
-
-                width += getCompoundPaddingLeft() + getCompoundPaddingRight();
-
-                if (mMaxWidthMode == EMS) {
-                    width = Math.min(width, mMaxWidth * getLineHeight());
-                } else {
-                    width = Math.min(width, mMaxWidth);
-                }
-
-                if (mMinWidthMode == EMS) {
-                    width = Math.max(width, mMinWidth * getLineHeight());
-                } else {
-                    width = Math.max(width, mMinWidth);
-                }
-
-                // Check against our minimum width
-                width = Math.max(width, getSuggestedMinimumWidth());
-
-                if (widthMode == MeasureSpec.AT_MOST) {
-                    width = Math.min(widthSize, width);
+                if (hintWidth > width) {
+                    width = hintWidth;
                 }
             }
 
-            int want = width - getCompoundPaddingLeft() - getCompoundPaddingRight();
-            int unpaddedWidth = want;
+            width += getCompoundPaddingLeft() + getCompoundPaddingRight();
 
-            if (mHorizontallyScrolling) want = VERY_WIDE;
-
-            int hintWant = want;
-            int hintWidth = (mHintLayout == null) ? hintWant : mHintLayout.getWidth();
-
-            if (mLayout == null) {
-                makeNewLayout(want, hintWant, boring, hintBoring,
-                        width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
+            if (mMaxWidthMode == EMS) {
+                width = Math.min(width, mMaxWidth * getLineHeight());
             } else {
-                final boolean layoutChanged =
-                        (mLayout.getWidth() != want) || (hintWidth != hintWant)
-                                || (mLayout.getEllipsizedWidth()
-                                != width - getCompoundPaddingLeft() - getCompoundPaddingRight());
-
-                final boolean widthChanged = (mHint == null) && (mEllipsize == null)
-                        && (want > mLayout.getWidth())
-                        && (mLayout instanceof BoringLayout
-                        || (fromexisting && des >= 0 && des <= want));
-
-                final boolean maximumChanged =
-                        (mMaxMode != mOldMaxMode) || (mMaximum != mOldMaximum);
-
-                if (layoutChanged || maximumChanged) {
-                    if (!maximumChanged && widthChanged) {
-                        mLayout.increaseWidthTo(want);
-                    } else {
-                        makeNewLayout(want, hintWant, boring, hintBoring,
-                                width - getCompoundPaddingLeft() - getCompoundPaddingRight(),
-                                false);
-                    }
-                } else {
-                    // Nothing has changed
-                }
+                width = Math.min(width, mMaxWidth);
             }
 
-            if (heightMode == MeasureSpec.EXACTLY) {
-                // Parent has told us how big to be. So be it.
-                height = heightSize;
-                mDesiredHeightAtMeasure = -1;
+            if (mMinWidthMode == EMS) {
+                width = Math.max(width, mMinWidth * getLineHeight());
             } else {
-                int desired = getDesiredHeight();
-
-                height = desired;
-                mDesiredHeightAtMeasure = desired;
-
-                if (heightMode == MeasureSpec.AT_MOST) {
-                    height = Math.min(desired, heightSize);
-                }
+                width = Math.max(width, mMinWidth);
             }
 
-            int unpaddedHeight = height - getCompoundPaddingTop() - getCompoundPaddingBottom();
-            if (mMaxMode == LINES && mLayout.getLineCount() > mMaximum) {
-                unpaddedHeight = Math.min(unpaddedHeight, mLayout.getLineTop(mMaximum));
-            }
+            // Check against our minimum width
+            width = Math.max(width, getSuggestedMinimumWidth());
 
-            /*
-             * We didn't let makeNewLayout() register to bring the cursor into view,
-             * so do it here if there is any possibility that it is needed.
-             */
-            if (mMovement != null
-                    || mLayout.getWidth() > unpaddedWidth
-                    || mLayout.getHeight() > unpaddedHeight) {
-                registerForPreDraw();
-            } else {
-                scrollTo(0, 0);
+            if (widthMode == MeasureSpec.AT_MOST) {
+                width = Math.min(widthSize, width);
             }
-
-            setMeasuredDimension(width, height);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
+
+        int want = width - getCompoundPaddingLeft() - getCompoundPaddingRight();
+        int unpaddedWidth = want;
+
+        if (mHorizontallyScrolling) want = VERY_WIDE;
+
+        int hintWant = want;
+        int hintWidth = (mHintLayout == null) ? hintWant : mHintLayout.getWidth();
+
+        if (mLayout == null) {
+            makeNewLayout(want, hintWant, boring, hintBoring,
+                          width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
+        } else {
+            final boolean layoutChanged = (mLayout.getWidth() != want) || (hintWidth != hintWant)
+                    || (mLayout.getEllipsizedWidth()
+                            != width - getCompoundPaddingLeft() - getCompoundPaddingRight());
+
+            final boolean widthChanged = (mHint == null) && (mEllipsize == null)
+                    && (want > mLayout.getWidth())
+                    && (mLayout instanceof BoringLayout
+                            || (fromexisting && des >= 0 && des <= want));
+
+            final boolean maximumChanged = (mMaxMode != mOldMaxMode) || (mMaximum != mOldMaximum);
+
+            if (layoutChanged || maximumChanged) {
+                if (!maximumChanged && widthChanged) {
+                    mLayout.increaseWidthTo(want);
+                } else {
+                    makeNewLayout(want, hintWant, boring, hintBoring,
+                            width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
+                }
+            } else {
+                // Nothing has changed
+            }
+        }
+
+        if (heightMode == MeasureSpec.EXACTLY) {
+            // Parent has told us how big to be. So be it.
+            height = heightSize;
+            mDesiredHeightAtMeasure = -1;
+        } else {
+            int desired = getDesiredHeight();
+
+            height = desired;
+            mDesiredHeightAtMeasure = desired;
+
+            if (heightMode == MeasureSpec.AT_MOST) {
+                height = Math.min(desired, heightSize);
+            }
+        }
+
+        int unpaddedHeight = height - getCompoundPaddingTop() - getCompoundPaddingBottom();
+        if (mMaxMode == LINES && mLayout.getLineCount() > mMaximum) {
+            unpaddedHeight = Math.min(unpaddedHeight, mLayout.getLineTop(mMaximum));
+        }
+
+        /*
+         * We didn't let makeNewLayout() register to bring the cursor into view,
+         * so do it here if there is any possibility that it is needed.
+         */
+        if (mMovement != null
+                || mLayout.getWidth() > unpaddedWidth
+                || mLayout.getHeight() > unpaddedHeight) {
+            registerForPreDraw();
+        } else {
+            scrollTo(0, 0);
+        }
+
+        setMeasuredDimension(width, height);
     }
 
     /**
