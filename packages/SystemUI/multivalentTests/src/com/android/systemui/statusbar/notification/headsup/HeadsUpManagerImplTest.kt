@@ -111,6 +111,24 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Before
     fun setUp() {
+        mContext.getOrCreateTestableResources().apply {
+            this.addOverride(R.integer.ambient_notification_extension_time, TEST_EXTENSION_TIME)
+            this.addOverride(R.integer.touch_acceptance_delay, TEST_TOUCH_ACCEPTANCE_TIME)
+            this.addOverride(
+                R.integer.heads_up_notification_minimum_time,
+                TEST_MINIMUM_DISPLAY_TIME,
+            )
+            this.addOverride(
+                R.integer.heads_up_notification_minimum_time_with_throttling,
+                TEST_MINIMUM_DISPLAY_TIME,
+            )
+            this.addOverride(R.integer.heads_up_notification_decay, TEST_AUTO_DISMISS_TIME)
+            this.addOverride(
+                R.integer.sticky_heads_up_notification_time,
+                TEST_STICKY_AUTO_DISMISS_TIME,
+            )
+        }
+
         whenever(mShadeInteractor.isAnyExpanded).thenReturn(MutableStateFlow(false))
         whenever(mShadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
         whenever(mBypassController.bypassEnabled).thenReturn(false)
@@ -125,9 +143,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             )
             .thenReturn(TEST_AUTO_DISMISS_TIME)
         mDependency.injectMockDependency(NotificationShadeWindowController::class.java)
-        mContext
-            .getOrCreateTestableResources()
-            .addOverride(R.integer.ambient_notification_extension_time, 500)
+
         mAvalancheController =
             AvalancheController(dumpManager, mUiEventLogger, mHeadsUpManagerLogger, mBgHandler)
     }
@@ -190,7 +206,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
         hmp.showNotification(entry)
         hmp.extendHeadsUp()
-        mSystemClock.advanceTime((TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2).toLong())
+        mSystemClock.advanceTime(((TEST_AUTO_DISMISS_TIME + TEST_EXTENSION_TIME) / 2).toLong())
         Assert.assertTrue(hmp.isHeadsUpEntry(entry.key))
     }
 

@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
@@ -87,7 +88,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     @Mock protected var mRow: ExpandableNotificationRow? = null
 
     private fun createHeadsUpManager(): HeadsUpManagerImpl {
-        return TestableHeadsUpManager(
+        return HeadsUpManagerImpl(
             mContext,
             mLogger,
             mKosmos.statusBarStateController,
@@ -95,9 +96,10 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
             GroupMembershipManagerImpl(),
             mKosmos.visualStabilityProvider,
             mKosmos.configurationController,
-            mExecutor,
+            mockExecutorHandler(mExecutor),
             mGlobalSettings,
             mSystemClock,
+            mExecutor,
             mAccessibilityMgr,
             mUiEventLoggerFake,
             JavaAdapter(mKosmos.testScope),
@@ -150,6 +152,24 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     @Throws(Exception::class)
     override fun SysuiSetup() {
         super.SysuiSetup()
+        mContext.getOrCreateTestableResources().apply {
+            this.addOverride(R.integer.ambient_notification_extension_time, TEST_EXTENSION_TIME)
+            this.addOverride(R.integer.touch_acceptance_delay, TEST_TOUCH_ACCEPTANCE_TIME)
+            this.addOverride(
+                R.integer.heads_up_notification_minimum_time,
+                TEST_MINIMUM_DISPLAY_TIME,
+            )
+            this.addOverride(
+                R.integer.heads_up_notification_minimum_time_with_throttling,
+                TEST_MINIMUM_DISPLAY_TIME,
+            )
+            this.addOverride(R.integer.heads_up_notification_decay, TEST_AUTO_DISMISS_TIME)
+            this.addOverride(
+                R.integer.sticky_heads_up_notification_time,
+                TEST_STICKY_AUTO_DISMISS_TIME,
+            )
+        }
+
         mAvalancheController =
             AvalancheController(dumpManager!!, mUiEventLoggerFake, mLogger, mBgHandler!!)
         Mockito.`when`(mShadeInteractor!!.isAnyExpanded).thenReturn(MutableStateFlow(true))
@@ -662,6 +682,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     companion object {
         const val TEST_TOUCH_ACCEPTANCE_TIME: Int = 200
         const val TEST_A11Y_AUTO_DISMISS_TIME: Int = 1000
+        const val TEST_EXTENSION_TIME = 500
 
         const val TEST_MINIMUM_DISPLAY_TIME: Int = 400
         const val TEST_AUTO_DISMISS_TIME: Int = 600

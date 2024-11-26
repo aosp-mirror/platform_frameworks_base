@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.configurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
@@ -97,7 +98,7 @@ class AvalancheControllerTest : SysuiTestCase() {
             AvalancheController(dumpManager, mUiEventLoggerFake, mHeadsUpManagerLogger, mBgHandler)
 
         testableHeadsUpManager =
-            TestableHeadsUpManager(
+            HeadsUpManagerImpl(
                 mContext,
                 mLogger,
                 kosmos.statusBarStateController,
@@ -105,9 +106,10 @@ class AvalancheControllerTest : SysuiTestCase() {
                 GroupMembershipManagerImpl(),
                 kosmos.visualStabilityProvider,
                 kosmos.configurationController,
-                mExecutor,
+                mockExecutorHandler(mExecutor),
                 mGlobalSettings,
                 mSystemClock,
+                mExecutor,
                 mAccessibilityMgr,
                 mUiEventLoggerFake,
                 JavaAdapter(kosmos.testScope),
