@@ -57,7 +57,6 @@ public final class BroadcastFilter extends IntentFilter {
     final boolean visibleToInstantApp;
     public final boolean exported;
     final int initialPriority;
-    final ApplicationInfo applicationInfo;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
             String _packageName, String _featureId, String _receiverId, String _requiredPermission,
@@ -74,10 +73,9 @@ public final class BroadcastFilter extends IntentFilter {
         instantApp = _instantApp;
         visibleToInstantApp = _visibleToInstantApp;
         exported = _exported;
-        applicationInfo = _applicationInfo;
         initialPriority = getPriority();
         setPriority(calculateAdjustedPriority(owningUid, initialPriority,
-                applicationInfo, platformCompat));
+                _applicationInfo, platformCompat));
     }
 
     public @Nullable String getReceiverClassName() {
@@ -91,7 +89,7 @@ public final class BroadcastFilter extends IntentFilter {
     }
 
     public @NonNull ApplicationInfo getApplicationInfo() {
-        return applicationInfo;
+        return receiverList.app.info;
     }
 
     @NeverCompile
