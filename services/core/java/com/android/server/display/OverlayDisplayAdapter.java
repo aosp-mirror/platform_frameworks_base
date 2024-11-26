@@ -73,9 +73,13 @@ import java.util.regex.Pattern;
  * </pre>
  * Supported flags:
  * <ul>
- * <li><pre>secure</pre>: creates a secure display</li>
- * <li><pre>own_content_only</pre>: only shows this display's own content</li>
- * <li><pre>should_show_system_decorations</pre>: supports system decorations</li>
+ * <li><code>secure</code>: creates a secure display</li>
+ * <li><code>own_content_only</code>: only shows this display's own content</li>
+ * <li><code>should_show_system_decorations</code>: supports system decorations</li>
+ * <li><code>gravity_top_left</code>: display the overlay at the top left of the screen</li>
+ * <li><code>gravity_top_right</code>: display the overlay at the top right of the screen</li>
+ * <li><code>gravity_bottom_right</code>: display the overlay at the bottom right of the screen</li>
+ * <li><code>gravity_bottom_left</code>: display the overlay at the bottom left of the screen</li>
  * </ul>
  * </p><p>
  * Example:
@@ -112,6 +116,12 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
      */
     private static final String OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS =
             "should_show_system_decorations";
+
+    // Gravity flags to decide where the overlay should be shown.
+    private static final String GRAVITY_TOP_LEFT = "gravity_top_left";
+    private static final String GRAVITY_BOTTOM_RIGHT = "gravity_bottom_right";
+    private static final String GRAVITY_TOP_RIGHT = "gravity_top_right";
+    private static final String GRAVITY_BOTTOM_LEFT = "gravity_bottom_left";
 
     private static final int MIN_WIDTH = 100;
     private static final int MIN_HEIGHT = 100;
@@ -237,8 +247,11 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     String name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_overlay_display_name,
                             number);
-                    int gravity = chooseOverlayGravity(number);
                     OverlayFlags flags = OverlayFlags.parseFlags(flagString);
+                    int gravity = flags.mGravity;
+                    if (flags.mGravity == Gravity.NO_GRAVITY) {
+                        gravity = chooseOverlayGravity(number);
+                    }
 
                     Slog.i(TAG, "Showing overlay display device #" + number
                             + ": name=" + name + ", modes=" + Arrays.toString(modes.toArray())
@@ -264,6 +277,16 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             default:
                 return Gravity.BOTTOM | Gravity.LEFT;
         }
+    }
+
+    private static int parseOverlayGravity(String overlayGravity) {
+        return switch (overlayGravity) {
+            case GRAVITY_TOP_LEFT -> Gravity.TOP | Gravity.LEFT;
+            case GRAVITY_TOP_RIGHT -> Gravity.TOP | Gravity.RIGHT;
+            case GRAVITY_BOTTOM_RIGHT -> Gravity.BOTTOM | Gravity.RIGHT;
+            case GRAVITY_BOTTOM_LEFT -> Gravity.BOTTOM | Gravity.LEFT;
+            default -> Gravity.NO_GRAVITY;
+        };
     }
 
     private abstract class OverlayDisplayDevice extends DisplayDevice {
@@ -605,13 +628,17 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         /** See {@link #OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS}. */
         final boolean mShouldShowSystemDecorations;
 
+        final int mGravity;
+
         OverlayFlags(
                 boolean secure,
                 boolean ownContentOnly,
-                boolean shouldShowSystemDecorations) {
+                boolean shouldShowSystemDecorations,
+                int gravity) {
             mSecure = secure;
             mOwnContentOnly = ownContentOnly;
             mShouldShowSystemDecorations = shouldShowSystemDecorations;
+            mGravity = gravity;
         }
 
         static OverlayFlags parseFlags(@Nullable String flagString) {
@@ -619,24 +646,26 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 return new OverlayFlags(
                         false /* secure */,
                         false /* ownContentOnly */,
-                        false /* shouldShowSystemDecorations */);
+                        false /* shouldShowSystemDecorations */,
+                        Gravity.NO_GRAVITY);
             }
 
             boolean secure = false;
             boolean ownContentOnly = false;
             boolean shouldShowSystemDecorations = false;
+            int gravity = Gravity.NO_GRAVITY;
             for (String flag: flagString.split(FLAG_SPLITTER)) {
                 if (OVERLAY_DISPLAY_FLAG_SECURE.equals(flag)) {
                     secure = true;
-                }
-                if (OVERLAY_DISPLAY_FLAG_OWN_CONTENT_ONLY.equals(flag)) {
+                } else if (OVERLAY_DISPLAY_FLAG_OWN_CONTENT_ONLY.equals(flag)) {
                     ownContentOnly = true;
-                }
-                if (OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS.equals(flag)) {
+                } else if (OVERLAY_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS.equals(flag)) {
                     shouldShowSystemDecorations = true;
+                } else {
+                    gravity = parseOverlayGravity(flag);
                 }
             }
-            return new OverlayFlags(secure, ownContentOnly, shouldShowSystemDecorations);
+            return new OverlayFlags(secure, ownContentOnly, shouldShowSystemDecorations, gravity);
         }
 
         @Override
@@ -645,6 +674,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     .append("secure=").append(mSecure)
                     .append(", ownContentOnly=").append(mOwnContentOnly)
                     .append(", shouldShowSystemDecorations=").append(mShouldShowSystemDecorations)
+                    .append(", gravity").append(Gravity.toString(mGravity))
                     .append("}")
                     .toString();
         }
