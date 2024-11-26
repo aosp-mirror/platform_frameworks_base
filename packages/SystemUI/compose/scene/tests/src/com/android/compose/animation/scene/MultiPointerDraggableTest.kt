@@ -101,7 +101,6 @@ class MultiPointerDraggableTest {
                     .thenIf(enabled) {
                         Modifier.multiPointerDraggable(
                             orientation = Orientation.Vertical,
-                            startDragImmediately = { false },
                             onDragStarted = { _, _ ->
                                 started = true
                                 SimpleDragController(
@@ -169,8 +168,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        // We want to start a drag gesture immediately
-                        startDragImmediately = { true },
                         onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
@@ -242,7 +239,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
@@ -361,7 +357,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         onDragStarted = { _, _ ->
                             started = true
                             SimpleDragController(
@@ -466,7 +461,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         onDragStarted = { _, _ ->
                             verticalStarted = true
                             SimpleDragController(
@@ -478,7 +472,6 @@ class MultiPointerDraggableTest {
                     )
                     .multiPointerDraggable(
                         orientation = Orientation.Horizontal,
-                        startDragImmediately = { false },
                         onDragStarted = { _, _ ->
                             horizontalStarted = true
                             SimpleDragController(
@@ -570,7 +563,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         swipeDetector =
                             object : SwipeDetector {
                                 override fun detectSwipe(change: PointerInputChange): Boolean {
@@ -636,7 +628,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         swipeDetector =
                             object : SwipeDetector {
                                 override fun detectSwipe(change: PointerInputChange): Boolean {
@@ -738,7 +729,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         onDragStarted = { _, _ ->
                             SimpleDragController(
                                 onDrag = { consumedOnDrag = it },
@@ -809,7 +799,6 @@ class MultiPointerDraggableTest {
                     .nestedScrollDispatcher()
                     .multiPointerDraggable(
                         orientation = Orientation.Vertical,
-                        startDragImmediately = { false },
                         onDragStarted = { _, _ ->
                             SimpleDragController(
                                 onDrag = { /* do nothing */ },
