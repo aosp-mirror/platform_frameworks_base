@@ -261,11 +261,11 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
- }
+}
 
- flag {
+flag {
     name: "indeterminate_range_info"
     namespace: "accessibility"
     description: "Creates a way to create an INDETERMINATE RangeInfo"
     bug: "376108874"
- }
+}
