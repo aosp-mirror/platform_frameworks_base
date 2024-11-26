@@ -21,20 +21,24 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import com.android.app.tracing.coroutines.coroutineScopeTraced
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.volume.Events
+import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
-import com.android.systemui.volume.dialog.ui.binder.VolumeDialogViewBinder
 import javax.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 
 class VolumeDialog
 @Inject
 constructor(
     @Application context: Context,
-    private val viewBinder: VolumeDialogViewBinder,
+    private val componentFactory: VolumeDialogComponent.Factory,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
 ) : Dialog(context, R.style.Theme_SystemUI_Dialog_Volume) {
 
@@ -64,7 +68,14 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.volume_dialog)
-        viewBinder.bind(this)
+        requireViewById<View>(R.id.volume_dialog_root).repeatWhenAttached {
+            coroutineScopeTraced("[Volume]dialog") {
+                val component = componentFactory.create(this)
+                with(component.volumeDialogViewBinder()) { bind(this@VolumeDialog) }
+
+                awaitCancellation()
+            }
+        }
     }
 
     /**
