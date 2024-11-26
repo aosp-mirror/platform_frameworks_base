@@ -48,7 +48,14 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
     minikinPaint.fontStyle = resolvedFace->fStyle;
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
-    minikinPaint.fontVariationSettings = paint->getFontVariationOverride();
+    if (!resolvedFace->fIsVariationInstance) {
+        // This is an optimization for direct private API use typically done by System UI.
+        // In the public API surface, if Typeface is already configured for variation instance
+        // (Target SDK <= 35) the font variation settings of Paint is not set.
+        // On the other hand, if Typeface is not configured so (Target SDK >= 36), the font
+        // variation settings are configured dynamically.
+        minikinPaint.fontVariationSettings = paint->getFontVariationOverride();
+    }
     minikinPaint.verticalText = paint->isVerticalText();
 
     const std::optional<minikin::FamilyVariant>& familyVariant = paint->getFamilyVariant();
