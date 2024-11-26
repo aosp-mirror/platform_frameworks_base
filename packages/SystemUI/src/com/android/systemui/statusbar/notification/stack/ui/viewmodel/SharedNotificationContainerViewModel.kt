@@ -116,7 +116,7 @@ constructor(
     private val interactor: SharedNotificationContainerInteractor,
     dumpManager: DumpManager,
     @Application applicationScope: CoroutineScope,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
