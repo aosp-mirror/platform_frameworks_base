@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * This service manage picture profile and sound profile for TV setting. Also communicates with the
@@ -90,6 +91,7 @@ public class MediaQualityService extends SystemService {
         public void updatePictureProfile(String id, PictureProfile pp) {
             // TODO: implement
         }
+
         @Override
         public void removePictureProfile(String id) {
             // TODO: implement
@@ -220,11 +222,9 @@ public class MediaQualityService extends SystemService {
             String [] column = {BaseParameters.PARAMETER_NAME};
             List<PictureProfile> pictureProfiles = getPictureProfilesBasedOnConditions(column,
                     null, null);
-            List<String> packageNames = new ArrayList<>();
-            for (PictureProfile pictureProfile: pictureProfiles) {
-                packageNames.add(pictureProfile.getName());
-            }
-            return packageNames;
+            return pictureProfiles.stream()
+                    .map(PictureProfile::getName)
+                    .collect(Collectors.toList());
         }
 
         private List<PictureProfile> getPictureProfilesBasedOnConditions(String[] columns,
@@ -283,21 +283,107 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public SoundProfile getSoundProfile(int type, String id) {
-            return null;
+            SQLiteDatabase db = mMediaQualityDbHelper.getReadableDatabase();
+
+            String selection = BaseParameters.PARAMETER_ID + " = ?";
+            String[] selectionArguments = {id};
+
+            try (
+                    Cursor cursor = db.query(
+                            mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME,
+                            getAllSoundProfileColumns(),
+                            selection,
+                            selectionArguments,
+                            /*groupBy=*/ null,
+                            /*having=*/ null,
+                            /*orderBy=*/ null)
+            ) {
+                int count = cursor.getCount();
+                if (count == 0) {
+                    return null;
+                }
+                if (count > 1) {
+                    Log.wtf(TAG, String.format(Locale.US, "%d entries found for id=%s"
+                                    + " in %s. Should only ever be 0 or 1.", count, id,
+                            mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME));
+                    return null;
+                }
+                cursor.moveToFirst();
+                return getSoundProfileFromCursor(cursor);
+            }
         }
+
         @Override
         public List<SoundProfile> getSoundProfilesByPackage(String packageName) {
-            return new ArrayList<>();
+            String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
+            String[] selectionArguments = {packageName};
+            return getSoundProfilesBasedOnConditions(getAllSoundProfileColumns(), selection,
+                    selectionArguments);
         }
+
         @Override
         public List<SoundProfile> getAvailableSoundProfiles() {
             return new ArrayList<>();
         }
+
         @Override
         public List<String> getSoundProfilePackageNames() {
-            return new ArrayList<>();
+            String [] column = {BaseParameters.PARAMETER_NAME};
+            List<SoundProfile> soundProfiles = getSoundProfilesBasedOnConditions(column,
+                    null, null);
+            return soundProfiles.stream()
+                    .map(SoundProfile::getName)
+                    .collect(Collectors.toList());
         }
 
+        private String[] getAllSoundProfileColumns() {
+            return new String[]{
+                    BaseParameters.PARAMETER_ID,
+                    BaseParameters.PARAMETER_NAME,
+                    BaseParameters.PARAMETER_INPUT_ID,
+                    BaseParameters.PARAMETER_PACKAGE,
+                    mMediaQualityDbHelper.SETTINGS
+            };
+        }
+
+        private SoundProfile getSoundProfileFromCursor(Cursor cursor) {
+            String returnId = cursor.getString(
+                    cursor.getColumnIndexOrThrow(BaseParameters.PARAMETER_ID));
+            int type = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(BaseParameters.PARAMETER_TYPE));
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(BaseParameters.PARAMETER_NAME));
+            String inputId = cursor.getString(
+                    cursor.getColumnIndexOrThrow(BaseParameters.PARAMETER_INPUT_ID));
+            String packageName = cursor.getString(
+                    cursor.getColumnIndexOrThrow(BaseParameters.PARAMETER_PACKAGE));
+            String settings = cursor.getString(
+                    cursor.getColumnIndexOrThrow(mMediaQualityDbHelper.SETTINGS));
+            return new SoundProfile(returnId, type, name, inputId, packageName,
+                    jsonToBundle(settings));
+        }
+
+        private List<SoundProfile> getSoundProfilesBasedOnConditions(String[] columns,
+                String selection, String[] selectionArguments) {
+            SQLiteDatabase db = mMediaQualityDbHelper.getReadableDatabase();
+
+            try (
+                    Cursor cursor = db.query(
+                            mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME,
+                            columns,
+                            selection,
+                            selectionArguments,
+                            /*groupBy=*/ null,
+                            /*having=*/ null,
+                            /*orderBy=*/ null)
+            ) {
+                List<SoundProfile> soundProfiles = new ArrayList<>();
+                while (cursor.moveToNext()) {
+                    soundProfiles.add(getSoundProfileFromCursor(cursor));
+                }
+                return soundProfiles;
+            }
+        }
 
         @Override
         public void registerPictureProfileCallback(final IPictureProfileCallback callback) {
