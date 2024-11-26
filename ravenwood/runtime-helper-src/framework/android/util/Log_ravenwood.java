@@ -15,8 +15,10 @@
  */
 package android.util;
 
+import android.annotation.Nullable;
 import android.util.Log.Level;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
@@ -24,7 +26,9 @@ import com.android.ravenwood.common.RavenwoodCommonUtils;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Ravenwood "native substitution" class for {@link android.util.Log}.
@@ -35,16 +39,101 @@ import java.util.Locale;
  */
 public class Log_ravenwood {
 
-    public static final SimpleDateFormat sTimestampFormat =
+    private static final SimpleDateFormat sTimestampFormat =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US);
 
-    public static boolean isLoggable(String tag, @Level int level) {
-        return true;
+    private static final Object sLock = new Object();
+
+    @GuardedBy("sLock")
+    private static int sDefaultLogLevel;
+
+    @GuardedBy("sLock")
+    private static final Map<String, Integer> sTagLogLevels = new HashMap<>();
+
+    /**
+     * Used by {@link android.platform.test.ravenwood.RavenwoodRule#setAndroidLogTags(String)}
+     * via reflections.
+     */
+    public static void setLogLevels(String androidLogTags) {
+        var map = parseLogLevels(androidLogTags);
+
+        synchronized (sLock) {
+            sTagLogLevels.clear();
+            sTagLogLevels.putAll(map);
+
+            var def = map.get("*");
+            sDefaultLogLevel = def != null ? def
+                    : RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING ?  Log.VERBOSE : Log.INFO;
+        }
+    }
+
+    private static Map<String, Integer> parseLogLevels(String androidLogTags) {
+        final Map<String, Integer> ret = new HashMap<>();
+
+        if (androidLogTags == null) {
+            return ret;
+        }
+
+        String[] tagPairs = androidLogTags.trim().split("\\s+");
+        for (String tagPair : tagPairs) {
+            String[] parts = tagPair.split(":");
+            if (parts.length == 2) {
+                String tag = parts[0];
+                try {
+                    int priority = switch (parts[1]) {
+                        case "V": yield Log.VERBOSE;
+                        case "D": yield Log.DEBUG;
+                        case "I": yield Log.INFO;
+                        case "W": yield Log.WARN;
+                        case "E": yield Log.ERROR;
+                        case "F": yield Log.ERROR + 1; // Not used in the java side.
+                        case "S": yield Integer.MAX_VALUE; // Silent
+                        default: throw new IllegalArgumentException(
+                                "Invalid priority level for tag: " + tag);
+                    };
+
+                    ret.put(tag, priority);
+                } catch (IllegalArgumentException e) {
+                    System.err.println(e.getMessage());
+                }
+            } else {
+                System.err.println("Invalid tag format: " + tagPair);
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * Used by {@link android.platform.test.ravenwood.RavenwoodRule#setLogLevel(String, int)}
+     * via reflections. Pass NULL to {@code tag} to set the default level.
+     */
+    public static void setLogLevel(@Nullable String tag, int level) {
+        synchronized (sLock) {
+            if (tag == null) {
+                sDefaultLogLevel = level;
+            } else {
+                sTagLogLevels.put(tag, level);
+            }
+        }
+    }
+
+    /**
+     * Replaces {@link Log#isLoggable}.
+     */
+    public static boolean isLoggable(String tag, @Level int priority) {
+        synchronized (sLock) {
+            var threshold = sTagLogLevels.get(tag);
+            if (threshold == null) {
+                threshold = sDefaultLogLevel;
+            }
+            return priority >= threshold;
+        }
     }
 
     public static int println_native(int bufID, int priority, String tag, String msg) {
-        if (priority < Log.INFO && !RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING) {
-            return msg.length(); // No verbose logging.
+        if (!isLoggable(tag, priority)) {
+            return msg.length();
         }
 
         final String prio;
