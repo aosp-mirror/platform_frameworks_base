@@ -867,9 +867,6 @@ constructor(
                     ) {
                         // Raise closing task to "above" layer so it isn't covered.
                         t.setLayer(target.leash, aboveLayers - i)
-                    } else if (TransitionUtil.isOpeningType(change.mode)) {
-                        // Put into the "below" layer space.
-                        t.setLayer(target.leash, belowLayers - i)
                     }
                 } else if (TransitionInfo.isIndependent(change, info)) {
                     // Root tasks
@@ -1136,7 +1133,7 @@ constructor(
                 // If a [controller.windowAnimatorState] exists, treat this like a takeover.
                 takeOverAnimationInternal(
                     window,
-                    startWindowState = null,
+                    startWindowStates = null,
                     startTransaction = null,
                     callback,
                 )
@@ -1151,23 +1148,22 @@ constructor(
             callback: IRemoteAnimationFinishedCallback?,
         ) {
             val window = setUpAnimation(apps, callback) ?: return
-            val startWindowState = startWindowStates[apps!!.indexOf(window)]
-            takeOverAnimationInternal(window, startWindowState, startTransaction, callback)
+            takeOverAnimationInternal(window, startWindowStates, startTransaction, callback)
         }
 
         private fun takeOverAnimationInternal(
             window: RemoteAnimationTarget,
-            startWindowState: WindowAnimationState?,
+            startWindowStates: Array<WindowAnimationState>?,
             startTransaction: SurfaceControl.Transaction?,
             callback: IRemoteAnimationFinishedCallback?,
         ) {
             val useSpring =
-                !controller.isLaunching && startWindowState != null && startTransaction != null
+                !controller.isLaunching && startWindowStates != null && startTransaction != null
             startAnimation(
                 window,
                 navigationBar = null,
                 useSpring,
-                startWindowState,
+                startWindowStates,
                 startTransaction,
                 callback,
             )
@@ -1277,7 +1273,7 @@ constructor(
             window: RemoteAnimationTarget,
             navigationBar: RemoteAnimationTarget? = null,
             useSpring: Boolean = false,
-            startingWindowState: WindowAnimationState? = null,
+            startingWindowStates: Array<WindowAnimationState>? = null,
             startTransaction: SurfaceControl.Transaction? = null,
             iCallback: IRemoteAnimationFinishedCallback? = null,
         ) {
@@ -1323,7 +1319,6 @@ constructor(
 
             val isExpandingFullyAbove =
                 transitionAnimator.isExpandingFullyAbove(controller.transitionContainer, endState)
-            val windowState = startingWindowState ?: controller.windowAnimatorState
 
             // We animate the opening window and delegate the view expansion to [this.controller].
             val delegate = this.controller
@@ -1345,6 +1340,18 @@ constructor(
                                     )
                                 }
                         }
+
+                        // The states are sorted matching the changes inside the transition info.
+                        // Using this info, the RemoteAnimationTargets are created, with their
+                        // prefixOrderIndex fields in reverse order to that of changes. To extract
+                        // the right state, we need to invert again.
+                        val windowState =
+                            if (startingWindowStates != null) {
+                                startingWindowStates[
+                                    startingWindowStates.size - window.prefixOrderIndex]
+                            } else {
+                                controller.windowAnimatorState
+                            }
 
                         // TODO(b/323863002): use the timestamp and velocity to update the initial
                         //   position.
@@ -1434,6 +1441,12 @@ constructor(
                         delegate.onTransitionAnimationProgress(state, progress, linearProgress)
                     }
                 }
+            val windowState =
+                if (startingWindowStates != null) {
+                    startingWindowStates[startingWindowStates.size - window.prefixOrderIndex]
+                } else {
+                    controller.windowAnimatorState
+                }
             val velocityPxPerS =
                 if (longLivedReturnAnimationsEnabled() && windowState?.velocityPxPerMs != null) {
                     val xVelocityPxPerS = windowState.velocityPxPerMs.x * 1000
@@ -1452,7 +1465,6 @@ constructor(
                     fadeWindowBackgroundLayer = !controller.isBelowAnimatingWindow,
                     drawHole = !controller.isBelowAnimatingWindow,
                     startVelocity = velocityPxPerS,
-                    startFrameTime = windowState?.timestamp ?: -1,
                 )
         }
 
