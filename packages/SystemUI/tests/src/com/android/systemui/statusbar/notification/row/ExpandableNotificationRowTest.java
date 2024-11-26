@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiForceExpanded;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
@@ -875,6 +876,85 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         // THEN
         assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_sensitivePromotedNotification_notExpanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setSensitive(/* sensitive= */true, /* hideSensitive= */false);
+        row.setHideSensitiveForIntrinsicHeight(/* hideSensitive= */true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationNotOnKeyguard_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationAllowOnKeyguard_expanded() throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+
+        // THEN
+        assertThat(row.isExpanded(/* allowOnKeyguard = */ true)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationIgnoreLockscreenConstraints_expanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+        row.setIgnoreLockscreenConstraints(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationSaveSpaceOnLockScreen_notExpanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+        row.setSaveSpaceOnLockscreen(true);
+
+        // THEN
+        assertThat(row.isExpanded()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUiForceExpanded.FLAG_NAME)
+    public void isExpanded_promotedNotificationNotSaveSpaceOnLockScreen_expanded()
+            throws Exception {
+        // GIVEN
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        row.setPromotedOngoing(true);
+        row.setOnKeyguard(true);
+        row.setSaveSpaceOnLockscreen(false);
+
+        // THEN
+        assertThat(row.isExpanded()).isTrue();
     }
 
     @Test

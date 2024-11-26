@@ -106,6 +106,7 @@ import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiForceExpanded;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedaction;
@@ -163,6 +164,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowSnooze = false;
     private boolean mIsFaded;
 
+    private boolean mIsPromotedOngoing = false;
+
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
      */
@@ -196,6 +199,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mMaxSmallHeightBeforeS;
     private int mMaxSmallHeight;
     private int mMaxExpandedHeight;
+    private int mMaxExpandedHeightForPromotedOngoing;
     private int mNotificationLaunchHeight;
     private boolean mMustStayOnScreen;
 
@@ -328,6 +332,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * True if we always show the collapsed layout on lockscreen because vertical space is low.
      */
     private boolean mSaveSpaceOnLockscreen;
+
+    /**
+     * It is added for unit testing purpose.
+     * Please do not use it for other purposes.
+     */
+    @VisibleForTesting
+    public void setIgnoreLockscreenConstraints(boolean ignoreLockscreenConstraints) {
+        mIgnoreLockscreenConstraints = ignoreLockscreenConstraints;
+    }
 
     /**
      * True if we use intrinsic height regardless of vertical space available on lockscreen.
@@ -803,6 +816,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateLimitsForView(NotificationContentView layout) {
+        final int maxExpandedHeight;
+        if (isPromotedOngoing()) {
+            maxExpandedHeight = mMaxExpandedHeightForPromotedOngoing;
+        } else {
+            maxExpandedHeight = mMaxExpandedHeight;
+        }
+
         View contractedView = layout.getContractedChild();
         boolean customView = contractedView != null
                 && contractedView.getId()
@@ -823,7 +843,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 smallHeight = mMaxSmallHeightBeforeS;
             }
         } else if (isCallLayout) {
-            smallHeight = mMaxExpandedHeight;
+            smallHeight = maxExpandedHeight;
         } else {
             smallHeight = mMaxSmallHeight;
         }
@@ -847,7 +867,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (headsUpWrapper != null) {
             headsUpHeight = Math.max(headsUpHeight, headsUpWrapper.getMinLayoutHeight());
         }
-        layout.setHeights(smallHeight, headsUpHeight, mMaxExpandedHeight);
+
+        layout.setHeights(smallHeight, headsUpHeight, maxExpandedHeight);
     }
 
     @NonNull
@@ -1256,6 +1277,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int getPinnedHeadsUpHeight(boolean atLeastMinHeight) {
         if (mIsSummaryWithChildren) {
             return mChildrenContainer.getIntrinsicHeight();
+        }
+        if (isPromotedOngoing()) {
+            return getMaxExpandHeight();
         }
         if (mExpandedWhenPinned) {
             return Math.max(getMaxExpandHeight(), getHeadsUpHeight());
@@ -2072,6 +2096,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mMaxExpandedHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
+        mMaxExpandedHeightForPromotedOngoing = NotificationUtils.getFontScaledHeight(mContext,
+                R.dimen.notification_max_height_for_promoted_ongoing);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height_legacy);
         mMaxHeadsUpHeightBeforeP = NotificationUtils.getFontScaledHeight(mContext,
@@ -2757,12 +2783,27 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return !mChildrenExpanded;
         }
+        if (isPromotedOngoing()) {
+            return false;
+        }
         return mEnableNonGroupedNotificationExpand && mExpandable;
     }
 
     public void setExpandable(boolean expandable) {
         mExpandable = expandable;
         mPrivateLayout.updateExpandButtons(isExpandable());
+    }
+
+    /**
+     * Set this notification to be promoted ongoing
+     */
+    public void setPromotedOngoing(boolean promotedOngoing) {
+        if (PromotedNotificationUiForceExpanded.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        mIsPromotedOngoing = promotedOngoing;
+        setExpandable(!mIsPromotedOngoing);
     }
 
     @Override
@@ -2834,6 +2875,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setUserLocked(boolean userLocked) {
+        if (isPromotedOngoing()) return;
+
         mUserLocked = userLocked;
         mPrivateLayout.setUserExpanding(userLocked);
         // This is intentionally not guarded with mIsSummaryWithChildren since we might have had
@@ -2995,6 +3038,35 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    public boolean isPromotedOngoing() {
+        return PromotedNotificationUiForceExpanded.isEnabled() && mIsPromotedOngoing;
+    }
+
+    private boolean isPromotedNotificationExpanded(boolean allowOnKeyguard) {
+        // public view in non group notifications is always collapsed.
+        if (shouldShowPublic()) {
+            return false;
+        }
+        // RON will always be expanded when it is not on keyguard.
+        if (!mOnKeyguard) {
+            return true;
+        }
+        // RON will always be expanded when it is allowed on keyguard.
+        // allowOnKeyguard is used for getting the maximum height by NotificationContentView and
+        // NotificationChildrenContainer.
+        if (allowOnKeyguard) {
+            return true;
+        }
+
+        // RON will be expanded when it needs to ignore lockscreen constraints.
+        if (mIgnoreLockscreenConstraints) {
+            return true;
+        }
+
+        // RON will need be collapsed when it needs to save space on the lock screen.
+        return !mSaveSpaceOnLockscreen;
+    }
+
     /**
      * Check whether the view state is currently expanded. This is given by the system in {@link
      * #setSystemExpanded(boolean)} and can be overridden by user expansion or
@@ -3008,6 +3080,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
+        if (isPromotedOngoing()) {
+            return isPromotedNotificationExpanded(allowOnKeyguard);
+        }
+
         return (!shouldShowPublic()) && (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion()
                 && (isSystemExpanded() || isSystemChildExpanded())
@@ -4006,6 +4082,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     + (!shouldShowPublic() && mIsSummaryWithChildren));
             pw.print(", mShowNoBackground: " + mShowNoBackground);
             pw.print(", clipBounds: " + getClipBounds());
+            if (PromotedNotificationUiForceExpanded.isEnabled()) {
+                pw.print(", isPromotedOngoing: " + isPromotedOngoing());
+                pw.print(", isExpandable: " + isExpandable());
+                pw.print(", mExpandable: " + mExpandable);
+            }
 
             pw.println();
             if (NotificationContentView.INCLUDE_HEIGHTS_TO_DUMP) {

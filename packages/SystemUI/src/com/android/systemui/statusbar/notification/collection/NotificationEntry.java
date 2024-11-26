@@ -836,6 +836,14 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /**
+     * Returns whether the NotificationEntry is promoted ongoing.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public boolean isOngoingPromoted() {
+        return mSbn.getNotification().isPromotedOngoing();
+    }
+
+    /**
      * Returns whether this row is considered blockable (i.e. it's not a system notif
      * or is not in an allowList).
      */
