@@ -58,10 +58,13 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_windowing_scvh_cache"
+    name: "enable_desktop_windowing_scvh_cache_bug_fix"
     namespace: "lse_desktop_experience"
     description: "Enables a SurfaceControlViewHost cache for window decorations"
-    bug: "345146928"
+    bug: "360452034"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
