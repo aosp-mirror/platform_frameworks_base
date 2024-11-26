@@ -21,22 +21,20 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.Process;
 
-import android.security.intrusiondetection.IntrusionDetectionEventTransport;
-
 import com.android.internal.infra.AndroidFuture;
 
 
 public class TestLoggingService extends Service {
     private static final String TAG = "TestLoggingService";
-    private IntrusionDetectionEventTransport mIntrusionDetectionEventTransport;
+    private LocalIntrusionDetectionEventTransport mLocalIntrusionDetectionEventTransport;
 
     public TestLoggingService() {
-        mIntrusionDetectionEventTransport = new IntrusionDetectionEventTransport();
+        mLocalIntrusionDetectionEventTransport = new LocalIntrusionDetectionEventTransport();
     }
 
     // Binder given to clients.
     @Override
     public IBinder onBind(Intent intent) {
-        return mIntrusionDetectionEventTransport.getBinder();
+        return mLocalIntrusionDetectionEventTransport.getBinder();
     }
 }

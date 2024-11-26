@@ -26,19 +26,9 @@ android_test_helper_app {
     name: "TestIntrusionDetectionApp",
 
     static_libs: [
-        "androidx.test.core",
-        "androidx.test.rules",
-        "androidx.test.runner",
-        "compatibility-device-util-axt",
         "frameworks-base-testutils",
-        "junit",
-        "platform-test-annotations",
         "services.core",
         "servicestests-utils",
-        "coretests-aidl",
-        "truth",
-        "Nene",
-        "Harrier",
     ],
 
     srcs: ["**/*.java"],

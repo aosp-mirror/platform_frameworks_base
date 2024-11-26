@@ -54,7 +54,6 @@ import android.os.test.TestLooper;
 import android.security.intrusiondetection.IIntrusionDetectionServiceCommandCallback;
 import android.security.intrusiondetection.IIntrusionDetectionServiceStateCallback;
 import android.security.intrusiondetection.IntrusionDetectionEvent;
-import android.security.intrusiondetection.IntrusionDetectionEventTransport;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
@@ -71,6 +70,7 @@ import com.android.bedstead.nene.exceptions.NeneException;
 import com.android.bedstead.permissions.CommonPermissions;
 import com.android.bedstead.permissions.PermissionContext;
 import com.android.bedstead.permissions.annotations.EnsureHasPermission;
+import com.android.coretests.apps.testapp.LocalIntrusionDetectionEventTransport;
 import com.android.internal.infra.AndroidFuture;
 import com.android.server.ServiceThread;
 
@@ -601,7 +601,8 @@ public class IntrusionDetectionServiceTest {
     private ServiceConnection startTestService() throws SecurityException, InterruptedException {
         final String TAG = "startTestService";
         final CountDownLatch latch = new CountDownLatch(1);
-        IntrusionDetectionEventTransport transport = new IntrusionDetectionEventTransport();
+        LocalIntrusionDetectionEventTransport transport =
+                new LocalIntrusionDetectionEventTransport();
 
         ServiceConnection serviceConnection = new ServiceConnection() {
             // Called when connection with the service is established.
@@ -624,6 +625,16 @@ public class IntrusionDetectionServiceTest {
         intent.setComponent(new ComponentName(TEST_PKG, TEST_SERVICE));
         mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
         latch.await(5, TimeUnit.SECONDS);
+
+        // call the methods on the transport object
+        IntrusionDetectionEvent event =
+                new IntrusionDetectionEvent(new SecurityEvent(123, new byte[15]));
+        List<IntrusionDetectionEvent> events = new ArrayList<>();
+        events.add(event);
+        assertTrue(transport.initialize());
+        assertTrue(transport.addData(events));
+        assertTrue(transport.release());
+        assertEquals(1, transport.getEvents().size());
 
         return serviceConnection;
     }
