@@ -27,6 +27,7 @@ import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.helpers.FIND_TIMEOUT
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.ConditionsFactory
+import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.component.IComponentMatcher
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.parsers.toFlickerComponent
@@ -35,12 +36,11 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 
-open class PipAppHelper(instrumentation: Instrumentation) :
-    StandardAppHelper(
-        instrumentation,
-        ActivityOptions.Pip.LABEL,
-        ActivityOptions.Pip.COMPONENT.toFlickerComponent()
-    ) {
+open class PipAppHelper(
+    instrumentation: Instrumentation,
+    appName: String = ActivityOptions.Pip.LABEL,
+    componentNameMatcher: ComponentNameMatcher = ActivityOptions.Pip.COMPONENT.toFlickerComponent(),
+) : StandardAppHelper(instrumentation, appName, componentNameMatcher) {
     private val mediaSessionManager: MediaSessionManager
         get() =
             context.getSystemService(MediaSessionManager::class.java)
