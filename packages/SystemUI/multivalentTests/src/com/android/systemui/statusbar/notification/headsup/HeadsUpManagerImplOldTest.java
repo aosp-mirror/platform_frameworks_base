@@ -81,8 +81,8 @@ import java.util.List;
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(ParameterizedAndroidJunit4.class)
-// TODO(b/378142453): Merge this with HeadsUpManagerPhoneTest.
-public class HeadsUpManagerImplTest extends SysuiTestCase {
+// TODO(b/378142453): Merge this with HeadsUpManagerImplTest.
+public class HeadsUpManagerImplOldTest extends SysuiTestCase {
     protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
 
     @Rule
@@ -169,7 +169,7 @@ public class HeadsUpManagerImplTest extends SysuiTestCase {
         return FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME);
     }
 
-    public HeadsUpManagerImplTest(FlagsParameterization flags) {
+    public HeadsUpManagerImplOldTest(FlagsParameterization flags) {
         mSetFlagsRule.setFlagsParameterization(flags);
     }
 

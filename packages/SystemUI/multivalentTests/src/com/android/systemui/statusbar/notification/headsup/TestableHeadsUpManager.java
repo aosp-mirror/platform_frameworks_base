@@ -78,10 +78,10 @@ class TestableHeadsUpManager extends HeadsUpManagerImpl {
                 shadeInteractor,
                 avalancheController);
 
-        mTouchAcceptanceDelay = HeadsUpManagerImplTest.TEST_TOUCH_ACCEPTANCE_TIME;
-        mMinimumDisplayTime = HeadsUpManagerImplTest.TEST_MINIMUM_DISPLAY_TIME;
-        mAutoDismissTime = HeadsUpManagerImplTest.TEST_AUTO_DISMISS_TIME;
-        mStickyForSomeTimeAutoDismissTime = HeadsUpManagerImplTest.TEST_STICKY_AUTO_DISMISS_TIME;
+        mTouchAcceptanceDelay = HeadsUpManagerImplOldTest.TEST_TOUCH_ACCEPTANCE_TIME;
+        mMinimumDisplayTime = HeadsUpManagerImplOldTest.TEST_MINIMUM_DISPLAY_TIME;
+        mAutoDismissTime = HeadsUpManagerImplOldTest.TEST_AUTO_DISMISS_TIME;
+        mStickyForSomeTimeAutoDismissTime = HeadsUpManagerImplOldTest.TEST_STICKY_AUTO_DISMISS_TIME;
     }
 
     @NonNull
