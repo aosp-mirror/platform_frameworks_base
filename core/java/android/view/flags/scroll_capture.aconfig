@@ -3,7 +3,7 @@ container: "system"
 
 flag {
     name: "scroll_capture_target_z_order_fix"
-    namespace: "system_ui"
+    namespace: "systemui"
     description: "Always prefer targets with higher z-order"
     bug: "365969802"
     metadata {
