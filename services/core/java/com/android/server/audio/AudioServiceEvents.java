@@ -657,8 +657,8 @@ public class AudioServiceEvents {
                     return "CSD lowering volume to RS1";
                 case UPDATE_ABS_VOLUME_ATTENUATION:
                     return String.format(java.util.Locale.US,
-                            "Updating CSD absolute volume attenuation on device %d with %.2f dB ",
-                            mLongValue, mFloatValue);
+                            "Updating CSD absolute volume attenuation on device 0x%s with %.2f dB ",
+                            Long.toHexString(mLongValue), mFloatValue);
             }
             return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }
