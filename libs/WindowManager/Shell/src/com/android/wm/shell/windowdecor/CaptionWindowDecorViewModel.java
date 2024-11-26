@@ -468,7 +468,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
                 case MotionEvent.ACTION_DOWN: {
                     mDragPointerId = e.getPointerId(0);
                     mDragPositioningCallback.onDragPositioningStart(
-                            0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
+                            0 /* ctrlType */, e.getDisplayId(), e.getRawX(0), e.getRawY(0));
                     mIsDragging = false;
                     return false;
                 }
@@ -481,6 +481,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
                     if (decoration.isHandlingDragResize()) break;
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningMove(
+                            e.getDisplayId(),
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mIsDragging = true;
                     return true;
@@ -492,6 +493,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
                     }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
+                            e.getDisplayId(),
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(newTaskBounds,
                             mWindowDecorByTaskId.get(mTaskId).calculateValidDragArea());
