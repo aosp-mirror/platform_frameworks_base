@@ -140,6 +140,11 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "tv_os",
+        "aaos_carframework_triage",
+        "aaos_performance_triage",
+        "aaos_user_triage",
+        "aaos_window_triage",
         "aaos_audio_triage",
         "aaos_power_triage",
         "aaos_sdv",
