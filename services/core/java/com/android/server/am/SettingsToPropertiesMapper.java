@@ -42,7 +42,6 @@ import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
-import static com.android.aconfig.flags.Flags.enableSystemAconfigdRust;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -461,9 +460,8 @@ public class SettingsToPropertiesMapper {
     static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
-        String socketName = enableSystemAconfigdRust()
-                    ? "aconfigd_system" : "aconfigd";
-        try{
+        String socketName = "aconfigd_system";
+        try {
             client.connect(new LocalSocketAddress(
                 socketName, LocalSocketAddress.Namespace.RESERVED));
             Slog.d(TAG, "connected to aconfigd socket");
