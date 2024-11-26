@@ -51,9 +51,9 @@ public:
 
     ~PointerController() override;
 
-    FloatPoint move(float deltaX, float deltaY) override;
+    vec2 move(float deltaX, float deltaY) override;
     void setPosition(float x, float y) override;
-    FloatPoint getPosition() const override;
+    vec2 getPosition() const override;
     ui::LogicalDisplayId getDisplayId() const override;
     void fade(Transition transition) override;
     void unfade(Transition transition) override;
@@ -166,13 +166,13 @@ public:
 
     ~TouchPointerController() override;
 
-    FloatPoint move(float, float) override {
+    vec2 move(float, float) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void setPosition(float, float) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    FloatPoint getPosition() const override {
+    vec2 getPosition() const override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     ui::LogicalDisplayId getDisplayId() const override {

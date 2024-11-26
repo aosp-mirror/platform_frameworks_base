@@ -362,7 +362,7 @@ public:
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
-    FloatPoint getMouseCursorPosition(ui::LogicalDisplayId displayId);
+    vec2 getMouseCursorPosition(ui::LogicalDisplayId displayId);
     void setStylusPointerIconEnabled(bool enabled);
     void setInputMethodConnectionIsActive(bool isActive);
     void setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping);
@@ -441,7 +441,7 @@ public:
     std::shared_ptr<PointerControllerInterface> createPointerController(
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
-                                       const FloatPoint& position) override;
+                                       const vec2& position) override;
     void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
@@ -871,7 +871,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerCon
 }
 
 void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId pointerDisplayId,
-                                                       const FloatPoint& position) {
+                                                       const vec2& position) {
     // Notify the Reader so that devices can be reconfigured.
     { // acquire lock
         std::scoped_lock _l(mLock);
@@ -2023,7 +2023,7 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
             InputReaderConfiguration::Change::STYLUS_BUTTON_REPORTING);
 }
 
-FloatPoint NativeInputManager::getMouseCursorPosition(ui::LogicalDisplayId displayId) {
+vec2 NativeInputManager::getMouseCursorPosition(ui::LogicalDisplayId displayId) {
     return mInputManager->getChoreographer().getMouseCursorPosition(displayId);
 }
 
