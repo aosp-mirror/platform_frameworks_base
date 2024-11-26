@@ -21,7 +21,7 @@
     <string name="update" msgid="3932142540719227615">"Aktualizovat"</string>
     <string name="done" msgid="6632441120016885253">"Hotovo"</string>
     <string name="cancel" msgid="1018267193425558088">"Zrušit"</string>
-    <string name="installing" msgid="4921993079741206516">"Instalace…"</string>
+    <string name="installing" msgid="4921993079741206516">"Probíhá instalace…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Instalace balíčku <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Aplikace je nainstalována."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Chcete tuto aplikaci nainstalovat?"</string>
