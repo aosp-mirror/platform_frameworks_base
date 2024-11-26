@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivado"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestionar en los ajustes"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hay modos activos}=1{{mode} está activo}many{Hay # modos activos}other{Hay # modos activos}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hay modos activos}=1{{mode} activo}many{Hay # modos activos}other{Hay # modos activos}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas, los recordatorios, los eventos y las llamadas que especifiques. Seguirás escuchando el contenido que quieras reproducir, como música, vídeos y juegos."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas. Seguirás escuchando el contenido que quieras reproducir, como música, vídeos y juegos."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalizar"</string>
@@ -547,7 +547,7 @@
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ha inhabilitado esta opción"</string>
     <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Elegir una aplicación para compartir"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"¿Enviar tu pantalla?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Enviar solo una aplicación"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Enviar una aplicación"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Enviar toda la pantalla"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Cuando envías toda tu pantalla, se ve todo lo que hay en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Cuando envías una aplicación, se ve todo lo que se muestre o reproduzca en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
@@ -695,7 +695,7 @@
     <string name="volume_panel_hint_muted" msgid="1124844870181285320">"silenciado"</string>
     <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"vibrar"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Reproduciendo <xliff:g id="LABEL">%s</xliff:g> en"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Se reproducirá en"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"El audio se reproducirá en"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Llamando desde"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Configurador de UI del sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
@@ -789,8 +789,8 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Inicio"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atrás"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulador"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"Espacio"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Espa-cio"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Intro"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tecla de retroceso"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Reproducir/Pausa"</string>
@@ -847,7 +847,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar la pantalla dividida con la aplicación actual a la derecha"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar la pantalla dividida con la aplicación actual a la izquierda"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar a la app de la derecha o de abajo en pantalla dividida"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar a la aplicación de la derecha o de abajo en pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Cambiar a la app de la izquierda o de arriba en pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
@@ -1439,11 +1439,11 @@
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Usa el panel táctil para ir a la pantalla de inicio"</string>
     <string name="home_edu_notification_content" msgid="6631697734535766588">"Desliza hacia arriba con tres dedos. Toca para aprender a usar más gestos."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"Usa el panel táctil para ver las aplicaciones recientes"</string>
-    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Desliza hacia arriba y mantén pulsado con tres dedos. Toca para aprender a usar más gestos."</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Desliza hacia arriba con tres dedos y mantén pulsado. Toca para aprender a usar más gestos."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Usa el teclado para ver todas las aplicaciones"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Pulsa la tecla de acción en cualquier momento. Toca para aprender a usar más gestos."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"La atenuación extra ahora forma parte del control deslizante de brillo"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes atenuar aún más tu pantalla reduciendo el nivel de brillo incluso más todavía.\n\nComo esta función ahora forma parte del control deslizante de brillo, se van a quitar los accesos directos de atenuación extra."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes atenuar aún más tu pantalla reduciendo el nivel de brillo.\n\nComo esta función ahora forma parte del control deslizante de brillo, se van a quitar los accesos directos de atenuación extra."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Eliminar accesos directos de atenuación extra"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Accesos directos de atenuación extra eliminados"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Conectividad"</string>

@@ -836,12 +836,12 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"واپس جائیں"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"ہوم اسکرین پر جائیں"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"حالیہ ایپس دیکھیں"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"حالیہ ایپس کے ذریعے آگے کی طرف سائیکل کریں"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"حالیہ ایپس کے ذریعے پیچھے کی طرف سائیکل کریں"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"حالیہ ایپس میں اگلی ایپ پر جائیں"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"حالیہ ایپس میں پچھلی ایپ پر جائیں"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ایپس کی فہرست کھولیں"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ترتیبات کھولیں"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"اسسٹنٹ کھولیں"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"مقفل اسکرین"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"اسکرین لاک کریں"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"نوٹ لیں"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ملٹی ٹاسکنگ"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"دائیں جانب موجودہ ایپ کے ساتھ اسپلٹ اسکرین کا استعمال کریں"</string>
@@ -1400,7 +1400,7 @@
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"اپنے کی بورڈ کا استعمال کر کے نیویگیٹ کریں"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"کی بورڈ شارٹ کٹس جانیں"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"اپنے ٹچ پیڈ کا استعمال کر کے نیویگیٹ کریں"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ٹچ پیڈ کے اشارے کو جانیں"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ٹچ پیڈ کے اشاروں کو جانیں"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"اپنے کی بورڈ اور ٹچ پیڈ کا استعمال کر کے نیویگیٹ کریں"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ٹچ پیڈ کے اشارے، کی بورڈ شارٹ کٹس اور مزید جانیں"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"پیچھے جانے کا اشارہ"</string>
@@ -1418,7 +1418,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"حالیہ ایپس دیکھیں"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"اپنے ٹچ پیڈ پر تین انگلیوں کا استعمال کرتے ہوئے اوپر کی طرف سوائپ کریں اور دبائے رکھیں۔"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"بہترین!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"آپ نے حالیہ ایپس کا اشارہ مکمل کر لیا ہے۔"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"آپ نے حالیہ ایپس دیکھیں کا اشارہ مکمل کر لیا ہے۔"</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"ایکشن کلید"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"اپنی ایپس تک رسائی حاصل کرنے کے لیے، اپنے کی بورڈ پر ایکشن کلید کو دبائیں۔"</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"مبارکباد!"</string>
@@ -1445,7 +1445,7 @@
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"اضافی دھندلا اب چمک سلائیڈر کا حصہ ہے"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"آپ چمکیلے پن لیول کو مزید کم کر کے اپنی اسکرین کو اضافی دھندلی بنا سکتے ہیں۔\n\nچونکہ یہ خصوصیت اب چمکیلے پن کے سلائیڈر کا حصہ ہے، اس لیے اضافی دھندلا شارٹ کٹس کو ہٹایا جا رہا ہے۔"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"اضافی دھندلا شارٹ کٹس کو ہٹائیں"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"اضافی دھندلا شارٹ کٹس ہٹا دیے گئے"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"اضافی دھندلے شارٹ کٹس ہٹا دیے گئے"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"کنیکٹویٹی"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"ایکسیسبیلٹی"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"یوٹیلیٹیز"</string>

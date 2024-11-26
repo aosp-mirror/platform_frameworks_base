@@ -657,7 +657,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Programa atsegta"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Skambutis"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Skambutis"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Skambėjimas"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medija"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Signalas"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Pranešimas"</string>
@@ -1387,11 +1387,11 @@
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Naujausios programos"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Išskaidyto ekrano režimas"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Įvestis"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Programos šaukiniai"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Programos spartieji klavišai"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Esama programa"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Pritaikomumas"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Spartieji klavišai"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Paieškos šaukiniai"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Ieškoti sparčiųjų klavišų"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nėra jokių paieškos rezultatų"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Sutraukimo piktograma"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Išskleidimo piktograma"</string>

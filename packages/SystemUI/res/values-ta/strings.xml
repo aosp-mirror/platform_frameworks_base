@@ -306,7 +306,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"சேமிக்கப்பட்டது"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"இணைப்பு நீக்கும்"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"செயல்படுத்தும்"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"தானாகவே நாளை இயக்கப்படும்"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"தானாகவே நாளை இயங்குதல்"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்கள் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"நாளை காலை புளூடூத் இயக்கப்படும்"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"ஆடியோவைப் பகிர்"</string>
@@ -844,8 +844,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"பூட்டுத் திரை"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"குறிப்பெடுத்தல்"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"பல வேலைகளைச் செய்தல்"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"தற்போது உள்ள ஆப்ஸுடன் வலதுபுறத்தில் திரைப் பிரிப்பைப் பயன்படுத்துதல்"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"தற்போது உள்ள ஆப்ஸுடன் இடதுபுறத்தில் திரைப் பிரிப்பைப் பயன்படுத்துதல்"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"தற்போது உள்ள ஆப்ஸ் வலதுபுறம் வரும்படி திரைப் பிரிப்பைப் பயன்படுத்துதல்"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"தற்போது உள்ள ஆப்ஸ் இடதுபுறம் வரும்படி திரைப் பிரிப்பைப் பயன்படுத்துதல்"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"திரைப் பிரிப்பு பயன்முறையிலிருந்து முழுத்திரைக்கு மாற்றுதல்"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"திரைப் பிரிப்பைப் பயன்படுத்தும்போது வலது/கீழ் உள்ள ஆப்ஸுக்கு மாறுதல்"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"திரைப் பிரிப்பைப் பயன்படுத்தும்போது இடது/மேலே உள்ள ஆப்ஸுக்கு மாறுதல்"</string>
@@ -969,7 +969,7 @@
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ஸ்கிரீன் ஷாட்டுகள்"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"இன்ஸ்டண்ட் ஆப்ஸ்"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"அமைவு"</string>
-    <string name="notification_channel_storage" msgid="2720725707628094977">"சேமிப்பிடம்"</string>
+    <string name="notification_channel_storage" msgid="2720725707628094977">"சேமிப்பகம்"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"குறிப்புகள்"</string>
     <string name="notification_channel_accessibility" msgid="8956203986976245820">"மாற்றுத்திறன் வசதி"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"தற்போதைய ஆப்ஸ்"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"மாற்றுத்திறன் வசதி"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"கீபோர்டு ஷார்ட்கட்கள்"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"தேடல் ஷார்ட்கட்கள்"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ஷார்ட்கட்களைத் தேடுக"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"தேடல் முடிவுகள் இல்லை"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"சுருக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"விரிவாக்குவதற்கான ஐகான்"</string>

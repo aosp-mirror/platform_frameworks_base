@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"ปิด"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"ตั้งค่า"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"จัดการในการตั้งค่า"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ไม่มีโหมดที่ใช้งานอยู่}=1{ใช้งานอยู่ {mode} โหมด}other{ใช้งานอยู่ # โหมด}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ไม่มีโหมดที่ใช้งานอยู่}=1{{mode} ทำงานอยู่}other{ใช้งานอยู่ # โหมด}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นเสียงนาฬิกาปลุก การช่วยเตือน กิจกรรม และผู้โทรที่ระบุไว้ คุณจะยังคงได้ยินสิ่งที่คุณเลือกเล่น เช่น เพลง วิดีโอ และเกม"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"คุณจะไม่ถูกรบกวนจากเสียงและการสั่น ยกเว้นเสียงนาฬิกาปลุก คุณจะยังคงได้ยินสิ่งที่คุณเลือกเล่น เช่น เพลง วิดีโอ และเกม"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"กำหนดค่า"</string>
@@ -792,7 +792,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"วรรค"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"ลบถอยหลัง"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"เล่น/หยุดชั่วคราว"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"หยุด"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"ถัดไป"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ย้อนกลับ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"หากต้องการย้อนกลับ ให้ใช้ 3 นิ้วปัดไปทางซ้ายหรือขวาที่ใดก็ได้บนทัชแพด\n\nหรือใช้การดำเนินการแป้นพิมพ์ลัด + ESC ได้เช่นเดียวกัน"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"เก่งมาก"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"คุณทำท่าทางสัมผัสเพื่อย้อนกลับเสร็จแล้ว"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"คุณทำท่าทางสัมผัสเพื่อย้อนกลับสำเร็จแล้ว"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ไปที่หน้าแรก"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ใช้ 3 นิ้วปัดขึ้นจากด้านล่างของหน้าจอเพื่อไปที่หน้าจอหลักได้ทุกเมื่อ"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ดีมาก"</string>
@@ -1437,9 +1437,9 @@
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ใช้ทัชแพดเพื่อย้อนกลับ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ใช้ 3 นิ้วปัดไปทางซ้ายหรือขวา แตะเพื่อดูข้อมูลเพิ่มเติมเกี่ยวกับท่าทางสัมผัสต่างๆ"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ใช้ทัชแพดเพื่อไปยังหน้าแรก"</string>
-    <string name="home_edu_notification_content" msgid="6631697734535766588">"ใช้ 3 นิ้วปัดขึ้น แตะเพื่อดูข้อมูลเพิ่มเติมเกี่ยวกับท่าทางสัมผัสต่างๆ"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"ใช้ 3 นิ้วปัดขึ้น แตะเพื่อดูท่าทางสัมผัสต่างๆ เพิ่มเติม"</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"ใช้ทัชแพดเพื่อดูแอปล่าสุด"</string>
-    <string name="overview_edu_notification_content" msgid="3578204677648432500">"ใช้ 3 นิ้วปัดขึ้นแล้วค้างไว้ แตะเพื่อดูข้อมูลเพิ่มเติมเกี่ยวกับท่าทางสัมผัสต่างๆ"</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"ใช้ 3 นิ้วปัดขึ้นแล้วค้างไว้ แตะเพื่อดูท่าทางสัมผัสต่างๆ เพิ่มเติม"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ใช้แป้นพิมพ์เพื่อดูแอปทั้งหมด"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"กดปุ่มดำเนินการได้ทุกเมื่อ แตะเพื่อดูข้อมูลเพิ่มเติมเกี่ยวกับท่าทางสัมผัสต่างๆ"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"ตอนนี้การหรี่แสงเพิ่มเติมเป็นส่วนหนึ่งของแถบเลื่อนความสว่างแล้ว"</string>

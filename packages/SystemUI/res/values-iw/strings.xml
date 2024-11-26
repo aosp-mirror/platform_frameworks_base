@@ -306,7 +306,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"הפעלה אוטומטית מחר"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"הפעלה אוטומטית ביום הבא"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‏תכונות כמו \'שיתוף מהיר\' ו\'איפה המכשיר שלי\' משתמשות ב-Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‏חיבור ה-Bluetooth יופעל מחר בבוקר"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"שיתוף האודיו"</string>
@@ -568,7 +568,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"ניהול"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"היסטוריה"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"התראות חדשות"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"שקטות"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"מצב שקט"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"התראות"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"שיחות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ניקוי כל ההתראות השקטות"</string>
@@ -680,7 +680,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"אודיו מרחבי"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"השבתה"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"מצב סטטי"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"מעקב אחר תנועות הראש"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"מעקב ראש"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"יש להקיש כדי לשנות את מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"השתקה"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ביטול ההשתקה"</string>
@@ -835,13 +835,13 @@
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"הצגת מקשי הקיצור"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"חזרה"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"מעבר למסך הבית"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"הצגת האפליקציות האחרונות"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"צפייה באפליקציות האחרונות"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"דפדוף קדימה באפליקציות האחרונות"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"דפדוף אחורה באפליקציות האחרונות"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"פתיחה של רשימת האפליקציות"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"פתיחת ההגדרות"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‏לפתיחת Google Assistant"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"מסך הנעילה"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"‏פתיחת Google Assistant"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"נעילת המסך"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"כתיבת הערה"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ריבוי משימות"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"שימוש במסך מפוצל כשהאפליקציה הנוכחית בצד ימין"</string>
@@ -1401,24 +1401,24 @@
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"מידע על מקשי קיצור"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ניווט באמצעות לוח המגע"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"מידע על התנועות בלוח המגע"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ניווט באמצעות המקלדת ולוח המגע"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"מידע על התנועות בלוח המגע, מקשי קיצור ועוד"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ניווט עם המקלדת ולוח המגע"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"כאן אפשר לקרוא איך מפעילים תנועות בלוח המגע, מקשי קיצור ועוד"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"תנועת חזרה"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"תנועת חזרה למסך הבית"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"מעבר למסך הבית"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"הצגת האפליקציות האחרונות"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"‏כדי לחזור אחורה, מחליקים שמאלה או ימינה עם שלוש אצבעות בכל מקום על לוח המגע.\n\nאפשר לבצע את הפעולה הזו גם באמצעות קיצור הדרך לפעולה + מקש ESC."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"מעולה!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"השלמת את התנועה \'הקודם\'."</string>
-    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"מעבר לדף הבית"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"סיימת לתרגל את התנועה \'הקודם\'."</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"מעבר למסך הבית"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"כדי לעבור למסך הבית בכל שלב, צריך להחליק למעלה עם שלוש אצבעות מהחלק התחתון של המסך."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"איזה יופי!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"השלמת את תנועת המעבר למסך הבית."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"הצגת האפליקציות האחרונות"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"מחליקים למעלה ולוחצים לחיצה ארוכה עם שלוש אצבעות על לוח המגע."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"מעולה!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"השלמת את התנועה להצגת האפליקציות האחרונות."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"סיימת לתרגל את התנועה להצגת האפליקציות האחרונות."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"מקש הפעולה"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"כדי לגשת לאפליקציות, מקישים על מקש הפעולה במקלדת."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"כל הכבוד!"</string>
@@ -1430,16 +1430,16 @@
     <string name="volume_undo_action" msgid="5815519725211877114">"ביטול"</string>
     <string name="back_edu_toast_content" msgid="4530314597378982956">"כדי לחזור אחורה, מחליקים שמאלה או ימינה עם שלוש אצבעות על לוח המגע."</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"כדי לעבור למסך הבית, מחליקים למעלה עם שלוש אצבעות על לוח המגע"</string>
-    <string name="overview_edu_toast_content" msgid="5797030644017804518">"כדי לראות את האפליקציות האחרונות, מחליקים למעלה עם שלוש אצבעות על לוח המגע ולוחצים לחיצה ארוכה"</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"כדי לראות את האפליקציות האחרונות, מחליקים למעלה לוחצים לחיצה ארוכה עם שלוש אצבעות על לוח המגע"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"כדי לראות את כל האפליקציות, מקישים על מקש הפעולה במקלדת"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"מצונזר"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"צריך לבטל את הנעילה כדי לראות"</string>
-    <string name="back_edu_notification_title" msgid="5624780717751357278">"איך להשתמש בלוח המגע כדי לחזור אחורה"</string>
+    <string name="back_edu_notification_title" msgid="5624780717751357278">"אפשר להשתמש בלוח המגע כדי לחזור אחורה"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"מחליקים ימינה או שמאלה עם שלוש אצבעות. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"איך להשתמש בלוח המגע כדי לעבור למסך הבית"</string>
-    <string name="home_edu_notification_content" msgid="6631697734535766588">"מחליקים למעלה עם שלוש אצבעות. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"מחליקים למעלה עם שלוש אצבעות. אפשר להקיש כדי לקבל מידע נוסף על התנועות."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"איך להשתמש בלוח המגע כדי לראות את האפליקציות האחרונות"</string>
-    <string name="overview_edu_notification_content" msgid="3578204677648432500">"מחליקים למעלה ולוחצים לחיצה ארוכה עם שלוש אצבעות. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"מחליקים למעלה ולוחצים לחיצה ארוכה עם שלוש אצבעות. אפשר להקיש כדי לקבל מידע נוסף על התנועות."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"איך להשתמש במקלדת כדי לראות את כל האפליקציות"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"בכל שלב אפשר ללחוץ על מקש הפעולה. ניתן להקיש כדי לקבל מידע נוסף על התנועות."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"התכונה \'מעומעם במיוחד\' נוספה לפס ההזזה לבהירות"</string>

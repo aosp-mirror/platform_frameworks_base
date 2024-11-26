@@ -113,7 +113,7 @@
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Grabar una app"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Grabar toda la pantalla"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Cuando grabes toda la pantalla, se grabará todo lo que se muestre en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Cuando grabes una app, se registrará todo lo que se muestre o reproduzca en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Cuando grabes una app, se grabará todo lo que se muestre o reproduzca en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grabar pantalla"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Elige una app para grabar"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivado"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Administrar en configuración"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hay modos activos}=1{{mode} está activo}many{# de modos están activos}other{# modos están activos}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hay modos activos}=1{{mode} activo}many{# de modos activos}other{# modos activos}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas, los recordatorios, los eventos y las llamadas de los emisores que especifiques. Podrás escuchar el contenido que reproduzcas, como música, videos y juegos."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas. Podrás escuchar el contenido que reproduzcas, como música, videos y juegos."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalizar"</string>
@@ -550,7 +550,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Transmitir una app"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Transmitir pantalla entera"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Cuando transmitas la pantalla entera, todo lo que se muestre es visible. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Cuando transmitas una app, todo lo que se muestre o reproduzcas en ella será visible. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Cuando transmitas una app, todo lo que se muestre o reproduzca en ella será visible. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Transmitir pantalla"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Elige la app para transmitir"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"¿Quieres empezar a compartir?"</string>
@@ -984,7 +984,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi desactivado"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth desactivado"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"No interrumpir desactivado"</string>
-    <string name="dnd_is_on" msgid="7009368176361546279">"No interrumpir está activado"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"No interrumpir activado"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Se activó el modo No interrumpir con una regla automática (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Se activó el modo No interrumpir con una app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Se activó el modo No interrumpir con una app o regla automática."</string>
@@ -1443,7 +1443,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Usa el teclado para ver todas las apps"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Presiona la tecla de acción en cualquier momento. Presiona para aprender más gestos."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"La atenuación extra ahora es parte del control deslizante de brillo"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes bajar el nivel del brillo de la pantalla para atenuarla aún más.\n\nComo esta función ahora es parte del control deslizante de brillo, se quitaron los accesos directos de atenuación extra."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes bajar el nivel del brillo de la pantalla para atenuarla aún más.\n\nComo esta función ahora es parte del control deslizante de brillo, se quitaron los accesos directos a la atenuación extra."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Quitar accesos directos a la atenuación extra"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Se quitaron los accesos directos a la atenuación extra"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Conectividad"</string>

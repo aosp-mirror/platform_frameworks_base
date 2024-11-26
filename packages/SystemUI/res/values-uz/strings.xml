@@ -113,7 +113,7 @@
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Bitta ilovani yozib olish"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Butun ekranni yozib olish"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Butun ekranni yozib olishda ekranda koʻrsatilgan barcha axborotlar yozib olinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Ilovani yozib olishda ilova koʻrsatilgan yoki ijro etilgan barcha axborotlar yozib olinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Ilovani yozib olishda ilovada koʻrsatilgan yoki ijro etilgan barcha axborotlar yozib olinadi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekranni yozib olish"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Yozib olinadigan ilovani tanlash"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio yozib olish"</string>
@@ -1059,7 +1059,7 @@
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Masshtab"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Oʻrtacha"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Kichik"</string>
-    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Yirik"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Katta"</string>
     <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Butun ekran"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Tayyor"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Tahrirlash"</string>
@@ -1411,7 +1411,7 @@
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Ortga qaytish uchun sensorli panelda uchta barmoqni chapga yoki oʻngga suring.\n\nBuning uchun Action + ESC tezkor tugmalaridan ham foydalanishingiz mumkin."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Barakalla!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Ortga qaytish ishorasi darsini tamomladingiz."</string>
-    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Boshiga"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Boshiga qaytish"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Istalgan vaqtda bosh ekranga oʻtish uchun ekranning pastidan uchta barmoq bilan tepaga suring."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Yaxshi!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Bosh ekranni ochish ishorasi darsini tamomladingiz."</string>
@@ -1444,8 +1444,8 @@
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Amal tugmasini istalganda bosing. Boshqa ishoralar bilan tanishish uchun bosing."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Juda xira endi yorqinlik slayderida joylashgan"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Endi yorqinlik darajasini yanada pasaytirish orqali ekranni yanada xiralashtirishingiz mumkin.\n\nBu funksiya yorqinlik slayderiga kiritilgani uchun \"juda xira\" buyruqlari olib tashlanmoqda."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Juda xira buyruqlarini olib tashlash"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Juda xira buyruqlari olib tashlandi"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"“Juda xira” buyruqlarini olib tashlash"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"“Juda xira” buyruqlari olib tashlandi"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Aloqa"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Qulayliklar"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Vositalar"</string>

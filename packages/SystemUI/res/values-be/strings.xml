@@ -1443,7 +1443,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Выкарыстайце клавіятуру для прагляду ўсіх праграм"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Можна націснуць на клавішу дзеяння ў любы момант. Націсніце, каб азнаёміцца з іншымі жэстамі."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Цяпер кіраваць дадатковым памяншэннем яркасці можна з дапамогай паўзунка яркасці"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Цяпер вы можаце дадаткова зацямніць экран, яшчэ больш панізіўшы ўзровень яркасці.\n\nПаколькі гэта функцыя цяпер уваходзіць у склад паўзунка яркасці, хуткія каманды для дадатковага памяншэння яркасці былі выдалены."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Цяпер вы можаце дадаткова зацямніць экран, яшчэ больш панізіўшы ўзровень яркасці.\n\nПаколькі гэта функцыя цяпер уваходзіць у склад паўзунка яркасці, хуткія каманды для дадатковага памяншэння яркасці будуць выдалены."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Выдаліць хуткія каманды для дадатковага памяншэння яркасці"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Хуткія каманды для дадатковага памяншэння яркасці выдалены"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Магчымасць падключэння"</string>

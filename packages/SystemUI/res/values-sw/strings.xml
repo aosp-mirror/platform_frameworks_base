@@ -831,7 +831,7 @@
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Inaonyesha njia za mkato za kufungua programu"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Inaonyesha njia za mkato za programu unayotumia kwa sasa"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Tazama arifa"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Kupiga picha ya skrini"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Piga picha ya skrini"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Onyesha njia za mkato"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Rudi nyuma"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Nenda kwenye skrini ya kwanza"</string>
@@ -1179,7 +1179,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Spika na Skrini"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Vifaa Vilivyopendekezwa"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Vifaa vya kuingiza data"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Vifaa vya kuingiza maudhui"</string>
     <string name="media_output_group_title" msgid="6789001895863332576">"Vifaa vya kutoa maudhui"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Simamisha kipindi unachoshiriki ili uhamishie maudhui kwenye kifaa kingine"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Simamisha"</string>
@@ -1398,11 +1398,11 @@
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"au"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Aikoni ya buruta"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Kusogeza kwa kutumia kibodi yako"</string>
-    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Jifunze kuhusu mikato ya kibodi"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Fahamu kuhusu mikato ya kibodi"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Kusogeza kwa kutumia padi yako ya kugusa"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Jifunze kuhusu miguso ya padi ya kugusa"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Fahamu miguso ya padi ya kugusa"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Kusogeza kwa kutumia kibodi na padi yako ya kugusa"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Jifunze kuhusu miguso ya padi ya kugusa, mikato ya kibodi na mengineyo"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Fahamu kuhusu miguso ya padi ya kugusa, mikato ya kibodi na mengineyo"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Ishara ya kurudi nyuma"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Mguso wa kurudi kwenye skrini ya kwanza"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Angalia programu za hivi majuzi"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Rudi nyuma"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Telezesha vidole vitatu kushoto au kulia mahali popote kwenye padi ya kugusa ili urudi nyuma.\n\nUnaweza pia kutumia mikato ya kibodi ya Kitendo pamoja na ESC kutekeleza kitendo hiki."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Kazi nzuri!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Umekamilisha ishara ya kurudi nyuma."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Umekamilisha mafunzo ya miguso ya kurudi nyuma."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Nenda kwenye skrini ya kwanza"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Ili uende kwenye skrini ya kwanza wakati wowote, telezesha vidole vitatu juu kutoka sehemu ya chini ya skrini yako."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Safi!"</string>

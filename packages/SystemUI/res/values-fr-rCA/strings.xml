@@ -550,7 +550,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Diffuser une appli"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Diffuser l\'intégralité de l\'écran"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Lorsque vous diffusez l\'intégralité de votre écran, tout ce qui s\'y trouve est visible. Par conséquent, soyez prudent avec les mots de passe, les détails du paiement, les messages, les photos et les contenus audio et vidéo."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Lorsque vous diffusez une appli, tout ce qui s\'y affiche ou s\'y joue est visible. Par conséquent, soyez prudent avec les mots de passe, les détails du paiement, les messages, les photos et les contenus audio et vidéo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Lorsque vous diffusez une appli, tout ce qui s\'y affiche ou s\'y joue est visible. Par conséquent, soyez prudent avec les mots de passe, les détails du mode de paiement, les messages, les photos et les contenus audio et vidéo."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Diffuser l\'écran"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Choisir l\'appli à diffuser"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Commencer à partager?"</string>
@@ -819,7 +819,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ou"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Effacez la requête de recherche"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Raccourcis-clavier"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Recherchez des raccourcis"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Rechercher des raccourcis"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Aucun raccourci trouvé"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Système"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrée"</string>
@@ -841,12 +841,12 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ouvrir la liste des applis"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ouvrir les paramètres"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ouvrir l\'Assistant"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Écran de verrouillage"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Verrouiller l\'écran"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Prendre une note"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitâche"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Utiliser l\'Écran divisé avec l\'appli actuelle à droite"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Utiliser l\'Écran divisé avec l\'appli actuelle à gauche"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'écran divisé au plein écran"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'Écran divisé au plein écran"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passer à l\'appli à droite ou en dessous avec l\'Écran divisé"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Passer à l\'appli à gauche ou au-dessus avec l\'Écran divisé"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"En mode d\'écran divisé : remplacer une appli par une autre"</string>
@@ -1179,7 +1179,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Haut-parleurs et écrans"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Appareils suggérés"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Entrer"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Entrée"</string>
     <string name="media_output_group_title" msgid="6789001895863332576">"Sortie"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Arrêtez votre session partagée pour déplacer des contenus multimédias vers un autre appareil"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Arrêter"</string>
@@ -1237,7 +1237,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Un problème est survenu lors de la lecture du niveau de charge de la pile"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Touchez pour en savoir plus"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Aucune alarme définie"</string>
-    <string name="accessibility_bouncer" msgid="5896923685673320070">"entrer verrouillage de l\'écran"</string>
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"accéder au verrouillage de l\'écran"</string>
     <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Toucher le capteur d\'empreintes digitales. Il s\'agit du bouton le plus court sur le côté du téléphone"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Capteur d\'empreintes digitales"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"authentifier"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Appli actuelle"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilité"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Raccourcis-clavier"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Recherchez des raccourcis"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Rechercher des raccourcis"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Aucun résultat de recherche"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
@@ -1443,9 +1443,9 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Utiliser votre clavier pour afficher toutes les applis"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Appuyez sur la touche d\'action à tout moment. Touchez pour apprendre d\'autres gestes."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"La réduction supplémentaire de la luminosité fait désormais partie du curseur de luminosité"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Vous pouvez désormais réduire la luminosité de l\'écran encore plus.\n\nÉtant donné que cette fonctionnalité fait désormais partie du curseur de luminosité, les raccourcis de la réduction supplémentaire de la luminosité sont retirés."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Vous pouvez désormais réduire la luminosité de l\'écran encore plus.\n\nÉtant donné que cette fonctionnalité fait maintenant partie du curseur de luminosité, les raccourcis de la réduction supplémentaire de la luminosité sont retirés."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Retirer les raccourcis de la réduction supplémentaire de la luminosité"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Les raccourcis de la réduction supplémentaire de la luminosité ont été retirés"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Raccourcis de la réduction supplémentaire de la luminosité retirés"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Connectivité"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Accessibilité"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Utilitaires"</string>

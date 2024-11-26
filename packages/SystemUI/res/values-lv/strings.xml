@@ -791,8 +791,8 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atpakaļ"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Atstarpe"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"Ievadīšanas taustiņš"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Atpakaļatkāpes taustiņš"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Atskaņot/apturēt"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Apturēt"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Nākamais"</string>
@@ -802,7 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Lapa uz augšu"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Lapa uz leju"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Dzēšanas taustiņš"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"Atsoļa taustiņš"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Sākumvietas taustiņš"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Beigvietas taustiņš"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Ievietošanas taustiņš"</string>
@@ -1196,7 +1196,7 @@
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Nevar saglabāt."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Izmantojiet vismaz 4 rakstzīmes"</string>
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Izmantojiet mazāk nekā <xliff:g id="LENGTH">%1$d</xliff:g> rakstzīmes."</string>
-    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versijas numurs"</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Būvējuma numurs"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versijas numurs ir kopēts starpliktuvē."</string>
     <string name="basic_status" msgid="2315371112182658176">"Atvērt sarunu"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Sarunu logrīki"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Pašreizējā lietotne"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Pieejamība"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Īsinājumtaustiņi"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Meklēšanas saīsnes"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Meklēt saīsnes"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nav meklēšanas rezultātu"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Sakļaušanas ikona"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Izvēršanas ikona"</string>

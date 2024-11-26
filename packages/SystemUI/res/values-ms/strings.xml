@@ -1397,11 +1397,11 @@
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Kembangkan ikon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Pemegang seret"</string>
-    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigasi menggunakan papan kekunci anda"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigasi menggunakan papan kekunci"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Ketahui pintasan papan kekunci"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigasi menggunakan pad sentuh anda"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Ketahui gerak isyarat pad sentuh"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigasi menggunakan papan kekunci dan pad sentuh anda"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigasi menggunakan papan kekunci dan pad sentuh"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Ketahui gerak isyarat pad sentuh, pintasan papan kekunci dan pelbagai lagi"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gerak isyarat kembali"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gerak isyarat pergi ke laman utama"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kembali"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Untuk kembali, leret ke kiri atau ke kanan menggunakan tiga jari di mana-mana sahaja pada pad sentuh.\n\nAnda juga boleh menggunakan pintasan papan kekunci Action + ESC untuk kembali."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Syabas!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Anda telah melengkapkan gerak isyarat undur."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Anda telah melengkapkan gerak isyarat kembali."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Akses laman utama"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Untuk mengakses skrin utama anda pada bila-bila masa, leret ke atas menggunakan tiga jari daripada bahagian bawah skrin anda."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bagus!"</string>
@@ -1418,7 +1418,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Lihat apl terbaharu"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Leret ke atas dan tahan menggunakan tiga jari pada pad sentuh anda."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Syabas!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Anda melengkapkan gerak isyarat lihat apl terbaharu."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Anda telah melengkapkan gerak isyarat lihat apl terbaharu."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Kekunci tindakan"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Untuk mengakses semua apl anda, tekan kekunci tindakan pada papan kekunci anda."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Tahniah!"</string>
@@ -1431,7 +1431,7 @@
     <string name="back_edu_toast_content" msgid="4530314597378982956">"Untuk kembali, leret ke kiri atau ke kanan dengan tiga jari pada pad sentuh"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Untuk mengakses laman utama, leret ke atas dengan tiga jari pada pad sentuh"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Untuk melihat apl terbaharu, leret ke atas dan tahan dengan tiga jari pada pad sentuh"</string>
-    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Untuk melihat semua apl anda, tekan kekunci tindakan pada papan kekunci anda"</string>
+    <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Untuk melihat semua apl, tekan kekunci tindakan pada papan kekunci"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Disunting"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Buka kunci untuk melihat"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Gunakan pad sentuh anda untuk kembali"</string>
@@ -1442,8 +1442,8 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Leret ke atas, tahan dengan tiga jari. Ketik untuk mengetahui lebih lanjut tentang gerak isyarat."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gunakan papan kekunci anda untuk melihat semua apl"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Tekan kekunci tindakan pada bila-bila masa. Ketik dan ketahui lebih lanjut tentang gerak isyarat."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Kini ciri amat malap merupakan sebahagian daripada peluncur kecerahan"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Kini anda boleh menjadikan skrin amat malap dengan merendahkan lebih lagi tahap kecerahan.\n\nMemandangkan ciri ini kini merupakan sebahagian daripada peluncur kecerahan, pintasan amat malap dialih keluar."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Ciri amat malap kini bergabung dengan peluncur kecerahan"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Skrin boleh dijadikan amat malap dengan menurunkan lagi tahap kecerahannya.\n\nOleh sebab ciri ini telah bergabung dengan peluncur kecerahan, pintasan amat malap dialih keluar."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Alih keluar pintasan amat malap"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Pintasan amat malap dialih keluar"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Kesambungan"</string>

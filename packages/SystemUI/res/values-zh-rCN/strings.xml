@@ -112,7 +112,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"要录制屏幕吗？"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"录制单个应用"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"录制整个屏幕"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"录制整个屏幕时，屏幕上显示的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"录制整个屏幕时，屏幕上显示的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款详情、消息、照片、音频、视频等敏感信息。"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"录制单个应用时，该应用中显示或播放的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"录制屏幕"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"选择要录制的应用"</string>
@@ -307,7 +307,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"断开连接"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"启用"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"明天自动开启"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"快速分享、查找我的设备等功能会使用蓝牙"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"“快速分享”“查找我的设备”等功能会使用蓝牙"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"蓝牙将在明天早上开启"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"分享音频"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"正在分享音频"</string>
@@ -552,7 +552,7 @@
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"投放整个屏幕时，屏幕上的所有内容均公开可见。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"投放单个应用时，该应用显示或播放的所有内容均公开可见。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"投放屏幕"</string>
-    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"选择要投放的应用"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"选择要投屏的应用"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"开始分享？"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"在分享内容时，Android 可以访问屏幕上显示或设备中播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"在分享、录制或投放内容时，Android 可以访问通过此应用显示或播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
@@ -844,8 +844,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"锁定屏幕"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"添加记事"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"多任务处理"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"使用分屏模式，并且当前应用位于右侧"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"使用分屏模式，并且当前应用位于左侧"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"使用分屏模式，并将当前应用置于右侧"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"使用分屏模式，并将当前应用置于左侧"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"从分屏模式切换为全屏"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"使用分屏模式时，切换到右侧或下方的应用"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"使用分屏模式时，切换到左侧或上方的应用"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"返回"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"如要返回，请使用三根手指在触控板上的任意位置左滑或右滑。\n\n您也可以使用键盘快捷操作键 + ESC 键进行返回。"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"太棒了！"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"您完成了“返回”手势教程。"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"您已完成“返回”手势教程。"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"前往主屏幕"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"若要随时进入主屏幕，请用三根手指从屏幕的底部向上滑动。"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"很好！"</string>

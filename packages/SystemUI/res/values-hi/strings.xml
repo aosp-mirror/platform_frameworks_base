@@ -109,11 +109,11 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"क्या आपको स्क्रीन रिकॉर्ड करनी है?"</string>
-    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एक ऐप्लिकेशन की रिकॉर्डिंग करें"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"क्या आपको स्क्रीन को रिकॉर्ड करना है?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"एक ऐप्लिकेशन रिकॉर्ड करें"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"पूरी स्क्रीन रिकॉर्ड करें"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"पूरी स्क्रीन रिकॉर्ड करते समय, स्क्रीन पर दिखने वाली हर चीज़ रिकॉर्ड की जाती है. इसलिए पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज,  डिवाइस पर चल रहे ऑडियो और वीडियो, और फ़ोटो जैसी चीज़ों को लेकर सावधानी बरतें."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"किसी ऐप्लिकेशन को रिकॉर्ड करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी रिकॉर्ड होता है. इसलिए, रिकॉर्ड करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"किसी ऐप्लिकेशन को रिकॉर्ड करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया भी रिकॉर्ड होता है. इसलिए, रिकॉर्ड करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"स्क्रीन रिकॉर्ड करें"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"रिकॉर्ड करने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडियो रिकॉर्ड करें"</string>
@@ -124,7 +124,7 @@
     <string name="screenrecord_continue" msgid="4055347133700593164">"शुरू करें"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रीन को रिकॉर्ड किया जा रहा है"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रीन और ऑडियो, दोनों रिकॉर्ड हो रहे हैं"</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीन को कहां-कहां छुआ गया, यह दिखाएं"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"दिखाएं कि स्क्रीन पर कहां-कहां टच किया जा रहा है"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"रोकें"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"शेयर करें"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"स्क्रीन रिकॉर्डिंग सेव की गई"</string>
@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"बंद है"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"सेट अप करें"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"सेटिंग में जाकर मैनेज करें"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{कोई मोड चालू नहीं है}=1{{mode} चालू है}one{# मोड चालू है}other{# मोड चालू हैं}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{कोई मोड चालू नहीं है}=1{{mode} मोड चालू है}one{# मोड चालू है}other{# मोड चालू हैं}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"आपको अलार्म छोड़कर दूसरी आवाज़ों और कंपनों से परेशान नहीं किया जाएगा. आपको अब भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"अपनी पसंद के मुताबिक बनाएं"</string>
@@ -549,8 +549,8 @@
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"क्या स्क्रीन को कास्ट करना है?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"एक ऐप्लिकेशन को कास्ट करें"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"पूरी स्क्रीन को कास्ट करें"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"पूरी स्क्रीन को कास्ट करने के दौरान, उस पर दिख रहा कॉन्टेंट दूसरी स्क्रीन पर भी दिखता है. इसलिए, कास्ट करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"किसी ऐप्लिकेशन को कास्ट करने के दौरान, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी दिखता है. इसलिए, कास्ट करते समय पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"पूरी स्क्रीन को कास्ट करने पर, उस पर दिख रहा कॉन्टेंट दूसरी स्क्रीन पर भी दिखता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"किसी ऐप्लिकेशन को कास्ट करने पर, उस पर दिख रहा कॉन्टेंट या चल रहा मीडिया दूसरी स्क्रीन पर भी दिखता है. इसलिए, पासवर्ड, पेमेंट के तरीके की जानकारी, मैसेज, फ़ोटो, ऑडियो, और वीडियो को लेकर सावधानी बरतें."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"स्क्रीन कास्ट करें"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"कास्ट करने के लिए ऐप्लिकेशन चुनें"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"क्या मीडिया शेयर करना है?"</string>
@@ -840,12 +840,12 @@
     <string name="group_system_cycle_back" msgid="8194102916946802902">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन के पिछले पेज पर जाने के लिए"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ऐप्लिकेशन की सूची खोलने के लिए"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"सेटिंग खोलने के लिए"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Google Assistant खोलने के लिए"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"सहायक ऐप्लिकेशन खोलने के लिए"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रीन लॉक करने के लिए"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"नोट करने के लिए"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"नोट बनाने के लिए"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"मल्टीटास्किंग (एक साथ कई काम करना)"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"मौजूदा ऐप्लिकेशन को दाईं ओर दिखाने वाली स्प्लिट स्क्रीन इस्तेमाल करें"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"मौजूदा ऐप्लिकेशन को बाईं ओर दिखाने वाली स्प्लिट स्क्रीन इस्तेमाल करें"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"स्प्लिट स्क्रीन में मौजूदा ऐप्लिकेशन को दाईं ओर दिखाने के लिए"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"स्प्लिट स्क्रीन में मौजूदा ऐप्लिकेशन को बाईं ओर दिखाने के लिए"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"स्प्लिट स्क्रीन से फ़ुल स्क्रीन मोड पर स्विच करने के लिए"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रीन पर, दाईं ओर या नीचे के ऐप पर स्विच करने के लिए"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रीन पर, बाईं ओर या ऊपर के ऐप पर स्विच करने के लिए"</string>
@@ -1314,7 +1314,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग ऐक्सेस करने की अनुमति देनी है?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति न दें"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए कर सकते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी फिर भी डिवाइस के कुछ लॉग या जानकारी ऐक्सेस कर सकती है."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए कर सकते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. इसके अलावा, डिवाइस को बनाने वाली कंपनी भी डिवाइस के कुछ लॉग या जानकारी ऐक्सेस कर सकती है."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ज़्यादा जानें"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ज़्यादा जानने के लिए <xliff:g id="URL">%s</xliff:g> पर जाएं"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोलें"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"मौजूदा ऐप्लिकेशन"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"सुलभता"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"कीबोर्ड शॉर्टकट"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"सर्च शॉर्टकट"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"शॉर्टकट खोजें"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"खोज का कोई नतीजा नहीं मिला"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"छोटा करने का आइकॉन"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"बड़ा करने का आइकॉन"</string>
@@ -1400,9 +1400,9 @@
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"कीबोर्ड का इस्तेमाल करके नेविगेट करें"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"कीबोर्ड शॉर्टकट के बारे में जानें"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"टचपैड का इस्तेमाल करके नेविगेट करें"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"टचपैड पर हाथ के जेस्चर के बारे में जानें"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"टचपैड से जुड़े जेस्चर के बारे में जानें"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"कीबोर्ड और टचपैड का इस्तेमाल करके नेविगेट करें"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"टचपैड पर हाथ के जेस्चर, कीबोर्ड शॉर्टकट वगैरह के बारे में जानें"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"टचपैड से जुड़े जेस्चर, कीबोर्ड शॉर्टकट वगैरह के बारे में जानें"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"पीछे जाने का जेस्चर"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"होम स्क्रीन पर जाने का जेस्चर"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"वापस जाएं"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"वापस जाने के लिए, टचपैड पर कहीं भी तीन उंगलियों से दाईं या बाईं ओर स्वाइप करें.\n\nइसके अलावा, ऐसा करने के लिए Action + ESC बटन का भी इस्तेमाल किया जा सकता है."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"बहुत बढ़िया!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"अब आपने जान लिया है कि हाथ का जेस्चर इस्तेमाल करके, पिछली स्क्रीन पर वापस कैसे जाएं."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"अब आपको हाथ के जेस्चर का इस्तेमाल करके, पिछली स्क्रीन पर वापस जाने का तरीका पता चल गया है."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"होम स्क्रीन पर जाएं"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"किसी भी समय फ़ोन की होम स्क्रीन पर जाने के लिए, तीन उंगलियों से फ़ोन पर सबसे नीचे से ऊपर की ओर स्वाइप करें."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"बढ़िया!"</string>
@@ -1418,7 +1418,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"अपने टचपैड पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और फिर होल्ड करें."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"बहुत बढ़िया!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"आपने हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने के लिए, हाथ के जेस्चर के बारे में जान लिया है."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"अब आपको हाथ के जेस्चर का इस्तेमाल करके, हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने का तरीका पता चल गया है."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"ऐक्शन बटन"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"अपने ऐप्लिकेशन ऐक्सेस करने के लिए, कीबोर्ड पर ऐक्शन बटन दबाएं."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"बधाई हो!"</string>
@@ -1435,11 +1435,11 @@
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"जानकारी छिपाने के लिए सूचना में बदलाव किया गया"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"देखने के लिए डिवाइस अनलॉक करें"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"वापस जाने के लिए, अपने डिवाइस के टचपैड का इस्तेमाल करें"</string>
-    <string name="back_edu_notification_content" msgid="2497557451540954068">"तीन उंगलियों से बाईं या दाईं ओर स्वाइप करें. जेस्चर के बारे में ज़्यादा जानने के लिए टैप करें."</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"तीन उंगलियों से बाईं या दाईं ओर स्वाइप करें. ज़्यादा जेस्चर के बारे में जानने के लिए टैप करें."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"होम पर जाने के लिए, अपने डिवाइस के टचपैड का इस्तेमाल करें"</string>
-    <string name="home_edu_notification_content" msgid="6631697734535766588">"तीन उंगलियों से ऊपर की ओर स्वाइप करें. जेस्चर के बारे में ज़्यादा जानने के लिए टैप करें."</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"तीन उंगलियों से ऊपर की ओर स्वाइप करें. ज़्यादा जेस्चर के बारे में जानने के लिए टैप करें."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"हाल ही में इस्तेमाल हुए ऐप्लिकेशन देखने के लिए, अपने डिवाइस के टचपैड का इस्तेमाल करें"</string>
-    <string name="overview_edu_notification_content" msgid="3578204677648432500">"तीन उंगलियों से ऊपर की ओर स्वाइप करें और दबाकर रखें. जेस्चर की ज़्यादा जानकारी पाने के लिए टैप करें."</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"तीन उंगलियों से ऊपर की ओर स्वाइप करके दबाकर रखें. ज़्यादा जेस्चर के बारे में जानने के लिए टैप करें."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"सभी ऐप्लिकेशन देखने के लिए, कीबोर्ड का इस्तेमाल करें"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"किसी भी समय ऐक्शन बटन दबाएं. हाथ के जेस्चर के बारे में ज़्यादा जानने के लिए टैप करें."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"स्क्रीन की रोशनी को सामान्य लेवल से और कम करने की सुविधा, अब ब्राइटनेस स्लाइडर का हिस्सा है"</string>

@@ -163,7 +163,7 @@
     <string name="issuerecord_start_error" msgid="3402782952722871190">"Impossibile avviare la registrazione del problema"</string>
     <string name="immersive_cling_title" msgid="8372056499315585941">"Visualizzazione a schermo intero"</string>
     <string name="immersive_cling_description" msgid="2717426731830851921">"Per uscire, scorri verso il basso dalla parte superiore dello schermo"</string>
-    <string name="immersive_cling_positive" msgid="3076681691468978568">"OK"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Ok"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Indietro"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
@@ -651,7 +651,7 @@
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Per sbloccare questa app, tocca e tieni premuti i pulsanti Indietro e Home"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Per sbloccare questa app, scorri verso l\'alto e tieni premuto"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No, grazie"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"App bloccata"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App sbloccata"</string>
@@ -730,7 +730,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Il divertimento riservato a pochi eletti"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"L\'Ottimizzatore UI di sistema mette a disposizione altri metodi per modificare e personalizzare l\'interfaccia utente di Android. Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Queste funzioni sperimentali potrebbero cambiare, interrompersi o scomparire nelle versioni successive. Procedi con cautela."</string>
-    <string name="got_it" msgid="477119182261892069">"OK"</string>
+    <string name="got_it" msgid="477119182261892069">"Ok"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Complimenti! L\'Ottimizzatore UI di sistema è stato aggiunto alle impostazioni."</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Rimuovi dalle impostazioni"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Vuoi rimuovere l\'Ottimizzatore UI di sistema dalle impostazioni e smettere di utilizzare tutte le sue funzioni?"</string>
@@ -1402,7 +1402,7 @@
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Naviga usando il touchpad"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Impara i gesti con il touchpad"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Naviga usando la tastiera e il touchpad"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Scopri gesti con il touchpad, scorciatoie da tastiera e altro ancora"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Impara i gesti con il touchpad, le scorciatoie da tastiera e altro ancora"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gesto Indietro"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gesto Home"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Visualizza app recenti"</string>
@@ -1417,7 +1417,7 @@
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Hai completato il gesto Vai alla schermata Home."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Visualizza app recenti"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Scorri verso l\'alto e tieni premuto con tre dita sul touchpad."</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Ottimo lavoro."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Ottimo lavoro!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Hai completato il gesto Visualizza app recenti."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tasto azione"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Per accedere alle tue app, premi il tasto azione sulla tastiera."</string>
@@ -1428,7 +1428,7 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controlli della casa"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Accedi rapidamente ai controlli della casa dal salvaschermo"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Annulla"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Per tornare indietro, scorri verso sinistra o verso destra con tre dita sul touchpad."</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Per tornare indietro, scorri verso sinistra o destra con tre dita sul touchpad."</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Per andare alla schermata Home, scorri verso l\'alto con tre dita sul touchpad"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Per visualizzare le app recenti, scorri verso l\'alto e tieni premuto con tre dita sul touchpad"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Per visualizzare tutte le tue app, premi il tasto azione sulla tastiera"</string>
@@ -1443,7 +1443,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Usa la tastiera per visualizzare tutte le app"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Premi il tasto azione in qualsiasi momento. Tocca per scoprire altri gesti."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Ora l\'attenuazione extra è nel cursore della luminosità"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ora puoi usare l\'attenuazione extra per lo schermo abbassando il livello di luminosità ancora di più.\n\nDato che questa funzionalità ora fa parte del cursore della luminosità, le scorciatoie per l\'attenuazione extra vengono rimosse."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ora puoi usare l\'attenuazione extra per lo schermo abbassando ulteriormente il livello di luminosità.\n\nDato che questa funzionalità è ora integrata nel cursore della luminosità, le scorciatoie per l\'attenuazione extra vengono rimosse."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Rimuovi scorciatoie attenuazione extra"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Scorciatoie attenuazione extra rimosse"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Connettività"</string>

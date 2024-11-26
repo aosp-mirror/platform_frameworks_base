@@ -790,7 +790,7 @@
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"ដកឃ្លា"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Play/Pause"</string>
@@ -1383,7 +1383,7 @@
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"ប្រព័ន្ធ"</string>
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"ការគ្រប់គ្រង​ប្រព័ន្ធ"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"កម្មវិធី​ប្រព័ន្ធ"</string>
-    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ការដំណើរការបានច្រើន"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ការធ្វើកិច្ចការច្រើន"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"កម្មវិធី​ថ្មីៗ"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"មុខងារ​បំបែកអេក្រង់"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ធាតុចូល"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"កម្មវិធីបច្ចុប្បន្ន"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ភាពងាយស្រួល"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ផ្លូវកាត់​ក្ដារ​ចុច"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ផ្លូវ​កាត់ការស្វែងរក"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ស្វែងរកផ្លូវ​កាត់"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"គ្មាន​លទ្ធផល​ស្វែងរក​ទេ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"រូបតំណាង \"បង្រួម\""</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"រូបតំណាង \"ពង្រីក\""</string>

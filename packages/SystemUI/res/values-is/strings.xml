@@ -112,10 +112,10 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Viltu taka upp skjáinn?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Taka upp eitt forrit"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Taka upp allan skjáinn"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Þegar þú tekur upp allan skjáinn verður allt sem er sýnilegt á skjánum tekið upp. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og vídeó."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Þegar þú tekur upp forrit verður allt sem er sýnilegt eða spilað í forritinu tekið upp. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og vídeó."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Þegar þú tekur upp allan skjáinn verður allt sem er sýnilegt á skjánum tekið upp. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Þegar þú tekur upp forrit verður allt sem er sýnilegt eða spilað í forritinu tekið upp. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Taka upp skjá"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Velja forrit til að taka upp"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Veldu forrit til að taka upp"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Taka upp hljóð"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Hljóð tækis"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Hljóð úr tækinu á borð við tónlist, símtöl og hringitóna"</string>
@@ -541,8 +541,8 @@
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"Deila öllum skjánum"</string>
     <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
     <skip />
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Þegar þú deilir öllum skjánum verður allt á skjánum sýnilegt <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og vídeó."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Þegar þú deilir forriti er allt sem sést eða er spilað í því forriti sýnilegt <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og vídeó."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Þegar þú deilir öllum skjánum verður allt á skjánum sýnilegt <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Þegar þú deilir forriti er allt sem sést eða er spilað í því forriti sýnilegt <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Deila skjá"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> slökkti á þessum valkosti"</string>
     <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Velja forrit til að deila"</string>
@@ -551,7 +551,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Varpa öllum skjánum"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Þegar þú varpar öllum skjánum þá er allt á skjánum sýnilegt. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Þegar þú varpar forriti er allt sem sést eða er spilað í því forriti sýnilegt. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Senda út skjá"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Varpa skjá"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Velja forrit til að varpa"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Byrja að deila?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Þegar þú deilir, tekur upp eða varpar hefur Android aðgang að öllu sem sést á skjánum eða spilast í tækinu. Passaðu því upp á aðgangsorð, greiðsluupplýsingar, skilaboð, myndir, hljóð og myndskeið."</string>
@@ -1386,12 +1386,12 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Fjölvinnsla"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Nýleg forrit"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Skjáskipting"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Inntak"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Innsláttur"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Flýtileiðir forrita"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Núverandi forrit"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Aðgengi"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Flýtilyklar"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Leitarflýtileiðir"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Leita að flýtileiðum"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Engar leitarniðurstöður"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Minnka tákn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Stækka tákn"</string>

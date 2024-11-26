@@ -1386,7 +1386,7 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Πολυδιεργασία"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Πρόσφατες εφαρμογές"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Διαχωρισμός οθόνης"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Είσοδος"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Εισαγωγή"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Συντομεύσεις εφαρμογών"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Τρέχουσα εφαρμογή"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Προσβασιμότητα"</string>

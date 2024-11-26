@@ -564,7 +564,7 @@
     <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"Cambio de aplicación"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"O teu administrador de TI bloqueou esta aplicación"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A política do dispositivo desactivou a opción de capturar a pantalla"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todo"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Xestionar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Notificacións novas"</string>
@@ -802,7 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"Re Páx"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"Av Páx"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"Supr"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"Escape"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"Inicio"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"Fin"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Inserir"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aplicación actual"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accesibilidade"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Atallos de teclado"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Atallos de busca"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Busca atallos"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Non hai resultados de busca"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icona de contraer"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icona de despregar"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Volver"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Para retroceder, pasa tres dedos cara á esquerda ou cara á dereita en calquera parte do panel táctil.\n\nTamén podes usar o atallo de teclado Acción + Escape."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Moi ben!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Completaches o xesto de retroceso."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Completaches o titorial do xesto de retroceso."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir ao inicio"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Para ir á pantalla de inicio, pasa tres dedos cara arriba desde a parte inferior da pantalla."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Excelente!"</string>

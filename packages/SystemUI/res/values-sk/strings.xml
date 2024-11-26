@@ -680,7 +680,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Priestorový zvuk"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Vypnuté"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Pevné"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sled. polohy hlavy"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sledovanie hlavy"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Režim zvonenia zmeníte klepnutím"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"vypnite zvuk"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"zapnite zvuk"</string>
@@ -840,12 +840,12 @@
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Cyklické prechádzanie dozadu po nedávnych aplikáciách"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvorenie zoznamu aplikácií"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvorenie nastavení"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvorenie Asistenta"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvoriť asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Uzamknutie obrazovky"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Napísanie poznámky"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Použite rozdelenú obrazovku s aktuálnou aplikáciou vpravo"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Použite rozdelenú obrazovku s aktuálnou aplikáciou vľavo"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Rozdeliť obrazovku, aktuálna aplikácia vpravo"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Rozdeliť obrazovku, aktuálna aplikácia vľavo"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prepnutie rozdelenej obrazovky na celú"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Prechod na aplikáciu vpravo alebo dole pri rozdelenej obrazovke"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Prechod na aplikáciu vľavo alebo hore pri rozdelenej obrazovke"</string>
@@ -1387,21 +1387,21 @@
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Nedávne aplikácie"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Rozdelená obrazovka"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Vstup"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Odkazy do aplikácií"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Skratky aplikácií"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuálna aplikácia"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Dostupnosť"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Klávesové skratky"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Vyhľadávacie odkazy"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Prehľadávať skratky"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Žiadne výsledky vyhľadávania"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona zbalenia"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona rozbalenia"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"alebo"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Presúvadlo"</string>
-    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Prechádzajte pomocou klávesnice"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Pohybujte sa v systéme pomocou klávesnice"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Naučte sa klávesové skratky"</string>
-    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Prechádzajte pomocou touchpadu"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Pohybujte sa v systéme pomocou touchpadu"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Naučte sa gestá touchpadu"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Prechádzajte pomocou klávesnice a touchpadu"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Pohybujte sa v systéme pomocou klávesnice a touchpadu"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Naučte sa gestá touchpadu, klávesové skratky a ďalšie funkcie"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gesto prechodu späť"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gesto prechodu domov"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Prejsť späť"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Ak chcete prejsť späť, potiahnite kdekoľvek na touchpade troma prstami doľava alebo doprava.\n\nMôžete použiť aj klávesovú skratku, teda akčný kláves + ESC."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Skvelé!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Dokončili ste gesto na prechod späť."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Použili ste gesto na prechod späť."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Prechod na plochu"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Na plochu môžete kedykoľvek prejsť potiahnutím troma prstami zdola obrazovky."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Výborne!"</string>
@@ -1418,7 +1418,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Zobrazenie nedávnych aplikácií"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Potiahnite troma prstami na touchpade nahor a pridržte ich."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Skvelé!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Dokončili ste gesto na zobrazenie nedávnych aplikácií."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Použili ste gesto na zobrazenie nedávnych aplikácií."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Akčný kláves"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Ak chcete získať prístup k aplikáciám, stlačte na klávesnici akčný kláves."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Blahoželáme!"</string>

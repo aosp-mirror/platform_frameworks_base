@@ -940,7 +940,7 @@
     <string name="data_connection_no_internet" msgid="691058178914184544">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Endre rekkefølgen på innstillingene."</string>
-    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"På/av-meny"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Av/på-meny"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> av <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskjerm"</string>
     <string name="finder_active" msgid="7907846989716941952">"Du kan finne denne telefonen med Finn enheten min, selv når den er slått av"</string>
@@ -1448,7 +1448,7 @@
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Snarveiene for ekstra dimming er fjernet"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Tilkobling"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Tilgjengelighet"</string>
-    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Systemverktøy"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Verktøy"</string>
     <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"Personvern"</string>
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Levert av apper"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Skjerm"</string>

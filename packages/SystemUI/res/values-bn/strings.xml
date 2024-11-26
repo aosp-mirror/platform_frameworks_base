@@ -791,8 +791,8 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"ফিরুন"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"এন্টার"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"ব্যাকস্পেস"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"প্লে/বিরতি"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"থামান"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"পরবর্তী"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"বর্তমান অ্যাপ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"অ্যাক্সেসিবিলিটি"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"কীবোর্ড শর্টকাট"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"সার্চ শর্টকাট"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"শর্টকাট সার্চ করুন"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"কোনও সার্চ ফলাফল নেই"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"আইকন আড়াল করুন"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"আইকন বড় করুন"</string>
@@ -1448,7 +1448,7 @@
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"\'অতিরিক্ত কম ব্রাইটনেস\' ফিচারের শর্টকাট সরানো হয়েছে"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"কানেক্টিভিটি"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"অ্যাক্সেসিবিলিটি"</string>
-    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"উপযোগিতা"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"ইউটিলিটি"</string>
     <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"গোপনীয়তা"</string>
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"অ্যাপের তরফ থেকে দেওয়া"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ডিসপ্লে"</string>

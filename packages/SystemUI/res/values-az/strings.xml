@@ -1411,7 +1411,7 @@
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Geri getmək üçün taçpeddə istənilən yerdə üç barmaqla sola və ya sağa çəkin.\n\nBunun üçün Action + ESC klaviatura qısayolundan da istifadə edə bilərsiniz."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Əla!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Geri getmə jestini tamamladınız."</string>
-    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ana ekrana qayıdın"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Əsas səhifəyə keçin"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"İstənilən vaxt ana ekrana keçmək üçün ekranın aşağısından üç barmağınızla yuxarı çəkin."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Əla!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Əsas ekrana keçid jestini tamamladınız."</string>

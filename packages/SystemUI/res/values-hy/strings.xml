@@ -115,7 +115,7 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Երբ դուք տեսագրում եք ամբողջ էկրանը, էկրանին ցուցադրվող ամեն ինչ տեսագրվում է։ Ուստի ուշադիր եղեք այնպիսի բաների հետ, ինչպիսիք են գաղտնաբառերը, վճարային տվյալները, հաղորդագրությունները, լուսանկարները, աուդիո և վիդեո բովանդակությունը։"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Երբ դուք որևէ հավելված եք տեսագրում, հավելվածում ցուցադրվող կամ նվագարկվող ամեն ինչ տեսագրվում է։ Ուստի ուշադիր եղեք այնպիսի բաների հետ, ինչպիսիք են գաղտնաբառերը, վճարային տվյալները, հաղորդագրությունները, լուսանկարները, աուդիո և վիդեո բովանդակությունը։"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Տեսագրել էկրանը"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Հավելվածի ընտրություն՝ տեսագրելու համար"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Հավելված ընտրեք՝ տեսագրելու համար"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ձայնագրել"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Սարքի ձայները"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Ձեր սարքի ձայները, օրինակ՝ երաժշտությունը, զանգերն ու զանգերանգները"</string>
@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Անջատված է"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Կարգավորել"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Կառավարել կարգավորումներում"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ակտիվ ռեժիմներ չկան}=1{{mode} ռեժիմ ակտիվ է}one{# ռեժիմ ակտիվ է}other{# ռեժիմ ակտիվ է}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ակտիվ ռեժիմ չկա}=1{{mode} ռեժիմն ակտիվ է}one{# ռեժիմ ակտիվ է}other{# ռեժիմ ակտիվ է}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ձայները և թրթռոցները չեն անհանգստացնի ձեզ, բացի ձեր կողմից նշված զարթուցիչները, հիշեցումները, միջոցառումների ծանուցումները և զանգերը։ Դուք կլսեք ձեր ընտրածի նվագարկումը, այդ թվում՝ երաժշտություն, տեսանյութեր և խաղեր:"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Ձայները և թրթռոցները, բացի զարթուցիչներից, չեն անհանգստացնի ձեզ: Դուք կլսեք ձեր ընտրածի նվագարկումը, այդ թվում՝ երաժշտություն, տեսանյութեր և խաղեր:"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Հարմարեցնել"</string>
@@ -676,7 +676,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s: Հպեք՝ ձայնն անջատելու համար: Մատչելիության ծառայությունների ձայնը կարող է անջատվել:"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s։ Հպեք՝ թրթռոցը միացնելու համար։"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s։ Հպեք՝ ձայնը անջատելու համար։"</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Աղմուկի կառավարում"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Աղմուկի վերահսկում"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Տարածական հնչողություն"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Անջատել"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Ֆիքսված"</string>
@@ -791,7 +791,7 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Հետ"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Բացատ"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Նվագարկում/դադար"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Կանգնեցնել"</string>
@@ -836,16 +836,16 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Հետ գնալ"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Անցնել հիմնական էկրան"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Դիտել վերջին հավելվածները"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Առաջ անցնել վերջին հավելվածների միջով"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Հետ անցնել վերջին հավելվածների միջով"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Առաջ անցնել վերջին հավելվածներով"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Հետ անցնել վերջին հավելվածներով"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Բացել հավելվածների ցանկը"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Բացել կարգավորումները"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Բացել Օգնականը"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Կողպէկրան"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Ստեղծել նշում"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Բազմախնդրություն"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Աջ մասում օգտագործեք տրոհված էկրանն այս հավելվածի հետ"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Ձախ մասում օգտագործեք տրոհված էկրանն այս հավելվածի հետ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Բազմախնդրու­թյուն"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Տրոհել էկրանը և տեղավորել այս հավելվածը աջում"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Տրոհել էկրանը և տեղավորել այս հավելվածը ձախում"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Տրոհված էկրանից անցնել լիաէկրան ռեժիմ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Անցեք աջ կողմի կամ ներքևի հավելվածին տրոհված էկրանի միջոցով"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Անցեք աջ կողմի կամ վերևի հավելվածին տրոհված էկրանի միջոցով"</string>
@@ -1383,7 +1383,7 @@
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Համակարգ"</string>
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Համակարգի կառավարման տարրեր"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Համակարգային հավելվածներ"</string>
-    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Բազմախնդրություն"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Բազմախնդրու­թյուն"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Վերջին օգտագործած հավելվածները"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Տրոհված էկրան"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ներածում"</string>
@@ -1417,7 +1417,7 @@
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Դուք սովորեցիք հիմնական էկրան անցնելու ժեստը։"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Դիտել վերջին հավելվածները"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Երեք մատը սահեցրեք վերև և սեղմած պահեք հպահարթակին։"</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Կեցցե՛ք։"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Կեցցե՛ք"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Դուք կատարեցիք վերջին օգտագործված հավելվածների դիտման ժեստը։"</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Գործողության ստեղն"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Բոլոր հավելվածներն օգտագործելու համար սեղմեք գործողության ստեղնը ստեղնաշարի վրա"</string>
@@ -1428,7 +1428,7 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Տան կառավարման տարրեր"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Տան կառավարման տարրերը դարձրեք էկրանապահ"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Հետարկել"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Հետ գնալու համար հպահարթակի վրա երեք մատը սահեցրեք ձախ կամ աջ"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Հետ գնալու համար երեք մատը հպահարթակի վրա սահեցրեք ձախ կամ աջ"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Հիմնական էկրան անցնելու համար հպահարթակի վրա երեք մատը սահեցրեք ձախ կամ աջ"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Վերջերս օգտագործված հավելվածները դիտելու համար երեք մատը սահեցրեք վերև և սեղմած պահեք"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Բոլոր հավելվածները դիտելու համար սեղմեք գործողության ստեղնը ստեղնաշարի վրա"</string>

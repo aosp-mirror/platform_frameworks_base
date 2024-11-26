@@ -111,8 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Ekranınız kaydedilsin mi?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Bir uygulamayı kaydet"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Tüm ekranı kaydedin"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Tüm ekranınızı kaydettiğinizde ekranınızda gösterilen her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Tüm ekranı kaydet"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Ekranın tamamını kaydederken ekranınızda gösterilen her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Bir uygulamayı kaydettiğinizde o uygulamada gösterilen veya oynatılan her şey kaydedilir. Bu nedenle şifre, ödeme ayrıntıları, mesaj, fotoğraf, ses ve video gibi öğeler konusunda dikkatli olun."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekranı kaydet"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Kaydedilecek uygulamayı seçin"</string>
@@ -307,7 +307,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"bağlantıyı kes"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"etkinleştir"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Yarın otomatik olarak aç"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share ve Cihazımı Bul gibi özellikler Bluetooth\'u kullanır"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share ve Cihazımı Bul gibi özellikler Bluetooth\'u kullanır."</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth yarın sabah açılacak"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Sesi paylaş"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Ses paylaşılıyor"</string>
@@ -844,10 +844,10 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kilit ekranı"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Not al"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Çoklu görev"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Sağdaki mevcut uygulamayla birlikte bölünmüş ekranı kullanın"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Soldaki mevcut uygulamayla birlikte bölünmüş ekranı kullanın"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Sağdaki mevcut uygulamayla birlikte bölünmüş ekranı kullan"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Soldaki mevcut uygulamayla birlikte bölünmüş ekranı kullan"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Bölünmüş ekrandan tam ekrana geç"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Bölünmüş ekran kullanırken sağdaki veya alttaki uygulamaya geçiş yapın"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Bölünmüş ekran kullanırken sağdaki veya alttaki uygulamaya geçiş yap"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Bölünmüş ekran kullanırken soldaki veya üstteki uygulamaya geçiş yapın"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Bölünmüş ekran etkinken: Bir uygulamayı başkasıyla değiştir"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Giriş"</string>
@@ -1383,7 +1383,7 @@
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Sistem"</string>
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Sistem kontrolleri"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Sistem uygulamaları"</string>
-    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Çoklu görev becerisi"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Çoklu görev"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Son uygulamalar"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Bölünmüş ekran"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Giriş"</string>
