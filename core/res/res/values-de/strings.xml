@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ermöglicht der App, die relative Distanz zwischen Ultrabreitband-Geräten in der Nähe zu bestimmen"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Mit WLAN-Geräten in der Nähe interagieren"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Erlaubt der App, Inhalte an WLAN-Geräte in der Nähe zu senden, sich mit ihnen zu verbinden und ihre relative Position zu ermitteln"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"Relative Position zu Geräten in der Nähe bestimmen"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Ermöglicht es der App, die relative Position zu Geräten in der Nähe zu bestimmen"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informationen zum bevorzugten NFC-Zahlungsdienst"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>

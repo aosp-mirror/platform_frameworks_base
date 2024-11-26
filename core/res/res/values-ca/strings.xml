@@ -613,6 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permet que l\'aplicació determini la posició relativa entre els dispositius de banda ultraampla propers"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interaccionar amb els dispositius Wi‑Fi propers"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet que l\'aplicació s\'anunciï i es connecti als dispositius Wi‑Fi propers, i en determini la posició relativa"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"determin. posició relativa entre dispositius propers"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permet que l\'aplicació determini la posició relativa entre els dispositius propers"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informació preferent sobre el servei de pagament per NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet que l\'aplicació obtingui informació preferent sobre el servei de pagament per NFC, com ara complements registrats i destinacions de rutes."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicació de camp proper (NFC)"</string>
@@ -1759,9 +1761,9 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Tria la funció que vols utilitzar quan toquis el botó d\'accessibilitat:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Tria la funció que vols utilitzar amb el gest d\'accessibilitat (llisca cap amunt amb dos dits des de la part inferior de la pantalla):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Tria la funció que vols utilitzar amb el gest d\'accessibilitat (fes lliscar tres dits cap amunt des de la part inferior de la pantalla):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Per canviar entre funcions, mantén premut el botó d\'accessibilitat."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Per canviar entre funcions, llisca cap amunt amb dos dits i mantén premut."</string>
-    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Per canviar entre funcions, llisca cap amunt amb tres dits i mantén premut."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Per canviar d\'una funció a una altra, mantén premut el botó d\'accessibilitat."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Per canviar d\'una funció a una altra, llisca cap amunt amb dos dits i mantén premut."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Per canviar d\'una funció a una altra, llisca cap amunt amb tres dits i mantén premut."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliació"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"S\'està canviant a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1924,7 +1926,7 @@
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no ho desactivis"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Replega"</string>
@@ -2384,12 +2386,12 @@
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilitza un altre cable i torna-ho a provar"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"El dispositiu està massa calent i no pot duplicar a la pantalla fins que es refredi"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La pantalla dual està activada"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Pantalla dual està activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> està utilitzant les dues pantalles per mostrar contingut"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositiu està massa calent"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La pantalla dual no està disponible perquè el telèfon està massa calent"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen no està disponible"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen no està disponible perquè la funció Estalvi de bateria està activada. Pots desactivar aquesta opció a Configuració."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Pantalla dual no està disponible perquè el telèfon està massa calent"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Pantalla dual no està disponible"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Pantalla dual no està disponible perquè la funció Estalvi de bateria està activada. Pots desactivar aquesta opció a Configuració."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ves a Configuració"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactiva"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> configurat"</string>
