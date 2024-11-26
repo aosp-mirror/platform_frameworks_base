@@ -335,7 +335,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ghi âm"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Hoạt động thể chất"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"truy cập vào hoạt động thể chất"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Máy ảnh"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"chụp ảnh và quay video"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Thiết bị ở gần"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"khám phá và kết nối với các thiết bị ở gần"</string>
@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"xác định vị trí tương đối giữa các thiết bị ở gần"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Cho phép ứng dụng xác định vị trí tương đối giữa các thiết bị ở gần"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -2140,7 +2142,7 @@
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Đóng"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cài đặt"</string>
-    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Máy ảnh"</string>
+    <string name="notification_appops_camera_active" msgid="8177643089272352083">"Camera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrô"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"hiển thị qua các ứng dụng khác trên màn hình của bạn"</string>
     <string name="notification_feedback_indicator" msgid="663476517711323016">"Gửi ý kiến phản hồi"</string>

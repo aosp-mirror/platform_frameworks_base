@@ -201,7 +201,7 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Jobbprofilen är inte längre tillgänglig på enheten"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"För många försök med lösenord"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratören tillåter inte längre privat bruk av enheten"</string>
-    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privat område har tagits bort"</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privat utrymme har tagits bort"</string>
     <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Din organisation tillåter inte privata utrymmen på den här hanterade enheten."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Enheten hanteras"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisationen hanterar den här enheten och kan övervaka nätverkstrafiken. Tryck om du vill veta mer."</string>
@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tillåt att appen fastställer den relativa positionen mellan Ultra Wideband-enheter i närheten"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagera med wifi-enheter i närheten"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Tillåter appen att sända ut till, ansluta till och fastställa relativ position för wifi-enheter i närheten"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"fastställa relativ position för enheter i närheten"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Tillåt att appen fastställer den relativa positionen mellan enheter i närheten"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Information kopplad till standardtjänsten för NFC-betalning"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillåter att appen hämtar information kopplad till standardtjänsten för NFC-betalning, till exempel registrerade hjälpmedel och ruttdestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollera närfältskommunikationen"</string>
@@ -2416,10 +2418,10 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Allmän"</string>
     <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Jobbprofil"</string>
-    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privat område"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Privat utrymme"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klona"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Allmän"</string>
-    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privat område"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Privat utrymme"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Känsligt aviseringsinnehåll dolt"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Av säkerhetsskäl döljs appinnehållet vid skärmdelning"</string>

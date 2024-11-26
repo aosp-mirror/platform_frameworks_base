@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Дозволува апликацијата да ја одреди релативната положба помеѓу уредите со ултраширок појас во близина"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"да има интеракција со уредите со Wi‑Fi во близина"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Дозволува апликацијата да рекламира, да се поврзува и да ја одредува релативната положба на уреди со Wi‑Fi во близина"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"да ја одредува рел. положба меѓу уреди во близина"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Дозволува апликацијата да ја одредува релативната положба меѓу уредите во близина"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информации за претпочитаната услуга за плаќање преку NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
@@ -2408,9 +2410,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Распоредот на тастатурата е поставен на <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Допрете за да промените."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физичките тастатури се конфигурирани"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Допрете за да ги видите тастатурите"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Приватно"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Приватен"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клониран профил"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Работно"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Работен"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Работен профил 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Работен профил 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Профил за тестирање"</string>

@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Аппад ойролцоох ультра өргөн зурвасын төхөөрөмжүүдийн хоорондох холбоотой байрлалыг тодорхойлохыг зөвшөөрөх"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ойролцоох Wi-Fi төхөөрөмжүүдтэй харилцах"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Аппад ойролцоох Wi-Fi төхөөрөмжүүдтэй холбоотой байрлалыг мэдэгдэх, холбох, тодорхойлохыг зөвшөөрнө"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ойр төхөөрөмжүүдийн хоорондох харьцангуй байрлалыг тодорхойл"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Аппад ойролцоох төхөөрөмжүүдийн хоорондох харьцангуй байрлалыг тодорхойлохыг зөвшөөрнө үү"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сонгосон NFC төлбөрийн үйлчилгээний мэдээлэл"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Бүртгүүлсэн төхөөрөмж болон маршрутын хүрэх цэг зэрэг сонгосон nfc төлбөрийн үйлчилгээний мэдээллийг авахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ойролцоо талбарын холбоог удирдах"</string>
@@ -913,7 +915,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Тусгай"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Гэрийн"</string>
-    <string name="phoneTypeMobile" msgid="1178852541462086735">"Мобайл"</string>
+    <string name="phoneTypeMobile" msgid="1178852541462086735">"Гар утас"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"Ажлын"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Ажлын факс"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Гэрийн Факс"</string>

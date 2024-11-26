@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Allow the app to determine relative position between nearby ultra-wideband devices"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interact with nearby Wi‑Fi devices"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Allows the app to advertise, connect and determine the relative position of nearby Wi‑Fi devices"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"determine relative position between nearby devices"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Allow the app to determine relative position between nearby devices"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferred NFC payment service information"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred NFC payment service information, such as registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near-Field Communication"</string>
@@ -1401,7 +1403,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB turned on"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Device connected as webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB accessory connected"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Tap for more options."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Tap for more options"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Charging connected device. Tap for more options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogue audio accessory detected"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"The attached device is not compatible with this phone. Tap to learn more."</string>
@@ -2439,7 +2441,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Your face model can no longer be recognised. Set up Face Unlock again."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Set up"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Not now"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm for: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm for <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Switch user"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Mute"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tap to mute sound"</string>

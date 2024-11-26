@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"අවට ඇති අල්ට්‍රා-වයිඩ්බෑන්ඩ් උපාංග අතර සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දීම"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"අවට Wi‑Fi උපාංග සමග අන්තර්ක්‍රියා කරන්න"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"වෙළඳ දැන්වීම් පළ කිරීමට, සම්බන්ධ වීමට සහ අවට ඇති Wi-Fi උපාංගවල සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"අවට උපාංග අතර සාපේක්ෂ පිහිටීම තීරණය කරන්න"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"අවට උපාංග අතර සාපේක්ෂ පිහිටීම තීරණය කිරීමට යෙදුමට ඉඩ දෙන්න"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"කැමති NFC ගෙවීම් සේවා තොරතුරු"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
@@ -1057,7 +1059,7 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> කොටුව එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"රටාව සම්පූර්ණයි"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"රටා ප්‍රදේශය."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%%1$s. %%3$d න් %%2$d විජටය."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. %3$d න් %2$d විජටය."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"විජටය එක් කරන්න."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"හිස්"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"අගුළු අරින ප්‍රදේශය විදහා ඇත."</string>
@@ -2408,7 +2410,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"යතුරු පුවරුව <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> ලෙස සකසා ඇත… වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"භෞතික යතුරු පුවරුව වින්‍යාස කෙරිණි"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"යතුරු පුවරු බැලීමට තට්ටු කරන්න"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"පෞද්ගලික"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"රහසිගත"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ක්ලෝන කරන්න"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"කාර්යාලය"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"කාර්යාලය 2"</string>

@@ -614,6 +614,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"З цим дозволом додаток може визначати відстань між розташованими поблизу пристроями з надширокосмуговим зв’язком"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"взаємодіяти з пристроями Wi‑Fi поблизу"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Додаток може виявляти пристрої Wi‑Fi поблизу, підключатися до них і визначати їх відносне розташування"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"визначати відстань між пристроями поблизу"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Із цим дозволом додаток може визначати відстань між розташованими поблизу пристроями"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Використання інформації з платіжного NFC-сервісу"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
@@ -1575,7 +1577,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Видалити елементи"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Відмінити видалення"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Наразі нічого не робити"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Вибрати обліковий запис"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Вибрати облік. запис"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Додати обліковий запис"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Додати облік. запис"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Збільшити"</string>
