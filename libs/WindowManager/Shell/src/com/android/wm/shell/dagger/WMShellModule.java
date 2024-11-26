@@ -857,14 +857,16 @@ public abstract class WMShellModule {
             InputManager inputManager,
             ShellTaskOrganizer shellTaskOrganizer,
             FocusTransitionObserver focusTransitionObserver,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            DisplayController displayController) {
         if (DesktopModeStatus.canEnterDesktopMode(context) && useKeyGestureEventHandler()
                 && manageKeyGestures()
                 && (Flags.enableMoveToNextDisplayShortcut()
                 || Flags.enableTaskResizingKeyboardShortcuts())) {
             return Optional.of(new DesktopModeKeyGestureHandler(context,
                     desktopModeWindowDecorViewModel, desktopTasksController,
-                    inputManager, shellTaskOrganizer, focusTransitionObserver, mainExecutor));
+                    inputManager, shellTaskOrganizer, focusTransitionObserver,
+                    mainExecutor, displayController));
         }
         return Optional.empty();
     }

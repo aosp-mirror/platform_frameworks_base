@@ -84,6 +84,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
+import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.DragStartState
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
@@ -795,32 +796,24 @@ class DesktopTasksController(
      */
     fun toggleDesktopTaskSize(
         taskInfo: RunningTaskInfo,
-        resizeTrigger: ResizeTrigger,
-        inputMethod: InputMethod,
-        maximizeCujRecorder: (() -> Unit)? = null,
-        unmaximizeCujRecorder: (() -> Unit)? = null,
+        interaction: ToggleTaskSizeInteraction
     ) {
         val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
         desktopModeEventLogger.logTaskResizingStarted(
-            resizeTrigger,
-            inputMethod,
+            interaction.resizeTrigger,
+            interaction.inputMethod,
             taskInfo,
             currentTaskBounds.width(),
             currentTaskBounds.height(),
             displayController
         )
-
         val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-
-        val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
         val destinationBounds = Rect()
-
-        val isMaximized = isTaskMaximized(taskInfo, stableBounds)
+        val isMaximized = interaction.direction == ToggleTaskSizeInteraction.Direction.RESTORE
         // If the task is currently maximized, we will toggle it not to be and vice versa. This is
         // helpful to eliminate the current task from logic to calculate taskbar corner rounding.
-        val willMaximize = !isMaximized
+        val willMaximize = interaction.direction == ToggleTaskSizeInteraction.Direction.MAXIMIZE
         if (isMaximized) {
-            unmaximizeCujRecorder?.invoke()
             // The desktop task is at the maximized width and/or height of the stable bounds.
             // If the task's pre-maximize stable bounds were saved, toggle the task to those bounds.
             // Otherwise, toggle to the default bounds.
@@ -836,7 +829,6 @@ class DesktopTasksController(
                 }
             }
         } else {
-            maximizeCujRecorder?.invoke()
             // Save current bounds so that task can be restored back to original bounds if necessary
             // and toggle to the stable bounds.
             desktopTilingDecorViewModel.removeTaskIfTiled(taskInfo.displayId, taskInfo.taskId)
@@ -857,10 +849,16 @@ class DesktopTasksController(
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
+        interaction.uiEvent?.let { uiEvent ->
+            desktopModeUiEventLogger.log(taskInfo, uiEvent)
+        }
         desktopModeEventLogger.logTaskResizingEnded(
-            resizeTrigger, inputMethod,
-            taskInfo, destinationBounds.width(),
-            destinationBounds.height(), displayController
+            interaction.resizeTrigger,
+            interaction.inputMethod,
+            taskInfo,
+            destinationBounds.width(),
+            destinationBounds.height(),
+            displayController,
         )
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
     }
@@ -871,10 +869,7 @@ class DesktopTasksController(
         currentDragBounds: Rect,
         motionEvent: MotionEvent
     ) {
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-        val stableBounds = Rect()
-        displayLayout.getStableBounds(stableBounds)
-        if (isTaskMaximized(taskInfo, stableBounds)) {
+        if (isTaskMaximized(taskInfo, displayController)) {
             // Handle the case where we attempt to drag-to-maximize when already maximized: the task
             // position won't need to change but we want to animate the surface going back to the
             // maximized position.
@@ -892,8 +887,11 @@ class DesktopTasksController(
 
         toggleDesktopTaskSize(
             taskInfo,
-            ResizeTrigger.DRAG_TO_TOP_RESIZE_TRIGGER,
-            DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            ToggleTaskSizeInteraction(
+                direction = ToggleTaskSizeInteraction.Direction.MAXIMIZE,
+                source = ToggleTaskSizeInteraction.Source.HEADER_DRAG_TO_TOP,
+                inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+            )
         )
     }
 
@@ -908,19 +906,6 @@ class DesktopTasksController(
                 Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
             return centerInArea(
                 newSize, stableBounds, stableBounds.left, stableBounds.top)
-        }
-    }
-
-    private fun isTaskMaximized(
-        taskInfo: RunningTaskInfo,
-        stableBounds: Rect
-    ): Boolean {
-        val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
-
-        return if (taskInfo.isResizeable) {
-            isTaskBoundsEqual(currentTaskBounds, stableBounds)
-        } else {
-            isTaskWidthOrHeightEqual(currentTaskBounds, stableBounds)
         }
     }
 
