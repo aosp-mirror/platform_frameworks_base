@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Mycket snabb"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Har upphört att gälla"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Kopplas ifrån"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Frånkopplad"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Kopplar ifrån…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Ansluter…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Ansluten<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -235,7 +235,7 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personlig"</string>
     <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
     <string name="category_private" msgid="4244892185452788977">"Privat"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Aktiverar funktionen Förbättrad anslutning."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivera en terminalapp som ger åtkomst till hyllor lokalt"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-utvecklingsmiljö"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimentellt) Kör Linux-terminalen på Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Om du inaktiverar detta rensas data i Linux-terminalen"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontroll"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Konfigurera HDCP-kontroll"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Felsökning"</string>

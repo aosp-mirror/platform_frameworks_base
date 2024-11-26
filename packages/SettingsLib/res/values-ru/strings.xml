@@ -125,7 +125,7 @@
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Профиль A2DP"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Звонки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Профиль OPP"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Профиль HID"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Устройство ввода"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ к интернету"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Разрешить доступ к контактам и журналу звонков"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Эти сведения нужны для оповещений о звонках и других функций"</string>
@@ -283,7 +283,7 @@
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Во время зарядки экран будет всегда включен"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Сохранять все пакеты Bluetooth (перезапустите Bluetooth после изменения этой настройки)"</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"Заводская разблокировка"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Разблокировка загрузчика"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Разрешить разблокировку загрузчика ОС"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Разрешить заводскую разблокировку?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ВНИМАНИЕ! Функции защиты не будут работать на устройстве, пока включен этот параметр."</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Включить улучшенный обмен данными"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Разрешить терминальный доступ к локальной оболочке"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Среда разработки Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"Запустить терминал Linux в Android (экспериментальная функция)"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Если отключить эту функцию, данные терминала Linux будут удалены"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Порядок проверки HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отладка"</string>
@@ -582,7 +585,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Этот смартфон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Этот планшет"</string>
-    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Встроенный динамик компьютера"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Встроенное"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"Микрофон (встроенный)"</string>

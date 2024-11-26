@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"மேம்படுத்தப்பட்ட இணைப்புநிலை அம்சத்தை இயக்கும்."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"அக முனையம்"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் ஆப்ஸை இயக்கு"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux டெவெலப்மெண்ட் சூழல்"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(பரிசோதனை) Androidடில் Linux டெர்மினலை இயக்கலாம்"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"நீங்கள் முடக்கினால், Linux டெர்மினல் தரவு அழிக்கப்படும்"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"பிழைதிருத்தம்"</string>
