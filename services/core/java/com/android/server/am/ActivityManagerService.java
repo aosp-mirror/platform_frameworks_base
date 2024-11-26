@@ -132,7 +132,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.security.Flags.preventIntentRedirect;
 import static android.security.Flags.preventIntentRedirectCollectNestedKeysOnServerIfNotCollected;
-import static android.security.Flags.preventIntentRedirectShowToast;
+import static android.security.Flags.preventIntentRedirectShowToastIfNestedKeysNotCollected;
 import static android.security.Flags.preventIntentRedirectThrowExceptionIfNestedKeysNotCollected;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
@@ -19326,7 +19326,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "[IntentRedirect] The intent does not have its nested keys collected as a "
                             + "preparation for creating intent creator tokens. Intent: "
                             + intent + "; creatorPackage: " + creatorPackage);
-            if (preventIntentRedirectShowToast()) {
+            if (preventIntentRedirectShowToastIfNestedKeysNotCollected()) {
                 UiThread.getHandler().post(
                         () -> Toast.makeText(mContext,
                                 "Nested keys not collected. go/report-bug-intentRedir to report a"
