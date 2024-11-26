@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.qsTileViewModelAdaperFactory by
@@ -29,7 +28,6 @@ val Kosmos.qsTileViewModelAdaperFactory by
                     applicationCoroutineScope,
                     mock(),
                     qsTileViewModel,
-                    testDispatcher,
                 )
             }
         }
