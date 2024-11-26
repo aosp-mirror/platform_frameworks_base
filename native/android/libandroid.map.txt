@@ -362,6 +362,8 @@ LIBANDROID {
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
     AThermal_getThermalHeadroomThresholds; # introduced=VanillaIceCream
+    AThermal_registerThermalHeadroomListener; # introduced=36
+    AThermal_unregisterThermalHeadroomListener; # introduced=36
     APerformanceHint_getManager; # introduced=Tiramisu
     APerformanceHint_createSession; # introduced=Tiramisu
     APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
