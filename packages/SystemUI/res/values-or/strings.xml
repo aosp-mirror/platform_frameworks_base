@@ -318,7 +318,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ଇନପୁଟ୍"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"ଶ୍ରବଣ ଯନ୍ତ୍ର"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ଅନ୍ ହେଉଛି…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ଅଟୋ-ରୋଟେଟ୍"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ଅଟୋ-ରୋଟେଟ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ଅଟୋ-ରୋଟେଟ ସ୍କ୍ରିନ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ଲୋକେସନ"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"ସ୍କ୍ରିନ ସେଭର"</string>
@@ -551,7 +551,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"ଆପଣ ଆପଣଙ୍କ ସମ୍ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନକୁ କାଷ୍ଟ କରିବା ସମୟରେ ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ସବୁକିଛି ଦେଖାଯାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"ଆପଣ ଏକ ଆପ କାଷ୍ଟ କରିବା ସମୟରେ, ସେହି ଆପରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ପ୍ଲେ ହେଉଥିବା ସବୁକିଛି ଦେଖାଯାଏ। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"କାଷ୍ଟ ସ୍କ୍ରିନ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"ସ୍କ୍ରିନ କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"କାଷ୍ଟ କରିବାକୁ ଆପ ବାଛନ୍ତୁ"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ସେୟାରିଂ ଆରମ୍ଭ କରିବେ?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ଆପଣ ସେୟାର, ରେକର୍ଡ କିମ୍ବା କାଷ୍ଟ କରିବା ସମୟରେ, ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଦେଖାଯାଉଥିବା କିମ୍ବା ଆପଣଙ୍କ ଡିଭାଇସରେ ପ୍ଲେ ହେଉଥିବା ସବୁକିଛିକୁ Androidର ଆକ୍ସେସ ଅଛି। ତେଣୁ ପାସୱାର୍ଡ, ପେମେଣ୍ଟ ବିବରଣୀ, ମେସେଜ, ଫଟୋ ଏବଂ ଅଡିଓ ଓ ଭିଡିଓ ପରି ବିଷୟଗୁଡ଼ିକ ପ୍ରତି ସତର୍କ ରୁହନ୍ତୁ।"</string>
@@ -679,7 +679,7 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ନଏଜ କଣ୍ଟ୍ରୋଲ"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"ସ୍ପାସିଅଲ ଅଡିଓ"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"ବନ୍ଦ ଅଛି"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ନିଶ୍ଚିତ ହୋଇଛି"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ଠିକ ହୋଇଯାଇଛି"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ହେଡ ଟ୍ରାକିଂ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ରିଙ୍ଗର୍ ମୋଡ୍ ବଦଳାଇବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ମ୍ୟୁଟ"</string>
@@ -790,9 +790,9 @@
     <string name="keyboard_key_home" msgid="3734400625170020657">"ହୋମ"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"ଫେରନ୍ତୁ"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"ସ୍ପେସ୍‍"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"ଏଣ୍ଟର୍"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"ବ୍ୟାକସ୍ପେସ୍‍"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"ସ୍ପେସ"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"ଏଣ୍ଟର"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"ବେକସ୍ପେସ"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"ପ୍ଲେ କରନ୍ତୁ/ପଜ୍‍ କରନ୍ତୁ"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"ପରବର୍ତ୍ତୀ"</string>
@@ -802,7 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"ଉପର ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"ତଳ ପୃଷ୍ଠା"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"ଡିଲିଟ କରନ୍ତୁ"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"ଏସକେପ"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ହୋମ"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"ସମାପ୍ତ"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"ଇନ୍‌ସର୍ଟ"</string>
@@ -862,7 +862,7 @@
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ଇମେଲ୍"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"ମ୍ୟୁଜିକ୍‍"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"କ୍ୟାଲେଣ୍ଡର"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"କାଲକୁଲେଟର"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
@@ -1267,7 +1267,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ଟାଇଲ୍ ଯୋଗ କର ନାହିଁ"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ୟୁଜର ଚୟନ କରନ୍ତୁ"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{#ଟି ଆପ ସକ୍ରିୟ ଅଛି}other{#ଟି ଆପ ସକ୍ରିୟ ଅଛି}}"</string>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ଆପ ସକ୍ରିୟ ଅଛି}other{# ଆପ ସକ୍ରିୟ ଅଛି}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ନୂଆ ସୂଚନା"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ସକ୍ରିୟ ଆପ୍ସ"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ଆପଣ ଏହି ଆପ୍ସକୁ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ ସେଗୁଡ଼ିକ ସକ୍ରିୟ ରହିଥାଏ ଏବଂ ଚାଲୁଥାଏ। ଏହା ସେଗୁଡ଼ିକର କାର୍ଯ୍ୟକ୍ଷମତାକୁ ଉନ୍ନତ କରେ, କିନ୍ତୁ ଏହା ମଧ୍ୟ ବେଟେରୀ ଲାଇଫକୁ ପ୍ରଭାବିତ କରିପାରେ।"</string>
@@ -1415,7 +1415,7 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ଯେ କୌଣସି ସମୟରେ ଆପଣଙ୍କ ହୋମ ସ୍କ୍ରିନକୁ ଯିବା ପାଇଁ ଆପଣଙ୍କ ସ୍କିନର ତଳୁ ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ କରନ୍ତୁ।"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ବଢ଼ିଆ!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ଆପଣ \'ହୋମକୁ ଯାଆନ୍ତୁ\' ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
-    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ବର୍ତ୍ତମାନର ଆପ୍ସ ଭ୍ୟୁ କରନ୍ତୁ"</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ବର୍ତ୍ତମାନର ଆପ୍ସକୁ ଭ୍ୟୁ କରନ୍ତୁ"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"ଆପଣଙ୍କ ଟଚପେଡରେ ତିନୋଟି ଆଙ୍ଗୁଠିକୁ ବ୍ୟବହାର କରି ଉପରକୁ ସ୍ୱାଇପ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ବଢ଼ିଆ କାମ!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ଆପଣ ବର୍ତ୍ତମାନର ଆପ୍ସ ଜେଶ୍ଚରକୁ ଭ୍ୟୁ କରିବା ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>

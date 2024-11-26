@@ -551,7 +551,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Emitiranje cijelog zaslona"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kada emitirate cijeli zaslon, sve na zaslonu bit će vidljivo. Stoga pazite na stvari kao što su zaporke, podaci o plaćanju, poruke, fotografije te audio i videozapisi."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Kada emitirate aplikaciju, sve što se prikazuje ili reproducira u toj aplikaciji bit će vidljivo. Stoga pazite na stvari kao što su zaporke, podaci o plaćanju, poruke, fotografije te audio i videozapisi."</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Emitiranje zaslona"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Emitiraj zaslon"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Odaberite aplikaciju za emitiranje"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Želite li pokrenuti dijeljenje?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kad dijelite, snimate ili emitirate, Android ima pristup svemu što je vidljivo na zaslonu ili se reproducira na uređaju. Stoga pazite na zaporke, podatke o plaćanju, poruke, fotografije te audio i videozapise."</string>
@@ -836,8 +836,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Natrag"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Otvaranje početnog zaslona"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Prikaz nedavnih aplikacija"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje unaprijed kroz nedavne aplikacije"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje unatrag kroz nedavne aplikacije"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Listajte nedavne aplikacije (prema naprijed)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Listajte nedavne aplikacije (unatrag)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje popisa aplikacija"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje asistenta"</string>
@@ -1410,25 +1410,25 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Natrag"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Da biste se vratili natrag, s tri prsta prijeđite ulijevo ili udesno bilo gdje na dodirnoj podlozi.\n\nZa to možete upotrijebiti i tipku za radnju tipkovnog prečaca + ESC."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Sjajno!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Izvršili ste pokret za povratak."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Napravili ste pokret za povratak."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Na početnu stranicu"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Da biste u bilo kojem trenutku otvorili početni zaslon, trima prstima prijeđite prema gore od dna zaslona."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Odlično!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Izvršili ste pokret za otvaranje početnog zaslona."</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Napravili ste pokret za otvaranje početnog zaslona."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Pregled nedavnih aplikacija"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Prijeđite prema gore trima prstima na dodirnoj podlozi i zadržite pritisak."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Sjajno!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Izvršili ste pokret za prikaz nedavno korištenih aplikacija."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Napravili ste pokret za prikaz nedavno korištenih aplikacija."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tipka za radnju"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Da biste pristupili svojim aplikacijama, pritisnite tipku za radnje na tipkovnici."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Čestitamo!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Izvršili ste pokret tipke za radnju.\n\nRadnja + / prikazuje sve prečace koji su vam dostupni."</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Napravili ste pokret tipke za radnju.\n\nRadnja + / prikazuje sve prečace koji su vam dostupni."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Pozadinsko osvjetljenje tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Razina %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Upravljanje uređajima"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Brzo upravljajte uređajima putem čuvara zaslona"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Poništi"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Za povratak prijeđite ulijevo ili udesno trima prstima na dodirnoj podlozi"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Za povratak trima prstima prijeđite ulijevo ili udesno na dodirnoj podlozi"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Da biste se vratili na početni zaslon, prijeđite prema gore trima prstima na dodirnoj podlozi."</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Za prikaz nedavnih aplikacija prijeđite prema gore trima prstima i zadržite pritisak na dodirnoj podlozi"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Za prikaz svojih svih aplikacija pritisnite tipku za radnju na tipkovnici"</string>

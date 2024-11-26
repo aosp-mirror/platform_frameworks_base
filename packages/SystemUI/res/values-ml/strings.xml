@@ -847,7 +847,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"വലതുവശത്തുള്ള നിലവിലെ ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"ഇടതുവശത്തുള്ള നിലവിലെ ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"സ്‌ക്രീൻ വിഭജന മോഡിൽ നിന്ന് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറുക"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ വലതുവശത്തെ/താഴത്തെ ആപ്പിലേക്ക് മാറൂ"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ വലതുവശത്തെ/താഴത്തെ ആപ്പിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ ഇടതുവശത്തെ/മുകളിലെ ആപ്പിലേക്ക് മാറൂ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"സ്‌ക്രീൻ വിഭജന മോഡിൽ: ഒരു ആപ്പിൽ നിന്ന് മറ്റൊന്നിലേക്ക് മാറുക"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ഇൻപുട്ട്"</string>

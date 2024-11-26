@@ -847,7 +847,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Anänd delad skärm med den aktuella appen till höger"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Använd delad skärm med den aktuella appen till vänster"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Byt mellan delad skärm och helskärm"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Byt till appen till vänster eller nedanför när du använder delad skärm"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Byt till appen till höger eller nedanför när du använder delad skärm"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Byt till appen till vänster eller ovanför när du använder delad skärm"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Med delad skärm: ersätt en app med en annan"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Inmatning"</string>
@@ -1386,7 +1386,7 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multikörning"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Senaste apparna"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Delad skärm"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ingång"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Inmatning"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Genvägar till appar"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuell app"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Tillgänglighet"</string>

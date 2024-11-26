@@ -655,9 +655,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ના, આભાર"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ઍપ પિન કરી"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ઍપ અનપિન કરી"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"કૉલ કરો"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"કૉલ"</string>
     <string name="stream_system" msgid="7663148785370565134">"સિસ્ટમ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"રિંગ વગાડો"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"રિંગ"</string>
     <string name="stream_music" msgid="2188224742361847580">"મીડિયા"</string>
     <string name="stream_alarm" msgid="16058075093011694">"અલાર્મ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"નોટિફિકેશન"</string>
@@ -858,7 +858,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"ઍપ્લિકેશનો"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"બ્રાઉઝર"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"સંપર્કો"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacts"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ઇમેઇલ"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"મ્યુઝિક"</string>
@@ -1418,7 +1418,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"તાજેતરની ઍપ જુઓ"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"તમારા ટચપૅડ પર ત્રણ આંગળીઓનો ઉપયોગ કરીને ઉપર સ્વાઇપ કરો અને દબાવી રાખો."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ખૂબ સરસ કામ!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"તમે \"તાજેતરની ઍપ જુઓ\" સંકેત પૂર્ણ કર્યો."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"તમે \'તાજેતરની ઍપ જુઓ\' સંકેત પૂર્ણ કર્યો."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"ઍક્શન કી"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"તમારી ઍપ ઍક્સેસ કરવા માટે, તમારા કીબોર્ડ પરની ઍક્શન કી દબાવો."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"અભિનંદન!"</string>
@@ -1442,7 +1442,7 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"ત્રણ આંગળીઓનો ઉપયોગ કરીને ઉપર સ્વાઇપ કરો અને દબાવી રાખો. સંકેતો વિશે વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"બધી ઍપ જોવા માટે તમારા કીબોર્ડનો ઉપયોગ કરો"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"કોઈપણ સમયે ઍક્શન કી દબાવો. સંકેતો વિશે વધુ જાણવા માટે ટૅપ કરો."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"બ્રાઇટનેસ સ્લાઇડર હવે એક્સ્ટ્રા ડિમનો ભાગ છે"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"એક્સ્ટ્રા ડિમ હવે બ્રાઇટનેસ સ્લાઇડરનો ભાગ છે"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"તમે હવે બ્રાઇટનેસ લેવલને હજી પણ ઘટાડીને સ્ક્રીનને એક્સ્ટ્રા ડિમ બનાવી શકો છો.\n\nઆ સુવિધા હવે બ્રાઇટનેસ સ્લાઇડરનો ભાગ હોવાથી એક્સ્ટ્રા ડિમ શૉર્ટકટને કાઢી નાખવામાં આવી રહ્યાં છે."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"એક્સ્ટ્રા ડિમ શૉર્ટકટ કાઢી નાખો"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"એક્સ્ટ્રા ડિમ શૉર્ટકટ કાઢી નાખ્યા"</string>

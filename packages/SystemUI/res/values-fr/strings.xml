@@ -112,7 +112,7 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Enregistrer l\'écran ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Enregistrer une appli"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Enregistrer tout l\'écran"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Lorsque vous enregistrez l\'intégralité de votre écran, tout ce qui s\'y affiche est enregistré. Faites donc attention aux éléments tels que les mots de passe, les détails du mode de paiement, les messages, les photos, et les contenus audio et vidéo."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Lorsque vous enregistrez l\'intégralité de votre écran, tout ce qui s\'y affiche est enregistré. Faites donc attention aux éléments tels que les mots de passe, les détails de mode de paiement, les messages, les photos, et les contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Lorsque vous enregistrez une appli, tout ce qui est affiché ou lu dans celle-ci est enregistré. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Enregistrer l\'écran"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Choisir l\'appli à enregistrer"</string>
@@ -197,7 +197,7 @@
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
     <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Annuler l\'authentification"</string>
     <string name="biometric_dialog_content_view_more_options_button" msgid="2663810393874865475">"Plus d\'options"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utiliser un code PIN"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utiliser un code"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utiliser un schéma"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Utiliser un mot de passe"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Code incorrect"</string>
@@ -318,11 +318,11 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Entrée"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Appareils auditifs"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Activation…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotation automatique"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotation auto"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotation automatique de l\'écran"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Économiseur d\'écran"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à l\'appareil photo"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Économ. d\'écran"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès caméra"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accès au micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqué"</string>
@@ -364,7 +364,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Avertissement : <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Applis pro"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"En pause"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Éclairage nocturne"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Éclair. nocturne"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Activé la nuit"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Jusqu\'à l\'aube"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"À partir de <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -577,7 +577,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"Aucune notification"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Aucune nouvelle notification"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"La limitation des notifications est activée"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Les alertes et le volume de l\'appareil sont réduits automatiquement pendant 2 minutes max. quand vous recevez trop de notifications à la fois."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Les alertes et le volume de l\'appareil sont réduits automatiquement pendant 2 minutes maximum quand vous recevez trop de notifications à la fois."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Désactiver"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Déverrouiller pour voir anciennes notifications"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Cet appareil est géré par tes parents"</string>
@@ -836,8 +836,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Retour"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Accéder à l\'écran d\'accueil"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Afficher les applis récentes"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Avancer dans les applications récentes"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Revenir sur les applications récentes"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Faire défiler les applications récentes"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Faire défiler les applications récentes à l\'envers"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ouvrir la liste d\'applications"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ouvrir les paramètres"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ouvrir l\'Assistant"</string>
@@ -847,7 +847,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Utiliser l\'écran partagé avec l\'appli actuelle sur la droite"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Utiliser l\'écran partagé avec l\'appli actuelle sur la gauche"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'écran partagé au plein écran"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passez à l\'appli à droite ou en dessous avec l\'écran partagé"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passer à l\'appli à droite ou en dessous avec l\'écran partagé"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Passez à l\'appli à gauche ou au-dessus avec l\'écran partagé"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"En mode écran partagé : Remplacer une appli par une autre"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Saisie"</string>
@@ -1391,18 +1391,18 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Appli actuelle"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilité"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Raccourcis clavier"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Raccourcis de recherche"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Rechercher des raccourcis"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Aucun résultat de recherche"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Poignée de déplacement"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Naviguer à l\'aide du clavier"</string>
-    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Découvrir les raccourcis clavier"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Apprenez à utiliser les raccourcis clavier"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Naviguer à l\'aide de votre pavé tactile"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Découvrir les gestes au pavé tactile"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Découvrez les gestes au pavé tactile"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Naviguer à l\'aide de votre clavier et de votre pavé tactile"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Découvrir les gestes au pavé tactile, les raccourcis clavier et plus encore"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Découvrir les gestes du pavé tactile, les raccourcis clavier et plus encore"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Geste Retour"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Geste Accueil"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Afficher les applis récentes"</string>
@@ -1410,7 +1410,7 @@
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Retour"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Pour revenir en arrière, balayez vers la gauche ou vers la droite avec trois doigts n\'importe où sur le pavé tactile.\n\nVous pouvez aussi utiliser le raccourci clavier Action+Échap pour cela."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Bravo !"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Vous avez appris le geste pour revenir en arrière."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Vous avez appris le geste pour revenir en arrière"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Retour à l\'accueil"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Pour accéder à l\'écran d\'accueil à tout moment, balayez l\'écran du bas vers le haut avec trois doigts."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bravo !"</string>
@@ -1428,7 +1428,7 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Contrôle de la maison"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Domotique sous forme d\'économiseur d\'écran"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Annuler"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Pour retourner en arrière, glissez vers la gauche ou la droite avec trois doigts sur le pavé tactile"</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Pour retourner en arrière, balayez vers la gauche ou la droite avec trois doigts sur le pavé tactile"</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Pour revenir à l\'accueil, balayez vers le haut avec trois doigts sur le pavé tactile"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Pour afficher les applis récentes, balayez vers le haut avec trois doigts sur le pavé tactile et maintenez-les."</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Pour afficher toutes vos applis, appuyez sur la touche d\'action de votre clavier"</string>

@@ -266,7 +266,7 @@
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಯ ಪರದೆ."</string>
     <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"ಲಾಕ್ ಸ್ಕ್ರೀನ್"</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ಕೆಲಸದ ಲಾಕ್ ಪರದೆ"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ಕೆಲಸದ ಲಾಕ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚಿ"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
@@ -546,8 +546,8 @@
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ಸ್ಕ್ರೀನ್‌ ಹಂಚಿಕೊಳ್ಳಿ"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಈ ಆಯ್ಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದೆ"</string>
     <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"ಹಂಚಿಕೊಳ್ಳಲು ಆ್ಯಪ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡಬೇಕೆ?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ಒಂದು ಆ್ಯಪ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡಿ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕಾಸ್ಟ್ ಮಾಡಬೇಕೆ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ಒಂದು ಆ್ಯಪ್ ಅನ್ನು ಕಾಸ್ಟ್ ಮಾಡಿ"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡಿ"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನೀವು ಕ್ಯಾಸ್ಟ್ ಮಾಡುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಏನಾದರೂ ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸಿರುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿರುವುದು ಗೋಚರಿಸುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
@@ -847,8 +847,8 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"ಬಲಭಾಗದಲ್ಲಿ ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಮೂಲಕ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಬಳಸಿ"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"ಎಡಭಾಗದಲ್ಲಿ ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಮೂಲಕ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಬಳಸಿ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್‌ನಿಂದ ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ಗೆ ಬದಲಿಸಿ"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ಪರದೆ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ಬಳಸುವಾಗ ಬಲಭಾಗ ಅಥವಾ ಕೆಳಭಾಗದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
-    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ಪರದೆ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ಬಳಸುವಾಗ ಎಡಭಾಗ ಅಥವಾ ಮೇಲ್ಭಾಗದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ಬಳಸುವಾಗ ಬಲಭಾಗ ಅಥವಾ ಕೆಳಭಾಗದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ಬಳಸುವಾಗ ಎಡಭಾಗ ಅಥವಾ ಮೇಲ್ಭಾಗದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸುವ ಸಮಯದಲ್ಲಿ: ಒಂದು ಆ್ಯಪ್‌ನಿಂದ ಮತ್ತೊಂದು ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ಇನ್‌ಪುಟ್"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ಮುಂದಿನ ಭಾಷೆಗೆ ಬದಲಿಸಿ"</string>
@@ -1400,7 +1400,7 @@
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಕಲಿಯಿರಿ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ಟಚ್‌ಪ್ಯಾಡ್ ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಕಲಿಯಿರಿ"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ಟಚ್‌ಪ್ಯಾಡ್ ಜೆಸ್ಚರ್‌ಗಳನ್ನು ಕಲಿಯಿರಿ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಮತ್ತು ಟಚ್‌ಪ್ಯಾಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ಟಚ್‌ಪ್ಯಾಡ್ ಗೆಸ್ಚರ್‌ಗಳು, ಕೀಬೋರ್ಡ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ತಿಳಿಯಿರಿ"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ಹಿಂಬದಿ ಗೆಸ್ಚರ್"</string>
@@ -1418,7 +1418,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ಭೇಷ್‌!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ನೀವು ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳ ಗೆಸ್ಚರ್‌ ವೀಕ್ಷಣೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ನೀವು ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳ ಜೆಸ್ಚರ್‌ ವೀಕ್ಷಣೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"ಆ್ಯಕ್ಷನ್‌ ಕೀ"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ನಿಮ್ಮ ಆ್ಯಪ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ಅಭಿನಂದನೆಗಳು!"</string>

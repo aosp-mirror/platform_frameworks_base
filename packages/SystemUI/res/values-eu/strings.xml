@@ -115,7 +115,7 @@
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Pantaila osoa grabatzen ari zarenean, pantailan agertzen den guztia grabatzen da. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Aplikazio bat grabatzen ari zarenean, aplikazio horretan agertzen den edo bertan erreproduzitzen ari den guztia grabatzen da. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Grabatu pantaila"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Aukeratu zer aplikazio grabatu nahi duzun"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Aukeratu zein aplikazio grabatu nahi duzun"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabatu audioa"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Gailuaren audioa"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Gailuko soinuak; adibidez, musika, deiak eta tonuak"</string>
@@ -550,9 +550,9 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Igorri aplikazio bat"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Igorri pantaila osoa"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Pantaila osoa igortzen ari zarenean, pantailan duzun guztia dago ikusgai. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Aplikazio bat igortzen ari zarenean, aplikazio horretan agertzen den edo bertan erreproduzitzen ari den guztia dago ikusgai. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Aplikazio bat igortzen ari zarenean, aplikazio horretan agertzen edo erreproduzitzen den guztia dago ikusgai. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Igorri pantaila"</string>
-    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Aukeratu zer aplikazio igorri nahi duzun"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Aukeratu zein aplikazio igorri nahi duzun"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Partekatzen hasi nahi duzu?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Edukia partekatzen, grabatzen edo igortzen ari zarenean, pantailan ikusgai dagoen edo gailuan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Aplikazio bat partekatzen, grabatzen edo igortzen ari zarenean, aplikazio horretan ikusgai dagoen edo bertan erreproduzitzen ari den guztia atzi dezake Android-ek. Beraz, kontuz ibili pasahitzekin, ordainketen xehetasunekin, mezuekin, argazkiekin, audioekin eta bideoekin, besteak beste."</string>
@@ -1436,8 +1436,8 @@
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Desblokeatu ikusteko"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Erabili ukipen-panela atzera egiteko"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Pasatu 3 hatz ezkerrera edo eskuinera. Sakatu keinu gehiago ikasteko."</string>
-    <string name="home_edu_notification_title" msgid="6097902076909654045">"Erabili ukipen-panela hasierako pantailara joateko"</string>
-    <string name="home_edu_notification_content" msgid="6631697734535766588">"Pasatu 3 hatz. Sakatu keinu gehiago ikasteko."</string>
+    <string name="home_edu_notification_title" msgid="6097902076909654045">"Erabili ukipen-panela orri nagusira joateko"</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Pasatu 3 hatz gora. Sakatu keinu gehiago ikasteko."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"Erabili ukipen-panela azkenaldiko aplikazioak ikusteko"</string>
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Pasatu 3 hatz gora eta eduki sakatuta. Sakatu keinu gehiago ikasteko."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Erabili teklatua aplikazio guztiak ikusteko"</string>

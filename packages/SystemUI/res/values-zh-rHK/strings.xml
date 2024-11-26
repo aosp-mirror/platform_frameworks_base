@@ -1443,7 +1443,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"使用鍵盤查看所有應用程式"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"隨時按下快捷操作鍵。輕按即可瞭解更多手勢。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"亮度滑桿現已加入超暗功能"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"而家只要將亮度校得越低，螢幕就會更加暗。\n\n由於亮度滑桿而家加入咗呢個功能，所以系統將會移除超暗功能捷徑。"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"現在，只要調校亮度就能將螢幕變得超暗。\n\n由於超暗功能已加到亮度滑桿，其功能捷徑將被移除。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"移除超暗功能捷徑"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"超暗功能捷徑已移除"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"裝置連接"</string>

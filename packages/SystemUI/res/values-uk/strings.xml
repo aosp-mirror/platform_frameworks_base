@@ -307,7 +307,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"від’єднати"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активувати"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"Автоматично ввімкнути завтра"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Такі функції, як швидкий обмін і \"Знайти пристрій\", використовують Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Такі функції, як \"Швидкий обмін\" і \"Знайти пристрій\", використовують Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth увімкнеться завтра вранці"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Поділитись аудіо"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Надсилання аудіо"</string>
@@ -836,8 +836,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Назад"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Перейти на головний екран"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Переглянути нещодавні додатки"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Перемикатися між нещодавніми додатками вперед"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Перемикатися між нещодавніми додатками назад"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Прокрутити вперед список нещодавніх додатків"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Прокрутити назад список нещодавніх додатків"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Відкрити список додатків"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Відкрити налаштування"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Відкрити додаток Асистент"</string>
@@ -847,7 +847,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Розділити екран і показувати поточний додаток праворуч"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Розділити екран і показувати поточний додаток ліворуч"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Перейти з розділення екрана на весь екран"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Під час розділення екрана перемикатися на додаток праворуч або внизу"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти до додатка праворуч або внизу на розділеному екрані"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Під час розділення екрана перемикатися на додаток ліворуч або вгорі"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Під час розділення екрана: замінити додаток іншим"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Метод введення"</string>
@@ -1179,8 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки й екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Пропоновані пристрої"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Введення"</string>
-    <string name="media_output_group_title" msgid="6789001895863332576">"Виведення"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Ввід"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Вивід"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Зупиніть сеанс спільного доступу, щоб перенести медіаконтент на інший пристрій"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Зупинити"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як працює трансляція"</string>
@@ -1398,11 +1398,11 @@
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"або"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер переміщення"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навігація за допомогою клавіатури"</string>
-    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Комбінації клавіш: докладніше"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Дізнайтеся більше про комбінації клавіш"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навігація за допомогою сенсорної панелі"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Жести для сенсорної панелі: докладніше"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Дізнатися про жести на сенсорній панелі"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Навігація за допомогою клавіатури й сенсорної панелі"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Жести для сенсорної панелі, комбінації клавіш тощо: докладніше"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Дізнатися про жести на сенсорній панелі, комбінації клавіш і багато іншого"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Жест \"Назад\""</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Жест переходу на головний екран"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Переглянути нещодавні додатки"</string>

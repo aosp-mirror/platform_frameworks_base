@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Ki"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"Beállítás"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"A Beállítások között kezelheti"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Nincs aktív mód}=1{A(z) {mode} aktív}other{# mód aktív}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Nincs aktív mód}=1{{mode} aktív}other{# mód aktív}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Az Ön által meghatározott ébresztéseken, emlékeztetőkön, eseményeken és hívókon kívül nem fogja Önt más hang vagy rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Az ébresztéseken kívül nem fogja Önt más hang és rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Személyre szabás"</string>
@@ -1387,7 +1387,7 @@
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Legutóbbi alkalmazások"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Osztott képernyő"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Bevitel"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Alkalmazás-parancsikonok"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Alkalmazásikonok"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Jelenlegi alkalmazás"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Kisegítő lehetőségek"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Billentyűparancsok"</string>

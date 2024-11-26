@@ -832,7 +832,7 @@
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Қазіргі қолданбаға арналған жылдам пәрмендер көрсетіледі."</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Хабарландыруларды көру"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Скриншот жасау"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Жылдам пәрмендерді көрсету"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Пернелер тіркесімдерін көрсету"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Артқа"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Негізгі экранға өту"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Соңғы қолданбаларды көру"</string>
@@ -844,8 +844,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Экранды құлыптау"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Ескертпе жазу"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Мультитаскинг"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Ағымдағы қолданба оң жақта тұратын бөлінген экранды пайдаланыңыз"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Ағымдағы қолданба сол жақта тұратын бөлінген экранды пайдаланыңыз"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Қолданбаны бөлінген экранның оң жағынан пайдалану"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Қолданбаны бөлінген экранның сол жағынан пайдалану"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Бөлінген экран режимінен толық экран режиміне ауысу"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Бөлінген экранда оң не төмен жақтағы қолданбаға ауысу"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Бөлінген экранда сол не жоғары жақтағы қолданбаға ауысу"</string>
@@ -1179,7 +1179,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер мен дисплейлер"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Ұсынылған құрылғылар"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Кіріс"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Енгізу"</string>
     <string name="media_output_group_title" msgid="6789001895863332576">"Шығыс"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Мультимедиа файлын басқа құрылғыға жылжыту үшін ортақ сеансты тоқтатыңыз."</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Тоқтату"</string>
@@ -1386,7 +1386,7 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Мультитаскинг"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Соңғы қолданбалар"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Экранды бөлу"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Кіріс"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Енгізу"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Қолданба таңбашалары"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Қолданыстағы қолданба"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Арнайы мүмкіндіктер"</string>

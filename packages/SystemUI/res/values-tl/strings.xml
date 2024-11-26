@@ -862,7 +862,7 @@
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Email"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Music"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendaryo"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Mga mapa"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Huwag Istorbohin"</string>
@@ -1384,7 +1384,7 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Mga kontrol ng system"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Mga system app"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Pag-multitask"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Kamakailang mga app"</string>
+    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Mga kamakailang app"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Split screen"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Input"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Mga shortcut ng app"</string>
@@ -1443,7 +1443,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gamitin ang iyong keyboard para tingnan ang lahat ng app"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Pindutin ang action key kahit kailan. I-tap para matuto pa tungkol sa mga galaw."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Bahagi na ng slider ng liwanag ang extra dim"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Puwede mo nang gawing extra dim ang screen sa pamamagitan ng pagbababa pa sa antas ng liwanag .\n\nDahil bahagi na ang feature na ito ng slider ng liwanag, aalisin na ang mga shortcut sa extra dim."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Puwede mo nang gawing extra dim ang screen sa pamamagitan ng pagbababa pa ng antas ng liwanag .\n\nDahil bahagi na ang feature na ito ng slider ng liwanag, aalisin na ang mga shortcut sa extra dim."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Alisin ang mga shortcut sa extra dim"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Inalis ang mga shortcut sa extra dim"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Pagkakonekta"</string>

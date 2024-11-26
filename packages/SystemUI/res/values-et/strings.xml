@@ -114,8 +114,8 @@
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Kogu ekraanikuva salvestamine"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kui salvestate kogu ekraani, salvestatakse kõik ekraanil kuvatud andmed. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kui salvestate rakendust, salvestatakse kõik, mida selles rakenduses näidatakse või esitatakse. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
-    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekraanikuva jäädvustamine"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Vali salvestamiseks rakendus"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Salvesta ekraanikuva"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Valige salvestamiseks rakendus"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Salvesta heli"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Seadme heli"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Seadmest pärinev heli, nt muusika, kõned ja helinad"</string>
@@ -552,7 +552,7 @@
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kogu ekraanikuva ülekandmisel on kogu sellel kuvatav sisu nähtav. Seega olge ettevaatlik näiteks paroolide, makseteabe, sõnumite, fotode ning heli ja videoga."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Rakenduse ülekandmisel on kogu rakenduses kuvatav või esitatav sisu nähtav. Seega olge ettevaatlik näiteks paroolide, makseteabe, sõnumite, fotode ning heli ja videoga."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Kanna üle ekraanikuva"</string>
-    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Vali ülekandmiseks rakendus"</string>
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Valige ülekandmiseks rakendus"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Kas alustada jagamist?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kui jagate, salvestate või kannate üle, on Androidil juurdepääs kõigele, mis on teie ekraanikuval nähtaval või mida teie seadmes esitatakse. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kui jagate, salvestate või kannate rakendust üle, on Androidil juurdepääs kõigele, mida selles rakenduses kuvatakse või esitatakse. Seega olge paroolide, makseteabe, sõnumite, fotode, heli ja videoga ettevaatlik."</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Praegune rakendus"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Juurdepääsetavus"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Klaviatuuri otseteed"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Otsingu otseteed"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Otsige otseteid"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Otsingutulemused puuduvad"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ahendamisikoon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Laiendamisikoon"</string>
@@ -1402,7 +1402,7 @@
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigeerige puuteplaadi abil"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Õppige puuteplaadi liigutusi"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigeerige klaviatuuri ja puuteplaadi abil"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Õppige puuteplaadi liigutusi, klaviatuuri otseteid ja palju muud"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Õppige puuteplaadi liigutusi, klaviatuuri otseteid ja palju muud."</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Tagasiliikumisliigutus"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Avakuvale liikumise liigutus"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Hiljutiste rakenduste vaatamine"</string>
@@ -1411,14 +1411,14 @@
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Tagasiliikumiseks pühkige puuteplaadil kolme sõrmega vasakule või paremale.\n\nSamuti saate selle jaoks kasutada klaviatuuri otseteed toiminguklahv + paoklahv."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Väga hea!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Tegite tagasiliikumise liigutuse."</string>
-    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Avalehele"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Avakuvale"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Mis tahes ajal avakuvale liikumiseks pühkige kolme sõrmega ekraanikuva allosast üles."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Hästi tehtud!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Tegite avakuvale minemise liigutuse."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Hiljutiste rakenduste vaatamine"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Pühkige üles ja hoidke kolme sõrmega puuteplaadil."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Väga hea!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Lõpetasite hiljutiste rakenduste vaatamise liigutuse."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Tegite hiljutiste rakenduste vaatamise liigutuse."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Toiminguklahv"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Rakendustele juurdepääsemiseks vajutage klaviatuuril toiminguklahvi."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Õnnitleme!"</string>
@@ -1429,19 +1429,19 @@
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Juurdepääs kodu juhtelementidele ekraanisäästjalt"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Võta tagasi"</string>
     <string name="back_edu_toast_content" msgid="4530314597378982956">"Tagasiliikumiseks pühkige puuteplaadil kolme sõrmega vasakule või paremale"</string>
-    <string name="home_edu_toast_content" msgid="3381071147871955415">"Avakuvale liikumiseks pühkige puuteplaadil kolme sõrmega üles"</string>
-    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Hiljutiste rakenduste kuvamiseks pühkige puuteplaadil kolme sõrmega üles ja hoidke sõrmi puuteplaadil"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Avakuvale liikumiseks pühkige puuteplaadil kolme sõrmega üles."</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Hiljutiste rakenduste kuvamiseks pühkige puuteplaadil kolme sõrmega üles ja hoidke sõrmi puuteplaadil."</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Kõigi oma rakenduste kuvamiseks vajutage klaviatuuril toiminguklahvi"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Peidetud"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Vaatamiseks avage"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Puuteplaadi kasutamine tagasiliikumiseks"</string>
-    <string name="back_edu_notification_content" msgid="2497557451540954068">"Pühkige kolme sõrmega vasakule või paremale. Puudutage žestide kohta lisateabe saamiseks."</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Pühkige kolme sõrmega vasakule või paremale. Puudutage liigutuste kohta lisateabe saamiseks."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Puuteplaadi kasutamine avakuvale liikumiseks"</string>
-    <string name="home_edu_notification_content" msgid="6631697734535766588">"Pühkige kolme sõrmega üles. Puudutage žestide kohta lisateabe saamiseks."</string>
+    <string name="home_edu_notification_content" msgid="6631697734535766588">"Pühkige kolme sõrmega üles. Puudutage liigutuste kohta lisateabe saamiseks."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"Puuteplaadi kasutamine hiljutiste rakenduste kuvamiseks"</string>
-    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Pühkige kolme sõrmega üles ja hoidke sõrmi plaadil. Puudutage žestide kohta lisateabe saamiseks."</string>
+    <string name="overview_edu_notification_content" msgid="3578204677648432500">"Pühkige kolme sõrmega üles ja hoidke sõrmi plaadil. Puudutage liigutuste kohta lisateabe saamiseks."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Klaviatuuri kasutamine kõigi rakenduste kuvamiseks"</string>
-    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Vajutage soovitud ajal toiminguklahvi. Puudutage žestide kohta lisateabe saamiseks."</string>
+    <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Vajutage soovitud ajal toiminguklahvi. Puudutage liigutuste kohta lisateabe saamiseks."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Funktsioon „Eriti tume“ on nüüd osa ereduse liugurist"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Nüüd saate muuta ekraani eriti tumedaks, vähendades ereduse taset veelgi rohkem.\n\nKuna see funktsioon kuulub nüüd ereduse liugurisse, eemaldatakse funktsiooni „Eriti tume“ otseteed."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Eemalda funktsiooni „Eriti tume“ otseteed"</string>

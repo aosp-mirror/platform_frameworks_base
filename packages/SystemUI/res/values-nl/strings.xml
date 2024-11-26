@@ -1387,11 +1387,11 @@
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Recente apps"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Gesplitst scherm"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Invoer"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-snelkoppelingen"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"App-sneltoetsen"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Huidige app"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Toegankelijkheid"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Sneltoetsen"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Snelkoppelingen voor zoekopdrachten"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Sneltoetsen zoeken"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Geen zoekresultaten"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icoon voor samenvouwen"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icoon voor uitvouwen"</string>
@@ -1417,7 +1417,7 @@
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Je weet nu hoe je het gebaar Naar startscherm maakt."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Recente apps bekijken"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Swipe met 3 vingers omhoog en houd vast op je touchpad."</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Goed werk!"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Goed gedaan!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Je weet nu hoe je het gebaar Recente apps bekijken maakt."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Actietoets"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Als je toegang tot je apps wilt krijgen, druk je op de actietoets op je toetsenbord."</string>

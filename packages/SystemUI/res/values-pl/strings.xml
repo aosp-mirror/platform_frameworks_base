@@ -547,8 +547,8 @@
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> ma wyłączoną tę opcję"</string>
     <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Wybieranie aplikacji do udostępniania"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"Włączyć przesyłanie treści wyświetlanych na ekranie?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Przesyłanie obrazu z jednej aplikacji"</string>
-    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Przesyłanie obrazu z całego ekranu"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Przesyłanie obrazu z 1 aplikacji"</string>
+    <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"Przesyłanie całego ekranu"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kiedy przesyłasz treści z całego ekranu, widoczny jest cały obraz z wyświetlacza. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Kiedy przesyłasz obraz z aplikacji, widoczne jest wszystko to, co jest w niej wyświetlane lub odtwarzane. Dlatego zachowaj ostrożność w zakresie haseł, danych do płatności, wiadomości, zdjęć, audio i filmów."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"Prześlij ekran"</string>
@@ -1428,14 +1428,14 @@
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Sterowanie domem"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Szybki dostęp do sterowania domem na wygaszaczu ekranu"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Cofnij"</string>
-    <string name="back_edu_toast_content" msgid="4530314597378982956">"Aby przejść wstecz, przesuń w prawo lub lewo za pomocą 3 palców na touchpadzie."</string>
+    <string name="back_edu_toast_content" msgid="4530314597378982956">"Aby przejść wstecz, przesuń trzema palcami w prawo lub lewo na touchpadzie."</string>
     <string name="home_edu_toast_content" msgid="3381071147871955415">"Aby przejść do ekranu głównego, przesuń w górę za pomocą 3 palców na touchpadzie"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"Aby wyświetlić ostatnie aplikacje, przesuń w górę za pomocą 3 palców na touchpadzie i przytrzymaj."</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Aby wyświetlić wszystkie swoje aplikacje, naciśnij klawisz działania na klawiaturze"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Usunięto"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Odblokuj, aby zobaczyć"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Przechodzenie wstecz za pomocą touchpada"</string>
-    <string name="back_edu_notification_content" msgid="2497557451540954068">"Przesuń w prawo lub lewo za pomocą 3 palców. Kliknij, aby poznać więcej gestów."</string>
+    <string name="back_edu_notification_content" msgid="2497557451540954068">"Przesuń trzema palcami w prawo lub lewo. Kliknij, aby poznać więcej gestów."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Przechodzenie do ekranu głównego za pomocą touchpada"</string>
     <string name="home_edu_notification_content" msgid="6631697734535766588">"Przesuń w górę za pomocą 3 palców. Kliknij, aby poznać więcej gestów."</string>
     <string name="overview_edu_notification_title" msgid="1265824157319562406">"Wyświetlanie ostatnio używanych aplikacji za pomocą touchpada"</string>
@@ -1444,7 +1444,7 @@
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Naciśnij klawisz działania w dowolnym momencie. Kliknij, aby poznać więcej gestów."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Dodatkowe przyciemnienie jest teraz częścią suwaka jasności"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Możesz teraz dodatkowo przyciemnić ekran, jeszcze bardziej zmniejszając poziom jasności.\n\nTa funkcja jest teraz częścią suwaka jasności, więc skróty do dodatkowego przyciemniania zostaną usunięte."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Usuń skróty do dodatkowego przyciemnienia"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Usuń skróty do dodatkowego przyciemniania"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Skróty do dodatkowego przyciemnienia zostały usunięte"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Łączność"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Ułatwienia dostępu"</string>

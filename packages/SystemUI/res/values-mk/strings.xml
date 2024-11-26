@@ -679,7 +679,7 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контрола на шум"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Просторен звук"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Исклучено"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Фиксно"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Фиксирано"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Следење на главата"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Допрете за да го промените режимот на ѕвончето"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"исклучен звук"</string>
@@ -792,7 +792,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Бришење наназад"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Пушти/Паузирај"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Сопри"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Следно"</string>
@@ -832,7 +832,7 @@
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Се прикажуваат кратенки за тековната апликација"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Прегледајте ги известувањата"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Направете слика од екранот"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Прикажи кратенки"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Прикажете кратенки"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Вратете се назад"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Одете на почетниот екран"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Прегледајте ги неодамнешните апликации"</string>
@@ -1391,21 +1391,21 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Тековна апликација"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Пристапност"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Кратенки од тастатура"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Кратенки за пребарување"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пребарувајте кратенки"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нема резултати од пребарување"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за собирање"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширување"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Рачка за влечење"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Движете се со користење на тастатурата"</string>
-    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Научете кратенки од тастатурата"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Научете ги кратенките од тастатурата"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Движете се со користење на допирната подлога"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Научете движења за допирната подлога"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Движете се со користење на тастатурата и допирната подлога"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Научете движења за допирната подлога, кратенки од тастатурата и друго"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Движење за назад"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Движење за почетен екран"</string>
-    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Прегледајте ги неодамнешните апликации"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Прикажи ги неодамнешните апликации"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"За да се вратите назад, повлечете налево или надесно со три прста каде било на допирната подлога.\n\nЗа ова може да ја користите и кратенката од тастатурата Action + ESC."</string>
@@ -1415,7 +1415,7 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"За да одите на вашиот почетен екран кога сакате, повлечете нагоре со три прсти од дното на екранот."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Одлично!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Го научивте движењето за враќање на почетниот екран."</string>
-    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Прегледајте ги неодамнешните апликации"</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Прикажи ги неодамнешните апликации"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Повлечете нагоре и задржете со три прста на допирната подлога."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Одлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Го завршивте движењето за прегледување на неодамнешните апликации."</string>

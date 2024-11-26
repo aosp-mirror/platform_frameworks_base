@@ -112,8 +112,8 @@
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Record your screen?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Record one app"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Record entire screen"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"When you\'re recording your entire screen, anything displayed on your screen is recorded. So, be careful with things like passwords, payment details, messages, photos, audio and video."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"When you\'re recording an app, anything displayed or played in that app is recorded. So, be careful with things like passwords, payment details, messages, photos, audio and video."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"When you\'re recording your entire screen, anything displayed on your screen is recorded. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"When you\'re recording an app, anything displayed or played in that app is recorded. So be careful with things like passwords, payment details, messages, photos, audio and video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Record screen"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Choose app to record"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Record audio"</string>

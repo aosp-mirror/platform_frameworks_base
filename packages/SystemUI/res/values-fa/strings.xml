@@ -405,7 +405,7 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"برای جفت کردن دستگاه جدید، کلیک کنید"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"پیش‌تنظیم به‌روزرسانی نشد"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"پیش‌تنظیم"</string>
-    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"زیرنویس ناشنوایان زنده"</string>
+    <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"زیرنویس زنده ناشنوایان"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"میکروفون دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"دوربین دستگاه لغو انسداد شود؟"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"دوربین و میکروفون دستگاه لغو انسداد شود؟"</string>
@@ -634,7 +634,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"غیرفعال کردن"</string>
     <string name="sound_settings" msgid="8874581353127418308">"صدا و لرزش"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"تنظیمات"</string>
-    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"زیرنویس ناشنوایان زنده"</string>
+    <string name="volume_panel_captioning_title" msgid="5984936949147684357">"زیرنویس زنده ناشنوایان"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"صدا به سطح ایمن‌تر کاهش یافت"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"صدای هدفون برای مدتی طولانی‌تر از حد توصیه‌شده بلند بوده است"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"صدای هدفون از حد ایمن برای این هفته فراتر رفته است"</string>
@@ -802,7 +802,7 @@
     <string name="keyboard_key_page_up" msgid="173914303254199845">"صفحه بعد"</string>
     <string name="keyboard_key_page_down" msgid="9035902490071829731">"صفحه قبل"</string>
     <string name="keyboard_key_forward_del" msgid="5325501825762733459">"حذف"</string>
-    <string name="keyboard_key_esc" msgid="6230365950511411322">"کلید گریز"</string>
+    <string name="keyboard_key_esc" msgid="6230365950511411322">"Esc"</string>
     <string name="keyboard_key_move_home" msgid="3496502501803911971">"ابتدا"</string>
     <string name="keyboard_key_move_end" msgid="99190401463834854">"End"</string>
     <string name="keyboard_key_insert" msgid="4621692715704410493">"Insert"</string>
@@ -1405,7 +1405,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"آشنایی با اشاره‌های صفحه لمسی، میان‌برهای صفحه‌کلید، و موارد دیگر"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"اشاره برگشت"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"اشاره صفحه اصلی"</string>
-    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"مشاهده کردن برنامه‌های اخیر"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"مشاهده برنامه‌های اخیر"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"تمام"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"برگشتن"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"برای برگشتن، در هر جایی از صفحه لمسی، با سه انگشت تند به‌چپ یا راست بکشید.\n\nبرای این کار می‌توانید از میان‌بر صفحه‌کلید «کنش + گریز» هم استفاده کنید."</string>
@@ -1415,10 +1415,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"برای رفتن به صفحه اصلی در هرزمانی، با سه انگشت از پایین صفحه‌نمایش تند به‌بالا بکشید."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"آفرین!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"اشاره رفتن به صفحه اصلی را تکمیل کردید."</string>
-    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"مشاهده کردن برنامه‌های اخیر"</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"مشاهده برنامه‌های اخیر"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"با سه انگشت روی صفحه لمسی تند به‌بالا بکشید و نگه دارید."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"عالی است!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"اشاره مشاهده برنامه‌های اخیر را انجام دادید"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"اشاره «مشاهده برنامه‌های اخیر» را تمام کردید"</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"دکمه کنش"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"برای دسترسی به برنامه‌هایتان، دکمه کنش در صفحه‌کلید را فشار دهید."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"تبریک!"</string>

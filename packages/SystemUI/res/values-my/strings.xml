@@ -551,7 +551,7 @@
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"ဖန်သားပြင်တစ်ခုလုံးကို ကာစ်လုပ်ရန်"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"သင့်ဖန်သားပြင်တစ်ခုလုံးကို ကာစ်လုပ်သည့်အခါ ဖန်သားပြင်ပေါ်ရှိ အရာအားလုံးကို မြင်နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"အက်ပ်တစ်ခုကို ကာစ်လုပ်သည့်အခါ ယင်းအက်ပ်တွင် ပြထားသော (သို့) ဖွင့်ထားသော အရာအားလုံးကို မြင်နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
-    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"စခရင် ကာစ်လုပ်ရန်"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"ဖန်သားပြင်ကာစ်လုပ်ရန်"</string>
     <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ကာစ်လုပ်ရန် အက်ပ်ရွေးခြင်း"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"စတင်မျှဝေမလား။"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
@@ -789,10 +789,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ခလုတ် <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ပင်မ"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"နောက်သို့"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"တဘ်ခလုတ်"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter ခလုတ်"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"နောက်ပြန်ဖျက်ပါ"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"နောက်ပြန်ခလုတ်"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"ဖွင့်ပါ/ခဏရပ်ပါ"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"ရပ်ပါ"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"ရှေ့သို့"</string>
@@ -836,9 +836,9 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"ပြန်သွားရန်"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"ပင်မစာမျက်နှာသို့သွားရန်"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"မကြာသေးမီကအက်ပ်များ ကြည့်ရန်"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"မကြာသေးမီက အက်ပ်များကို အဝိုင်းပုံရှေ့သို့လှည့်ရန်"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"မကြာသေးမီက အက်ပ်များကို အဝိုင်းပုံနောက်ပြန်လှည့်ရန်"</string>
-    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"အက်ပ်ပြသမှု ဖွင့်ရန်"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"လတ်တလော အက်ပ်များတလျှောက် ရှေ့သို့လှည့်ရန်"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"လတ်တလော အက်ပ်များတလျှောက် နောက်ပြန်လှည့်ရန်"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"အက်ပ်စာရင်း ဖွင့်ရန်"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ဆက်တင်များ ဖွင့်ရန်"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ဖွင့်ရန်"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"လော့ခ်မျက်နှာပြင်"</string>
@@ -1391,7 +1391,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"လက်ရှိအက်ပ်"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"အများသုံးနိုင်မှု"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"လက်ကွက်ဖြတ်လမ်းများ"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ရှာဖွေစာလုံး ဖြတ်လမ်း"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ဖြတ်လမ်းများ ရှာရန်"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ရှာဖွေမှုရလဒ် မရှိပါ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"လျှော့ပြရန် သင်္ကေတ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ပိုပြရန် သင်္ကေတ"</string>
