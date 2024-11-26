@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ઍપને નજીકના અલ્ટ્રા-વાઇડબૅન્ડ ડિવાઇસની વચ્ચેનું સંબંધિત અંતર નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"નજીકના વાઇ-ફાઇ ડિવાઇસ સાથે ક્રિયાપ્રતિક્રિયા કરો"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ઍપને નજીકના વાઇ-ફાઇ ડિવાઇસની માહિતી બતાવવાની, તેની સાથે કનેક્ટ કરવાની અને તેની સંબંધિત સ્થિતિ નક્કી કરવાની મંજૂરી આપો"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ડિવાઇસની વચ્ચેનું સાપેક્ષ અંતર નક્કી કરો"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ઍપને નજીકના ડિવાઇસની વચ્ચેનું સાપેક્ષ અંતર નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"આ મંજૂરીને આપવાથી, ઍપ તમારી પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી મેળવી શકે છે, જેમ કે રજિસ્ટર થયેલી સહાય અને નિર્ધારિત સ્થાન."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"નિઅર ફીલ્ડ કમ્યુનિકેશન નિયંત્રિત કરો"</string>
@@ -642,7 +644,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"બાયોમેટ્રિક્સનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"બાયોમેટ્રિક્સ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"આ તમે જ છો તેની ચકાસણી કરો"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"આગળ વધવા માટે બાયોમેટ્રિકનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ચાલુ રાખવા માટે તમારા બાયોમેટ્રિક ડેટા અથવા સ્ક્રીન લૉક સુવિધાનો ઉપયોગ કરો"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
@@ -1658,7 +1660,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"હેડફોન"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"સિસ્ટમ"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"બ્લૂટૂથ ઑડિઓ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"બ્લૂટૂથ ઑડિયો"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"વાયરલેસ ડિસ્પ્લે"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"કાસ્ટ કરો"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
@@ -2046,7 +2048,7 @@
     <string name="conference_call" msgid="5731633152336490471">"કોન્ફરન્સ કૉલ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"ટૂલટિપ"</string>
     <string name="app_category_game" msgid="4534216074910244790">"રમતો"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"સંગીત અને ઑડિયો"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"મ્યુઝિક અને ઑડિયો"</string>
     <string name="app_category_video" msgid="2590183854839565814">"મૂવી અને વીડિઓ"</string>
     <string name="app_category_image" msgid="7307840291864213007">"ફોટો અને છબીઓ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"સામાજિક અને સંચાર"</string>

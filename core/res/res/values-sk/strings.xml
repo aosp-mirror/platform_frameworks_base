@@ -614,6 +614,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Povoľte aplikácii určovať relatívnu polohu medzi zariadeniami s ultraširokopásmovým pripojením v okolí"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcia so zariadeniami Wi-Fi v okolí"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Umožňuje aplikácii oznamovať a rozpoznávať relatívnu polohu zariadení Wi‑Fi v okolí a pripájať sa k nim"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"určovať relatívnu polohu medzi zariadeniami v okolí"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Povoľte aplikácii určovať relatívnu polohu medzi zariadeniami v okolí"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferované informácie platenej služby NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
@@ -644,7 +646,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Umožňuje aplikácii čítať polohy zo zbierky médií."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Použiť biometrické údaje"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Použiť biometrické údaje alebo zámku obrazovky"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Overenie, že ste to vy"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrďte, že ste to vy"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Ak chcete pokračovať, použite biometrický údaj"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Pokračujte použitím biometrických údajov alebo zámky obrazovky"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrický hardvér nie je k dispozícii"</string>
@@ -2405,8 +2407,8 @@
     <string name="profile_label_work" msgid="3495359133038584618">"Pracovné"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"2. pracovný"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. pracovný"</string>
-    <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>
-    <string name="profile_label_communal" msgid="8743921499944800427">"Spoločný"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Spoločné"</string>
     <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Pracovný profil"</string>
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Súkromný priestor"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
