@@ -8909,7 +8909,11 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
-        <service android:name="com.android.server.profcollect.ProfcollectForwardingService$ProfcollectBGJobService"
+        <service android:name="com.android.server.profcollect.ProfcollectForwardingService$PeriodicTraceJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.profcollect.ProfcollectForwardingService$ReportProcessJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
