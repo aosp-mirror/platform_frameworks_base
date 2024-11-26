@@ -32,6 +32,7 @@ import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -176,6 +177,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         } else {
             state.state = isDreaming() ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
+        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Nullable

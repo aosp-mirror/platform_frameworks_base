@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
@@ -126,6 +127,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
         // would go to "Unavailable" state only when GMS core is updating.
         state.secondaryLabel = state.state == Tile.STATE_UNAVAILABLE
                 ? mContext.getString(R.string.qr_code_scanner_updating_secondary_label) : null;
+        state.expandedAccessibilityClassName = Button.class.getName();
     }
 
     @Override
