@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
     <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
-    <string name="category_private" msgid="4244892185452788977">"Faragha"</string>
+    <string name="category_private" msgid="4244892185452788977">"Sehemu ya Faragha"</string>
     <string name="category_clone" msgid="1554511758987195974">"Kloni"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Huwasha kipengele cha Muunganisho Ulioboreshwa."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Mazingira ya usanidi wa Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Ya majaribio) Tumia temino ya Linux kwenye Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ukizima, data ya kituo cha Linux itafutwa"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Inakagua HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Weka HDCP ya kukagua tabia"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Utatuzi"</string>

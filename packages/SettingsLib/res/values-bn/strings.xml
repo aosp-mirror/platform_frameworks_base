@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"কানেক্টিভিটি ফিচার উন্নত করার বিষয়টি চালু করা হয়েছে।"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ডেভেলপমেন্ট এনভায়র্নমেন্ট"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(পরীক্ষামূলক) Android-এ Linux টার্মিনাল চালান"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"আপনি বন্ধ করে দিলে, Linux টার্মিনাল ডেটা মুছে যাবে"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -376,7 +379,7 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"মুখ্য থ্রেডে অ্যাপগুলির দীর্ঘ কার্যকলাপের ক্ষেত্রে স্ক্রিন ফ্ল্যাশ করে"</string>
     <string name="pointer_location" msgid="7516929526199520173">"পয়েন্টারের লোকেশন"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
-    <string name="show_touches" msgid="8437666942161289025">"আলতো চাপ দেখান"</string>
+    <string name="show_touches" msgid="8437666942161289025">"ট্যাপ দেখান"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"আলতো চাপ দিলে ভিজ্যুয়াল প্রতিক্রিয়া দেখান"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"প্রেস করা কী দেখুন"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ফিজিক্যাল কী প্রেস করা হলে ভিজুয়াল ফিডব্যাক দেখুন"</string>

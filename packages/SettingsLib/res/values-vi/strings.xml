@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Bật tính năng Kết nối nâng cao."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Dòng lệnh cục bộ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Bật ứng dụng dòng lệnh cung cấp quyền truy cập vỏ cục bộ"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Môi trường phát triển Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Thử nghiệm) Chạy cửa sổ dòng lệnh Linux trên Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Nếu bạn tắt, dữ liệu trên cửa sổ dòng lệnh Linux sẽ bị xoá"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kiểm tra HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Đặt hành vi kiểm tra HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Gỡ lỗi"</string>
