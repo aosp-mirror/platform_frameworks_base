@@ -99,7 +99,7 @@
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Geen kamerakwessies nie? Tik om toe te maak."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Sien en doen meer"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Sleep ’n ander app in vir verdeelde skerm"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik buite ’n program om dit te herposisioneer"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik buite ’n app om dit te herposisioneer"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Het dit"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Vou uit vir meer inligting."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Herbegin vir ’n beter aansig?"</string>
