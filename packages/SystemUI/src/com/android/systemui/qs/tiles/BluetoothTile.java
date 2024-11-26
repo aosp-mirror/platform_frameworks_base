@@ -43,6 +43,7 @@ import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.satellite.SatelliteDialogUtils;
 import com.android.systemui.animation.Expandable;
+import com.android.systemui.bluetooth.qsdialog.BluetoothDetailsViewModel;
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -51,6 +52,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
+import com.android.systemui.plugins.qs.TileDetailsViewModel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
@@ -63,6 +65,7 @@ import kotlinx.coroutines.Job;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -121,6 +124,21 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick(@Nullable Expandable expandable) {
+        handleClickWithSatelliteCheck(() -> handleClickEvent(expandable));
+    }
+
+    @Override
+    public boolean getDetailsViewModel(Consumer<TileDetailsViewModel> callback) {
+        handleClickWithSatelliteCheck(() ->
+                callback.accept(new BluetoothDetailsViewModel(() -> {
+                    longClick(null);
+                    return null;
+                }))
+        );
+        return true;
+    }
+
+    private void handleClickWithSatelliteCheck(Runnable clickCallback) {
         if (com.android.internal.telephony.flags.Flags.oemEnabledSatelliteFlag()) {
             if (mClickJob != null && !mClickJob.isCompleted()) {
                 return;
@@ -130,12 +148,12 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         if (!isAllowClick) {
                             return null;
                         }
-                        handleClickEvent(expandable);
+                        clickCallback.run();
                         return null;
                     });
             return;
         }
-        handleClickEvent(expandable);
+        clickCallback.run();
     }
 
     private void handleClickEvent(@Nullable Expandable expandable) {
