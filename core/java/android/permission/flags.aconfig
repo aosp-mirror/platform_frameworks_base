@@ -454,3 +454,12 @@ flag {
     description: "API change to enable getTextClassifier by type"
     bug: "377229653"
 }
+
+flag {
+    name: "updatable_text_classifier_for_otp_detection_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables text classifier for OTP detection that is updatable from mainline module"
+    bug: "377229653"
+}
