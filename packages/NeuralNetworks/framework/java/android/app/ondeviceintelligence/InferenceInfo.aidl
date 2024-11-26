@@ -19,4 +19,4 @@ package android.app.ondeviceintelligence;
 /**
   * @hide
   */
-parcelable InferenceInfo;
+@JavaOnlyStableParcelable parcelable InferenceInfo;

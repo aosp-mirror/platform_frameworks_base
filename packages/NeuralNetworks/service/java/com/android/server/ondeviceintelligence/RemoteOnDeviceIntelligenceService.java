@@ -16,6 +16,7 @@
 
 package com.android.server.ondeviceintelligence;
 
+import static android.app.ondeviceintelligence.OnDeviceIntelligenceManager.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 
@@ -26,13 +27,15 @@ import android.provider.Settings;
 import android.service.ondeviceintelligence.IOnDeviceIntelligenceService;
 import android.service.ondeviceintelligence.OnDeviceIntelligenceService;
 
-import com.android.internal.infra.ServiceConnector;
+import com.android.modules.utils.ServiceConnector;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Manages the connection to the remote on-device intelligence service. Also, handles unbinding
  * logic set by the service implementation via a Secure Settings flag.
+ *
+ * @hide
  */
 public class RemoteOnDeviceIntelligenceService extends
         ServiceConnector.Impl<IOnDeviceIntelligenceService> {
@@ -56,11 +59,13 @@ public class RemoteOnDeviceIntelligenceService extends
         return LONG_TIMEOUT;
     }
 
+    // Using #getLong here as the timeout settings are only applicable to the services running in
+    // SYSTEM user only.
     @Override
+    @SuppressWarnings("NonUserGetterCalled")
     protected long getAutoDisconnectTimeoutMs() {
-        return Settings.Secure.getLongForUser(mContext.getContentResolver(),
-                Settings.Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
-                TimeUnit.SECONDS.toMillis(30),
-                mContext.getUserId());
+        return Settings.Secure.getLong(mContext.getContentResolver(),
+                ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS,
+                TimeUnit.SECONDS.toMillis(30));
     }
 }

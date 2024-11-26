@@ -16,8 +16,8 @@
 
  package android.app.ondeviceintelligence;
 
- import com.android.internal.infra.AndroidFuture;
- import android.os.ICancellationSignal;
+ import com.android.modules.utils.AndroidFuture;
+ import android.app.ondeviceintelligence.ICancellationSignal;
  import android.os.ParcelFileDescriptor;
  import android.os.PersistableBundle;
  import android.os.RemoteCallback;

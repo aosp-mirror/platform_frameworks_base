@@ -16,6 +16,7 @@
 
 package com.android.server.ondeviceintelligence;
 
+import static android.app.ondeviceintelligence.OnDeviceIntelligenceManager.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 
@@ -26,7 +27,7 @@ import android.provider.Settings;
 import android.service.ondeviceintelligence.IOnDeviceSandboxedInferenceService;
 import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 
-import com.android.internal.infra.ServiceConnector;
+import com.android.modules.utils.ServiceConnector;
 
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +36,8 @@ import java.util.concurrent.TimeUnit;
  * Manages the connection to the remote on-device sand boxed inference service. Also, handles
  * unbinding
  * logic set by the service implementation via a SecureSettings flag.
+ *
+ * @hide
  */
 public class RemoteOnDeviceSandboxedInferenceService extends
         ServiceConnector.Impl<IOnDeviceSandboxedInferenceService> {
@@ -65,12 +68,13 @@ public class RemoteOnDeviceSandboxedInferenceService extends
         return LONG_TIMEOUT;
     }
 
-
+    // Using #getLong here as the timeout settings are only applicable to the services running in
+    // SYSTEM user only.
     @Override
+    @SuppressWarnings("NonUserGetterCalled")
     protected long getAutoDisconnectTimeoutMs() {
-        return Settings.Secure.getLongForUser(mContext.getContentResolver(),
-                Settings.Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
-                TimeUnit.SECONDS.toMillis(30),
-                mContext.getUserId());
+        return Settings.Secure.getLong(mContext.getContentResolver(),
+                ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS,
+                TimeUnit.SECONDS.toMillis(30));
     }
 }

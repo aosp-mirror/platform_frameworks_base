@@ -20,13 +20,14 @@ package android.app.ondeviceintelligence;
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.PersistableBundle;
 
-import androidx.annotation.IntDef;
-
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -124,8 +125,9 @@ public class OnDeviceIntelligenceException extends Exception {
                     PROCESSING_ERROR_SERVICE_UNAVAILABLE,
                     ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
                     PROCESSING_UPDATE_STATUS_CONNECTION_FAILED
-            }, open = true)
+            })
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    @Retention(RetentionPolicy.SOURCE)
     @interface OnDeviceIntelligenceError {
     }
 

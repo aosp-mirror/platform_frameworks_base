@@ -23,8 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.PersistableBundle;
-
-import androidx.annotation.IntDef;
+import android.annotation.IntDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,14 +52,14 @@ public interface DownloadCallback {
 
     /**
      * Sent when feature download has been initiated already, hence no need to request download
-     * again. Caller can query {@link OnDeviceIntelligenceManager#getFeatureStatus} to check if
+     * again. Caller can query {@link OnDeviceIntelligenceManager#getFeatureDetails} to check if
      * download has been completed.
      */
     int DOWNLOAD_FAILURE_STATUS_DOWNLOADING = 3;
 
     /**
      * Sent when feature download did not start due to errors (e.g. remote exception of features not
-     * available). Caller can query {@link OnDeviceIntelligenceManager#getFeatureStatus} to check
+     * available). Caller can query {@link OnDeviceIntelligenceManager#getFeatureDetails} to check
      * if feature-status is {@link FeatureDetails#FEATURE_STATUS_DOWNLOADABLE}.
      */
     int DOWNLOAD_FAILURE_STATUS_UNAVAILABLE = 4;
@@ -72,7 +71,7 @@ public interface DownloadCallback {
             DOWNLOAD_FAILURE_STATUS_NETWORK_FAILURE,
             DOWNLOAD_FAILURE_STATUS_DOWNLOADING,
             DOWNLOAD_FAILURE_STATUS_UNAVAILABLE
-    }, open = true)
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface DownloadFailureStatus {
     }

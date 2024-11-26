@@ -19,18 +19,18 @@ package android.app.ondeviceintelligence;
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-
-import androidx.annotation.IntDef;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.text.MessageFormat;
+import java.util.Objects;
 
 /**
  * Represents a status of a requested {@link Feature}.
@@ -69,7 +69,7 @@ public final class FeatureDetails implements Parcelable {
             FEATURE_STATUS_DOWNLOADING,
             FEATURE_STATUS_AVAILABLE,
             FEATURE_STATUS_SERVICE_UNAVAILABLE
-    }, open = true)
+    })
     @Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {
@@ -79,18 +79,12 @@ public final class FeatureDetails implements Parcelable {
             @Status int featureStatus,
             @NonNull PersistableBundle featureDetailParams) {
         this.mFeatureStatus = featureStatus;
-        com.android.internal.util.AnnotationValidations.validate(
-                Status.class, null, mFeatureStatus);
-        this.mFeatureDetailParams = featureDetailParams;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mFeatureDetailParams);
+        this.mFeatureDetailParams = Objects.requireNonNull(featureDetailParams);
     }
 
     public FeatureDetails(
             @Status int featureStatus) {
         this.mFeatureStatus = featureStatus;
-        com.android.internal.util.AnnotationValidations.validate(
-                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = new PersistableBundle();
     }
 
@@ -155,11 +149,7 @@ public final class FeatureDetails implements Parcelable {
                 PersistableBundle.CREATOR);
 
         this.mFeatureStatus = status;
-        com.android.internal.util.AnnotationValidations.validate(
-                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = persistableBundle;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mFeatureDetailParams);
     }
 
 
