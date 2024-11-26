@@ -65,6 +65,7 @@ import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
@@ -141,8 +142,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      */
     private boolean mBouncerShowing = false;
 
-    private final com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
-            mDreamComplicationComponentFactory;
+    private final DreamComplicationComponent.Factory mDreamComplicationComponentFactory;
     private final ComplicationComponent.Factory mComplicationComponentFactory;
     private final DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
     private final AmbientTouchComponent.Factory mAmbientTouchComponentFactory;
@@ -376,8 +376,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             @Main DelayableExecutor executor,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             ComplicationComponent.Factory complicationComponentFactory,
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
-                    dreamComplicationComponentFactory,
+            DreamComplicationComponent.Factory dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             AmbientTouchComponent.Factory ambientTouchComponentFactory,
             DreamOverlayStateController stateController,
@@ -479,9 +478,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mLifecycleOwner,
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit),
                 new ViewModelStore(), mTouchInsetManager);
-        final com.android.systemui.dreams.complication.dagger.ComplicationComponent
-                dreamComplicationComponent = mDreamComplicationComponentFactory.create(
-                complicationComponent.getVisibilityController(), mTouchInsetManager);
+        final DreamComplicationComponent dreamComplicationComponent =
+                mDreamComplicationComponentFactory.create(
+                        complicationComponent.getVisibilityController(), mTouchInsetManager);
 
         final DreamOverlayComponent dreamOverlayComponent = mDreamOverlayComponentFactory.create(
                 mLifecycleOwner, complicationComponent.getComplicationHostViewController(),

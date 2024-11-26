@@ -32,7 +32,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.SystemDialogsCloser;
-import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
 import com.android.systemui.dreams.homecontrols.dagger.HomeControlsDataSourceModule;
 import com.android.systemui.dreams.homecontrols.dagger.HomeControlsRemoteServiceComponent;
@@ -68,7 +68,7 @@ import javax.inject.Named;
         HomeControlsDataSourceModule.class,
 },
         subcomponents = {
-                ComplicationComponent.class,
+                DreamComplicationComponent.class,
                 DreamOverlayComponent.class,
                 HomeControlsRemoteServiceComponent.class,
         })

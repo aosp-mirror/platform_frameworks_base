@@ -1,14 +1,14 @@
 package com.android.systemui.dreams.complication.dagger
 
 import android.content.res.Resources
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 
 @Module
-object ComplicationModule {
+object DreamComplicationModule {
     const val COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout"
     const val COMPLICATIONS_FADE_OUT_DELAY = "complication_fade_out_delay"
 

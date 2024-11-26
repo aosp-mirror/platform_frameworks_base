@@ -6,15 +6,15 @@ import com.android.systemui.touch.TouchInsetManager
 import dagger.BindsInstance
 import dagger.Subcomponent
 
-@Subcomponent(modules = [ComplicationModule::class])
-interface ComplicationComponent {
-    /** Factory for generating [ComplicationComponent]. */
+@Subcomponent(modules = [DreamComplicationModule::class])
+interface DreamComplicationComponent {
+    /** Factory for generating [DreamComplicationComponent]. */
     @Subcomponent.Factory
     interface Factory {
         fun create(
             @BindsInstance visibilityController: Complication.VisibilityController,
-            @BindsInstance touchInsetManager: TouchInsetManager
-        ): ComplicationComponent
+            @BindsInstance touchInsetManager: TouchInsetManager,
+        ): DreamComplicationComponent
     }
 
     fun getHideComplicationTouchHandler(): HideComplicationTouchHandler
