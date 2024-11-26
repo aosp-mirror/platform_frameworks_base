@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"ویژگی «اتصال بهبودیافته» را فعال می‌کند."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"‏محیط توسعه نرم‌افزار Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"‏(آزمایشی) اجرا کردن «پایانه Linux» در Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"‏اگر پایانه Linux را غیرفعال کنید، داده‌های آن پاک خواهد شد"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏بررسی HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏تنظیم عملکرد بررسی HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"اشکال‌زدایی"</string>

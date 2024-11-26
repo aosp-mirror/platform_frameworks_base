@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Konexioak hobetzeko eginbidea gaitzen du."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-eko garapen-ingurunea"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"Exekutatu Linux terminala Android-en (esperimentala)"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Desgaitzen baduzu, Linux-eko terminaleko datuak garbituko dira"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP egiaztapena"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Ezarri HDCP egiaztapen-portaera"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Arazketa"</string>
@@ -563,7 +566,7 @@
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta abisuak ezartzeko baimena"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta abisuak"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nBaimen hori ematen ez baduzu, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, abisua, erlojua"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, gogorarazpena, erlojua"</string>
     <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ez molestatzeko"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Ez molestatzeko modua"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktibatu"</string>

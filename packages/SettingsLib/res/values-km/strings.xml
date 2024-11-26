@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"បើក​មុខងារ​ការតភ្ជាប់​ដែលបានធ្វើឱ្យប្រសើរឡើង។"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"មជ្ឈដ្ឋាន​អភិវឌ្ឍន៍ Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ពិសោធន៍) ដំណើរការទែមីណាល់ Linux នៅលើ Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ប្រសិនបើអ្នកបិទ ទិន្នន័យទែមីណាល់ Linux នឹងត្រូវបានសម្អាត"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ពិនិត្យ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"កំណត់​ឥរិយាបថ​ពិនិត្យ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ការជួសជុល"</string>
@@ -473,7 +476,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ខ្វាក់ពណ៌ក្រហម (ក្រហម​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ខ្វាក់ពណ៌ខៀវ (ខៀវ​លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែតម្រូវ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;ដកពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - កំពុងផ្អាកការសាកថ្ម ដើម្បីការពារថ្ម"</string>
