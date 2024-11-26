@@ -506,6 +506,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
                 if (!isTask && a.getExtensionEdges() != 0x0) {
                     if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
+                        startTransaction.setEdgeExtensionEffect(
+                                change.getLeash(), a.getExtensionEdges());
                         finishTransaction.setEdgeExtensionEffect(change.getLeash(), /* edge */ 0);
                     } else {
                         if (!TransitionUtil.isOpeningType(mode)) {
@@ -564,7 +566,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
                 buildSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
                         mTransactionPool, mMainExecutor, animRelOffset, cornerRadius,
-                        clipRect, change.getActivityComponent() != null);
+                        clipRect);
 
                 final TransitionInfo.AnimationOptions options;
                 if (Flags.moveAnimationOptionsToChange()) {
@@ -876,8 +878,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         buildSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, change.getEndRelOffset(), cornerRadius, change.getEndAbsBounds(),
-                change.getActivityComponent() != null);
+                mMainExecutor, change.getEndRelOffset(), cornerRadius, change.getEndAbsBounds());
     }
 
     private void attachThumbnailAnimation(@NonNull ArrayList<Animator> animations,
@@ -901,8 +902,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         a.restrictDuration(MAX_ANIMATION_DURATION);
         a.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         buildSurfaceAnimation(animations, a, wt.getSurface(), finisher, mTransactionPool,
-                mMainExecutor, change.getEndRelOffset(), cornerRadius, change.getEndAbsBounds(),
-                change.getActivityComponent() != null);
+                mMainExecutor, change.getEndRelOffset(), cornerRadius, change.getEndAbsBounds());
     }
 
     private static int getWallpaperTransitType(TransitionInfo info) {
