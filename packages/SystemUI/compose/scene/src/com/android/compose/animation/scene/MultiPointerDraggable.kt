@@ -132,11 +132,7 @@ internal class MultiPointerDraggableNode(
     var onFirstPointerDown: () -> Unit,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
-) :
-    DelegatingNode(),
-    PointerInputModifierNode,
-    CompositionLocalConsumerModifierNode,
-    SpaceVectorConverter {
+) : DelegatingNode(), PointerInputModifierNode, CompositionLocalConsumerModifierNode {
     private val pointerTracker = delegate(SuspendingPointerInputModifierNode { pointerTracker() })
     private val pointerInput = delegate(SuspendingPointerInputModifierNode { pointerInput() })
     private val velocityTracker = VelocityTracker()
@@ -151,13 +147,13 @@ internal class MultiPointerDraggableNode(
 
     private var converter = SpaceVectorConverter(orientation)
 
-    override fun Offset.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
+    fun Offset.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
 
-    override fun Velocity.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
+    fun Velocity.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
 
-    override fun Float.toOffset(): Offset = with(converter) { this@toOffset.toOffset() }
+    fun Float.toOffset(): Offset = with(converter) { this@toOffset.toOffset() }
 
-    override fun Float.toVelocity(): Velocity = with(converter) { this@toVelocity.toVelocity() }
+    fun Float.toVelocity(): Velocity = with(converter) { this@toVelocity.toVelocity() }
 
     var orientation: Orientation = orientation
         set(value) {
