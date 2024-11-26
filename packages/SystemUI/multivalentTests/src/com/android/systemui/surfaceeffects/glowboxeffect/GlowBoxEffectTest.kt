@@ -90,15 +90,15 @@ class GlowBoxEffectTest : SysuiTestCase() {
 
         assertThat(glowBoxEffect.state).isEqualTo(GlowBoxEffect.AnimationState.EASE_IN)
 
-        animatorTestRule.advanceTimeBy(config.easeInDuration + 50L)
+        animatorTestRule.advanceAnimationDuration(config.easeInDuration + 50L)
 
         assertThat(glowBoxEffect.state).isEqualTo(GlowBoxEffect.AnimationState.MAIN)
 
-        animatorTestRule.advanceTimeBy(config.duration + 50L)
+        animatorTestRule.advanceAnimationDuration(config.duration + 50L)
 
         assertThat(glowBoxEffect.state).isEqualTo(GlowBoxEffect.AnimationState.EASE_OUT)
 
-        animatorTestRule.advanceTimeBy(config.easeOutDuration + 50L)
+        animatorTestRule.advanceAnimationDuration(config.easeOutDuration + 50L)
 
         assertThat(glowBoxEffect.state).isEqualTo(GlowBoxEffect.AnimationState.NOT_PLAYING)
     }

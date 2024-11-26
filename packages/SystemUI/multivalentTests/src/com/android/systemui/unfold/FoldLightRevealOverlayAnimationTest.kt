@@ -193,7 +193,11 @@ class FoldLightRevealOverlayAnimationTest : SysuiTestCase() {
         }
 
     private fun TestScope.advanceTime(timeMs: Long) {
-        animatorTestRule.advanceTimeBy(timeMs)
+        if (timeMs == ANIMATION_DURATION) {
+            animatorTestRule.advanceAnimationDuration(timeMs)
+        } else {
+            animatorTestRule.advanceTimeBy(timeMs)
+        }
         advanceTimeBy(timeMs)
     }
 

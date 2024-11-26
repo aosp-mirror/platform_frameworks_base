@@ -16,6 +16,7 @@
 
 package com.android.systemui.animation
 
+import android.animation.Animator
 import java.util.function.Consumer
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -68,6 +69,22 @@ class AnimatorTestRule(test: Any?) : TestRule {
         //  rules before either rule does its frame output. Failing to do this could cause the
         //  animation from one to start later than the other.
         platformRule.advanceTimeBy(timeDelta, advanceAndroidXTimeBy)
+    }
+
+    /**
+     * This is similar to [advanceTimeBy] but it expects to reach the end of an animation. This call
+     * may produce 2 frames for the last animation frame and end animation callback.
+     *
+     * @param durationMs the duration that is greater than or equal to the animation duration.
+     */
+    fun advanceAnimationDuration(durationMs: Long) {
+        advanceTimeBy(durationMs)
+        if (Animator.isPostNotifyEndListenerEnabled()) {
+            // If the post-end-callback is enabled, the AnimatorListener#onAnimationEnd will be
+            // called on the next frame of last animation frame. So trigger additional doFrame to
+            // ensure the end callback method is called (by android.animation.AnimatorTestRule).
+            advanceTimeBy(0)
+        }
     }
 
     /**
