@@ -554,6 +554,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setConfigChanges(ORIENTATION_CONFIG_CHANGES)
@@ -641,6 +642,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void ignoreRequestedOrientationForResizableInSplitWindows() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
         final Task rootTask = activity.getRootTask();
@@ -685,6 +687,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void respectRequestedOrientationForNonResizableInSplitWindows() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
         spyOn(tda);
         doReturn(true).when(tda).supportsNonResizableMultiWindow();
@@ -1906,6 +1909,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testActivityOnCancelFixedRotationTransform() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = createActivityWithTask();
         final DisplayRotation displayRotation = activity.mDisplayContent.getDisplayRotation();
         final RemoteDisplayChangeController remoteDisplayChangeController = activity
@@ -2054,6 +2058,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testFixedRotationSnapshotStartingWindow() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = createActivityWithTask();
         // TaskSnapshotSurface requires a fullscreen opaque window.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -2278,6 +2283,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testSupportsFreeform() {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setComponent(getUniqueComponentName(mContext.getPackageName()))
                 .setCreateTask(true)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
@@ -2410,6 +2416,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testOrientationForScreenOrientationBehind() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task task = createTask(mDisplayContent);
         // Activity below
         new ActivityBuilder(mAtm)
@@ -2507,6 +2514,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testLandscapeSeascapeRotationByApp() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopNonFinishingActivity();
@@ -2572,6 +2580,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     @Presubmit
     public void testGetOrientation() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         // ActivityBuilder will resume top activities and cause the activity been added into
         // opening apps list. Since this test is focus on the effect of visible on getting
         // orientation, we skip app transition to avoid interference.
@@ -2663,8 +2672,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testSetOrientation_restrictedByTargetSdk() {
         mSetFlagsRule.enableFlags(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT);
-        mDisplayContent.setIgnoreOrientationRequest(true);
         makeDisplayLargeScreen(mDisplayContent);
+        assertTrue(mDisplayContent.getIgnoreOrientationRequest());
 
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_SOCIAL, false);
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_GAME, true);
@@ -2702,6 +2711,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testRespectTopFullscreenOrientation() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Configuration displayConfig = activity.mDisplayContent.getConfiguration();
         final Configuration activityConfig = activity.getConfiguration();

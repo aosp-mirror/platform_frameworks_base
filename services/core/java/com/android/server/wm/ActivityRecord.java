@@ -3212,8 +3212,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * will be ignored.
      */
     boolean isUniversalResizeable() {
-        final boolean isLargeScreen = mDisplayContent != null && mDisplayContent.getConfiguration()
-                .smallestScreenWidthDp >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
+        final boolean isLargeScreen = mDisplayContent != null && mDisplayContent.isLargeScreen()
                 && mDisplayContent.getIgnoreOrientationRequest();
         if (!canBeUniversalResizeable(info.applicationInfo, mWmService, isLargeScreen,
                 true /* forActivity */)) {

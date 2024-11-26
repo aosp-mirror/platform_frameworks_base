@@ -1333,6 +1333,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testDeferRotationForTransientLaunch() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TestTransitionPlayer player = registerTestTransitionPlayer();
         assumeFalse(mDisplayContent.mTransitionController.useShellTransitionsRotation());
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();

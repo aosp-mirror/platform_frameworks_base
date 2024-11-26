@@ -511,6 +511,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     @Test
     public void testSupportsMultiWindow_nonResizable() {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setComponent(getUniqueComponentName(mContext.getPackageName()))
                 .setCreateTask(true)
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)
                 .build();

@@ -374,9 +374,9 @@ class DisplayWindowSettings {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
-        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
-                ? settings.mIgnoreOrientationRequest : false;
-        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
+        if (settings.mIgnoreOrientationRequest != null) {
+            dc.setIgnoreOrientationRequest(settings.mIgnoreOrientationRequest);
+        }
 
         dc.getDisplayRotation().resetAllowAllRotations();
     }

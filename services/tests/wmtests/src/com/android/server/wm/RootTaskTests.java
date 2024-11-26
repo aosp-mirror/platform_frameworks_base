@@ -132,6 +132,7 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testClosingAppDifferentTaskOrientation() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -146,6 +147,7 @@ public class RootTaskTests extends WindowTestsBase {
 
     @Test
     public void testMoveTaskToBackDifferentTaskOrientation() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity1 = createActivityRecord(mDisplayContent);
         activity1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
