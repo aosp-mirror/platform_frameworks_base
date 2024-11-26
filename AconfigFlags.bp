@@ -575,6 +575,8 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
+        "com.android.art",
+        "com.android.art.debug",
         "com.android.permission",
     ],
 }
