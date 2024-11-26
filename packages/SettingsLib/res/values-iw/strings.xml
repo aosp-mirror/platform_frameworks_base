@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"הפעלה של תכונת הקישוריות המשופרת."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"מסוף מקומי"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"הפעלה של אפליקציית מסוף המציעה גישה מקומית למעטפת"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"‏סביבת פיתוח של Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"‏(ניסיוני) הפעלת טרמינל Linux ב-Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"‏אם ההגדרה תושבת, הנתונים של טרמינל Linux יימחקו"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏בדיקת HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏הגדרת האופן של בדיקת HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ניפוי באגים"</string>
@@ -408,7 +411,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏טעינת שכבות לניפוי באגים ב-GPU לאפליקציות ניפוי באגים"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"הפעלת רישום ספקים מפורט ביומן"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"הוספת רישומי יומן של יצרנים למכשירים ספציפיים בדוחות על באגים. דוחות אלה עשויים להכיל מידע פרטי, להגביר את צריכת הסוללה ולצרוך נפח אחסון גדול יותר."</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"קנה מידה לאנימציה של חלון"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"מהירות אנימציית מעבר במסכים"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"יצירת הדמיה של תצוגות משניות"</string>
@@ -566,8 +569,8 @@
     <string name="zen_alarm_warning" msgid="245729928048586280">"לא תושמע ההתראה הבאה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3346777418136233330">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"משך זמן"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"יש לשאול בכל פעם"</string>
+    <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"כמה זמן"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"אני רוצה לבחור בכל פעם"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"עד הכיבוי"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"הרגע"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"הטלפון הזה"</string>

@@ -156,13 +156,13 @@
     <item msgid="1241278021345116816">"Optimizirano za kvalitet zvuka (990 kbps/909 kbps)"</item>
     <item msgid="3523665555859696539">"Uravnotežen kvalitet zvuka i veze (660kbps/606kbps)"</item>
     <item msgid="886408010459747589">"Optimizirano za kvalitet veze (330 kbps/303 kbps)"</item>
-    <item msgid="3808414041654351577">"Maksimalan napor (prilagodljiva brzina prijenosa)"</item>
+    <item msgid="3808414041654351577">"Maksimalan napor (prilagodljiva brzina prenosa)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="804499336721569838">"Optimizirano za kvalitet zvuka"</item>
     <item msgid="7451422070435297462">"Uravnotežen kvalitet zvuka i veze"</item>
     <item msgid="6173114545795428901">"Optimizirano za kvalitet veze"</item>
-    <item msgid="4349908264188040530">"Maksimalan napor (prilagodljiva brzina prijenosa)"</item>
+    <item msgid="4349908264188040530">"Maksimalan napor (prilagodljiva brzina prenosa)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="8019740759207729126"></item>
@@ -276,8 +276,8 @@
   </string-array>
   <string-array name="usb_configuration_titles">
     <item msgid="3358668781763928157">"Punjenje"</item>
-    <item msgid="7804797564616858506">"MTP (protokol za prijenos sadržaja medija)"</item>
-    <item msgid="910925519184248772">"PTP (protokol za prijenos slika)"</item>
+    <item msgid="7804797564616858506">"MTP (protokol za prenos sadržaja medija)"</item>
+    <item msgid="910925519184248772">"PTP (protokol za prenos slika)"</item>
     <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
     <item msgid="8828567335701536560">"Izvor zvuka"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
