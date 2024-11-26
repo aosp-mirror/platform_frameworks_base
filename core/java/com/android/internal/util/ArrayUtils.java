@@ -85,6 +85,51 @@ public class ArrayUtils {
     }
 
     /**
+     * This is like <code>new byte[length]</code>, but it allocates the array as non-movable. This
+     * prevents copies of the data from being left on the Java heap as a result of heap compaction.
+     * Use this when the array will contain sensitive data such as a password or cryptographic key
+     * that needs to be wiped from memory when no longer needed. The owner of the array is still
+     * responsible for the zeroization; {@link #zeroize(byte[])} should be used to do so.
+     *
+     * @param length the length of the array to allocate
+     * @return the new array
+     */
+    public static byte[] newNonMovableByteArray(int length) {
+        return (byte[]) VMRuntime.getRuntime().newNonMovableArray(byte.class, length);
+    }
+
+    /**
+     * Like {@link #newNonMovableByteArray(int)}, but allocates a char array.
+     *
+     * @param length the length of the array to allocate
+     * @return the new array
+     */
+    public static char[] newNonMovableCharArray(int length) {
+        return (char[]) VMRuntime.getRuntime().newNonMovableArray(char.class, length);
+    }
+
+    /**
+     * Zeroizes a byte array as securely as possible. Use this when the array contains sensitive
+     * data such as a password or cryptographic key.
+     * <p>
+     * This zeroizes the array in a way that is guaranteed to not be optimized out by the compiler.
+     * If supported by the architecture, it zeroizes the data not just in the L1 data cache but also
+     * in other levels of the memory hierarchy up to and including main memory (but not above that).
+     * <p>
+     * This works on any <code>byte[]</code>, but to ensure that copies of the array aren't left on
+     * the Java heap the array should have been allocated with {@link #newNonMovableByteArray(int)}.
+     * Use on other arrays might also introduce performance anomalies.
+     *
+     * @param array the array to zeroize
+     */
+    public static native void zeroize(byte[] array);
+
+    /**
+     * Like {@link #zeroize(byte[])}, but for char arrays.
+     */
+    public static native void zeroize(char[] array);
+
+    /**
      * Checks if the beginnings of two byte arrays are equal.
      *
      * @param array1 the first byte array
