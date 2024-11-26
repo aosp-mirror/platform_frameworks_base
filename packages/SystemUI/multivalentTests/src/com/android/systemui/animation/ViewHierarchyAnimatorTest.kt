@@ -24,8 +24,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
-class
-ViewHierarchyAnimatorTest : SysuiTestCase() {
+class ViewHierarchyAnimatorTest : SysuiTestCase() {
     companion object {
         private const val TEST_DURATION = 1000L
         private val TEST_INTERPOLATOR = Interpolators.LINEAR
@@ -49,9 +48,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         // animate()
-        var success = ViewHierarchyAnimator.animate(
-            rootView, interpolator = TEST_INTERPOLATOR, duration = TEST_DURATION
-        )
+        var success =
+            ViewHierarchyAnimator.animate(
+                rootView,
+                interpolator = TEST_INTERPOLATOR,
+                duration = TEST_DURATION,
+            )
         rootView.layout(0 /* l */, 0 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -64,9 +66,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.stopAnimating(rootView)
 
         // animateNextUpdate()
-        success = ViewHierarchyAnimator.animateNextUpdate(
-            rootView, interpolator = TEST_INTERPOLATOR, duration = TEST_DURATION
-        )
+        success =
+            ViewHierarchyAnimator.animateNextUpdate(
+                rootView,
+                interpolator = TEST_INTERPOLATOR,
+                duration = TEST_DURATION,
+            )
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         assertTrue(success)
@@ -79,9 +84,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // animateAddition()
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView, interpolator = TEST_INTERPOLATOR, duration = TEST_DURATION
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                interpolator = TEST_INTERPOLATOR,
+                duration = TEST_DURATION,
+            )
         rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         assertTrue(success)
@@ -93,9 +101,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         // animateRemoval()
         setUpRootWithChildren()
         val child = rootView.getChildAt(0)
-        success = ViewHierarchyAnimator.animateRemoval(
-            child, interpolator = TEST_INTERPOLATOR, duration = TEST_DURATION
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                child,
+                interpolator = TEST_INTERPOLATOR,
+                duration = TEST_DURATION,
+            )
 
         assertTrue(success)
         assertNotNull(child.getTag(R.id.tag_animator))
@@ -185,7 +196,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         // Change all bounds.
         rootView.measure(
             View.MeasureSpec.makeMeasureSpec(190, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
         )
         rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
 
@@ -211,14 +222,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     fun animatesRootAndChildren_withExcludedViews() {
         setUpRootWithChildren()
 
-        val success = ViewHierarchyAnimator.animate(
-            rootView,
-            excludedViews = setOf(rootView.getChildAt(0))
-        )
+        val success =
+            ViewHierarchyAnimator.animate(rootView, excludedViews = setOf(rootView.getChildAt(0)))
         // Change all bounds.
         rootView.measure(
-                View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+            View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
         )
         rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
 
@@ -245,14 +254,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     fun animatesRootOnly() {
         setUpRootWithChildren()
 
-        val success = ViewHierarchyAnimator.animate(
-                rootView,
-                animateChildren = false
-        )
+        val success = ViewHierarchyAnimator.animate(rootView, animateChildren = false)
         // Change all bounds.
         rootView.measure(
-                View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+            View.MeasureSpec.makeMeasureSpec(180, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
         )
         rootView.layout(10 /* l */, 20 /* t */, 200 /* r */, 120 /* b */)
 
@@ -351,10 +357,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     fun animatesAppearingViewsRespectingOrigin() {
         // CENTER.
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        var success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.CENTER
-        )
+        var success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.CENTER,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -364,10 +371,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // LEFT.
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.LEFT
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.LEFT,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -377,10 +385,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // TOP_LEFT.
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.TOP_LEFT
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.TOP_LEFT,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -390,10 +399,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // TOP.
         rootView.layout(150 /* l */, 0 /* t */, 150 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.TOP
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.TOP,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -403,10 +413,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // TOP_RIGHT.
         rootView.layout(150 /* l */, 0 /* t */, 150 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.TOP_RIGHT
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.TOP_RIGHT,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -416,10 +427,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // RIGHT.
         rootView.layout(150 /* l */, 150 /* t */, 150 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.RIGHT
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.RIGHT,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -429,10 +441,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // BOTTOM_RIGHT.
         rootView.layout(150 /* l */, 150 /* t */, 150 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -442,10 +455,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // BOTTOM.
         rootView.layout(0 /* l */, 150 /* t */, 0 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.BOTTOM
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.BOTTOM,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -455,10 +469,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // BOTTOM_LEFT.
         rootView.layout(0 /* l */, 150 /* t */, 0 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -471,11 +486,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     fun animatesAppearingViewsRespectingMargins() {
         // CENTER.
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        var success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.CENTER,
-            includeMargins = true
-        )
+        var success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.CENTER,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -485,10 +501,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // LEFT.
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView, origin = ViewHierarchyAnimator.Hotspot.LEFT,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.LEFT,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -498,11 +516,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // TOP_LEFT.
         rootView.layout(0 /* l */, 0 /* t */, 0 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.TOP_LEFT,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.TOP_LEFT,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -512,10 +531,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // TOP.
         rootView.layout(150 /* l */, 0 /* t */, 150 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView, origin = ViewHierarchyAnimator.Hotspot.TOP,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.TOP,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -525,11 +546,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // TOP_RIGHT.
         rootView.layout(150 /* l */, 0 /* t */, 150 /* r */, 0 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.TOP_RIGHT,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.TOP_RIGHT,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -539,11 +561,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // RIGHT.
         rootView.layout(150 /* l */, 150 /* t */, 150 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.RIGHT,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.RIGHT,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -553,11 +576,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // BOTTOM_RIGHT.
         rootView.layout(150 /* l */, 150 /* t */, 150 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -567,11 +591,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // BOTTOM.
         rootView.layout(0 /* l */, 150 /* t */, 0 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.BOTTOM,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.BOTTOM,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -581,11 +606,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         // BOTTOM_LEFT.
         rootView.layout(0 /* l */, 150 /* t */, 0 /* r */, 150 /* b */)
-        success = ViewHierarchyAnimator.animateAddition(
-            rootView,
-            origin = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT,
-            includeMargins = true
-        )
+        success =
+            ViewHierarchyAnimator.animateAddition(
+                rootView,
+                origin = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT,
+                includeMargins = true,
+            )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         assertTrue(success)
@@ -626,7 +652,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateAddition(
             rootView,
             includeFadeIn = true,
-            fadeInInterpolator = Interpolators.LINEAR
+            fadeInInterpolator = Interpolators.LINEAR,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -641,7 +667,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateAddition(
             rootView,
             includeFadeIn = true,
-            fadeInInterpolator = Interpolators.LINEAR
+            fadeInInterpolator = Interpolators.LINEAR,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -663,7 +689,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateAddition(
             rootView,
             includeFadeIn = true,
-            fadeInInterpolator = Interpolators.LINEAR
+            fadeInInterpolator = Interpolators.LINEAR,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -680,7 +706,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateAddition(
             rootView,
             includeFadeIn = true,
-            fadeInInterpolator = Interpolators.LINEAR
+            fadeInInterpolator = Interpolators.LINEAR,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -692,7 +718,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateAddition(
             rootView,
             includeFadeIn = true,
-            fadeInInterpolator = Interpolators.LINEAR
+            fadeInInterpolator = Interpolators.LINEAR,
         )
 
         // THEN the alpha remains at its current value (it doesn't get reset to 0)
@@ -721,7 +747,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         ViewHierarchyAnimator.animateAddition(
             rootView,
             includeFadeIn = false,
-            fadeInInterpolator = Interpolators.LINEAR
+            fadeInInterpolator = Interpolators.LINEAR,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -738,10 +764,10 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val onAnimationEndRunnable = { runnableRun = true }
 
         ViewHierarchyAnimator.animateAddition(
-                rootView,
-                origin = ViewHierarchyAnimator.Hotspot.CENTER,
-                includeMargins = true,
-                onAnimationEnd = onAnimationEndRunnable
+            rootView,
+            origin = ViewHierarchyAnimator.Hotspot.CENTER,
+            includeMargins = true,
+            onAnimationEnd = onAnimationEndRunnable,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -751,7 +777,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun animateAddition_runnableDoesNotRunWhenAnimationCancelled() {
+    fun animateAddition_runnableRunsWhenAnimationCancelled() {
         var runnableRun = false
         val onAnimationEndRunnable = { runnableRun = true }
 
@@ -759,13 +785,13 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             rootView,
             origin = ViewHierarchyAnimator.Hotspot.CENTER,
             includeMargins = true,
-            onAnimationEnd = onAnimationEndRunnable
+            onAnimationEnd = onAnimationEndRunnable,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
         cancelAnimation(rootView)
 
-        assertEquals(false, runnableRun)
+        assertEquals(true, runnableRun)
     }
 
     @Test
@@ -777,7 +803,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             rootView,
             origin = ViewHierarchyAnimator.Hotspot.CENTER,
             includeMargins = true,
-            onAnimationEnd = onAnimationEndRunnable
+            onAnimationEnd = onAnimationEndRunnable,
         )
         rootView.layout(50 /* l */, 50 /* t */, 100 /* r */, 100 /* b */)
 
@@ -791,11 +817,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
 
         val child = rootView.getChildAt(0)
-        val success = ViewHierarchyAnimator.animateRemoval(
-            child,
-            destination = ViewHierarchyAnimator.Hotspot.LEFT,
-            interpolator = Interpolators.LINEAR
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                child,
+                destination = ViewHierarchyAnimator.Hotspot.LEFT,
+                interpolator = Interpolators.LINEAR,
+            )
 
         assertTrue(success)
         assertNotNull(child.getTag(R.id.tag_animator))
@@ -820,11 +847,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         rootView.addView(onlyChild)
         forceLayout()
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            onlyChild,
-            destination = ViewHierarchyAnimator.Hotspot.LEFT,
-            interpolator = Interpolators.LINEAR
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                onlyChild,
+                destination = ViewHierarchyAnimator.Hotspot.LEFT,
+                interpolator = Interpolators.LINEAR,
+            )
 
         assertTrue(success)
         assertNotNull(onlyChild.getTag(R.id.tag_animator))
@@ -845,9 +873,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         var removedChild = rootView.getChildAt(0)
         var remainingChild = rootView.getChildAt(1)
-        var success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.CENTER
-        )
+        var success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.CENTER,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -863,9 +893,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.LEFT
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.LEFT,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -881,9 +913,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.TOP_LEFT
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.TOP_LEFT,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -899,9 +933,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.TOP
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.TOP,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -917,9 +953,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.TOP_RIGHT
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.TOP_RIGHT,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -935,9 +973,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.RIGHT
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.RIGHT,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -953,9 +993,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -971,9 +1013,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.BOTTOM
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.BOTTOM,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -989,9 +1033,11 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         setUpRootWithChildren()
         removedChild = rootView.getChildAt(0)
         remainingChild = rootView.getChildAt(1)
-        success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, destination = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT
-        )
+        success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT,
+            )
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -1014,11 +1060,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalRight = removedChild.right
         val originalBottom = removedChild.bottom
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.CENTER,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.CENTER,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1027,13 +1074,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val expectedX = ((originalLeft - M_LEFT) + (originalRight + M_RIGHT)) / 2
         val expectedY = ((originalTop - M_TOP) + (originalBottom + M_BOTTOM)) / 2
 
-        checkBounds(
-            removedChild,
-            l = expectedX,
-            t = expectedY,
-            r = expectedX,
-            b = expectedY
-        )
+        checkBounds(removedChild, l = expectedX, t = expectedY, r = expectedX, b = expectedY)
     }
 
     @Test
@@ -1044,11 +1085,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalTop = removedChild.top
         val originalBottom = removedChild.bottom
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.LEFT,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.LEFT,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1059,7 +1101,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalLeft - M_LEFT,
             t = originalTop,
             r = originalLeft - M_LEFT,
-            b = originalBottom
+            b = originalBottom,
         )
     }
 
@@ -1070,11 +1112,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalLeft = removedChild.left
         val originalTop = removedChild.top
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.TOP_LEFT,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.TOP_LEFT,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1085,7 +1128,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalLeft - M_LEFT,
             t = originalTop - M_TOP,
             r = originalLeft - M_LEFT,
-            b = originalTop - M_TOP
+            b = originalTop - M_TOP,
         )
     }
 
@@ -1097,11 +1140,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalTop = removedChild.top
         val originalRight = removedChild.right
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.TOP,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.TOP,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1112,7 +1156,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalLeft,
             t = originalTop - M_TOP,
             r = originalRight,
-            b = originalTop - M_TOP
+            b = originalTop - M_TOP,
         )
     }
 
@@ -1123,11 +1167,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalTop = removedChild.top
         val originalRight = removedChild.right
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.TOP_RIGHT,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.TOP_RIGHT,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1138,7 +1183,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalRight + M_RIGHT,
             t = originalTop - M_TOP,
             r = originalRight + M_RIGHT,
-            b = originalTop - M_TOP
+            b = originalTop - M_TOP,
         )
     }
 
@@ -1150,11 +1195,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalRight = removedChild.right
         val originalBottom = removedChild.bottom
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.RIGHT,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.RIGHT,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1165,7 +1211,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalRight + M_RIGHT,
             t = originalTop,
             r = originalRight + M_RIGHT,
-            b = originalBottom
+            b = originalBottom,
         )
     }
 
@@ -1176,11 +1222,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalRight = removedChild.right
         val originalBottom = removedChild.bottom
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.BOTTOM_RIGHT,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1191,7 +1238,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalRight + M_RIGHT,
             t = originalBottom + M_BOTTOM,
             r = originalRight + M_RIGHT,
-            b = originalBottom + M_BOTTOM
+            b = originalBottom + M_BOTTOM,
         )
     }
 
@@ -1203,11 +1250,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalRight = removedChild.right
         val originalBottom = removedChild.bottom
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.BOTTOM,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.BOTTOM,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1218,7 +1266,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalLeft,
             t = originalBottom + M_BOTTOM,
             r = originalRight,
-            b = originalBottom + M_BOTTOM
+            b = originalBottom + M_BOTTOM,
         )
     }
 
@@ -1229,11 +1277,12 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val originalLeft = removedChild.left
         val originalBottom = removedChild.bottom
 
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild,
-            destination = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT,
-            includeMargins = true,
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(
+                removedChild,
+                destination = ViewHierarchyAnimator.Hotspot.BOTTOM_LEFT,
+                includeMargins = true,
+            )
         forceLayout()
 
         assertTrue(success)
@@ -1244,9 +1293,10 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
             l = originalLeft - M_LEFT,
             t = originalBottom + M_BOTTOM,
             r = originalLeft - M_LEFT,
-            b = originalBottom + M_BOTTOM
+            b = originalBottom + M_BOTTOM,
         )
     }
+
     /* ******** end of animatesViewRemoval_includeMarginsTrue tests ******** */
 
     @Test
@@ -1256,9 +1306,8 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val child = rootView.getChildAt(0) as ViewGroup
         val firstGrandChild = child.getChildAt(0)
         val secondGrandChild = child.getChildAt(1)
-        val success = ViewHierarchyAnimator.animateRemoval(
-            child, interpolator = Interpolators.LINEAR
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(child, interpolator = Interpolators.LINEAR)
 
         assertTrue(success)
         assertNotNull(child.getTag(R.id.tag_animator))
@@ -1288,9 +1337,8 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         val removedChild = rootView.getChildAt(0)
         val remainingChild = rootView.getChildAt(1)
-        val success = ViewHierarchyAnimator.animateRemoval(
-            removedChild, interpolator = Interpolators.LINEAR
-        )
+        val success =
+            ViewHierarchyAnimator.animateRemoval(removedChild, interpolator = Interpolators.LINEAR)
         // Ensure that the layout happens before the checks.
         forceLayout()
 
@@ -1315,17 +1363,14 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         forceLayout()
         val removedView = rootView.getChildAt(0)
 
-        ViewHierarchyAnimator.animateRemoval(
-            removedView,
-            onAnimationEnd = onAnimationEndRunnable
-        )
+        ViewHierarchyAnimator.animateRemoval(removedView, onAnimationEnd = onAnimationEndRunnable)
         endAnimation(removedView)
 
         assertEquals(true, runnableRun)
     }
 
     @Test
-    fun animateRemoval_runnableDoesNotRunWhenAnimationCancelled() {
+    fun animateRemoval_runnableRunsWhenAnimationCancelled() {
         var runnableRun = false
         val onAnimationEndRunnable = { runnableRun = true }
 
@@ -1333,13 +1378,10 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         forceLayout()
         val removedView = rootView.getChildAt(0)
 
-        ViewHierarchyAnimator.animateRemoval(
-            removedView,
-            onAnimationEnd = onAnimationEndRunnable
-        )
+        ViewHierarchyAnimator.animateRemoval(removedView, onAnimationEnd = onAnimationEndRunnable)
         cancelAnimation(removedView)
 
-        assertEquals(false, runnableRun)
+        assertEquals(true, runnableRun)
     }
 
     @Test
@@ -1351,10 +1393,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         forceLayout()
         val removedView = rootView.getChildAt(0)
 
-        ViewHierarchyAnimator.animateRemoval(
-            removedView,
-            onAnimationEnd = onAnimationEndRunnable
-        )
+        ViewHierarchyAnimator.animateRemoval(removedView, onAnimationEnd = onAnimationEndRunnable)
         advanceAnimation(removedView, 0.5f)
 
         assertEquals(false, runnableRun)
@@ -1370,7 +1409,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         rootView.addView(secondChild)
         rootView.measure(
             View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
         )
         rootView.layout(0 /* l */, 0 /* t */, 100 /* r */, 100 /* b */)
 
@@ -1378,7 +1417,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         // Change all bounds.
         rootView.measure(
             View.MeasureSpec.makeMeasureSpec(150, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY)
+            View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.EXACTLY),
         )
         rootView.layout(0 /* l */, 0 /* t */, 150 /* r */, 100 /* b */)
 
@@ -1501,7 +1540,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         checkBounds(rootView, l = 0, t = 15, r = 70, b = 80)
 
         // Change all bounds again.
-        rootView.layout(10 /* l */, 10 /* t */, 50/* r */, 50 /* b */)
+        rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 10, t = 10, r = 50, b = 50)
@@ -1523,7 +1562,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
 
         ViewHierarchyAnimator.stopAnimating(rootView)
         // Change all bounds again.
-        rootView.layout(10 /* l */, 10 /* t */, 50/* r */, 50 /* b */)
+        rootView.layout(10 /* l */, 10 /* t */, 50 /* r */, 50 /* b */)
 
         assertNull(rootView.getTag(R.id.tag_animator))
         checkBounds(rootView, l = 10, t = 10, r = 50, b = 50)
@@ -1543,10 +1582,8 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         val secondChild = View(mContext)
         rootView.addView(secondChild)
 
-        val firstChildParams = LinearLayout.LayoutParams(
-            0 /* width */,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
+        val firstChildParams =
+            LinearLayout.LayoutParams(0 /* width */, LinearLayout.LayoutParams.MATCH_PARENT)
         firstChildParams.weight = 0.5f
         if (includeMarginsOnFirstChild) {
             firstChildParams.leftMargin = M_LEFT
@@ -1556,23 +1593,25 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
         }
         firstChild.layoutParams = firstChildParams
 
-        val secondChildParams = LinearLayout.LayoutParams(
-            0 /* width */,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
+        val secondChildParams =
+            LinearLayout.LayoutParams(0 /* width */, LinearLayout.LayoutParams.MATCH_PARENT)
         secondChildParams.weight = 0.5f
         secondChild.layoutParams = secondChildParams
 
         firstGrandChild.layoutParams = RelativeLayout.LayoutParams(40 /* width */, 40 /* height */)
-        (firstGrandChild.layoutParams as RelativeLayout.LayoutParams)
-            .addRule(RelativeLayout.ALIGN_PARENT_START)
-        (firstGrandChild.layoutParams as RelativeLayout.LayoutParams)
-            .addRule(RelativeLayout.ALIGN_PARENT_TOP)
+        (firstGrandChild.layoutParams as RelativeLayout.LayoutParams).addRule(
+            RelativeLayout.ALIGN_PARENT_START
+        )
+        (firstGrandChild.layoutParams as RelativeLayout.LayoutParams).addRule(
+            RelativeLayout.ALIGN_PARENT_TOP
+        )
         secondGrandChild.layoutParams = RelativeLayout.LayoutParams(40 /* width */, 40 /* height */)
-        (secondGrandChild.layoutParams as RelativeLayout.LayoutParams)
-            .addRule(RelativeLayout.ALIGN_PARENT_END)
-        (secondGrandChild.layoutParams as RelativeLayout.LayoutParams)
-            .addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+        (secondGrandChild.layoutParams as RelativeLayout.LayoutParams).addRule(
+            RelativeLayout.ALIGN_PARENT_END
+        )
+        (secondGrandChild.layoutParams as RelativeLayout.LayoutParams).addRule(
+            RelativeLayout.ALIGN_PARENT_BOTTOM
+        )
 
         forceLayout()
     }
@@ -1580,7 +1619,7 @@ ViewHierarchyAnimatorTest : SysuiTestCase() {
     private fun forceLayout() {
         rootView.measure(
             View.MeasureSpec.makeMeasureSpec(200 /* width */, View.MeasureSpec.AT_MOST),
-            View.MeasureSpec.makeMeasureSpec(100 /* height */, View.MeasureSpec.AT_MOST)
+            View.MeasureSpec.makeMeasureSpec(100 /* height */, View.MeasureSpec.AT_MOST),
         )
         rootView.layout(0 /* l */, 0 /* t */, 200 /* r */, 100 /* b */)
     }

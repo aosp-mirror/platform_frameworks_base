@@ -225,19 +225,24 @@ class DesktopTilingWindowDecoration(
     fun onDividerHandleDragStart(motionEvent: MotionEvent) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
 
         desktopModeEventLogger.logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             leftTiledTask.taskInfo,
-            displayController
+            leftTiledTask.bounds.width(),
+            leftTiledTask.bounds.height(),
+            displayController,
         )
 
         desktopModeEventLogger.logTaskResizingStarted(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             rightTiledTask.taskInfo,
-            displayController
+            rightTiledTask.bounds.width(),
+            rightTiledTask.bounds.height(),
+            displayController,
         )
     }
 
@@ -296,23 +301,24 @@ class DesktopTilingWindowDecoration(
     ) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
 
         desktopModeEventLogger.logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             leftTiledTask.taskInfo,
-            leftTiledTask.newBounds.height(),
             leftTiledTask.newBounds.width(),
-            displayController
+            leftTiledTask.newBounds.height(),
+            displayController,
         )
 
         desktopModeEventLogger.logTaskResizingEnded(
             ResizeTrigger.TILING_DIVIDER,
-            motionEvent,
+            inputMethod,
             rightTiledTask.taskInfo,
-            rightTiledTask.newBounds.height(),
             rightTiledTask.newBounds.width(),
-            displayController
+            rightTiledTask.newBounds.height(),
+            displayController,
         )
 
         if (leftTiledTask.newBounds == leftTiledTask.bounds) {
@@ -471,9 +477,9 @@ class DesktopTilingWindowDecoration(
         }
     }
 
+    // Only called if [taskInfo] relates to a focused task
     private fun isTilingFocusRemoved(taskInfo: RunningTaskInfo): Boolean {
-        return taskInfo.isFocused &&
-            isTilingFocused &&
+        return isTilingFocused &&
             taskInfo.taskId != leftTaskResizingHelper?.taskInfo?.taskId &&
             taskInfo.taskId != rightTaskResizingHelper?.taskInfo?.taskId
     }
@@ -484,11 +490,10 @@ class DesktopTilingWindowDecoration(
         }
     }
 
+    // Only called if [taskInfo] relates to a focused task
     private fun isTilingRefocused(taskInfo: RunningTaskInfo): Boolean {
-        return !isTilingFocused &&
-            taskInfo.isFocused &&
-            (taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
-                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId)
+        return taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
+                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId
     }
 
     private fun buildTiledTasksMoveToFront(leftOnTop: Boolean): WindowContainerTransaction {
@@ -573,8 +578,18 @@ class DesktopTilingWindowDecoration(
         removeTaskIfTiled(taskId, taskVanished = true, shouldDelayUpdate = true)
     }
 
-    fun moveTiledPairToFront(taskInfo: RunningTaskInfo): Boolean {
+    /**
+     * Moves the tiled pair to the front of the task stack, if the [taskInfo] is focused and one of
+     * the two tiled tasks.
+     *
+     * If specified, [isTaskFocused] will override [RunningTaskInfo.isFocused]. This is to be used
+     * when called when the task will be focused, but the [taskInfo] hasn't been updated yet.
+     */
+    fun moveTiledPairToFront(taskInfo: RunningTaskInfo, isTaskFocused: Boolean? = null): Boolean {
         if (!isTilingManagerInitialised) return false
+
+        val isFocused = isTaskFocused ?: taskInfo.isFocused
+        if (!isFocused) return false
 
         // If a task that isn't tiled is being focused, let the generic handler do the work.
         if (isTilingFocusRemoved(taskInfo)) {

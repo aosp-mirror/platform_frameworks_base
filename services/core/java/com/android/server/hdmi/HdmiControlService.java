@@ -725,6 +725,13 @@ public class HdmiControlService extends SystemService {
         }
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         setProhibitMode(false);
+        if (isTvDevice() && getWasCecDisabledOnStandbyByLowEnergyMode()) {
+            Slog.w(TAG, "Re-enable CEC on boot-up since it was disabled due to low energy "
+                    + " mode.");
+            mHdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                    HDMI_CEC_CONTROL_ENABLED);
+            setWasCecDisabledOnStandbyByLowEnergyMode(false);
+        }
         mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
 
@@ -4019,7 +4026,8 @@ public class HdmiControlService extends SystemService {
                     return;
                 }
                 if (isTvDevice() && getDisableCecOnStandbyByLowEnergyMode()
-                        && mPowerManager.isLowPowerStandbyEnabled()) {
+                        && mPowerManager.isLowPowerStandbyEnabled()
+                        && !userEnabledCecInOfflineMode()) {
                     Slog.w(TAG, "Disable CEC on standby due to low power energy mode.");
                     setWasCecDisabledOnStandbyByLowEnergyMode(true);
                     getHdmiCecConfig().setIntValue(
@@ -5216,5 +5224,15 @@ public class HdmiControlService extends SystemService {
         writeStringSystemProperty(
                 Constants.PROPERTY_WAS_CEC_DISABLED_ON_STANDBY_BY_LOW_ENERGY_MODE,
                 String.valueOf(value));
+    }
+
+    /**
+     * Reads the property that checks if CEC was enabled by the user while in offline mode such that
+     * it won't be disabled when going to sleep by low energy mode.
+     */
+    @VisibleForTesting
+    protected boolean userEnabledCecInOfflineMode() {
+        return SystemProperties.getBoolean(
+                Constants.PROPERTY_USER_ACTION_KEEP_CEC_ENABLED_IN_OFFLINE_MODE, false);
     }
 }

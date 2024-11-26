@@ -72,9 +72,13 @@ class MultiPointerDraggableTest {
             return delta
         }
 
-        override fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float> {
+        override suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float {
             onStop.invoke(velocity)
-            return { velocity }
+            return velocity
+        }
+
+        override fun onCancel(canChangeContent: Boolean) {
+            error("MultiPointerDraggable never calls onCancel()")
         }
     }
 
@@ -593,7 +597,7 @@ class MultiPointerDraggableTest {
             }
         }
 
-        fun continueDraggingDown() {
+        fun dragDown() {
             rule.onRoot().performTouchInput { moveBy(Offset(0f, touchSlop)) }
         }
 
@@ -603,11 +607,78 @@ class MultiPointerDraggableTest {
         assertThat(started).isFalse()
 
         swipeConsume = true
-        continueDraggingDown()
+        // Drag in same direction
+        dragDown()
         assertThat(capturedChange).isNotNull()
         capturedChange = null
 
-        continueDraggingDown()
+        dragDown()
+        assertThat(capturedChange).isNull()
+
+        assertThat(started).isTrue()
+    }
+
+    @Test
+    fun multiPointerSwipeDetectorInteractionZeroOffsetFromStartPosition() {
+        val size = 200f
+        val middle = Offset(size / 2f, size / 2f)
+
+        var started = false
+
+        var capturedChange: PointerInputChange? = null
+        var swipeConsume = false
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            Box(
+                Modifier.size(with(LocalDensity.current) { Size(size, size).toDpSize() })
+                    .nestedScrollDispatcher()
+                    .multiPointerDraggable(
+                        orientation = Orientation.Vertical,
+                        startDragImmediately = { false },
+                        swipeDetector =
+                            object : SwipeDetector {
+                                override fun detectSwipe(change: PointerInputChange): Boolean {
+                                    capturedChange = change
+                                    return swipeConsume
+                                }
+                            },
+                        onDragStarted = { _, _ ->
+                            started = true
+                            SimpleDragController(
+                                onDrag = { /* do nothing */ },
+                                onStop = { /* do nothing */ },
+                            )
+                        },
+                        dispatcher = defaultDispatcher,
+                    )
+            ) {}
+        }
+
+        fun startDraggingDown() {
+            rule.onRoot().performTouchInput {
+                down(middle)
+                moveBy(Offset(0f, touchSlop))
+            }
+        }
+
+        fun dragUp() {
+            rule.onRoot().performTouchInput { moveBy(Offset(0f, -touchSlop)) }
+        }
+
+        startDraggingDown()
+        assertThat(capturedChange).isNotNull()
+        capturedChange = null
+        assertThat(started).isFalse()
+
+        swipeConsume = true
+        // Drag in the opposite direction
+        dragUp()
+        assertThat(capturedChange).isNotNull()
+        capturedChange = null
+
+        dragUp()
         assertThat(capturedChange).isNull()
 
         assertThat(started).isTrue()

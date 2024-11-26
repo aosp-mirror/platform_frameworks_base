@@ -18,20 +18,30 @@ package com.android.server.vibrator;
 
 import android.hardware.vibrator.IVibrator;
 import android.os.VibratorInfo;
+import android.os.vibrator.BasicPwleSegment;
 import android.os.vibrator.PwleSegment;
 import android.os.vibrator.VibrationEffectSegment;
 
 import java.util.List;
 
 /**
- * Validates Pwle segments to ensure they are compatible with the device's capabilities
- * and adhere to frequency constraints.
+ * Validates {@link PwleSegment} and {@link BasicPwleSegment} instances to ensure they are
+ * compatible with the device's capabilities.
  *
- * <p>The validator verifies that each segment's start and end frequencies fall within
- * the supported range.
- *
- * <p>The segments will be considered invalid of the device does not have
- * {@link IVibrator#CAP_COMPOSE_PWLE_EFFECTS_V2}.
+ * <p>This validator performs the following checks:
+ * <ul>
+ *   <li>For {@link PwleSegment}:
+ *     <ul>
+ *       <li>Verifies that the device supports {@link IVibrator#CAP_COMPOSE_PWLE_EFFECTS_V2}.
+ *       <li>Verifies that each segment's start and end frequencies fall within the supported range.
+ *     </ul>
+ *   </li>
+ *   <li>For {@link BasicPwleSegment}:
+ *     <ul>
+ *       <li>Verifies that the device supports {@link IVibrator#CAP_COMPOSE_PWLE_EFFECTS_V2}.
+ *     </ul>
+ *   </li>
+ * </ul>
  */
 final class PwleSegmentsValidator implements VibrationSegmentsValidator {
 
@@ -43,15 +53,16 @@ final class PwleSegmentsValidator implements VibrationSegmentsValidator {
         float maxFrequency = info.getFrequencyProfile().getMaxFrequencyHz();
 
         for (VibrationEffectSegment segment : segments) {
-            if (!(segment instanceof PwleSegment pwleSegment)) {
-                continue;
-            }
-
-            if (!hasPwleCapability || pwleSegment.getStartFrequencyHz() < minFrequency
-                    || pwleSegment.getStartFrequencyHz() > maxFrequency
-                    || pwleSegment.getEndFrequencyHz() < minFrequency
-                    || pwleSegment.getEndFrequencyHz() > maxFrequency) {
+            if (segment instanceof BasicPwleSegment && !hasPwleCapability) {
                 return false;
+            }
+            if (segment instanceof PwleSegment pwleSegment) {
+                if (!hasPwleCapability || pwleSegment.getStartFrequencyHz() < minFrequency
+                        || pwleSegment.getStartFrequencyHz() > maxFrequency
+                        || pwleSegment.getEndFrequencyHz() < minFrequency
+                        || pwleSegment.getEndFrequencyHz() > maxFrequency) {
+                    return false;
+                }
             }
         }
 

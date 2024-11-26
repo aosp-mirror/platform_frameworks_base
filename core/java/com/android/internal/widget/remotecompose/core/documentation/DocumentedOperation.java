@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.ArrayList;
 
 public class DocumentedOperation {
@@ -32,20 +35,21 @@ public class DocumentedOperation {
     public static final int FLOAT_ARRAY = 10;
     public static final int INT_ARRAY = 11;
 
-    String mCategory;
+    @NonNull final String mCategory;
     int mId;
-    String mName;
-    String mDescription;
+    @NonNull final String mName;
+    @NonNull String mDescription = "";
 
     boolean mWIP;
-    String mTextExamples;
+    @Nullable String mTextExamples;
 
-    ArrayList<StringPair> mExamples = new ArrayList<>();
-    ArrayList<OperationField> mFields = new ArrayList<>();
-    String mVarSize = "";
+    @NonNull ArrayList<StringPair> mExamples = new ArrayList<>();
+    @NonNull ArrayList<OperationField> mFields = new ArrayList<>();
+    @NonNull String mVarSize = "";
     int mExamplesWidth = 100;
     int mExamplesHeight = 100;
 
+    @NonNull
     public static String getType(int type) {
         switch (type) {
             case INT:
@@ -74,22 +78,24 @@ public class DocumentedOperation {
         return "UNKNOWN";
     }
 
-    public DocumentedOperation(String category, int id, String name, boolean wip) {
+    public DocumentedOperation(
+            @NonNull String category, int id, @NonNull String name, boolean wip) {
         mCategory = category;
         mId = id;
         mName = name;
         mWIP = wip;
     }
 
-    public DocumentedOperation(String category, int id, String name) {
+    public DocumentedOperation(@NonNull String category, int id, @NonNull String name) {
         this(category, id, name, false);
     }
 
+    @NonNull
     public ArrayList<OperationField> getFields() {
         return mFields;
     }
 
-    public String getCategory() {
+    public @NonNull String getCategory() {
         return mCategory;
     }
 
@@ -97,6 +103,7 @@ public class DocumentedOperation {
         return mId;
     }
 
+    @NonNull
     public String getName() {
         return mName;
     }
@@ -105,6 +112,7 @@ public class DocumentedOperation {
         return mWIP;
     }
 
+    @NonNull
     public String getVarSize() {
         return mVarSize;
     }
@@ -121,14 +129,17 @@ public class DocumentedOperation {
         return size;
     }
 
+    @Nullable
     public String getDescription() {
         return mDescription;
     }
 
+    @Nullable
     public String getTextExamples() {
         return mTextExamples;
     }
 
+    @NonNull
     public ArrayList<StringPair> getExamples() {
         return mExamples;
     }
@@ -141,38 +152,46 @@ public class DocumentedOperation {
         return mExamplesHeight;
     }
 
-    public DocumentedOperation field(int type, String name, String description) {
+    @NonNull
+    public DocumentedOperation field(int type, @NonNull String name, @NonNull String description) {
         mFields.add(new OperationField(type, name, description));
         return this;
     }
 
-    public DocumentedOperation field(int type, String name, String varSize, String description) {
+    @NonNull
+    public DocumentedOperation field(
+            int type, @NonNull String name, @NonNull String varSize, @NonNull String description) {
         mFields.add(new OperationField(type, name, varSize, description));
         return this;
     }
 
-    public DocumentedOperation possibleValues(String name, int value) {
+    @NonNull
+    public DocumentedOperation possibleValues(@NonNull String name, int value) {
         if (!mFields.isEmpty()) {
             mFields.get(mFields.size() - 1).possibleValue(name, "" + value);
         }
         return this;
     }
 
-    public DocumentedOperation description(String description) {
+    @NonNull
+    public DocumentedOperation description(@NonNull String description) {
         mDescription = description;
         return this;
     }
 
-    public DocumentedOperation examples(String examples) {
+    @NonNull
+    public DocumentedOperation examples(@NonNull String examples) {
         mTextExamples = examples;
         return this;
     }
 
-    public DocumentedOperation exampleImage(String name, String imagePath) {
+    @NonNull
+    public DocumentedOperation exampleImage(@NonNull String name, @NonNull String imagePath) {
         mExamples.add(new StringPair(name, imagePath));
         return this;
     }
 
+    @NonNull
     public DocumentedOperation examplesDimension(int width, int height) {
         mExamplesWidth = width;
         mExamplesHeight = height;

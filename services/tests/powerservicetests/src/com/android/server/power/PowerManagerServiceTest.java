@@ -2705,12 +2705,11 @@ public class PowerManagerServiceTest {
         verify(mInvalidateInteractiveCachesMock).call();
 
         listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
-        verify(mInvalidateInteractiveCachesMock, times(2)).call();
 
         mService.setWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP, WAKEFULNESS_ASLEEP,
                 mClock.now(), 0, PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
 
-        verify(mInvalidateInteractiveCachesMock, times(3)).call();
+        verify(mInvalidateInteractiveCachesMock, times(2)).call();
     }
 
     @Test
@@ -2732,12 +2731,11 @@ public class PowerManagerServiceTest {
         verify(mInvalidateInteractiveCachesMock).call();
 
         listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
-        verify(mInvalidateInteractiveCachesMock, times(2)).call();
 
         mService.setWakefulnessLocked(nonDefaultDisplayGroupId, WAKEFULNESS_ASLEEP, mClock.now(),
                 0, PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
 
-        verify(mInvalidateInteractiveCachesMock, times(3)).call();
+        verify(mInvalidateInteractiveCachesMock, times(2)).call();
     }
 
     @Test

@@ -19,9 +19,14 @@ package com.android.settingslib.service
 import android.app.Application
 import com.android.settingslib.graph.GetPreferenceGraphApiHandler
 import com.android.settingslib.graph.GetPreferenceGraphRequest
+import com.android.settingslib.ipc.ApiPermissionChecker
+import com.android.settingslib.preference.PreferenceScreenProvider
 
 /** Api to get preference graph. */
-internal class PreferenceGraphApi : GetPreferenceGraphApiHandler() {
+internal class PreferenceGraphApi(
+    preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>>,
+    private val permissionChecker: ApiPermissionChecker<GetPreferenceGraphRequest>,
+) : GetPreferenceGraphApiHandler(preferenceScreenProviders) {
 
     override val id: Int
         get() = API_GET_PREFERENCE_GRAPH
@@ -31,5 +36,5 @@ internal class PreferenceGraphApi : GetPreferenceGraphApiHandler() {
         myUid: Int,
         callingUid: Int,
         request: GetPreferenceGraphRequest,
-    ) = true
+    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
 }

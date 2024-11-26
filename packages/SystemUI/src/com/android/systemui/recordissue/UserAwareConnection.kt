@@ -69,7 +69,11 @@ open class UserAwareConnection(
     @WorkerThread
     fun doUnBind() {
         if (shouldUnBind) {
-            userContextProvider.userContext.unbindService(this)
+            try {
+                userContextProvider.userContext.unbindService(this)
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Can't disconnect because service wasn't connected anyways.", e)
+            }
             shouldUnBind = false
         }
     }

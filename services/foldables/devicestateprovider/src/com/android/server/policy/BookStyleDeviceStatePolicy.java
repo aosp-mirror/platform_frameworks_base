@@ -19,6 +19,7 @@ package com.android.server.policy;
 import static android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
@@ -71,6 +72,7 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
     private static final int DEVICE_STATE_OPENED = 2;
     private static final int DEVICE_STATE_REAR_DISPLAY = 3;
     private static final int DEVICE_STATE_CONCURRENT_INNER_DEFAULT = 4;
+    private static final int DEVICE_STATE_REAR_DISPLAY_OUTER_DEFAULT = 5;
     private static final int TENT_MODE_SWITCH_ANGLE_DEGREES = 90;
     private static final int TABLE_TOP_MODE_SWITCH_ANGLE_DEGREES = 125;
     private static final int MIN_CLOSED_ANGLE_DEGREES = 0;
@@ -130,14 +132,17 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
                             return hingeAngle >= MAX_CLOSED_ANGLE_DEGREES
                                     && hingeAngle <= TABLE_TOP_MODE_SWITCH_ANGLE_DEGREES;
                         }),
-                createConfig(getOpenedDeviceState(), /* activeStatePredicate= */
-                        ALLOWED),
-                createConfig(getRearDisplayDeviceState(), /* activeStatePredicate= */
-                        NOT_ALLOWED),
-                createConfig(getDualDisplayDeviceState(), /* activeStatePredicate= */
-                        NOT_ALLOWED, /* availabilityPredicate= */
-                        provider -> !mIsDualDisplayBlockingEnabled
-                                || provider.hasNoConnectedExternalDisplay())};
+                createConfig(getOpenedDeviceState(),
+                        /* activeStatePredicate= */ ALLOWED),
+                createConfig(getRearDisplayDeviceState(),
+                        /* activeStatePredicate= */ NOT_ALLOWED),
+                createConfig(getDualDisplayDeviceState(),
+                        /* activeStatePredicate= */ NOT_ALLOWED,
+                        /* availabilityPredicate= */ provider -> !mIsDualDisplayBlockingEnabled
+                                || provider.hasNoConnectedExternalDisplay()),
+                createConfig(getRearDisplayOuterDefaultState(),
+                        /* activeStatePredicate= */ NOT_ALLOWED)
+        };
     }
 
     private DeviceStatePredicateWrapper createClosedConfiguration(
@@ -263,6 +268,26 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
 
         return new DeviceState(new DeviceState.Configuration.Builder(
                 DEVICE_STATE_CONCURRENT_INNER_DEFAULT, "CONCURRENT_INNER_DEFAULT")
+                .setSystemProperties(systemProperties)
+                .build());
+    }
+
+    /**
+     * Returns the {link DeviceState.Configuration} that represents the new rear display state
+     * where the inner display is also enabled, showing a system affordance to exit the state.
+     */
+    @NonNull
+    private DeviceState getRearDisplayOuterDefaultState() {
+        Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties = new HashSet<>(
+                List.of(PROPERTY_EMULATED_ONLY,
+                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                        PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST,
+                        PROPERTY_FEATURE_REAR_DISPLAY,
+                        PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT));
+
+        return new DeviceState(new DeviceState.Configuration.Builder(
+                DEVICE_STATE_REAR_DISPLAY_OUTER_DEFAULT,
+                "REAR_DISPLAY_OUTER_DEFAULT")
                 .setSystemProperties(systemProperties)
                 .build());
     }

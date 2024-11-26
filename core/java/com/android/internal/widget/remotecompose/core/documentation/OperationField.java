@@ -15,23 +15,27 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.ArrayList;
 
 public class OperationField {
-    int mType;
-    String mName;
-    String mDescription;
-    String mVarSize = null;
+    final int mType;
+    @NonNull final String mName;
+    @NonNull final String mDescription;
+    @Nullable String mVarSize = null;
 
-    ArrayList<StringPair> mPossibleValues = new ArrayList<>();
+    @NonNull ArrayList<StringPair> mPossibleValues = new ArrayList<>();
 
-    public OperationField(int type, String name, String description) {
+    public OperationField(int type, @NonNull String name, @NonNull String description) {
         mType = type;
         mName = name;
         mDescription = description;
     }
 
-    public OperationField(int type, String name, String varSize, String description) {
+    public OperationField(
+            int type, @NonNull String name, @Nullable String varSize, @NonNull String description) {
         mType = type;
         mName = name;
         mDescription = description;
@@ -42,19 +46,22 @@ public class OperationField {
         return mType;
     }
 
+    @NonNull
     public String getName() {
         return mName;
     }
 
+    @NonNull
     public String getDescription() {
         return mDescription;
     }
 
+    @NonNull
     public ArrayList<StringPair> getPossibleValues() {
         return mPossibleValues;
     }
 
-    public void possibleValue(String name, String value) {
+    public void possibleValue(@NonNull String name, @NonNull String value) {
         mPossibleValues.add(new StringPair(name, value));
     }
 
@@ -62,6 +69,7 @@ public class OperationField {
         return !mPossibleValues.isEmpty();
     }
 
+    @Nullable
     public String getVarSize() {
         return mVarSize;
     }

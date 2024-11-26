@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_OPEN
 import android.window.DesktopModeFlags
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
@@ -52,6 +53,7 @@ class DesktopMixedTransitionHandler(
     private val freeformTaskTransitionHandler: FreeformTaskTransitionHandler,
     private val closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler,
     private val desktopImmersiveController: DesktopImmersiveController,
+    private val desktopBackNavigationTransitionHandler: DesktopBackNavigationTransitionHandler,
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
     shellInit: ShellInit,
@@ -94,7 +96,7 @@ class DesktopMixedTransitionHandler(
     fun startLaunchTransition(
         @WindowManager.TransitionType transitionType: Int,
         wct: WindowContainerTransaction,
-        taskId: Int,
+        taskId: Int?,
         minimizingTaskId: Int? = null,
         exitingImmersiveTask: Int? = null,
     ): IBinder {
@@ -161,6 +163,14 @@ class DesktopMixedTransitionHandler(
                 finishTransaction,
                 finishCallback
             )
+            is PendingMixedTransition.Minimize -> animateMinimizeTransition(
+                pending,
+                transition,
+                info,
+                startTransaction,
+                finishTransaction,
+                finishCallback
+            )
         }
     }
 
@@ -205,17 +215,19 @@ class DesktopMixedTransitionHandler(
         finishTransaction: SurfaceControl.Transaction,
         finishCallback: TransitionFinishCallback,
     ): Boolean {
-        val launchChange = findDesktopTaskChange(info, pending.launchingTask)
-        if (launchChange == null) {
-            logV("No launch Change, returning")
-            return false
-        }
         // Check if there's also an immersive change during this launch.
         val immersiveExitChange = pending.exitingImmersiveTask?.let { exitingTask ->
-            findDesktopTaskChange(info, exitingTask)
+            findTaskChange(info, exitingTask)
         }
         val minimizeChange = pending.minimizingTask?.let { minimizingTask ->
-            findDesktopTaskChange(info, minimizingTask)
+            findTaskChange(info, minimizingTask)
+        }
+        val launchChange = findDesktopTaskLaunchChange(info, pending.launchingTask)
+        if (launchChange == null) {
+            check(minimizeChange == null)
+            check(immersiveExitChange == null)
+            logV("No launch Change, returning")
+            return false
         }
 
         var subAnimationCount = -1
@@ -267,6 +279,42 @@ class DesktopMixedTransitionHandler(
             startTransaction,
             finishTransaction,
             finishCb
+        )
+    }
+
+    private fun animateMinimizeTransition(
+        pending: PendingMixedTransition.Minimize,
+        transition: IBinder,
+        info: TransitionInfo,
+        startTransaction: SurfaceControl.Transaction,
+        finishTransaction: SurfaceControl.Transaction,
+        finishCallback: TransitionFinishCallback,
+    ): Boolean {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue) return false
+
+        val minimizeChange = findTaskChange(info, pending.minimizingTask)
+        if (minimizeChange == null) {
+            logW("Should have minimizing desktop task")
+            return false
+        }
+        if (pending.isLastTask) {
+            // Dispatch close desktop task animation to the default transition handlers.
+            return dispatchToLeftoverHandler(
+                transition,
+                info,
+                startTransaction,
+                finishTransaction,
+                finishCallback
+            )
+        }
+
+        // Animate minimizing desktop task transition with [DesktopBackNavigationTransitionHandler].
+        return desktopBackNavigationTransitionHandler.startAnimation(
+            transition,
+            info,
+            startTransaction,
+            finishTransaction,
+            finishCallback,
         )
     }
 
@@ -370,8 +418,24 @@ class DesktopMixedTransitionHandler(
         }
     }
 
-    private fun findDesktopTaskChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? {
-        return info.changes.firstOrNull { change -> change.taskInfo?.taskId == taskId }
+    private fun findTaskChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? =
+        info.changes.firstOrNull { change -> change.taskInfo?.taskId == taskId }
+
+    private fun findDesktopTaskLaunchChange(
+        info: TransitionInfo,
+        launchTaskId: Int?
+    ): TransitionInfo.Change? {
+        return if (launchTaskId != null) {
+            // Launching a known task (probably from background or moving to front), so
+            // specifically look for it.
+            findTaskChange(info, launchTaskId)
+        } else {
+            // Launching a new task, so the first opening freeform task.
+            info.changes.firstOrNull { change ->
+                change.mode == TRANSIT_OPEN
+                        && change.taskInfo != null && change.taskInfo!!.isFreeform
+            }
+        }
     }
 
     private fun WindowContainerTransaction?.merge(
@@ -394,9 +458,17 @@ class DesktopMixedTransitionHandler(
         /** A task is opening or moving to front. */
         data class Launch(
             override val transition: IBinder,
-            val launchingTask: Int,
+            val launchingTask: Int?,
             val minimizingTask: Int?,
             val exitingImmersiveTask: Int?,
+        ) : PendingMixedTransition()
+
+        /** A task is minimizing. This should be used for task going to back and some closing cases
+         * with back navigation. */
+        data class Minimize(
+            override val transition: IBinder,
+            val minimizingTask: Int,
+            val isLastTask: Boolean,
         ) : PendingMixedTransition()
     }
 

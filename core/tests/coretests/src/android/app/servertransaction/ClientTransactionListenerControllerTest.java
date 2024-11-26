@@ -120,7 +120,8 @@ public class ClientTransactionListenerControllerTest {
         doReturn(newDisplayInfo).when(mIDisplayManager).getDisplayInfo(123);
 
         mDisplayManager.registerDisplayListener(mListener, mHandler,
-                DisplayManager.EVENT_FLAG_DISPLAY_CHANGED, null /* packageName */);
+                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
+                null /* packageName */);
 
         mController.onDisplayChanged(123);
         mHandler.runWithScissors(() -> { }, 0);

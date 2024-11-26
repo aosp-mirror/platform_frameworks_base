@@ -19,16 +19,17 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the size of an element to the size of another element. */
-internal class AnchoredSize(
-    override val matcher: ElementMatcher,
+internal class AnchoredSize
+private constructor(
     private val anchor: ElementKey,
     private val anchorWidth: Boolean,
     private val anchorHeight: Boolean,
-) : PropertyTransformation<IntSize> {
+) : InterpolatedPropertyTransformation<IntSize> {
+    override val property = PropertyTransformation.Property.Size
+
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
@@ -58,5 +59,13 @@ internal class AnchoredSize(
         } else {
             anchorSizeIn(transition.fromContent)
         }
+    }
+
+    class Factory(
+        private val anchor: ElementKey,
+        private val anchorWidth: Boolean,
+        private val anchorHeight: Boolean,
+    ) : Transformation.Factory {
+        override fun create(): Transformation = AnchoredSize(anchor, anchorWidth, anchorHeight)
     }
 }

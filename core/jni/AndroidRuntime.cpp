@@ -77,6 +77,7 @@ extern int register_android_opengl_jni_GLES32(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
 extern int register_android_hardware_camera2_CameraMetadata(JNIEnv *env);
+extern int register_android_hardware_camera2_CameraDevice(JNIEnv *env);
 extern int register_android_hardware_camera2_DngCreator(JNIEnv *env);
 extern int register_android_hardware_camera2_impl_CameraExtensionJpegProcessor(JNIEnv* env);
 extern int register_android_hardware_camera2_utils_SurfaceUtils(JNIEnv* env);
@@ -128,6 +129,7 @@ extern int register_android_view_InputApplicationHandle(JNIEnv* env);
 extern int register_android_view_InputWindowHandle(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
+extern int register_android_view_SurfaceControlActivePictureListener(JNIEnv* env);
 extern int register_android_view_SurfaceControlHdrLayerInfoListener(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_CompositionSamplingListener(JNIEnv* env);
@@ -1563,6 +1565,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_view_DisplayEventReceiver),
         REG_JNI(register_android_view_Surface),
         REG_JNI(register_android_view_SurfaceControl),
+        REG_JNI(register_android_view_SurfaceControlActivePictureListener),
         REG_JNI(register_android_view_SurfaceControlHdrLayerInfoListener),
         REG_JNI(register_android_view_SurfaceSession),
         REG_JNI(register_android_view_InputApplicationHandle),
@@ -1621,6 +1624,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
         REG_JNI(register_android_hardware_Camera),
         REG_JNI(register_android_hardware_camera2_CameraMetadata),
+        REG_JNI(register_android_hardware_camera2_CameraDevice),
         REG_JNI(register_android_hardware_camera2_DngCreator),
         REG_JNI(register_android_hardware_camera2_impl_CameraExtensionJpegProcessor),
         REG_JNI(register_android_hardware_camera2_utils_SurfaceUtils),

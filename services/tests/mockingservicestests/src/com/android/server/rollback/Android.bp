@@ -34,7 +34,10 @@ android_test {
         "services.core",
         "truth",
         "flag-junit",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": ["service-crashrecovery-pre-jarjar"],
+        default: [],
+    }),
 
     libs: [
         "android.test.mock.stubs.system",

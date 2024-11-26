@@ -679,6 +679,11 @@ public class WindowlessWindowManager implements IWindowSession {
             @NonNull ImeTracker.Token statsToken) {
     }
 
+    @Override
+    public void notifyInsetsAnimationRunningStateChanged(IWindow window, boolean running) {
+        // NO-OP
+    }
+
     void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {
         IBinder oldInterface = mParentInterface == null ? null : mParentInterface.asBinder();
         IBinder newInterface = parentInterface == null ? null : parentInterface.asBinder();

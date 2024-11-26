@@ -42,6 +42,7 @@ import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
+import static com.android.aconfig.flags.Flags.enableSystemAconfigdRust;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -139,12 +140,13 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "aaos_audio_triage",
+        "aaos_power_triage",
         "aaos_sdv",
         "accessibility",
         "android_core_networking",
         "android_health_services",
         "android_sdk",
-        "android_stylus",
         "aoc",
         "app_widgets",
         "arc_next",
@@ -209,6 +211,7 @@ public class SettingsToPropertiesMapper {
         "pixel_continuity",
         "pixel_perf",
         "pixel_sensors",
+        "pixel_state_server",
         "pixel_system_sw_video",
         "pixel_video_sw",
         "pixel_watch",
@@ -220,6 +223,7 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "psap_ai",
         "ravenwood",
         "resource_manager",
         "responsible_apis",
@@ -255,6 +259,7 @@ public class SettingsToPropertiesMapper {
         "wear_systems",
         "wear_sysui",
         "wear_system_managed_surfaces",
+        "wear_watchfaces",
         "window_surfaces",
         "windowing_frontend",
         "xr",
@@ -456,9 +461,11 @@ public class SettingsToPropertiesMapper {
     static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
+        String socketName = enableSystemAconfigdRust()
+                    ? "aconfigd_system" : "aconfigd";
         try{
             client.connect(new LocalSocketAddress(
-                "aconfigd", LocalSocketAddress.Namespace.RESERVED));
+                socketName, LocalSocketAddress.Namespace.RESERVED));
             Slog.d(TAG, "connected to aconfigd socket");
         } catch (IOException ioe) {
             logErr("failed to connect to aconfigd socket", ioe);
@@ -528,9 +535,8 @@ public class SettingsToPropertiesMapper {
      * @param packageName the package of the flag
      * @param flagName the name of the flag
      * @param immediate if true, clear immediately; otherwise, clear on next reboot
-     *
-     * @hide
      */
+    @VisibleForTesting
     public static void writeFlagOverrideRemovalRequest(
         ProtoOutputStream proto, String packageName, String flagName, boolean immediate) {
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
@@ -586,7 +592,8 @@ public class SettingsToPropertiesMapper {
      * apply flag local override in aconfig new storage
      * @param props
      */
-    static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
+    @VisibleForTesting
+    public static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
         int num_requests = 0;
         ProtoOutputStream requests = new ProtoOutputStream();
         for (String flagName : props.getKeyset()) {

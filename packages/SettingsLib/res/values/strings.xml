@@ -821,8 +821,10 @@
 
     <!-- Title of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=32] -->
     <string name="enable_linux_terminal_title">Linux development environment</string>
-    <!-- Summary of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=64] -->
-    <string name="enable_linux_terminal_summary">Run Linux terminal on Android</string>
+    <!-- Summary of checkbox setting that enables the Linux terminal app. [CHAR LIMIT=none] -->
+    <string name="enable_linux_terminal_summary">(Experimental) Run Linux terminal on Android</string>
+    <!-- Disclaimer below the checkbox that disabling the Linux terminal app would clear its data. [CHAR LIMIT=none] -->
+    <string name="disable_linux_terminal_disclaimer">If you disable, Linux terminal data will be cleared</string>
 
     <!-- HDCP checking title, used for debug purposes only. [CHAR LIMIT=25] -->
     <string name="hdcp_checking_title">HDCP checking</string>
@@ -1417,7 +1419,7 @@
     <!-- Name of the internal speaker and mic. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_desktop">This computer (internal)</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
-    <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
+    <string name="media_transfer_this_device_name_tv">This TV</string>
     <!-- Name of the dock device. [CHAR LIMIT=30] -->
     <string name="media_transfer_dock_speaker_device_name">Dock speaker</string>
     <!-- Default name of the external device. [CHAR LIMIT=30] -->
@@ -1426,6 +1428,12 @@
     <string name="media_transfer_default_device_name">Connected device</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
+    <!-- Name of the digital audio output, i.e. S/PDIF, usually optical. [CHAR LIMIT=30] -->
+    <string name="media_transfer_digital_line_name">S/PDIF</string>
+    <!-- Name of the analog audio output. [CHAR LIMIT=30] -->
+    <string name="media_transfer_analog_line_name">Analog</string>
+    <!-- Name of the AUX audio output. [CHAR LIMIT=30] -->
+    <string name="media_transfer_aux_line_name">AUX</string>
     <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->
     <string name="media_output_status_unknown_error">Can\’t play on this device</string>
     <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
@@ -1454,12 +1462,11 @@
     <!-- Media output switcher. Subtitle for devices connected through HDMI EARC if a device name is available. [CHAR LIMIT=NONE] -->
     <string name="tv_media_transfer_earc_subtitle">Connected via eARC</string>
 
-    <!-- TV media output switcher. Title for the default audio output of the device [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_default">TV default</string>
-    <!-- TV media output switcher. Subtitle for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_hdmi">HDMI output</string>
-    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker, i.e. panel VTs [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_internal_speakers">Internal speakers</string>
+    <!-- TV media output switcher. Subtitle for default audio output which is internal speaker [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_internal_speakers">Built-in speaker</string>
+
+    <!-- TV media output switcher. Title for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
+    <string name="tv_media_transfer_hdmi_title">TV Audio</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>

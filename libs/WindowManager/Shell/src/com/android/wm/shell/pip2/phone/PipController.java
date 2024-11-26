@@ -16,11 +16,13 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
@@ -66,6 +68,8 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -94,7 +98,7 @@ public class PipController implements ConfigurationChangeListener,
     private final PipTouchHandler mPipTouchHandler;
     private final ShellExecutor mMainExecutor;
     private final PipImpl mImpl;
-    private Consumer<Boolean> mOnIsInPipStateChangedListener;
+    private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
 
     // Wrapper for making Binder calls into PiP animation listener hosted in launcher's Recents.
     private PipAnimationListener mPipRecentsAnimationListener;
@@ -250,6 +254,7 @@ public class PipController implements ConfigurationChangeListener,
     @Override
     public void onConfigurationChanged(Configuration newConfiguration) {
         mPipDisplayLayoutState.onConfigurationChanged();
+        mPipTouchHandler.onConfigurationChanged();
     }
 
     @Override
@@ -290,6 +295,11 @@ public class PipController implements ConfigurationChangeListener,
 
         // Update the display layout caches even if we are not in PiP.
         setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
+        if (toRotation != ROTATION_UNDEFINED) {
+            // Make sure we rotate to final rotation ourselves in case display change is coming
+            // from the remote rotation as a part of an already collecting transition.
+            mPipDisplayLayoutState.rotateTo(toRotation);
+        }
 
         if (!mPipTransitionState.isInPip()) {
             // Skip the PiP-relevant updates if we aren't in a valid PiP state.
@@ -319,7 +329,7 @@ public class PipController implements ConfigurationChangeListener,
             mPipBoundsAlgorithm.applySnapFraction(toBounds, snapFraction);
             mPipBoundsState.setBounds(toBounds);
         }
-        t.setBounds(mPipTransitionState.mPipTaskToken, mPipBoundsState.getBounds());
+        t.setBounds(mPipTransitionState.getPipTaskToken(), mPipBoundsState.getBounds());
     }
 
     private void setDisplayLayout(DisplayLayout layout) {
@@ -413,13 +423,13 @@ public class PipController implements ConfigurationChangeListener,
                 if (mPipTransitionState.isInSwipePipToHomeTransition()) {
                     mPipTransitionState.resetSwipePipToHomeState();
                 }
-                if (mOnIsInPipStateChangedListener != null) {
-                    mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
+                    listener.accept(true /* inPip */);
                 }
                 break;
             case PipTransitionState.EXITED_PIP:
-                if (mOnIsInPipStateChangedListener != null) {
-                    mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
+                    listener.accept(false /* inPip */);
                 }
                 break;
         }
@@ -451,10 +461,16 @@ public class PipController implements ConfigurationChangeListener,
         mPipTransitionState.dump(pw, innerPrefix);
     }
 
-    private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
-        mOnIsInPipStateChangedListener = callback;
-        if (mOnIsInPipStateChangedListener != null) {
+    private void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.add(callback);
             callback.accept(mPipTransitionState.isInPip());
+        }
+    }
+
+    private void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.remove(callback);
         }
     }
 
@@ -473,9 +489,16 @@ public class PipController implements ConfigurationChangeListener,
         public void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {}
 
         @Override
-        public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+        public void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
             mMainExecutor.execute(() -> {
-                PipController.this.setOnIsInPipStateChangedListener(callback);
+                PipController.this.addOnIsInPipStateChangedListener(callback);
+            });
+        }
+
+        @Override
+        public void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+            mMainExecutor.execute(() -> {
+                PipController.this.removeOnIsInPipStateChangedListener(callback);
             });
         }
 

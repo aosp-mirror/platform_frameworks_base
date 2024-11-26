@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -29,6 +30,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -134,6 +136,7 @@ public class RemoteCallbackList<E extends IInterface> {
 
     private final @FrozenCalleePolicy int mFrozenCalleePolicy;
     private final int mMaxQueueSize;
+    private final Executor mExecutor;
 
     private final class Interface implements IBinder.DeathRecipient,
             IBinder.FrozenStateChangeCallback {
@@ -194,15 +197,27 @@ public class RemoteCallbackList<E extends IInterface> {
             }
         }
 
-        public void maybeSubscribeToFrozenCallback() throws RemoteException {
+        void maybeSubscribeToFrozenCallback() throws RemoteException {
             if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
-                mBinder.addFrozenStateChangeCallback(this);
+                try {
+                    mBinder.addFrozenStateChangeCallback(mExecutor, this);
+                } catch (UnsupportedOperationException e) {
+                    // The kernel does not support frozen notifications. In this case we want to
+                    // silently fall back to FROZEN_CALLEE_POLICY_UNSET. This is done by simply
+                    // ignoring the error and moving on. mCurrentState would always be
+                    // STATE_UNFROZEN and all callbacks are invoked immediately.
+                }
             }
         }
 
-        public void maybeUnsubscribeFromFrozenCallback() {
+        void maybeUnsubscribeFromFrozenCallback() {
             if (mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
-                mBinder.removeFrozenStateChangeCallback(this);
+                try {
+                    mBinder.removeFrozenStateChangeCallback(this);
+                } catch (UnsupportedOperationException | IllegalArgumentException e) {
+                    // The kernel does not support frozen notifications. Ignore the error and move
+                    // on.
+                }
             }
         }
 
@@ -225,6 +240,7 @@ public class RemoteCallbackList<E extends IInterface> {
         private @FrozenCalleePolicy int mFrozenCalleePolicy;
         private int mMaxQueueSize = DEFAULT_MAX_QUEUE_SIZE;
         private InterfaceDiedCallback mInterfaceDiedCallback;
+        private Executor mExecutor;
 
         /**
          * Creates a Builder for {@link RemoteCallbackList}.
@@ -273,6 +289,18 @@ public class RemoteCallbackList<E extends IInterface> {
         }
 
         /**
+         * Sets the executor to be used when invoking callbacks asynchronously.
+         *
+         * This is only used when callbacks need to be invoked asynchronously, e.g. when the process
+         * hosting a callback becomes unfrozen. Callbacks that can be invoked immediately run on the
+         * same thread that calls {@link #broadcast} synchronously.
+         */
+        public @NonNull Builder setExecutor(@NonNull @CallbackExecutor Executor executor) {
+            mExecutor = executor;
+            return this;
+        }
+
+        /**
          * For notifying when the process hosting a callback interface has died.
          *
          * @param <E> The remote callback interface type.
@@ -296,15 +324,21 @@ public class RemoteCallbackList<E extends IInterface> {
          * @return The built {@link RemoteCallbackList} object.
          */
         public @NonNull RemoteCallbackList<E> build() {
+            Executor executor = mExecutor;
+            if (executor == null && mFrozenCalleePolicy != FROZEN_CALLEE_POLICY_UNSET) {
+                // TODO Throw an exception here once the existing API caller is updated to provide
+                // an executor.
+                executor = new HandlerExecutor(Handler.getMain());
+            }
             if (mInterfaceDiedCallback != null) {
-                return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize) {
+                return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize, executor) {
                     @Override
                     public void onCallbackDied(E deadInterface, Object cookie) {
                         mInterfaceDiedCallback.onInterfaceDied(this, deadInterface, cookie);
                     }
                 };
             }
-            return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize);
+            return new RemoteCallbackList<E>(mFrozenCalleePolicy, mMaxQueueSize, executor);
         }
     }
 
@@ -329,13 +363,23 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
+     * Returns the executor used when invoking callbacks asynchronously.
+     *
+     * @return The executor.
+     */
+    @FlaggedApi(Flags.FLAG_BINDER_FROZEN_STATE_CHANGE_CALLBACK)
+    public @Nullable Executor getExecutor() {
+        return mExecutor;
+    }
+
+    /**
      * Creates a RemoteCallbackList with {@link #FROZEN_CALLEE_POLICY_UNSET}. This is equivalent to
      * <pre>
      * new RemoteCallbackList.Build(RemoteCallbackList.FROZEN_CALLEE_POLICY_UNSET).build()
      * </pre>
      */
     public RemoteCallbackList() {
-        this(FROZEN_CALLEE_POLICY_UNSET, DEFAULT_MAX_QUEUE_SIZE);
+        this(FROZEN_CALLEE_POLICY_UNSET, DEFAULT_MAX_QUEUE_SIZE, null);
     }
 
     /**
@@ -350,10 +394,14 @@ public class RemoteCallbackList<E extends IInterface> {
      * recipient's process is frozen. Once the limit is reached, the oldest callbacks would be
      * dropped to keep the size under limit. Ignored except for
      * {@link #FROZEN_CALLEE_POLICY_ENQUEUE_ALL}.
+     *
+     * @param executor The executor used when invoking callbacks asynchronously.
      */
-    private RemoteCallbackList(@FrozenCalleePolicy int frozenCalleePolicy, int maxQueueSize) {
+    private RemoteCallbackList(@FrozenCalleePolicy int frozenCalleePolicy, int maxQueueSize,
+            @CallbackExecutor Executor executor) {
         mFrozenCalleePolicy = frozenCalleePolicy;
         mMaxQueueSize = maxQueueSize;
+        mExecutor = executor;
     }
 
     /**

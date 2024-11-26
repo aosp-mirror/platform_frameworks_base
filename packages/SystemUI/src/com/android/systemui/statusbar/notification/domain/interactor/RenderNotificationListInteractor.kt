@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.provider.SectionSt
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProvider
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
@@ -151,6 +152,13 @@ private class ActiveNotificationsStoreBuilder(
             } else {
                 null
             }
+        val promotedContent =
+            if (PromotedNotificationContentModel.featureFlagEnabled()) {
+                promotedNotificationContentModel
+            } else {
+                null
+            }
+
         return existingModels.createOrReuse(
             key = key,
             groupKey = sbn.groupKey,
@@ -173,6 +181,7 @@ private class ActiveNotificationsStoreBuilder(
             isGroupSummary = sbn.notification.isGroupSummary,
             bucket = bucket,
             callType = sbn.toCallType(),
+            promotedContent = promotedContent,
         )
     }
 }
@@ -199,6 +208,7 @@ private fun ActiveNotificationsStore.createOrReuse(
     isGroupSummary: Boolean,
     bucket: Int,
     callType: CallType,
+    promotedContent: PromotedNotificationContentModel?,
 ): ActiveNotificationModel {
     return individuals[key]?.takeIf {
         it.isCurrent(
@@ -223,6 +233,7 @@ private fun ActiveNotificationsStore.createOrReuse(
             contentIntent = contentIntent,
             bucket = bucket,
             callType = callType,
+            promotedContent = promotedContent,
         )
     }
         ?: ActiveNotificationModel(
@@ -247,6 +258,7 @@ private fun ActiveNotificationsStore.createOrReuse(
             contentIntent = contentIntent,
             bucket = bucket,
             callType = callType,
+            promotedContent = promotedContent,
         )
 }
 
@@ -272,6 +284,7 @@ private fun ActiveNotificationModel.isCurrent(
     isGroupSummary: Boolean,
     bucket: Int,
     callType: CallType,
+    promotedContent: PromotedNotificationContentModel?,
 ): Boolean {
     return when {
         key != this.key -> false
@@ -295,6 +308,9 @@ private fun ActiveNotificationModel.isCurrent(
         contentIntent != this.contentIntent -> false
         bucket != this.bucket -> false
         callType != this.callType -> false
+        // QQQ: Do we need to do the same `isCurrent` thing within the content model to avoid
+        // recreating the active notification model constantly?
+        promotedContent != this.promotedContent -> false
         else -> true
     }
 }

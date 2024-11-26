@@ -16,6 +16,10 @@
 
 package android.media.quality;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
+import android.graphics.PixelFormat;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,9 +28,13 @@ import androidx.annotation.NonNull;
 import java.util.Arrays;
 
 /**
- * @hide
+ * Metadata of ambient backlight.
+ *
+ * <p>A metadata instance is sent from ambient backlight hardware in a {@link AmbientBacklightEvent}
+ * with {@link AmbientBacklightEvent#AMBIENT_BACKLIGHT_EVENT_METADATA}.
  */
-public class AmbientBacklightMetadata implements Parcelable {
+@FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
+public final class AmbientBacklightMetadata implements Parcelable {
     @NonNull
     private final String mPackageName;
     private final int mCompressAlgorithm;
@@ -37,8 +45,16 @@ public class AmbientBacklightMetadata implements Parcelable {
     @NonNull
     private final int[] mZonesColors;
 
-    public AmbientBacklightMetadata(@NonNull String packageName, int compressAlgorithm,
-            int source, int colorFormat, int horizontalZonesNumber, int verticalZonesNumber,
+    /**
+     * Constructs AmbientBacklightMetadata.
+     */
+    public AmbientBacklightMetadata(
+            @NonNull String packageName,
+            @AmbientBacklightSettings.CompressAlgorithm int compressAlgorithm,
+            @AmbientBacklightSettings.Source int source,
+            @PixelFormat.Format int colorFormat,
+            int horizontalZonesNumber,
+            int verticalZonesNumber,
             @NonNull int[] zonesColors) {
         mPackageName = packageName;
         mCompressAlgorithm = compressAlgorithm;
@@ -59,31 +75,69 @@ public class AmbientBacklightMetadata implements Parcelable {
         mZonesColors = in.createIntArray();
     }
 
+    /**
+     * Gets package name of the metadata.
+     */
     @NonNull
     public String getPackageName() {
         return mPackageName;
     }
 
+    /**
+     * Gets compress algorithm.
+     */
+    @AmbientBacklightSettings.CompressAlgorithm
     public int getCompressAlgorithm() {
         return mCompressAlgorithm;
     }
 
+    /**
+     * Gets source of ambient backlight detection.
+     */
+    @AmbientBacklightSettings.Source
     public int getSource() {
         return mSource;
     }
 
+    /**
+     * Gets color format.
+     */
+    @PixelFormat.Format
     public int getColorFormat() {
         return mColorFormat;
     }
 
+    /**
+     * Gets the number of horizontal color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
+     */
+    @IntRange(from = 0)
     public int getHorizontalZonesNumber() {
         return mHorizontalZonesNumber;
     }
 
+    /**
+     * Gets the number of vertical color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
+     */
+    @IntRange(from = 0)
     public int getVerticalZonesNumber() {
         return mVerticalZonesNumber;
     }
 
+    /**
+     * Gets color data of all available color zones.
+     *
+     * <p>The format of the color data can be found at {@link #getColorFormat()}.
+     *
+     * @return an array of color data, in row by row (left-to-right then top-to-bottom) order of the
+     * color zones.
+     *
+     * @see #getHorizontalZonesNumber()
+     * @see #getVerticalZonesNumber()
+     */
     @NonNull
     public int[] getZonesColors() {
         return mZonesColors;

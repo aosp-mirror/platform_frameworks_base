@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"មជ្ឈដ្ឋាន​អភិវឌ្ឍន៍ Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"ដំណើរការទែមីណាល់ Linux នៅលើ Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ពិសោធន៍) ដំណើរការទែមីណាល់ Linux នៅលើ Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ប្រសិនបើអ្នកបិទ ទិន្នន័យទែមីណាល់ Linux នឹងត្រូវបានសម្អាត"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"ពិនិត្យ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"កំណត់​ឥរិយាបថ​ពិនិត្យ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ការជួសជុល"</string>
@@ -475,7 +476,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ខ្វាក់ពណ៌ក្រហម (ក្រហម​បៃតង​)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ខ្វាក់ពណ៌ខៀវ (ខៀវ​លឿង​)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ការ​កែតម្រូវ​ពណ៌"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;លុបពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"ការ​កែតម្រូវ​ពណ៌អាចមានប្រយោជន៍ នៅពេលអ្នកចង់៖&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;មើលពណ៌កាន់តែត្រឹមត្រូវ&lt;/li&gt; &lt;li&gt;&amp;nbsp;ដកពណ៌ចេញ ដើម្បីជួយឱ្យអ្នកផ្ដោតអារម្មណ៍&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - កំពុងផ្អាកការសាកថ្ម ដើម្បីការពារថ្ម"</string>
@@ -585,12 +586,15 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ថេប្លេតនេះ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"កុំព្យូទ័រនេះ (ខាងក្នុង)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
+    <!-- no translation found for media_transfer_this_device_name_tv (8508713779441163887) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ឧបាល័រជើងទម្រ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ឧបករណ៍ខាងក្រៅ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"​ឧបករណ៍ដែលបាន​ភ្ជាប់"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ទូរសព្ទនេះ"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"អាណាឡូក"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"មិនអាចចាក់នៅលើ​ឧបករណ៍នេះបានទេ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ដំឡើងកម្រិតគណនី ដើម្បីប្ដូរ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"មិនអាចចាក់ខ្លឹមសារដែលបានទាញយកនៅទីនេះបានទេ"</string>
@@ -603,9 +607,10 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"បានភ្ជាប់តាមរយៈ ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"បានភ្ជាប់តាមរយៈ eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"លំនាំដើម​ទូរទស្សន៍"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"ធាតុចេញ HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ឧបករណ៍បំពងសំឡេងខាងក្នុង"</string>
+    <!-- no translation found for tv_media_transfer_internal_speakers (4662765121700213785) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_hdmi_title (6715658310934507444) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>
     <string name="help_label" msgid="3528360748637781274">"ជំនួយ និងមតិកែលម្អ"</string>

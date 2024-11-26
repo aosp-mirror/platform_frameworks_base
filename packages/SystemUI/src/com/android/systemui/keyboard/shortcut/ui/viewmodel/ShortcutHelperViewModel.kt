@@ -123,7 +123,7 @@ constructor(
                         userContext.packageManager.getApplicationIcon(type.packageName)
                     IconSource(painter = DrawablePainter(drawable = iconDrawable))
                 } catch (e: NameNotFoundException) {
-                    Log.wtf(
+                    Log.w(
                         "ShortcutHelperViewModel",
                         "Package not found when retrieving icon for ${type.packageName}",
                     )
@@ -153,7 +153,7 @@ constructor(
                 packageManagerForUser.getApplicationInfo(type.packageName, /* flags= */ 0)
             return packageManagerForUser.getApplicationLabel(currentAppInfo).toString()
         } catch (e: NameNotFoundException) {
-            Log.wtf(
+            Log.w(
                 "ShortcutHelperViewModel",
                 "Package Not found when retrieving Label for ${type.packageName}",
             )

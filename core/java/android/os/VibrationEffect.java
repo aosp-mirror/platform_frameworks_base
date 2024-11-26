@@ -18,6 +18,7 @@ package android.os;
 
 import static android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -34,6 +35,7 @@ import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
+import android.os.vibrator.BasicPwleSegment;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -41,6 +43,7 @@ import android.os.vibrator.PwleSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorEnvelopeEffectInfo;
 import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.MathUtils;
 
@@ -1483,6 +1486,15 @@ public abstract class VibrationEffect implements Parcelable {
         public @interface PrimitiveType {
         }
 
+        /** @hide */
+        @IntDef(prefix = { "DELAY_TYPE_" }, value = {
+                DELAY_TYPE_PAUSE,
+                DELAY_TYPE_RELATIVE_START_OFFSET,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface DelayType {
+        }
+
         /**
          * Exception thrown when adding an element to a {@link Composition} that already ends in an
          * indefinitely repeating effect.
@@ -1541,6 +1553,53 @@ public abstract class VibrationEffect implements Parcelable {
         // Internally this maps to the HAL constant CompositePrimitive::LOW_TICK
         public static final int PRIMITIVE_LOW_TICK = 8;
 
+        /**
+         * The delay represents a pause in the composition between the end of the previous primitive
+         * and the beginning of the next one.
+         *
+         * <p>The primitive will start after the requested pause after the last primitive ended.
+         * The actual time the primitive will be played depends on the previous primitive's actual
+         * duration on the device hardware. This enables the combination of primitives to create
+         * more complex effects based on how close to each other they'll play. Here is an example:
+         *
+         * <pre>
+         *     VibrationEffect popEffect = VibrationEffect.startComposition()
+         *         .addPrimitive(PRIMITIVE_QUICK_RISE)
+         *         .addPrimitive(PRIMITIVE_CLICK, 0.7, 50, DELAY_TYPE_PAUSE)
+         *         .compose()
+         * </pre>
+         */
+        @FlaggedApi(Flags.FLAG_PRIMITIVE_COMPOSITION_ABSOLUTE_DELAY)
+        public static final int DELAY_TYPE_PAUSE = 0;
+
+        /**
+         * The delay represents an offset before starting this primitive, relative to the start
+         * time of the previous primitive in the composition.
+         *
+         * <p>The primitive will start at the requested fixed time after the last primitive started,
+         * independently of that primitive's actual duration on the device hardware. This enables
+         * precise timings of primitives within a composition, ensuring they'll be played at the
+         * desired intervals. Here is an example:
+         *
+         * <pre>
+         *     VibrationEffect.startComposition()
+         *         .addPrimitive(PRIMITIVE_CLICK, 1.0)
+         *         .addPrimitive(PRIMITIVE_TICK, 1.0, 20, DELAY_TYPE_RELATIVE_START_OFFSET)
+         *         .addPrimitive(PRIMITIVE_THUD, 1.0, 80, DELAY_TYPE_RELATIVE_START_OFFSET)
+         *         .compose()
+         * </pre>
+         *
+         * Will be performed on the device as follows:
+         *
+         * <pre>
+         *  0ms               20ms                     100ms
+         *  PRIMITIVE_CLICK---PRIMITIVE_TICK-----------PRIMITIVE_THUD
+         * </pre>
+         *
+         * <p>A primitive will be dropped from the composition if it overlaps with previous ones.
+         */
+        @FlaggedApi(Flags.FLAG_PRIMITIVE_COMPOSITION_ABSOLUTE_DELAY)
+        public static final int DELAY_TYPE_RELATIVE_START_OFFSET = 1;
 
         private final ArrayList<VibrationEffectSegment> mSegments = new ArrayList<>();
         private int mRepeatIndex = -1;
@@ -1656,16 +1715,38 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Add a haptic primitive to the end of the current composition.
          *
+         * <p>Similar to {@link #addPrimitive(int, float, int, int)}, but default
+         * delay type applied is {@link #DELAY_TYPE_PAUSE}.
+         *
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
-         * @param delay The amount of time in milliseconds to wait before playing this primitive,
-         *              starting at the time the previous element in this composition is finished.
+         * @param delay The amount of time in milliseconds to wait between the end of the last
+         *              primitive and the beginning of this one (i.e. a pause in the composition).
          * @return This {@link Composition} object to enable adding multiple elements in one chain.
          */
         @NonNull
         public Composition addPrimitive(@PrimitiveType int primitiveId,
                 @FloatRange(from = 0f, to = 1f) float scale, @IntRange(from = 0) int delay) {
-            PrimitiveSegment primitive = new PrimitiveSegment(primitiveId, scale, delay);
+            return addPrimitive(primitiveId, scale, delay, PrimitiveSegment.DEFAULT_DELAY_TYPE);
+        }
+
+        /**
+         * Add a haptic primitive to the end of the current composition.
+         *
+         * @param primitiveId The primitive to add
+         * @param scale The scale to apply to the intensity of the primitive.
+         * @param delay The amount of time in milliseconds to wait before playing this primitive,
+         *              as defined by the given {@code delayType}.
+         * @param delayType The type of delay to be applied, e.g. a pause between last primitive and
+         *                  this one or a start offset.
+         * @return This {@link Composition} object to enable adding multiple elements in one chain.
+         */
+        @FlaggedApi(Flags.FLAG_PRIMITIVE_COMPOSITION_ABSOLUTE_DELAY)
+        @NonNull
+        public Composition addPrimitive(@PrimitiveType int primitiveId,
+                @FloatRange(from = 0f, to = 1f) float scale, @IntRange(from = 0) int delay,
+                @DelayType int delayType) {
+            PrimitiveSegment primitive = new PrimitiveSegment(primitiveId, scale, delay, delayType);
             primitive.validate();
             return addSegment(primitive);
         }
@@ -1733,52 +1814,20 @@ public abstract class VibrationEffect implements Parcelable {
                 default -> Integer.toString(id);
             };
         }
-    }
 
-    /**
-     * Start building a waveform vibration.
-     *
-     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
-     * allowing control over vibration amplitude and frequency via smooth transitions between
-     * values. The waveform will start the first transition from the vibrator off state, using
-     * the same frequency of the first control point. To provide a different initial vibration
-     * frequency, use {@link #startWaveformEnvelope(float)}.
-     *
-     * <p>Note: To check whether waveform envelope effects are supported, use
-     * {@link Vibrator#areEnvelopeEffectsSupported()}.
-     *
-     * @see VibrationEffect.WaveformEnvelopeBuilder
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    @NonNull
-    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope() {
-        return new WaveformEnvelopeBuilder();
-    }
-
-    /**
-     * Start building a waveform vibration with an initial frequency.
-     *
-     * <p>The waveform envelope builder offers more flexibility for creating waveform effects,
-     * allowing control over vibration amplitude and frequency via smooth transitions between
-     * values.
-     *
-     * <p>This is the same as {@link #startWaveformEnvelope()}, but the waveform will start
-     * vibrating at given frequency, in hertz, while it transitions to the new amplitude and
-     * frequency of the first control point.
-     *
-     * <p>Note: To check whether waveform envelope effects are supported, use
-     * {@link Vibrator#areEnvelopeEffectsSupported()}.
-     *
-     * @param initialFrequencyHz The starting frequency of the vibration, in hertz. Must be greater
-     *                           than zero.
-     *
-     * @see VibrationEffect.WaveformEnvelopeBuilder
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    @NonNull
-    public static VibrationEffect.WaveformEnvelopeBuilder startWaveformEnvelope(
-            @FloatRange(from = 0) float initialFrequencyHz) {
-        return new WaveformEnvelopeBuilder(initialFrequencyHz);
+        /**
+         * Convert the delay type to a human readable string for debugging.
+         * @param type The delay type to convert
+         * @return The delay type in a human readable format.
+         * @hide
+         */
+        public static String delayTypeToString(@DelayType int type) {
+            return switch (type) {
+                case DELAY_TYPE_PAUSE -> "PAUSE";
+                case DELAY_TYPE_RELATIVE_START_OFFSET -> "START_OFFSET";
+                default -> Integer.toString(type);
+            };
+        }
     }
 
     /**
@@ -1792,12 +1841,14 @@ public abstract class VibrationEffect implements Parcelable {
      * 100ms, holds that state for 200ms, and then ramps back down over 100ms:
      *
      * <pre>{@code
-     * VibrationEffect effect = VibrationEffect.startWaveformEnvelope()
+     * VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
      *     .addControlPoint(1.0f, 120f, 100)
      *     .addControlPoint(1.0f, 120f, 200)
      *     .addControlPoint(0.0f, 120f, 100)
      *     .build();
      * }</pre>
+     *
+     * <p>The builder automatically starts all effects at 0 amplitude.
      *
      * <p>It is crucial to ensure that the frequency range used in your effect is compatible with
      * the device's capabilities. The framework will not play any frequencies that fall partially
@@ -1819,27 +1870,55 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * <p>You can use the following APIs to obtain these limits:
      * <ul>
-     * <li>Maximum envelope control points: {@link Vibrator#getMaxEnvelopeEffectSize()}</li>
+     * <li>Maximum envelope control points: {@link VibratorEnvelopeEffectInfo#getMaxSize()}
      * <li>Minimum control point duration:
-     * {@link Vibrator#getMinEnvelopeEffectControlPointDurationMillis()}</li>
+     * {@link VibratorEnvelopeEffectInfo#getMinControlPointDurationMillis()}
      * <li>Maximum control point duration:
-     * {@link Vibrator#getMaxEnvelopeEffectControlPointDurationMillis()}</li>
-     * <li>Maximum total effect duration: {@link Vibrator#getMaxEnvelopeEffectDurationMillis()}</li>
+     * {@link VibratorEnvelopeEffectInfo#getMaxControlPointDurationMillis()}
+     * <li>Maximum total effect duration: {@link VibratorEnvelopeEffectInfo#getMaxDurationMillis()}
      * </ul>
-     *
-     * @see VibrationEffect#startWaveformEnvelope()
      */
     @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public static final class WaveformEnvelopeBuilder {
 
         private ArrayList<PwleSegment> mSegments = new ArrayList<>();
         private float mLastAmplitude = 0f;
-        private float mLastFrequencyHz = 0f;
+        private float mLastFrequencyHz = Float.NaN;
 
-        private WaveformEnvelopeBuilder() {}
+        public WaveformEnvelopeBuilder() {}
 
-        private WaveformEnvelopeBuilder(float initialFrequency) {
-            mLastFrequencyHz = initialFrequency;
+        /**
+         * Sets the initial frequency for the waveform in Hertz.
+         *
+         * <p>The effect will start vibrating at this frequency when it transitions to the
+         * amplitude and frequency defined by the first control point.
+         *
+         * <p>The frequency must be greater than zero and within the supported range. To determine
+         * the supported range, use {@link Vibrator#getFrequencyProfile()}. Creating
+         * effects using frequencies outside this range will result in the vibration not playing.
+         *
+         * @param initialFrequencyHz The starting frequency of the vibration, in Hz. Must be
+         *                           greater than zero.
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @SuppressWarnings("MissingGetterMatchingBuilder")// No getter to initial frequency once set.
+        @NonNull
+        public WaveformEnvelopeBuilder setInitialFrequencyHz(
+                @FloatRange(from = 0) float initialFrequencyHz) {
+
+            if (mSegments.isEmpty()) {
+                mLastFrequencyHz = initialFrequencyHz;
+            } else {
+                PwleSegment firstSegment = mSegments.getFirst();
+                mSegments.set(0, new PwleSegment(
+                        firstSegment.getStartAmplitude(),
+                        firstSegment.getEndAmplitude(),
+                        initialFrequencyHz, // Update start frequency
+                        firstSegment.getEndFrequencyHz(),
+                        firstSegment.getDuration()));
+            }
+
+            return this;
         }
 
         /**
@@ -1850,35 +1929,34 @@ public abstract class VibrationEffect implements Parcelable {
          * perceived intensity. It's determined by the actuator response curve.
          *
          * <p>Frequency must be greater than zero and within the supported range. To determine
-         * the supported range, use {@link Vibrator#getFrequencyProfile()}. This method returns a
-         * {@link android.os.vibrator.VibratorFrequencyProfile} object, which contains the
-         * minimum and maximum frequencies, among other frequency-related information. Creating
+         * the supported range, use {@link Vibrator#getFrequencyProfile()}. Creating
          * effects using frequencies outside this range will result in the vibration not playing.
          *
          * <p>Time specifies the duration (in milliseconds) for the vibrator to smoothly transition
          * from the previous control point to this new one. It must be greater than zero. To
          * transition as quickly as possible, use
-         * {@link Vibrator#getMinEnvelopeEffectControlPointDurationMillis()}.
+         * {@link VibratorEnvelopeEffectInfo#getMinControlPointDurationMillis()}.
          *
-         * @param amplitude   The amplitude value between 0 and 1, inclusive. 0 represents the
-         *                    vibrator being off, and 1 represents the maximum achievable amplitude
-         *                    at this frequency.
-         * @param frequencyHz The frequency in Hz, must be greater than zero.
-         * @param timeMillis  The transition time in milliseconds.
+         * @param amplitude      The amplitude value between 0 and 1, inclusive. 0 represents the
+         *                       vibrator being off, and 1 represents the maximum achievable
+         *                       amplitude
+         *                       at this frequency.
+         * @param frequencyHz    The frequency in Hz, must be greater than zero.
+         * @param durationMillis The transition time in milliseconds.
          */
         @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
         @SuppressWarnings("MissingGetterMatchingBuilder") // No getters to segments once created.
         @NonNull
         public WaveformEnvelopeBuilder addControlPoint(
                 @FloatRange(from = 0, to = 1) float amplitude,
-                @FloatRange(from = 0) float frequencyHz, int timeMillis) {
+                @FloatRange(from = 0) float frequencyHz, @DurationMillisLong long durationMillis) {
 
-            if (mLastFrequencyHz == 0) {
+            if (Float.isNaN(mLastFrequencyHz)) {
                 mLastFrequencyHz = frequencyHz;
             }
 
             mSegments.add(new PwleSegment(mLastAmplitude, amplitude, mLastFrequencyHz, frequencyHz,
-                    timeMillis));
+                    durationMillis));
 
             mLastAmplitude = amplitude;
             mLastFrequencyHz = frequencyHz;
@@ -1894,6 +1972,7 @@ public abstract class VibrationEffect implements Parcelable {
          * calling this method again.
          *
          * @return The {@link VibrationEffect} resulting from the list of control points.
+         * @throws IllegalStateException if no control points were added to the builder.
          */
         @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
         @NonNull
@@ -1906,6 +1985,168 @@ public abstract class VibrationEffect implements Parcelable {
             effect.validate();
             return effect;
         }
+    }
+
+    /**
+     * A builder for waveform effects defined by their envelope, designed to provide a consistent
+     * haptic perception across devices with varying capabilities.
+     *
+     * <p>This builder simplifies the creation of waveform effects by automatically adapting them
+     * to different devices based on their capabilities. Effects are defined by control points
+     * specifying target vibration intensity and sharpness, along with durations to reach those
+     * targets. The vibrator will smoothly transition between these control points.
+     *
+     * <p><b>Intensity:</b> Defines the overall strength of the vibration, ranging from
+     * 0 (off) to 1 (maximum achievable strength). Higher values result in stronger
+     * vibrations. Supported intensity values guarantee sensitivity levels (SL) above
+     * 10 dB SL to ensure human perception.
+     *
+     * <p><b>Sharpness:</b> Defines the crispness of the vibration, ranging from 0 to 1.
+     * Lower values produce smoother vibrations, while higher values create a sharper,
+     * more snappy sensation. Sharpness is mapped to its equivalent frequency within
+     * the device's supported frequency range.
+     *
+     * <p>While this builder handles most of the adaptation logic, it does come with some
+     * limitations:
+     * <ul>
+     *     <li>It may not use the full range of frequencies</li>
+     *     <li>It's restricted to a frequency range that can generate output of at least 10 db
+     *     SL</li>
+     *     <li>Effects must end with a zero intensity control point. Failure to end at a zero
+     *     intensity control point will result in an {@link IllegalStateException}.</li>
+     * </ul>
+     *
+     * <p>The builder automatically starts all effects at 0 intensity.
+     *
+     * <p>To avoid these limitations and to have more control over the effects output, use
+     * {@link WaveformEnvelopeBuilder}, where direct amplitude and frequency values can be used.
+     *
+     * <p>For optimal cross-device consistency, it's recommended to limit the number of control
+     * points to a maximum of 16. However this is not mandatory, and if a pattern exceeds the
+     * maximum number of allowed control points, the framework will automatically break down the
+     * effect to ensure it plays correctly.
+     *
+     * <p>For example, the following code creates a vibration effect that ramps up the intensity
+     * from a low-pitched to a high-pitched strong vibration over 500ms and then ramps it down to
+     * 0 (off) over 100ms:
+     *
+     * <pre>{@code
+     * VibrationEffect effect = new VibrationEffect.BasicEnvelopeBuilder()
+     *     .setInitialSharpness(0.0f)
+     *     .addControlPoint(1.0f, 1.0f, 500)
+     *     .addControlPoint(0.0f, 1.0f, 100)
+     *     .build();
+     * }</pre>
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public static final class BasicEnvelopeBuilder {
+
+        private ArrayList<BasicPwleSegment> mSegments = new ArrayList<>();
+        private float mLastIntensity = 0f;
+        private float mLastSharpness = Float.NaN;
+
+        public BasicEnvelopeBuilder() {}
+
+        /**
+         * Sets the initial sharpness for the basic envelope effect.
+         *
+         * <p>The effect will start vibrating at this sharpness when it transitions to the
+         * intensity and sharpness defined by the first control point.
+         *
+         * <p> The sharpness defines the crispness of the vibration, ranging from 0 to 1. Lower
+         * values translate to smoother vibrations, while higher values create a sharper more snappy
+         * sensation. This value is mapped to the supported frequency range of the device.
+         *
+         * @param initialSharpness The starting sharpness of the vibration in the range of [0, 1].
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @SuppressWarnings("MissingGetterMatchingBuilder")// No getter to initial sharpness once set.
+        @NonNull
+        public BasicEnvelopeBuilder setInitialSharpness(
+                @FloatRange(from = 0, to = 1) float initialSharpness) {
+
+            if (mSegments.isEmpty()) {
+                mLastSharpness = initialSharpness;
+            } else {
+                BasicPwleSegment firstSegment = mSegments.getFirst();
+                mSegments.set(0, new BasicPwleSegment(
+                        firstSegment.getStartIntensity(),
+                        firstSegment.getEndIntensity(),
+                        initialSharpness, // Update start sharpness
+                        firstSegment.getEndSharpness(),
+                        firstSegment.getDuration()));
+            }
+
+            return this;
+        }
+
+        /**
+         * Adds a new control point to the end of this waveform envelope.
+         *
+         * <p>Intensity defines the overall strength of the vibration, ranging from 0 (off) to 1
+         * (maximum achievable strength). Higher values translate to stronger vibrations.
+         *
+         * <p>Sharpness defines the crispness of the vibration, ranging from 0 to 1. Lower
+         * values translate to smoother vibrations, while higher values create a sharper more snappy
+         * sensation. This value is mapped to the supported frequency range of the device.
+         *
+         * <p>Time specifies the duration (in milliseconds) for the vibrator to smoothly transition
+         * from the previous control point to this new one. It must be greater than zero. To
+         * transition as quickly as possible, use
+         * {@link VibratorEnvelopeEffectInfo#getMinControlPointDurationMillis()}.
+         *
+         * @param intensity      The target vibration intensity, ranging from 0 (off) to 1 (maximum
+         *                       strength).
+         * @param sharpness      The target sharpness, ranging from 0 (smoothest) to 1 (sharpest).
+         * @param durationMillis The transition time in milliseconds.
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @SuppressWarnings("MissingGetterMatchingBuilder") // No getters to segments once created.
+        @NonNull
+        public BasicEnvelopeBuilder addControlPoint(
+                @FloatRange(from = 0, to = 1) float intensity,
+                @FloatRange(from = 0, to = 1) float sharpness,
+                @DurationMillisLong long durationMillis) {
+
+            if (Float.isNaN(mLastSharpness)) {
+                mLastSharpness = sharpness;
+            }
+
+            mSegments.add(new BasicPwleSegment(mLastIntensity, intensity, mLastSharpness, sharpness,
+                    durationMillis));
+
+            mLastIntensity = intensity;
+            mLastSharpness = sharpness;
+
+            return this;
+        }
+
+        /**
+         * Build the waveform as a single {@link VibrationEffect}.
+         *
+         * <p>The {@link BasicEnvelopeBuilder} object is still valid after this call, so you can
+         * continue adding more primitives to it and generating more {@link VibrationEffect}s by
+         * calling this method again.
+         *
+         * @return The {@link VibrationEffect} resulting from the list of control points.
+         * @throws IllegalStateException if the last control point does not end at zero intensity.
+         */
+        @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+        @NonNull
+        public VibrationEffect build() {
+            if (mSegments.isEmpty()) {
+                throw new IllegalStateException(
+                        "BasicEnvelopeBuilder must have at least one control point to build.");
+            }
+            if (mSegments.getLast().getEndIntensity() != 0) {
+                throw new IllegalStateException(
+                        "Basic envelope effects must end at a zero intensity control point.");
+            }
+            VibrationEffect effect = new Composed(mSegments, /* repeatIndex= */ -1);
+            effect.validate();
+            return effect;
+        }
+
     }
 
     /**

@@ -437,16 +437,16 @@ public class ScaleGestureDetector {
         }
     }
 
-  /**
-   * Return whether the quick scale gesture, in which the user performs a double tap followed by a
-   * swipe, should perform scaling. {@see #setQuickScaleEnabled(boolean)}.
-   */
+    /**
+     * Return whether the quick scale gesture, in which the user performs a double tap followed by a
+     * swipe, should perform scaling. {@see #setQuickScaleEnabled(boolean)}.
+     */
     public boolean isQuickScaleEnabled() {
         return mQuickScaleEnabled;
     }
 
     /**
-     * Sets whether the associates {@link OnScaleGestureListener} should receive
+     * Sets whether the associated {@link OnScaleGestureListener} should receive
      * onScale callbacks when the user uses a stylus and presses the button.
      * Note that this is enabled by default if the app targets API 23 and newer.
      *

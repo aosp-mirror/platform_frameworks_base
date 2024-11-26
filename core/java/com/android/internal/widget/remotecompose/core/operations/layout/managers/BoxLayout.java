@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -43,7 +46,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     int mVerticalPositioning;
 
     public BoxLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -58,7 +61,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     public BoxLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -75,6 +78,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
                 verticalPositioning);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BOX ["
@@ -93,6 +97,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
                 + mVisibility;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "BOX";
@@ -100,7 +105,13 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
 
     @Override
     public void computeWrapSize(
-            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
+            @NonNull PaintContext context,
+            float maxWidth,
+            float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
+            @NonNull MeasurePass measure,
+            @NonNull Size size) {
         for (Component c : mChildrenComponents) {
             c.measure(context, 0f, maxWidth, 0f, maxHeight, measure);
             ComponentMeasure m = measure.get(c);
@@ -114,19 +125,19 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
 
     @Override
     public void computeSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         for (Component child : mChildrenComponents) {
             child.measure(context, minWidth, maxWidth, minHeight, maxHeight, measure);
         }
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
+    public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         float selfWidth = selfMeasure.getW() - mPaddingLeft - mPaddingRight;
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;
@@ -161,16 +172,22 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         }
     }
 
+    @NonNull
     public static String name() {
         return "BoxLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_BOX;
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -182,7 +199,13 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         buffer.writeInt(verticalPositioning);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         int horizontalPositioning = buffer.readInt();
@@ -196,7 +219,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
                         verticalPositioning));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
                         "Box layout implementation.\n\n"
@@ -224,7 +247,7 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId, mAnimationId, mHorizontalPositioning, mVerticalPositioning);
     }
 }

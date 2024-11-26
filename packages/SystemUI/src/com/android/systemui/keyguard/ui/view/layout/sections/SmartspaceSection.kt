@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.res.R as R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
@@ -44,7 +45,7 @@ import kotlinx.coroutines.DisposableHandle
 open class SmartspaceSection
 @Inject
 constructor(
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     val keyguardClockViewModel: KeyguardClockViewModel,
     val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
     private val keyguardSmartspaceInteractor: KeyguardSmartspaceInteractor,
@@ -123,7 +124,7 @@ constructor(
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                horizontalPaddingStart
+                horizontalPaddingStart,
             )
 
             // migrate addSmartspaceView from KeyguardClockSwitchController
@@ -134,15 +135,15 @@ constructor(
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                horizontalPaddingStart
+                horizontalPaddingStart,
             )
             connect(
                 sharedR.id.bc_smartspace_view,
                 ConstraintSet.END,
-                if (keyguardClockViewModel.clockShouldBeCentered.value) ConstraintSet.PARENT_ID
-                else R.id.split_shade_guideline,
+                if (keyguardSmartspaceViewModel.isShadeLayoutWide.value) R.id.split_shade_guideline
+                else ConstraintSet.PARENT_ID,
                 ConstraintSet.END,
-                horizontalPaddingEnd
+                horizontalPaddingEnd,
             )
 
             if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
@@ -151,7 +152,7 @@ constructor(
                     sharedR.id.date_smartspace_view,
                     ConstraintSet.BOTTOM,
                     sharedR.id.bc_smartspace_view,
-                    ConstraintSet.TOP
+                    ConstraintSet.TOP,
                 )
             } else {
                 clear(sharedR.id.date_smartspace_view, ConstraintSet.BOTTOM)
@@ -159,13 +160,13 @@ constructor(
                     sharedR.id.date_smartspace_view,
                     ConstraintSet.TOP,
                     customR.id.lockscreen_clock_view,
-                    ConstraintSet.BOTTOM
+                    ConstraintSet.BOTTOM,
                 )
                 connect(
                     sharedR.id.bc_smartspace_view,
                     ConstraintSet.TOP,
                     sharedR.id.date_smartspace_view,
-                    ConstraintSet.BOTTOM
+                    ConstraintSet.BOTTOM,
                 )
             }
 
@@ -173,10 +174,7 @@ constructor(
                 R.id.smart_space_barrier_bottom,
                 Barrier.BOTTOM,
                 0,
-                *intArrayOf(
-                    sharedR.id.bc_smartspace_view,
-                    sharedR.id.date_smartspace_view,
-                )
+                *intArrayOf(sharedR.id.bc_smartspace_view, sharedR.id.date_smartspace_view),
             )
         }
         updateVisibility(constraintSet)
@@ -211,7 +209,7 @@ constructor(
             setVisibility(sharedR.id.weather_smartspace_view, weatherVisibility)
             setAlpha(
                 sharedR.id.weather_smartspace_view,
-                if (weatherVisibility == View.VISIBLE) 1f else 0f
+                if (weatherVisibility == View.VISIBLE) 1f else 0f,
             )
             val dateVisibility =
                 if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
@@ -219,7 +217,7 @@ constructor(
             setVisibility(sharedR.id.date_smartspace_view, dateVisibility)
             setAlpha(
                 sharedR.id.date_smartspace_view,
-                if (dateVisibility == ConstraintSet.VISIBLE) 1f else 0f
+                if (dateVisibility == ConstraintSet.VISIBLE) 1f else 0f,
             )
         }
     }

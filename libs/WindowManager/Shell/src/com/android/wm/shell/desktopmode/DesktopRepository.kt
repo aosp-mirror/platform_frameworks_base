@@ -102,6 +102,9 @@ class DesktopRepository (
     /* Tracks last bounds of task before toggled to stable bounds. */
     private val boundsBeforeMaximizeByTaskId = SparseArray<Rect>()
 
+    /* Tracks last bounds of task before it is minimized. */
+    private val boundsBeforeMinimizeByTaskId = SparseArray<Rect>()
+
     /* Tracks last bounds of task before toggled to immersive state. */
     private val boundsBeforeFullImmersiveByTaskId = SparseArray<Rect>()
 
@@ -408,6 +411,12 @@ class DesktopRepository (
             desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
         // Remove task from unminimized task if it is minimized.
         unminimizeTask(displayId, taskId)
+        // Mark task as not in immersive if it was immersive.
+        setTaskInFullImmersiveState(
+            displayId = displayId,
+            taskId = taskId,
+            immersive = false
+        )
         removeActiveTask(taskId)
         removeVisibleTask(taskId)
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
@@ -462,6 +471,14 @@ class DesktopRepository (
     fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) =
         boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
 
+    /** Removes and returns the bounds saved before minimizing the given task. */
+    fun removeBoundsBeforeMinimize(taskId: Int): Rect? =
+        boundsBeforeMinimizeByTaskId.removeReturnOld(taskId)
+
+    /** Saves the bounds of the given task before minimizing. */
+    fun saveBoundsBeforeMinimize(taskId: Int, bounds: Rect?) =
+        boundsBeforeMinimizeByTaskId.set(taskId, Rect(bounds))
+
     /** Removes and returns the bounds saved before entering immersive with the given task. */
     fun removeBoundsBeforeFullImmersive(taskId: Int): Rect? =
         boundsBeforeFullImmersiveByTaskId.removeReturnOld(taskId)
@@ -476,6 +493,9 @@ class DesktopRepository (
             mainCoroutineScope.launch {
                 try {
                     persistentRepository.addOrUpdateDesktop(
+                        // Use display id as desktop id for now since only once desktop per display
+                        // is supported.
+                        desktopId = displayId,
                         visibleTasks = desktopTaskDataByDisplayIdCopy.visibleTasks,
                         minimizedTasks = desktopTaskDataByDisplayIdCopy.minimizedTasks,
                         freeformTasksInZOrder = desktopTaskDataByDisplayIdCopy.freeformTasksInZOrder

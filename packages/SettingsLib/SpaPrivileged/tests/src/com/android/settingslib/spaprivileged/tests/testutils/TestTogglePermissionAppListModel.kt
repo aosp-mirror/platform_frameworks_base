@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 class TestTogglePermissionAppListModel(
     isAllowed: Boolean? = null,
     private val isChangeable: Boolean = false,
+    override val switchifBlockedByAdminOverrideCheckedValueTo: Boolean? = null,
 ) : TogglePermissionAppListModel<TestAppRecord> {
     override val pageTitleResId = R.string.test_permission_title
     override val switchTitleResId = R.string.test_permission_switch_title

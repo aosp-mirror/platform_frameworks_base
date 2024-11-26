@@ -20,18 +20,23 @@ import os
 import unittest
 import subprocess
 
-GOLDEN_DIR = 'golden-output'
+GOLDEN_DIRS = [
+    'golden-output',
+    'golden-output.RELEASE_TARGET_JAVA_21',
+]
+
 
 # Run diff.
 def run_diff(file1, file2):
-    command = ['diff', '-u', '--ignore-blank-lines', '--ignore-space-change', file1, file2]
+    command = ['diff', '-u', '--ignore-blank-lines',
+               '--ignore-space-change', file1, file2]
     print(' '.join(command))
-    result = subprocess.run(command, stderr = sys.stdout)
+    result = subprocess.run(command, stderr=sys.stdout)
 
     success = result.returncode == 0
 
     if success:
-        print(f'No diff found.')
+        print('No diff found.')
     else:
         print(f'Fail: {file1} and {file2} are different.')
 
@@ -39,26 +44,42 @@ def run_diff(file1, file2):
 
 
 # Check one golden file.
-def check_one_file(filename):
+def check_one_file(golden_dir, filename):
     print(f'= Checking file: {filename}')
-    return run_diff(os.path.join(GOLDEN_DIR, filename), filename)
+    return run_diff(os.path.join(golden_dir, filename), filename)
+
 
 class TestWithGoldenOutput(unittest.TestCase):
 
     # Test to check the generated jar files to the golden output.
+    # Depending on build flags, the golden output may differ in expected ways.
+    # So only expect the files to match one of the possible golden outputs.
     def test_compare_to_golden(self):
-        files = os.listdir(GOLDEN_DIR)
-        files.sort()
+        success = False
 
-        print(f"Golden files: {files}")
-        success = True
-
-        for file in files:
-            if not check_one_file(file):
-                success = False
+        for golden_dir in GOLDEN_DIRS:
+            if self.matches_golden(golden_dir):
+                success = True
+                print(f"Test passes for dir: {golden_dir}")
+                break
 
         if not success:
-            self.fail('Some files are different. See stdout log for more details.')
+            self.fail('Some files are different. ' +
+                      'See stdout log for more details.')
+
+    def matches_golden(self, golden_dir):
+        files = os.listdir(golden_dir)
+        files.sort()
+
+        print(f"Golden files for {golden_dir}: {files}")
+        match_success = True
+
+        for file in files:
+            if not check_one_file(golden_dir, file):
+                match_success = False
+
+        return match_success
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

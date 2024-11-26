@@ -18,13 +18,13 @@
 <resources>
     <!--  Button Styles  -->
     <!-- Material Button - Filled  -->
-    <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button">
+    <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button.WearMaterial3">
         <item name="android:background">@drawable/btn_background_material_filled</item>
         <item name="textAppearance">@style/TextAppearance.Widget.Button.Material.Filled</item>
     </style>
 
     <!-- Material Button - Filled Tonal(Override system default button styles) -->
-    <style name="Widget.DeviceDefault.Button">
+    <style name="Widget.DeviceDefault.Button.WearMaterial3">
         <item name="background">@drawable/btn_background_material_filled_tonal</item>
         <item name="textAppearance">@style/TextAppearance.Widget.Button.Material</item>
         <item name="minHeight">@dimen/btn_material_height</item>
@@ -57,7 +57,7 @@
     </style>
 
     <!--  AlertDialog Styles  -->
-    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog" parent="Widget.DeviceDefault.Button">
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3" parent="Widget.DeviceDefault.Button">
         <item name="android:textSize">0sp</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingStart">0dp</item>
@@ -65,14 +65,14 @@
         <item name="android:drawablePadding">0dp</item>
     </style>
 
-    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.Confirm" parent="Widget.DeviceDefault.Button.ButtonBar.AlertDialog">
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3.Confirm">
         <!-- Use a ImageView as background -->
         <item name="background">@android:color/transparent</item>
         <item name="minWidth">@dimen/dialog_btn_confirm_width</item>
         <item name="minHeight">@dimen/dialog_btn_confirm_height</item>
     </style>
 
-    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.Negative" parent="Widget.DeviceDefault.Button.ButtonBar.AlertDialog">
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3.Negative">
         <item name="background">@drawable/dialog_alert_button_negative</item>
         <item name="minWidth">@dimen/dialog_btn_negative_width</item>
         <item name="minHeight">@dimen/dialog_btn_negative_height</item>

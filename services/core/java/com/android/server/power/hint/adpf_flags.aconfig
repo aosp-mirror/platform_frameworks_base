@@ -1,0 +1,15 @@
+# New location for generic ADPF flags across the system
+# This will be moved to the top-level frameworks/base adpf library
+# once it lands
+
+package: "android.adpf"
+container: "system"
+
+flag {
+    name: "adpf_viewrootimpl_action_down_boost"
+    is_exported: true
+    namespace: "game"
+    description: "Guards boosting on touch in ViewRootImpl."
+    is_fixed_read_only: true
+    bug: "360345939"
+}

@@ -17,6 +17,7 @@
 package com.android.server.devicepolicy;
 
 import static com.android.server.devicepolicy.DevicePolicyEngine.DEVICE_LOCK_CONTROLLER_ROLE;
+import static com.android.server.devicepolicy.DevicePolicyEngine.SYSTEM_SUPERVISION_ROLE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -94,14 +95,18 @@ final class PolicyDefinition<V> {
     private static final MostRestrictive<Boolean> TRUE_MORE_RESTRICTIVE = new MostRestrictive<>(
             List.of(new BooleanPolicyValue(true), new BooleanPolicyValue(false)));
 
-    static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
+    static PolicyDefinition<Integer> AUTO_TIME_ZONE = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY),
-            // auto timezone is disabled by default, hence enabling it is more restrictive.
-            TRUE_MORE_RESTRICTIVE,
+            // Auto time zone is enabled by default. Enabled state has higher priority given it
+            // means the time will be more precise and other applications can rely on that for
+            // their purposes.
+            new TopPriority<>(List.of(
+                    EnforcingAdmin.getRoleAuthorityOf(SYSTEM_SUPERVISION_ROLE),
+                    EnforcingAdmin.getRoleAuthorityOf(DEVICE_LOCK_CONTROLLER_ROLE),
+                    EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_GLOBAL_ONLY_POLICY,
-            (Boolean value, Context context, Integer userId, PolicyKey policyKey) ->
-                    PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context),
-            new BooleanPolicySerializer());
+            PolicyEnforcerCallbacks::setAutoTimeZonePolicy,
+            new IntegerPolicySerializer());
 
     static final PolicyDefinition<Integer> GENERIC_PERMISSION_GRANT =
             new PolicyDefinition<>(
@@ -344,12 +349,22 @@ final class PolicyDefinition<V> {
                     PolicyEnforcerCallbacks::setMtePolicy,
                     new IntegerPolicySerializer());
 
+    static PolicyDefinition<Integer> AUTO_TIME = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.AUTO_TIME_POLICY),
+            new TopPriority<>(List.of(
+                    EnforcingAdmin.getRoleAuthorityOf(SYSTEM_SUPERVISION_ROLE),
+                    EnforcingAdmin.getRoleAuthorityOf(DEVICE_LOCK_CONTROLLER_ROLE),
+                    EnforcingAdmin.DPC_AUTHORITY)),
+            POLICY_FLAG_GLOBAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::setAutoTimePolicy,
+            new IntegerPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
     // TODO(b/277218360): Revisit policies that should be marked as global-only.
     static {
-        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIME_ZONE);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
                 GENERIC_PERMISSION_GRANT);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SECURITY_LOGGING_POLICY,
@@ -392,6 +407,7 @@ final class PolicyDefinition<V> {
                 PACKAGES_SUSPENDED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.MEMORY_TAGGING_POLICY,
                 MEMORY_TAGGING);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIME_POLICY, AUTO_TIME);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

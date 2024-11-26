@@ -84,6 +84,19 @@ public class JankTracker {
         registerWindowListeners();
     }
 
+    /**
+     * Merges app jank stats reported by components outside the platform to the current pending
+     * stats
+     */
+    public void mergeAppJankStats(AppJankStats appJankStats) {
+        getHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                mJankDataProcessor.mergeJankStats(appJankStats, mActivityName);
+            }
+        });
+    }
+
     public void setActivityName(@NonNull String activityName) {
         mActivityName = activityName;
     }

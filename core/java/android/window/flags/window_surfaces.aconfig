@@ -29,14 +29,6 @@ flag {
 
 flag {
     namespace: "window_surfaces"
-    name: "secure_window_state"
-    description: "Move SC secure flag to WindowState level"
-    is_fixed_read_only: true
-    bug: "308662081"
-}
-
-flag {
-    namespace: "window_surfaces"
     name: "trusted_presentation_listener_for_window"
     is_exported: true
     description: "Enable trustedPresentationListener on windows public API"
@@ -96,4 +88,13 @@ flag {
     description: "Set VRI SC properties in the client instead of system server"
     is_fixed_read_only: true
     bug: "308662081"
+}
+
+flag {
+    name: "jank_api"
+    namespace: "window_surfaces"
+    description: "Adds the jank data listener to AttachedSurfaceControl"
+    is_fixed_read_only: true
+    is_exported: true
+    bug: "293949943"
 }

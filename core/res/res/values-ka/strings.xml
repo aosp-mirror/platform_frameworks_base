@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ნებას რთავს აპს, დაადგინოს შედარებითი პოზიცია ახლომახლო ულტრაფართო სიხშირის მოწყობილობების შესახებ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ინტერაქცია ახლომახლო Wi-Fi მოწყობილობებთან"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"საშუალებას აძლევს აპს, განაცხადოს ახლომახლო Wi-Fi მოწყობილობების შესახებ, დაუკავშირდეს მათ და განსაზღვროს მათი შედარებითი პოზიცია"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ახლომახლო მოწყობილობებთან მიმართ. პოზიციის დადგენა"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"აპისთვის ახლომახლო მოწყობილობებთან მიმართებაში პოზიციის დადგენის ნების დართვა"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"უპირატესი NFC გადახდის სერვისის ინფორმაცია"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"საშუალებას აძლევს აპს, მიიღოს უპირატესი NFC გადახდის სერვისის ინფორმაცია, მაგალითად, რეგისტრირებული დახმარება და დანიშნულება."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ახლო მოქმედების რადიოკავშირი (NFC) მართვა"</string>
@@ -1938,12 +1940,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"შაბათ-კვირა"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"მოვლენა"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ძილისას"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"არ შემაწუხოთ (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"მართავს <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ჩართული"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"გამორთული"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
     <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ნებისმიერი კალენდარი"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ზოგიერთ ხმას ადუმებს"</string>
@@ -2426,15 +2430,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"შეტყობინებების გაგზავნა და მიღება მობილური ან Wi-Fi ქსელის გარეშე"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages-ის გახსნა"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"მუშაობის პრინციპი"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"„ქსელის ავტომატურად არჩევის“ ჩართვა"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ჩართეთ „ქსელის ავტომატურად არჩევა“ პარამეტრებში, რათა თქვენმა ტელეფონმა სატელიტთან თავსებადი ქსელის პოვნა შეძლოს"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ჩართვა"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"უკან დაბრუნება"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"მომლოდინე..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"სატელიტური SOS ახლა ხელმისაწვდომია"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"შეგიძლიათ, შეტყობინება გაუგზავნოთ გადაუდებელი დახმარების სამსახურებს, თუ მობილური ან Wi-Fi ქსელი არ არის ხელმისაწვდომი. საჭიროა, რომ Google Messages იყოს თქვენი ნაგულისხმევი შეტყობინებების აპი."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"სატელიტური SOS არ არის მხარდაჭერილი"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"სატელიტური SOS არ არის მხარდაჭერილი ამ მოწყობილობაზე"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"სატელიტური SOS არ არის დაყენებული"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"დარწმუნდით, რომ დაკავშირებული ხართ ინტერნეტთან და ცადეთ ხელახლა დაყენება"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"სატელიტური SOS არ არის ხელმისაწვდომი"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"სატელიტური SOS ამ ქვეყანასა თუ რეგიონში არ არის ხელმისაწვდომი"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"სატელიტური SOS არ არის დაყენებული"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"შეტყობინებების სატელიტური მიმოცვლისთვის თქვენს ნაგულისხმევ შეტყობინებების აპად დააყენეთ Google Messages"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"სატელიტური SOS არ არის ხელმისაწვდომი"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ამ ქვეყანაში ან რეგიონში სატელიტური SOS-ის ხელმისაწვდომობის შესამოწმებლად ჩართეთ მდებარეობის პარამეტრები"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"შეტყობინებების სატელიტური მიმოცვლა ხელმისაწვდომია"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"შეტყობინების გაგზავნა სატელიტის საშუალებით შეგიძლიათ, თუ მობილურზე ან Wi-Fi ქსელზე წვდომა არ გაქვთ. საჭიროა, რომ Google Messages იყოს თქვენი ნაგულისხმევი შეტყობინებების აპი."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"შეტყობინებების სატელიტური მიმოცვლა მხარდაჭერილი არ არის"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ამ მოწყობილობაზე შეტყობინებების სატელიტური მიმოცვლა არ არის მხარდაჭერილი"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"შეტყობინებების სატელიტური მიმოცვლა დაყენებული არ არის"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"დარწმუნდით, რომ დაკავშირებული ხართ ინტერნეტთან და ცადეთ ხელახლა დაყენება"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"შეტყობინებების სატელიტური მიმოცვლა მიუწვდომელია"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ამ ქვეყანაში ან რეგიონში შეტყობინებების სატელიტური მიმოცვლა მიუწვდომელია"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"შეტყობინებების სატელიტური მიმოცვლა დაყენებული არ არის"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"შეტყობინებების სატელიტური მიმოცვლისთვის თქვენს ნაგულისხმევ შეტყობინებების აპად დააყენეთ Google Messages"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"შეტყობინებების სატელიტური მიმოცვლა მიუწვდომელია"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ამ ქვეყანაში ან რეგიონში შეტყობინებების სატელიტური მიმოცვლის ხელმისაწვდომობის შესამოწმებლად ჩართეთ მდებარეობის პარამეტრები"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ანაბეჭდით განბლოკვის ხელახლა დაყენება"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>-ისა და <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>-ის ამოცნობა ვეღარ ხერხდება."</string>

@@ -1961,12 +1961,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
-            try {
-                PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
-                BroadcastStickyCache.dump(pfd);
-            } finally {
-                IoUtils.closeQuietly(pfd);
-            }
+            PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
+            IoUtils.closeQuietly(pfd);
         }
 
         private File getDatabasesDir(Context context) {
@@ -8847,9 +8843,9 @@ public final class ActivityThread extends ClientTransactionHandler
         // Call per-process mainline module initialization.
         initializeMainlineModules();
 
-        Process.setArgV0("<pre-initialized>");
-
         Looper.prepareMainLooper();
+
+        Process.setArgV0("<pre-initialized>");
 
         // Find the value for {@link #PROC_START_SEQ_IDENT} if provided on the command line.
         // It will be in the format "seq=114"

@@ -58,6 +58,9 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     /** Specifies preference order in the hierarchy. */
     infix fun PreferenceHierarchyNode.order(order: Int) = apply { this.order = order }
 
+    /** Specifies preference order in the hierarchy for group. */
+    infix fun PreferenceHierarchy.order(order: Int) = apply { this.order = order }
+
     /** Adds a preference to the hierarchy. */
     @JvmOverloads
     fun add(metadata: PreferenceMetadata, order: Int? = null) {
@@ -136,6 +139,18 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         for (it in children) action(it)
     }
 
+    /** Traversals preference hierarchy recursively and applies given action. */
+    fun forEachRecursively(action: (PreferenceHierarchyNode) -> Unit) {
+        action(this)
+        for (child in children) {
+            if (child is PreferenceHierarchy) {
+                child.forEachRecursively(action)
+            } else {
+                action(child)
+            }
+        }
+    }
+
     /** Traversals preference hierarchy and applies given action. */
     suspend fun forEachAsync(action: suspend (PreferenceHierarchyNode) -> Unit) {
         for (it in children) action(it)
@@ -153,21 +168,6 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
             }
         }
         return null
-    }
-
-    /** Returns all the [PreferenceHierarchyNode]s appear in the hierarchy. */
-    fun getAllPreferences(): List<PreferenceHierarchyNode> =
-        mutableListOf<PreferenceHierarchyNode>().also { getAllPreferences(it) }
-
-    private fun getAllPreferences(result: MutableList<PreferenceHierarchyNode>) {
-        result.add(this)
-        for (child in children) {
-            if (child is PreferenceHierarchy) {
-                child.getAllPreferences(result)
-            } else {
-                result.add(child)
-            }
-        }
     }
 }
 

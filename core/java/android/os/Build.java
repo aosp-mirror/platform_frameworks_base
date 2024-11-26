@@ -32,6 +32,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.sdk.Flags;
+import android.sysprop.BackportedFixesProperties;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -1545,6 +1546,57 @@ public class Build {
     }
 
     /**
+     * Convert a major.minor version String like "36.1" to an int that
+     * represents both major and minor version.
+     *
+     * @param version the String to parse
+     * @return an int encoding the major and minor version
+     * @throws IllegalArgumentException if the string could not be converted into an int
+     *
+     * @hide
+     */
+    @SuppressWarnings("FlaggedApi") // SDK_INT_MULTIPLIER is defined in this file
+    public static @SdkIntFull int parseFullVersion(@NonNull String version) {
+        int index = version.indexOf('.');
+        int major;
+        int minor = 0;
+        try {
+            if (index == -1) {
+                major = Integer.parseInt(version);
+            } else {
+                major = Integer.parseInt(version.substring(0, index));
+                minor = Integer.parseInt(version.substring(index + 1));
+            }
+            if (major < 0 || minor < 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("failed to parse '" + version
+                    + "' as a major.minor version code");
+        }
+        return major * VERSION_CODES_FULL.SDK_INT_MULTIPLIER + minor;
+    }
+
+    /**
+     * Convert an int representing a major.minor version like SDK_INT_FULL to a
+     * human readable string. The returned string is only intended for debug
+     * and error messages.
+     *
+     * @param version the int to convert to a string
+     * @return a String representing the same major.minor version as the int passed in
+     * @throws IllegalArgumentException if {@code version} is negative
+     *
+     * @hide
+     */
+    public static String fullVersionToString(@SdkIntFull int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("failed to convert '" + version
+                    + "' to string: not a valid major.minor version code");
+        }
+        return String.format("%d.%d", getMajorSdkVersion(version), getMinorSdkVersion(version));
+    }
+
+    /**
      * The vendor API for 2024 Q2
      *
      * <p>For Android 14-QPR3 and later, the vendor API level is completely decoupled from the SDK
@@ -1564,6 +1616,74 @@ public class Build {
 
     /** A string that uniquely identifies this build.  Do not attempt to parse this value. */
     public static final String FINGERPRINT = deriveFingerprint();
+
+    /** The status of the known issue on this device is not known. */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_UNKNOWN = 0;
+    /** The known issue is fixed on this device. */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_FIXED = 1;
+    /**
+     * The known issue is not applicable to this device.
+     *
+     * <p>For example if the issue only affects a specific brand, devices
+     * from other brands would report not applicable.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_NOT_APPLICABLE = 2;
+    /** The known issue is not fixed on this device. */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static final int BACKPORTED_FIX_STATUS_NOT_FIXED = 3;
+
+    /**
+     * The status of the backported fix for a known issue on this device.
+     *
+     * @hide
+     */
+    @IntDef(
+            prefix = {"BACKPORTED_FIX_STATUS_"},
+            value = {
+                    BACKPORTED_FIX_STATUS_UNKNOWN,
+                    BACKPORTED_FIX_STATUS_FIXED,
+                    BACKPORTED_FIX_STATUS_NOT_APPLICABLE,
+                    BACKPORTED_FIX_STATUS_NOT_FIXED,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BackportedFixStatus {
+    }
+
+    /**
+     * The status of the backported fix for a known issue on this device.
+     *
+     * @param id The id of the known issue to check.
+     * @return {@link #BACKPORTED_FIX_STATUS_FIXED} if the known issue is
+     * fixed on this device,
+     * {@link #BACKPORTED_FIX_STATUS_NOT_FIXED} if the known issue is not
+     * fixed on this device,
+     * {@link #BACKPORTED_FIX_STATUS_NOT_APPLICABLE} if the known issue is
+     * is not applicable on this device,
+     * otherwise {@link #BACKPORTED_FIX_STATUS_UNKNOWN}.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
+    public static @BackportedFixStatus int getBackportedFixStatus(long id) {
+        if (id <= 0 || id > 1023) {
+            return BACKPORTED_FIX_STATUS_UNKNOWN;
+        }
+        return isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
+                ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
+    }
+
+    private static boolean isBitSet(List<Long> bitsetLongArray, int bitIndex) {
+        // Because java.util.BitSet is not threadsafe do the calculations here instead.
+        if (bitIndex < 0) {
+            return false;
+        }
+        int arrayIndex = bitIndex >> 6;
+        if (bitsetLongArray.size() <= arrayIndex) {
+            return false;
+        }
+        return (bitsetLongArray.get(arrayIndex) & (1L << bitIndex)) != 0;
+    }
 
     /**
      * Some devices split the fingerprint components between multiple

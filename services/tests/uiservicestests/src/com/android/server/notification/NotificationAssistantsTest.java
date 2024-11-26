@@ -17,6 +17,9 @@ package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
+import static android.service.notification.Adjustment.TYPE_NEWS;
+import static android.service.notification.Adjustment.TYPE_PROMOTION;
 
 import static com.android.server.notification.NotificationManagerService.DEFAULT_ALLOWED_ADJUSTMENTS;
 
@@ -679,5 +682,124 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         assertThat(mAssistants.getAllowedAssistantAdjustments())
                 .containsExactlyElementsIn(DEFAULT_ALLOWED_ADJUSTMENTS);
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testSetAssistantAdjustmentKeyTypeState_allow() {
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactly(TYPE_PROMOTION);
+
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_PROMOTION, TYPE_CONTENT_RECOMMENDATION));
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testSetAssistantAdjustmentKeyTypeState_disallow() {
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDisallowAdjustmentKeyType_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactlyElementsIn(List.of(TYPE_NEWS, TYPE_CONTENT_RECOMMENDATION));
+    }
+
+    @Test
+    @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void testDefaultAllowedKeyAdjustments_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getAllowedAdjustmentKeyTypes()).asList()
+                .containsExactly(TYPE_PROMOTION);
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+    public void testSetAssistantAdjustmentKeyTypeStateForPackage_allowsAndDenies() {
+        // Given that a package is allowed to have its type adjusted,
+        String allowedPackage = "allowed.package";
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).isEmpty();
+        mAssistants.setTypeAdjustmentForPackageState(allowedPackage, true);
+
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).isEmpty();
+        assertTrue(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPackage));
+
+        // Set type adjustment disallowed for this package
+        mAssistants.setTypeAdjustmentForPackageState(allowedPackage, false);
+
+        // Then the package is marked as denied
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).asList()
+                .containsExactly(allowedPackage);
+        assertFalse(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPackage));
+
+        // Set type adjustment allowed again
+        mAssistants.setTypeAdjustmentForPackageState(allowedPackage, true);
+
+        // Then the package is marked as allowed again
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).isEmpty();
+        assertTrue(mAssistants.isTypeAdjustmentAllowedForPackage(allowedPackage));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+    public void testSetAssistantAdjustmentKeyTypeStateForPackage_deniesMultiple() {
+        // Given packages not allowed to have their type adjusted,
+        String deniedPkg1 = "denied.Pkg1";
+        String deniedPkg2 = "denied.Pkg2";
+        String deniedPkg3 = "denied.Pkg3";
+        // Set type adjustment disallowed for these packages
+        mAssistants.setTypeAdjustmentForPackageState(deniedPkg1, false);
+        mAssistants.setTypeAdjustmentForPackageState(deniedPkg2, false);
+        mAssistants.setTypeAdjustmentForPackageState(deniedPkg3, false);
+
+        // Then the packages are marked as denied
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg2, deniedPkg3));
+        assertFalse(mAssistants.isTypeAdjustmentAllowedForPackage(deniedPkg1));
+        assertFalse(mAssistants.isTypeAdjustmentAllowedForPackage(deniedPkg2));
+        assertFalse(mAssistants.isTypeAdjustmentAllowedForPackage(deniedPkg3));
+
+        // And when we re-allow one of them,
+        mAssistants.setTypeAdjustmentForPackageState(deniedPkg2, true);
+
+        // Then the rest of the original packages are still marked as denied.
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg3));
+        assertFalse(mAssistants.isTypeAdjustmentAllowedForPackage(deniedPkg1));
+        assertTrue(mAssistants.isTypeAdjustmentAllowedForPackage(deniedPkg2));
+        assertFalse(mAssistants.isTypeAdjustmentAllowedForPackage(deniedPkg3));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+    public void testSetAssistantAdjustmentKeyTypeStateForPackage_readWriteXml() throws Exception {
+        mAssistants.loadDefaultsFromConfig(true);
+        String deniedPkg1 = "denied.Pkg1";
+        String allowedPkg2 = "allowed.Pkg2";
+        String deniedPkg3 = "denied.Pkg3";
+        // Set type adjustment disallowed or allowed for these packages
+        mAssistants.setTypeAdjustmentForPackageState(deniedPkg1, false);
+        mAssistants.setTypeAdjustmentForPackageState(allowedPkg2, true);
+        mAssistants.setTypeAdjustmentForPackageState(deniedPkg3, false);
+
+        writeXmlAndReload(USER_ALL);
+
+        assertThat(mAssistants.getTypeAdjustmentDeniedPackages()).asList()
+                .containsExactlyElementsIn(List.of(deniedPkg1, deniedPkg3));
     }
 }

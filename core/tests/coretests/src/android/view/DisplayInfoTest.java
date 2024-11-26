@@ -78,6 +78,23 @@ public class DisplayInfoTest {
     }
 
     @Test
+    public void testRefreshRateOverride_keepsDisplyInfosEqualWhenOverrideIsSame() {
+        Display.Mode mode = new Display.Mode(
+                /*modeId=*/1, /*width=*/1000, /*height=*/1000, /*refreshRate=*/120);
+        DisplayInfo displayInfo1 = new DisplayInfo();
+        setSupportedMode(displayInfo1, mode);
+        displayInfo1.renderFrameRate = 60;
+        displayInfo1.refreshRateOverride = 30;
+
+        DisplayInfo displayInfo2 = new DisplayInfo();
+        setSupportedMode(displayInfo2, mode);
+        displayInfo2.renderFrameRate = 30;
+        displayInfo2.refreshRateOverride = 30;
+
+        assertTrue(displayInfo1.equals(displayInfo2));
+    }
+
+    @Test
     public void testRefreshRateOverride_makeDisplayInfosDifferent() {
         Display.Mode mode = new Display.Mode(
                 /*modeId=*/1, /*width=*/1000, /*height=*/1000, /*refreshRate=*/120);

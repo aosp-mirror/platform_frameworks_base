@@ -23,9 +23,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.data.repository.fakeLightBarControllerStore
 import com.android.systemui.statusbar.data.repository.fakePrivacyDotWindowControllerStore
 import com.android.systemui.testKosmos
 import com.google.common.truth.Expect
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -48,6 +50,7 @@ class MultiDisplayStatusBarStarterTest : SysuiTestCase() {
     private val fakeOrchestratorFactory = kosmos.fakeStatusBarOrchestratorFactory
     private val fakeInitializerStore = kosmos.fakeStatusBarInitializerStore
     private val fakePrivacyDotStore = kosmos.fakePrivacyDotWindowControllerStore
+    private val fakeLightBarStore = kosmos.fakeLightBarControllerStore
     // Lazy, so that @EnableFlags is set before initializer is instantiated.
     private val underTest by lazy { kosmos.multiDisplayStatusBarStarter }
 
@@ -92,6 +95,31 @@ class MultiDisplayStatusBarStarterTest : SysuiTestCase() {
 
             verify(fakePrivacyDotStore.forDisplay(displayId = 1)).start()
             verify(fakePrivacyDotStore.forDisplay(displayId = 2)).start()
+        }
+
+    @Test
+    fun start_doesNotStartLightBarControllerForCurrentDisplays() =
+        testScope.runTest {
+            fakeDisplayRepository.addDisplay(displayId = 1)
+            fakeDisplayRepository.addDisplay(displayId = 2)
+
+            underTest.start()
+            runCurrent()
+
+            verify(fakeLightBarStore.forDisplay(displayId = 1), never()).start()
+            verify(fakeLightBarStore.forDisplay(displayId = 2), never()).start()
+        }
+
+    @Test
+    fun start_createsLightBarControllerForCurrentDisplays() =
+        testScope.runTest {
+            fakeDisplayRepository.addDisplay(displayId = 1)
+            fakeDisplayRepository.addDisplay(displayId = 2)
+
+            underTest.start()
+            runCurrent()
+
+            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(1, 2)
         }
 
     @Test
@@ -145,6 +173,30 @@ class MultiDisplayStatusBarStarterTest : SysuiTestCase() {
         }
 
     @Test
+    fun displayAdded_lightBarForNewDisplayIsCreated() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+
+            fakeDisplayRepository.addDisplay(displayId = 3)
+            runCurrent()
+
+            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(3)
+        }
+
+    @Test
+    fun displayAdded_lightBarForNewDisplayIsNotStarted() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+
+            fakeDisplayRepository.addDisplay(displayId = 3)
+            runCurrent()
+
+            verify(fakeLightBarStore.forDisplay(displayId = 3), never()).start()
+        }
+
+    @Test
     fun displayAddedDuringStart_initializerForNewDisplayIsStarted() =
         testScope.runTest {
             underTest.start()
@@ -177,5 +229,27 @@ class MultiDisplayStatusBarStarterTest : SysuiTestCase() {
             runCurrent()
 
             verify(fakePrivacyDotStore.forDisplay(displayId = 3)).start()
+        }
+
+    @Test
+    fun displayAddedDuringStart_lightBarForNewDisplayIsCreated() =
+        testScope.runTest {
+            underTest.start()
+
+            fakeDisplayRepository.addDisplay(displayId = 3)
+            runCurrent()
+
+            assertThat(fakeLightBarStore.perDisplayMocks.keys).containsExactly(3)
+        }
+
+    @Test
+    fun displayAddedDuringStart_lightBarForNewDisplayIsNotStarted() =
+        testScope.runTest {
+            underTest.start()
+
+            fakeDisplayRepository.addDisplay(displayId = 3)
+            runCurrent()
+
+            verify(fakeLightBarStore.forDisplay(displayId = 3), never()).start()
         }
 }

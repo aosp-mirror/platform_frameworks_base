@@ -71,8 +71,8 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
@@ -125,7 +125,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     @Mock protected LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock protected NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock protected ShadeHeaderController mShadeHeaderController;
-    @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock protected ShadeTouchableRegionManager mShadeTouchableRegionManager;
+    @Mock protected StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     @Mock protected DozeParameters mDozeParameters;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected KeyguardBypassController mKeyguardBypassController;
@@ -149,7 +150,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     @Mock protected LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
-            new FakeDisableFlagsRepository();
+            mKosmos.getFakeDisableFlagsRepository();
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     protected FakeShadeRepository mShadeRepository = new FakeShadeRepository();
 
@@ -185,7 +186,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 mKosmos.getDeviceProvisioningInteractor(),
-                mDisableFlagsRepository,
+                mKosmos.getDisableFlagsInteractor(),
                 mDozeParameters,
                 mKeyguardRepository,
                 keyguardTransitionInteractor,
@@ -249,7 +250,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
                 mShadeHeaderController,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
+                () -> mStatusBarLongPressGestureDetector,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mScrimController,

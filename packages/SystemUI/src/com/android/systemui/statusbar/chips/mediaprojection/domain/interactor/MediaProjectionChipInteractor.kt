@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
 import android.content.pm.PackageManager
+import android.media.projection.StopReason
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -25,6 +27,7 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.mediaprojection.MediaProjectionUtils.packageHasCastingCapabilities
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import javax.inject.Inject
@@ -33,7 +36,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Interactor for media projection events, used to show chips in the status bar for share-to-app and
@@ -104,10 +106,10 @@ constructor(
 
     /** Stops the currently active projection. */
     fun stopProjecting() {
-        scope.launch { mediaProjectionRepository.stopProjecting() }
+        scope.launch { mediaProjectionRepository.stopProjecting(StopReason.STOP_PRIVACY_CHIP) }
     }
 
     companion object {
-        private const val TAG = "MediaProjection"
+        private val TAG = "MediaProjection".pad()
     }
 }

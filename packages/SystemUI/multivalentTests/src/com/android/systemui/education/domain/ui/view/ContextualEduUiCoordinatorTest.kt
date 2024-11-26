@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.contextualeducation.GestureType.HOME
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.contextualEducationInteractor
@@ -52,6 +53,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -66,6 +68,7 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     private val minDurationForNextEdu =
         KeyboardTouchpadEduInteractor.minIntervalBetweenEdu + 1.seconds
     private lateinit var underTest: ContextualEduUiCoordinator
+    private lateinit var previousDialog: Dialog
     @Mock private lateinit var dialog: Dialog
     @Mock private lateinit var notificationManager: NotificationManager
     @Mock private lateinit var accessibilityManagerWrapper: AccessibilityManagerWrapper
@@ -95,9 +98,11 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
                 kosmos.applicationCoroutineScope,
                 viewModel,
                 kosmos.applicationContext,
-                notificationManager
+                notificationManager,
             ) { model ->
                 toastContent = model.message
+                previousDialog = dialog
+                dialog = mock<Dialog>()
                 dialog
             }
         underTest.start()
@@ -129,6 +134,14 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
         }
 
     @Test
+    fun dismissPreviousDialogOnNewDialog() =
+        testScope.runTest {
+            triggerEducation(BACK)
+            triggerEducation(HOME)
+            verify(previousDialog).dismiss()
+        }
+
+    @Test
     fun verifyBackEduToastContent() =
         testScope.runTest {
             triggerEducation(BACK)
@@ -149,14 +162,14 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
             verifyNotificationContent(
                 R.string.back_edu_notification_title,
                 R.string.back_edu_notification_content,
-                notificationCaptor.value
+                notificationCaptor.value,
             )
         }
 
     private fun verifyNotificationContent(
         titleResId: Int,
         contentResId: Int,
-        notification: Notification
+        notification: Notification,
     ) {
         val expectedContent = context.getString(contentResId)
         val expectedTitle = context.getString(titleResId)

@@ -289,6 +289,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getEmergencyInstaller,
         AndroidPackage::isAllowCrossUidActivitySwitchFromBelow,
         AndroidPackage::getIntentMatchingFlags,
+        AndroidPackage::getPageSizeAppCompatFlags,
     )
 
     override fun extraParams() = listOf(
@@ -581,6 +582,34 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             "isSystemExt",
             PackageImpl::setSystemExt,
             true
+        ),
+        getSetByValue(
+            AndroidPackage::getAlternateLauncherIconResIds,
+            PackageImpl::setAlternateLauncherIconResIds,
+            intArrayOf(3, 5, 7),
+            compare = { first, second ->
+                equalBy(
+                    first, second,
+                    { it.size },
+                    { it[0] },
+                    { it[1] },
+                    { it[2] }
+                )
+            }
+        ),
+        getSetByValue(
+            AndroidPackage::getAlternateLauncherLabelResIds,
+            PackageImpl::setAlternateLauncherLabelResIds,
+            intArrayOf(3, 5, 7),
+            compare = { first, second ->
+                equalBy(
+                    first, second,
+                    { it.size },
+                    { it[0] },
+                    { it[1] },
+                    { it[2] }
+                )
+            }
         ),
     )
 

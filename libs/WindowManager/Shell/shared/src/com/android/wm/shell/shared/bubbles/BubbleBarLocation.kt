@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.shared.bubbles
 
+import android.annotation.IntDef
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -58,6 +59,38 @@ enum class BubbleBarLocation : Parcelable {
             }
 
             override fun newArray(size: Int) = arrayOfNulls<BubbleBarLocation>(size)
+        }
+    }
+
+    /** Define set of constants that allow to determine why location changed. */
+    @IntDef(
+        UpdateSource.DRAG_BAR,
+        UpdateSource.DRAG_BUBBLE,
+        UpdateSource.DRAG_EXP_VIEW,
+        UpdateSource.A11Y_ACTION_BAR,
+        UpdateSource.A11Y_ACTION_BUBBLE,
+        UpdateSource.A11Y_ACTION_EXP_VIEW,
+    )
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class UpdateSource {
+        companion object {
+            /** Location changed from dragging the bar */
+            const val DRAG_BAR = 1
+
+            /** Location changed from dragging the bubble */
+            const val DRAG_BUBBLE = 2
+
+            /** Location changed from dragging the expanded view */
+            const val DRAG_EXP_VIEW = 3
+
+            /** Location changed via a11y action on the bar */
+            const val A11Y_ACTION_BAR = 4
+
+            /** Location changed via a11y action on the bubble */
+            const val A11Y_ACTION_BUBBLE = 5
+
+            /** Location changed via a11y action on the expanded view */
+            const val A11Y_ACTION_EXP_VIEW = 6
         }
     }
 }

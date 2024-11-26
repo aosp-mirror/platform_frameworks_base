@@ -23,14 +23,10 @@ import com.android.internal.protolog.ProtoLogConfigurationServiceImpl.RegisterCl
 import com.android.internal.protolog.common.IProtoLogGroup;
 
 public class UnprocessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
-    public UnprocessedPerfettoProtoLogImpl(@NonNull IProtoLogGroup[] groups)
+    public UnprocessedPerfettoProtoLogImpl(
+            @NonNull ProtoLogDataSource dataSource, @NonNull IProtoLogGroup[] groups)
             throws ServiceManager.ServiceNotFoundException {
-        this(() -> {}, groups);
-    }
-
-    public UnprocessedPerfettoProtoLogImpl(@NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
-        super(cacheUpdater, groups);
+        super(dataSource, (instance) -> {}, groups);
         readyToLogToLogcat();
     }
 

@@ -53,6 +53,7 @@ import com.android.server.am.DropboxRateLimiter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -400,9 +401,18 @@ public class BootReceiver extends BroadcastReceiver {
             Slog.w(TAG, "Tombstone too large to add to DropBox: " + tombstone.toPath());
             return;
         }
-        // Read the proto tombstone file as bytes.
-        final byte[] tombstoneBytes = Files.readAllBytes(tombstone.toPath());
 
+        // Read the proto tombstone file as bytes.
+        // Previously used Files.readAllBytes() which internally creates a ThreadLocal BufferCache
+        // via ChannelInputStream that isn't properly released. Switched to
+        // FileInputStream.transferTo() which avoids the NIO channels completely,
+        // preventing the memory leak while maintaining the same functionality.
+        final byte[] tombstoneBytes;
+        try (FileInputStream fis = new FileInputStream(tombstone);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            fis.transferTo(baos);
+            tombstoneBytes = baos.toByteArray();
+        }
         final File tombstoneProtoWithHeaders = File.createTempFile(
                 tombstone.getName(), ".tmp", TOMBSTONE_TMP_DIR);
         Files.setPosixFilePermissions(

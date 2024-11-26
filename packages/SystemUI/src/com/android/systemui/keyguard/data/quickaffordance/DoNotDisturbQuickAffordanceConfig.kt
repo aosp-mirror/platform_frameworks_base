@@ -40,6 +40,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.util.settings.SecureSettings
@@ -75,7 +76,7 @@ constructor(
 
     @Inject
     constructor(
-        context: Context,
+        @ShadeDisplayAware context: Context,
         controller: ZenModeController,
         interactor: ZenModeInteractor,
         secureSettings: SecureSettings,

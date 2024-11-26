@@ -21,7 +21,9 @@ import static android.media.audio.Flags.FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE;
 
 import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
+import static com.android.media.flags.Flags.FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES;
+import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -150,6 +152,9 @@ public final class MediaRoute2Info implements Parcelable {
                 TYPE_HDMI,
                 TYPE_HDMI_ARC,
                 TYPE_HDMI_EARC,
+                TYPE_LINE_DIGITAL,
+                TYPE_LINE_ANALOG,
+                TYPE_AUX_LINE,
                 TYPE_USB_DEVICE,
                 TYPE_USB_ACCESSORY,
                 TYPE_DOCK,
@@ -229,6 +234,24 @@ public final class MediaRoute2Info implements Parcelable {
      */
     @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public static final int TYPE_HDMI_EARC = AudioDeviceInfo.TYPE_HDMI_EARC;
+
+    /**
+     * Indicates the route is a digital line connection (for example S/PDIF).
+     */
+    @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
+    public static final int TYPE_LINE_DIGITAL = AudioDeviceInfo.TYPE_LINE_DIGITAL;
+
+    /**
+     * Indicates the route is an analog line-level connection.
+     */
+    @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
+    public static final int TYPE_LINE_ANALOG = AudioDeviceInfo.TYPE_LINE_ANALOG;
+
+    /**
+     * Indicates the route is using the auxiliary line-level connectors.
+     */
+    @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
+    public static final int TYPE_AUX_LINE = AudioDeviceInfo.TYPE_AUX_LINE;
 
     /**
      * Indicates the route is a USB audio device.
@@ -399,6 +422,51 @@ public final class MediaRoute2Info implements Parcelable {
      */
     public static final int TYPE_GROUP = 2000;
 
+    /** @hide */
+    @IntDef(
+            prefix = {"ROUTING_TYPE_"},
+            value = {
+                FLAG_ROUTING_TYPE_SYSTEM_AUDIO,
+                FLAG_ROUTING_TYPE_SYSTEM_VIDEO,
+                FLAG_ROUTING_TYPE_REMOTE
+            },
+            flag = true)
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RoutingType {}
+
+    /**
+     * Indicates that a route supports routing of the system audio.
+     *
+     * <p>Providers that support this type of routing require the {@link
+     * android.Manifest.permission#MODIFY_AUDIO_ROUTING} permission.
+     */
+    @FlaggedApi(FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2)
+    public static final int FLAG_ROUTING_TYPE_SYSTEM_AUDIO = 1;
+
+    /**
+     * Indicates that a route supports routing of the system video.
+     *
+     * @hide
+     */
+    // TODO: b/380431086 - Enable this API once we add support for system video routing.
+    @FlaggedApi(FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2)
+    public static final int FLAG_ROUTING_TYPE_SYSTEM_VIDEO = 1 << 1;
+
+    /**
+     * Indicates that a route supports routing playback to remote routes through control commands.
+     *
+     * <p>This type of routing does not affect affect this system's audio or video, but instead
+     * relies on the device that corresponds to this route to fetch and play the media. It also
+     * requires the media app to take care of initializing and controlling playback.
+     */
+    @FlaggedApi(FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2)
+    public static final int FLAG_ROUTING_TYPE_REMOTE = 1 << 2;
+
+    private static final int FLAG_ROUTING_TYPE_ALL =
+            FLAG_ROUTING_TYPE_SYSTEM_AUDIO
+                    | FLAG_ROUTING_TYPE_SYSTEM_VIDEO
+                    | FLAG_ROUTING_TYPE_REMOTE;
+
     /**
      * Route feature: Live audio.
      * <p>
@@ -531,6 +599,7 @@ public final class MediaRoute2Info implements Parcelable {
     private final List<String> mFeatures;
     @Type
     private final int mType;
+    @RoutingType private final int mRoutingTypeFlags;
     private final boolean mIsSystem;
     private final Uri mIconUri;
     private final CharSequence mDescription;
@@ -554,6 +623,7 @@ public final class MediaRoute2Info implements Parcelable {
         mName = builder.mName;
         mFeatures = builder.mFeatures;
         mType = builder.mType;
+        mRoutingTypeFlags = builder.mRoutingTypeFlags;
         mIsSystem = builder.mIsSystem;
         mIconUri = builder.mIconUri;
         mDescription = builder.mDescription;
@@ -578,6 +648,7 @@ public final class MediaRoute2Info implements Parcelable {
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mFeatures = in.createStringArrayList();
         mType = in.readInt();
+        mRoutingTypeFlags = validateRoutingTypeFlags(in.readInt());
         mIsSystem = in.readBoolean();
         mIconUri = in.readParcelable(null, android.net.Uri.class);
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -636,6 +707,13 @@ public final class MediaRoute2Info implements Parcelable {
     @Type
     public int getType() {
         return mType;
+    }
+
+    /** Returns the flags that indicate the routing types supported by this route. */
+    @RoutingType
+    @FlaggedApi(FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2)
+    public int getSupportedRoutingTypes() {
+        return mRoutingTypeFlags;
     }
 
     /**
@@ -839,6 +917,7 @@ public final class MediaRoute2Info implements Parcelable {
     public boolean isSystemRouteType() {
         return switch (mType) {
             case TYPE_BUILTIN_SPEAKER,
+                            TYPE_AUX_LINE,
                             TYPE_BLUETOOTH_A2DP,
                             TYPE_DOCK,
                             TYPE_BLE_HEADSET,
@@ -846,6 +925,8 @@ public final class MediaRoute2Info implements Parcelable {
                             TYPE_HDMI,
                             TYPE_HDMI_ARC,
                             TYPE_HDMI_EARC,
+                            TYPE_LINE_DIGITAL,
+                            TYPE_LINE_ANALOG,
                             TYPE_USB_ACCESSORY,
                             TYPE_USB_DEVICE,
                             TYPE_USB_HEADSET,
@@ -879,6 +960,7 @@ public final class MediaRoute2Info implements Parcelable {
         pw.println(indent + "mName=" + mName);
         pw.println(indent + "mFeatures=" + mFeatures);
         pw.println(indent + "mType=" + getDeviceTypeString(mType));
+        pw.println(indent + "mRoutingTypeFlags=" + getRoutingTypeFlagsString(mRoutingTypeFlags));
         pw.println(indent + "mIsSystem=" + mIsSystem);
         pw.println(indent + "mIconUri=" + mIconUri);
         pw.println(indent + "mDescription=" + mDescription);
@@ -916,6 +998,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mName, other.mName)
                 && Objects.equals(mFeatures, other.mFeatures)
                 && (mType == other.mType)
+                && (mRoutingTypeFlags == other.mRoutingTypeFlags)
                 && (mIsSystem == other.mIsSystem)
                 && Objects.equals(mIconUri, other.mIconUri)
                 && Objects.equals(mDescription, other.mDescription)
@@ -941,6 +1024,7 @@ public final class MediaRoute2Info implements Parcelable {
                 mName,
                 mFeatures,
                 mType,
+                mRoutingTypeFlags,
                 mIsSystem,
                 mIconUri,
                 mDescription,
@@ -969,6 +1053,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(getName())
                 .append(", type=")
                 .append(getDeviceTypeString(getType()))
+                .append(", routingTypes=")
+                .append(getRoutingTypeFlagsString(getSupportedRoutingTypes()))
                 .append(", isSystem=")
                 .append(isSystemRoute())
                 .append(", features=")
@@ -1010,6 +1096,7 @@ public final class MediaRoute2Info implements Parcelable {
         TextUtils.writeToParcel(mName, dest, flags);
         dest.writeStringList(mFeatures);
         dest.writeInt(mType);
+        dest.writeInt(mRoutingTypeFlags);
         dest.writeBoolean(mIsSystem);
         dest.writeParcelable(mIconUri, flags);
         TextUtils.writeToParcel(mDescription, dest, flags);
@@ -1074,6 +1161,12 @@ public final class MediaRoute2Info implements Parcelable {
                 return "HDMI_ARC";
             case TYPE_HDMI_EARC:
                 return "HDMI_EARC";
+            case TYPE_LINE_DIGITAL:
+                return "LINE_DIGITAL";
+            case TYPE_LINE_ANALOG:
+                return "LINE_ANALOG";
+            case TYPE_AUX_LINE:
+                return "AUX_LINE";
             case TYPE_DOCK:
                 return "DOCK";
             case TYPE_USB_DEVICE:
@@ -1112,6 +1205,34 @@ public final class MediaRoute2Info implements Parcelable {
         }
     }
 
+    /** Returns a human-readable representation of the given {@code routingTypeFlags}. */
+    private static String getRoutingTypeFlagsString(@RoutingType int routingTypeFlags) {
+        List<String> typeStrings = new ArrayList<>();
+        if ((routingTypeFlags & FLAG_ROUTING_TYPE_SYSTEM_AUDIO) != 0) {
+            typeStrings.add("SYSTEM_AUDIO");
+        }
+        if ((routingTypeFlags & FLAG_ROUTING_TYPE_SYSTEM_VIDEO) != 0) {
+            typeStrings.add("SYSTEM_VIDEO");
+        }
+        if ((routingTypeFlags & FLAG_ROUTING_TYPE_REMOTE) != 0) {
+            typeStrings.add("REMOTE");
+        }
+        return String.join(/* delimiter= */ "|", typeStrings);
+    }
+
+    /**
+     * Throws an {@link IllegalArgumentException} if the provided {@code routingTypeFlags} are not
+     * valid. Otherwise, returns the provided value.
+     */
+    private static int validateRoutingTypeFlags(@RoutingType int routingTypeFlags) {
+        if (routingTypeFlags == 0 || (routingTypeFlags & ~FLAG_ROUTING_TYPE_ALL) != 0) {
+            throw new IllegalArgumentException(
+                    "Invalid routing type flags: " + Integer.toHexString(routingTypeFlags));
+        } else {
+            return routingTypeFlags;
+        }
+    }
+
     /**
      * Builder for {@link MediaRoute2Info media route info}.
      */
@@ -1122,6 +1243,7 @@ public final class MediaRoute2Info implements Parcelable {
 
         @Type
         private int mType = TYPE_UNKNOWN;
+        @RoutingType private int mRoutingTypeFlags = FLAG_ROUTING_TYPE_REMOTE;
         private boolean mIsSystem;
         private Uri mIconUri;
         private CharSequence mDescription;
@@ -1193,6 +1315,7 @@ public final class MediaRoute2Info implements Parcelable {
             mName = routeInfo.mName;
             mFeatures = new ArrayList<>(routeInfo.mFeatures);
             mType = routeInfo.mType;
+            mRoutingTypeFlags = routeInfo.mRoutingTypeFlags;
             mIsSystem = routeInfo.mIsSystem;
             mIconUri = routeInfo.mIconUri;
             mDescription = routeInfo.mDescription;
@@ -1266,6 +1389,18 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setType(@Type int type) {
             mType = type;
+            return this;
+        }
+
+        /**
+         * Sets the routing types that this route supports.
+         *
+         * @see MediaRoute2Info#getSupportedRoutingTypes()
+         */
+        @NonNull
+        @FlaggedApi(FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2)
+        public Builder setSupportedRoutingTypes(@RoutingType int routingTypeFlags) {
+            mRoutingTypeFlags = validateRoutingTypeFlags(routingTypeFlags);
             return this;
         }
 

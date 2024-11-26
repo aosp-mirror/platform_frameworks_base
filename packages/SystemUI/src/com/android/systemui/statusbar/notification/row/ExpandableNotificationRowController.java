@@ -41,6 +41,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -58,7 +59,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationRowStatsLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.time.SystemClock;
@@ -378,15 +379,19 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mView.getEntry().setInitializationTime(mClock.elapsedRealtime());
                 mPluginManager.addPluginListener(mView,
                         NotificationMenuRowPlugin.class, false /* Allow multiple */);
-                mView.setOnKeyguard(mStatusBarStateController.getState() == KEYGUARD);
-                mStatusBarStateController.addCallback(mStatusBarStateListener);
+                if (!SceneContainerFlag.isEnabled()) {
+                    mView.setOnKeyguard(mStatusBarStateController.getState() == KEYGUARD);
+                    mStatusBarStateController.addCallback(mStatusBarStateListener);
+                }
                 mSettingsController.addCallback(BUBBLES_SETTING_URI, mSettingsListener);
             }
 
             @Override
             public void onViewDetachedFromWindow(View v) {
                 mPluginManager.removePluginListener(mView);
-                mStatusBarStateController.removeCallback(mStatusBarStateListener);
+                if (!SceneContainerFlag.isEnabled()) {
+                    mStatusBarStateController.removeCallback(mStatusBarStateListener);
+                }
                 mSettingsController.removeCallback(BUBBLES_SETTING_URI, mSettingsListener);
             }
         });

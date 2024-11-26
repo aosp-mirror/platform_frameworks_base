@@ -67,12 +67,16 @@ public class BackgroundActivityStartControllerLogTests {
     @Mock
     PendingIntentRecord mPendingIntentRecord;
     MirrorActiveUids mActiveUids = new MirrorActiveUids();
+    @Mock
+    VisibleActivityProcessTracker mVisibleActivityProcessTracker;
     BackgroundActivityStartController mController;
     BackgroundActivityStartController.BalState mState;
 
     @Before
     public void setup() {
         setViaReflection(mService, "mActiveUids", mActiveUids);
+        setViaReflection(mService, "mVisibleActivityProcessTracker",
+                mVisibleActivityProcessTracker);
         mController = new BackgroundActivityStartController(mService,
                 mSupervisor);
     }

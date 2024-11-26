@@ -30,6 +30,7 @@ import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileMode
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileIconModel
 import javax.inject.Inject
 
@@ -37,9 +38,9 @@ import javax.inject.Inject
 class InternetTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Resources.Theme,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @Main private val handler: Handler,
 ) : QSTileDataToStateMapper<InternetTileModel> {
 

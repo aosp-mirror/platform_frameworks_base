@@ -280,7 +280,25 @@ public class RuntimeColorFilter extends ColorFilter {
         if (colorFilter == null) {
             throw new NullPointerException("The colorFilter parameter must not be null");
         }
-        nativeUpdateChild(getNativeInstance(), filterName, colorFilter.getNativeInstance());
+        nativeUpdateInputColorFilter(getNativeInstance(), filterName,
+                colorFilter.getNativeInstance());
+    }
+
+    /**
+     * Assigns the uniform xfermode to the provided xfermode parameter.  If the shader program does
+     * not have a uniform xfermode with that name then an IllegalArgumentException is thrown.
+     *
+     * @param xfermodeName name matching the uniform declared in the AGSL program
+     * @param xfermode filter passed into the AGSL program for sampling
+     */
+    public void setInputXfermode(@NonNull String xfermodeName, @NonNull RuntimeXfermode xfermode) {
+        if (xfermodeName == null) {
+            throw new NullPointerException("The xfermodeName parameter must not be null");
+        }
+        if (xfermode == null) {
+            throw new NullPointerException("The xfermode parameter must not be null");
+        }
+        nativeUpdateChild(getNativeInstance(), xfermodeName, xfermode.createNativeInstance());
     }
 
     /** @hide */
@@ -301,5 +319,6 @@ public class RuntimeColorFilter extends ColorFilter {
             long colorFilter, String uniformName, int value1, int value2, int value3,
             int value4, int count);
     private static native void nativeUpdateChild(long colorFilter, String childName, long child);
-
+    private static native void nativeUpdateInputColorFilter(long colorFilter, String childName,
+            long inputFilter);
 }

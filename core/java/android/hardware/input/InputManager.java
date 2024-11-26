@@ -34,6 +34,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
@@ -259,7 +260,7 @@ public final class InputManager {
     }
 
     /**
-     * Custom input gesture error: Input gesture already exists
+     * Custom input gesture result success
      *
      * @hide
      */
@@ -1487,12 +1488,13 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
     @CustomInputGestureResult
+    @UserHandleAware
     public int addCustomInputGesture(@NonNull InputGestureData inputGestureData) {
         if (!enableCustomizableInputGestures()) {
             return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
         }
         try {
-            return mIm.addCustomInputGesture(inputGestureData.getAidlData());
+            return mIm.addCustomInputGesture(mContext.getUserId(), inputGestureData.getAidlData());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1509,12 +1511,14 @@ public final class InputManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
     @CustomInputGestureResult
+    @UserHandleAware
     public int removeCustomInputGesture(@NonNull InputGestureData inputGestureData) {
         if (!enableCustomizableInputGestures()) {
             return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
         }
         try {
-            return mIm.removeCustomInputGesture(inputGestureData.getAidlData());
+            return mIm.removeCustomInputGesture(mContext.getUserId(),
+                    inputGestureData.getAidlData());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1522,15 +1526,20 @@ public final class InputManager {
 
     /** Removes all custom input gestures
      *
+     * @param filter for removing all gestures of a category. If {@code null}, all custom input
+     *               gestures will be removed
+     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
-    public void removeAllCustomInputGestures() {
+    @UserHandleAware
+    public void removeAllCustomInputGestures(@Nullable InputGestureData.Filter filter) {
         if (!enableCustomizableInputGestures()) {
             return;
         }
         try {
-            mIm.removeAllCustomInputGestures();
+            mIm.removeAllCustomInputGestures(mContext.getUserId(),
+                    filter == null ? -1 : filter.getTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1538,15 +1547,20 @@ public final class InputManager {
 
     /** Get all custom input gestures
      *
+     * @param filter for fetching all gestures of a category. If {@code null}, then will return
+     *               all custom input gestures
+     *
      * @hide
      */
-    public List<InputGestureData> getCustomInputGestures() {
+    @UserHandleAware
+    public List<InputGestureData> getCustomInputGestures(@Nullable InputGestureData.Filter filter) {
         List<InputGestureData> result = new ArrayList<>();
         if (!enableCustomizableInputGestures()) {
             return result;
         }
         try {
-            for (AidlInputGestureData data : mIm.getCustomInputGestures()) {
+            for (AidlInputGestureData data : mIm.getCustomInputGestures(mContext.getUserId(),
+                    filter == null ? -1 : filter.getTag())) {
                 result.add(new InputGestureData(data));
             }
         } catch (RemoteException e) {
@@ -1570,6 +1584,21 @@ public final class InputManager {
                 result.add(new InputGestureData(data));
             }
             return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resets locked modifier state (i.e.. Caps Lock, Num Lock, Scroll Lock state)
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public void resetLockedModifierState() {
+        try {
+            mIm.resetLockedModifierState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

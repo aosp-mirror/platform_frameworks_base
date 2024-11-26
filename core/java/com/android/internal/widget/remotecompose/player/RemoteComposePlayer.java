@@ -15,17 +15,26 @@
  */
 package com.android.internal.widget.remotecompose.player;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.HapticFeedbackConstants;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.player.platform.RemoteComposeCanvas;
 
@@ -57,11 +66,7 @@ public class RemoteComposePlayer extends FrameLayout {
      * @param debugFlags 1 to set debug on
      */
     public void setDebug(int debugFlags) {
-        if (debugFlags == 1) {
-            mInner.setDebug(true);
-        } else {
-            mInner.setDebug(false);
-        }
+        mInner.setDebug(debugFlags);
     }
 
     public RemoteComposeDocument getDocument() {
@@ -82,6 +87,15 @@ public class RemoteComposePlayer extends FrameLayout {
             mInner.setDocument(null);
         }
         mapColors();
+        setupSensors();
+        mInner.setHapticEngine(
+                new CoreDocument.HapticEngine() {
+
+                    @Override
+                    public void haptic(int type) {
+                        provideHapticFeedback(type);
+                    }
+                });
     }
 
     /**
@@ -259,10 +273,37 @@ public class RemoteComposePlayer extends FrameLayout {
     /**
      * This returns a list of colors that have names in the Document.
      *
-     * @return
+     * @return the names of named Strings or null
      */
     public String[] getNamedColors() {
         return mInner.getNamedColors();
+    }
+
+    /**
+     * This returns a list of floats that have names in the Document.
+     *
+     * @return return the names of named floats in the document
+     */
+    public String[] getNamedFloats() {
+        return mInner.getNamedVariables(NamedVariable.FLOAT_TYPE);
+    }
+
+    /**
+     * This returns a list of string name that have names in the Document.
+     *
+     * @return the name of named string (not the string itself)
+     */
+    public String[] getNamedStrings() {
+        return mInner.getNamedVariables(NamedVariable.STRING_TYPE);
+    }
+
+    /**
+     * This returns a list of images that have names in the Document.
+     *
+     * @return
+     */
+    public String[] getNamedImages() {
+        return mInner.getNamedVariables(NamedVariable.IMAGE_TYPE);
     }
 
     /**
@@ -480,5 +521,152 @@ public class RemoteComposePlayer extends FrameLayout {
             int color = arr.getColor(0, -1);
             return color;
         }
+    }
+
+    private static int[] sHapticTable = {
+        HapticFeedbackConstants.NO_HAPTICS,
+        HapticFeedbackConstants.LONG_PRESS,
+        HapticFeedbackConstants.VIRTUAL_KEY,
+        HapticFeedbackConstants.KEYBOARD_TAP,
+        HapticFeedbackConstants.CLOCK_TICK,
+        HapticFeedbackConstants.CONTEXT_CLICK,
+        HapticFeedbackConstants.KEYBOARD_PRESS,
+        HapticFeedbackConstants.KEYBOARD_RELEASE,
+        HapticFeedbackConstants.VIRTUAL_KEY_RELEASE,
+        HapticFeedbackConstants.TEXT_HANDLE_MOVE,
+        HapticFeedbackConstants.GESTURE_START,
+        HapticFeedbackConstants.GESTURE_END,
+        HapticFeedbackConstants.CONFIRM,
+        HapticFeedbackConstants.REJECT,
+        HapticFeedbackConstants.TOGGLE_ON,
+        HapticFeedbackConstants.TOGGLE_OFF,
+        HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE,
+        HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE,
+        HapticFeedbackConstants.DRAG_START,
+        HapticFeedbackConstants.SEGMENT_TICK,
+        HapticFeedbackConstants.SEGMENT_FREQUENT_TICK,
+    };
+
+    private void provideHapticFeedback(int type) {
+        performHapticFeedback(sHapticTable[type % sHapticTable.length]);
+    }
+
+    SensorManager mSensorManager;
+    Sensor mAcc = null, mGyro = null, mMag = null, mLight = null;
+    SensorEventListener mListener;
+
+    private void setupSensors() {
+
+        int minId = RemoteContext.ID_ACCELERATION_X;
+        int maxId = RemoteContext.ID_LIGHT;
+        int[] ids = new int[1 + maxId - minId];
+
+        int count = mInner.hasSensorListeners(ids);
+        mAcc = null;
+        mGyro = null;
+        mMag = null;
+        mLight = null;
+        if (count > 0) {
+            Application app = (Application) getContext().getApplicationContext();
+
+            mSensorManager = (SensorManager) app.getSystemService(Context.SENSOR_SERVICE);
+            for (int i = 0; i < count; i++) {
+                switch (ids[i]) {
+                    case RemoteContext.ID_ACCELERATION_X:
+                    case RemoteContext.ID_ACCELERATION_Y:
+                    case RemoteContext.ID_ACCELERATION_Z:
+                        if (mAcc == null) {
+                            mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                        }
+                        break;
+                    case RemoteContext.ID_GYRO_ROT_X:
+                    case RemoteContext.ID_GYRO_ROT_Y:
+                    case RemoteContext.ID_GYRO_ROT_Z:
+                        if (mGyro == null) {
+                            mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+                        }
+                        break;
+                    case RemoteContext.ID_MAGNETIC_X:
+                    case RemoteContext.ID_MAGNETIC_Y:
+                    case RemoteContext.ID_MAGNETIC_Z:
+                        if (mMag == null) {
+                            mMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+                        }
+                        break;
+                    case RemoteContext.ID_LIGHT:
+                        if (mLight == null) {
+                            mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+                        }
+                }
+            }
+        }
+        registerListener();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        unregisterListener();
+    }
+
+    public void registerListener() {
+        Sensor[] s = {mAcc, mGyro, mMag, mLight};
+        if (mListener != null) {
+            unregisterListener();
+        }
+        SensorEventListener listener =
+                new SensorEventListener() {
+                    @Override
+                    public void onSensorChanged(SensorEvent event) {
+                        if (event.sensor == mAcc) {
+                            mInner.setExternalFloat(
+                                    RemoteContext.ID_ACCELERATION_X, event.values[0]);
+                            mInner.setExternalFloat(
+                                    RemoteContext.ID_ACCELERATION_Y, event.values[1]);
+                            mInner.setExternalFloat(
+                                    RemoteContext.ID_ACCELERATION_Z, event.values[2]);
+                        } else if (event.sensor == mGyro) {
+                            mInner.setExternalFloat(RemoteContext.ID_GYRO_ROT_X, event.values[0]);
+                            mInner.setExternalFloat(RemoteContext.ID_GYRO_ROT_Y, event.values[1]);
+                            mInner.setExternalFloat(RemoteContext.ID_GYRO_ROT_Z, event.values[2]);
+                        } else if (event.sensor == mMag) {
+                            mInner.setExternalFloat(RemoteContext.ID_MAGNETIC_X, event.values[0]);
+                            mInner.setExternalFloat(RemoteContext.ID_MAGNETIC_Y, event.values[1]);
+                            mInner.setExternalFloat(RemoteContext.ID_MAGNETIC_Z, event.values[2]);
+                        } else if (event.sensor == mLight) {
+                            mInner.setExternalFloat(RemoteContext.ID_LIGHT, event.values[0]);
+                        }
+                    }
+
+                    @Override
+                    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+                };
+
+        Sensor[] sensors = {mAcc, mGyro, mMag, mLight};
+        for (int i = 0; i < sensors.length; i++) {
+            Sensor sensor = sensors[i];
+            if (sensor != null) {
+                mListener = listener;
+                mSensorManager.registerListener(
+                        mListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+        }
+    }
+
+    public void unregisterListener() {
+        if (mListener != null && mSensorManager != null) {
+            mSensorManager.unregisterListener(mListener);
+        }
+        mListener = null;
+    }
+
+    /**
+     * This returns the amount of time in ms the player used to evalueate a pass it is averaged over
+     * a number of evaluations.
+     *
+     * @return time in ms
+     */
+    public float getEvalTime() {
+        return mInner.getEvalTime();
     }
 }

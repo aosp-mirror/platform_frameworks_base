@@ -16,6 +16,16 @@ flag {
 }
 
 flag {
+   name: "multiuser_wifi_picker_tracker_support"
+   namespace: "systemui"
+   description: "Adds WifiPickerTracker support for multiple users to support when HSUM is enabled."
+   bug: "371586248"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "udfps_view_performance"
    namespace: "systemui"
    description: "Decrease screen off blocking calls by waiting until the device is finished going to sleep before adding the udfps view."
@@ -257,7 +267,7 @@ flag {
 flag {
     name: "dual_shade"
     namespace: "systemui"
-    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    description: "Enables Dual Shade (go/dual-shade-design-doc)."
     bug: "337259436"
 }
 
@@ -414,6 +424,17 @@ flag {
 }
 
 flag {
+    name: "status_bar_auto_start_screen_record_chip"
+    namespace: "systemui"
+    description: "When screen recording, use the specified start time to update the screen record "
+        "chip state instead of waiting for an official 'recording started' signal"
+    bug: "366448907"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
@@ -537,6 +558,13 @@ flag {
 }
 
 flag {
+   name: "lockscreen_custom_clocks"
+   namespace: "systemui"
+   description: "Enable lockscreen custom clocks"
+   bug: "378486437"
+}
+
+flag {
    name: "faster_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"
@@ -604,9 +632,9 @@ flag {
 
 flag {
   name: "status_bar_connected_displays"
-  namespace: "systemui"
+  namespace: "lse_desktop_experience"
   description: "Shows the status bar on connected displays"
-  bug: "362720336"
+  bug: "379264862"
 }
 
 flag {
@@ -620,9 +648,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_simple_fragment"
+    name: "status_bar_root_modernization"
     namespace: "systemui"
-    description: "Feature flag for refactoring the collapsed status bar fragment"
+    description: "Feature flag for replacing the status bar fragment with a compose root"
     bug: "364360986"
 }
 
@@ -1173,6 +1201,16 @@ flag {
 }
 
 flag {
+  name: "communal_hub_use_thread_pool_for_widgets"
+  namespace: "systemui"
+  description: "Use a dedicated thread pool executor for loading widgets on glanceable hub"
+  bug: "369412569"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "communal_standalone_support"
   namespace: "systemui"
   description: "Support communal features without a dock"
@@ -1183,6 +1221,13 @@ flag {
   name: "communal_hub_on_mobile"
   namespace: "systemui"
   description: "Brings the glanceable hub experience to mobile phones"
+  bug: "375689917"
+}
+
+flag {
+  name: "glanceable_hub_v2"
+  namespace: "systemui"
+  description: "Gates the refreshed glanceable hub experience that also brings the glanceable hub to mobile phones"
   bug: "375689917"
 }
 
@@ -1339,16 +1384,6 @@ flag {
 }
 
 flag {
-  name: "notification_pulsing_fix"
-  namespace: "systemui"
-  description: "Allow showing new pulsing notifications when the device is already pulsing."
-  bug: "335560575"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "media_lockscreen_launch_animation"
     namespace : "systemui"
     description : "Enable the origin launch animation for UMO when opening on top of lockscreen."
@@ -1478,6 +1513,16 @@ flag {
    namespace: "systemui"
    description: "The SIM PIN bouncer does not close after unlocking"
    bug: "297461589"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "sim_pin_use_slot_id"
+   namespace: "systemui"
+   description: "Reorient SIM data processing around slotId instead of subId"
+   bug: "376173142"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
@@ -1676,6 +1721,16 @@ flag {
 }
 
 flag {
+   name: "show_toast_when_app_control_brightness"
+   namespace: "systemui"
+   description: "Showing the warning toast if the current running app window has controlled the brightness value."
+   bug: "363225340"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "home_controls_dream_hsum"
   namespace: "systemui"
   description: "Enables the home controls dream in HSUM"
@@ -1720,6 +1775,13 @@ flag {
 }
 
 flag {
+    name: "notification_shade_blur"
+    namespace: "systemui"
+    description: "Enables the new blur effect on the Notification Shade."
+    bug: "370555223"
+}
+
+flag {
   name: "ensure_enr_views_visibility"
   namespace: "systemui"
   description: "Ensures public and private visibilities"
@@ -1742,4 +1804,62 @@ flag {
     namespace: "systemui"
     description: "An implementation of shortcut customizations through shortcut helper."
     bug: "365064144"
+}
+
+flag {
+    name: "notification_reentrant_dismiss"
+    namespace: "systemui"
+    description: "Posts to avoid a crashing reentrant pipeline run"
+    bug: "328328054"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+      }
+}
+
+flag {
+    name: "stoppable_fgs_system_app"
+    namespace: "systemui"
+    description: "System app with foreground service can opt in to be stoppable."
+    bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "keyguard_transition_force_finish_on_screen_off"
+    namespace: "systemui"
+    description: "Forces KTF transitions to finish if the screen turns all the way off."
+    bug: "331636736"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "gsf_bouncer"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Bouncer surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "gsf_quick_settings"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Quick Settings surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "glanceable_hub_shortcut_button"
+    namespace: "systemui"
+    description: "Adds a shortcut button to lockscreen to show glanceable hub."
+    bug: "378173531"
+}
+
+flag {
+    name: "spatial_model_launcher_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on Launcher when users pull down shade."
+    bug: "370562309"
 }

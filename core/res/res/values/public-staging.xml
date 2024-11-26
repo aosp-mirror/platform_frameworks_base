@@ -127,21 +127,60 @@
     <public name="intentMatchingFlags"/>
     <!-- @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API) -->
     <public name="layoutLabel"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+    <public name="alternateLauncherIcons"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+    <public name="alternateLauncherLabels"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
+    <public name="pageSizeCompat" />
+    <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
+    <public name="shareRolePriority"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SUPPORT_MINOR_VERSIONS_IN_MINSDKVERSION) -->
+    <public name="minSdkVersionFull"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
+    <!-- @FlaggedApi(android.appwidget.flags.Flags.FLAG_ENGAGEMENT_METRICS) -->
+    <public name="remoteViewsMetricsId"/>
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01b50000">
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01b40000">
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+         @hide @SystemApi -->
+    <public name="config_systemDependencyInstaller" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b20000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_on_surface_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_primary_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_surface_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_scrim_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_shadow_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_surface_tint_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_on_surface_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_primary_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_surface_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_scrim_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_shadow_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_surface_tint_dark"/>
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01b10000">

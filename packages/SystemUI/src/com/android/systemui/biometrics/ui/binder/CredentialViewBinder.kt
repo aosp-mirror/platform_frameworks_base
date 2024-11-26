@@ -9,18 +9,21 @@ import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.biometrics.AuthPanelController
+import com.android.systemui.biometrics.plugins.AuthContextPlugins
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialPatternView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.AuthContextPlugin
 import com.android.systemui.res.R
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val ANIMATE_CREDENTIAL_INITIAL_DURATION_MS = 150
 
@@ -42,6 +45,7 @@ object CredentialViewBinder {
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
         legacyCallback: Spaghetti.Callback,
+        plugins: AuthContextPlugins?,
         maxErrorDuration: Long = 3_000L,
         requestFocusForInput: Boolean = true,
     ) {
@@ -72,6 +76,10 @@ object CredentialViewBinder {
             }
 
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                if (plugins != null) {
+                    launch { plugins.notifyShowingBPCredential(view) }
+                }
+
                 // show prompt metadata
                 launch {
                     viewModel.header.collect { header ->
@@ -136,6 +144,12 @@ object CredentialViewBinder {
                             host.onCredentialAttemptsRemaining(info.remaining!!, info.message)
                         }
                 }
+
+                try {
+                    awaitCancellation()
+                } catch (_: Throwable) {
+                    plugins?.notifyHidingBPCredential()
+                }
             }
         }
 
@@ -172,3 +186,15 @@ private var TextView.textOrHide: String?
         text = if (gone) "" else value
     }
     get() = text?.toString()
+
+private suspend fun AuthContextPlugins.notifyShowingBPCredential(view: View) = use { plugin ->
+    plugin.onShowingSensitiveSurface(
+        AuthContextPlugin.SensitiveSurface.BiometricPrompt(view = view, isCredential = true)
+    )
+}
+
+private fun AuthContextPlugins.notifyHidingBPCredential() = useInBackground { plugin ->
+    plugin.onHidingSensitiveSurface(
+        AuthContextPlugin.SensitiveSurface.BiometricPrompt(isCredential = true)
+    )
+}

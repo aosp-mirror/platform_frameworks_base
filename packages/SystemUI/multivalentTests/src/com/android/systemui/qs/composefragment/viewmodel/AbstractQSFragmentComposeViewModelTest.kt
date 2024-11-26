@@ -16,11 +16,13 @@
 
 package com.android.systemui.qs.composefragment.viewmodel
 
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
@@ -36,7 +38,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 
@@ -58,11 +59,14 @@ abstract class AbstractQSFragmentComposeViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         Dispatchers.setMain(kosmos.testDispatcher)
-    }
+        onTeardown { Dispatchers.resetMain() }
 
-    @After
-    fun teardown() {
-        Dispatchers.resetMain()
+        val globalWriteObserverHandle =
+            Snapshot.registerGlobalWriteObserver {
+                Snapshot.sendApplyNotifications()
+                kosmos.runCurrent()
+            }
+        onTeardown { globalWriteObserverHandle.dispose() }
     }
 
     protected inline fun TestScope.testWithinLifecycle(

@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ॲपला जवळच्या अल्ट्रा-वाइडबँड डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"जवळपासच्या वाय-फाय डिव्हाइसशी संवाद साधा"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ॲपला जाहिरात करण्याची, कनेक्ट करण्याची आणि जवळपासच्या वाय-फाय डिव्हाइसचे संबंधित स्थान निर्धारित करण्याची परवानगी देते"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"जवळपासच्या डिव्हाइसदरम्यान संबंधित स्थान निश्चित करा"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ॲपला जवळच्या डिव्हाइसदरम्यानचे संबंधित स्थान निर्धारित करण्याची अनुमती द्या"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"प्राधान्यकृत NFC पेमेंट सेवा माहिती"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"नोंदणीकृत एड्स आणि मार्ग गंतव्यस्थान सारखी प्राधान्यकृत एनएफसी पेमेंट सेवेची माहिती मिळवण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
@@ -1938,12 +1940,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"आठवड्याच्या शेवटी"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इव्‍हेंट"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"झोपताना"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"व्यत्यय आणू नका (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> द्वारे व्यवस्थापित"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"सुरू आहे"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद आहे"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ते <xliff:g id="END">%2$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
     <skip />
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"कोणतेही कॅलेंडर"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> काही ध्‍वनी म्‍यूट करत आहे"</string>
@@ -2426,15 +2430,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल किंवा वाय-फाय नेटवर्कशिवाय मेसेज पाठवणे आणि मिळवणे"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages उघडा"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ते कसे काम करते"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"नेटवर्क आपोआप निवडा\" सुरू करा"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"सेटिंग्ज मध्ये \"नेटवर्क आपोआप निवडा\" सुरू करा, जेणेकरून तुमचा फोन सॅटेलाइटसोबत काम करणारे नेटवर्क शोधू शकेल"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"सुरू करा"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"मागे जा"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"प्रलंबित आहे..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"सॅटेलाइट SOS आता उपलब्ध आहे"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"कोणतेही मोबाइल किंवा वाय-फाय नेटवर्क उपलब्ध नसल्यास, तुम्ही आणीबाणी सेवांना मेसेज पाठवू शकता. Google Messages हे तुमचे डीफॉल्ट मेसेजिंग ॲप असणे आवश्यक आहे."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"सॅटेलाइट SOS ला सपोर्ट नाही"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"या डिव्हाइसवर सॅटेलाइट SOS ला सपोर्ट नाही"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"सॅटेलाइट SOS सेट केलेले नाही"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"तुम्ही इंटरनेटशी कनेक्ट केले असल्याची खात्री करा आणि पुन्हा सेटअप करून पहा"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"सॅटेलाइट SOS उपलब्ध नाही"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"या देशात किंवा प्रदेशात सॅटेलाइट SOS उपलब्ध नाही"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"सॅटेलाइट SOS सेट केलेले नाही"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"सॅटेलाइटद्वारे मेसेज करण्यासाठी, Google Messages ला तुमचे डीफॉल्ट मेसेजिंग ॲप म्हणून सेट करा"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"सॅटेलाइट SOS उपलब्ध नाही"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"या देशात किंवा प्रदेशात सॅटेलाइट SOS उपलब्ध आहे का हे तपासण्यासाठी, स्थान सेटिंग्ज सुरू करा"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"सॅटेलाइट मेसेजिंग उपलब्ध आहे"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"मोबाईल किंवा वाय-फाय नेटवर्क नसल्यास, तुम्ही सॅटेलाइटद्वारे मेसेज पाठवू शकता. Google Messages हे तुमचे डीफॉल्ट मेसेजिंग ॲप असणे आवश्यक आहे."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"सॅटेलाइट मेसेजिंगला सपोर्ट नाही"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"या डिव्हाइसवर सॅटेलाइट मेसेजिंगला सपोर्ट नाही"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"सॅटेलाइट मेसेजिंग सेट केलेले नाही"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"तुम्ही इंटरनेटशी कनेक्ट केले असल्याची खात्री करा आणि पुन्हा सेटअप करून पहा"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"सॅटेलाइट मेसेजिंग उपलब्ध नाही"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"या देशामध्ये किंवा प्रदेशामध्ये सॅटेलाइट मेसेजिंग उपलब्ध नाही"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"सॅटेलाइट मेसेजिंग सेट केलेले नाही"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"सॅटेलाइटद्वारे मेसेज करण्यासाठी, Google Messages ला तुमचे डीफॉल्ट मेसेजिंग ॲप म्हणून सेट करा"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"सॅटेलाइट मेसेजिंग उपलब्ध नाही"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"या देशात किंवा प्रदेशात सॅटेलाइट मेसेजिंग उपलब्ध आहे का हे तपासण्यासाठी, स्थान सेटिंग्ज सुरू करा"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फिंगरप्रिंट अनलॉक पुन्हा सेट करा"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> यापुढे ओळखता येणार नाही."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> आणि <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> यापुढे ओळखता येणार नाहीत."</string>

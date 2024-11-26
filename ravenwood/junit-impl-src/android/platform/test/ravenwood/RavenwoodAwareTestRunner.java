@@ -30,6 +30,8 @@ import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.ravenwood.common.RavenwoodCommonUtils;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -131,9 +133,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
 
         Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
 
-        // This is needed to make AndroidJUnit4ClassRunner happy.
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
-
         // Hook point to allow more customization.
         runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);
 
@@ -229,7 +228,9 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
             s.evaluate();
             onAfter(description, scope, order, null);
         } catch (Throwable t) {
-            if (onAfter(description, scope, order, t)) {
+            var shouldReportFailure = RavenwoodCommonUtils.runIgnoringException(
+                    () -> onAfter(description, scope, order, t));
+            if (shouldReportFailure == null || shouldReportFailure) {
                 throw t;
             }
         }

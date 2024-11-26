@@ -16,6 +16,8 @@
 
 package com.android.server.backup.fullbackup;
 
+import static android.app.backup.BackupAnnotations.OperationType.BACKUP;
+
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
@@ -34,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -388,6 +391,10 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 }
             }
 
+            // We ask the transport which packages should not be put in restricted mode and cache
+            // the result in UBMS to be used later when the apps are started for backup.
+            setNoRestrictedModePackages(transport, mPackages);
+
             // Set up to send data to the transport
             final int N = mPackages.size();
             int chunkSizeInBytes = 8 * 1024; // 8KB
@@ -694,6 +701,10 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 mUserBackupManagerService.scheduleNextFullBackupJob(backoff);
             }
 
+            // Clear this to avoid using the memory until reboot.
+            mUserBackupManagerService
+                    .getBackupAgentConnectionManager().clearNoRestrictedModePackages();
+
             Slog.i(TAG, "Full data backup pass finished.");
             mUserBackupManagerService.getWakelock().release();
         }
@@ -719,6 +730,22 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     Slog.w(TAG, "Unable to close pipe!");
                 }
             }
+        }
+    }
+
+    private void setNoRestrictedModePackages(BackupTransportClient transport,
+            List<PackageInfo> packages) {
+        try {
+            Set<String> packageNames = new ArraySet<>();
+            for (int i = 0; i < packages.size(); i++) {
+                packageNames.add(packages.get(i).packageName);
+            }
+            packageNames = transport.getPackagesThatShouldNotUseRestrictedMode(packageNames,
+                    BACKUP);
+            mUserBackupManagerService.getBackupAgentConnectionManager().setNoRestrictedModePackages(
+                    packageNames, BACKUP);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "Failed to retrieve no restricted mode packages from transport");
         }
     }
 

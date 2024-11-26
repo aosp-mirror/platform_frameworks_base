@@ -67,6 +67,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.LongArrayMultiStateCounter;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.server.power.feature.flags.Flags;
 
@@ -120,6 +121,7 @@ public class BatteryStatsImplTest {
             }});
 
     private final MockClock mMockClock = new MockClock();
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(777666, mMockClock);
     private MockBatteryStatsImpl mBatteryStatsImpl;
     private Handler mHandler;
     private PowerStatsStore mPowerStatsStore;
@@ -160,7 +162,7 @@ public class BatteryStatsImplTest {
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerAttributor,
                 mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore, 0,
-                mMockClock);
+                mMockClock, mMonotonicClock);
     }
 
     @Test

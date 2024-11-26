@@ -98,7 +98,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
@@ -114,6 +114,7 @@ import kotlin.Unit;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
@@ -140,7 +141,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final NotificationShadeDepthController mDepthController;
     private final ShadeHeaderController mShadeHeaderController;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final ShadeTouchableRegionManager mShadeTouchableRegionManager;
+    private final Provider<StatusBarLongPressGestureDetector> mStatusBarLongPressGestureDetector;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationRemoteInputManager mRemoteInputManager;
@@ -315,7 +317,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             NotificationShadeDepthController notificationShadeDepthController,
             ShadeHeaderController shadeHeaderController,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ShadeTouchableRegionManager shadeTouchableRegionManager,
+            Provider<StatusBarLongPressGestureDetector> statusBarLongPressGestureDetector,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController keyguardBypassController,
             ScrimController scrimController,
@@ -363,7 +366,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mDepthController = notificationShadeDepthController;
         mShadeHeaderController = shadeHeaderController;
-        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mShadeTouchableRegionManager = shadeTouchableRegionManager;
+        mStatusBarLongPressGestureDetector = statusBarLongPressGestureDetector;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = keyguardBypassController;
         mScrimController = scrimController;
@@ -691,7 +695,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
                 /* bottom= */ headerBottom + frameTop);
         // Also allow QS to intercept if the touch is near the notch.
-        mStatusBarTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
+        mShadeTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
         final boolean onHeader = mInterceptRegion.contains((int) x, (int) y);
 
         if (getExpanded()) {
@@ -1648,6 +1652,10 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (isSplitShadeAndTouchXOutsideQs(event.getX())) {
             return false;
         }
+        boolean isInStatusBar = event.getY(event.getActionIndex()) < mStatusBarMinHeight;
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled() && isInStatusBar) {
+            mStatusBarLongPressGestureDetector.get().handleTouch(event);
+        }
         final int action = event.getActionMasked();
         boolean collapsedQs = !getExpanded() && !mSplitShadeEnabled;
         boolean expandedShadeCollapsedQs = mShadeExpandedFraction == 1f
@@ -1684,9 +1692,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed && isExpansionEnabled()) {
             mTwoFingerExpandPossible = true;
         }
-        if (mTwoFingerExpandPossible && isOpenQsEvent(event)
-                && event.getY(event.getActionIndex())
-                < mStatusBarMinHeight) {
+        if (mTwoFingerExpandPossible && isOpenQsEvent(event) && isInStatusBar) {
             mMetricsLogger.count(COUNTER_PANEL_OPEN_QS, 1);
             setExpandImmediate(true);
             mNotificationStackScrollLayoutController.setShouldShowShelfOnly(!mSplitShadeEnabled);

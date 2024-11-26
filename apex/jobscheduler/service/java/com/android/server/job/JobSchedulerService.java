@@ -44,6 +44,7 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.app.job.PendingJobReasonsInfo;
 import android.app.job.UserVisibleJobSummary;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -572,6 +573,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_MIN_LINEAR_BACKOFF_TIME_MS:
                         case Constants.KEY_MIN_EXP_BACKOFF_TIME_MS:
                         case Constants.KEY_SYSTEM_STOP_TO_FAILURE_RATIO:
+                        case Constants.KEY_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF:
                             mConstants.updateBackoffConstantsLocked();
                             break;
                         case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
@@ -678,6 +680,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_EXP_BACKOFF_TIME_MS = "min_exp_backoff_time_ms";
         private static final String KEY_SYSTEM_STOP_TO_FAILURE_RATIO =
                 "system_stop_to_failure_ratio";
+        private static final String KEY_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF =
+                "abandoned_job_timeouts_before_aggressive_backoff";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
         private static final String KEY_CONN_USE_CELL_SIGNAL_STRENGTH =
@@ -749,6 +753,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final int DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO = 3;
+        private static final int DEFAULT_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF = 3;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
         private static final boolean DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH = true;
@@ -844,7 +849,12 @@ public class JobSchedulerService extends com.android.server.SystemService
          * incremental failure in the backoff policy calculation.
          */
         int SYSTEM_STOP_TO_FAILURE_RATIO = DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO;
-
+        /**
+         * Number of consecutive timeouts by abandoned jobs before we change to aggressive backoff
+         * policy.
+         */
+        int ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF =
+                DEFAULT_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF;
         /**
          * The fraction of a job's running window that must pass before we
          * consider running it when the network is congested.
@@ -1077,6 +1087,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             SYSTEM_STOP_TO_FAILURE_RATIO = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_SYSTEM_STOP_TO_FAILURE_RATIO,
                     DEFAULT_SYSTEM_STOP_TO_FAILURE_RATIO);
+            ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF,
+                    DEFAULT_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF);
         }
 
         // TODO(141645789): move into ConnectivityController.CcConfig
@@ -1286,6 +1300,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS).println();
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_SYSTEM_STOP_TO_FAILURE_RATIO, SYSTEM_STOP_TO_FAILURE_RATIO).println();
+            pw.print(KEY_ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF,
+                    ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.print(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
             pw.print(KEY_CONN_USE_CELL_SIGNAL_STRENGTH, CONN_USE_CELL_SIGNAL_STRENGTH).println();
@@ -2084,8 +2100,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.v(TAG, debugPrefix + " ready=" + jobReady);
         }
-        if (!jobReady) {
-            return job.getPendingJobReasons();
+        final JobRestriction restriction = checkIfRestricted(job);
+        if (DEBUG) {
+            Slog.v(TAG, debugPrefix + " restriction=" + restriction);
+        }
+        if (!jobReady || restriction != null) {
+            return job.getPendingJobReasons(restriction);
         }
 
         final boolean userStarted = areUsersStartedLocked(job);
@@ -2103,18 +2123,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (backingUp) {
             // TODO: Should we make a special reason for this?
             return new int[] { JobScheduler.PENDING_JOB_REASON_APP };
-        }
-
-        final JobRestriction restriction = checkIfRestricted(job);
-        if (DEBUG) {
-            Slog.v(TAG, debugPrefix + " restriction=" + restriction);
-        }
-        if (restriction != null) {
-            // Currently this will return _DEVICE_STATE because of thermal reasons.
-            // TODO (b/372031023): does it make sense to move this along with the
-            //  pendingJobReasons() call above and also get the pending reasons from
-            //  all of the restriction controllers?
-            return new int[] { restriction.getPendingReason() };
         }
 
         // The following can be a little more expensive, so we are doing it later,
@@ -2138,6 +2146,20 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         return new int[] { JobScheduler.PENDING_JOB_REASON_UNDEFINED };
+    }
+
+    @NonNull
+    private List<PendingJobReasonsInfo> getPendingJobReasonsHistory(
+            int uid, String namespace, int jobId) {
+        synchronized (mLock) {
+            final JobStatus job = mJobs.getJobByUidAndJobId(uid, namespace, jobId);
+            if (job == null) {
+                // Job doesn't exist.
+                throw new IllegalArgumentException("Invalid job id");
+            }
+
+            return job.getPendingJobReasonsHistory();
+        }
     }
 
     private JobInfo getPendingJob(int uid, @Nullable String namespace, int jobId) {
@@ -2990,6 +3012,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         final long initialBackoffMillis = job.getInitialBackoffMillis();
         int numFailures = failureToReschedule.getNumFailures();
+        int numAbandonedFailures = failureToReschedule.getNumAbandonedFailures();
         int numSystemStops = failureToReschedule.getNumSystemStops();
         // We should back off slowly if JobScheduler keeps stopping the job,
         // but back off immediately if the issue appeared to be the app's fault
@@ -2999,9 +3022,19 @@ public class JobSchedulerService extends com.android.server.SystemService
                 || internalStopReason == JobParameters.INTERNAL_STOP_REASON_ANR
                 || stopReason == JobParameters.STOP_REASON_USER) {
             numFailures++;
+        } else if (android.app.job.Flags.handleAbandonedJobs()
+                && internalStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED) {
+            numAbandonedFailures++;
+            numFailures++;
         } else {
             numSystemStops++;
         }
+
+        int backoffPolicy = job.getBackoffPolicy();
+        if (shouldUseAggressiveBackoff(numAbandonedFailures)) {
+            backoffPolicy = JobInfo.BACKOFF_POLICY_EXPONENTIAL;
+        }
+
         final int backoffAttempts =
                 numFailures + numSystemStops / mConstants.SYSTEM_STOP_TO_FAILURE_RATIO;
         final long earliestRuntimeMs;
@@ -3010,7 +3043,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             earliestRuntimeMs = JobStatus.NO_EARLIEST_RUNTIME;
         } else {
             long delayMillis;
-            switch (job.getBackoffPolicy()) {
+            switch (backoffPolicy) {
                 case JobInfo.BACKOFF_POLICY_LINEAR: {
                     long backoff = initialBackoffMillis;
                     if (backoff < mConstants.MIN_LINEAR_BACKOFF_TIME_MS) {
@@ -3039,7 +3072,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         JobStatus newJob = new JobStatus(failureToReschedule,
                 earliestRuntimeMs,
-                JobStatus.NO_LATEST_RUNTIME, numFailures, numSystemStops,
+                JobStatus.NO_LATEST_RUNTIME, numFailures, numAbandonedFailures, numSystemStops,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis(),
                 failureToReschedule.getCumulativeExecutionTimeMs());
         if (stopReason == JobParameters.STOP_REASON_USER) {
@@ -3059,6 +3092,20 @@ public class JobSchedulerService extends com.android.server.SystemService
             controller.rescheduleForFailureLocked(newJob, failureToReschedule);
         }
         return newJob;
+    }
+
+    /**
+     * Returns {@code true} if the given number of abandoned failures indicates that JobScheduler
+     * should use an aggressive backoff policy.
+     *
+     * @param numAbandonedFailures The number of abandoned failures.
+     * @return {@code true} if the given number of abandoned failures indicates that JobScheduler
+     *     should use an aggressive backoff policy.
+     */
+    public boolean shouldUseAggressiveBackoff(int numAbandonedFailures) {
+        return android.app.job.Flags.handleAbandonedJobs()
+                && numAbandonedFailures
+                        > mConstants.ABANDONED_JOB_TIMEOUTS_BEFORE_AGGRESSIVE_BACKOFF;
     }
 
     /**
@@ -3140,6 +3187,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             return new JobStatus(periodicToReschedule,
                     elapsedNow + period - flex, elapsedNow + period,
                     0 /* numFailures */, 0 /* numSystemStops */,
+                    0 /* numAbandonedFailures */,
                     sSystemClock.millis() /* lastSuccessfulRunTime */,
                     periodicToReschedule.getLastFailedRunTime(),
                     0 /* Reset cumulativeExecutionTime because of successful execution */);
@@ -3156,6 +3204,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         return new JobStatus(periodicToReschedule,
                 newEarliestRunTimeElapsed, newLatestRuntimeElapsed,
                 0 /* numFailures */, 0 /* numSystemStops */,
+                0 /* numAbandonedFailures */,
                 sSystemClock.millis() /* lastSuccessfulRunTime */,
                 periodicToReschedule.getLastFailedRunTime(),
                 0 /* Reset cumulativeExecutionTime because of successful execution */);
@@ -3164,6 +3213,10 @@ public class JobSchedulerService extends com.android.server.SystemService
     @VisibleForTesting
     void maybeProcessBuggyJob(@NonNull JobStatus jobStatus, int debugStopReason) {
         boolean jobTimedOut = debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT;
+        if (android.app.job.Flags.handleAbandonedJobs()) {
+            jobTimedOut |= (debugStopReason
+                == JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED);
+        }
         // If madeActive = 0, the job never actually started.
         if (!jobTimedOut && jobStatus.madeActive > 0) {
             final long executionDurationMs = sUptimeMillisClock.millis() - jobStatus.madeActive;
@@ -3245,9 +3298,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         // we stop it.
         final JobStatus rescheduledJob = needsReschedule
                 ? getRescheduleJobForFailureLocked(jobStatus, stopReason, debugStopReason) : null;
+        final boolean isStopReasonAbandoned = android.app.job.Flags.handleAbandonedJobs()
+                && (debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED);
         if (rescheduledJob != null
                 && !rescheduledJob.shouldTreatAsUserInitiatedJob()
                 && (debugStopReason == JobParameters.INTERNAL_STOP_REASON_TIMEOUT
+                || isStopReasonAbandoned
                 || debugStopReason == JobParameters.INTERNAL_STOP_REASON_PREEMPT)) {
             rescheduledJob.disallowRunInBatterySaverAndDoze();
         }
@@ -5122,6 +5178,19 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public List<PendingJobReasonsInfo> getPendingJobReasonsHistory(String namespace, int jobId)
+                throws RemoteException {
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return JobSchedulerService.this.getPendingJobReasonsHistory(
+                        uid, validateNamespace(namespace), jobId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public void cancelAll() throws RemoteException {
             final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
@@ -5856,6 +5925,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API,
                     android.app.job.Flags.getPendingJobReasonsApi());
+            pw.println();
+            pw.print(android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_HISTORY_API,
+                    android.app.job.Flags.getPendingJobReasonsHistoryApi());
             pw.println();
             pw.decreaseIndent();
             pw.println();

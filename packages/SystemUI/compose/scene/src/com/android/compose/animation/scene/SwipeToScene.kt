@@ -56,7 +56,7 @@ private fun DraggableHandlerImpl.contentForSwipes(): Content {
 }
 
 /** Whether swipe should be enabled in the given [orientation]. */
-private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
+internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
     if (userActions.isEmpty()) {
         return false
     }
@@ -165,8 +165,7 @@ private class SwipeToSceneNode(
 
     private val nestedScrollHandlerImpl =
         NestedScrollHandlerImpl(
-            layoutImpl = draggableHandler.layoutImpl,
-            orientation = draggableHandler.orientation,
+            draggableHandler = draggableHandler,
             topOrLeftBehavior = NestedScrollBehavior.Default,
             bottomOrRightBehavior = NestedScrollBehavior.Default,
             isExternalOverscrollGesture = { false },
@@ -200,10 +199,10 @@ private class SwipeToSceneNode(
 
     override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
 
-    private fun startDragImmediately(pointersInfo: PointersInfo): Boolean {
+    private fun startDragImmediately(pointersDown: PointersInfo.PointersDown): Boolean {
         // Immediately start the drag if the user can't swipe in the other direction and the gesture
         // handler can intercept it.
-        return !canOppositeSwipe() && draggableHandler.shouldImmediatelyIntercept(pointersInfo)
+        return !canOppositeSwipe() && draggableHandler.shouldImmediatelyIntercept(pointersDown)
     }
 
     private fun canOppositeSwipe(): Boolean {

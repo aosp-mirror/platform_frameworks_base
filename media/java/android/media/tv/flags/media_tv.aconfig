@@ -2,6 +2,22 @@ package: "android.media.tv.flags"
 container: "system"
 
 flag {
+    name: "enable_le_audio_broadcast_ui"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enable Broadcast UI for LE Audio on TV."
+    bug: "378732734"
+}
+
+flag {
+    name: "enable_le_audio_unicast_ui"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Enable Unicast UI for LE Audio on TV."
+    bug: "378732734"
+}
+
+flag {
     name: "broadcast_visibility_types"
     is_exported: true
     namespace: "media_tv"
@@ -77,6 +93,30 @@ flag {
     name: "set_resource_holder_retain"
     is_exported: true
     namespace: "media_tv"
-    description : "Feature flag to add setResourceHolderRetain api to MediaCas and Tuner JAVA."
+    description: "Feature flag to add setResourceOwnershipRetention api to MediaCas and Tuner JAVA."
     bug: "372973197"
+}
+
+flag {
+    name: "mediacas_update_client_profile_priority"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Feature flag to add updateResourcePriority api to MediaCas"
+    bug: "372971241"
+}
+
+flag {
+    name: "apply_picture_profiles"
+    is_exported: true
+    namespace: "media_tv"
+    description : "Feature flag to enable APIs for applying picture profiles"
+    bug: "337330263"
+}
+
+flag {
+    name: "hdmi_control_collect_physical_address"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Collect physical address from HDMI-CEC messages in metrics"
+    bug: "376001043"
 }

@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.Nullable;
+
 /**
  * Support a standardized interface to commands that contain arrays All commands that implement
  * array access will be collected in a map in the state TODO refactor to DataAccess,
@@ -27,6 +29,7 @@ public interface ArrayAccess {
         return 0;
     }
 
+    @Nullable
     float[] getFloats();
 
     int getLength();

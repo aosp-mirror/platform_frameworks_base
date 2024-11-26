@@ -23,6 +23,7 @@ import com.android.internal.compat.IPlatformCompatNative;
 /**
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PlatformCompatNative extends IPlatformCompatNative.Stub {
     private final PlatformCompat mPlatformCompat;
 

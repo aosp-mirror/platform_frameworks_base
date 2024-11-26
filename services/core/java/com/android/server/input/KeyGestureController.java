@@ -20,8 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
-import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
-import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
+import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
@@ -50,7 +49,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
@@ -214,7 +212,7 @@ final class KeyGestureController {
     }
 
     private void initKeyCombinationRules() {
-        if (!useKeyGestureEventHandler() || !useKeyGestureEventHandlerMultiPressGestures()) {
+        if (!InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()) {
             return;
         }
         // TODO(b/358569822): Handle Power, Back key properly since key combination gesture is
@@ -440,7 +438,8 @@ final class KeyGestureController {
 
     public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         final boolean interactive = (policyFlags & FLAG_INTERACTIVE) != 0;
-        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+        if (InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()
+                && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
             return mKeyCombinationManager.interceptKey(event, interactive);
         }
         return false;
@@ -456,15 +455,18 @@ final class KeyGestureController {
         final long keyConsumed = -1;
         final long keyNotConsumed = 0;
 
-        if (mKeyCombinationManager.isKeyConsumed(event)) {
-            return keyConsumed;
-        }
+        if (InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()) {
+            if (mKeyCombinationManager.isKeyConsumed(event)) {
+                return keyConsumed;
+            }
 
-        if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
-            final long now = SystemClock.uptimeMillis();
-            final long interceptTimeout = mKeyCombinationManager.getKeyInterceptTimeout(keyCode);
-            if (now < interceptTimeout) {
-                return interceptTimeout - now;
+            if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
+                final long now = SystemClock.uptimeMillis();
+                final long interceptTimeout = mKeyCombinationManager.getKeyInterceptTimeout(
+                        keyCode);
+                if (now < interceptTimeout) {
+                    return interceptTimeout - now;
+                }
             }
         }
 
@@ -750,6 +752,28 @@ final class KeyGestureController {
                     }
                 }
                 break;
+            case KeyEvent.KEYCODE_LOCK:
+                if (enableNew25q2Keycodes()) {
+                    if (firstDown) {
+                        handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_LOCK},
+                                /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, focusedToken,
+                                /* flags = */0, /* appLaunchData = */null);
+                    }
+                }
+                return true;
+            case KeyEvent.KEYCODE_FULLSCREEN:
+                if (enableNew25q2Keycodes()) {
+                    if (firstDown) {
+                        handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_FULLSCREEN},
+                                /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, focusedToken,
+                                /* flags = */0, /* appLaunchData = */null);
+                    }
+                }
+                return true;
             case KeyEvent.KEYCODE_ASSIST:
                 Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
                 return true;
@@ -764,6 +788,14 @@ final class KeyGestureController {
                 Slog.wtf(TAG, "KEYCODE_STYLUS_BUTTON_* should be handled in"
                         + " interceptKeyBeforeQueueing");
                 return true;
+            case KeyEvent.KEYCODE_DO_NOT_DISTURB:
+                // TODO(b/365920375): Implement 25Q2 keycode implementation in system
+                return true;
+        }
+
+        // Handle shortcuts through shortcut services
+        if (mAppLaunchShortcutManager.handleShortcutService(event)) {
+            return true;
         }
 
         // Handle custom shortcuts
@@ -847,6 +879,13 @@ final class KeyGestureController {
                 /* appLaunchData = */null);
     }
 
+    private void handleTouchpadGesture(@KeyGestureEvent.KeyGestureType int keyGestureType,
+            @Nullable AppLaunchData appLaunchData) {
+        handleKeyGesture(KeyCharacterMap.VIRTUAL_KEYBOARD, new int[0], /* modifierState= */0,
+                keyGestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                Display.DEFAULT_DISPLAY, /* focusedToken = */null, /* flags = */0, appLaunchData);
+    }
+
     @VisibleForTesting
     boolean handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int displayId,
@@ -897,11 +936,18 @@ final class KeyGestureController {
         handleKeyGesture(event, null /*focusedToken*/);
     }
 
-    public void handleTouchpadThreeFingerTap() {
-        // TODO(b/365063048): trigger a custom shortcut based on the three-finger tap.
-        if (DEBUG) {
-            Slog.d(TAG, "Three-finger touchpad tap occurred");
+    public void handleTouchpadGesture(int touchpadGestureType) {
+        // Handle custom shortcuts
+        InputGestureData customGesture;
+        synchronized (mUserLock) {
+            customGesture = mInputGestureManager.getCustomGestureForTouchpadGesture(mCurrentUserId,
+                    touchpadGestureType);
         }
+        if (customGesture == null) {
+            return;
+        }
+        handleTouchpadGesture(customGesture.getAction().keyGestureType(),
+                customGesture.getAction().appLaunchData());
     }
 
     @MainThread
@@ -1007,13 +1053,16 @@ final class KeyGestureController {
     }
 
     @BinderThread
-    public void removeAllCustomInputGestures(@UserIdInt int userId) {
-        mInputGestureManager.removeAllCustomInputGestures(userId);
+    public void removeAllCustomInputGestures(@UserIdInt int userId,
+            @Nullable InputGestureData.Filter filter) {
+        mInputGestureManager.removeAllCustomInputGestures(userId, filter);
     }
 
     @BinderThread
-    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId) {
-        List<InputGestureData> customGestures = mInputGestureManager.getCustomInputGestures(userId);
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId,
+            @Nullable InputGestureData.Filter filter) {
+        List<InputGestureData> customGestures = mInputGestureManager.getCustomInputGestures(userId,
+                filter);
         AidlInputGestureData[] result = new AidlInputGestureData[customGestures.size()];
         for (int i = 0; i < customGestures.size(); i++) {
             result[i] = customGestures.get(i).getAidlData();
@@ -1214,6 +1263,7 @@ final class KeyGestureController {
     public void dump(IndentingPrintWriter ipw) {
         ipw.println("KeyGestureController:");
         ipw.increaseIndent();
+        ipw.println("mCurrentUserId = " + mCurrentUserId);
         ipw.println("mSystemPid = " + mSystemPid);
         ipw.println("mPendingMetaAction = " + mPendingMetaAction);
         ipw.println("mPendingCapsLockToggle = " + mPendingCapsLockToggle);

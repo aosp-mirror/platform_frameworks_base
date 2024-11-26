@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.res.R
@@ -82,7 +83,14 @@ constructor(
     private val accessibilityManager: AccessibilityManager,
     private val packageManager: PackageManager,
     @Named(LAUNCHER_PACKAGE) private val launcherPackage: String,
-) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
+    mediaCarouselController: MediaCarouselController,
+) :
+    BaseCommunalViewModel(
+        communalSceneInteractor,
+        communalInteractor,
+        mediaHost,
+        mediaCarouselController,
+    ) {
 
     private val logger = Logger(logBuffer, "CommunalEditModeViewModel")
 
@@ -141,13 +149,23 @@ constructor(
     override fun onReorderWidgets(widgetIdToRankMap: Map<Int, Int>) =
         communalInteractor.updateWidgetOrder(widgetIdToRankMap)
 
-    override fun onResizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+    override fun onResizeWidget(
+        appWidgetId: Int,
+        spanY: Int,
+        widgetIdToRankMap: Map<Int, Int>,
+        componentName: ComponentName,
+        rank: Int,
+    ) {
         communalInteractor.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+        metricsLogger.logResizeWidget(
+            componentName = componentName.flattenToString(),
+            rank = rank,
+            spanY = spanY,
+        )
     }
 
-    override fun onReorderWidgetStart() {
-        // Clear selection status
-        setSelectedKey(null)
+    override fun onReorderWidgetStart(draggingItemKey: String) {
+        setSelectedKey(draggingItemKey)
         _reorderingWidgets.value = true
         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
     }

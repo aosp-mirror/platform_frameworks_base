@@ -21,6 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
@@ -61,9 +63,13 @@ public class PowerManagerTest {
     private UiDevice mUiDevice;
     private Executor mExec = Executors.newSingleThreadExecutor();
     @Mock
-    private PowerManager.OnThermalStatusChangedListener mListener1;
+    private PowerManager.OnThermalStatusChangedListener mStatusListener1;
     @Mock
-    private PowerManager.OnThermalStatusChangedListener mListener2;
+    private PowerManager.OnThermalStatusChangedListener mStatusListener2;
+    @Mock
+    private PowerManager.OnThermalHeadroomChangedListener mHeadroomListener1;
+    @Mock
+    private PowerManager.OnThermalHeadroomChangedListener mHeadroomListener2;
     private static final long CALLBACK_TIMEOUT_MILLI_SEC = 5000;
     private native Parcel nativeObtainPowerSaveStateParcel(boolean batterySaverEnabled,
             boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
@@ -245,51 +251,88 @@ public class PowerManagerTest {
         // Initial override status is THERMAL_STATUS_NONE
         int status = PowerManager.THERMAL_STATUS_NONE;
         // Add listener1
-        mPm.addThermalStatusListener(mExec, mListener1);
-        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        mPm.addThermalStatusListener(mExec, mStatusListener1);
+        verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onThermalStatusChanged(status);
-        reset(mListener1);
+        reset(mStatusListener1);
         status = PowerManager.THERMAL_STATUS_SEVERE;
         mUiDevice.executeShellCommand("cmd thermalservice override-status "
                 + Integer.toString(status));
-        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onThermalStatusChanged(status);
-        reset(mListener1);
+        reset(mStatusListener1);
         // Add listener1 again
         try {
-            mPm.addThermalStatusListener(mListener1);
+            mPm.addThermalStatusListener(mStatusListener1);
             fail("Expected exception not thrown");
         } catch (IllegalArgumentException expectedException) {
         }
         // Add listener2 on main thread.
-        mPm.addThermalStatusListener(mListener2);
-        verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        mPm.addThermalStatusListener(mStatusListener2);
+        verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
             .times(1)).onThermalStatusChanged(status);
-        reset(mListener2);
+        reset(mStatusListener2);
         status = PowerManager.THERMAL_STATUS_MODERATE;
         mUiDevice.executeShellCommand("cmd thermalservice override-status "
                 + Integer.toString(status));
-        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onThermalStatusChanged(status);
-        verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onThermalStatusChanged(status);
-        reset(mListener1);
-        reset(mListener2);
+        reset(mStatusListener1);
+        reset(mStatusListener2);
         // Remove listener1
-        mPm.removeThermalStatusListener(mListener1);
+        mPm.removeThermalStatusListener(mStatusListener1);
         // Remove listener1 again
         try {
-            mPm.removeThermalStatusListener(mListener1);
+            mPm.removeThermalStatusListener(mStatusListener1);
             fail("Expected exception not thrown");
         } catch (IllegalArgumentException expectedException) {
         }
         status = PowerManager.THERMAL_STATUS_LIGHT;
         mUiDevice.executeShellCommand("cmd thermalservice override-status "
                 + Integer.toString(status));
-        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).onThermalStatusChanged(status);
-        verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+        verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onThermalStatusChanged(status);
+    }
+
+    /**
+     * Confirm that we can add/remove thermal headroom listener.
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ALLOW_THERMAL_THRESHOLDS_CALLBACK)
+    public void testThermalHeadroomCallback() throws Exception {
+        float headroom = mPm.getThermalHeadroom(0);
+        // If the device doesn't support thermal headroom, return early
+        if (Float.isNaN(headroom)) {
+            return;
+        }
+        // Add listener1
+        mPm.addThermalHeadroomListener(mExec, mHeadroomListener1);
+        verify(mHeadroomListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalHeadroomChanged(anyInt(), anyInt(), anyInt(), any());
+        reset(mHeadroomListener1);
+        // Add listener1 again
+        try {
+            mPm.addThermalHeadroomListener(mHeadroomListener1);
+            fail("Expected exception not thrown");
+        } catch (IllegalArgumentException expectedException) {
+        }
+        // Add listener2 on main thread.
+        mPm.addThermalHeadroomListener(mHeadroomListener2);
+        verify(mHeadroomListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalHeadroomChanged(anyInt(), anyInt(), anyInt(), any());
+        reset(mHeadroomListener2);
+        // Remove listener1
+        mPm.removeThermalHeadroomListener(mHeadroomListener1);
+        // Remove listener1 again
+        try {
+            mPm.removeThermalHeadroomListener(mHeadroomListener1);
+            fail("Expected exception not thrown");
+        } catch (IllegalArgumentException expectedException) {
+        }
     }
 
     @Test

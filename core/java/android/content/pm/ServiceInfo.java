@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.health.connect.HealthPermissions;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -251,6 +252,7 @@ public class ServiceInfo extends ComponentInfo
      * {@link android.Manifest.permission#NFC},
      * {@link android.Manifest.permission#TRANSMIT_IR},
      * {@link android.Manifest.permission#UWB_RANGING},
+     * {@link android.Manifest.permission#RANGING},
      * or has been granted the access to one of the attached USB devices/accessories.
      */
     @RequiresPermission(
@@ -267,6 +269,7 @@ public class ServiceInfo extends ComponentInfo
                 Manifest.permission.NFC,
                 Manifest.permission.TRANSMIT_IR,
                 Manifest.permission.UWB_RANGING,
+                Manifest.permission.RANGING,
             },
             conditional = true
     )
@@ -359,8 +362,10 @@ public class ServiceInfo extends ComponentInfo
      * {@link android.Manifest.permission#FOREGROUND_SERVICE_HEALTH} and one of the following
      * permissions:
      * {@link android.Manifest.permission#ACTIVITY_RECOGNITION},
-     * {@link android.Manifest.permission#BODY_SENSORS},
      * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS}.
+     * {@link android.health.connect.HealthPermissions#READ_HEART_RATE},
+     * {@link android.health.connect.HealthPermissions#READ_SKIN_TEMPERATURE},
+     * {@link android.health.connect.HealthPermissions#READ_OXYGEN_SATURATION},
      */
     @RequiresPermission(
             allOf = {
@@ -368,10 +373,13 @@ public class ServiceInfo extends ComponentInfo
             },
             anyOf = {
                 Manifest.permission.ACTIVITY_RECOGNITION,
-                Manifest.permission.BODY_SENSORS,
                 Manifest.permission.HIGH_SAMPLING_RATE_SENSORS,
+                HealthPermissions.READ_HEART_RATE,
+                HealthPermissions.READ_SKIN_TEMPERATURE,
+                HealthPermissions.READ_OXYGEN_SATURATION,
             }
     )
+    @FlaggedApi(android.permission.flags.Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
     public static final int FOREGROUND_SERVICE_TYPE_HEALTH = 1 << 8;
 
     /**

@@ -25,6 +25,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon
@@ -35,14 +36,17 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.util.concurrent.CopyOnWriteArraySet
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.launch
 
 // TODO(b/http://b/299909989): Use QSTileViewModel directly after the rollout
 class QSTileViewModelAdapter
@@ -51,6 +55,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val qsHost: QSHost,
     @Assisted private val qsTileViewModel: QSTileViewModel,
+    @UiBackground private val uiBgDispatcher: CoroutineDispatcher,
 ) : QSTile, Dumpable {
 
     private val context
@@ -81,7 +86,7 @@ constructor(
                             // additional
                             // guidance on how to auto add your tile
                             throw UnsupportedOperationException(
-                                "Turning on tile is not supported now"
+                                "Turning on tile is not supported now. Tile spec: $tileSpec"
                             )
                         }
                     }
@@ -162,19 +167,25 @@ constructor(
     override fun setListening(client: Any?, listening: Boolean) {
         client ?: return
         if (listening) {
-            val clientWasNotAlreadyListening = listeningClients.add(client)
-            if (clientWasNotAlreadyListening && listeningClients.size == 1) {
-                stateJob =
-                    qsTileViewModel.state
-                        .filterNotNull()
-                        .map { mapState(context, it, qsTileViewModel.config) }
-                        .onEach { legacyState ->
-                            val changed = legacyState.copyTo(cachedState)
-                            if (changed) {
-                                callbacks.forEach { it.onStateChanged(legacyState) }
+            applicationScope.launch(uiBgDispatcher) {
+                val shouldStartMappingJob =
+                    listeningClients.add(client) // new client
+                    && listeningClients.size == 1 // first client
+
+                if (shouldStartMappingJob) {
+                    stateJob =
+                        qsTileViewModel.state
+                            .filterNotNull()
+                            .map { mapState(context, it, qsTileViewModel.config) }
+                            .onEach { legacyState ->
+                                val changed = legacyState.copyTo(cachedState)
+                                if (changed) {
+                                    callbacks.forEach { it.onStateChanged(legacyState) }
+                                }
                             }
-                        }
-                        .launchIn(applicationScope)
+                            .flowOn(uiBgDispatcher)
+                            .launchIn(applicationScope)
+                }
             }
         } else {
             listeningClients.remove(client)

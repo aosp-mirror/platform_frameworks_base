@@ -449,6 +449,18 @@ public class VibrationSettingsTest {
         }
     }
 
+    @Test
+    public void shouldIgnoreVibration_withoutAudioManager_allowsAllVibrations() {
+        mVibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
+        mVibrationSettings.onSystemReady(mPackageManagerInternalMock,
+                mPowerManagerInternalMock, mActivityManagerMock, mVirtualDeviceManagerInternalMock,
+                /* audioManager= */ null);
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
 
     @Test
     public void shouldIgnoreVibration_vibrateOnDisabled_ignoresUsagesNotAccessibility() {

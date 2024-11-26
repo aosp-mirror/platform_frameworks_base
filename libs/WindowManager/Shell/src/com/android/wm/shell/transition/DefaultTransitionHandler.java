@@ -353,7 +353,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             boolean isSeamlessDisplayChange = false;
 
             if (mode == TRANSIT_CHANGE && change.hasFlags(FLAG_IS_DISPLAY)) {
-                if (info.getType() == TRANSIT_CHANGE) {
+                if (info.getType() == TRANSIT_CHANGE || isOnlyTranslucent) {
                     final int anim = getRotationAnimationHint(change, info, mDisplayController);
                     isSeamlessDisplayChange = anim == ROTATION_ANIMATION_SEAMLESS;
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
@@ -395,10 +395,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     continue;
                 }
                 // No default animation for this, so just update bounds/position.
-                final int rootIdx = TransitionUtil.rootIndexFor(change, info);
-                startTransaction.setPosition(change.getLeash(),
-                        change.getEndAbsBounds().left - info.getRoot(rootIdx).getOffset().x,
-                        change.getEndAbsBounds().top - info.getRoot(rootIdx).getOffset().y);
+                if (change.getParent() == null) {
+                    // For independent change without a parent, we have reparented it to the root
+                    // leash in Transitions#setupAnimHierarchy.
+                    final int rootIdx = TransitionUtil.rootIndexFor(change, info);
+                    startTransaction.setPosition(change.getLeash(),
+                            change.getEndAbsBounds().left - info.getRoot(rootIdx).getOffset().x,
+                            change.getEndAbsBounds().top - info.getRoot(rootIdx).getOffset().y);
+                } else {
+                    startTransaction.setPosition(change.getLeash(),
+                            change.getEndRelOffset().x, change.getEndRelOffset().y);
+                }
                 // Seamless display transition doesn't need to animate.
                 if (isSeamlessDisplayChange) continue;
                 if (isTask || (change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY)

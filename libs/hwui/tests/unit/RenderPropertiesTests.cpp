@@ -40,7 +40,11 @@ TEST(RenderProperties, layerValidity) {
     props.setLeftTopRightBottom(0, 0, maxTextureSize + 1, maxTextureSize + 1);
     ASSERT_FALSE(props.fitsOnLayer());
 
-    // Too small, but still 'fits'. Not fitting is an error case, so don't report empty as such.
+    // Too small, we can't create a layer for a 0 width or height
     props.setLeftTopRightBottom(0, 0, 100, 0);
-    ASSERT_TRUE(props.fitsOnLayer());
+    ASSERT_FALSE(props.fitsOnLayer());
+
+    // Can't create a negative-sized layer
+    props.setLeftTopRightBottom(0, 0, -100, 300);
+    ASSERT_FALSE(props.fitsOnLayer());
 }

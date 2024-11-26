@@ -30,14 +30,6 @@ flag {
 
 flag {
     namespace: "input_native"
-    name: "emoji_and_screenshot_keycodes_available"
-    is_exported: true
-    description: "Add new KeyEvent keycodes for opening Emoji Picker and Taking Screenshots"
-    bug: "315307777"
-}
-
-flag {
-    namespace: "input_native"
     name: "keyboard_a11y_slow_keys_flag"
     description: "Controls if the slow keys accessibility feature for physical keyboard is available to the user"
     bug: "294546335"
@@ -96,6 +88,17 @@ flag {
 }
 
 flag {
+    name: "input_manager_lifecycle_support"
+    namespace: "input"
+    description: "Add support for Lifecycle support in input manager"
+    bug: "362473586"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     namespace: "input_native"
     name: "manage_key_gestures"
     description: "Manage key gestures through Input APIs"
@@ -111,8 +114,8 @@ flag {
 }
 
 flag {
-    namespace: "input_native"
-    name: "use_key_gesture_event_handler_multi_press_gestures"
+    namespace: "input"
+    name: "use_key_gesture_event_handler_multi_key_gestures"
     description: "Use KeyGestureEvent handler APIs to control multi key press gestures"
     bug: "358569822"
 }
@@ -141,7 +144,7 @@ flag {
 flag {
   name: "keyboard_a11y_shortcut_control"
   namespace: "input"
-  description: "Adds shortcuts to toggle and control a11y features"
+  description: "Adds shortcuts to toggle and control a11y keyboard features"
   bug: "373458181"
 }
 
@@ -153,9 +156,16 @@ flag {
 }
 
 flag {
+    name: "enable_new_25q2_keycodes"
+    namespace: "input"
+    description: "Enables new 25Q2 keycodes"
+    bug: "365920375"
+}
+
+flag {
   name: "override_power_key_behavior_in_focused_window"
-  namespace: "input_native"
-  description: "Allows privileged focused windows to capture power key events."
+  namespace: "wallet_integration"
+  description: "Allows privileged focused windows to override the power key double tap behavior."
   bug: "357144512"
 }
 
@@ -165,3 +175,17 @@ flag {
   description: "Turns three-finger touchpad taps into a customizable shortcut."
   bug: "365063048"
 }
+
+flag {
+  name: "enable_talkback_and_magnifier_key_gestures"
+  namespace: "input"
+  description: "Adds key gestures for talkback and magnifier"
+  bug: "375277034"
+}
+
+flag {
+  name: "can_window_override_power_gesture_api"
+  namespace: "wallet_integration"
+  description: "Adds new API in WindowManager class to check if the window can override the power key double tap behavior."
+  bug: "378736024"
+  }

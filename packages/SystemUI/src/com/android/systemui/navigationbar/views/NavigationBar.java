@@ -149,9 +149,9 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.data.repository.LightBarControllerStore;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.AutoHideControllerStore;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -259,10 +259,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private boolean mTransientShownFromGestureOnSystemBar;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
-    private final LightBarControllerStore mLightBarControllerStore;
+    private final LightBarController mMainLightBarController;
+    private final LightBarController.Factory mLightBarControllerFactory;
     private AutoHideController mAutoHideController;
-    private final AutoHideController mMainAutoHideController;
-    private final AutoHideController.Factory mAutoHideControllerFactory;
+    private final AutoHideControllerStore mAutoHideControllerStore;
     private final Optional<TelecomManager> mTelecomManagerOptional;
     private final InputMethodManager mInputMethodManager;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
@@ -580,9 +580,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             @Background Executor bgExecutor,
             UiEventLogger uiEventLogger,
             NavBarHelper navBarHelper,
-            LightBarControllerStore lightBarControllerStore,
-            AutoHideController mainAutoHideController,
-            AutoHideController.Factory autoHideControllerFactory,
+            LightBarController mainLightBarController,
+            LightBarController.Factory lightBarControllerFactory,
+            AutoHideControllerStore autoHideControllerStore,
             Optional<TelecomManager> telecomManagerOptional,
             InputMethodManager inputMethodManager,
             DeadZone deadZone,
@@ -627,9 +627,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mUiEventLogger = uiEventLogger;
         mNavBarHelper = navBarHelper;
         mNotificationShadeDepthController = notificationShadeDepthController;
-        mLightBarControllerStore = lightBarControllerStore;
-        mMainAutoHideController = mainAutoHideController;
-        mAutoHideControllerFactory = autoHideControllerFactory;
+        mMainLightBarController = mainLightBarController;
+        mLightBarControllerFactory = lightBarControllerFactory;
+        mAutoHideControllerStore = autoHideControllerStore;
         mTelecomManagerOptional = telecomManagerOptional;
         mInputMethodManager = inputMethodManager;
         mUserContextProvider = userContextProvider;
@@ -840,16 +840,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         // Unfortunately, we still need it because status bar needs LightBarController
         // before notifications creation. We cannot directly use getLightBarController()
         // from NavigationBarFragment directly.
-        LightBarController lightBarController = mLightBarControllerStore.forDisplay(mDisplayId);
+        LightBarController lightBarController = mIsOnDefaultDisplay
+                ? mMainLightBarController : mLightBarControllerFactory.create(mContext);
         setLightBarController(lightBarController);
 
-        // TODO(b/118592525): to support multi-display, we start to add something which is
-        //                    per-display, while others may be global. I think it's time to
-        //                    add a new class maybe named DisplayDependency to solve
-        //                    per-display Dependency problem.
-        // Alternative: this is a good case for a Dagger subcomponent. Same with LightBarController.
-        AutoHideController autoHideController = mIsOnDefaultDisplay
-                ? mMainAutoHideController : mAutoHideControllerFactory.create(mContext);
+        AutoHideController autoHideController = mAutoHideControllerStore.forDisplay(mDisplayId);
         setAutoHideController(autoHideController);
         restoreAppearanceAndTransientState();
     }

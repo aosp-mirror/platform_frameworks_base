@@ -29,7 +29,7 @@ import java.util.function.BiConsumer;
 
 /**
  * List of keys that have expiration time.
- * If the expiration time is less than current elapsedRealtime, the key has expired.
+ * If the expiration time is less than current uptime, the key has expired.
  * Otherwise it is valid (or allowed).
  *
  * <p>This is used for both FGS-BG-start restriction, and FGS-while-in-use permissions check.</p>
@@ -42,7 +42,7 @@ public class FgsTempAllowList<E> {
     private static final int DEFAULT_MAX_SIZE = 100;
 
     /**
-     * The value is Pair type, Pair.first is the expirationTime(an elapsedRealtime),
+     * The value is Pair type, Pair.first is the expirationTime(in cpu uptime),
      * Pair.second is the optional information entry about this key.
      */
     private final SparseArray<Pair<Long, E>> mTempAllowList = new SparseArray<>();
@@ -82,7 +82,9 @@ public class FgsTempAllowList<E> {
             }
             // The temp allowlist should be a short list with only a few entries in it.
             // for a very large list, HashMap structure should be used.
-            final long now = SystemClock.elapsedRealtime();
+            final long now = com.android.server.deviceidle.Flags.useCpuTimeForTempAllowlist()
+                    ? SystemClock.uptimeMillis()
+                    : SystemClock.elapsedRealtime();
             final int size = mTempAllowList.size();
             if (size > mMaxSize) {
                 Slog.w(TAG_AM, "FgsTempAllowList length:" + size + " exceeds maxSize"
@@ -112,12 +114,15 @@ public class FgsTempAllowList<E> {
             final int index = mTempAllowList.indexOfKey(uid);
             if (index < 0) {
                 return null;
-            } else if (mTempAllowList.valueAt(index).first < SystemClock.elapsedRealtime()) {
+            }
+            final long timeNow = com.android.server.deviceidle.Flags.useCpuTimeForTempAllowlist()
+                    ? SystemClock.uptimeMillis()
+                    : SystemClock.elapsedRealtime();
+            if (mTempAllowList.valueAt(index).first < timeNow) {
                 mTempAllowList.removeAt(index);
                 return null;
-            } else {
-                return mTempAllowList.valueAt(index);
             }
+            return mTempAllowList.valueAt(index);
         }
     }
 

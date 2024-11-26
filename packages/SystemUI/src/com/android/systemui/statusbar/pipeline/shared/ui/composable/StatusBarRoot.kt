@@ -31,7 +31,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore
+import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
@@ -44,7 +48,6 @@ import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarVie
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import javax.inject.Inject
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Factory to simplify the dependency management for [StatusBarRoot] */
 class StatusBarRootFactory
@@ -56,6 +59,8 @@ constructor(
     private val darkIconManagerFactory: DarkIconManager.Factory,
     private val iconController: StatusBarIconController,
     private val ongoingCallController: OngoingCallController,
+    private val darkIconDispatcherStore: DarkIconDispatcherStore,
+    private val eventAnimationInteractor: SystemStatusEventAnimationInteractor,
 ) {
     fun create(root: ViewGroup, andThen: (ViewGroup) -> Unit): ComposeView {
         val composeView = ComposeView(root.context)
@@ -69,6 +74,8 @@ constructor(
                     darkIconManagerFactory = darkIconManagerFactory,
                     iconController = iconController,
                     ongoingCallController = ongoingCallController,
+                    darkIconDispatcher = darkIconDispatcherStore.forDisplay(root.context.displayId),
+                    eventAnimationInteractor = eventAnimationInteractor,
                     onViewCreated = andThen,
                 )
             }
@@ -97,9 +104,11 @@ fun StatusBarRoot(
     darkIconManagerFactory: DarkIconManager.Factory,
     iconController: StatusBarIconController,
     ongoingCallController: OngoingCallController,
+    darkIconDispatcher: DarkIconDispatcher,
+    eventAnimationInteractor: SystemStatusEventAnimationInteractor,
     onViewCreated: (ViewGroup) -> Unit,
 ) {
-    // None of these methods are used when [StatusBarSimpleFragment] is on.
+    // None of these methods are used when [StatusBarRootModernization] is on.
     // This can be deleted once the fragment is gone
     val nopVisibilityChangeListener =
         object : StatusBarVisibilityChangeListener {
@@ -135,7 +144,11 @@ fun StatusBarRoot(
                         phoneStatusBarView.requireViewById<StatusIconContainer>(R.id.statusIcons)
                     // TODO(b/364360986): turn this into a repo/intr/viewmodel
                     val darkIconManager =
-                        darkIconManagerFactory.create(statusIconContainer, StatusBarLocation.HOME)
+                        darkIconManagerFactory.create(
+                            statusIconContainer,
+                            StatusBarLocation.HOME,
+                            darkIconDispatcher,
+                        )
                     iconController.addIconGroup(darkIconManager)
 
                     // TODO(b/372657935): This won't be needed once OngoingCallController is
@@ -157,9 +170,13 @@ fun StatusBarRoot(
                     // TODO(b/369337701): implement notification icons for all displays.
                     //  Currently if we try to bind for all displays, there is a crash, because the
                     //  same notification icon view can't have multiple parents.
-                    if (context.displayId == Display.DEFAULT_DISPLAY) {
+                    val displayId = context.displayId
+                    if (displayId == Display.DEFAULT_DISPLAY) {
                         scope.launch {
-                            notificationIconsBinder.bindWhileAttached(notificationIconContainer)
+                            notificationIconsBinder.bindWhileAttached(
+                                notificationIconContainer,
+                                displayId,
+                            )
                         }
                     }
 
@@ -168,6 +185,8 @@ fun StatusBarRoot(
                         statusBarViewBinder.bind(
                             phoneStatusBarView,
                             statusBarViewModel,
+                            eventAnimationInteractor::animateStatusBarContentForChipEnter,
+                            eventAnimationInteractor::animateStatusBarContentForChipExit,
                             nopVisibilityChangeListener,
                         )
                     }

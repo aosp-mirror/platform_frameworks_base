@@ -45,6 +45,7 @@ final class ExternalVibrationSession extends Vibration
         void onExternalVibrationReleased(long vibrationId);
     }
 
+    private final long mSessionId = VibrationSession.nextSessionId();
     private final ExternalVibration mExternalVibration;
     private final ExternalVibrationScale mScale = new ExternalVibrationScale();
     private final VibratorManagerHooks mManagerHooks;
@@ -62,6 +63,11 @@ final class ExternalVibrationSession extends Vibration
 
     public ExternalVibrationScale getScale() {
         return mScale;
+    }
+
+    @Override
+    public long getSessionId() {
+        return mSessionId;
     }
 
     @Override
@@ -148,7 +154,12 @@ final class ExternalVibrationSession extends Vibration
 
     @Override
     public void notifySyncedVibratorsCallback(long vibrationId) {
-        // ignored, external control does not expect callbacks from the vibrator manager
+        // ignored, external control does not expect callbacks from the vibrator manager for sync
+    }
+
+    @Override
+    public void notifySessionCallback() {
+        // ignored, external control does not expect callbacks from the vibrator manager for session
     }
 
     boolean isHoldingSameVibration(ExternalVibration vib) {
@@ -174,7 +185,8 @@ final class ExternalVibrationSession extends Vibration
     @Override
     public String toString() {
         return "ExternalVibrationSession{"
-                + "id=" + id
+                + "sessionId=" + mSessionId
+                + ", vibrationId=" + id
                 + ", callerInfo=" + callerInfo
                 + ", externalVibration=" + mExternalVibration
                 + ", scale=" + mScale

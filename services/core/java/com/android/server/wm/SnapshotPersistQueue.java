@@ -64,6 +64,7 @@ class SnapshotPersistQueue {
     private boolean mStarted;
     private final Object mLock = new Object();
     private final UserManagerInternal mUserManagerInternal;
+    private boolean mShutdown;
 
     SnapshotPersistQueue() {
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -98,6 +99,16 @@ class SnapshotPersistQueue {
             if (!paused) {
                 mLock.notifyAll();
             }
+        }
+    }
+
+    /**
+     * Write out everything in the queue because of shutdown.
+     */
+    void shutdown() {
+        synchronized (mLock) {
+            mShutdown = true;
+            mLock.notifyAll();
         }
     }
 
@@ -193,7 +204,9 @@ class SnapshotPersistQueue {
                     if (isReadyToWrite) {
                         next.write();
                     }
-                    SystemClock.sleep(DELAY_MS);
+                    if (!mShutdown) {
+                        SystemClock.sleep(DELAY_MS);
+                    }
                 }
                 synchronized (mLock) {
                     final boolean writeQueueEmpty = mWriteQueue.isEmpty();

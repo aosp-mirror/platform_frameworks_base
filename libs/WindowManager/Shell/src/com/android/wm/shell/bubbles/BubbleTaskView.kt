@@ -42,6 +42,16 @@ class BubbleTaskView(val taskView: TaskView, executor: Executor) {
     var componentName: ComponentName? = null
       private set
 
+    /**
+     * Whether the task view is visible and has a surface. Note that this does not check the alpha
+     * value of the task view.
+     *
+     * When this is `true` it is safe to start showing the task view. Otherwise if this is `false`
+     * callers should wait for it to be visible which will be indicated either by a call to
+     * [TaskView.Listener.onTaskCreated] or [TaskView.Listener.onTaskVisibilityChanged]. */
+    var isVisible = false
+      private set
+
     /** [TaskView.Listener] for users of this class. */
     var delegateListener: TaskView.Listener? = null
 
@@ -61,9 +71,12 @@ class BubbleTaskView(val taskView: TaskView, executor: Executor) {
             this@BubbleTaskView.taskId = taskId
             isCreated = true
             componentName = name
+            // when the task is created it is visible
+            isVisible = true
         }
 
         override fun onTaskVisibilityChanged(taskId: Int, visible: Boolean) {
+            this@BubbleTaskView.isVisible = visible
             delegateListener?.onTaskVisibilityChanged(taskId, visible)
         }
 

@@ -78,18 +78,18 @@ fun createTaskInfo(
  * Any fields without corresponding parameters will retain their default values.
  */
 fun createWindowingEducationProto(
-    educationViewedTimestampMillis: Long? = null,
-    featureUsedTimestampMillis: Long? = null,
+    appHandleHintViewedTimestampMillis: Long? = null,
+    appHandleHintUsedTimestampMillis: Long? = null,
     appUsageStats: Map<String, Int>? = null,
     appUsageStatsLastUpdateTimestampMillis: Long? = null
 ): WindowingEducationProto =
     WindowingEducationProto.newBuilder()
         .apply {
-          if (educationViewedTimestampMillis != null) {
-            setEducationViewedTimestampMillis(educationViewedTimestampMillis)
+          if (appHandleHintViewedTimestampMillis != null) {
+            setAppHandleHintViewedTimestampMillis(appHandleHintViewedTimestampMillis)
           }
-          if (featureUsedTimestampMillis != null) {
-            setFeatureUsedTimestampMillis(featureUsedTimestampMillis)
+          if (appHandleHintUsedTimestampMillis != null) {
+            setAppHandleHintUsedTimestampMillis(appHandleHintUsedTimestampMillis)
           }
           setAppHandleEducation(
               createAppHandleEducationProto(appUsageStats, appUsageStatsLastUpdateTimestampMillis))
