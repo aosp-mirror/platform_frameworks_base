@@ -29,7 +29,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
-/** Represents an app function related errors. */
+/**
+ * Represents an app function related error.
+ *
+ * <p>This exception may include an {@link AppFunctionException#getExtras() Bundle}
+ * containing additional error-specific metadata.
+ *
+ * <p>The AppFunction SDK can expose structured APIs by packing and unpacking this Bundle.
+ */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public final class AppFunctionException extends Exception implements Parcelable {
     /**
