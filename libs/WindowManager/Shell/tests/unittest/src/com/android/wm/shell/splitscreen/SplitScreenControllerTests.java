@@ -74,7 +74,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -178,7 +177,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
         mSplitScreenController.onInit();
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN), any(), any());
+                eq(ISplitScreen.DESCRIPTOR), any(), any());
     }
 
     @Test

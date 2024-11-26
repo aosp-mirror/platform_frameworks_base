@@ -86,7 +86,6 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -254,7 +253,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void instantiateController_addExternalInterface() {
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION), any(), any());
+                eq(IBackAnimation.DESCRIPTOR), any(), any());
     }
 
     @Test

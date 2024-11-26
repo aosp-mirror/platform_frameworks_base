@@ -104,7 +104,6 @@ import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.recents.RecentsTransitionStateListener.RecentsTransitionState
 import com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_NOT_RUNNING
-import com.android.wm.shell.shared.ShellSharedConstants
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -236,7 +235,7 @@ class DesktopTasksController(
         shellCommandHandler.addDumpCallback(this::dump, this)
         shellCommandHandler.addCommandCallback("desktopmode", desktopModeShellCommandHandler, this)
         shellController.addExternalInterface(
-            ShellSharedConstants.KEY_EXTRA_SHELL_DESKTOP_MODE,
+            IDesktopMode.DESCRIPTOR,
             { createExternalInterface() },
             this,
         )
