@@ -263,6 +263,7 @@ interface BaseContentScope : ElementStateScope {
     fun Modifier.noResizeDuringTransitions(): Modifier
 }
 
+@Deprecated("Use ContentScope instead", ReplaceWith("ContentScope"))
 typealias SceneScope = ContentScope
 
 @Stable
