@@ -613,6 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permet que l\'aplicació determini la posició relativa entre els dispositius de banda ultraampla propers"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interaccionar amb els dispositius Wi‑Fi propers"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet que l\'aplicació s\'anunciï i es connecti als dispositius Wi‑Fi propers, i en determini la posició relativa"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"determin. posició relativa entre dispositius propers"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permet que l\'aplicació determini la posició relativa entre els dispositius propers"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informació preferent sobre el servei de pagament per NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet que l\'aplicació obtingui informació preferent sobre el servei de pagament per NFC, com ara complements registrats i destinacions de rutes."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicació de camp proper (NFC)"</string>
@@ -1929,7 +1931,7 @@
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no el desactivis"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Fins que no ho desactivis"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Fins que desactivis el mode No molestis"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Replega"</string>

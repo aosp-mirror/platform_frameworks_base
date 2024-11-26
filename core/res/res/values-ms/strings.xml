@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Benarkan apl menentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan peranti Wi-Fi berdekatan"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Membenarkan apl mengiklankan, menyambung dan menentukan kedudukan relatif peranti Wi-Fi berdekatan"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"tentukan kedudukan relatif antara peranti berdekatan"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Benarkan apl menentukan kedudukan relatif antara peranti berdekatan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
@@ -2419,7 +2421,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Ruang persendirian"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Umum"</string>
-    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang privasi"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang persendirian"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Kandungan pemberitahuan yang sensitif disembunyikan"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Kandungan apl disembunyikan daripada perkongsian skrin untuk keselamatan"</string>

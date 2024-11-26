@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Mengizinkan aplikasi menentukan posisi relatif antar-perangkat Ultra-Wideband di sekitar"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan perangkat Wi-Fi di sekitar"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Mengizinkan aplikasi menampilkan, menghubungkan, dan menentukan posisi relatif perangkat Wi-Fi di sekitar"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"menentukan posisi relatif antar-perangkat di sekitar"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Izinkan aplikasi menentukan posisi relatif antar-perangkat di sekitar"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informasi Layanan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Mengizinkan aplikasi untuk mendapatkan informasi layanan pembayaran NFC pilihan seperti bantuan terdaftar dan tujuan rute."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrol NFC"</string>
@@ -1393,7 +1395,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Tidak perlu izin"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"ini mungkin tidak gratis"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Oke"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Daya perangkat sedang diisi via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Mengisi daya perangkat ini via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Mengisi daya perangkat yang terhubung via USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfer file USB diaktifkan"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB diaktifkan"</string>
@@ -1759,7 +1761,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Alat bantu dengar"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> diaktifkan."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dinonaktifkan."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lepaskan tombol volume. Untuk mengaktifkan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tekan dan tahan kedua tombol volume lagi selama 3 detik."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lepaskan tombol volume. Untuk mengaktifkan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tekan kedua tombol volume lagi selama 3 detik."</string>
     <string name="accessibility_button_prompt_text" msgid="6105393217162198616">"Pilih fitur"</string>
     <string name="accessibility_gesture_prompt_text" msgid="6452246951969541792">"Pilih fitur"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="77745752309056152">"Pilih fitur"</string>
@@ -1904,7 +1906,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Upaya ke-2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Upaya ke-3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clone <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> Pribadi"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> Privasi"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Meminta PIN sebelum melepas sematan"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Meminta pola pembukaan kunci sebelum melepas sematan"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Meminta sandi sebelum melepas sematan"</string>

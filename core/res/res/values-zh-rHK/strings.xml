@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置之間的相對位置"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與附近的 Wi‑Fi 裝置互動"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式向附近的 Wi-Fi 裝置顯示此裝置、連接這些裝置並判斷其相對位置"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"判斷附近裝置之間的相對位置"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"允許應用程式判斷附近裝置之間的相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"由用戶允許授權的 NFC 付款服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得由用戶允許授權的 NFC 付款服務資訊 (如已註冊的付款輔助功能和最終付款對象)。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>

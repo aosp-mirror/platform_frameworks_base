@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Võimaldab rakendusel määrata lähedalasuvate ülilairibaühendust kasutavate seadmete suhtelise kauguse üksteisest"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Läheduses olevate WiFi-seadmetega suhtlemine"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lubab rakendusel läheduses olevatele WiFi-seadmetele reklaamida, nendega ühenduse luua ja määrata nende suhteline asend"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"Määrata läheduses olevate seadmete suhtelise kauguse üksteisest."</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Võimaldab rakendusel määrata läheduses olevate seadmete suhtelise kauguse üksteisest"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Eelistatud NFC-makseteenuse teave"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Võimaldab rakendusel hankida eelistatud NFC-makseteenuse teavet (nt registreeritud abi ja marsruudi sihtkoht)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lähiväljaside juhtimine"</string>
@@ -2450,7 +2452,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Muusika"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Kalkulaator"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Kaardid"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Rakendused"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Teie sõrmejälgi ei saa enam tuvastada. Seadistage sõrmejäljega avamine uuesti."</string>
 </resources>

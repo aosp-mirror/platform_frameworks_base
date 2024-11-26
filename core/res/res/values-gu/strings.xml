@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ઍપને નજીકના અલ્ટ્રા-વાઇડબૅન્ડ ડિવાઇસની વચ્ચેનું સંબંધિત અંતર નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"નજીકના વાઇ-ફાઇ ડિવાઇસ સાથે ક્રિયાપ્રતિક્રિયા કરો"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ઍપને નજીકના વાઇ-ફાઇ ડિવાઇસની માહિતી બતાવવાની, તેની સાથે કનેક્ટ કરવાની અને તેની સંબંધિત સ્થિતિ નક્કી કરવાની મંજૂરી આપો"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ડિવાઇસની વચ્ચેનું સાપેક્ષ અંતર નક્કી કરો"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ઍપને નજીકના ડિવાઇસની વચ્ચેનું સાપેક્ષ અંતર નક્કી કરવાની મંજૂરી આપો"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"આ મંજૂરીને આપવાથી, ઍપ તમારી પસંદગીની NFC ચુકવણીની સેવા વિશે માહિતી મેળવી શકે છે, જેમ કે રજિસ્ટર થયેલી સહાય અને નિર્ધારિત સ્થાન."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"નિઅર ફીલ્ડ કમ્યુનિકેશન નિયંત્રિત કરો"</string>
@@ -1663,7 +1665,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"હેડફોન"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"સિસ્ટમ"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"બ્લૂટૂથ ઑડિઓ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"બ્લૂટૂથ ઑડિયો"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"વાયરલેસ ડિસ્પ્લે"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"કાસ્ટ કરો"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ઉપકરણ સાથે કનેક્ટ કરો"</string>
@@ -2056,7 +2058,7 @@
     <string name="conference_call" msgid="5731633152336490471">"કોન્ફરન્સ કૉલ"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"ટૂલટિપ"</string>
     <string name="app_category_game" msgid="4534216074910244790">"રમતો"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"સંગીત અને ઑડિયો"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"મ્યુઝિક અને ઑડિયો"</string>
     <string name="app_category_video" msgid="2590183854839565814">"મૂવી અને વીડિઓ"</string>
     <string name="app_category_image" msgid="7307840291864213007">"ફોટો અને છબીઓ"</string>
     <string name="app_category_social" msgid="2278269325488344054">"સામાજિક અને સંચાર"</string>
@@ -2444,13 +2446,13 @@
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"મ્યૂટ કરો"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"સાઉન્ડ મ્યૂટ કરવા માટે ટૅપ કરો"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6535007304687100909">"બ્રાઉઝર"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"સંપર્કો"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2750702518068326356">"Contacts"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="4229037666415353683">"ઇમેઇલ"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"મ્યુઝિક"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"કૅલેન્ડર"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"કેલ્ક્યુલેટર"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"નકશા"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Maps"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"ઍપ્લિકેશનો"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"તમારી ફિંગરપ્રિન્ટને હવેથી ઓળખી શકાશે નહીં. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
 </resources>
