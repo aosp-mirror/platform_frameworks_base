@@ -31,6 +31,8 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
             </intent-filter>
         </receiver>
+      <service android:name="com.android.server.security.intrusiondetection.TestLoggingService"
+                 android:exported="true"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

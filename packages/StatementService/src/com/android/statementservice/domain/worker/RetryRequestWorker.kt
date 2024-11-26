@@ -17,18 +17,9 @@
 package com.android.statementservice.domain.worker
 
 import android.content.Context
-import android.content.UriRelativeFilterGroup
-import android.content.pm.verify.domain.DomainVerificationManager
 import androidx.work.NetworkType
 import androidx.work.WorkerParameters
 import com.android.statementservice.domain.VerifyStatus
-import com.android.statementservice.utils.AndroidUtils
-import com.android.statementservice.utils.StatementUtils
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.isActive
-import java.util.UUID
 
 /**
  * Scheduled every 24 hours with [NetworkType.CONNECTED] and every 72 hours without any constraints
@@ -37,63 +28,7 @@ import java.util.UUID
 class RetryRequestWorker(
     appContext: Context,
     params: WorkerParameters
-) : BaseRequestWorker(appContext, params) {
+) : PeriodicUpdateWorker(appContext, params) {
 
-    data class VerifyResult(
-        val domainSetId: UUID,
-        val host: String,
-        val status: VerifyStatus,
-        val packageName: String,
-        val groups: List<UriRelativeFilterGroup>
-    )
-
-    override suspend fun doWork() = coroutineScope {
-        if (!AndroidUtils.isReceiverV2Enabled(appContext)) {
-            return@coroutineScope Result.success()
-        }
-
-        val packageNames = verificationManager.queryValidVerificationPackageNames()
-
-        verifier.collectHosts(packageNames)
-            .map { (domainSetId, packageName, host) ->
-                async {
-                    if (isActive && !isStopped) {
-                        val (_, status, statement) = verifier.verifyHost(host, packageName, params.network)
-                        val groups = statement?.dynamicAppLinkComponents.orEmpty().map {
-                            StatementUtils.createUriRelativeFilterGroup(it)
-                        }
-                        VerifyResult(domainSetId, host, status, packageName, groups)
-                    } else {
-                        // If the job gets cancelled, stop the remaining hosts, but continue the
-                        // job to commit the results for hosts that were already requested.
-                        null
-                    }
-                }
-            }
-            .awaitAll()
-            .filterNotNull() // TODO(b/159952358): Fast fail packages which can't be retrieved.
-            .groupBy { it.packageName }
-            .forEach { (packageName, resultsByName) ->
-                val groupUpdates = mutableMapOf<String, List<UriRelativeFilterGroup>>()
-                resultsByName.groupBy { it.domainSetId }
-                    .forEach { (domainSetId, resultsById) ->
-                        resultsById.groupBy { it.status }
-                            .forEach { (status, verifyResults) ->
-                                val error = verificationManager.setDomainVerificationStatus(
-                                    domainSetId,
-                                    verifyResults.map(VerifyResult::host).toSet(),
-                                    status.value
-                                )
-                                if (error == DomainVerificationManager.STATUS_OK
-                                    && status == VerifyStatus.SUCCESS) {
-                                    verifyResults.forEach { groupUpdates[it.host] = it.groups }
-                                }
-                            }
-                    }
-                updateUriRelativeFilterGroups(packageName, groupUpdates)
-            }
-
-        // Succeed regardless of results since this retry is best effort and not required
-        Result.success()
-    }
+    override suspend fun doWork() = updateDomainVerificationStatus(VerifyStatus::shouldRetry)
 }

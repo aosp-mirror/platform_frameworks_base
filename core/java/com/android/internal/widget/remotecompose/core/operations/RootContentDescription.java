@@ -28,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Describe a content description for the document */
-public class RootContentDescription implements RemoteComposeOperation {
+public class RootContentDescription extends Operation implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.ROOT_CONTENT_DESCRIPTION;
     private static final String CLASS_NAME = "RootContentDescription";
     int mContentDescription;
@@ -69,6 +69,11 @@ public class RootContentDescription implements RemoteComposeOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -78,12 +83,23 @@ public class RootContentDescription implements RemoteComposeOperation {
         buffer.writeInt(contentDescription);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int contentDescription = buffer.readInt();
         RootContentDescription header = new RootContentDescription(contentDescription);
         operations.add(header);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description("Content description of root")

@@ -42,6 +42,10 @@ import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.Bundle;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
@@ -52,6 +56,7 @@ import android.security.intrusiondetection.IIntrusionDetectionServiceStateCallba
 import android.security.intrusiondetection.IntrusionDetectionEvent;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -66,6 +71,8 @@ import com.android.bedstead.permissions.CommonPermissions;
 import com.android.bedstead.permissions.PermissionContext;
 import com.android.bedstead.permissions.annotations.EnsureHasPermission;
 import com.android.server.ServiceThread;
+import com.android.server.security.intrusiondetection.TestLoggingService;
+import com.android.server.security.intrusiondetection.TestLoggingService.LocalBinder;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -116,6 +123,8 @@ public class IntrusionDetectionServiceTest {
     private TestLooper mTestLooperOfDataAggregator;
     private Looper mLooperOfDataAggregator;
     private FakePermissionEnforcer mPermissionEnforcer;
+    private TestLoggingService mService;
+    private boolean mBoundToLoggingService = false;
 
     @BeforeClass
     public static void setDeviceOwner() {
@@ -141,8 +150,8 @@ public class IntrusionDetectionServiceTest {
 
     @SuppressLint("VisibleForTests")
     @Before
-    public void setUp() {
-        mContext = spy(ApplicationProvider.getApplicationContext());
+    public void setUp() throws Exception {
+        mContext = ApplicationProvider.getApplicationContext();
 
         mPermissionEnforcer = new FakePermissionEnforcer();
         mPermissionEnforcer.grant(READ_INTRUSION_DETECTION_STATE);
@@ -563,6 +572,61 @@ public class IntrusionDetectionServiceTest {
                 urlConnection.disconnect();
             }
         }
+    }
+
+    @Test
+    public void test_StartBackupTransportService() {
+        final String TAG = "test_StartBackupTransportService";
+        ServiceConnection serviceConnection = null;
+
+        assertEquals(false, mBoundToLoggingService);
+        try {
+            serviceConnection = startTestService();
+            assertEquals(true, mBoundToLoggingService);
+            assertNotNull(serviceConnection);
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException while starting: ", e);
+            fail("Exception thrown while connecting to service");
+        } catch (InterruptedException e) {
+            Log.e(TAG, "InterruptedException while starting: ", e);
+            fail("Interrupted while connecting to service");
+        } finally {
+            mContext.unbindService(serviceConnection);
+        }
+    }
+
+    private ServiceConnection startTestService() throws SecurityException, InterruptedException {
+        final String TAG = "startTestService";
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            // Called when the connection with the service is established.
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                // Because we have bound to an explicit
+                // service that is running in our own process, we can
+                // cast its IBinder to a concrete class and directly access it.
+                Log.d(TAG, "onServiceConnected");
+                LocalBinder binder = (LocalBinder) service;
+                mService = binder.getService();
+                mBoundToLoggingService = true;
+                latch.countDown();
+            }
+
+            // Called when the connection with the service disconnects unexpectedly.
+            @Override
+            public void onServiceDisconnected(ComponentName className) {
+                Log.d(TAG, "onServiceDisconnected");
+                mBoundToLoggingService = false;
+                latch.countDown();
+            }
+        };
+
+        Intent intent = new Intent(mContext, TestLoggingService.class);
+        mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        latch.await(5, TimeUnit.SECONDS);
+
+        return serviceConnection;
     }
 
     private class MockInjector implements IntrusionDetectionService.Injector {

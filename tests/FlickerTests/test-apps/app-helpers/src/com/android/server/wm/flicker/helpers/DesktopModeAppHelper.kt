@@ -39,6 +39,7 @@ import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.MotionEventHelper.InputMethod.TOUCH
 import java.time.Duration
+import kotlin.math.abs
 
 /**
  * Wrapper class around App helper classes. This class adds functionality to the apps that the
@@ -222,11 +223,16 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         val expectedRect = Rect(displayRect).apply {
             if (toLeft) right -= expectedWidth else left += expectedWidth
         }
-
-        wmHelper
-            .StateSyncBuilder()
+        wmHelper.StateSyncBuilder()
             .withAppTransitionIdle()
-            .withSurfaceVisibleRegion(this, Region(expectedRect))
+            .withSurfaceMatchingVisibleRegion(
+                this,
+                Region(expectedRect),
+                { surfaceRegion, expectedRegion ->
+                    areSnapWindowRegionsMatchingWithinThreshold(
+                        surfaceRegion, expectedRegion, toLeft
+                    )
+                })
             .waitForAndVerify()
     }
 
@@ -460,6 +466,33 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     private fun isInDesktopWindowingMode(wmHelper: WindowManagerStateHelper) =
         wmHelper.getWindow(innerHelper)?.windowingMode == WINDOWING_MODE_FREEFORM
 
+    private fun areSnapWindowRegionsMatchingWithinThreshold(
+        surfaceRegion: Region, expectedRegion: Region, toLeft: Boolean
+    ): Boolean {
+        val surfaceBounds = surfaceRegion.bounds
+        val expectedBounds = expectedRegion.bounds
+        // If snapped to left, right bounds will be cut off by the center divider.
+        // Else if snapped to right, the left bounds will be cut off.
+        val leftSideMatching: Boolean
+        val rightSideMatching: Boolean
+        if (toLeft) {
+            leftSideMatching = surfaceBounds.left == expectedBounds.left
+            rightSideMatching =
+                abs(surfaceBounds.right - expectedBounds.right) <=
+                        surfaceBounds.right * SNAP_WINDOW_MAX_THRESHOLD_DIFF
+        } else {
+            leftSideMatching =
+                abs(surfaceBounds.left - expectedBounds.left) <=
+                        surfaceBounds.left * SNAP_WINDOW_MAX_THRESHOLD_DIFF
+            rightSideMatching = surfaceBounds.right == expectedBounds.right
+        }
+
+        return surfaceBounds.top == expectedBounds.top &&
+                surfaceBounds.bottom == expectedBounds.bottom &&
+                leftSideMatching &&
+                rightSideMatching
+    }
+
     private companion object {
         val TIMEOUT: Duration = Duration.ofSeconds(3)
         const val SNAP_RESIZE_DRAG_INSET: Int = 5 // inset to avoid dragging to display edge
@@ -475,5 +508,12 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         const val HEADER_EMPTY_VIEW: String = "caption_handle"
         val caption: BySelector
             get() = By.res(SYSTEMUI_PACKAGE, CAPTION)
+        // In DesktopMode, window snap can be done with just a single window. In this case, the
+        // divider tiling between left and right window won't be shown, and hence its states are not
+        // obtainable in test.
+        // As the test should just focus on ensuring window goes to one side of the screen, an
+        // acceptable approach is to ensure snapped window still fills > 95% of either side of the
+        // screen.
+        const val SNAP_WINDOW_MAX_THRESHOLD_DIFF = 0.05
     }
 }

@@ -21,7 +21,7 @@ import android.annotation.NonNull;
  * PaintOperation interface, used for operations aimed at painting (while any operation _can_ paint,
  * this make it a little more explicit)
  */
-public abstract class PaintOperation implements Operation {
+public abstract class PaintOperation extends Operation {
 
     @Override
     public void apply(@NonNull RemoteContext context) {

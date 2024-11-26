@@ -26,9 +26,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.RestrictedLockUtils
 import com.android.settingslib.spa.testutils.FakeNavControllerWrapper
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
+import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdminImpl
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsProvider
 import com.android.settingslib.spaprivileged.tests.testutils.TestAppRecord
@@ -97,6 +99,26 @@ class TogglePermissionAppListPageTest {
     }
 
     @Test
+    fun summary_whenAllowedButAdminOverrideToNotAllowed() {
+        fakeRestrictionsProvider.restrictedMode =
+            BlockedByAdminImpl(context = context, enforcedAdmin = ENFORCED_ADMIN)
+        val listModel =
+            TestTogglePermissionAppListModel(
+                isAllowed = true,
+                switchifBlockedByAdminOverrideCheckedValueTo = false,
+            )
+
+        val summary = getSummary(listModel)
+
+        assertThat(summary)
+            .isEqualTo(
+                context.getString(
+                    com.android.settingslib.widget.restricted.R.string.disabled_by_admin
+                )
+            )
+    }
+
+    @Test
     fun appListItem_onClick_navigate() {
         val listModel = TestTogglePermissionAppListModel()
         composeTestRule.setContent {
@@ -162,8 +184,9 @@ class TogglePermissionAppListPageTest {
         const val PACKAGE_NAME = "package.name"
         const val LABEL = "Label"
         const val SUMMARY = "Summary"
-        val APP = ApplicationInfo().apply {
-            packageName = PACKAGE_NAME
-        }
+        val APP = ApplicationInfo().apply { packageName = PACKAGE_NAME }
+        const val RESTRICTION = "restriction"
+        val ENFORCED_ADMIN: RestrictedLockUtils.EnforcedAdmin =
+            RestrictedLockUtils.EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(RESTRICTION)
     }
 }

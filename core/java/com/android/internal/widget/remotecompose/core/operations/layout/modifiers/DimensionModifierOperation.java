@@ -17,13 +17,15 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import android.annotation.NonNull;
 
+import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 /** Base class for dimension modifiers */
-public abstract class DimensionModifierOperation implements ModifierOperation, VariableSupport {
+public abstract class DimensionModifierOperation extends Operation
+        implements ModifierOperation, VariableSupport {
 
     public enum Type {
         EXACT,

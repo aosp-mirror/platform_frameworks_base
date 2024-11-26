@@ -112,3 +112,11 @@ flag {
     description : "Feature flag to enable APIs for applying picture profiles"
     bug: "337330263"
 }
+
+flag {
+    name: "hdmi_control_collect_physical_address"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Collect physical address from HDMI-CEC messages in metrics"
+    bug: "376001043"
+}

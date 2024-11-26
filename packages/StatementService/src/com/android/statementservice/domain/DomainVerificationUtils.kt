@@ -22,6 +22,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.android.statementservice.domain.worker.RetryRequestWorker
+import com.android.statementservice.domain.worker.UpdateVerifiedDomainsWorker
 import java.time.Duration
 
 object DomainVerificationUtils {
@@ -30,6 +31,10 @@ object DomainVerificationUtils {
     private const val PERIODIC_SHORT_HOURS = 24L
     private const val PERIODIC_LONG_ID = "retry_long"
     private const val PERIODIC_LONG_HOURS = 72L
+    private const val PERIODIC_UPDATE_ID = "update"
+    private const val PERIODIC_UPDATE_HOURS = 720L
+
+    private const val UPDATE_WORKER_ENABLED = false
 
     /**
      * In a majority of cases, the initial requests will be enough to verify domains, since they
@@ -72,6 +77,40 @@ object DomainVerificationUtils {
                         ExistingPeriodicWorkPolicy.KEEP, it
                     )
                 }
+        }
+    }
+
+    /**
+     * Schedule a periodic worker to check for any updates to assetlink.json files for domains that
+     * have already been verified.
+     *
+     * Due to the potential for this worker to generate enough traffic across all android devices
+     * to overwhelm websites, this method is hardcoded to be disabled by default. It is highly
+     * recommended to not enable this worker and instead implement a custom worker that pulls
+     * updates from a caching service instead of directly from websites.
+     */
+    fun schedulePeriodicUpdateUnlocked(workManager: WorkManager) {
+        if (UPDATE_WORKER_ENABLED) {
+            workManager.apply {
+                PeriodicWorkRequestBuilder<UpdateVerifiedDomainsWorker>(
+                    Duration.ofDays(
+                        PERIODIC_UPDATE_HOURS
+                    )
+                )
+                    .setConstraints(
+                        Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .setRequiresDeviceIdle(true)
+                            .build()
+                    )
+                    .build()
+                    .let {
+                        enqueueUniquePeriodicWork(
+                            PERIODIC_UPDATE_ID,
+                            ExistingPeriodicWorkPolicy.KEEP, it
+                        )
+                    }
+            }
         }
     }
 }

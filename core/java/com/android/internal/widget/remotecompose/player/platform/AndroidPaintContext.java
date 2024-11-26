@@ -529,6 +529,7 @@ public class AndroidPaintContext extends PaintContext {
                     @Override
                     public void setImageFilterQuality(int quality) {
                         Utils.log(" quality =" + quality);
+                        mPaint.setFilterBitmap(quality == 1);
                     }
 
                     @Override
@@ -711,20 +712,32 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
+    public void tweenPath(int out, int path1, int path2, float tween) {
+        float[] p = getPathArray(path1, path2, tween);
+        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
+        androidContext.mRemoteComposeState.putPathData(out, p);
+    }
+
+    @Override
     public void reset() {
         mPaint.reset();
     }
 
     private Path getPath(int path1Id, int path2Id, float tween, float start, float end) {
+        return getPath(getPathArray(path1Id, path2Id, tween), start, end);
+    }
+
+    private float[] getPathArray(int path1Id, int path2Id, float tween) {
+        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
         if (tween == 0.0f) {
-            return getPath(path1Id, start, end);
+            return androidContext.mRemoteComposeState.getPathData(path1Id);
         }
         if (tween == 1.0f) {
-            return getPath(path2Id, start, end);
+            return androidContext.mRemoteComposeState.getPathData(path2Id);
         }
-        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
-        float[] data1 = (float[]) androidContext.mRemoteComposeState.getFromId(path1Id);
-        float[] data2 = (float[]) androidContext.mRemoteComposeState.getFromId(path2Id);
+
+        float[] data1 = androidContext.mRemoteComposeState.getPathData(path1Id);
+        float[] data2 = androidContext.mRemoteComposeState.getPathData(path2Id);
         float[] tmp = new float[data2.length];
         for (int i = 0; i < tmp.length; i++) {
             if (Float.isNaN(data1[i]) || Float.isNaN(data2[i])) {
@@ -733,6 +746,10 @@ public class AndroidPaintContext extends PaintContext {
                 tmp[i] = (data2[i] - data1[i]) * tween + data1[i];
             }
         }
+        return tmp;
+    }
+
+    private Path getPath(float[] tmp, float start, float end) {
         Path path = new Path();
         FloatsToPath.genPath(path, tmp, start, end);
         return path;
@@ -741,9 +758,9 @@ public class AndroidPaintContext extends PaintContext {
     private Path getPath(int id, float start, float end) {
         AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
         Path path = new Path();
-        if (androidContext.mRemoteComposeState.containsId(id)) {
-            float[] data = (float[]) androidContext.mRemoteComposeState.getFromId(id);
-            FloatsToPath.genPath(path, data, start, end);
+        float[] pathData = androidContext.mRemoteComposeState.getPathData(id);
+        if (pathData != null) {
+            FloatsToPath.genPath(path, pathData, start, end);
         }
         return path;
     }

@@ -32,7 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Apply a value change on an integer variable. */
-public class ValueIntegerChangeActionOperation implements ActionOperation {
+public class ValueIntegerChangeActionOperation extends Operation implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_INTEGER_CHANGE_ACTION;
 
     int mTargetValueId = -1;
@@ -87,6 +87,12 @@ public class ValueIntegerChangeActionOperation implements ActionOperation {
         buffer.writeInt(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int valueId = buffer.readInt();
         int value = buffer.readInt();
