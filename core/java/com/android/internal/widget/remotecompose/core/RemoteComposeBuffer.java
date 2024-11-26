@@ -59,7 +59,10 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixSkew;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
+import com.android.internal.widget.remotecompose.core.operations.PathAppend;
+import com.android.internal.widget.remotecompose.core.operations.PathCreate;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
+import com.android.internal.widget.remotecompose.core.operations.PathTween;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.RootContentDescription;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
@@ -644,6 +647,37 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * interpolate the two paths to produce a 3rd
+     *
+     * @param pid1 the first path
+     * @param pid2 the second path
+     * @param tween path is the path1+(pat2-path1)*tween
+     * @return id of the tweened path
+     */
+    public int pathTween(int pid1, int pid2, float tween) {
+        int out = mRemoteComposeState.nextId();
+        PathTween.apply(mBuffer, out, pid1, pid2, tween);
+        return out;
+    }
+
+    /**
+     * Create a path with an initial moveTo
+     *
+     * @param x x coordinate of the moveto
+     * @param y y coordinate of the moveto
+     * @return id of the created path
+     */
+    public int pathCreate(float x, float y) {
+        int out = mRemoteComposeState.nextId();
+        PathCreate.apply(mBuffer, out, x, y);
+        return out;
+    }
+
+    public void pathAppend(int id, float... path) {
+        PathAppend.apply(mBuffer, id, path);
+    }
+
+    /**
      * Draw the specified path
      *
      * @param pathId
@@ -1154,6 +1188,16 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * Reserve a float and returns a NaN number pointing to that float
+     *
+     * @return the nan id of float
+     */
+    public float reserveFloatVariable() {
+        int id = mRemoteComposeState.cacheFloat(0f);
+        return Utils.asNan(id);
+    }
+
+    /**
      * Add a Integer return an id number pointing to that float.
      *
      * @param value adds an integer and assigns it an id
@@ -1651,8 +1695,8 @@ public class RemoteComposeBuffer {
      */
     public void addModifierScroll(int direction, float positionId, int notches) {
         // TODO: add support for non-notch behaviors etc.
-        float max = this.addFloat(0f);
-        float notchMax = this.addFloat(0f);
+        float max = this.reserveFloatVariable();
+        float notchMax = this.reserveFloatVariable();
         float touchExpressionDirection =
                 direction != 0 ? RemoteContext.FLOAT_TOUCH_POS_X : RemoteContext.FLOAT_TOUCH_POS_Y;
         this.addTouchExpression(
@@ -1807,8 +1851,8 @@ public class RemoteComposeBuffer {
         ClipRectModifierOperation.apply(mBuffer);
     }
 
-    public void addLoopStart(float count, float from, float step, int indexId) {
-        LoopOperation.apply(mBuffer, count, from, step, indexId);
+    public void addLoopStart(int indexId, float from, float step, float until) {
+        LoopOperation.apply(mBuffer, indexId, from, step, until);
     }
 
     public void addLoopEnd() {

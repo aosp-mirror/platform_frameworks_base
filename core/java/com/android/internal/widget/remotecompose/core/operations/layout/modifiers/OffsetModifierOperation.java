@@ -94,6 +94,11 @@ public class OffsetModifierOperation extends DecoratorModifierOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }

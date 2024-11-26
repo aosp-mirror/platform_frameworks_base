@@ -55,10 +55,10 @@ var Kosmos.shortcutHelperAppCategoriesShortcutsSource: KeyboardShortcutGroupsSou
     Kosmos.Fixture { AppCategoriesShortcutsSource(windowManager, testDispatcher) }
 
 var Kosmos.shortcutHelperSystemShortcutsSource: KeyboardShortcutGroupsSource by
-    Kosmos.Fixture { SystemShortcutsSource(mainResources) }
+    Kosmos.Fixture { SystemShortcutsSource(mainResources, fakeInputManager.inputManager) }
 
 var Kosmos.shortcutHelperMultiTaskingShortcutsSource: KeyboardShortcutGroupsSource by
-    Kosmos.Fixture { MultitaskingShortcutsSource(mainResources) }
+    Kosmos.Fixture { MultitaskingShortcutsSource(mainResources, applicationContext) }
 
 val Kosmos.shortcutHelperStateRepository by
     Kosmos.Fixture {
@@ -72,7 +72,9 @@ val Kosmos.shortcutHelperStateRepository by
     }
 
 var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
-    Kosmos.Fixture { InputShortcutsSource(mainResources, windowManager) }
+    Kosmos.Fixture {
+        InputShortcutsSource(mainResources, windowManager, fakeInputManager.inputManager)
+    }
 
 var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
@@ -141,7 +143,10 @@ val Kosmos.shortcutHelperStateInteractor by
 
 val Kosmos.shortcutHelperCategoriesInteractor by
     Kosmos.Fixture {
-        ShortcutHelperCategoriesInteractor(defaultShortcutCategoriesRepository) {
+        ShortcutHelperCategoriesInteractor(
+            context = applicationContext,
+            defaultShortcutCategoriesRepository,
+        ) {
             customShortcutCategoriesRepository
         }
     }

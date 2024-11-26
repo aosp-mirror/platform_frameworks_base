@@ -20,14 +20,10 @@
 
      Typical shortcuts (not necessarily defined here):
        'b': Browser
-       'c': Contacts
+       'p': Contacts
        'e': Email
-       'g': GMail
-       'k': Calendar
+       'c': Calendar
        'm': Maps
-       'p': Music
-       's': SMS
-       't': Talk
        'u': Calculator
        'y': YouTube
 -->
@@ -40,22 +36,16 @@
         shortcut="b" />
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        shortcut="c" />
+        shortcut="p" />
     <bookmark
         category="android.intent.category.APP_EMAIL"
         shortcut="e" />
     <bookmark
         category="android.intent.category.APP_CALENDAR"
-        shortcut="k" />
+        shortcut="c" />
     <bookmark
         category="android.intent.category.APP_MAPS"
         shortcut="m" />
-    <bookmark
-        category="android.intent.category.APP_MUSIC"
-        shortcut="p" />
-    <bookmark
-        role="android.app.role.SMS"
-        shortcut="s" />
     <bookmark
         category="android.intent.category.APP_CALCULATOR"
         shortcut="u" />

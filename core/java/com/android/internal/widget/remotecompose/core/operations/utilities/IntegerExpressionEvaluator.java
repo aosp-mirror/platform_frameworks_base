@@ -82,7 +82,7 @@ public class IntegerExpressionEvaluator {
         for (int i = 0; i < mStack.length; i++) {
             int v = mStack[i];
             if (((1 << i) & mask) != 0) {
-                sp = mOps[v - OFFSET].eval(sp);
+                sp = opEval(sp, v);
             } else {
                 mStack[++sp] = v;
             }
@@ -107,7 +107,7 @@ public class IntegerExpressionEvaluator {
         for (int i = 0; i < len; i++) {
             int v = mStack[i];
             if (((1 << i) & mask) != 0) {
-                sp = mOps[v - OFFSET].eval(sp);
+                sp = opEval(sp, v);
             } else {
                 mStack[++sp] = v;
             }
@@ -130,7 +130,7 @@ public class IntegerExpressionEvaluator {
         for (int i = 0; i < exp.length; i++) {
             int v = mStack[i];
             if (((1 << i) & opMask) != 0) {
-                sp = mOps[v - OFFSET].eval(sp);
+                sp = opEval(sp, v);
             } else {
                 mStack[++sp] = v;
             }
@@ -138,171 +138,140 @@ public class IntegerExpressionEvaluator {
         return mStack[sp];
     }
 
-    @NonNull Op[] mOps;
+    private static final int OP_ADD = OFFSET + 1;
+    private static final int OP_SUB = OFFSET + 2;
+    private static final int OP_MUL = OFFSET + 3;
+    private static final int OP_DIV = OFFSET + 4;
+    private static final int OP_MOD = OFFSET + 5;
+    private static final int OP_SHL = OFFSET + 6;
+    private static final int OP_SHR = OFFSET + 7;
+    private static final int OP_USHR = OFFSET + 8;
+    private static final int OP_OR = OFFSET + 9;
+    private static final int OP_AND = OFFSET + 10;
+    private static final int OP_XOR = OFFSET + 11;
+    private static final int OP_COPY_SIGN = OFFSET + 12;
+    private static final int OP_MIN = OFFSET + 13;
+    private static final int OP_MAX = OFFSET + 14;
+    private static final int OP_NEG = OFFSET + 15;
+    private static final int OP_ABS = OFFSET + 16;
+    private static final int OP_INCR = OFFSET + 17;
+    private static final int OP_DECR = OFFSET + 18;
+    private static final int OP_NOT = OFFSET + 19;
+    private static final int OP_SIGN = OFFSET + 20;
+    private static final int OP_CLAMP = OFFSET + 21;
+    private static final int OP_TERNARY_CONDITIONAL = OFFSET + 22;
+    private static final int OP_MAD = OFFSET + 23;
+    private static final int OP_FIRST_VAR = OFFSET + 24;
+    private static final int OP_SECOND_VAR = OFFSET + 25;
+    private static final int OP_THIRD_VAR = OFFSET + 26;
 
-    {
-        Op mADD =
-                (sp) -> { // ADD
-                    mStack[sp - 1] = mStack[sp - 1] + mStack[sp];
-                    return sp - 1;
-                };
-        Op mSUB =
-                (sp) -> { // SUB
-                    mStack[sp - 1] = mStack[sp - 1] - mStack[sp];
-                    return sp - 1;
-                };
-        Op mMUL =
-                (sp) -> { // MUL
-                    mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
-                    return sp - 1;
-                };
-        Op mDIV =
-                (sp) -> { // DIV
-                    mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
-                    return sp - 1;
-                };
-        Op mMOD =
-                (sp) -> { // MOD
-                    mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
-                    return sp - 1;
-                };
-        Op mSHL =
-                (sp) -> { // SHL
-                    mStack[sp - 1] = mStack[sp - 1] << mStack[sp];
-                    return sp - 1;
-                };
-        Op mSHR =
-                (sp) -> { // SHR
-                    mStack[sp - 1] = mStack[sp - 1] >> mStack[sp];
-                    return sp - 1;
-                };
-        Op mUSHR =
-                (sp) -> { // USHR
-                    mStack[sp - 1] = mStack[sp - 1] >>> mStack[sp];
-                    return sp - 1;
-                };
-        Op mOR =
-                (sp) -> { // OR
-                    mStack[sp - 1] = mStack[sp - 1] | mStack[sp];
-                    return sp - 1;
-                };
-        Op mAND =
-                (sp) -> { // AND
-                    mStack[sp - 1] = mStack[sp - 1] & mStack[sp];
-                    return sp - 1;
-                };
-        Op mXOR =
-                (sp) -> { // XOR
-                    mStack[sp - 1] = mStack[sp - 1] ^ mStack[sp];
-                    return sp - 1;
-                };
-        Op mCOPY_SIGN =
-                (sp) -> { // COPY_SIGN copy the sign via bit manipulation
-                    mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31)) - (mStack[sp] >> 31);
-                    return sp - 1;
-                };
-        Op mMIN =
-                (sp) -> { // MIN
-                    mStack[sp - 1] = Math.min(mStack[sp - 1], mStack[sp]);
-                    return sp - 1;
-                };
-        Op mMAX =
-                (sp) -> { // MAX
-                    mStack[sp - 1] = Math.max(mStack[sp - 1], mStack[sp]);
-                    return sp - 1;
-                };
-        Op mNEG =
-                (sp) -> { // NEG
-                    mStack[sp] = -mStack[sp];
-                    return sp;
-                };
-        Op mABS =
-                (sp) -> { // ABS
-                    mStack[sp] = Math.abs(mStack[sp]);
-                    return sp;
-                };
-        Op mINCR =
-                (sp) -> { // INCR
-                    mStack[sp] = mStack[sp] + 1;
-                    return sp;
-                };
-        Op mDECR =
-                (sp) -> { // DECR
-                    mStack[sp] = mStack[sp] - 1;
-                    return sp;
-                };
-        Op mNOT =
-                (sp) -> { // NOT
-                    mStack[sp] = ~mStack[sp];
-                    return sp;
-                };
-        Op mSIGN =
-                (sp) -> { // SIGN x<0 = -1,x==0 =  0 , x>0 = 1
-                    mStack[sp] = (mStack[sp] >> 31) | (-mStack[sp] >>> 31);
-                    return sp;
-                };
-        Op mCLAMP =
-                (sp) -> { // CLAMP(min,max, val)
-                    mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
-                    return sp - 2;
-                };
-        Op mTERNARY_CONDITIONAL =
-                (sp) -> { // TERNARY_CONDITIONAL
-                    mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
-                    return sp - 2;
-                };
-        Op mMAD =
-                (sp) -> { // MAD
-                    mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
-                    return sp - 2;
-                };
-        Op mFIRST_VAR =
-                (sp) -> { // FIRST_VAR
-                    mStack[sp] = mVar[0];
-                    return sp;
-                };
-        Op mSECOND_VAR =
-                (sp) -> { // SECOND_VAR
-                    mStack[sp] = mVar[1];
-                    return sp;
-                };
-        Op mTHIRD_VAR =
-                (sp) -> { // THIRD_VAR
-                    mStack[sp] = mVar[2];
-                    return sp;
-                };
+    int opEval(int sp, int id) {
+        switch (id) {
+            case OP_ADD: // ADD
+                mStack[sp - 1] = mStack[sp - 1] + mStack[sp];
+                return sp - 1;
 
-        Op[] ops = {
-            null,
-            mADD,
-            mSUB,
-            mMUL,
-            mDIV,
-            mMOD,
-            mSHL,
-            mSHR,
-            mUSHR,
-            mOR,
-            mAND,
-            mXOR,
-            mCOPY_SIGN,
-            mMIN,
-            mMAX,
-            mNEG,
-            mABS,
-            mINCR,
-            mDECR,
-            mNOT,
-            mSIGN,
-            mCLAMP,
-            mTERNARY_CONDITIONAL,
-            mMAD,
-            mFIRST_VAR,
-            mSECOND_VAR,
-            mTHIRD_VAR,
-        };
+            case OP_SUB: // SUB
+                mStack[sp - 1] = mStack[sp - 1] - mStack[sp];
+                return sp - 1;
 
-        mOps = ops;
+            case OP_MUL: // MUL
+                mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
+                return sp - 1;
+
+            case OP_DIV: // DIV
+                mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
+                return sp - 1;
+
+            case OP_MOD: // MOD
+                mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
+                return sp - 1;
+
+            case OP_SHL: // SHL
+                mStack[sp - 1] = mStack[sp - 1] << mStack[sp];
+                return sp - 1;
+
+            case OP_SHR: // SHR
+                mStack[sp - 1] = mStack[sp - 1] >> mStack[sp];
+                return sp - 1;
+
+            case OP_USHR: // USHR
+                mStack[sp - 1] = mStack[sp - 1] >>> mStack[sp];
+                return sp - 1;
+
+            case OP_OR: // OR
+                mStack[sp - 1] = mStack[sp - 1] | mStack[sp];
+                return sp - 1;
+
+            case OP_AND: // AND
+                mStack[sp - 1] = mStack[sp - 1] & mStack[sp];
+                return sp - 1;
+
+            case OP_XOR: // XOR
+                mStack[sp - 1] = mStack[sp - 1] ^ mStack[sp];
+                return sp - 1;
+
+            case OP_COPY_SIGN: // COPY_SIGN copy the sign via bit manipulation
+                mStack[sp - 1] = (mStack[sp - 1] ^ (mStack[sp] >> 31)) - (mStack[sp] >> 31);
+                return sp - 1;
+
+            case OP_MIN: // MIN
+                mStack[sp - 1] = Math.min(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_MAX: // MAX
+                mStack[sp - 1] = Math.max(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_NEG: // NEG
+                mStack[sp] = -mStack[sp];
+                return sp;
+
+            case OP_ABS: // ABS
+                mStack[sp] = Math.abs(mStack[sp]);
+                return sp;
+
+            case OP_INCR: // INCR
+                mStack[sp] = mStack[sp] + 1;
+                return sp;
+
+            case OP_DECR: // DECR
+                mStack[sp] = mStack[sp] - 1;
+                return sp;
+
+            case OP_NOT: // NOT
+                mStack[sp] = ~mStack[sp];
+                return sp;
+
+            case OP_SIGN: // SIGN x<0 = -1,x==0 =  0 , x>0 = 1
+                mStack[sp] = (mStack[sp] >> 31) | (-mStack[sp] >>> 31);
+                return sp;
+
+            case OP_CLAMP: // CLAMP(min,max, val)
+                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
+                return sp - 2;
+
+            case OP_TERNARY_CONDITIONAL: // TERNARY_CONDITIONAL
+                mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
+                return sp - 2;
+
+            case OP_MAD: // MAD
+                mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
+                return sp - 2;
+
+            case OP_FIRST_VAR: // FIRST_VAR
+                mStack[sp] = mVar[0];
+                return sp;
+
+            case OP_SECOND_VAR: // SECOND_VAR
+                mStack[sp] = mVar[1];
+                return sp;
+
+            case OP_THIRD_VAR: // THIRD_VAR
+                mStack[sp] = mVar[2];
+                return sp;
+        }
+        return 0;
     }
 
     static {

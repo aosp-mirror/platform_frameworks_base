@@ -19,8 +19,14 @@ package android.app.wallpaper;
 import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 
 import android.annotation.FlaggedApi;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.app.WallpaperInfo;
+import android.app.WallpaperManager;
+import android.app.WallpaperManager.ScreenOrientation;
 import android.content.ComponentName;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,6 +35,8 @@ import android.text.Html;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.util.Log;
+import android.util.Pair;
+import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,6 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -71,12 +80,15 @@ public final class WallpaperDescription implements Parcelable {
     @Nullable private final Uri mContextUri;
     @Nullable private final CharSequence mContextDescription;
     @NonNull private final PersistableBundle mContent;
+    @NonNull private final SparseArray<Rect> mCropHints;
+    private final float mSampleSize;
 
     private WallpaperDescription(@Nullable ComponentName component,
             @Nullable String id, @Nullable Uri thumbnail, @Nullable CharSequence title,
             @Nullable List<CharSequence> description, @Nullable Uri contextUri,
             @Nullable CharSequence contextDescription,
-            @Nullable PersistableBundle content) {
+            @Nullable PersistableBundle content, @NonNull SparseArray<Rect> cropHints,
+            float sampleSize) {
         this.mComponent = component;
         this.mId = id;
         this.mThumbnail = thumbnail;
@@ -85,6 +97,8 @@ public final class WallpaperDescription implements Parcelable {
         this.mContextUri = contextUri;
         this.mContextDescription = contextDescription;
         this.mContent = (content != null) ? content : new PersistableBundle();
+        this.mCropHints = cropHints;
+        this.mSampleSize = sampleSize;
     }
 
     /** @return the component for this wallpaper, or {@code null} for a static wallpaper */
@@ -134,6 +148,24 @@ public final class WallpaperDescription implements Parcelable {
         return mContent;
     }
 
+    /**
+     * @return the cropping for the current image as described in
+     * {@link Builder#setCropHints(SparseArray)}
+     * @hide
+     */
+    @NonNull
+    public SparseArray<Rect> getCropHints() {
+        return mCropHints;
+    }
+
+    /**
+     * @return the subsamling size as described in {@link Builder#setSampleSize(float)}.
+     * @hide
+     */
+    public float getSampleSize() {
+        return mSampleSize;
+    }
+
     ////// Comparison overrides
 
     @Override
@@ -163,9 +195,23 @@ public final class WallpaperDescription implements Parcelable {
         if (mContextDescription != null) {
             out.attribute(null, "contextdescription", toHtml(mContextDescription));
         }
+
+        for (Pair<Integer, String> pair : screenDimensionPairs()) {
+            @ScreenOrientation int orientation = pair.first;
+            String attrName = pair.second;
+            Rect cropHint = mCropHints.get(orientation);
+            if (cropHint == null) continue;
+            out.attributeInt(null, "cropLeft" + attrName, cropHint.left);
+            out.attributeInt(null, "cropTop" + attrName, cropHint.top);
+            out.attributeInt(null, "cropRight" + attrName, cropHint.right);
+            out.attributeInt(null, "cropBottom" + attrName, cropHint.bottom);
+        }
+        out.attributeFloat(null, "sampleSize", mSampleSize);
+
         out.startTag(null, XML_TAG_DESCRIPTION);
         for (CharSequence s : mDescription) out.attribute(null, "descriptionline", toHtml(s));
         out.endTag(null, XML_TAG_DESCRIPTION);
+
         try {
             out.startTag(null, XML_TAG_CONTENT);
             mContent.saveToXml(out);
@@ -194,6 +240,19 @@ public final class WallpaperDescription implements Parcelable {
         CharSequence contextDescription = fromHtml(
                 in.getAttributeValue(null, "contextdescription"));
 
+        SparseArray<Rect> cropHints = new SparseArray<>();
+        screenDimensionPairs().forEach(pair -> {
+            @ScreenOrientation int orientation = pair.first;
+            String attrName = pair.second;
+            Rect crop = new Rect(
+                    in.getAttributeInt(null, "cropLeft" + attrName, 0),
+                    in.getAttributeInt(null, "cropTop" + attrName, 0),
+                    in.getAttributeInt(null, "cropRight" + attrName, 0),
+                    in.getAttributeInt(null, "cropBottom" + attrName, 0));
+            if (!crop.isEmpty()) cropHints.put(orientation, crop);
+        });
+        float sampleSize = in.getAttributeFloat(null, "sampleSize", 1f);
+
         List<CharSequence> description = new ArrayList<>();
         PersistableBundle content = null;
         int type;
@@ -213,7 +272,7 @@ public final class WallpaperDescription implements Parcelable {
         }
 
         return new WallpaperDescription(componentName, id, thumbnail, title, description,
-                contextUri, contextDescription, content);
+                contextUri, contextDescription, content, cropHints, sampleSize);
     }
 
     private static String toHtml(@NonNull CharSequence c) {
@@ -253,6 +312,13 @@ public final class WallpaperDescription implements Parcelable {
         mContextUri = Uri.CREATOR.createFromParcel(in);
         mContextDescription = in.readCharSequence();
         mContent = PersistableBundle.CREATOR.createFromParcel(in);
+        mCropHints = new SparseArray<>();
+        screenDimensionPairs().forEach(pair -> {
+            int orientation = pair.first;
+            Rect crop = in.readTypedObject(Rect.CREATOR);
+            if (crop != null) mCropHints.put(orientation, crop);
+        });
+        mSampleSize = in.readFloat();
     }
 
     @NonNull
@@ -283,6 +349,11 @@ public final class WallpaperDescription implements Parcelable {
         Uri.writeToParcel(dest, mContextUri);
         dest.writeCharSequence(mContextDescription);
         dest.writePersistableBundle(mContent);
+        screenDimensionPairs().forEach(pair -> {
+            int orientation = pair.first;
+            dest.writeTypedObject(mCropHints.get(orientation), flags);
+        });
+        dest.writeFloat(mSampleSize);
     }
 
     ////// Builder
@@ -293,9 +364,17 @@ public final class WallpaperDescription implements Parcelable {
      */
     @NonNull
     public Builder toBuilder() {
-        return new Builder().setComponent(mComponent).setId(mId).setThumbnail(mThumbnail).setTitle(
-                mTitle).setDescription(mDescription).setContextUri(
-                mContextUri).setContextDescription(mContextDescription).setContent(mContent);
+        return new Builder()
+                .setComponent(mComponent)
+                .setId(mId)
+                .setThumbnail(mThumbnail)
+                .setTitle(mTitle)
+                .setDescription(mDescription)
+                .setContextUri(mContextUri)
+                .setContextDescription(mContextDescription)
+                .setContent(mContent)
+                .setCropHints(mCropHints)
+                .setSampleSize(mSampleSize);
     }
 
     /** Builder for the immutable {@link WallpaperDescription} class */
@@ -308,6 +387,9 @@ public final class WallpaperDescription implements Parcelable {
         @Nullable private Uri mContextUri;
         @Nullable private CharSequence mContextDescription;
         @NonNull private PersistableBundle mContent = new PersistableBundle();
+        @NonNull
+        private SparseArray<Rect> mCropHints = new SparseArray<>();
+        private float mSampleSize = 1f;
 
         /** Creates a new, empty {@link Builder}. */
         public Builder() {}
@@ -416,11 +498,69 @@ public final class WallpaperDescription implements Parcelable {
             return this;
         }
 
+        /**
+         * Defines which part of the source wallpaper image is in the stored crop file.
+         *
+         * @param cropHints map from screen dimensions to a sub-region of the image to display
+         *                  for those dimensions. The {@code Rect} sub-region may have a larger
+         *                  width/height ratio than the screen dimensions to apply a horizontal
+         *                  parallax effect. If the map is empty or some entries are missing, the
+         *                  system will apply a default strategy to position the wallpaper for
+         *                  any unspecified screen dimensions.
+         * @hide
+         */
+        @NonNull
+        @TestApi
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setCropHints(@NonNull Map<Point, Rect> cropHints) {
+            mCropHints = new SparseArray<>();
+            cropHints.forEach(
+                    (point, rect) -> mCropHints.put(WallpaperManager.getOrientation(point), rect));
+            return this;
+        }
+
+        /**
+         * Defines which part of the source wallpaper image is in the stored crop file.
+         *
+         * @param cropHints map from {@link ScreenOrientation} to a sub-region of the image to
+         *                  display for that screen orientation.
+         * @hide
+         */
+        @NonNull
+        @TestApi
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setCropHints(@NonNull SparseArray<Rect> cropHints) {
+            mCropHints = cropHints;
+            return this;
+        }
+
+        /**
+         * How much the crop is sub-sampled. A value > 1 means that the image quality was reduced.
+         * This is the ratio between the cropHint height and the actual stored crop file height.
+         * height.
+         *
+         * @param sampleSize Sub-sampling value
+         * @hide
+         */
+        @NonNull
+        public Builder setSampleSize(float sampleSize) {
+            mSampleSize = sampleSize;
+            return this;
+        }
+
         /** Creates and returns the {@link WallpaperDescription} represented by this builder. */
         @NonNull
         public WallpaperDescription build() {
             return new WallpaperDescription(mComponent, mId, mThumbnail, mTitle, mDescription,
-                    mContextUri, mContextDescription, mContent);
+                    mContextUri, mContextDescription, mContent, mCropHints, mSampleSize);
         }
+    }
+
+    private static List<Pair<Integer, String>> screenDimensionPairs() {
+        return List.of(
+                new Pair<>(WallpaperManager.ORIENTATION_PORTRAIT, "Portrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_LANDSCAPE, "Landscape"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_PORTRAIT, "SquarePortrait"),
+                new Pair<>(WallpaperManager.ORIENTATION_SQUARE_LANDSCAPE, "SquareLandscape"));
     }
 }

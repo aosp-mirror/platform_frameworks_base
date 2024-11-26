@@ -71,9 +71,9 @@ constructor(
     @Assisted private val statusBarInitializer: StatusBarInitializer,
     @Assisted private val statusBarWindowController: StatusBarWindowController,
     @Main private val mainContext: CoroutineContext,
+    @Assisted private val autoHideController: AutoHideController,
     private val demoModeController: DemoModeController,
     private val pluginDependencyProvider: PluginDependencyProvider,
-    private val autoHideController: AutoHideController,
     private val remoteInputManager: NotificationRemoteInputManager,
     private val notificationShadeWindowViewControllerLazy:
         Lazy<NotificationShadeWindowViewController>,
@@ -210,10 +210,6 @@ constructor(
     }
 
     private fun setUpAutoHide() {
-        if (displayId != Display.DEFAULT_DISPLAY) {
-            return
-        }
-        // TODO(b/373309973): per display implementation of auto hide controller
         autoHideController.setStatusBar(
             object : AutoHideUiElement {
                 override fun synchronizeState() {}
@@ -241,10 +237,7 @@ constructor(
         if (!demoModeController.isInDemoMode) {
             barTransitions.transitionTo(barMode.toTransitionModeInt(), animate)
         }
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            // TODO(b/373309973): per display implementation of auto hide controller
-            autoHideController.touchAutoHide()
-        }
+        autoHideController.touchAutoHide()
     }
 
     private fun updateBubblesVisibility(statusBarVisible: Boolean) {
@@ -288,6 +281,7 @@ constructor(
             statusBarModeRepository: StatusBarModePerDisplayRepository,
             statusBarInitializer: StatusBarInitializer,
             statusBarWindowController: StatusBarWindowController,
+            autoHideController: AutoHideController,
         ): StatusBarOrchestrator
     }
 }

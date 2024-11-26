@@ -32,7 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Capture a host action information. This can be triggered on eg. a click. */
-public class HostActionOperation implements ActionOperation {
+public class HostActionOperation extends Operation implements ActionOperation {
     private static final int OP_CODE = Operations.HOST_ACTION;
 
     int mActionId = -1;
@@ -88,6 +88,12 @@ public class HostActionOperation implements ActionOperation {
         buffer.writeInt(actionId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int actionId = buffer.readInt();
         operations.add(new HostActionOperation(actionId));

@@ -333,6 +333,42 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun categories_addsSameContentDescriptionForShortcutsOfSameType() {
+        testScope.runTest {
+            setCustomInputGestures(listOf(customInputGestureTypeHome))
+            systemShortcutsSource.setGroups(groupWithGoHomeShortcutInfo)
+            helper.showFromActivity()
+
+            val categories by collectLastValue(interactor.shortcutCategories)
+            val contentDescriptions =
+                categories?.flatMap {
+                    it.subCategories.flatMap { it.shortcuts.map { it.contentDescription } }
+                }
+
+            assertThat(contentDescriptions)
+                .containsExactly(
+                    "Go to home screen, Press key Ctrl plus Alt plus B, or Ctrl plus Alt plus A",
+                    "Standard shortcut 3, Press key Ctrl plus J",
+                    "Standard shortcut 2, Press key Alt plus Shift plus Z",
+                    "Standard shortcut 1, Press key Meta plus N",
+                    "Standard shortcut 1, Press key Meta plus N",
+                    "Standard shortcut 2, Press key Alt plus Shift plus Z",
+                    "Standard shortcut 3, Press key Ctrl plus J",
+                    "Switch to next language, Press key Ctrl plus Space",
+                    "Switch to previous language, Press key Ctrl plus Shift plus Space",
+                    "Standard shortcut 1, Press key Meta plus N",
+                    "Standard shortcut 2, Press key Alt plus Shift plus Z",
+                    "Standard shortcut 3, Press key Ctrl plus J",
+                    "Standard shortcut 3, Press key Ctrl plus J",
+                    "Standard shortcut 2, Press key Alt plus Shift plus Z",
+                    "Standard shortcut 1, Press key Meta plus N",
+                    "Standard shortcut 2, Press key Alt plus Shift plus Z",
+                    "Standard shortcut 1, Press key Meta plus N",
+                )
+        }
+    }
+
     private fun setCustomInputGestures(customInputGestures: List<InputGestureData>) {
         whenever(fakeInputManager.inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
             .thenReturn(customInputGestures)

@@ -18,12 +18,11 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
-import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 /** Operations representing actions on the document */
-public interface ActionOperation extends Operation {
+public interface ActionOperation {
     void serializeToString(int indent, @NonNull StringSerializer serializer);
 
     void runAction(

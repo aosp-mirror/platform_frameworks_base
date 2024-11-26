@@ -35,7 +35,7 @@ import java.util.List;
  * <p>It encodes the version of the document (following semantic versioning) as well as the
  * dimensions of the document in pixels.
  */
-public class Header implements RemoteComposeOperation {
+public class Header extends Operation implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.HEADER;
     private static final String CLASS_NAME = "Header";
     public static final int MAJOR_VERSION = 0;
@@ -120,6 +120,11 @@ public class Header implements RemoteComposeOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -136,6 +141,12 @@ public class Header implements RemoteComposeOperation {
         buffer.writeLong(capabilities);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int majorVersion = buffer.readInt();
         int minorVersion = buffer.readInt();
@@ -157,6 +168,11 @@ public class Header implements RemoteComposeOperation {
         operations.add(header);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description(
