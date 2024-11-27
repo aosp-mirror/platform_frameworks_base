@@ -1998,39 +1998,6 @@ public class UserBackupManagerService {
         return mOperationStorage.isBackupOperationInProgress();
     }
 
-    /** Unbind the backup agent and kill the app if it's a non-system app. */
-    public void tearDownAgentAndKill(ApplicationInfo app) {
-        if (app == null) {
-            // Null means the system package, so just quietly move on.  :)
-            return;
-        }
-
-        try {
-            // unbind and tidy up even on timeout or failure, just in case
-            mActivityManager.unbindBackupAgent(app);
-
-            // The agent was running with a stub Application object, so shut it down.
-            // !!! We hardcode the confirmation UI's package name here rather than use a
-            //     manifest flag!  TODO something less direct.
-            if (!UserHandle.isCore(app.uid)
-                    && !app.packageName.equals("com.android.backupconfirm")) {
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, addUserIdToLogMessage(mUserId, "Killing agent host process"));
-                }
-                mActivityManager.killApplicationProcess(app.processName, app.uid);
-            } else {
-                if (MORE_DEBUG) {
-                    Slog.d(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Not killing after operation: " + app.processName));
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Lost app trying to shut down"));
-        }
-    }
-
     // ----- Full-data backup scheduling -----
 
     /**
