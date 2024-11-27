@@ -53,7 +53,14 @@ public final class DependencyInstallerCallback implements Parcelable {
      * Callback to indicate that all the requested dependencies have been resolved and their
      * sessions created. See {@link  DependencyInstallerService#onDependenciesRequired}.
      *
+     * The system will wait for the sessions to be installed before resuming the original session
+     * which requested dependency installation.
+     *
+     * If any of the session fails to install, the system may fail the original session. The caller
+     * is expected to handle clean up of any other pending sessions remanining.
+     *
      * @param sessionIds the install session IDs for all requested dependencies
+     * @throws IllegalArgumentException if session id doesn't exist or has already failed.
      */
     public void onAllDependenciesResolved(@NonNull int[] sessionIds) {
         try {
