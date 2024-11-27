@@ -445,3 +445,12 @@ flag {
     description: "Enable the Wallet role within profiles"
     bug: "356107987"
 }
+
+flag {
+    name: "text_classifier_choice_api_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "API change to enable getTextClassifier by type"
+    bug: "377229653"
+}

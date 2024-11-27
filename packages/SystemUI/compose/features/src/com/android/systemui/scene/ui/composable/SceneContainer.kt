@@ -39,6 +39,7 @@ import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.SceneTransitions
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
@@ -78,6 +79,7 @@ fun SceneContainer(
     sceneByKey: Map<SceneKey, Scene>,
     overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
+    sceneTransitions: SceneTransitions,
     dataSourceDelegator: SceneDataSourceDelegator,
     qsSceneAdapter: Provider<QSSceneAdapter>,
     modifier: Modifier = Modifier,
@@ -87,7 +89,7 @@ fun SceneContainer(
         MutableSceneTransitionLayoutState(
             initialScene = initialSceneKey,
             canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
-            transitions = SceneContainerTransitions,
+            transitions = sceneTransitions,
         )
     }
 

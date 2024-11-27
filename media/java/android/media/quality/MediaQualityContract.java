@@ -229,6 +229,129 @@ public class MediaQualityContract {
          */
         public static final String PARAMETER_TREBLE = "treble";
 
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SOUND_MODE = "sound_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SURROUND_SOUND = "surround_sound";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_EQUALIZER_DETAIL = "equalizer_detail";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SPEAKERS = "speakers";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SPEAKERS_DELAY = "speakers_delay";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_EARC = "earc";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_AUTO_VOLUME_CONTROL = "auto_volume_control";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOWN_MIX_MODE = "down_mix_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_DRC = "dts_drc";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING = "dolby_audio_processing";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_SOUND_MODE =
+                "dolby_audio_processing_sound_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_VOLUME_LEVELER =
+                "dolby_audio_processing_volume_leveler";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_SURROUND_VIRTUALIZER =
+                "dolby_audio_processing_surround_virtualizer";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_DOLBY_ATMOS =
+                "dolby_audio_processing_dolby_atmos";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DIALOGUE_ENHANCER = "dialogue_enhancer";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X = "dts_virtual_x";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_TBHDX = "dts_virtual_x_tbhdx";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_LIMITER = "dts_virtual_x_limiter";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_TRU_SURROUND_X =
+                "dts_virtual_x_tru_surround_x";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_TRU_VOLUME_HD =
+                "dts_virtual_x_tru_volume_hd";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_DIALOG_CLARITY =
+                "dts_virtual_x_dialog_clarity";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_DEFINITION = "dts_virtual_x_definition";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_HEIGHT = "dts_virtual_x_height";
+
+
         private SoundQuality() {
         }
     }

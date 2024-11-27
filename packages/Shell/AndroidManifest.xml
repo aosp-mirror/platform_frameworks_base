@@ -990,9 +990,6 @@
     <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
 
-    <!-- Permissions required for CTS test - BugreportManagerTest -->
-    <uses-permission android:name="android.permission.CAPTURE_CONSENTLESS_BUGREPORT_DELEGATED_CONSENT" />
-
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

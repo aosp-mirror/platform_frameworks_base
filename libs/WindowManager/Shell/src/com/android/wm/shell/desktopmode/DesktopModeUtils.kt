@@ -28,6 +28,7 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Rect
 import android.os.SystemProperties
 import android.util.Size
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 
 val DESKTOP_MODE_INITIAL_BOUNDS_SCALE: Float =
@@ -209,6 +210,31 @@ fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
     val appBounds = taskInfo.configuration.windowConfiguration.appBounds ?: return 1f
     return maxOf(appBounds.height(), appBounds.width()) /
         minOf(appBounds.height(), appBounds.width()).toFloat()
+}
+
+/** Returns whether the task is maximized. */
+fun isTaskMaximized(
+    taskInfo: RunningTaskInfo,
+    displayController: DisplayController
+): Boolean {
+    val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
+        ?: error("Could not get display layout for display=${taskInfo.displayId}")
+    val stableBounds = Rect()
+    displayLayout.getStableBounds(stableBounds)
+    return isTaskMaximized(taskInfo, stableBounds)
+}
+
+/** Returns whether the task is maximized. */
+fun isTaskMaximized(
+    taskInfo: RunningTaskInfo,
+    stableBounds: Rect
+): Boolean {
+    val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
+    return if (taskInfo.isResizeable) {
+        isTaskBoundsEqual(currentTaskBounds, stableBounds)
+    } else {
+        isTaskWidthOrHeightEqual(currentTaskBounds, stableBounds)
+    }
 }
 
 /** Returns true if task's width or height is maximized else returns false. */

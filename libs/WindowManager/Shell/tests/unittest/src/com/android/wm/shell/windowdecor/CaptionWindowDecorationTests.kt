@@ -48,6 +48,7 @@ class CaptionWindowDecorationTests : ShellTestCase() {
 
         CaptionWindowDecoration.updateRelayoutParams(
             relayoutParams,
+            mContext,
             taskInfo,
             true,
             false,
@@ -71,6 +72,7 @@ class CaptionWindowDecorationTests : ShellTestCase() {
 
         CaptionWindowDecoration.updateRelayoutParams(
             relayoutParams,
+            mContext,
             taskInfo,
             true,
             false,
@@ -90,6 +92,7 @@ class CaptionWindowDecorationTests : ShellTestCase() {
         val relayoutParams = WindowDecoration.RelayoutParams()
         CaptionWindowDecoration.updateRelayoutParams(
             relayoutParams,
+            mContext,
             taskInfo,
             true,
             false,

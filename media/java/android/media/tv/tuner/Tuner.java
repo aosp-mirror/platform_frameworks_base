@@ -757,14 +757,14 @@ public class Tuner implements AutoCloseable  {
      * scenario, when both resource holder and resource challenger have same processId and same
      * priority.
      *
-     * @param resourceHolderRetain Set to true to allow the resource holder to retain ownership, or
-     *     false to allow the resource challenger to acquire the resource. If not explicitly set,
-     *     resourceHolderRetain is set to false.
+     * @param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
      */
     @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
-    public void setResourceHolderRetain(boolean resourceHolderRetain) {
-        mTunerResourceManager.setResourceHolderRetain(mClientId, resourceHolderRetain);
+    public void setResourceOwnershipRetention(boolean enabled) {
+        mTunerResourceManager.setResourceOwnershipRetention(mClientId, enabled);
     }
 
     /**

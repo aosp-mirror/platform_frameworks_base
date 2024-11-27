@@ -17,20 +17,16 @@
 package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInputEventsInteractor
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 
+@VolumeDialogSliderScope
 class VolumeDialogSliderTouchesViewModel
-@AssistedInject
+@Inject
 constructor(private val interactor: VolumeDialogSliderInputEventsInteractor) {
 
     fun onTouchEvent(event: MotionEvent) {
         interactor.onTouchEvent(event)
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(): VolumeDialogSliderTouchesViewModel
     }
 }
