@@ -1139,6 +1139,16 @@
                 android:protectionLevel="signature|privileged|vendorPrivileged"
                 android:featureFlag="android.media.tv.flags.media_quality_fw"/>
 
+    <!--
+        @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+        Allows an application to read the aggregated color zones on the screen for use cases like
+        TV ambient backlight usages.
+        <p> Protection level: normal
+    -->
+    <permission android:name="android.permission.READ_COLOR_ZONES"
+                android:protectionLevel="normal"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
     <!-- ====================================================================== -->
