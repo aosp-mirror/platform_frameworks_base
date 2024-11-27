@@ -14,37 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.server.security.intrusiondetection;
+package com.android.coretests.apps.testapp;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
-import android.util.Log;
+
+import com.android.internal.infra.AndroidFuture;
 
 
 public class TestLoggingService extends Service {
     private static final String TAG = "TestLoggingService";
+    private LocalIntrusionDetectionEventTransport mLocalIntrusionDetectionEventTransport;
 
-    // Binder given to clients.
-    private final IBinder binder = new LocalBinder();
-
-    /**
-     * Class used for the client Binder.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
-    public class LocalBinder extends Binder {
-        TestLoggingService getService() {
-            // Return this instance of TestLoggingService so clients
-            // can call public methods.
-            return TestLoggingService.this;
-        }
+    public TestLoggingService() {
+        mLocalIntrusionDetectionEventTransport = new LocalIntrusionDetectionEventTransport();
     }
 
+    // Binder given to clients.
     @Override
     public IBinder onBind(Intent intent) {
-        // Return the binder for the service
-        return binder;
+        return mLocalIntrusionDetectionEventTransport.getBinder();
     }
 }

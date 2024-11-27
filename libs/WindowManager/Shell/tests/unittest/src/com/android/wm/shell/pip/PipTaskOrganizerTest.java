@@ -65,7 +65,7 @@ import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
-import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -103,7 +103,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
     @Mock private PipSurfaceTransactionHelper mMockPipSurfaceTransactionHelper;
     @Mock private PipUiEventLogger mMockPipUiEventLogger;
     @Mock private Optional<SplitScreenController> mMockOptionalSplitScreen;
-    @Mock private Optional<DesktopRepository> mMockOptionalDesktopRepository;
+    @Mock private Optional<DesktopUserRepositories> mMockOptionalDesktopUserRepositories;
     @Mock private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     @Mock private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock private PipParamsChangedForwarder mMockPipParamsChangedForwarder;
@@ -136,7 +136,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
                 mMockPipParamsChangedForwarder, mMockOptionalSplitScreen,
                 Optional.empty() /* pipPerfHintControllerOptional */,
-                mMockOptionalDesktopRepository, mRootTaskDisplayAreaOrganizer,
+                mMockOptionalDesktopUserRepositories, mRootTaskDisplayAreaOrganizer,
                 mMockDisplayController, mMockPipUiEventLogger, mMockShellTaskOrganizer,
                 mMainExecutor);
         mMainExecutor.flushAll();

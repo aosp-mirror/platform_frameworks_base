@@ -23,10 +23,12 @@ import com.android.wm.shell.freeform.TaskChangeListener
 
 /** Manages tasks handling specific to Android Desktop Mode. */
 class DesktopTaskChangeListener(
-    private val desktopRepository: DesktopRepository,
+  private val desktopUserRepositories: DesktopUserRepositories,
 ) : TaskChangeListener {
 
   override fun onTaskOpening(taskInfo: RunningTaskInfo) {
+    val desktopRepository: DesktopRepository =
+      desktopUserRepositories.getProfile(taskInfo.userId)
     if (!isFreeformTask(taskInfo) && desktopRepository.isActiveTask(taskInfo.taskId)) {
       desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
       return
@@ -37,6 +39,8 @@ class DesktopTaskChangeListener(
   }
 
   override fun onTaskChanging(taskInfo: RunningTaskInfo) {
+    val desktopRepository: DesktopRepository =
+      desktopUserRepositories.getProfile(taskInfo.userId)
     if (!desktopRepository.isActiveTask(taskInfo.taskId)) return
 
     // Case 1: Freeform task is changed in Desktop Mode.
@@ -61,6 +65,8 @@ class DesktopTaskChangeListener(
   }
 
   override fun onTaskMovingToFront(taskInfo: RunningTaskInfo) {
+    val desktopRepository: DesktopRepository =
+      desktopUserRepositories.getProfile(taskInfo.userId)
     if (!desktopRepository.isActiveTask(taskInfo.taskId)) return
     if (!isFreeformTask(taskInfo)) {
       desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
@@ -74,6 +80,8 @@ class DesktopTaskChangeListener(
   }
 
   override fun onTaskClosing(taskInfo: RunningTaskInfo) {
+    val desktopRepository: DesktopRepository =
+      desktopUserRepositories.getProfile(taskInfo.userId)
     if (!desktopRepository.isActiveTask(taskInfo.taskId)) return
     // TODO: b/370038902 - Handle Activity#finishAndRemoveTask.
     if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue() ||

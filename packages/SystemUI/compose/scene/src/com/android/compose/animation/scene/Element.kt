@@ -53,10 +53,10 @@ import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.CustomPropertyTransformation
 import com.android.compose.animation.scene.transformation.InterpolatedPropertyTransformation
 import com.android.compose.animation.scene.transformation.PropertyTransformation
-import com.android.compose.animation.scene.transformation.SharedElementTransformation
 import com.android.compose.animation.scene.transformation.TransformationWithRange
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.drawInContainer
+import com.android.compose.ui.util.IntIndexedMap
 import com.android.compose.ui.util.lerp
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -68,6 +68,14 @@ internal class Element(val key: ElementKey) {
     // TODO(b/316901148): Make this a normal map instead once we can make sure that new transitions
     // are first seen by composition then layout/drawing code. See b/316901148#comment2 for details.
     val stateByContent = SnapshotStateMap<ContentKey, State>()
+
+    /**
+     * A sorted map of nesting depth (key) to content key (value). For shared elements it is used to
+     * determine which content this element should be rendered by. The nesting depth refers to the
+     * number of STLs nested within each other, starting at 0 for the parent STL and increasing by
+     * one for each nested [NestedSceneTransitionLayout].
+     */
+    val renderAuthority = IntIndexedMap<ContentKey>()
 
     /**
      * The last transition that was used when computing the state (size, position and alpha) of this
@@ -232,9 +240,8 @@ internal class ElementNode(
     private val element: Element
         get() = _element!!
 
-    private var _stateInContent: Element.State? = null
     private val stateInContent: Element.State
-        get() = _stateInContent!!
+        get() = element.stateByContent.getValue(content.key)
 
     override val traverseKey: Any = ElementTraverseKey
 
@@ -248,9 +255,13 @@ internal class ElementNode(
         val element =
             layoutImpl.elements[key] ?: Element(key).also { layoutImpl.elements[key] = it }
         _element = element
-        _stateInContent =
-            element.stateByContent[content.key]
-                ?: Element.State(content.key).also { element.stateByContent[content.key] = it }
+        addToRenderAuthority(element)
+        if (!element.stateByContent.contains(content.key)) {
+            val elementState = Element.State(content.key)
+            element.stateByContent[content.key] = elementState
+
+            layoutImpl.ancestorContentKeys.forEach { element.stateByContent[it] = elementState }
+        }
     }
 
     private fun addNodeToContentState() {
@@ -272,8 +283,20 @@ internal class ElementNode(
         removeNodeFromContentState()
         maybePruneMaps(layoutImpl, element, stateInContent)
 
+        removeFromRenderAuthority()
         _element = null
-        _stateInContent = null
+    }
+
+    private fun addToRenderAuthority(element: Element) {
+        val nestingDepth = layoutImpl.ancestorContentKeys.size
+        element.renderAuthority[nestingDepth] = content.key
+    }
+
+    private fun removeFromRenderAuthority() {
+        val nestingDepth = layoutImpl.ancestorContentKeys.size
+        if (element.renderAuthority[nestingDepth] == content.key) {
+            element.renderAuthority.remove(nestingDepth)
+        }
     }
 
     private fun removeNodeFromContentState() {
@@ -346,15 +369,17 @@ internal class ElementNode(
         val elementState = elementState(layoutImpl, element, currentTransitionStates)
         if (elementState == null) {
             // If the element is not part of any transition, place it normally in its idle scene.
+            // This is the case if for example a transition between two overlays is ongoing where
+            // sharedElement isn't part of either but the element is still rendered as part of
+            // the underlying scene that is currently not being transitioned.
             val currentState = currentTransitionStates.last()
-            val placeInThisContent =
+            val shouldPlaceInThisContent =
                 elementContentWhenIdle(
                     layoutImpl,
                     currentState,
                     isInContent = { it in element.stateByContent },
                 ) == content.key
-
-            return if (placeInThisContent) {
+            return if (shouldPlaceInThisContent) {
                 placeNormally(measurable, constraints)
             } else {
                 doNotPlace(measurable, constraints)
@@ -536,7 +561,9 @@ internal class ElementNode(
 
         stateInContent.clearLastPlacementValues()
         traverseDescendants(ElementTraverseKey) { node ->
-            (node as ElementNode)._stateInContent?.clearLastPlacementValues()
+            if ((node as ElementNode)._element != null) {
+                node.stateInContent.clearLastPlacementValues()
+            }
             TraversableNode.Companion.TraverseDescendantsAction.ContinueTraversal
         }
     }
@@ -569,22 +596,30 @@ internal class ElementNode(
             element: Element,
             stateInContent: Element.State,
         ) {
-            // If element is not composed in this content anymore, remove the content values. This
-            // works because [onAttach] is called before [onDetach], so if an element is moved from
-            // the UI tree we will first add the new code location then remove the old one.
-            if (
-                stateInContent.nodes.isEmpty() &&
-                    element.stateByContent[stateInContent.content] == stateInContent
-            ) {
-                element.stateByContent.remove(stateInContent.content)
-
-                // If the element is not composed in any content, remove it from the elements map.
+            fun pruneForContent(contentKey: ContentKey) {
+                // If element is not composed in this content anymore, remove the content values.
+                // This works because [onAttach] is called before [onDetach], so if an element is
+                // moved from the UI tree we will first add the new code location then remove the
+                // old one.
                 if (
-                    element.stateByContent.isEmpty() && layoutImpl.elements[element.key] == element
+                    stateInContent.nodes.isEmpty() &&
+                        element.stateByContent[contentKey] == stateInContent
                 ) {
-                    layoutImpl.elements.remove(element.key)
+                    element.stateByContent.remove(contentKey)
+
+                    // If the element is not composed in any content, remove it from the elements
+                    // map.
+                    if (
+                        element.stateByContent.isEmpty() &&
+                            layoutImpl.elements[element.key] == element
+                    ) {
+                        layoutImpl.elements.remove(element.key)
+                    }
                 }
             }
+
+            pruneForContent(stateInContent.content)
+            layoutImpl.ancestorContentKeys.forEach { content -> pruneForContent(content) }
         }
     }
 }
@@ -890,12 +925,13 @@ private fun shouldPlaceElement(
     val transition =
         when (elementState) {
             is TransitionState.Idle -> {
-                return content ==
-                    elementContentWhenIdle(
-                        layoutImpl,
-                        elementState,
-                        isInContent = { it in element.stateByContent },
-                    )
+                return element.shouldBeRenderedBy(content) &&
+                    content ==
+                        elementContentWhenIdle(
+                            layoutImpl,
+                            elementState,
+                            isInContent = { it in element.stateByContent },
+                        )
             }
             is TransitionState.Transition -> elementState
         }
@@ -925,76 +961,7 @@ private fun shouldPlaceElement(
         return true
     }
 
-    return shouldPlaceOrComposeSharedElement(
-        layoutImpl,
-        content,
-        element.key,
-        transition,
-        isInContent = { it in element.stateByContent },
-    )
-}
-
-internal inline fun shouldPlaceOrComposeSharedElement(
-    layoutImpl: SceneTransitionLayoutImpl,
-    content: ContentKey,
-    element: ElementKey,
-    transition: TransitionState.Transition,
-    isInContent: (ContentKey) -> Boolean,
-): Boolean {
-    val overscrollContent = transition.currentOverscrollSpec?.content
-    if (overscrollContent != null) {
-        return when (transition) {
-            // If we are overscrolling between scenes, only place/compose the element in the
-            // overscrolling scene.
-            is TransitionState.Transition.ChangeScene -> content == overscrollContent
-
-            // If we are overscrolling an overlay, place/compose the element if [content] is the
-            // overscrolling content or if [content] is the current scene and the overscrolling
-            // overlay does not contain the element.
-            is TransitionState.Transition.ReplaceOverlay,
-            is TransitionState.Transition.ShowOrHideOverlay ->
-                content == overscrollContent ||
-                    (content == transition.currentScene && !isInContent(overscrollContent))
-        }
-    }
-
-    val scenePicker = element.contentPicker
-    val pickedScene =
-        scenePicker.contentDuringTransition(
-            element = element,
-            transition = transition,
-            fromContentZIndex = layoutImpl.content(transition.fromContent).zIndex,
-            toContentZIndex = layoutImpl.content(transition.toContent).zIndex,
-        )
-
-    return pickedScene == content
-}
-
-private fun isSharedElementEnabled(
-    element: ElementKey,
-    transition: TransitionState.Transition,
-): Boolean {
-    return sharedElementTransformation(element, transition)?.transformation?.enabled ?: true
-}
-
-internal fun sharedElementTransformation(
-    element: ElementKey,
-    transition: TransitionState.Transition,
-): TransformationWithRange<SharedElementTransformation>? {
-    val transformationSpec = transition.transformationSpec
-    val sharedInFromContent =
-        transformationSpec.transformations(element, transition.fromContent).shared
-    val sharedInToContent = transformationSpec.transformations(element, transition.toContent).shared
-
-    // The sharedElement() transformation must either be null or be the same in both contents.
-    if (sharedInFromContent != sharedInToContent) {
-        error(
-            "Different sharedElement() transformations matched $element " +
-                "(from=$sharedInFromContent to=$sharedInToContent)"
-        )
-    }
-
-    return sharedInFromContent
+    return shouldPlaceSharedElement(layoutImpl, content, element.key, transition)
 }
 
 /**

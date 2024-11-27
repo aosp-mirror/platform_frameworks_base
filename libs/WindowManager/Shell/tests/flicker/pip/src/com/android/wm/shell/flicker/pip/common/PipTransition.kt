@@ -27,6 +27,7 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import android.tools.helpers.WindowUtils
 import android.tools.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.PipApp
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.testapp.ActivityOptions
@@ -40,7 +41,6 @@ abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     @Rule
     val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
-    protected val pipApp = PipAppHelper(instrumentation)
     protected val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
 
@@ -62,6 +62,11 @@ abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
             @JvmStatic val ORIENTATION_PORTRAIT = 1
         }
     }
+
+    /**
+     * Defines the test app to run PIP flicker test.
+     */
+    protected open val pipApp: PipApp = PipAppHelper(instrumentation)
 
     /** Defines the transition used to run the test */
     protected open val thisTransition: FlickerBuilder.() -> Unit = {}
@@ -85,10 +90,11 @@ abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     /** Defines the default method of entering PiP */
     protected open val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
-            pipApp.launchViaIntentAndWaitForPip(
+            pipApp.launchViaIntent(
                 wmHelper,
                 stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true")
             )
+            pipApp.waitForPip(wmHelper)
         }
     }
 

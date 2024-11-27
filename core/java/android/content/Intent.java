@@ -7970,6 +7970,24 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
+     * Make a copy of all members important to identify an intent with its creator token.
+     * @hide
+     */
+    public @NonNull Intent cloneForCreatorToken() {
+        Intent clone = new Intent()
+                .setAction(this.mAction)
+                .setDataAndType(this.mData, this.mType)
+                .setPackage(this.mPackage)
+                .setComponent(this.mComponent)
+                .setFlags(this.mFlags & IMMUTABLE_FLAGS);
+        if (this.mClipData != null) {
+            clone.setClipData(this.mClipData.cloneOnlyUriItems());
+        }
+        clone.mCreatorTokenInfo = this.mCreatorTokenInfo;
+        return clone;
+    }
+
+    /**
      * Create an intent with a given action.  All other fields (data, type,
      * class) are null.  Note that the action <em>must</em> be in a
      * namespace because Intents are used globally in the system -- for
@@ -11684,12 +11702,51 @@ public class Intent implements Parcelable, Cloneable {
                 Log.w(TAG, "Failure filling in extras", e);
             }
         }
-        mCreatorTokenInfo = other.mCreatorTokenInfo;
+        fillInCreatorTokenInfo(other.mCreatorTokenInfo, changes);
         if (mayHaveCopiedUris && mContentUserHint == UserHandle.USER_CURRENT
                 && other.mContentUserHint != UserHandle.USER_CURRENT) {
             mContentUserHint = other.mContentUserHint;
         }
         return changes;
+    }
+
+    // keep original creator token and merge nested intent keys.
+    private void fillInCreatorTokenInfo(CreatorTokenInfo otherCreatorTokenInfo, int changes) {
+        if (otherCreatorTokenInfo != null && otherCreatorTokenInfo.mNestedIntentKeys != null) {
+            if (mCreatorTokenInfo == null) {
+                mCreatorTokenInfo = new CreatorTokenInfo();
+            }
+            ArraySet<NestedIntentKey> otherNestedIntentKeys =
+                    otherCreatorTokenInfo.mNestedIntentKeys;
+            if (mCreatorTokenInfo.mNestedIntentKeys == null) {
+                mCreatorTokenInfo.mNestedIntentKeys = new ArraySet<>(otherNestedIntentKeys);
+            } else {
+                ArraySet<NestedIntentKey> otherKeys;
+                if ((changes & FILL_IN_CLIP_DATA) == 0) {
+                    // If clip data is Not filled in from other, do not merge clip data keys.
+                    otherKeys = new ArraySet<>();
+                    int N = otherNestedIntentKeys.size();
+                    for (int i = 0; i < N; i++) {
+                        NestedIntentKey key = otherNestedIntentKeys.valueAt(i);
+                        if (key.mType != NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA) {
+                            otherKeys.add(key);
+                        }
+                    }
+                } else {
+                    // If clip data is filled in from other, remove clip data keys from this
+                    // creatorTokenInfo and then merge every key from the others.
+                    int N = mCreatorTokenInfo.mNestedIntentKeys.size();
+                    for (int i = N - 1; i >= 0; i--) {
+                        NestedIntentKey key = mCreatorTokenInfo.mNestedIntentKeys.valueAt(i);
+                        if (key.mType == NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA) {
+                            mCreatorTokenInfo.mNestedIntentKeys.removeAt(i);
+                        }
+                    }
+                    otherKeys = otherNestedIntentKeys;
+                }
+                mCreatorTokenInfo.mNestedIntentKeys.addAll(otherKeys);
+            }
+        }
     }
 
     /**
@@ -12228,6 +12285,7 @@ public class Intent implements Parcelable, Cloneable {
         private IBinder mCreatorToken;
         // Stores all extra keys whose values are intents for a top level intent.
         private ArraySet<NestedIntentKey> mNestedIntentKeys;
+
     }
 
     /**

@@ -101,6 +101,9 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.android.server.pm.BackgroundInstallControlService;
+import com.android.server.pm.BackgroundInstallControlCallbackHelper;
+
 /**
  * @hide
  */
@@ -138,6 +141,10 @@ public class BinaryTransparencyService extends SystemService {
     static final int MBA_STATUS_NEW_INSTALL = 3;
     // used for indicating newly installed MBAs that are updated (but unused currently)
     static final int MBA_STATUS_UPDATED_NEW_INSTALL = 4;
+    // used for indicating preloaded MBAs that are downgraded
+    static final int MBA_STATUS_DOWNGRADED_PRELOADED = 5;
+    // used for indicating MBAs that are uninstalled
+    static final int MBA_STATUS_UNINSTALLED = 6;
 
     @VisibleForTesting
     static final String KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION =
@@ -202,7 +209,9 @@ public class BinaryTransparencyService extends SystemService {
          * @param mbaStatus Assign this value of MBA status to the returned elements.
          * @return a @{@code List<IBinaryTransparencyService.AppInfo>}
          */
-        private @NonNull List<IBinaryTransparencyService.AppInfo> collectAppInfo(
+        @VisibleForTesting
+        @NonNull
+        List<IBinaryTransparencyService.AppInfo> collectAppInfo(
                 PackageState packageState, int mbaStatus) {
             // compute content digest
             if (DEBUG) {
@@ -336,26 +345,27 @@ public class BinaryTransparencyService extends SystemService {
                         + " packages after considering APEXs.");
             }
 
-            // proceed with all preloaded apps
-            List<IBinaryTransparencyService.AppInfo> allUpdatedPreloadInfo =
-                    collectAllUpdatedPreloadInfo(packagesMeasured);
-            for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
-                packagesMeasured.putBoolean(appInfo.packageName, true);
-                writeAppInfoToLog(appInfo);
-            }
-            if (DEBUG) {
-                Slog.d(TAG, "Measured " + packagesMeasured.size()
-                        + " packages after considering preloads");
-            }
-
-            if (!android.app.Flags.backgroundInstallControlCallbackApi()
-                    && CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
-                // lastly measure all newly installed MBAs
-                List<IBinaryTransparencyService.AppInfo> allMbaInfo =
-                        collectAllSilentInstalledMbaInfo(packagesMeasured);
-                for (IBinaryTransparencyService.AppInfo appInfo : allMbaInfo) {
+            if (!android.app.Flags.backgroundInstallControlCallbackApi()) {
+                // proceed with all preloaded apps
+                List<IBinaryTransparencyService.AppInfo> allUpdatedPreloadInfo =
+                        collectAllUpdatedPreloadInfo(packagesMeasured);
+                for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
                     packagesMeasured.putBoolean(appInfo.packageName, true);
                     writeAppInfoToLog(appInfo);
+                }
+                if (DEBUG) {
+                    Slog.d(TAG, "Measured " + packagesMeasured.size()
+                            + " packages after considering preloads");
+                }
+
+                if (CompatChanges.isChangeEnabled(LOG_MBA_INFO)) {
+                    // lastly measure all newly installed MBAs
+                    List<IBinaryTransparencyService.AppInfo> allMbaInfo =
+                            collectAllSilentInstalledMbaInfo(packagesMeasured);
+                    for (IBinaryTransparencyService.AppInfo appInfo : allMbaInfo) {
+                        packagesMeasured.putBoolean(appInfo.packageName, true);
+                        writeAppInfoToLog(appInfo);
+                    }
                 }
             }
             long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
@@ -466,7 +476,8 @@ public class BinaryTransparencyService extends SystemService {
                     apexInfo.signerDigests);
         }
 
-        private void writeAppInfoToLog(IBinaryTransparencyService.AppInfo appInfo) {
+        @VisibleForTesting
+        void writeAppInfoToLog(IBinaryTransparencyService.AppInfo appInfo) {
             // Must order by the proto's field number.
             FrameworkStatsLog.write(FrameworkStatsLog.MOBILE_BUNDLED_APP_INFO_GATHERED,
                     appInfo.packageName,
@@ -1165,40 +1176,85 @@ public class BinaryTransparencyService extends SystemService {
      * TODO: Add a host test for testing registration and callback of BicCallbackHandler
      *  b/380002484
      */
+    @VisibleForTesting
     static class BicCallbackHandler extends IRemoteCallback.Stub {
-        private static final String BIC_CALLBACK_HANDLER_TAG =
-                "BTS.BicCallbackHandler";
-        private final BinaryTransparencyServiceImpl mServiceImpl;
-        static final String FLAGGED_PACKAGE_NAME_KEY = "packageName";
+        private static final String BIC_CALLBACK_HANDLER_TAG = TAG + ".BicCallbackHandler";
 
-        BicCallbackHandler(BinaryTransparencyServiceImpl impl) {
-            mServiceImpl = impl;
+        private static final int INSTALL_EVENT_TYPE_UNSET = -1;
+
+        private final IBicAppInfoHelper mBicAppInfoHelper;
+
+        @VisibleForTesting
+        BicCallbackHandler(IBicAppInfoHelper bicAppInfoHelper) {
+            mBicAppInfoHelper = bicAppInfoHelper;
         }
 
         @Override
         public void sendResult(Bundle data) {
-            String packageName = data.getString(FLAGGED_PACKAGE_NAME_KEY);
-            if (packageName == null) return;
-            if (DEBUG) {
-                Slog.d(BIC_CALLBACK_HANDLER_TAG, "background install event detected for "
-                        + packageName);
+            String packageName = data.getString(
+                    BackgroundInstallControlCallbackHelper.FLAGGED_PACKAGE_NAME_KEY);
+            int installType = data.getInt(
+                    BackgroundInstallControlCallbackHelper.INSTALL_EVENT_TYPE_KEY,
+                    INSTALL_EVENT_TYPE_UNSET);
+            if (packageName == null || installType == INSTALL_EVENT_TYPE_UNSET) {
+                Slog.w(BIC_CALLBACK_HANDLER_TAG, "Package name or install type is "
+                        + "unavailable, ignoring event");
+                return;
             }
-
-            PackageState packageState = LocalServices.getService(PackageManagerInternal.class)
+            Slog.d(BIC_CALLBACK_HANDLER_TAG, "Detected new bic event for: " + packageName);
+            if (installType == BackgroundInstallControlService.INSTALL_EVENT_TYPE_INSTALL) {
+                PackageState packageState = LocalServices.getService(PackageManagerInternal.class)
                     .getPackageStateInternal(packageName);
-            if (packageState == null) {
-                Slog.w(TAG, "Package state is unavailable, ignoring the package "
-                        + packageName);
-                return;
+                if (packageState == null) {
+                    Slog.w(TAG, "Package state is unavailable, ignoring the package "
+                            + packageName);
+                    return;
+                }
+                int mbaStatus = MBA_STATUS_NEW_INSTALL;
+                if (packageState.isUpdatedSystemApp()) {
+                    mbaStatus = MBA_STATUS_UPDATED_PRELOAD;
+                }
+                List<IBinaryTransparencyService.AppInfo> mbaInfo = mBicAppInfoHelper.collectAppInfo(
+                        packageState, mbaStatus);
+                for (IBinaryTransparencyService.AppInfo appInfo : mbaInfo) {
+                    mBicAppInfoHelper.writeAppInfoToLog(appInfo);
+                }
+            } else if (installType
+                        == BackgroundInstallControlService.INSTALL_EVENT_TYPE_UNINSTALL) {
+                IBinaryTransparencyService.AppInfo appInfo
+                    = new IBinaryTransparencyService.AppInfo();
+                // since app is already uninstalled we won't be able to retrieve additional
+                // info on it.
+                appInfo.packageName = packageName;
+                appInfo.mbaStatus = MBA_STATUS_UNINSTALLED;
+                mBicAppInfoHelper.writeAppInfoToLog(appInfo);
+            } else {
+                Slog.w(BIC_CALLBACK_HANDLER_TAG, "Unsupported BIC event: " + installType);
             }
-            if (packageState.isUpdatedSystemApp()) {
-                return;
-            }
-            List<IBinaryTransparencyService.AppInfo> mbaInfo = mServiceImpl.collectAppInfo(
-                    packageState, MBA_STATUS_NEW_INSTALL);
-            for (IBinaryTransparencyService.AppInfo appInfo : mbaInfo) {
-                mServiceImpl.writeAppInfoToLog(appInfo);
-            }
+        }
+
+        /**
+         * A wrapper of interface for{@link FrameworkStatsLog and ApkDigests}
+         * for easier testing
+         */
+        @VisibleForTesting
+        public interface IBicAppInfoHelper {
+
+            /**
+             * A wrapper of {@link FrameworkStatsLog}
+             *
+             * @param appInfo The app info of the changed MBA to be logged
+             */
+            public void writeAppInfoToLog(IBinaryTransparencyService.AppInfo appInfo);
+
+            /**
+             * A wrapper of {@link BinaryTransparencyServiceImpl}
+             *
+             * @param packageState The packageState provided retrieved from PackageManagerInternal
+             * @param mbaStatus The MBA status of the package
+             */
+            public List<IBinaryTransparencyService.AppInfo> collectAppInfo(
+                PackageState packageState, int mbaStatus);
         }
     };
 
@@ -1596,7 +1652,21 @@ public class BinaryTransparencyService extends SystemService {
         }
         try {
             iBics.registerBackgroundInstallCallback(
-                    new BicCallbackHandler(mServiceImpl));
+                    new BicCallbackHandler(
+                        new BicCallbackHandler.IBicAppInfoHelper() {
+                            @Override
+                            public void writeAppInfoToLog(
+                                    IBinaryTransparencyService.AppInfo appInfo) {
+                                mServiceImpl.writeAppInfoToLog(appInfo);
+                            }
+
+                            @Override
+                            public List<IBinaryTransparencyService.AppInfo> collectAppInfo(
+                                PackageState packageState, int mbaStatus) {
+                                return mServiceImpl.collectAppInfo(packageState, mbaStatus);
+                            }
+                        }
+                    ));
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to register BackgroundInstallControl callback.");
         }
@@ -1643,8 +1713,12 @@ public class BinaryTransparencyService extends SystemService {
             }
 
             String packageName = data.getSchemeSpecificPart();
-            // now we've got to check what package is this
-            if (isPackagePreloaded(packageName) || isPackageAnApex(packageName)) {
+
+            boolean shouldMeasureMba =
+                !android.app.Flags.backgroundInstallControlCallbackApi()
+                && isPackagePreloaded(packageName);
+
+            if (shouldMeasureMba || isPackageAnApex(packageName)) {
                 Slog.d(TAG, packageName + " was updated. Scheduling measurement...");
                 UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
                         BinaryTransparencyService.this);
