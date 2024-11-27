@@ -31,9 +31,6 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.R as internalR
 import com.android.settingslib.Utils
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.util.children
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
@@ -45,6 +42,7 @@ import com.android.systemui.volume.dialog.ringer.ui.viewmodel.RingerViewModelSta
 import com.android.systemui.volume.dialog.ringer.ui.viewmodel.VolumeDialogRingerDrawerViewModel
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -55,7 +53,7 @@ private const val CLOSE_DRAWER_DELAY = 300L
 @VolumeDialogScope
 class VolumeDialogRingerViewBinder
 @Inject
-constructor(private val viewModelFactory: VolumeDialogRingerDrawerViewModel.Factory) {
+constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
     private val roundnessSpringForce =
         SpringForce(0F).apply {
             stiffness = 800F
@@ -68,95 +66,83 @@ constructor(private val viewModelFactory: VolumeDialogRingerDrawerViewModel.Fact
         }
     private val rgbEvaluator = ArgbEvaluator()
 
-    fun bind(view: View) {
-        with(view) {
-            val volumeDialogBackgroundView = requireViewById<View>(R.id.volume_dialog_background)
-            val drawerContainer = requireViewById<MotionLayout>(R.id.volume_ringer_drawer)
-            val unselectedButtonUiModel = RingerButtonUiModel.getUnselectedButton(context)
-            val selectedButtonUiModel = RingerButtonUiModel.getSelectedButton(context)
+    fun CoroutineScope.bind(view: View) {
+        val volumeDialogBackgroundView = view.requireViewById<View>(R.id.volume_dialog_background)
+        val drawerContainer = view.requireViewById<MotionLayout>(R.id.volume_ringer_drawer)
+        val unselectedButtonUiModel = RingerButtonUiModel.getUnselectedButton(view.context)
+        val selectedButtonUiModel = RingerButtonUiModel.getSelectedButton(view.context)
+        viewModel.ringerViewModel
+            .onEach { ringerState ->
+                when (ringerState) {
+                    is RingerViewModelState.Available -> {
+                        val uiModel = ringerState.uiModel
 
-            repeatWhenAttached {
-                viewModel(
-                    traceName = "VolumeDialogRingerViewBinder",
-                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelFactory.create() },
-                ) { viewModel ->
-                    viewModel.ringerViewModel
-                        .onEach { ringerState ->
-                            when (ringerState) {
-                                is RingerViewModelState.Available -> {
-                                    val uiModel = ringerState.uiModel
+                        // Set up view background and visibility
+                        drawerContainer.visibility = View.VISIBLE
+                        when (uiModel.drawerState) {
+                            is RingerDrawerState.Initial -> {
+                                drawerContainer.animateAndBindDrawerButtons(
+                                    viewModel,
+                                    uiModel,
+                                    selectedButtonUiModel,
+                                    unselectedButtonUiModel,
+                                )
+                                drawerContainer.closeDrawer(uiModel.currentButtonIndex)
+                                volumeDialogBackgroundView.setBackgroundResource(
+                                    R.drawable.volume_dialog_background
+                                )
+                            }
 
-                                    // Set up view background and visibility
-                                    drawerContainer.visibility = View.VISIBLE
-                                    when (uiModel.drawerState) {
-                                        is RingerDrawerState.Initial -> {
-                                            drawerContainer.animateAndBindDrawerButtons(
-                                                viewModel,
-                                                uiModel,
-                                                selectedButtonUiModel,
-                                                unselectedButtonUiModel,
-                                            )
-                                            drawerContainer.closeDrawer(uiModel.currentButtonIndex)
-                                            volumeDialogBackgroundView.setBackgroundResource(
-                                                R.drawable.volume_dialog_background
-                                            )
-                                        }
-                                        is RingerDrawerState.Closed -> {
-                                            if (
-                                                uiModel.selectedButton.ringerMode ==
-                                                    uiModel.drawerState.currentMode
-                                            ) {
-                                                drawerContainer.animateAndBindDrawerButtons(
-                                                    viewModel,
-                                                    uiModel,
-                                                    selectedButtonUiModel,
-                                                    unselectedButtonUiModel,
-                                                ) {
-                                                    drawerContainer.closeDrawer(
-                                                        uiModel.currentButtonIndex
-                                                    )
-                                                    volumeDialogBackgroundView
-                                                        .setBackgroundResource(
-                                                            R.drawable.volume_dialog_background
-                                                        )
-                                                }
-                                            }
-                                        }
-                                        is RingerDrawerState.Open -> {
-                                            drawerContainer.animateAndBindDrawerButtons(
-                                                viewModel,
-                                                uiModel,
-                                                selectedButtonUiModel,
-                                                unselectedButtonUiModel,
-                                            )
-                                            // Open drawer
-                                            drawerContainer.transitionToState(
-                                                R.id.volume_dialog_ringer_drawer_open
-                                            )
-                                            if (
-                                                uiModel.currentButtonIndex !=
-                                                    uiModel.availableButtons.size - 1
-                                            ) {
-                                                volumeDialogBackgroundView.setBackgroundResource(
-                                                    R.drawable.volume_dialog_background_small_radius
-                                                )
-                                            }
-                                        }
+                            is RingerDrawerState.Closed -> {
+                                if (
+                                    uiModel.selectedButton.ringerMode ==
+                                        uiModel.drawerState.currentMode
+                                ) {
+                                    drawerContainer.animateAndBindDrawerButtons(
+                                        viewModel,
+                                        uiModel,
+                                        selectedButtonUiModel,
+                                        unselectedButtonUiModel,
+                                    ) {
+                                        drawerContainer.closeDrawer(uiModel.currentButtonIndex)
+                                        volumeDialogBackgroundView.setBackgroundResource(
+                                            R.drawable.volume_dialog_background
+                                        )
                                     }
                                 }
-                                is RingerViewModelState.Unavailable -> {
-                                    drawerContainer.visibility = View.GONE
+                            }
+
+                            is RingerDrawerState.Open -> {
+                                drawerContainer.animateAndBindDrawerButtons(
+                                    viewModel,
+                                    uiModel,
+                                    selectedButtonUiModel,
+                                    unselectedButtonUiModel,
+                                )
+                                // Open drawer
+                                drawerContainer.transitionToState(
+                                    R.id.volume_dialog_ringer_drawer_open
+                                )
+                                if (
+                                    uiModel.currentButtonIndex != uiModel.availableButtons.size - 1
+                                ) {
                                     volumeDialogBackgroundView.setBackgroundResource(
-                                        R.drawable.volume_dialog_background
+                                        R.drawable.volume_dialog_background_small_radius
                                     )
                                 }
                             }
                         }
-                        .launchIn(this)
+                    }
+
+                    is RingerViewModelState.Unavailable -> {
+                        drawerContainer.visibility = View.GONE
+                        volumeDialogBackgroundView.setBackgroundResource(
+                            R.drawable.volume_dialog_background
+                        )
+                    }
                 }
             }
-        }
+            .launchIn(this)
     }
 
     private suspend fun MotionLayout.animateAndBindDrawerButtons(
