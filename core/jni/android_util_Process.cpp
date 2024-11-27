@@ -490,6 +490,28 @@ jintArray android_os_Process_getExclusiveCores(JNIEnv* env, jobject clazz) {
     return cpus;
 }
 
+jlongArray android_os_Process_getSchedAffinity(JNIEnv* env, jobject clazz, jint pid) {
+    // sched_getaffinity will do memset 0 for the unset bits within set_alloc_size_byte
+    cpu_set_t cpu_set;
+    if (sched_getaffinity(pid, sizeof(cpu_set_t), &cpu_set) != 0) {
+        signalExceptionForError(env, errno, pid);
+        return nullptr;
+    }
+    int cpu_cnt = std::min(CPU_SETSIZE, get_nprocs_conf());
+    int masks_len = (int)(CPU_ALLOC_SIZE(cpu_cnt) / sizeof(__CPU_BITTYPE));
+    jlongArray masks = env->NewLongArray(masks_len);
+    if (masks == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+    jlong* mask_elements = env->GetLongArrayElements(masks, 0);
+    for (int i = 0; i < masks_len; i++) {
+        mask_elements[i] = cpu_set.__bits[i];
+    }
+    env->ReleaseLongArrayElements(masks, mask_elements, 0);
+    return masks;
+}
+
 static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, jboolean bgOk) {
     // Establishes the calling thread as illegal to put into the background.
     // Typically used only for the system process's main looper.
@@ -1370,6 +1392,7 @@ static const JNINativeMethod methods[] = {
         {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
         {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
+        {"getSchedAffinity", "(I)[J", (void*)android_os_Process_getSchedAffinity},
         {"setArgV0Native", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
         {"setUid", "(I)I", (void*)android_os_Process_setUid},
         {"setGid", "(I)I", (void*)android_os_Process_setGid},
