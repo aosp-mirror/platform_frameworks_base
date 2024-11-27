@@ -3116,6 +3116,16 @@ public abstract class PackageManager {
     public static final long MAXIMUM_VERIFICATION_TIMEOUT = 60*60*1000;
 
     /**
+     * As the generated feature count is useful for classes that may not be compiled in the same
+     * annotation processing unit as PackageManager, we redeclare it here for visibility.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int SDK_FEATURE_COUNT =
+            com.android.internal.pm.SystemFeaturesMetadata.SDK_FEATURE_COUNT;
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device's
      * audio pipeline is low-latency, more suitable for audio applications sensitive to delays or
      * lag in sound input or output.

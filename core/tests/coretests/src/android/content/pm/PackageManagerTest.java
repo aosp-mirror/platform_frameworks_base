@@ -24,6 +24,9 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerTest {
@@ -45,5 +48,26 @@ public class PackageManagerTest {
     @Test
     public void testResolveInfoFlags() throws Exception {
         assertThat(PackageManager.ResolveInfoFlags.of(42L).getValue()).isEqualTo(42L);
+    }
+
+    @Test
+    public void testSdkFeatureCount() throws Exception {
+        // Check to make sure the system feature `SdkConst` annotation processor yields sensible
+        // results. We don't care about the exactness, just that it's not pathologically wrong.
+        assertThat(PackageManager.SDK_FEATURE_COUNT).isGreaterThan(150);
+        assertThat(PackageManager.SDK_FEATURE_COUNT).isLessThan(500);
+        assertThat(PackageManager.SDK_FEATURE_COUNT)
+                .isWithin(50)
+                .of(getApproximateFeatureCountUsingReflection());
+    }
+
+    /* Return a ballpark estimate of the feature count using FEATURE_ field names. */
+    private static int getApproximateFeatureCountUsingReflection() {
+        return (int)
+                Arrays.stream(PackageManager.class.getFields())
+                        .filter(field -> Modifier.isStatic(field.getModifiers()))
+                        .filter(field -> Modifier.isFinal(field.getModifiers()))
+                        .filter(field -> field.getName().startsWith("FEATURE_"))
+                        .count();
     }
 }
