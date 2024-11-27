@@ -23,6 +23,16 @@ flag {
 }
 
 flag {
+  name: "relayout_fix"
+  namespace: "autofill"
+  description: "Fixing relayout issue. Guarding enabling device config flags"
+  bug: "381226145"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "include_invisible_view_group_in_assist_structure"
   namespace: "autofill"
   description: "Mitigation for autofill providers miscalculating view visibility"
