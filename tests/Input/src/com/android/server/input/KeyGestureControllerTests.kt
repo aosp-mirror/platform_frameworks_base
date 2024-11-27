@@ -542,9 +542,9 @@ class KeyGestureControllerTests {
             ),
             TestData(
                 "META + C -> Launch Default Contacts",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_P),
+                intArrayOf(KeyEvent.KEYCODE_C),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
@@ -560,9 +560,9 @@ class KeyGestureControllerTests {
             ),
             TestData(
                 "META + K -> Launch Default Calendar",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_K),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_K),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
@@ -575,6 +575,24 @@ class KeyGestureControllerTests {
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MAPS)
+            ),
+            TestData(
+                "META + P -> Launch Default Music",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_P),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
+            ),
+            TestData(
+                "META + S -> Launch Default SMS",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_S),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_S),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_SMS)
             ),
             TestData(
                 "META + U -> Launch Default Calculator",
@@ -821,10 +839,10 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
             ),
             TestData(
-                "META + P -> Launch Default Contacts",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
+                "META + C -> Launch Default Contacts",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_P),
+                intArrayOf(KeyEvent.KEYCODE_C),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
@@ -839,10 +857,10 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_EMAIL)
             ),
             TestData(
-                "META + C -> Launch Default Calendar",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
+                "META + K -> Launch Default Calendar",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_K),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_K),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
@@ -855,6 +873,24 @@ class KeyGestureControllerTests {
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MAPS)
+            ),
+            TestData(
+                "META + P -> Launch Default Music",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_P),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
+            ),
+            TestData(
+                "META + S -> Launch Default SMS",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_S),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
+                intArrayOf(KeyEvent.KEYCODE_S),
+                KeyEvent.META_META_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
+                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_SMS)
             ),
             TestData(
                 "META + U -> Launch Default Calculator",
@@ -879,14 +915,14 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
             ),
             TestData(
-                "META + SHIFT + P -> Launch Default Contacts",
+                "META + SHIFT + C -> Launch Default Contacts",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_SHIFT_LEFT,
-                    KeyEvent.KEYCODE_P
+                    KeyEvent.KEYCODE_C
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_P),
+                intArrayOf(KeyEvent.KEYCODE_C),
                 KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
