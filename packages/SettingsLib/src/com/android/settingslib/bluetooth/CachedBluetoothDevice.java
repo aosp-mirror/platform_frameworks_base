@@ -444,10 +444,21 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device
+     * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device.
+     * @deprecated use {@link #isHearingDevice() }
+     * // TODO: b/385679160 - Target to deprecate it and replace  with #isHearingDevice()
      */
+    @Deprecated
     public boolean isHearingAidDevice() {
         return mHearingAidInfo != null;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} support any of hearing device profile.
+     */
+    public boolean isHearingDevice() {
+        return getProfiles().stream().anyMatch(
+                p -> (p instanceof HearingAidProfile || p instanceof HapClientProfile));
     }
 
     public int getDeviceSide() {
@@ -910,10 +921,31 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
     }
 
+    /**
+     * Checks if the device is connected to the specified Bluetooth profile.
+     *
+     * @param profile The Bluetooth profile to check.
+     * @return {@code true} if the device is connected to the profile.
+     */
     public boolean isConnectedProfile(LocalBluetoothProfile profile) {
         int status = getProfileConnectionState(profile);
         return status == BluetoothProfile.STATE_CONNECTED;
 
+    }
+
+    /**
+     * Checks if the device is connected to the Bluetooth profile with the given ID.
+     *
+     * @param profileId The ID of the Bluetooth profile to check.
+     * @return {@code true} if the device is connected to the profile.
+     */
+    public boolean isConnectedProfile(int profileId) {
+        for (LocalBluetoothProfile profile : getProfiles()) {
+            if (profile.getProfileId() == profileId) {
+                return isConnectedProfile(profile);
+            }
+        }
+        return false;
     }
 
     public boolean isBusy() {
@@ -1891,13 +1923,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return {@code true} if {@code cachedBluetoothDevice} is LeAudio hearing aid device
-     */
-    public boolean isConnectedLeAudioHearingAidDevice() {
-        return isConnectedHapClientDevice() && isConnectedLeAudioDevice();
-    }
-
-    /**
      * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device
      *
      * The device may be an ASHA hearing aid that supports {@link HearingAidProfile} or a LeAudio
@@ -1905,6 +1930,13 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public boolean isConnectedHearingAidDevice() {
         return isConnectedAshaHearingAidDevice() || isConnectedLeAudioHearingAidDevice();
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is LeAudio hearing aid device
+     */
+    public boolean isConnectedLeAudioHearingAidDevice() {
+        return isConnectedHapClientDevice() && isConnectedLeAudioDevice();
     }
 
     /**

@@ -2074,6 +2074,21 @@ public class CachedBluetoothDeviceTest {
         assertThat(mCachedDevice.getConnectionSummary(false)).isNull();
     }
 
+    @Test
+    public void isHearingDevice_supportHearingRelatedProfiles_returnTrue() {
+        when(mCachedDevice.getProfiles()).thenReturn(
+                ImmutableList.of(mHapClientProfile, mHearingAidProfile));
+
+        assertThat(mCachedDevice.isHearingDevice()).isTrue();
+    }
+
+    @Test
+    public void isHearingDevice_supportOnlyLeAudioProfile_returnFalse() {
+        when(mCachedDevice.getProfiles()).thenReturn(ImmutableList.of(mLeAudioProfile));
+
+        assertThat(mCachedDevice.isHearingDevice()).isFalse();
+    }
+
     private void updateProfileStatus(LocalBluetoothProfile profile, int status) {
         doReturn(status).when(profile).getConnectionStatus(mDevice);
         mCachedDevice.onProfileStateChanged(profile, status);

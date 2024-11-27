@@ -33,21 +33,37 @@ import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.ParcelUuid;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+
+import androidx.test.core.app.ApplicationProvider;
+
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public class CachedBluetoothDeviceManagerTest {
+    @Rule
+    public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
+    private final Context mContext = ApplicationProvider.getApplicationContext();
+
     private final static String DEVICE_NAME_1 = "TestName_1";
     private final static String DEVICE_NAME_2 = "TestName_2";
     private final static String DEVICE_NAME_3 = "TestName_3";
@@ -82,6 +98,8 @@ public class CachedBluetoothDeviceManagerTest {
     @Mock
     private HearingAidProfile mHearingAidProfile;
     @Mock
+    private HapClientProfile mHapClientProfile;
+    @Mock
     private CsipSetCoordinatorProfile mCsipSetCoordinatorProfile;
     @Mock
     private BluetoothDevice mDevice1;
@@ -89,12 +107,11 @@ public class CachedBluetoothDeviceManagerTest {
     private BluetoothDevice mDevice2;
     @Mock
     private BluetoothDevice mDevice3;
+    private HearingAidDeviceManager mHearingAidDeviceManager;
     private CachedBluetoothDevice mCachedDevice1;
     private CachedBluetoothDevice mCachedDevice2;
     private CachedBluetoothDevice mCachedDevice3;
     private CachedBluetoothDeviceManager mCachedDeviceManager;
-    private HearingAidDeviceManager mHearingAidDeviceManager;
-    private Context mContext;
 
     private BluetoothClass createBtClass(int deviceClass) {
         Parcel p = Parcel.obtain();
@@ -108,8 +125,6 @@ public class CachedBluetoothDeviceManagerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
         when(mDevice1.getAddress()).thenReturn(DEVICE_ADDRESS_1);
         when(mDevice2.getAddress()).thenReturn(DEVICE_ADDRESS_2);
         when(mDevice3.getAddress()).thenReturn(DEVICE_ADDRESS_3);
@@ -129,13 +144,15 @@ public class CachedBluetoothDeviceManagerTest {
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
         when(mPanProfile.isProfileReady()).thenReturn(true);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
+        when(mHapClientProfile.isProfileReady()).thenReturn(true);
         when(mCsipSetCoordinatorProfile.isProfileReady())
                 .thenReturn(true);
         doAnswer((invocation) -> mHearingAidProfile).
                 when(mLocalProfileManager).getHearingAidProfile();
         doAnswer((invocation) -> mCsipSetCoordinatorProfile)
                 .when(mLocalProfileManager).getCsipSetCoordinatorProfile();
-        mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, mLocalBluetoothManager);
+        mCachedDeviceManager = spy(
+                new CachedBluetoothDeviceManager(mContext, mLocalBluetoothManager));
         mCachedDevice1 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1));
         mCachedDevice2 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2));
         mCachedDevice3 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice3));
@@ -621,12 +638,55 @@ public class CachedBluetoothDeviceManagerTest {
     public void onActiveDeviceChanged_validHiSyncId_callExpectedFunction() {
         doNothing().when(mHearingAidDeviceManager).onActiveDeviceChanged(any());
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
-        cachedDevice1.setHearingAidInfo(
-                new HearingAidInfo.Builder().setHiSyncId(HISYNCID1).build());
+        when(mCachedDevice1.getProfiles()).thenReturn(
+                ImmutableList.of(mHapClientProfile, mHearingAidProfile));
 
-        mCachedDeviceManager.onActiveDeviceChanged(cachedDevice1);
+        mCachedDeviceManager.onActiveDeviceChanged(mCachedDevice1);
 
-        verify(mHearingAidDeviceManager).onActiveDeviceChanged(cachedDevice1);
+        verify(mHearingAidDeviceManager).onActiveDeviceChanged(mCachedDevice1);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void onActiveDeviceChanged_hearingDevice_callReportConnectionStatus() {
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mCachedDevice1.getProfiles()).thenReturn(
+                ImmutableList.of(mHapClientProfile, mHearingAidProfile));
+
+        mCachedDeviceManager.onActiveDeviceChanged(mCachedDevice1);
+
+        verify(mHearingAidDeviceManager).notifyDevicesConnectionStatusChanged();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void onDeviceUnpaired_hearingDevice_callReportConnectionStatus() {
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mCachedDevice1.getProfiles()).thenReturn(
+                ImmutableList.of(mHapClientProfile, mHearingAidProfile));
+
+        mCachedDeviceManager.onDeviceUnpaired(mCachedDevice1);
+
+        verify(mHearingAidDeviceManager).notifyDevicesConnectionStatusChanged();
+    }
+
+    @Test
+    public void notifyHearingDevicesConnectionStatusChanged_nonHearingDevice_notCallFunction() {
+        when(mCachedDevice1.getProfiles()).thenReturn(List.of(mA2dpProfile));
+
+        mCachedDeviceManager.notifyHearingDevicesConnectionStatusChangedIfNeeded(mCachedDevice1);
+
+        verify(mHearingAidDeviceManager, never()).notifyDevicesConnectionStatusChanged();
+    }
+
+    @Test
+    public void notifyHearingDevicesConnectionStatusChanged_hearingDeviceProfile_callFunction() {
+        when(mCachedDevice1.getProfiles()).thenReturn(List.of(mHapClientProfile));
+
+        mCachedDeviceManager.notifyHearingDevicesConnectionStatusChangedIfNeeded(mCachedDevice1);
+
+        verify(mHearingAidDeviceManager).notifyDevicesConnectionStatusChanged();
     }
 }

@@ -15,7 +15,10 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothDevice.BOND_BONDED;
+
 import android.bluetooth.BluetoothCsipSetCoordinator;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
@@ -30,14 +33,21 @@ import android.provider.Settings;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.collection.ArraySet;
+
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * HearingAidDeviceManager manages the set of remote HearingAid(ASHA) Bluetooth devices.
+ * HearingAidDeviceManager manages the set of remote bluetooth hearing devices.
  */
 public class HearingAidDeviceManager {
     private static final String TAG = "HearingAidDeviceManager";
@@ -48,6 +58,10 @@ public class HearingAidDeviceManager {
     private final LocalBluetoothManager mBtManager;
     private final List<CachedBluetoothDevice> mCachedDevices;
     private final HearingAidAudioRoutingHelper mRoutingHelper;
+    @ConnectionStatus
+    private int mDevicesConnectionStatus = ConnectionStatus.NO_DEVICE_BONDED;
+    private boolean mInitialDevicesConnectionStatusUpdate = false;
+
     HearingAidDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> CachedDevices) {
         mContext = context;
@@ -65,6 +79,145 @@ public class HearingAidDeviceManager {
         mBtManager = localBtManager;
         mCachedDevices = cachedDevices;
         mRoutingHelper = routingHelper;
+    }
+
+    /**
+     * Defines the connection status for hearing devices.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            ConnectionStatus.NO_DEVICE_BONDED,
+            ConnectionStatus.DISCONNECTED,
+            ConnectionStatus.CONNECTED,
+            ConnectionStatus.CONNECTING_OR_DISCONNECTING,
+            ConnectionStatus.ACTIVE
+    })
+    public @interface ConnectionStatus {
+        int NO_DEVICE_BONDED = -1;
+        int DISCONNECTED = 0;
+        int CONNECTED = 1;
+        int CONNECTING_OR_DISCONNECTING = 2;
+        int ACTIVE = 3;
+    }
+
+    /**
+     * Updates the connection status of the hearing devices based on the currently bonded
+     * hearing aid devices.
+     */
+    synchronized void notifyDevicesConnectionStatusChanged() {
+        updateDevicesConnectionStatus();
+        // TODO: b/357882387 - notify connection status changes for the callers
+    }
+
+    private void updateDevicesConnectionStatus() {
+        mInitialDevicesConnectionStatusUpdate = true;
+        // Add all hearing devices including sub and member into a set.
+        Set<CachedBluetoothDevice> allHearingDevices = mCachedDevices.stream()
+                .filter(d -> d.getBondState() == BluetoothDevice.BOND_BONDED
+                        && d.isHearingDevice())
+                .flatMap(d -> getAssociatedCachedDevice(d).stream())
+                .collect(Collectors.toSet());
+
+        // Status sequence matters here. If one of the hearing devices is in previous
+        // ConnectionStatus, we will treat whole hearing devices is in this status.
+        // E.g. One of hearing device is in CONNECTED status and another is in DISCONNECTED
+        // status, the hearing devices connection status will notify CONNECTED status.
+        if (isConnectingOrDisconnectingConnectionStatus(allHearingDevices)) {
+            mDevicesConnectionStatus = ConnectionStatus.CONNECTING_OR_DISCONNECTING;
+        } else if (isActiveConnectionStatus(allHearingDevices)) {
+            mDevicesConnectionStatus = ConnectionStatus.ACTIVE;
+        } else if (isConnectedStatus(allHearingDevices)) {
+            mDevicesConnectionStatus = ConnectionStatus.CONNECTED;
+        } else if (isDisconnectedStatus(allHearingDevices)) {
+            mDevicesConnectionStatus = ConnectionStatus.DISCONNECTED;
+        } else {
+            mDevicesConnectionStatus = ConnectionStatus.NO_DEVICE_BONDED;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "updateDevicesConnectionStatus: " + mDevicesConnectionStatus);
+        }
+    }
+
+    /**
+     * @return all the related CachedBluetoothDevices for this device.
+     */
+    @NonNull
+    public Set<CachedBluetoothDevice> getAssociatedCachedDevice(
+            @NonNull CachedBluetoothDevice device) {
+        ArraySet<CachedBluetoothDevice> cachedDeviceSet = new ArraySet<>();
+        cachedDeviceSet.add(device);
+        // Associated device should be added into memberDevice if it support CSIP profile.
+        Set<CachedBluetoothDevice> memberDevices = device.getMemberDevice();
+        if (!memberDevices.isEmpty()) {
+            cachedDeviceSet.addAll(memberDevices);
+            return cachedDeviceSet;
+        }
+        // If not support CSIP profile, it should be ASHA hearing device and added into subDevice.
+        CachedBluetoothDevice subDevice = device.getSubDevice();
+        if (subDevice != null) {
+            cachedDeviceSet.add(subDevice);
+            return cachedDeviceSet;
+        }
+
+        return cachedDeviceSet;
+    }
+
+    private boolean isConnectingOrDisconnectingConnectionStatus(
+            Set<CachedBluetoothDevice> devices) {
+        HearingAidProfile hearingAidProfile = mBtManager.getProfileManager().getHearingAidProfile();
+        HapClientProfile hapClientProfile = mBtManager.getProfileManager().getHapClientProfile();
+
+        for (CachedBluetoothDevice device : devices) {
+            if (hearingAidProfile != null) {
+                int status = device.getProfileConnectionState(hearingAidProfile);
+                if (status == BluetoothProfile.STATE_DISCONNECTING
+                        || status == BluetoothProfile.STATE_CONNECTING) {
+                    return true;
+                }
+            }
+            if (hapClientProfile != null) {
+                int status = device.getProfileConnectionState(hapClientProfile);
+                if (status == BluetoothProfile.STATE_DISCONNECTING
+                        || status == BluetoothProfile.STATE_CONNECTING) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isActiveConnectionStatus(Set<CachedBluetoothDevice> devices) {
+        for (CachedBluetoothDevice device : devices) {
+            if ((device.isActiveDevice(BluetoothProfile.HEARING_AID)
+                    && device.isConnectedProfile(BluetoothProfile.HEARING_AID))
+                    || (device.isActiveDevice(BluetoothProfile.LE_AUDIO)
+                    && device.isConnectedProfile(BluetoothProfile.LE_AUDIO))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isConnectedStatus(Set<CachedBluetoothDevice> devices) {
+        return devices.stream().anyMatch(CachedBluetoothDevice::isConnected);
+    }
+
+    private boolean isDisconnectedStatus(Set<CachedBluetoothDevice> devices) {
+        return devices.stream().anyMatch(
+                d -> (!d.isConnected() && d.getBondState() == BOND_BONDED));
+    }
+
+    /**
+     * Gets the connection status for hearing device set. Will update connection status first if
+     * never updated.
+     */
+    @ConnectionStatus
+    public int getDevicesConnectionStatus() {
+        if (!mInitialDevicesConnectionStatusUpdate) {
+            updateDevicesConnectionStatus();
+        }
+        return mDevicesConnectionStatus;
     }
 
     void initHearingAidDeviceIfNeeded(CachedBluetoothDevice newDevice,
