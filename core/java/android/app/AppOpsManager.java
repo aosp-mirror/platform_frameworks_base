@@ -3586,7 +3586,7 @@ public class AppOpsManager {
         /** Attribution tag of the proxy that noted the op */
         private @Nullable String mAttributionTag;
         /** Persistent device Id of the proxy that noted the op */
-        private @Nullable String mDeviceId;
+        private @NonNull String mDeviceId;
 
         /**
          * Reinit existing object with new state.
@@ -3599,7 +3599,7 @@ public class AppOpsManager {
          * @hide
          */
         public void reinit(@IntRange(from = 0) int uid, @Nullable String packageName,
-                @Nullable String attributionTag, @Nullable String deviceId) {
+                @Nullable String attributionTag, @NonNull String deviceId) {
             mUid = Preconditions.checkArgumentNonnegative(uid);
             mPackageName = packageName;
             mAttributionTag = attributionTag;
@@ -3662,7 +3662,8 @@ public class AppOpsManager {
                     "from", 0);
             this.mPackageName = packageName;
             this.mAttributionTag = attributionTag;
-            this.mDeviceId = deviceId;
+            this.mDeviceId = deviceId == null ? VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+                    : deviceId;
         }
         /**
          * Copy constructor
@@ -3705,7 +3706,7 @@ public class AppOpsManager {
          * Persistent device Id of the proxy that noted the op
          */
         @FlaggedApi(Flags.FLAG_DEVICE_ID_IN_OP_PROXY_INFO_ENABLED)
-        public @Nullable String getDeviceId() { return mDeviceId; }
+        public @NonNull String getDeviceId() { return mDeviceId; }
 
         @Override
         @DataClass.Generated.Member
@@ -3716,12 +3717,12 @@ public class AppOpsManager {
             byte flg = 0;
             if (mPackageName != null) flg |= 0x2;
             if (mAttributionTag != null) flg |= 0x4;
-            if (mDeviceId != null) flg |= 0x8;
+            flg |= 0x8;
             dest.writeByte(flg);
             dest.writeInt(mUid);
             if (mPackageName != null) dest.writeString(mPackageName);
             if (mAttributionTag != null) dest.writeString(mAttributionTag);
-            if (mDeviceId != null) dest.writeString(mDeviceId);
+            dest.writeString(mDeviceId);
         }
 
         @Override
@@ -3739,7 +3740,8 @@ public class AppOpsManager {
             int uid = in.readInt();
             String packageName = (flg & 0x2) == 0 ? null : in.readString();
             String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
-            String deviceId = (flg & 0x8) == 0 ? null : in.readString();
+            String deviceId = (flg & 0x8) == 0 ? VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+                    : in.readString();
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
