@@ -57,23 +57,23 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class YouTubeEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
-    override val standardAppHelper: YouTubeAppHelper = YouTubeAppHelper(instrumentation)
+    override val pipApp: YouTubeAppHelper = YouTubeAppHelper(instrumentation)
 
     override val permissions: Array<String> = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
-            standardAppHelper.launchViaIntent(
+            pipApp.launchViaIntent(
                 wmHelper,
                 YouTubeAppHelper.getYoutubeVideoIntent("3KtWfp0UopM"),
                 ComponentNameMatcher(YouTubeAppHelper.PACKAGE_NAME, "")
             )
-            standardAppHelper.waitForVideoPlaying()
+            pipApp.waitForVideoPlaying()
         }
     }
 
     override val defaultTeardown: FlickerBuilder.() -> Unit = {
-        teardown { standardAppHelper.exit(wmHelper) }
+        teardown { pipApp.exit(wmHelper) }
     }
 
     override val thisTransition: FlickerBuilder.() -> Unit = { transitions { tapl.goHome() } }

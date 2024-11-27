@@ -38,7 +38,7 @@
         <com.android.internal.widget.NotificationMaxHeightFrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="@dimen/notification_min_height"
+            android:minHeight="@dimen/notification_2025_min_height"
             android:clipChildren="false"
             >
 
@@ -98,8 +98,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
-                    android:layout_marginBottom="@dimen/notification_headerless_margin_twoline"
-                    android:layout_marginTop="@dimen/notification_headerless_margin_twoline"
+                    android:layout_marginBottom="@dimen/notification_2025_margin"
+                    android:layout_marginTop="@dimen/notification_2025_margin"
                     android:layout_marginStart="@dimen/notification_2025_content_margin_start"
                     android:clipChildren="false"
                     android:orientation="vertical"

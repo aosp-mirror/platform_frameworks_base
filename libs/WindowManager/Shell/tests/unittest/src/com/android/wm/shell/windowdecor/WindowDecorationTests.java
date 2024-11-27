@@ -114,6 +114,7 @@ public class WindowDecorationTests extends ShellTestCase {
     private static final Rect TASK_BOUNDS = new Rect(100, 300, 400, 400);
     private static final Point TASK_POSITION_IN_PARENT = new Point(40, 60);
     private static final int CORNER_RADIUS = 20;
+    private static final int SHADOW_RADIUS = 10;
     private static final int STATUS_BAR_INSET_SOURCE_ID = 0;
 
     @Rule
@@ -162,7 +163,7 @@ public class WindowDecorationTests extends ShellTestCase {
         mRelayoutParams.mLayoutResId = 0;
         mRelayoutParams.mCaptionHeightId = R.dimen.test_freeform_decor_caption_height;
         mCaptionMenuWidthId = R.dimen.test_freeform_decor_caption_menu_width;
-        mRelayoutParams.mShadowRadiusId = R.dimen.test_window_decor_shadow_radius;
+        mRelayoutParams.mShadowRadius = SHADOW_RADIUS;
         mRelayoutParams.mCornerRadius = CORNER_RADIUS;
 
         when(mMockDisplayController.getDisplay(Display.DEFAULT_DISPLAY))
@@ -280,7 +281,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlFinishT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
-        verify(mMockSurfaceControlStartT).setShadowRadius(mMockTaskSurface, 10);
+        verify(mMockSurfaceControlStartT).setShadowRadius(mMockTaskSurface, SHADOW_RADIUS);
 
         assertEquals(300, mRelayoutResult.mWidth);
         assertEquals(100, mRelayoutResult.mHeight);

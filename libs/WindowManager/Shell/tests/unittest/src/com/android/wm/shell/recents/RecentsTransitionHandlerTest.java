@@ -65,6 +65,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -100,7 +101,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
-    private DesktopRepository mDesktopRepository;
+    private DesktopUserRepositories mDesktopUserRepositories;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
     @Mock
@@ -111,6 +112,8 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     private TaskStackTransitionObserver mTaskStackTransitionObserver;
     @Mock
     private Transitions mTransitions;
+
+    @Mock private DesktopRepository mDesktopRepository;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -131,6 +134,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
         ExtendedMockito.doReturn(true)
                 .when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
 
+        when(mDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getSystemService(KeyguardManager.class))
@@ -140,7 +144,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
                 mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopRepository), mTaskStackTransitionObserver,
+                Optional.of(mDesktopUserRepositories), mTaskStackTransitionObserver,
                 mMainExecutor);
         mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,

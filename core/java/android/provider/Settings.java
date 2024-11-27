@@ -6374,6 +6374,14 @@ public final class Settings {
         public static final String LOCALE_PREFERENCES = "locale_preferences";
 
         /**
+         * User can change the region from region settings. This records user's preferred region.
+         *
+         * E.g. : if user's locale is en-US, this will record US
+         * @hide
+         */
+        public static final String PREFERRED_REGION = "preferred_region";
+
+        /**
          * Setting to enable camera flash notification feature.
          * <ul>
          *     <li> 0 = Off
@@ -6547,6 +6555,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
+            PRIVATE_SETTINGS.add(PREFERRED_REGION);
         }
 
         /**

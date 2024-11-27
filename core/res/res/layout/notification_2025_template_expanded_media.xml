@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- Note: This is the expanded version of the old media style notification (different from UMO). -->
+
+<!-- extends FrameLayout -->
+<com.android.internal.widget.MediaNotificationView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/status_bar_latest_event_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:tag="bigMediaNarrow"
+    >
+
+    <include layout="@layout/notification_2025_template_header" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/notification_media_content"
+        >
+
+        <LinearLayout
+            android:id="@+id/notification_main_column"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:layout_marginStart="@dimen/notification_2025_content_margin_start"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:orientation="vertical"
+            >
+            <include layout="@layout/notification_template_part_line1"/>
+            <include layout="@layout/notification_template_text"/>
+        </LinearLayout>
+
+        <!-- this FrameLayout's minHeight serves as a padding for the content above -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/notification_2025_media_actions_margin_start"
+            android:minHeight="@dimen/notification_content_margin"
+            >
+
+            <!-- Nesting in FrameLayout is required to ensure that the marginStart actually applies
+                 at the start instead of always the left, given that the media_actions LinearLayout
+                 has layoutDirection="ltr". -->
+            <LinearLayout
+                android:id="@+id/media_actions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/media_notification_actions_padding_bottom"
+                android:gravity="top"
+                android:orientation="horizontal"
+                android:layoutDirection="ltr"
+                >
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action0"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action1"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action2"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action3"
+                    />
+
+                <include
+                    layout="@layout/notification_material_media_action"
+                    android:id="@+id/action4"
+                    />
+            </LinearLayout>
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <include layout="@layout/notification_template_right_icon" />
+
+</com.android.internal.widget.MediaNotificationView>

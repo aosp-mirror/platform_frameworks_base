@@ -199,7 +199,7 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
     }
 
     void sendCallbackAdded(boolean enabled, IAdvancedProtectionCallback callback) {
-        Message.obtain(mHandler, MODE_CHANGED, /*enabled*/ enabled ? 1 : 0, /*unused*/ -1,
+        Message.obtain(mHandler, CALLBACK_ADDED, /*enabled*/ enabled ? 1 : 0, /*unused*/ -1,
                         /*callback*/ callback)
                 .sendToTarget();
     }

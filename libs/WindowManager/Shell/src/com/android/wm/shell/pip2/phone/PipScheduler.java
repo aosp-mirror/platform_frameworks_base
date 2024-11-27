@@ -39,7 +39,7 @@ import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
-import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
@@ -58,7 +58,7 @@ public class PipScheduler {
     private final PipBoundsState mPipBoundsState;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
-    private final Optional<DesktopRepository> mDesktopRepositoryOptional;
+    private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private PipTransitionController mPipTransitionController;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
@@ -72,13 +72,13 @@ public class PipScheduler {
             PipBoundsState pipBoundsState,
             ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState,
-            Optional<DesktopRepository> desktopRepositoryOptional,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
-        mDesktopRepositoryOptional = desktopRepositoryOptional;
+        mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
         mSurfaceControlTransactionFactory =
@@ -268,8 +268,8 @@ public class PipScheduler {
 
     /** Returns whether PiP is exiting while we're in desktop mode. */
     private boolean isPipExitingToDesktopMode() {
-        return Flags.enableDesktopWindowingPip() && mDesktopRepositoryOptional.isPresent()
-                && (mDesktopRepositoryOptional.get().getVisibleTaskCount(
+        return Flags.enableDesktopWindowingPip() && mDesktopUserRepositoriesOptional.isPresent()
+                && (mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(
                 Objects.requireNonNull(mPipTransitionState.getPipTaskInfo()).displayId) > 0
                 || isDisplayInFreeform());
     }

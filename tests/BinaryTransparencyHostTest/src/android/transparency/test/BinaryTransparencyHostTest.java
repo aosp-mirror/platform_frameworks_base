@@ -24,6 +24,9 @@ import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.LargeTest;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.host.HostFlagsValueProvider;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -34,6 +37,7 @@ import com.android.tradefed.util.CommandResult;
 import com.android.tradefed.util.CommandStatus;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,6 +52,10 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
 
     /** Waiting time for the job to be scheduled */
     private static final int JOB_CREATION_MAX_SECONDS = 30;
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            HostFlagsValueProvider.createCheckFlagsRule(this::getDevice);
 
     @Before
     public void setUp() throws Exception {
@@ -123,6 +131,7 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
         }
     }
 
+    @RequiresFlagsDisabled(android.app.Flags.FLAG_BACKGROUND_INSTALL_CONTROL_CALLBACK_API)
     @Test
     public void testPreloadUpdateTriggersJobScheduling() throws Exception {
         try {

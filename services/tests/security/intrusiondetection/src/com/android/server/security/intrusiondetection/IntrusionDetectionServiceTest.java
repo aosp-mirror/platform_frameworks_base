@@ -70,9 +70,9 @@ import com.android.bedstead.nene.exceptions.NeneException;
 import com.android.bedstead.permissions.CommonPermissions;
 import com.android.bedstead.permissions.PermissionContext;
 import com.android.bedstead.permissions.annotations.EnsureHasPermission;
+import com.android.coretests.apps.testapp.LocalIntrusionDetectionEventTransport;
+import com.android.internal.infra.AndroidFuture;
 import com.android.server.ServiceThread;
-import com.android.server.security.intrusiondetection.TestLoggingService;
-import com.android.server.security.intrusiondetection.TestLoggingService.LocalBinder;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -118,13 +118,16 @@ public class IntrusionDetectionServiceTest {
     private IntrusionDetectionEventTransportConnection mIntrusionDetectionEventTransportConnection;
     private DataAggregator mDataAggregator;
     private IntrusionDetectionService mIntrusionDetectionService;
+    private IBinder mService;
     private TestLooper mTestLooper;
     private Looper mLooper;
     private TestLooper mTestLooperOfDataAggregator;
     private Looper mLooperOfDataAggregator;
     private FakePermissionEnforcer mPermissionEnforcer;
-    private TestLoggingService mService;
     private boolean mBoundToLoggingService = false;
+    private static final String TEST_PKG =
+        "com.android.coretests.apps.testapp";
+    private static final String TEST_SERVICE = TEST_PKG + ".TestLoggingService";
 
     @BeforeClass
     public static void setDeviceOwner() {
@@ -575,8 +578,8 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
-    public void test_StartBackupTransportService() {
-        final String TAG = "test_StartBackupTransportService";
+    public void test_StartIntrusionDetectionEventTransportService() {
+        final String TAG = "test_StartIntrusionDetectionEventTransportService";
         ServiceConnection serviceConnection = null;
 
         assertEquals(false, mBoundToLoggingService);
@@ -598,17 +601,14 @@ public class IntrusionDetectionServiceTest {
     private ServiceConnection startTestService() throws SecurityException, InterruptedException {
         final String TAG = "startTestService";
         final CountDownLatch latch = new CountDownLatch(1);
+        LocalIntrusionDetectionEventTransport transport =
+                new LocalIntrusionDetectionEventTransport();
 
         ServiceConnection serviceConnection = new ServiceConnection() {
-            // Called when the connection with the service is established.
+            // Called when connection with the service is established.
             @Override
             public void onServiceConnected(ComponentName className, IBinder service) {
-                // Because we have bound to an explicit
-                // service that is running in our own process, we can
-                // cast its IBinder to a concrete class and directly access it.
-                Log.d(TAG, "onServiceConnected");
-                LocalBinder binder = (LocalBinder) service;
-                mService = binder.getService();
+                mService = transport.getBinder();
                 mBoundToLoggingService = true;
                 latch.countDown();
             }
@@ -618,13 +618,23 @@ public class IntrusionDetectionServiceTest {
             public void onServiceDisconnected(ComponentName className) {
                 Log.d(TAG, "onServiceDisconnected");
                 mBoundToLoggingService = false;
-                latch.countDown();
             }
         };
 
-        Intent intent = new Intent(mContext, TestLoggingService.class);
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(TEST_PKG, TEST_SERVICE));
         mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
         latch.await(5, TimeUnit.SECONDS);
+
+        // call the methods on the transport object
+        IntrusionDetectionEvent event =
+                new IntrusionDetectionEvent(new SecurityEvent(123, new byte[15]));
+        List<IntrusionDetectionEvent> events = new ArrayList<>();
+        events.add(event);
+        assertTrue(transport.initialize());
+        assertTrue(transport.addData(events));
+        assertTrue(transport.release());
+        assertEquals(1, transport.getEvents().size());
 
         return serviceConnection;
     }
