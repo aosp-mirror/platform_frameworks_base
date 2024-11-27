@@ -66,8 +66,20 @@ interface DisplayRepository {
     /** Display removal event indicating a display has been removed. */
     val displayRemovalEvent: Flow<Int>
 
-    /** Provides the current set of displays. */
+    /**
+     * Provides the current set of displays.
+     *
+     * Consider using [displayIds] if only the [Display.getDisplayId] is needed.
+     */
     val displays: StateFlow<Set<Display>>
+
+    /**
+     * Provides the current set of display ids.
+     *
+     * Note that it is preferred to use this instead of [displays] if only the
+     * [Display.getDisplayId] is needed.
+     */
+    val displayIds: StateFlow<Set<Int>>
 
     /**
      * Pending display id that can be enabled/disabled.
@@ -159,7 +171,7 @@ constructor(
     private val initialDisplayIds = initialDisplays.map { display -> display.displayId }.toSet()
 
     /** Propagate to the listeners only enabled displays */
-    private val enabledDisplayIds: Flow<Set<Int>> =
+    private val enabledDisplayIds: StateFlow<Set<Int>> =
         allDisplayEvents
             .scan(initial = initialDisplayIds) { previousIds: Set<Int>, event: DisplayEvent ->
                 val id = event.displayId
@@ -170,8 +182,8 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-            .stateIn(bgApplicationScope, SharingStarted.WhileSubscribed(), initialDisplayIds)
             .debugLog("enabledDisplayIds")
+            .stateIn(bgApplicationScope, SharingStarted.WhileSubscribed(), initialDisplayIds)
 
     private val defaultDisplay by lazy {
         getDisplayFromDisplayManager(Display.DEFAULT_DISPLAY)
@@ -208,6 +220,8 @@ constructor(
      * Those are commonly the ones provided by [DisplayManager.getDisplays] by default.
      */
     override val displays: StateFlow<Set<Display>> = enabledDisplays
+
+    override val displayIds: StateFlow<Set<Int>> = enabledDisplayIds
 
     /**
      * Implementation that maps from [displays], instead of [allDisplayEvents] for 2 reasons:
