@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -36,8 +37,9 @@ import java.util.UUID;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-public class SatelliteInfo implements Parcelable {
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+public final class SatelliteInfo implements Parcelable {
     /**
      * Unique identification number for the satellite.
      * This ID is used to distinguish between different satellites in the network.
@@ -68,6 +70,9 @@ public class SatelliteInfo implements Parcelable {
      */
     private final List<EarfcnRange> mEarfcnRangeList;
 
+    /**
+     * @hide
+     */
     protected SatelliteInfo(Parcel in) {
         ParcelUuid parcelUuid = in.readParcelable(
                 ParcelUuid.class.getClassLoader(), ParcelUuid.class);
@@ -89,6 +94,7 @@ public class SatelliteInfo implements Parcelable {
      * @param bandList          The list of frequency bandList supported by the satellite.
      * @param earfcnRanges      The list of {@link EarfcnRange} objects representing the EARFCN
      *                          ranges supported by the satellite.
+     * @hide
      */
     public SatelliteInfo(@NonNull UUID satelliteId, @NonNull SatellitePosition satellitePosition,
             @NonNull List<Integer> bandList, @NonNull List<EarfcnRange> earfcnRanges) {
@@ -98,6 +104,7 @@ public class SatelliteInfo implements Parcelable {
         mEarfcnRangeList = earfcnRanges;
     }
 
+    @NonNull
     public static final Creator<SatelliteInfo> CREATOR = new Creator<SatelliteInfo>() {
         @Override
         public SatelliteInfo createFromParcel(Parcel in) {
@@ -135,6 +142,10 @@ public class SatelliteInfo implements Parcelable {
 
     /**
      * Returns the position of the satellite.
+     * Position information of a geostationary satellite.
+     * This includes the longitude and altitude of the satellite.
+     * If the SatellitePosition is invalid,
+     * longitudeDegree and altitudeKm will be represented as DOUBLE.NaN.
      *
      * @return The {@link SatellitePosition} of the satellite.
      */
@@ -145,6 +156,8 @@ public class SatelliteInfo implements Parcelable {
 
     /**
      * Returns the list of frequency bands supported by the satellite.
+     *
+     * Refer specification 3GPP TS 36.101 for detailed information on frequency bands.
      *
      * @return The list of frequency bands.
      */
