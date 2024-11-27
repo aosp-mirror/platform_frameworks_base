@@ -221,6 +221,14 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestSessionStats(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+
+    public static final String KEY_SESSION_STATS_V2 = "session_stats_v2";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestIsProvisioned(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -3468,21 +3476,33 @@ public final class SatelliteManager {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            SatelliteSessionStats stats;
                             if (resultData.containsKey(KEY_SESSION_STATS)) {
-                                SatelliteSessionStats stats =
-                                        resultData.getParcelable(KEY_SESSION_STATS,
-                                                SatelliteSessionStats.class);
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onResult(stats)));
+                                stats = resultData.getParcelable(KEY_SESSION_STATS,
+                                        SatelliteSessionStats.class);
+                                if (resultData.containsKey(KEY_SESSION_STATS_V2)) {
+                                    SatelliteSessionStats stats1 = resultData.getParcelable(
+                                            KEY_SESSION_STATS_V2, SatelliteSessionStats.class);
+                                    if (stats != null && stats1 != null) {
+                                        stats.setSatelliteSessionStats(
+                                                stats1.getSatelliteSessionStats());
+                                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                                () -> callback.onResult(stats)));
+                                        return;
+                                    }
+                                } else {
+                                    loge("KEY_SESSION_STATS_V2 does not exist.");
+                                }
                             } else {
                                 loge("KEY_SESSION_STATS does not exist.");
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onError(new SatelliteException(
-                                                SATELLITE_RESULT_REQUEST_FAILED))));
                             }
+                            executor.execute(() -> Binder.withCleanCallingIdentity(
+                                    () -> callback.onError(new SatelliteException(
+                                            SATELLITE_RESULT_REQUEST_FAILED))));
+
                         } else {
-                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                    callback.onError(new SatelliteException(resultCode))));
+                            executor.execute(() -> Binder.withCleanCallingIdentity(
+                                    () -> callback.onError(new SatelliteException(resultCode))));
                         }
                     }
                 };
