@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import static android.content.pm.SigningInfo.AppSigningSchemeVersion;
 import static android.media.audio.Flags.FLAG_FEATURE_SPATIAL_AUDIO_HEADTRACKING_LOW_LATENCY;
 
 import static com.android.internal.pm.pkg.parsing.ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES;
@@ -59,6 +60,8 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -94,6 +97,7 @@ import android.telephony.ims.RcsUceAdapter;
 import android.telephony.ims.SipDelegateManager;
 import android.util.AndroidException;
 import android.util.Log;
+import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.parsing.PackageInfoCommonUtils;
@@ -11986,5 +11990,32 @@ public abstract class PackageManager {
             String rootTag, int[] attributes) {
         throw new UnsupportedOperationException(
                 "parseServiceMetadata not implemented in subclass");
+    }
+
+    /**
+     * Verifies and returns the
+     * <a href="https://source.android.com/docs/security/features/apksigning">app signing</a>
+     * information of the file at the given path. This operation takes a few milliseconds.
+     *
+     * Unlike {@link #getPackageArchiveInfo(String, PackageInfoFlags)} with {@link
+     * #GET_SIGNING_CERTIFICATES}, this method does not require the file to be a package archive
+     * file.
+     *
+     * @throws SigningInfoException if the verification fails
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_CLOUD_COMPILATION_PM)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static @NonNull SigningInfo getVerifiedSigningInfo(@NonNull String path,
+            @AppSigningSchemeVersion int minAppSigningSchemeVersion) throws SigningInfoException {
+        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        ParseResult<SigningDetails> result =
+                ApkSignatureVerifier.verify(input, path, minAppSigningSchemeVersion);
+        if (result.isError()) {
+            throw new SigningInfoException(
+                    result.getErrorCode(), result.getErrorMessage(), result.getException());
+        }
+        return new SigningInfo(result.getResult());
     }
 }
