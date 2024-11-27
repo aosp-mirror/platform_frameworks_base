@@ -107,8 +107,8 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađivanje snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Pokrenuti snimanje?"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Dok snimate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Dok snimate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Pokreni snimanje"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimanje zvuka"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk na uređaju"</string>
@@ -507,17 +507,17 @@
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Jedna aplikacija"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Dijelite ili snimite aplikaciju"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Pokrenuti snimanje ili emitiranje uz aplikaciju <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kada dijelite, snimate ili emitirate, aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kada dijelite, snimate ili emitirate aplikaciju, aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kada dijelite, snimate ili emitirate, aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kada dijelite, snimate ili emitirate aplikaciju, aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Pokreni"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je onemogućila tu opciju"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Pokrenuti emitiranje?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kada emitirate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kada emitirate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kada emitirate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kada emitirate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Pokreni emitiranje"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Pokrenuti dijeljenje?"</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kada dijelite, snimate ili emitirate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kada dijelite, snimate ili emitirate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kada dijelite, snimate ili emitirate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kada dijelite, snimate ili emitirate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, audio i videozapisi."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Pokreni"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Dijeljenje se pauzira kada promijenite aplikaciju"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Umjesto toga, dijeli aplikaciju"</string>
@@ -748,7 +748,7 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Nazad"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Tipka za razmak"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"Tipka za novi red"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tipka za brisanje"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Pokreni/pauziraj"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Zaustavi"</string>
@@ -792,18 +792,18 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Nazad"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Odlazak na početni ekran"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Prikaz nedavnih aplikacija"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje kroz nedavne aplikacije unaprijed"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje kroz nedavne aplikacije unazad"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje unaprijed kroz nedavne aplikacije"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje unazad kroz nedavne aplikacije"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje liste aplikacija"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje Asistenta"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključani ekran"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje ekrana"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Pisanje bilješke"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Korištenje podijeljenog ekrana s trenutnom aplikacijom na desnoj strani"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Korištenje podijeljenog ekrana s trenutnom aplikacijom na lijevoj strani"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prebacivanje s podijeljenog ekrana na prikaz preko cijelog ekrana"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Pređite u aplikaciju desno ili ispod dok koristite podijeljeni ekran"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Prelazak u aplikaciju desno ili ispod uz podijeljeni ekran"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Pređite u aplikaciju lijevo ili iznad dok koristite podijeljeni ekran"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Za vrijeme podijeljenog ekrana: zamjena jedne aplikacije drugom"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Unos"</string>
@@ -945,7 +945,7 @@
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Način rada Ne ometaj uključila je aplikacija <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način rada Ne ometaj uključilo je automatsko pravilo ili aplikacija."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije koje rade u pozadini"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dodirnite za detalje o potrošnji baterije i prenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Nećete imati pristup podacima ni internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi-ja."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"vaš operater"</string>

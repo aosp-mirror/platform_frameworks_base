@@ -75,7 +75,7 @@ import java.net.UnknownHostException;
 @android.ravenwood.annotation.RavenwoodClassLoadHook(
         "com.android.platform.test.ravenwood.runtimehelper.ClassLoadHook.onClassLoaded")
 // Uncomment the following annotation to switch to the Java substitution version.
-@android.ravenwood.annotation.RavenwoodRedirectionClass("Log_host")
+@android.ravenwood.annotation.RavenwoodRedirectionClass("Log_ravenwood")
 public final class Log {
     /** @hide */
     @IntDef({ASSERT, ERROR, WARN, INFO, DEBUG, VERBOSE})

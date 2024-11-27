@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Active la fonctionnalité Connectivité améliorée."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activer l\'appli Terminal permettant l\'accès au shell local"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Environnement de développement Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Expérimental) Exécutez le terminal Linux sur Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"La désactivation effacera les données du terminal Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Vérification HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Configurer vérification HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Débogage"</string>
@@ -391,7 +394,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Toujours utiliser le GPU pour la composition écran"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simuler espace colorimétrique"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Enable OpenGL traces"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Désact. routage audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Désactiver le routage audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Désactiver routage automatique appareils audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Afficher les contours"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites, les marges de clip, etc."</string>
@@ -503,7 +506,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En recharge sans fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Recharge en cours…"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"N\'est pas en charge"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Connecté, mais ne se recharge pas"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Appareil connecté, mais pas en cours de recharge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Complètement rechargée"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Recharge en pause"</string>
@@ -593,7 +596,7 @@
     <string name="tv_media_transfer_default" msgid="5403053145185843843">"Sortie audio par défaut de la télévision"</string>
     <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Sortie HDMI"</string>
     <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Haut-parleurs internes"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteingez et rallumez l\'appareil"</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteignez et rallumez l\'appareil"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Appareil audio à câble"</string>
     <string name="help_label" msgid="3528360748637781274">"Aide et commentaires"</string>
     <string name="storage_category" msgid="2287342585424631813">"Stockage"</string>

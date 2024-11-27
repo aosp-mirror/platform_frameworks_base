@@ -637,8 +637,8 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контроль шума"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Пространственное звучание"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Отключено"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Без отсле­живания"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"С отсле­живанием"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Статичное"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Динамичное"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Нажмите, чтобы изменить режим звонка."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"отключить звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"включить звук"</string>
@@ -720,7 +720,7 @@
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Уведомления о звонках нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Эту группу уведомлений нельзя настроить здесь."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Уведомление отправлено через прокси-сервер."</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Показывать все уведомления приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g>: все уведомления"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Ещё"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"Уровень важности этого уведомления был автоматически &lt;b&gt;повышен до \"По умолчанию\"&lt;/b&gt;."</string>
     <string name="feedback_silenced" msgid="9116540317466126457">"Уровень важности этого уведомления был автоматически &lt;/b&gt;понижен до \"Без звука\"&lt;/b&gt;."</string>
@@ -938,7 +938,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Модуль Wi-Fi отключен"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Модуль Bluetooth отключен."</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth отключен"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режим \"Не беспокоить\" отключен"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Режим \"Не беспокоить\" включен"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Режим \"Не беспокоить\" был включен специальным правилом (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -1336,7 +1336,7 @@
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Система"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Многозадачность"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ввод"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Ярлыки приложений"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Быстрые клавиши для приложений"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Специальные возможности"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Быстрые клавиши"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти быстрые клавиши"</string>

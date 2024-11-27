@@ -612,8 +612,10 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite que a aplicación determine a posición relativa entre os dispositivos próximos que usen banda ultralarga"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interactuar con dispositivos wifi próximos"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permítelle á aplicación enviar anuncios e conectarse a dispositivos wifi próximos, e determinar a súa posición relativa"</string>
-    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información do servizo de pago de NFC preferido"</string>
-    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pago de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"fixar a posición relativa entre disp. próximos"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permite que a aplicación determine a posición relativa entre os dispositivos próximos"</string>
+    <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Información do servizo de pagos de NFC preferido"</string>
+    <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a aplicación obteña información do servizo de pagos de NFC preferido, como as axudas rexistradas e o destino da ruta."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite á aplicación comunicarse con etiquetas, tarxetas e lectores Near Field Communication (NFC)."</string>
     <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento de transacción no elemento seguro"</string>
@@ -1932,7 +1934,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noite da semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Durmindo"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Mentres durmo"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Xestionada por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activada"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivada"</string>

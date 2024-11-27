@@ -53,7 +53,7 @@ interface INfcAdapter
     int getState();
     boolean disable(boolean saveState, in String pkg);
     boolean enable(in String pkg);
-    int pausePolling(int timeoutInMs);
+    int pausePolling(long timeoutInMs);
     int resumePolling();
 
     void setForegroundDispatch(in PendingIntent intent,
@@ -115,7 +115,7 @@ interface INfcAdapter
     void clearPreference();
     void setScreenState();
     void checkFirmware();
-    List<String> fetchActiveNfceeList();
+    Map fetchActiveNfceeList();
     void triggerInitialization();
     boolean getSettingStatus();
     boolean isTagPresent();
@@ -124,4 +124,5 @@ interface INfcAdapter
     int commitRouting();
     boolean isTagIntentAllowed(in String pkg, in int Userid);
     IT4tNdefNfcee getT4tNdefNfceeInterface();
+    long getMaxPausePollingTimeoutMs();
 }

@@ -28,7 +28,7 @@
     <string name="title_app_streaming" msgid="2270331024626446950">"Permitir que o app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; acesse estas informações do smartphone"</string>
     <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Permitir que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; faça streaming dos apps do smartphone?"</string>
     <string name="summary_app_streaming" msgid="295548145144086753">"O app %1$s terá acesso a tudo o que estiver visível ou for aberto no smartphone, incluindo áudios, fotos, senhas e mensagens. O app &lt;br/&gt;&lt;br/&gt;%1$s poderá fazer o streaming de apps até que você remova o acesso a essa permissão."</string>
-    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Serviços entre dispositivos"</string>
+    <string name="helper_title_app_streaming" msgid="4151687003439969765">"Serviços multidispositivo"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> está pedindo permissão em nome do seu dispositivo <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para fazer streaming de apps entre seus dispositivos"</string>
     <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> está pedindo permissão em nome do seu <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> para mostrar e fazer streaming de apps entre seus dispositivos"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>

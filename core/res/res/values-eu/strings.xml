@@ -421,8 +421,8 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datu-erabilera areago lezake."</string>
     <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"antolatu ekintzak une zehatzetan gerta daitezen"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Aplikazio honek ekintzak programa ditzake etorkizunean egin daitezen. Horrek esan nahi du gailua aktiboki erabiltzen ari ez zarenean ere exekuta daitekeela aplikazioa."</string>
-    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-abisuak"</string>
-    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikazioak hainbat ekintza programa ditzake; adibidez, alarmak eta abisuak, etorkizuneko une batean jakinarazpen bat jaso dezazun."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-gogorarazpenak"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikazioak hainbat ekintza programa ditzake; adibidez, alarmak eta gogorarazpenak, etorkizuneko une batean jakinarazpen bat jaso dezazun."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Bere zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen dio aplikazioari. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Bere zati batzuk memorian modu iraunkorrean ezartzeko baimena ematen dio aplikazioari. Ondorioz, beste aplikazioek memoria gutxiago izan lezakete erabilgarri, eta Android TV gailuak motelago funtziona lezake."</string>
@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen dio aplikazioari"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"inguruko wifi-gailuekin interakzioan jardun"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Inguruko wifi-gailuetan iragartzeko, haiekin konektatzeko eta haien kokapena zehazteko baimena ematen dio aplikazioari"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"zehaztu inguruko gailuen arteko distantzia erlatiboa"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen dio aplikazioari"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko baimena ematen dio aplikazioari, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
@@ -745,7 +747,7 @@
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Saiakera gehiegi egin dira. Horren ordez, erabili pantailaren blokeoa."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ez duzu konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Aurpegi bidez desblokeatzeko eginbidea ez da bateragarria gailu honekin"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Aurpegi bidez desblokeatzeko eginbidea ez da onartzen gailu honetan"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sentsorea aldi baterako desgaitu da."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
     <string name="face_app_setting_name" msgid="5854024256907828015">"Erabili aurpegi bidez desblokeatzeko eginbidea"</string>
@@ -1527,7 +1529,7 @@
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Horma-papera"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Aldatu horma-papera"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Jakinarazpen-hautemailea"</string>
-    <string name="vr_listener_binding_label" msgid="8013112996671206429">"Errealitate birtualeko hautemailea"</string>
+    <string name="vr_listener_binding_label" msgid="8013112996671206429">"EBko hautemailea"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Baldintza-hornitzailea"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Jakinarazpenen sailkapen-zerbitzua"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN eginbidea aktibatuta"</string>

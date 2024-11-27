@@ -613,9 +613,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ના, આભાર"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ઍપ પિન કરી"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ઍપ અનપિન કરી"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"કૉલ કરો"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"કૉલ"</string>
     <string name="stream_system" msgid="7663148785370565134">"સિસ્ટમ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"રિંગ વગાડો"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"રિંગ"</string>
     <string name="stream_music" msgid="2188224742361847580">"મીડિયા"</string>
     <string name="stream_alarm" msgid="16058075093011694">"અલાર્મ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"નોટિફિકેશન"</string>
@@ -814,7 +814,7 @@
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"ઍપ્લિકેશનો"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Assistant"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"બ્રાઉઝર"</string>
-    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"સંપર્કો"</string>
+    <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacts"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ઇમેઇલ"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"મ્યુઝિક"</string>

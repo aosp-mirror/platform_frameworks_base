@@ -1015,7 +1015,7 @@
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Masshtab"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Oʻrtacha"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Kichik"</string>
-    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Yirik"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Katta"</string>
     <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Butun ekran"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Tayyor"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Tahrirlash"</string>

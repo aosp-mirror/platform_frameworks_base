@@ -775,7 +775,7 @@
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ou"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Effacez la requête de recherche"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Raccourcis-clavier"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Recherchez des raccourcis"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Rechercher des raccourcis"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Aucun raccourci trouvé"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Système"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrée"</string>
@@ -797,12 +797,12 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ouvrir la liste des applis"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ouvrir les paramètres"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ouvrir l\'Assistant"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Écran de verrouillage"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Verrouiller l\'écran"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Prendre une note"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitâche"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Utiliser l\'Écran divisé avec l\'appli actuelle à droite"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Utiliser l\'Écran divisé avec l\'appli actuelle à gauche"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'écran divisé au plein écran"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Passer de l\'Écran divisé au plein écran"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Passer à l\'appli à droite ou en dessous avec l\'Écran divisé"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Passer à l\'appli à gauche ou au-dessus avec l\'Écran divisé"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"En mode d\'écran divisé : remplacer une appli par une autre"</string>
@@ -1191,7 +1191,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Un problème est survenu lors de la lecture du niveau de charge de la pile"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Touchez pour en savoir plus"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Aucune alarme définie"</string>
-    <string name="accessibility_bouncer" msgid="5896923685673320070">"entrer verrouillage de l\'écran"</string>
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"accéder au verrouillage de l\'écran"</string>
     <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"Toucher le capteur d\'empreintes digitales. Il s\'agit du bouton le plus court sur le côté du téléphone"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Capteur d\'empreintes digitales"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"authentifier"</string>
@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Raccourcis des applis"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibilité"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Raccourcis-clavier"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Recherchez des raccourcis"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Rechercher des raccourcis"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icône Réduire"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icône Développer"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>

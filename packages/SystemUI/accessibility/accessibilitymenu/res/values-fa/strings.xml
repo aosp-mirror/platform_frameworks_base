@@ -26,6 +26,6 @@
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"دکمه‌های بزرگ"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"افزایش اندازه «دکمه‌های منوی دسترس‌پذیری»"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"راهنما"</string>
-    <string name="brightness_percentage_label" msgid="7391554573977867369">"روشنایی <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
-    <string name="music_volume_percentage_label" msgid="398635599662604706">"بلندی صدای موسیقی <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"‏روشنایی ‎%%<xliff:g id="PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"‏بلندی صدای موسیقی ‎%%<xliff:g id="PERCENTAGE">%1$s</xliff:g>"</string>
 </resources>

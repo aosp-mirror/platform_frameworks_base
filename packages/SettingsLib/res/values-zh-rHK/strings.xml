@@ -100,7 +100,7 @@
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"使用中。右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"左耳機：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"啟用強化連線功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 開發環境"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(實驗性質) 在 Android 上執行 Linux 終端機"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"停用將清除 Linux 終端機資料"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 檢查"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"設定 HDCP 檢查行為"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"除錯"</string>
@@ -466,7 +469,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"「色彩校正」功能適用於以下情況：:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;你想讓裝置顯示更準確的色彩&lt;/li&gt; &lt;li&gt;&amp;nbsp;你想移除色彩以提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"「色彩校正」功能適用於以下情況：&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;你想讓裝置顯示更準確的色彩&lt;/li&gt; &lt;li&gt;&amp;nbsp;你想移除色彩以提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - 為保護電池，目前暫停充電"</string>

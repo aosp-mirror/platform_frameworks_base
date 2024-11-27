@@ -590,7 +590,7 @@
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Pozwala aplikacji na odbieranie pakietów wysyłanych przez sieć Wi-Fi do wszystkich urządzeń, a nie tylko do Twojego tabletu, przy użyciu adresów połączeń grupowych. Powoduje większe zapotrzebowanie na energię niż w trybie innym niż grupowy."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"Pozwala aplikacji odbierać pakiety wysyłane przez sieć Wi-Fi do wszystkich urządzeń (a nie tylko do Twojego urządzenia z Androidem TV) przy użyciu adresów połączeń grupowych. Powoduje większe zapotrzebowanie na energię niż w innych trybach."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Pozwala aplikacji na odbieranie pakietów wysyłanych przez sieć Wi-Fi do wszystkich urządzeń, a nie tylko do Twojego telefonu, przy użyciu adresów połączeń grupowych. Powoduje większe zapotrzebowanie na energię niż w trybie innym niż grupowy."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"uzyskiwanie dostępu do ustawień Bluetooth"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"uzyskiwanie dostępu do ustawień Bluetootha"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Pozwala aplikacji na konfigurowanie lokalnego tabletu z funkcją Bluetooth oraz na wykrywanie urządzeń zdalnych i parowanie z nimi."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1623992984547014588">"Pozwala aplikacji konfigurować Bluetootha na urządzeniu z Androidem TV oraz wykrywać urządzenia zdalne i przeprowadzać parowanie z nimi."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Pozwala aplikacji na konfigurowanie lokalnego telefonu z funkcją Bluetooth oraz na wykrywanie urządzeń zdalnych i parowanie z nimi."</string>
@@ -614,6 +614,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Zezwól na określanie przez aplikację względnego położenia urządzeń ultraszerokopasmowych w pobliżu"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcje z urządzeniami Wi-Fi w pobliżu"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Zezwala aplikacji na przesyłanie informacji o sobie, łączenie się z urządzeniami Wi‑Fi w pobliżu i określanie ich względnego położenia"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"określanie względnego położenia urządzeń w pobliżu"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Zezwól na określanie przez aplikację względnego położenia urządzeń w pobliżu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacje o preferowanych usługach płatniczych NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Pozwala aplikacji uzyskiwać informacje o preferowanych usługach płatniczych NFC, np. zarejestrowanych pomocach i miejscach docelowych tras."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolowanie łączności Near Field Communication"</string>
