@@ -43,10 +43,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.verification.VerificationMode
 
 /**
  * Tests for [LetterboxTransitionObserver].
@@ -292,14 +290,16 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
             expected: Boolean,
             displayId: Int = DISPLAY_ID,
             taskId: Int = TASK_ID,
-            taskBounds: Rect = Rect()
+            taskBounds: Rect = Rect(),
+            activityBounds: Rect = Rect()
         ) = verify(
             letterboxController,
             expected.asMode()
         ).updateLetterboxSurfaceBounds(
             eq(LetterboxKey(displayId, taskId)),
             any<SurfaceControl.Transaction>(),
-            eq(taskBounds)
+            eq(taskBounds),
+            eq(activityBounds)
         )
 
         fun createTopActivityChange(
@@ -334,7 +334,5 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                 this.displayId = displayId
             }, changeMode = TRANSIT_CLOSE)
         }
-
-        private fun Boolean.asMode(): VerificationMode = if (this) times(1) else never()
     }
 }

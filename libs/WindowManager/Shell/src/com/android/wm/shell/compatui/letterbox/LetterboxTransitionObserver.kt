@@ -41,6 +41,8 @@ class LetterboxTransitionObserver(
     companion object {
         @JvmStatic
         private val TAG = "LetterboxTransitionObserver"
+        @JvmStatic
+        private val EMPTY_BOUNDS = Rect()
     }
 
     init {
@@ -86,10 +88,13 @@ class LetterboxTransitionObserver(
                                 startTransaction,
                                 change.leash
                             )
+                            val activityBounds =
+                                ti.appCompatTaskInfo.topActivityLetterboxBounds ?: EMPTY_BOUNDS
                             updateLetterboxSurfaceBounds(
                                 key,
                                 startTransaction,
-                                taskBounds
+                                taskBounds,
+                                activityBounds
                             )
                         }
                         updateLetterboxSurfaceVisibility(

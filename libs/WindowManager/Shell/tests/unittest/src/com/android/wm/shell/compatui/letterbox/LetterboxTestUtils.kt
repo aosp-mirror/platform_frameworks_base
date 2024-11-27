@@ -16,18 +16,9 @@
 
 package com.android.wm.shell.compatui.letterbox
 
-import android.view.SurfaceControl
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.verification.VerificationMode
 
-// The key to use for identify the letterbox sessions.
-data class LetterboxKey(val displayId: Int, val taskId: Int)
-
-// Encapsulates the surfaces in the multiple surfaces scenario.
-data class LetterboxSurfaces(
-    var leftSurface: SurfaceControl? = null,
-    var topSurface: SurfaceControl? = null,
-    var rightSurface: SurfaceControl? = null,
-    var bottomSurface: SurfaceControl? = null
-) : Iterable<SurfaceControl?> {
-    override fun iterator() =
-        listOf(leftSurface, topSurface, rightSurface, bottomSurface).iterator()
-}
+// Utility to make verification mode depending on a [Boolean].
+fun Boolean.asMode(): VerificationMode = if (this) times(1) else never()

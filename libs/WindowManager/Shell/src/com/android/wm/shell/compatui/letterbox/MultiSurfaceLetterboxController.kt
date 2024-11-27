@@ -25,71 +25,67 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_APP_COMPAT
 import javax.inject.Inject
 
 /**
- * Component responsible for handling the lifecycle of a single letterbox surface.
+ * Component responsible for handling the lifecycle of multiple letterbox surfaces when needed.
  */
 @WMSingleton
-class SingleSurfaceLetterboxController @Inject constructor(
+class MultiSurfaceLetterboxController @Inject constructor(
     private val letterboxBuilder: LetterboxSurfaceBuilder
 ) : LetterboxController {
 
     companion object {
         @JvmStatic
-        private val TAG = "SingleSurfaceLetterboxController"
+        private val TAG = "MultiSurfaceLetterboxController"
     }
 
-    private val letterboxMap = mutableMapOf<LetterboxKey, SurfaceControl>()
+    private val letterboxMap = mutableMapOf<LetterboxKey, LetterboxSurfaces>()
 
-    /**
-     * Creates a Letterbox Surface for a given displayId/taskId if it doesn't exist.
-     */
     override fun createLetterboxSurface(
         key: LetterboxKey,
         transaction: Transaction,
         parentLeash: SurfaceControl
     ) {
-        letterboxMap.runOnItem(key, onMissed = { k, m ->
-            m[k] = letterboxBuilder.createSurface(
+        val surfaceBuilderFn = { position: String ->
+            letterboxBuilder.createSurface(
                 transaction,
                 parentLeash,
-                surfaceName = "ShellLetterboxSurface-$key",
-                callSite = "LetterboxController-createLetterboxSurface"
+                "ShellLetterboxSurface-$key-$position",
+                "MultiSurfaceLetterboxController#createLetterboxSurface"
+            )
+        }
+        letterboxMap.runOnItem(key, onMissed = { k, m ->
+            m[k] = LetterboxSurfaces(
+                leftSurface = surfaceBuilderFn("Left"),
+                topSurface = surfaceBuilderFn("Top"),
+                rightSurface = surfaceBuilderFn("Right"),
+                bottomSurface = surfaceBuilderFn("Bottom"),
             )
         })
     }
 
-    /**
-     * Invoked to destroy the surfaces for a letterbox session for given displayId/taskId.
-     */
     override fun destroyLetterboxSurface(
         key: LetterboxKey,
         transaction: Transaction
     ) {
         letterboxMap.runOnItem(key, onFound = { item ->
-            item.run {
-                transaction.remove(this)
+            item.forEach { s ->
+                s.remove(transaction)
             }
         })
         letterboxMap.remove(key)
     }
 
-    /**
-     * Invoked to show/hide the letterbox surfaces for given displayId/taskId.
-     */
     override fun updateLetterboxSurfaceVisibility(
         key: LetterboxKey,
         transaction: Transaction,
         visible: Boolean
     ) {
         letterboxMap.runOnItem(key, onFound = { item ->
-            item.run {
-                transaction.setVisibility(this, visible)
+            item.forEach { s ->
+                s.setVisibility(transaction, visible)
             }
         })
     }
 
-    /**
-     * Updates the bounds for the letterbox surfaces for given displayId/taskId.
-     */
     override fun updateLetterboxSurfaceBounds(
         key: LetterboxKey,
         transaction: Transaction,
@@ -97,9 +93,7 @@ class SingleSurfaceLetterboxController @Inject constructor(
         activityBounds: Rect
     ) {
         letterboxMap.runOnItem(key, onFound = { item ->
-            item.run {
-                transaction.moveAndCrop(this, taskBounds)
-            }
+            item.updateSurfacesBounds(transaction, taskBounds, activityBounds)
         })
     }
 
@@ -108,20 +102,33 @@ class SingleSurfaceLetterboxController @Inject constructor(
     }
 
     /*
-     * Executes [onFound] on the [SurfaceControl] if present or [onMissed] if not present.
+     * Executes [onFound] on the [LetterboxItem] if present or [onMissed] if not present.
      */
-    private fun MutableMap<LetterboxKey, SurfaceControl>.runOnItem(
+    private fun MutableMap<LetterboxKey, LetterboxSurfaces>.runOnItem(
         key: LetterboxKey,
-        onFound: (SurfaceControl) -> Unit = { _ -> },
+        onFound: (LetterboxSurfaces) -> Unit = { _ -> },
         onMissed: (
             LetterboxKey,
-            MutableMap<LetterboxKey, SurfaceControl>
+            MutableMap<LetterboxKey, LetterboxSurfaces>
         ) -> Unit = { _, _ -> }
     ) {
         this[key]?.let {
             return onFound(it)
         }
         return onMissed(key, this)
+    }
+
+    private fun SurfaceControl?.remove(
+        tx: Transaction
+    ) = this?.let {
+        tx.remove(this)
+    }
+
+    private fun SurfaceControl?.setVisibility(
+        tx: Transaction,
+        visible: Boolean
+    ) = this?.let {
+        tx.setVisibility(this, visible)
     }
 
     private fun Transaction.moveAndCrop(
@@ -134,4 +141,36 @@ class SingleSurfaceLetterboxController @Inject constructor(
                 rect.width(),
                 rect.height()
             )
+
+    private fun LetterboxSurfaces.updateSurfacesBounds(
+        tx: Transaction,
+        taskBounds: Rect,
+        activityBounds: Rect
+    ) {
+        // Update the bounds depending on the activity position.
+        leftSurface?.let { s ->
+            tx.moveAndCrop(
+                s,
+                Rect(taskBounds.left, taskBounds.top, activityBounds.left, taskBounds.bottom)
+            )
+        }
+        rightSurface?.let { s ->
+            tx.moveAndCrop(
+                s,
+                Rect(activityBounds.right, taskBounds.top, taskBounds.right, taskBounds.bottom)
+            )
+        }
+        topSurface?.let { s ->
+            tx.moveAndCrop(
+                s,
+                Rect(taskBounds.left, taskBounds.top, taskBounds.right, activityBounds.top)
+            )
+        }
+        bottomSurface?.let { s ->
+            tx.moveAndCrop(
+                s,
+                Rect(taskBounds.left, activityBounds.bottom, taskBounds.right, taskBounds.bottom)
+            )
+        }
+    }
 }
