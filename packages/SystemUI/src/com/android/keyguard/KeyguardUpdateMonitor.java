@@ -101,6 +101,7 @@ import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -642,6 +643,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                                 .getSimSlotIndex());
                         } else {
                             data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
+                        }
+                        if (data == null) {
+                            Log.w(TAG, "Null SimData for subscription: "
+                                    + changedSubscriptions.get(i));
+                            continue;
                         }
                         for (int j = 0; j < mCallbacks.size(); j++) {
                             var cb = mCallbacks.get(j).get();
@@ -3415,6 +3421,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Removes all valid subscription info from the map for the given slotId.
      */
     private void invalidateSlot(int slotId) {
+        if (simPinUseSlotId()) {
+            return;
+        }
         synchronized (mSimDataLockObject) {
             var iter = simPinUseSlotId() ? mSimDatasBySlotId.entrySet().iterator()
                     : mSimDatas.entrySet().iterator();
@@ -3446,7 +3455,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     || state == TelephonyManager.SIM_STATE_CARD_IO_ERROR) {
                 updateTelephonyCapable(true);
             }
-
             invalidateSlot(slotId);
         }
 
@@ -3966,10 +3974,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean refreshSimState(int subId, int slotId) {
         int state = mTelephonyManager.getSimState(slotId);
         synchronized (mSimDataLockObject) {
-            SimData data = simPinUseSlotId() ? mSimDatasBySlotId.get(slotId) : mSimDatas.get(subId);
             if (!SubscriptionManager.isValidSubscriptionId(subId)) {
                 invalidateSlot(slotId);
             }
+            SimData data = simPinUseSlotId() ? mSimDatasBySlotId.get(slotId) : mSimDatas.get(subId);
 
             final boolean changed;
             if (data == null) {
