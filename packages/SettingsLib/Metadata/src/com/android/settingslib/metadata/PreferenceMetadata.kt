@@ -175,7 +175,12 @@ interface PreferenceMetadata {
 
 /** Metadata of preference group. */
 @AnyThread
-open class PreferenceGroup(override val key: String, override val title: Int) : PreferenceMetadata
+interface PreferenceGroup : PreferenceMetadata
+
+/** Metadata of preference category. */
+@AnyThread
+open class PreferenceCategory(override val key: String, override val title: Int) :
+    PreferenceGroup
 
 /** Metadata of preference screen. */
 @AnyThread
