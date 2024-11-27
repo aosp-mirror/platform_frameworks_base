@@ -29,7 +29,6 @@ flag {
     namespace: "backstage_power"
     description: "Feature flag for streamlined connectivity battery stats"
     bug: "323970018"
-    is_exported: true
 }
 
 flag {

@@ -14,7 +14,6 @@ flag {
   namespace: "systemui"
   description: "Support storing different wallpaper crops for different display dimensions. Only effective after rebooting."
   bug: "281648899"
-  is_exported: true
 }
 
 flag {

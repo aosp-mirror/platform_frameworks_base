@@ -6,5 +6,4 @@ flag {
     name: "xr_manifest_entries"
     description: "Adds manifest entries used by Android XR"
     bug: "364416355"
-    is_exported: true
 }
