@@ -118,6 +118,5 @@ public final class DisallowInstallUnknownSourcesAdvancedProtectionHook
                         + " getAppOpPermissionPackages() threw the following exception: " + e);
             }
         }
-        // TODO(b/369361373): Update dialog strings.
     }
 }
