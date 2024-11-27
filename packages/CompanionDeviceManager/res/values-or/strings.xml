@@ -35,7 +35,7 @@
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"ଆପଣଙ୍କ ଫୋନରୁ ଏହି ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ସେବାଗୁଡ଼ିକ"</string>
+    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play ସେବା"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"ଆପଣଙ୍କ ଫୋନର ଫଟୋ, ମିଡିଆ ଏବଂ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଆକ୍ସେସ କରିବା ପାଇଁ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପଣଙ୍କର <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> ତରଫରୁ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"ଏହି ପଦକ୍ଷେପ ନେବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"ଆପଣଙ୍କ ଫୋନର ଆପ୍ସ ଏବଂ ସିଷ୍ଟମ ଫିଚରଗୁଡ଼ିକୁ ଷ୍ଟ୍ରିମ କରିବା ପାଇଁ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;କୁ ଅନୁମତି ଦେବେ?"</string>
@@ -58,7 +58,7 @@
     <string name="permission_calendar" msgid="6805668388691290395">"କେଲେଣ୍ଡର"</string>
     <string name="permission_microphone" msgid="2152206421428732949">"ମାଇକ୍ରୋଫୋନ"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"କଲ ଲଗଗୁଡ଼ିକ"</string>
-    <string name="permission_nearby_devices" msgid="7530973297737123481">"ଆଖପାଖର ଡିଭାଇସଗୁଡ଼ିକ"</string>
+    <string name="permission_nearby_devices" msgid="7530973297737123481">"ଆଖପାଖର ଡିଭାଇସ"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"ମିଡିଆ ଆଉଟପୁଟ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="permission_storage" msgid="6831099350839392343">"ଫଟୋ ଏବଂ ମିଡିଆ"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>

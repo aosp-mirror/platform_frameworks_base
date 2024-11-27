@@ -16,8 +16,9 @@
 
 package com.android.server.vcn.routeselection;
 
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;

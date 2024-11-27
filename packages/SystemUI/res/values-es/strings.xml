@@ -653,7 +653,7 @@
     <string name="volume_panel_hint_muted" msgid="1124844870181285320">"silenciado"</string>
     <string name="volume_panel_hint_vibrate" msgid="4136223145435914132">"vibrar"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Reproduciendo <xliff:g id="LABEL">%s</xliff:g> en"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Se reproducirá en"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"El audio se reproducirá en"</string>
     <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Llamando desde"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Configurador de UI del sistema"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de estado"</string>
@@ -746,8 +746,8 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Inicio"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atrás"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulador"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"Espacio"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Espa-cio"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Intro"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tecla de retroceso"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Reproducir/Pausa"</string>
@@ -803,7 +803,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Usar la pantalla dividida con la aplicación actual a la derecha"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Usar la pantalla dividida con la aplicación actual a la izquierda"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Cambiar de pantalla dividida a pantalla completa"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar a la app de la derecha o de abajo en pantalla dividida"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Cambiar a la aplicación de la derecha o de abajo en pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Cambiar a la app de la izquierda o de arriba en pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>

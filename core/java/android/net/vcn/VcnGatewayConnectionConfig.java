@@ -32,12 +32,12 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtils;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -789,11 +789,17 @@ public final class VcnGatewayConnectionConfig {
         public Builder setMinUdpPort4500NatTimeoutSeconds(
                 @IntRange(from = MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS)
                         int minUdpPort4500NatTimeoutSeconds) {
-            Preconditions.checkArgument(
-                    minUdpPort4500NatTimeoutSeconds == MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET
-                            || minUdpPort4500NatTimeoutSeconds
-                                    >= MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS,
-                    "Timeout must be at least 120s or MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET");
+            if (Flags.mainlineVcnModuleApi()) {
+                Preconditions.checkArgument(
+                        minUdpPort4500NatTimeoutSeconds == MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET
+                                || minUdpPort4500NatTimeoutSeconds
+                                        >= MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS,
+                        "Timeout must be at least 120s or MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET");
+            } else {
+                Preconditions.checkArgument(
+                        minUdpPort4500NatTimeoutSeconds >= MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS,
+                        "Timeout must be at least 120s");
+            }
 
             mMinUdpPort4500NatTimeoutSeconds = minUdpPort4500NatTimeoutSeconds;
             return this;
