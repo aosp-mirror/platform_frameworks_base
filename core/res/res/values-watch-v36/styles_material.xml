@@ -79,4 +79,13 @@
         <item name="maxWidth">@dimen/dialog_btn_negative_width</item>
         <item name="maxHeight">@dimen/dialog_btn_negative_height</item>
     </style>
+
+    <!-- Wear Material3 Progress Bar style: progressed ring.-->
+    <style name="Widget.DeviceDefault.ProgressBar.WearMaterial3">
+        <item name="indeterminateOnly">false</item>
+        <item name="progressDrawable">@drawable/progress_ring_wear_material3</item>
+        <item name="minHeight">@dimen/progress_bar_height</item>
+        <item name="maxHeight">@dimen/progress_bar_height</item>
+        <item name="mirrorForRtl">true</item>
+    </style>
 </resources>
