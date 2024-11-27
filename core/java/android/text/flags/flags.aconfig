@@ -91,6 +91,7 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+  is_exported: true
 }
 
 flag {
@@ -196,6 +197,7 @@ flag {
   namespace: "text"
   description: "Feature flag for adding a TYPE_DURATION to TtsSpan"
   bug: "337103893"
+  is_exported: true
 }
 
 flag {
@@ -203,6 +205,7 @@ flag {
   namespace: "text"
   description: "Deprecate the Paint#elegantTextHeight API and stick it to true"
   bug: "349519475"
+  is_exported: true
 }
 
 flag {
@@ -210,4 +213,5 @@ flag {
   namespace: "text"
   description: "Make Paint class work for vertical layout text."
   bug: "355296926"
+  is_exported: true
 }
