@@ -53,7 +53,6 @@ flag {
   namespace: "biometrics_framework"
   description: "This flag is for API changes related to Identity Check"
   bug: "373424727"
-  is_exported: true
 }
 
 flag {

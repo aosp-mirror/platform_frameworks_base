@@ -167,7 +167,6 @@ flag {
     namespace: "input"
     description: "Enables new 25Q2 keycodes"
     bug: "365920375"
-    is_exported: true
 }
 
 flag {

@@ -48,7 +48,6 @@ flag {
     namespace: "responsible_apis"
     description: "Introduce additional start modes."
     bug: "352182359"
-    is_exported: true
 }
 
 flag {
@@ -56,7 +55,6 @@ flag {
     namespace: "responsible_apis"
     description: "Add options parameter to IntentSender.sendIntent."
     bug: "339720406"
-    is_exported: true
 }
 
 flag {
@@ -65,7 +63,6 @@ flag {
     description: "Strict mode flag"
     bug: "324089586"
     is_fixed_read_only: true
-    is_exported: true
 }
 
 flag {

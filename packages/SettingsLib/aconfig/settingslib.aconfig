@@ -98,7 +98,6 @@ flag {
     namespace: "android_settings"
     description: "Settings catalyst project migration"
     bug: "323791114"
-    is_exported: true
 }
 
 flag {
@@ -107,7 +106,6 @@ flag {
     namespace: "android_settings"
     description: "Enable WRITE_SYSTEM_PREFERENCE permission and appop"
     bug: "375193223"
-    is_exported: true
 }
 
 flag {

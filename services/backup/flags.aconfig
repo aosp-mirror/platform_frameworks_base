@@ -68,7 +68,6 @@ flag {
             "B&R operations in certain cases."
     bug: "376661510"
     is_fixed_read_only: true
-    is_exported: true
 }
 
 flag {
