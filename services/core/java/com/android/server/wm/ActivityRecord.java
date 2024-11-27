@@ -3238,10 +3238,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final boolean compatEnabled = isLargeScreen && Flags.universalResizableByDefault()
                 && appInfo.isChangeEnabled(ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT);
-        if (!compatEnabled && !wms.mConstants.mIgnoreActivityOrientationRequest) {
-            return false;
-        }
-        if (wms.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(appInfo.packageName)) {
+        final boolean configEnabled = (isLargeScreen
+                ? wms.mConstants.mIgnoreActivityOrientationRequestLargeScreen
+                : wms.mConstants.mIgnoreActivityOrientationRequestSmallScreen)
+                && !wms.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(
+                        appInfo.packageName);
+        if (!compatEnabled && !configEnabled) {
             return false;
         }
         if (forActivity) {

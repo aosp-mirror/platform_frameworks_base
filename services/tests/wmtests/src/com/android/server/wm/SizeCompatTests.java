@@ -4892,7 +4892,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     public void testUniversalResizeable() {
-        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        mWm.mConstants.mIgnoreActivityOrientationRequestSmallScreen = true;
+        mWm.mConstants.mIgnoreActivityOrientationRequestLargeScreen = true;
         setUpApp(mDisplayContent);
         final float maxAspect = 1.8f;
         final float minAspect = 1.5f;
