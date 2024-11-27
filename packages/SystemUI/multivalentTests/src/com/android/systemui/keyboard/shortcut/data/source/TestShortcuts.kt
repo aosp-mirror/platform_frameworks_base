@@ -75,6 +75,27 @@ object TestShortcuts {
             /* modifiers = */ KeyEvent.META_SHIFT_ON,
         )
 
+    private val ShortcutsWithDiffSizeOfKeys =
+        KeyboardShortcutInfo(
+            /* label = */ "Shortcuts with diff size of keys",
+            /* keycode = */ KeyEvent.KEYCODE_HOME,
+            /* modifiers = */ 0,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys2 =
+        KeyboardShortcutInfo(
+            /* label = */ ShortcutsWithDiffSizeOfKeys.label,
+            /* keycode = */ KeyEvent.KEYCODE_1,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys3 =
+        KeyboardShortcutInfo(
+            /* label = */ ShortcutsWithDiffSizeOfKeys.label,
+            /* keycode = */ KeyEvent.KEYCODE_2,
+            /* modifiers = */ META_META_ON or META_FUNCTION_ON,
+        )
+
     private val shortcutWithGroupedRepeatedLabel =
         shortcut(shortcutInfoWithRepeatedLabel.label!!.toString()) {
             command {
@@ -380,6 +401,16 @@ object TestShortcuts {
             groupWithStandardShortcutInfo,
             groupWithOnlyUnsupportedModifierShortcut,
             groupWithSupportedAndUnsupportedModifierShortcut,
+        )
+
+    val groupWithDifferentSizeOfShortcutKeys =
+        KeyboardShortcutGroup(
+            "Group with different size of shortcut keys",
+            listOf(
+                ShortcutsWithDiffSizeOfKeys3,
+                ShortcutsWithDiffSizeOfKeys,
+                ShortcutsWithDiffSizeOfKeys2,
+            ),
         )
 
     val subCategoriesWithUnsupportedModifiersRemoved =

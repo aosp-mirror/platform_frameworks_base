@@ -95,7 +95,7 @@ constructor(
                 Shortcut(
                     label = commonLabel,
                     icon = groupedShortcuts.firstOrNull()?.icon,
-                    commands = groupedShortcuts.flatMap { it.commands },
+                    commands = groupedShortcuts.flatMap { it.commands }.sortedBy { it.keys.size },
                     contentDescription =
                         toContentDescription(commonLabel, groupedShortcuts.flatMap { it.commands }),
                 )

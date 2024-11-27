@@ -54,7 +54,7 @@ constructor(@Main private val resources: Resources, private val inputManager: In
         listOf(
             KeyboardShortcutGroup(
                 resources.getString(R.string.shortcut_helper_category_system_controls),
-                hardwareShortcuts(deviceId) + systemControlsShortcuts(),
+                systemControlsShortcuts() + hardwareShortcuts(deviceId),
             ),
             KeyboardShortcutGroup(
                 resources.getString(R.string.shortcut_helper_category_system_apps),
