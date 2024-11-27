@@ -19,11 +19,16 @@ import android.os.Handler
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper.RunWithLooper
+import android.view.accessibility.accessibilityManagerWrapper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -31,11 +36,15 @@ import com.android.systemui.statusbar.FakeStatusBarStateController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
+import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
+import com.android.systemui.statusbar.policy.configurationController
+import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
@@ -50,12 +59,11 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers
-import org.mockito.Mock
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
@@ -63,46 +71,33 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     private val mHeadsUpManagerLogger = HeadsUpManagerLogger(logcatLogBuffer())
 
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
 
-    @Mock private lateinit var mGroupManager: GroupMembershipManager
+    private val mGroupManager = mock<GroupMembershipManager>()
+    private val mBgHandler = mock<Handler>()
+    private val mShadeInteractor = mock<ShadeInteractor>()
 
-    @Mock private lateinit var mVSProvider: VisualStabilityProvider
-
-    val statusBarStateController = FakeStatusBarStateController()
-
-    @Mock private lateinit var mBypassController: KeyguardBypassController
-
-    @Mock private lateinit var mConfigurationController: ConfigurationControllerImpl
-
-    @Mock private lateinit var mAccessibilityManagerWrapper: AccessibilityManagerWrapper
-
-    @Mock private lateinit var mUiEventLogger: UiEventLogger
-
+    val statusBarStateController = kosmos.sysuiStatusBarStateController
     private val mJavaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
 
-    @Mock private lateinit var mShadeInteractor: ShadeInteractor
-    @Mock private lateinit var dumpManager: DumpManager
     private lateinit var mAvalancheController: AvalancheController
-
-    @Mock private lateinit var mBgHandler: Handler
 
     private fun createHeadsUpManagerPhone(): HeadsUpManagerImpl {
         return HeadsUpManagerImpl(
             mContext,
             mHeadsUpManagerLogger,
             statusBarStateController,
-            mBypassController,
+            kosmos.keyguardBypassController,
             mGroupManager,
-            mVSProvider,
-            mConfigurationController,
+            kosmos.visualStabilityProvider,
+            kosmos.configurationController,
             mockExecutorHandler(mExecutor),
             mGlobalSettings,
             mSystemClock,
             mExecutor,
-            mAccessibilityManagerWrapper,
-            mUiEventLogger,
+            kosmos.accessibilityManagerWrapper,
+            kosmos.uiEventLoggerFake,
             mJavaAdapter,
             mShadeInteractor,
             mAvalancheController,
@@ -131,21 +126,15 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
         whenever(mShadeInteractor.isAnyExpanded).thenReturn(MutableStateFlow(false))
         whenever(mShadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
-        whenever(mBypassController.bypassEnabled).thenReturn(false)
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
-        val accessibilityMgr =
-            mDependency.injectMockDependency(AccessibilityManagerWrapper::class.java)
-        whenever(
-                accessibilityMgr.getRecommendedTimeoutMillis(
-                    ArgumentMatchers.anyInt(),
-                    ArgumentMatchers.anyInt(),
-                )
-            )
-            .thenReturn(TEST_AUTO_DISMISS_TIME)
-        mDependency.injectMockDependency(NotificationShadeWindowController::class.java)
-
+        whenever(kosmos.keyguardBypassController.bypassEnabled).thenReturn(false)
+        kosmos.visualStabilityProvider.isReorderingAllowed = true
         mAvalancheController =
-            AvalancheController(dumpManager, mUiEventLogger, mHeadsUpManagerLogger, mBgHandler)
+            AvalancheController(
+                kosmos.dumpManager,
+                kosmos.uiEventLoggerFake,
+                mHeadsUpManagerLogger,
+                mBgHandler,
+            )
     }
 
     @Test
@@ -213,7 +202,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testShowNotification_removeWhenReorderingAllowedTrue() {
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        kosmos.visualStabilityProvider.isReorderingAllowed = true
         val hmp = createHeadsUpManagerPhone()
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -228,7 +217,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testReorderingAllowed_clearsListOfEntriesToRemove() {
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        kosmos.visualStabilityProvider.isReorderingAllowed = true
         val hmp = createHeadsUpManagerPhone()
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -243,7 +232,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testShowNotification_reorderNotAllowed_seenInShadeTrue() {
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
+        kosmos.visualStabilityProvider.isReorderingAllowed = false
         val hmp = createHeadsUpManagerPhone()
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -254,7 +243,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testShowNotification_reorderAllowed_seenInShadeFalse() {
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        kosmos.visualStabilityProvider.isReorderingAllowed = true
         val hmp = createHeadsUpManagerPhone()
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -264,7 +253,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun testShouldHeadsUpBecomePinned_noFSI_false() =
-        testScope.runTest {
+        kosmos.runTest {
             val hum = createHeadsUpManagerPhone()
             statusBarStateController.setState(StatusBarState.KEYGUARD)
 
@@ -275,7 +264,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun testShouldHeadsUpBecomePinned_hasFSI_notUnpinned_true() =
-        testScope.runTest {
+        kosmos.runTest {
             val hum = createHeadsUpManagerPhone()
             statusBarStateController.setState(StatusBarState.KEYGUARD)
 
@@ -293,7 +282,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun testShouldHeadsUpBecomePinned_wasUnpinned_false() =
-        testScope.runTest {
+        kosmos.runTest {
             val hum = createHeadsUpManagerPhone()
             statusBarStateController.setState(StatusBarState.KEYGUARD)
 
@@ -311,13 +300,12 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun shouldHeadsUpBecomePinned_shadeNotExpanded_true() =
-        testScope.runTest {
+        kosmos.runTest {
             // GIVEN
             whenever(mShadeInteractor.isAnyFullyExpanded).thenReturn(MutableStateFlow(false))
             val hmp = createHeadsUpManagerPhone()
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
             statusBarStateController.setState(StatusBarState.SHADE)
-            runCurrent()
 
             // THEN
             Assert.assertTrue(hmp.shouldHeadsUpBecomePinned(entry))
@@ -325,12 +313,11 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun shouldHeadsUpBecomePinned_shadeLocked_false() =
-        testScope.runTest {
+        kosmos.runTest {
             // GIVEN
             val hmp = createHeadsUpManagerPhone()
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
             statusBarStateController.setState(StatusBarState.SHADE_LOCKED)
-            runCurrent()
 
             // THEN
             Assert.assertFalse(hmp.shouldHeadsUpBecomePinned(entry))
@@ -338,12 +325,11 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun shouldHeadsUpBecomePinned_shadeUnknown_false() =
-        testScope.runTest {
+        kosmos.runTest {
             // GIVEN
             val hmp = createHeadsUpManagerPhone()
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
             statusBarStateController.setState(1207)
-            runCurrent()
 
             // THEN
             Assert.assertFalse(hmp.shouldHeadsUpBecomePinned(entry))
@@ -351,13 +337,12 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun shouldHeadsUpBecomePinned_keyguardWithBypassOn_true() =
-        testScope.runTest {
+        kosmos.runTest {
             // GIVEN
-            whenever(mBypassController.bypassEnabled).thenReturn(true)
+            whenever(keyguardBypassController.bypassEnabled).thenReturn(true)
             val hmp = createHeadsUpManagerPhone()
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
             statusBarStateController.setState(StatusBarState.KEYGUARD)
-            runCurrent()
 
             // THEN
             Assert.assertTrue(hmp.shouldHeadsUpBecomePinned(entry))
@@ -365,13 +350,12 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun shouldHeadsUpBecomePinned_keyguardWithBypassOff_false() =
-        testScope.runTest {
+        kosmos.runTest {
             // GIVEN
-            whenever(mBypassController.bypassEnabled).thenReturn(false)
+            whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
             val hmp = createHeadsUpManagerPhone()
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
             statusBarStateController.setState(StatusBarState.KEYGUARD)
-            runCurrent()
 
             // THEN
             Assert.assertFalse(hmp.shouldHeadsUpBecomePinned(entry))
@@ -379,13 +363,12 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
     @Test
     fun shouldHeadsUpBecomePinned_shadeExpanded_false() =
-        testScope.runTest {
+        kosmos.runTest {
             // GIVEN
             whenever(mShadeInteractor.isAnyExpanded).thenReturn(MutableStateFlow(true))
             val hmp = createHeadsUpManagerPhone()
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
             statusBarStateController.setState(StatusBarState.SHADE)
-            runCurrent()
 
             // THEN
             Assert.assertFalse(hmp.shouldHeadsUpBecomePinned(entry))
