@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -55,6 +56,9 @@ public final class MediaQualityManager {
     private final List<SoundProfileCallbackRecord> mSpCallbackRecords = new ArrayList<>();
     // @GuardedBy("mLock")
     private final List<AmbientBacklightCallbackRecord> mAbCallbackRecords = new ArrayList<>();
+    // @GuardedBy("mLock")
+    private final List<ActiveProcessingPictureListenerRecord> mApListenerRecords =
+            new ArrayList<>();
 
 
     /**
@@ -1014,6 +1018,88 @@ public final class MediaQualityManager {
          * Called when new ambient backlight event is emitted.
          */
         public void onAmbientBacklightEvent(@NonNull AmbientBacklightEvent event) {
+        }
+    }
+
+    /**
+     * Listener used to monitor status of active pictures.
+     */
+    public interface ActiveProcessingPictureListener {
+        /**
+         * Called when active pictures are changed.
+         *
+         * @param activeProcessingPictures contents currently undergoing picture processing.
+         */
+        void onActiveProcessingPicturesChanged(
+                @NonNull List<ActiveProcessingPicture> activeProcessingPictures);
+    }
+
+    /**
+     * Adds an active picture listener for the contents owner by the caller.
+     */
+    public void addActiveProcessingPictureListener(
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull ActiveProcessingPictureListener listener) {
+        Preconditions.checkNotNull(listener);
+        Preconditions.checkNotNull(executor);
+        synchronized (mLock) {
+            mApListenerRecords.add(
+                    new ActiveProcessingPictureListenerRecord(listener, executor, false));
+        }
+    }
+
+    /**
+     * Adds an active picture listener for all contents.
+     *
+     * @hide
+     */
+    @SuppressLint("PairedRegistration")
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public void addGlobalActiveProcessingPictureListener(
+            @NonNull Executor executor,
+            @NonNull ActiveProcessingPictureListener listener) {
+        Preconditions.checkNotNull(listener);
+        Preconditions.checkNotNull(executor);
+        synchronized (mLock) {
+            mApListenerRecords.add(
+                    new ActiveProcessingPictureListenerRecord(listener, executor, true));
+        }
+    }
+
+
+    /**
+     * Removes an active picture listener for the contents.
+     */
+    public void removeActiveProcessingPictureListener(
+            @NonNull ActiveProcessingPictureListener listener) {
+        Preconditions.checkNotNull(listener);
+        synchronized (mLock) {
+            for (Iterator<ActiveProcessingPictureListenerRecord> it = mApListenerRecords.iterator();
+                    it.hasNext(); ) {
+                ActiveProcessingPictureListenerRecord record = it.next();
+                if (record.getListener() == listener) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+    }
+
+    private static final class ActiveProcessingPictureListenerRecord {
+        private final ActiveProcessingPictureListener mListener;
+        private final Executor mExecutor;
+        private final boolean mIsGlobal;
+
+        ActiveProcessingPictureListenerRecord(
+                ActiveProcessingPictureListener listener, Executor executor, boolean isGlobal) {
+            mListener = listener;
+            mExecutor = executor;
+            mIsGlobal = isGlobal;
+        }
+
+        public ActiveProcessingPictureListener getListener() {
+            return mListener;
         }
     }
 }
