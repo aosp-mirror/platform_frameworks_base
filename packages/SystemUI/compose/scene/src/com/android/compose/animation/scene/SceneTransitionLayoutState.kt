@@ -28,7 +28,6 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
-import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -526,39 +525,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
         check(transitionStates.size == 1)
         transitionStates = listOf(TransitionState.Idle(scene, currentOverlays))
-    }
-
-    /**
-     * Check if a transition is in progress. If the progress value is near 0 or 1, immediately snap
-     * to the closest scene.
-     *
-     * Important: Snapping to the closest scene will instantly finish *all* ongoing transitions,
-     * only the progress of the last transition will be checked.
-     *
-     * @return true if snapped to the closest scene.
-     */
-    internal fun snapToIdleIfClose(threshold: Float): Boolean {
-        val transition = currentTransition ?: return false
-        val progress = transition.progress
-
-        fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
-
-        fun finishAllTransitions() {
-            // Force finish all transitions.
-            while (currentTransitions.isNotEmpty()) {
-                finishTransition(transitionStates[0] as TransitionState.Transition)
-            }
-        }
-
-        val shouldSnap =
-            (isProgressCloseTo(0f) && transition.isFromCurrentContent()) ||
-                (isProgressCloseTo(1f) && transition.isToCurrentContent())
-        return if (shouldSnap) {
-            finishAllTransitions()
-            true
-        } else {
-            false
-        }
     }
 
     override fun showOverlay(
