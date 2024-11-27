@@ -80,13 +80,25 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
 
     private void initFeatures(boolean enabled) {
         if (android.security.Flags.aapmFeatureDisableInstallUnknownSources()) {
+          try {
             mHooks.add(new DisallowInstallUnknownSourcesAdvancedProtectionHook(mContext, enabled));
+          } catch (Exception e) {
+            Slog.e(TAG, "Failed to initialize DisallowInstallUnknownSources", e);
+          }
         }
         if (android.security.Flags.aapmFeatureMemoryTaggingExtension()) {
+          try {
             mHooks.add(new MemoryTaggingExtensionHook(mContext, enabled));
+          } catch (Exception e) {
+            Slog.e(TAG, "Failed to initialize MemoryTaggingExtension", e);
+          }
         }
         if (android.security.Flags.aapmFeatureDisableCellular2g()) {
+          try {
             mHooks.add(new DisallowCellular2GAdvancedProtectionHook(mContext, enabled));
+          } catch (Exception e) {
+            Slog.e(TAG, "Failed to initialize DisallowCellular2g", e);
+          }
         }
     }
 
@@ -278,8 +290,13 @@ public class AdvancedProtectionService extends IAdvancedProtectionService.Stub  
 
             for (int i = 0; i < mHooks.size(); i++) {
                 AdvancedProtectionHook feature = mHooks.get(i);
-                if (feature.isAvailable()) {
-                    feature.onAdvancedProtectionChanged(enabled);
+                try {
+                    if (feature.isAvailable()) {
+                        feature.onAdvancedProtectionChanged(enabled);
+                    }
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to call hook for feature "
+                            + feature.getFeature().getId(), e);
                 }
             }
             synchronized (mCallbacks) {
