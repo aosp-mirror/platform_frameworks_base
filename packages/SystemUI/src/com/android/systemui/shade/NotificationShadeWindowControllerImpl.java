@@ -107,6 +107,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
     private final ShadeWindowLogger mLogger;
+    private final LayoutParams mShadeWindowLayoutParams;
     private final LayoutParams mLpChanged;
     private final long mLockScreenDisplayTimeout;
     private final float mKeyguardPreferredRefreshRate; // takes precedence over max
@@ -167,7 +168,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             UserTracker userTracker,
             NotificationShadeWindowModel notificationShadeWindowModel,
             SecureSettings secureSettings,
-            Lazy<CommunalInteractor> communalInteractor) {
+            Lazy<CommunalInteractor> communalInteractor,
+            @ShadeDisplayAware LayoutParams shadeWindowLayoutParams) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
         mWindowManager = viewCaptureAwareWindowManager;
@@ -175,6 +177,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mLogger = logger;
+        mShadeWindowLayoutParams = shadeWindowLayoutParams;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -271,7 +274,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         // Now that the notification shade encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
-        mLp = ShadeWindowLayoutParams.INSTANCE.create(mContext);
+        // mLP is assigned here (instead of the constructor) as its null value is also used to check
+        // if the shade window has been attached.
+        mLp = mShadeWindowLayoutParams;
         mWindowManager.addView(mWindowRootView, mLp);
 
         // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
