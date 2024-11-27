@@ -1790,7 +1790,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreShortcutTargets_hardware_targetsMerged() {
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
         final String servicePrevious = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
@@ -1815,7 +1814,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreShortcutTargets_hardware_alreadyHadDefaultService_doesNotClear() {
         final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE_NAME;
         mTestableContext.getOrCreateTestableResources().addOverride(
@@ -1841,7 +1839,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreShortcutTargets_hardware_didNotHaveDefaultService_clearsDefaultService() {
         final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE_NAME;
         final String serviceRestored = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
@@ -1866,7 +1863,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_CLEAR_DEFAULT_FROM_A11Y_SHORTCUT_TARGET_SERVICE_RESTORE)
     public void restoreShortcutTargets_hardware_nullSetting_clearsDefaultService() {
         final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE_NAME;
         final String serviceRestored = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
