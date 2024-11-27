@@ -34,7 +34,7 @@ import java.util.Set;
  * A class to manage the core default system properties of the Ravenwood environment.
  */
 public class RavenwoodSystemProperties {
-    private static final String TAG = "RavenwoodSystemProperties";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     /** We pull in properties from this file. */
     private static final String RAVENWOOD_BUILD_PROP = "ravenwood-data/ravenwood-build.prop";
