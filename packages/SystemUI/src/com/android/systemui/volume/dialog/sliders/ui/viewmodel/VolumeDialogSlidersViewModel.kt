@@ -17,10 +17,10 @@
 package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderComponent
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSlidersInteractor
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,8 +28,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+@VolumeDialogScope
 class VolumeDialogSlidersViewModel
-@AssistedInject
+@Inject
 constructor(
     @VolumeDialog coroutineScope: CoroutineScope,
     private val slidersInteractor: VolumeDialogSlidersInteractor,
@@ -47,12 +48,6 @@ constructor(
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
-
-    @AssistedFactory
-    interface Factory {
-
-        fun create(): VolumeDialogSlidersViewModel
-    }
 }
 
 /** Models slider ui */

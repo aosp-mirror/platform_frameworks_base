@@ -23,11 +23,15 @@ android_test {
         "frameworks-base-testutils",
         "junit",
         "platform-test-annotations",
+        "servicestests-utils",
         "services.core",
         "truth",
         "Nene",
         "Harrier",
         "TestApp",
+    ],
+    data: [
+        ":TestIntrusionDetectionApp",
     ],
 
     platform_apis: true,

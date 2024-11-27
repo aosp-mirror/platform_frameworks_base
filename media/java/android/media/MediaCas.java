@@ -1010,17 +1010,17 @@ public final class MediaCas implements AutoCloseable {
      * scenario, when both resource holder and resource challenger have same processId and same
      * priority.
      *
-     * @param resourceHolderRetain Set to {@code true} to allow the resource holder to retain
-     *     ownership, or false to allow the resource challenger to acquire the resource.
-     *     If not explicitly set, resourceHolderRetain is set to {@code false}.
+     *@param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
      * @hide
      */
     @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
-    public void setResourceHolderRetain(boolean resourceHolderRetain) {
+    public void setResourceOwnershipRetention(boolean enabled) {
         if (mTunerResourceManager != null) {
-            mTunerResourceManager.setResourceHolderRetain(mClientId, resourceHolderRetain);
+            mTunerResourceManager.setResourceOwnershipRetention(mClientId, enabled);
         }
     }
 

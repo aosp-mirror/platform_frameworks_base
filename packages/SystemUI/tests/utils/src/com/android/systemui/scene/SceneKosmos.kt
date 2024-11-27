@@ -13,6 +13,7 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
+import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.scene.ui.viewmodel.SceneContainerHapticsViewModel
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
@@ -60,6 +61,7 @@ var Kosmos.sceneContainerConfig by Fixture {
     SceneContainerConfig(
         sceneKeys = sceneKeys,
         initialSceneKey = initialSceneKey,
+        transitions = SceneContainerTransitions,
         overlayKeys = overlayKeys,
         navigationDistances = navigationDistances,
     )

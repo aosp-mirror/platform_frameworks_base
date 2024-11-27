@@ -73,8 +73,8 @@ class DesktopPersistentRepository(
      * Reads and returns the [DesktopRepositoryState] proto object from the DataStore for a user. If
      * the DataStore is empty or there's an error reading, it returns the default value of Proto.
      */
-    private suspend fun getDesktopRepositoryState(
-        userId: Int = DEFAULT_USER_ID
+    suspend fun getDesktopRepositoryState(
+        userId: Int
     ): DesktopRepositoryState? =
         try {
             dataStoreFlow
@@ -85,12 +85,20 @@ class DesktopPersistentRepository(
             null
         }
 
+    suspend fun getUserDesktopRepositoryMap(): Map<Int, DesktopRepositoryState>? =
+        try {
+            dataStoreFlow.first().desktopRepoByUserMap
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to read from datastore", e)
+            null
+        }
+
     /**
      * Reads the [Desktop] of a desktop filtering by the [userId] and [desktopId]. Executes the
      * [callback] using the [mainCoroutineScope].
      */
     suspend fun readDesktop(
-        userId: Int = DEFAULT_USER_ID,
+        userId: Int,
         desktopId: Int = DEFAULT_DESKTOP_ID,
     ): Desktop? =
         try {
@@ -103,7 +111,7 @@ class DesktopPersistentRepository(
 
     /** Adds or updates a desktop stored in the datastore */
     suspend fun addOrUpdateDesktop(
-        userId: Int = DEFAULT_USER_ID,
+        userId: Int,
         desktopId: Int = 0,
         visibleTasks: ArraySet<Int> = ArraySet(),
         minimizedTasks: ArraySet<Int> = ArraySet(),
@@ -111,9 +119,9 @@ class DesktopPersistentRepository(
     ) {
         // TODO: b/367609270 - Improve the API to support multi-user
         try {
-            dataStore.updateData { desktopPersistentRepositories: DesktopPersistentRepositories ->
+            dataStore.updateData { persistentRepositories: DesktopPersistentRepositories ->
                 val currentRepository =
-                    desktopPersistentRepositories.getDesktopRepoByUserOrDefault(
+                    persistentRepositories.getDesktopRepoByUserOrDefault(
                         userId, DesktopRepositoryState.getDefaultInstance())
                 val desktop =
                     getDesktop(currentRepository, desktopId)
@@ -125,7 +133,7 @@ class DesktopPersistentRepository(
                         )
                         .updateZOrder(freeformTasksInZOrder)
 
-                desktopPersistentRepositories
+                persistentRepositories
                     .toBuilder()
                     .putDesktopRepoByUser(
                         userId,
@@ -135,7 +143,7 @@ class DesktopPersistentRepository(
                             .build())
                     .build()
             }
-        } catch (exception: IOException) {
+        } catch (exception: Exception) {
             Log.e(
                 TAG,
                 "Error in updating desktop mode related data, data is " +
@@ -154,7 +162,6 @@ class DesktopPersistentRepository(
         private const val TAG = "DesktopPersistenceRepo"
         private const val DESKTOP_REPOSITORIES_DATASTORE_FILE = "desktop_persistent_repositories.pb"
 
-        private const val DEFAULT_USER_ID = 1000
         private const val DEFAULT_DESKTOP_ID = 0
 
         object DesktopPersistentRepositoriesSerializer : Serializer<DesktopPersistentRepositories> {

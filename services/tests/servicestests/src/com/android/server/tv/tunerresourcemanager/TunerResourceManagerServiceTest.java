@@ -506,9 +506,9 @@ public class TunerResourceManagerServiceTest {
         assertThat(client0.getProfile().getInUseFrontendHandles())
                 .isEqualTo(new HashSet<Long>(Arrays.asList(infos[0].handle)));
 
-        // setResourceHolderRetain sets mResourceHolderRetain to true to allow the Resource Holder
-        // (client0) to maintain ownership such as requester will not get the resources.
-        client1.getProfile().setResourceHolderRetain(true);
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to true to allow the Resource
+        // Holder (client0) to maintain ownership such as requester will not get the resources.
+        client1.getProfile().setResourceOwnershipRetention(true);
 
         request = tunerFrontendRequest(client1.getId() /*clientId*/, FrontendSettings.TYPE_DVBT);
         assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendHandle))
@@ -520,10 +520,10 @@ public class TunerResourceManagerServiceTest {
                 .isEqualTo(client0.getId());
         assertThat(client0.isReclaimed()).isFalse();
 
-        // setResourceHolderRetain sets mResourceHolderRetain to false to allow the Resource
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to false to allow the Resource
         // Challenger (client1) to acquire the resource and Resource Holder loses ownership of the
         // resources.
-        client1.getProfile().setResourceHolderRetain(false);
+        client1.getProfile().setResourceOwnershipRetention(false);
 
         assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendHandle))
                 .isTrue();
@@ -645,9 +645,9 @@ public class TunerResourceManagerServiceTest {
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(client0.getId())));
         assertThat(mTunerResourceManagerService.getCasResource(1).isFullyUsed()).isTrue();
 
-        // setResourceHolderRetain sets mResourceHolderRetain to true to allow the Resource Holder
-        // to maintain ownership such as requester (client1) will not get the resources.
-        client1.getProfile().setResourceHolderRetain(true);
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to true to allow the Resource
+        // Holder to maintain ownership such as requester (client1) will not get the resources.
+        client1.getProfile().setResourceOwnershipRetention(true);
 
         request = casSessionRequest(client1.getId(), 1);
         assertThat(
@@ -663,10 +663,10 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.getCasResource(1).isFullyUsed()).isTrue();
         assertThat(client0.isReclaimed()).isFalse();
 
-        // setResourceHolderRetain sets mResourceHolderRetain to false to allow the Resource
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to false to allow the Resource
         // Challenger (client1) to acquire the resource and Resource Holder loses ownership of the
         // resources.
-        client1.getProfile().setResourceHolderRetain(false);
+        client1.getProfile().setResourceOwnershipRetention(false);
 
         assertThat(
                 mTunerResourceManagerService.requestCasSessionInternal(request, casSessionHandle))
@@ -759,9 +759,9 @@ public class TunerResourceManagerServiceTest {
                 .isEqualTo(new HashSet<Integer>(Arrays.asList(client0.getId())));
         assertThat(mTunerResourceManagerService.getCiCamResource(1).isFullyUsed()).isTrue();
 
-        // setResourceHolderRetain sets mResourceHolderRetain to true to allow the Resource Holder
-        // (client0) to maintain ownership such as requester will not get the resources.
-        client1.getProfile().setResourceHolderRetain(true);
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to true to allow the Resource
+        // Holder (client0) to maintain ownership such as requester will not get the resources.
+        client1.getProfile().setResourceOwnershipRetention(true);
 
         request = tunerCiCamRequest(client1.getId(), 1);
         assertThat(mTunerResourceManagerService.requestCiCamInternal(request, ciCamHandle))
@@ -776,10 +776,10 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.getCiCamResource(1).isFullyUsed()).isTrue();
         assertThat(client0.isReclaimed()).isFalse();
 
-        // setResourceHolderRetain sets mResourceHolderRetain to false to allow the Resource
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to false to allow the Resource
         // Challenger (client1) to acquire the resource and Resource Holder loses ownership of the
         // resources.
-        client1.getProfile().setResourceHolderRetain(false);
+        client1.getProfile().setResourceOwnershipRetention(false);
 
         assertThat(mTunerResourceManagerService.requestCiCamInternal(request, ciCamHandle))
                 .isTrue();
@@ -927,9 +927,9 @@ public class TunerResourceManagerServiceTest {
         assertThat(client0.getProfile().getInUseLnbHandles())
                 .isEqualTo(new HashSet<Long>(Arrays.asList(lnbHandles[0])));
 
-        // setResourceHolderRetain sets mResourceHolderRetain to true to allow the Resource Holder
-        // (client0) to maintain ownership such as requester will not get the resources.
-        client1.getProfile().setResourceHolderRetain(true);
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to true to allow the Resource
+        // Holder (client0) to maintain ownership such as requester will not get the resources.
+        client1.getProfile().setResourceOwnershipRetention(true);
 
         request = new TunerLnbRequest();
         request.clientId = client1.getId();
@@ -942,10 +942,10 @@ public class TunerResourceManagerServiceTest {
         assertThat(client0.isReclaimed()).isFalse();
         assertThat(client1.getProfile().getInUseLnbHandles().size()).isEqualTo(0);
 
-        // setResourceHolderRetain sets mResourceHolderRetain to false to allow the Resource
+        // setResourceOwnershipRetention sets mResourceOwnerRetention to false to allow the Resource
         // Challenger (client1) to acquire the resource and Resource Holder loses ownership of the
         // resources.
-        client1.getProfile().setResourceHolderRetain(false);
+        client1.getProfile().setResourceOwnershipRetention(false);
 
         assertThat(mTunerResourceManagerService.requestLnbInternal(request, lnbHandle)).isTrue();
         assertThat(lnbHandle[0]).isEqualTo(lnbHandles[0]);

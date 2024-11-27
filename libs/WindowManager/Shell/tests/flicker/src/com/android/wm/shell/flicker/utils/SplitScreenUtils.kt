@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.graphics.Point
 import android.os.SystemClock
 import android.tools.Rotation
+import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.component.ComponentNameMatcher
@@ -102,8 +103,8 @@ object SplitScreenUtils {
         wmHelper: WindowManagerStateHelper,
         tapl: LauncherInstrumentation,
         device: UiDevice,
-        primaryApp: StandardAppHelper,
-        secondaryApp: StandardAppHelper,
+        primaryApp: IStandardAppHelper,
+        secondaryApp: IStandardAppHelper,
         rotation: Rotation
     ) {
         primaryApp.launchViaIntent(wmHelper)
@@ -117,8 +118,8 @@ object SplitScreenUtils {
 
     fun enterSplitViaIntent(
         wmHelper: WindowManagerStateHelper,
-        primaryApp: StandardAppHelper,
-        secondaryApp: StandardAppHelper
+        primaryApp: IStandardAppHelper,
+        secondaryApp: IStandardAppHelper
     ) {
         val stringExtras = mapOf(Primary.EXTRA_LAUNCH_ADJACENT to "true")
         primaryApp.launchViaIntent(wmHelper, null, null, stringExtras)

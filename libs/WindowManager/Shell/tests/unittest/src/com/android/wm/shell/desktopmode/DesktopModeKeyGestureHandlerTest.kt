@@ -136,8 +136,13 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
 
         desktopModeKeyGestureHandler = DesktopModeKeyGestureHandler(
             context,
-            Optional.of(desktopModeWindowDecorViewModel), Optional.of(desktopTasksController),
-            inputManager, shellTaskOrganizer, focusTransitionObserver, testExecutor
+            Optional.of(desktopModeWindowDecorViewModel),
+            Optional.of(desktopTasksController),
+            inputManager,
+            shellTaskOrganizer,
+            focusTransitionObserver,
+            testExecutor,
+            displayController
         )
     }
 

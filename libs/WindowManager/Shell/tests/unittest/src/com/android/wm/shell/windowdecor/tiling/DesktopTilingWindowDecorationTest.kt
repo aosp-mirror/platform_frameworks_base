@@ -39,6 +39,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeT
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.transition.Transitions
@@ -93,10 +94,11 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     private val transition: IBinder = mock()
     private val info: TransitionInfo = mock()
     private val finishCallback: Transitions.TransitionFinishCallback = mock()
-    private val desktopRepository: DesktopRepository = mock()
+    private val userRepositories: DesktopUserRepositories = mock()
     private val desktopModeEventLogger: DesktopModeEventLogger = mock()
     private val desktopTilingDividerWindowManager: DesktopTilingDividerWindowManager = mock()
     private val motionEvent: MotionEvent = mock()
+    private val desktopRepository: DesktopRepository = mock()
     private lateinit var tilingDecoration: DesktopTilingWindowDecoration
 
     private val split_divider_width = 10
@@ -116,10 +118,11 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
                 shellTaskOrganizer,
                 toggleResizeDesktopTaskTransitionHandler,
                 returnToDragStartAnimator,
-                desktopRepository,
+                userRepositories,
                 desktopModeEventLogger,
             )
         whenever(context.createContextAsUser(any(), any())).thenReturn(context)
+        whenever(userRepositories.current).thenReturn(desktopRepository)
     }
 
     @Test
@@ -275,8 +278,8 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         }
         whenever(context.resources).thenReturn(resources)
         whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
-        whenever(desktopRepository.isVisibleTask(eq(task1.taskId))).thenReturn(true)
-        whenever(desktopRepository.isVisibleTask(eq(task2.taskId))).thenReturn(true)
+        whenever(userRepositories.current.isVisibleTask(eq(task1.taskId))).thenReturn(true)
+        whenever(userRepositories.current.isVisibleTask(eq(task2.taskId))).thenReturn(true)
 
         tilingDecoration.onAppTiled(
             task1,
@@ -308,7 +311,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         whenever(context.resources).thenReturn(resources)
         whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
         whenever(desktopWindowDecoration.getLeash()).thenReturn(surfaceControlMock)
-        whenever(desktopRepository.isVisibleTask(any())).thenReturn(true)
+        whenever(userRepositories.current.isVisibleTask(any())).thenReturn(true)
         tilingDecoration.onAppTiled(
             task1,
             desktopWindowDecoration,
@@ -341,7 +344,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         whenever(context.resources).thenReturn(resources)
         whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
         whenever(desktopWindowDecoration.getLeash()).thenReturn(surfaceControlMock)
-        whenever(desktopRepository.isVisibleTask(any())).thenReturn(true)
+        whenever(userRepositories.current.isVisibleTask(any())).thenReturn(true)
         tilingDecoration.onAppTiled(
             task1,
             desktopWindowDecoration,
@@ -614,7 +617,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
 
     private fun createVisibleTask() =
         createFreeformTask().also {
-            whenever(desktopRepository.isVisibleTask(eq(it.taskId))).thenReturn(true)
+            whenever(userRepositories.current.isVisibleTask(eq(it.taskId))).thenReturn(true)
         }
 
     companion object {

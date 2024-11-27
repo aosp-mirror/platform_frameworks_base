@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Flags.notificationsRedesignTemplates;
 import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
@@ -102,6 +103,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -121,7 +123,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
@@ -2083,8 +2084,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height_before_p);
         mMaxSmallHeightBeforeS = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_before_s);
-        mMaxSmallHeight = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.notification_min_height);
+        if (notificationsRedesignTemplates()) {
+            mMaxSmallHeight = NotificationUtils.getFontScaledHeight(mContext,
+                    R.dimen.notification_2025_min_height);
+        } else {
+            mMaxSmallHeight = NotificationUtils.getFontScaledHeight(mContext,
+                    R.dimen.notification_min_height);
+        }
         mMaxSmallHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_increased);
         mMaxExpandedHeight = NotificationUtils.getFontScaledHeight(mContext,

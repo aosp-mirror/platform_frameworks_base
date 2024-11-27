@@ -627,6 +627,12 @@ public class PipTransition extends PipTransitionController implements
             finishTransition();
         });
         cacheAndStartTransitionAnimator(animator);
+
+        // Save the PiP bounds in case, we re-enter the PiP with the same component.
+        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                mPipBoundsState.getBounds());
+        mPipBoundsState.saveReentryState(snapFraction);
+
         return true;
     }
 
@@ -912,11 +918,6 @@ public class PipTransition extends PipTransitionController implements
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
-                // Save the PiP bounds in case, we re-enter the PiP with the same component.
-                float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
-                        mPipBoundsState.getBounds());
-                mPipBoundsState.saveReentryState(snapFraction);
-
                 mPipTransitionState.setPinnedTaskLeash(null);
                 mPipTransitionState.setPipTaskInfo(null);
                 break;

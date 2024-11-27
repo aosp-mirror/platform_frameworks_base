@@ -33,7 +33,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -57,7 +56,6 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private KeyguardMediaController mKeyguardMediaController;
-    @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private MediaContainerController mMediaContainerController;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private SectionHeaderController mIncomingHeaderController;
@@ -73,26 +71,10 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        when(mSectionsFeatureManager.getNumberOfBuckets()).thenAnswer(
-                invocation -> {
-                    int count = 2;
-                    if (mSectionsFeatureManager.isFilteringEnabled()) {
-                        count = 5;
-                    }
-                    if (mSectionsFeatureManager.isMediaControlsEnabled()) {
-                        if (!mSectionsFeatureManager.isFilteringEnabled()) {
-                            count = 5;
-                        } else {
-                            count += 1;
-                        }
-                    }
-                    return count;
-                });
         mSectionsManager =
                 new NotificationSectionsManager(
                         mConfigurationController,
                         mKeyguardMediaController,
-                        mSectionsFeatureManager,
                         mMediaContainerController,
                         mNotificationRoundnessManager,
                         mIncomingHeaderController,

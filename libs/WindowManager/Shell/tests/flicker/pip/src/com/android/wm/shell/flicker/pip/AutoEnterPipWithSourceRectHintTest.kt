@@ -22,6 +22,7 @@ import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.traces.component.ComponentNameMatcher
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.wm.shell.Flags
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -57,6 +58,8 @@ import org.junit.runners.Parameterized
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class AutoEnterPipWithSourceRectHintTest(flicker: LegacyFlickerTest) :
     AutoEnterPipOnGoToHomeTest(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
             pipApp.launchViaIntent(wmHelper)
