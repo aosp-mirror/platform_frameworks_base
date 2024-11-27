@@ -1028,8 +1028,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
-        Handler receiverHandler =
-                Flags.managerAvoidReceiverTimeout() ? BackgroundThread.getHandler() : null;
+        Handler receiverHandler = BackgroundThread.getHandler();
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
