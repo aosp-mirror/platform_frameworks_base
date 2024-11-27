@@ -7696,7 +7696,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: %d", displayId);
                 return false;
             }
-            return displayContent.supportsSystemDecorations();
+            return displayContent.isSystemDecorationsSupported();
         }
     }
 
