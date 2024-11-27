@@ -405,7 +405,11 @@ public class InteractionJankMonitor {
 
         RunningTracker tracker = putTrackerIfNoCurrent(cujType, () ->
                 new RunningTracker(
-                    conf, createFrameTracker(conf), () -> cancel(cujType, REASON_CANCEL_TIMEOUT)));
+                    conf, createFrameTracker(conf), () -> {
+                        Log.w(TAG, "CUJ cancelled due to timeout, CUJ="
+                                + Cuj.getNameOfCuj(cujType));
+                        cancel(cujType, REASON_CANCEL_TIMEOUT);
+                    }));
         if (tracker == null) {
             return false;
         }
