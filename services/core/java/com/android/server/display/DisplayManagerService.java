@@ -1682,7 +1682,7 @@ public final class DisplayManagerService extends SystemService {
             return checkCallingPermission(ADD_MIRROR_DISPLAY, "canCreateMirrorDisplays");
         }
         try {
-            return virtualDevice.canCreateMirrorDisplays();
+            return virtualDevice != null && virtualDevice.canCreateMirrorDisplays();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to query virtual device for permissions", e);
             return false;
