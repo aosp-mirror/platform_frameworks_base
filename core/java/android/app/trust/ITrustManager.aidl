@@ -18,6 +18,7 @@ package android.app.trust;
 
 import android.app.trust.ITrustListener;
 import android.hardware.biometrics.BiometricSourceType;
+import com.android.internal.policy.IDeviceLockedStateListener;
 
 /**
  * System private API to comunicate with trust service.
@@ -42,4 +43,8 @@ interface ITrustManager {
     void clearAllBiometricRecognized(in BiometricSourceType target, int unlockedUser);
     boolean isActiveUnlockRunning(int userId);
     boolean isInSignificantPlace();
+    @EnforcePermission("SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE")
+    void registerDeviceLockedStateListener(in IDeviceLockedStateListener listener, int deviceId);
+    @EnforcePermission("SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE")
+    void unregisterDeviceLockedStateListener(in IDeviceLockedStateListener listener);
 }
