@@ -221,11 +221,6 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    @NonNull
-    private SystemMediaRoute2Provider getSystemProviderForUser(@NonNull UserHandler userHandler) {
-        return userHandler.mSystemProvider;
-    }
-
     // Start of methods that implement MediaRouter2 operations.
 
     @NonNull
@@ -251,7 +246,7 @@ class MediaRouter2ServiceImpl {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
                 if (hasSystemRoutingPermissions) {
                     MediaRoute2ProviderInfo providerInfo =
-                            getSystemProviderForUser(userRecord.mHandler).getProviderInfo();
+                            userRecord.mHandler.getSystemProvider().getProviderInfo();
                     if (providerInfo != null) {
                         systemRoutes = providerInfo.getRoutes();
                     } else {
@@ -264,7 +259,7 @@ class MediaRouter2ServiceImpl {
                 } else {
                     systemRoutes = new ArrayList<>();
                     systemRoutes.add(
-                            getSystemProviderForUser(userRecord.mHandler).getDefaultRoute());
+                            userRecord.mHandler.getSystemProvider().getDefaultRoute());
                 }
             }
             return new ArrayList<>(systemRoutes);
@@ -856,11 +851,10 @@ class MediaRouter2ServiceImpl {
                     if (setDeviceRouteSelected) {
                         // Return a fake system session that shows the device route as selected and
                         // available bluetooth routes as transferable.
-                        return getSystemProviderForUser(userRecord.mHandler)
+                        return userRecord.mHandler.getSystemProvider()
                                 .generateDeviceRouteSelectedSessionInfo(targetPackageName);
                     } else {
-                        sessionInfos = getSystemProviderForUser(userRecord.mHandler)
-                                .getSessionInfos();
+                        sessionInfos = userRecord.mHandler.getSystemProvider().getSessionInfos();
                         if (!sessionInfos.isEmpty()) {
                             // Return a copy of the current system session with no modification,
                             // except setting the client package name.
@@ -873,8 +867,7 @@ class MediaRouter2ServiceImpl {
                     }
                 } else {
                     return new RoutingSessionInfo.Builder(
-                                    getSystemProviderForUser(userRecord.mHandler)
-                                            .getDefaultSessionInfo())
+                                    userRecord.mHandler.getSystemProvider().getDefaultSessionInfo())
                             .setClientPackageName(targetPackageName)
                             .build();
                 }
@@ -1382,7 +1375,7 @@ class MediaRouter2ServiceImpl {
             }
             manager.mLastSessionCreationRequest = null;
         } else {
-            String defaultRouteId = getSystemProviderForUser(userHandler).getDefaultRoute().getId();
+            String defaultRouteId = userHandler.getSystemProvider().getDefaultRoute().getId();
             if (route.isSystemRoute()
                     && !routerRecord.hasSystemRoutingPermission()
                     && !TextUtils.equals(route.getId(), defaultRouteId)) {
@@ -1470,7 +1463,7 @@ class MediaRouter2ServiceImpl {
                         routerRecord.mPackageName, routerRecord.mRouterId, route.getId()));
 
         UserHandler userHandler = routerRecord.mUserRecord.mHandler;
-        String defaultRouteId = getSystemProviderForUser(userHandler).getDefaultRoute().getId();
+        String defaultRouteId = userHandler.getSystemProvider().getDefaultRoute().getId();
         if (route.isSystemRoute()
                 && !routerRecord.hasSystemRoutingPermission()
                 && !TextUtils.equals(route.getId(), defaultRouteId)) {
@@ -2133,12 +2126,11 @@ class MediaRouter2ServiceImpl {
                 notifyRoutesUpdated(routesToReport.values().stream().toList());
 
                 List<RoutingSessionInfo> sessionInfos =
-                        getSystemProviderForUser(mUserRecord.mHandler).getSessionInfos();
+                        mUserRecord.mHandler.getSystemProvider().getSessionInfos();
                 RoutingSessionInfo systemSessionToReport =
                         newSystemRoutingPermissionValue && !sessionInfos.isEmpty()
                                 ? sessionInfos.get(0)
-                                : getSystemProviderForUser(mUserRecord.mHandler)
-                                        .getDefaultSessionInfo();
+                                : mUserRecord.mHandler.getSystemProvider().getDefaultSessionInfo();
                 notifySessionInfoChanged(systemSessionToReport);
             }
         }
@@ -2288,7 +2280,7 @@ class MediaRouter2ServiceImpl {
                 if (route.isSystemRoute() && !hasSystemRoutingPermission()) {
                     // The router lacks permission to modify system routing, so we hide system
                     // route info from them.
-                    route = getSystemProviderForUser(mUserRecord.mHandler).getDefaultRoute();
+                    route = mUserRecord.mHandler.getSystemProvider().getDefaultRoute();
                 }
                 mRouter.requestCreateSessionByManager(uniqueRequestId, oldSession, route);
             } catch (RemoteException ex) {
