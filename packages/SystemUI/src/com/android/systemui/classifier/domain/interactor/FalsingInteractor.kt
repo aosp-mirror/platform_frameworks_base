@@ -74,3 +74,12 @@ constructor(
     /** Returns `true` if the tap gesture should be rejected */
     fun isFalseTap(@Penalty penalty: Int): Boolean = manager.isFalseTap(penalty)
 }
+
+inline fun FalsingInteractor.runIfNotFalseTap(
+    penalty: Int = FalsingManager.LOW_PENALTY,
+    action: () -> Unit,
+) {
+    if (!isFalseTap(penalty)) {
+        action()
+    }
+}

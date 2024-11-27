@@ -52,6 +52,7 @@ import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileDetails
 import com.android.systemui.qs.panels.ui.compose.TileGrid
+import com.android.systemui.qs.panels.ui.compose.toolbar.Toolbar
 import com.android.systemui.qs.ui.composable.QuickSettingsShade.Dimensions.GridMaxHeight
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayActionsViewModel
@@ -189,6 +190,7 @@ fun SceneScope.QuickSettingsLayout(
                     bottom = QuickSettingsShade.Dimensions.Padding / 2,
                 ),
     ) {
+        Toolbar(viewModel.toolbarViewModelFactory)
         BrightnessSliderContainer(
             viewModel = viewModel.brightnessSliderViewModel,
             modifier =

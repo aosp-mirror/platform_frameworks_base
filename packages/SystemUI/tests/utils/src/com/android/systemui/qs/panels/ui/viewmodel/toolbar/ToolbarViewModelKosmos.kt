@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.qs.panels.ui.viewmodel.toolbar
 
+import android.content.applicationContext
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.globalactions.globalActionsDialogLite
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.footerActionsInteractor
 
-val Kosmos.editModeButtonViewModelFactory by
+val Kosmos.toolbarViewModelFactory by
     Kosmos.Fixture {
-        object : EditModeButtonViewModel.Factory {
-            override fun create(): EditModeButtonViewModel {
-                return EditModeButtonViewModel(editModeViewModel, falsingInteractor)
+        object : ToolbarViewModel.Factory {
+            override fun create(): ToolbarViewModel {
+                return ToolbarViewModel(
+                    editModeButtonViewModelFactory,
+                    footerActionsInteractor,
+                    { globalActionsDialogLite },
+                    falsingInteractor,
+                    applicationContext,
+                )
             }
         }
     }

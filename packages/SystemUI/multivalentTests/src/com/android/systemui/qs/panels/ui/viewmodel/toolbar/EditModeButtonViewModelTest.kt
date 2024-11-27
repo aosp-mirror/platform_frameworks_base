@@ -23,6 +23,7 @@ import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
+import com.android.systemui.qs.panels.ui.viewmodel.toolbar.editModeButtonViewModelFactory
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
