@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.media.MediaRoute2ProviderService;
 import android.os.Looper;
@@ -28,7 +29,13 @@ import android.os.UserHandle;
  * <p>System routes are those which can handle the system audio and/or video.
  */
 /* package */ class SystemMediaRoute2Provider2 extends SystemMediaRoute2Provider {
+
+    private static final ComponentName COMPONENT_NAME =
+            new ComponentName(
+                    SystemMediaRoute2Provider2.class.getPackage().getName(),
+                    SystemMediaRoute2Provider2.class.getName());
+
     SystemMediaRoute2Provider2(Context context, UserHandle user, Looper looper) {
-        super(context, user, looper);
+        super(context, COMPONENT_NAME, user, looper);
     }
 }
