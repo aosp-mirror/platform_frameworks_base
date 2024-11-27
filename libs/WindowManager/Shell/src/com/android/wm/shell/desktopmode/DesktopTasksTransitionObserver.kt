@@ -24,10 +24,10 @@ import android.view.SurfaceControl
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_TO_BACK
-import android.window.TransitionInfo
-import android.window.WindowContainerTransaction
 import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+import android.window.TransitionInfo
+import android.window.WindowContainerTransaction
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition
@@ -48,7 +48,7 @@ class DesktopTasksTransitionObserver(
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
-    shellInit: ShellInit
+    shellInit: ShellInit,
 ) : Transitions.TransitionObserver {
 
     private var transitionToCloseWallpaper: IBinder? = null
@@ -70,7 +70,7 @@ class DesktopTasksTransitionObserver(
         transition: IBinder,
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
-        finishTransaction: SurfaceControl.Transaction
+        finishTransaction: SurfaceControl.Transaction,
     ) {
         // TODO: b/332682201 Update repository state
         updateWallpaperToken(info)
@@ -93,8 +93,10 @@ class DesktopTasksTransitionObserver(
             if (taskInfo == null || taskInfo.taskId == -1) continue
 
             val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
-            if (desktopRepository.isActiveTask(taskInfo.taskId) &&
-                taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) {
+            if (
+                desktopRepository.isActiveTask(taskInfo.taskId) &&
+                    taskInfo.windowingMode != WINDOWING_MODE_FREEFORM
+            ) {
                 desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
             }
         }
@@ -111,13 +113,19 @@ class DesktopTasksTransitionObserver(
                 }
                 val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
                 val visibleTaskCount = desktopRepository.getVisibleTaskCount(taskInfo.displayId)
-                if (visibleTaskCount > 0 &&
-                    change.mode == TRANSIT_TO_BACK &&
-                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+                if (
+                    visibleTaskCount > 0 &&
+                        change.mode == TRANSIT_TO_BACK &&
+                        taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
+                ) {
                     desktopRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
                     desktopMixedTransitionHandler.addPendingMixedTransition(
                         DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
-                            transition, taskInfo.taskId, visibleTaskCount == 1))
+                            transition,
+                            taskInfo.taskId,
+                            visibleTaskCount == 1,
+                        )
+                    )
                 }
             }
         }
@@ -125,7 +133,7 @@ class DesktopTasksTransitionObserver(
 
     private fun removeWallpaperOnLastTaskClosingIfNeeded(
         transition: IBinder,
-        info: TransitionInfo
+        info: TransitionInfo,
     ) {
         for (change in info.changes) {
             val taskInfo = change.taskInfo
@@ -133,10 +141,12 @@ class DesktopTasksTransitionObserver(
                 continue
             }
             val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
-            if (desktopRepository.getVisibleTaskCount(taskInfo.displayId) == 1 &&
-                change.mode == TRANSIT_CLOSE &&
-                taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
-                desktopRepository.wallpaperActivityToken != null) {
+            if (
+                desktopRepository.getVisibleTaskCount(taskInfo.displayId) == 1 &&
+                    change.mode == TRANSIT_CLOSE &&
+                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
+                    desktopRepository.wallpaperActivityToken != null
+            ) {
                 transitionToCloseWallpaper = transition
                 currentProfileId = taskInfo.userId
             }
@@ -160,7 +170,8 @@ class DesktopTasksTransitionObserver(
                 transitions.startTransition(
                     TRANSIT_CLOSE,
                     WindowContainerTransaction().removeTask(wallpaperActivityToken),
-                    null)
+                    null,
+                )
             }
             transitionToCloseWallpaper = null
         }
@@ -182,10 +193,10 @@ class DesktopTasksTransitionObserver(
                             // task.
                             shellTaskOrganizer.applyTransaction(
                                 WindowContainerTransaction()
-                                    .setTaskTrimmableFromRecents(taskInfo.token, false))
+                                    .setTaskTrimmableFromRecents(taskInfo.token, false)
+                            )
                         }
-                        TRANSIT_CLOSE ->
-                            desktopRepository.wallpaperActivityToken = null
+                        TRANSIT_CLOSE -> desktopRepository.wallpaperActivityToken = null
                         else -> {}
                     }
                 }
