@@ -17,6 +17,7 @@ package com.android.wm.shell.windowdecor.common.viewhost
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Region
 import android.view.Display
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
@@ -59,7 +60,7 @@ class DefaultWindowDecorViewHost(
             .setCallsite("DefaultWindowDecorViewHost#init")
             .build()
 
-    private var wwm: WindowlessWindowManager? = null
+    private var wwm: WindowDecorWindowlessWindowManager? = null
     @VisibleForTesting var viewHost: SurfaceControlViewHost? = null
     private var currentUpdateJob: Job? = null
 
@@ -70,11 +71,12 @@ class DefaultWindowDecorViewHost(
         view: View,
         attrs: WindowManager.LayoutParams,
         configuration: Configuration,
+        touchableRegion: Region?,
         onDrawTransaction: SurfaceControl.Transaction?,
     ) {
         Trace.beginSection("DefaultWindowDecorViewHost#updateView")
         clearCurrentUpdateJob()
-        updateViewHost(view, attrs, configuration, onDrawTransaction)
+        updateViewHost(view, attrs, configuration, touchableRegion, onDrawTransaction)
         Trace.endSection()
     }
 
@@ -82,12 +84,19 @@ class DefaultWindowDecorViewHost(
         view: View,
         attrs: WindowManager.LayoutParams,
         configuration: Configuration,
+        touchableRegion: Region?,
     ) {
         Trace.beginSection("DefaultWindowDecorViewHost#updateViewAsync")
         clearCurrentUpdateJob()
         currentUpdateJob =
             mainScope.launch {
-                updateViewHost(view, attrs, configuration, onDrawTransaction = null)
+                updateViewHost(
+                    view,
+                    attrs,
+                    configuration,
+                    touchableRegion,
+                    onDrawTransaction = null
+                )
             }
         Trace.endSection()
     }
@@ -102,13 +111,13 @@ class DefaultWindowDecorViewHost(
         view: View,
         attrs: WindowManager.LayoutParams,
         configuration: Configuration,
+        touchableRegion: Region?,
         onDrawTransaction: SurfaceControl.Transaction?,
     ) {
         Trace.beginSection("DefaultWindowDecorViewHost#updateViewHost")
         if (wwm == null) {
-            wwm = WindowlessWindowManager(configuration, rootSurface, null)
+            wwm = WindowDecorWindowlessWindowManager(configuration, rootSurface)
         }
-        requireWindowlessWindowManager().setConfiguration(configuration)
         if (viewHost == null) {
             viewHost =
                 surfaceControlViewHostFactory.invoke(
@@ -117,6 +126,10 @@ class DefaultWindowDecorViewHost(
                     requireWindowlessWindowManager(),
                     "DefaultWindowDecorViewHost#updateViewHost",
                 )
+        }
+        requireWindowlessWindowManager().apply {
+            setConfiguration(configuration)
+            setTouchRegion(requireViewHost(), touchableRegion)
         }
         onDrawTransaction?.let { requireViewHost().rootSurfaceControl.applyTransactionOnDraw(it) }
         if (requireViewHost().view == null) {
@@ -137,7 +150,7 @@ class DefaultWindowDecorViewHost(
         currentUpdateJob = null
     }
 
-    private fun requireWindowlessWindowManager(): WindowlessWindowManager {
+    private fun requireWindowlessWindowManager(): WindowDecorWindowlessWindowManager {
         return wwm ?: error("Expected non-null windowless window manager")
     }
 
