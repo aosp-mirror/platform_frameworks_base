@@ -282,20 +282,12 @@ cc_defaults {
     visibility: ["//visibility:private"],
 }
 
-cc_library_host_shared {
-    name: "libravenwood_initializer",
-    defaults: ["ravenwood_jni_defaults"],
-    srcs: [
-        "runtime-jni/ravenwood_initializer.cpp",
-    ],
-}
-
 // We need this as a separate library because we need to overload the
 // sysprop symbols before libbase is loaded into the process
 cc_library_host_shared {
-    name: "libravenwood_sysprop",
+    name: "libravenwood_initializer",
     defaults: ["ravenwood_jni_defaults"],
-    srcs: ["runtime-jni/ravenwood_sysprop.cpp"],
+    srcs: ["runtime-jni/ravenwood_initializer.cpp"],
 }
 
 cc_library_host_shared {
@@ -669,7 +661,6 @@ android_ravenwood_libgroup {
     jni_libs: [
         // Libraries has to be loaded in the following order
         "libravenwood_initializer",
-        "libravenwood_sysprop",
         "libravenwood_runtime",
         "libandroid_runtime",
     ],
