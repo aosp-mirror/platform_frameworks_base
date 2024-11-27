@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.qs.panels.ui.compose
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.infiniteGridLayout
+import com.android.systemui.qs.panels.ui.viewmodel.paginatedGridViewModelFactory
 
-var Kosmos.gridLayoutTypeRepository by Kosmos.Fixture { GridLayoutTypeRepository() }
+val Kosmos.paginatedGridLayout by
+    Kosmos.Fixture { PaginatedGridLayout(paginatedGridViewModelFactory, infiniteGridLayout) }
