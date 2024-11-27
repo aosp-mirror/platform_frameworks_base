@@ -7061,12 +7061,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         @Override
-        public void setImeInputTargetRequestedVisibility(boolean visible) {
+        public void setImeInputTargetRequestedVisibility(boolean visible,
+                @NonNull ImeTracker.Token statsToken) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 // TODO(b/353463205) we won't have the statsToken in all cases, but should still log
                 try {
-                    mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible);
+                    mRemoteInsetsController.setImeInputTargetRequestedVisibility(visible,
+                            statsToken);
                 } catch (RemoteException e) {
+                    // TODO(b/353463205) fail statsToken
                     Slog.w(TAG, "Failed to deliver setImeInputTargetRequestedVisibility", e);
                 }
             }
