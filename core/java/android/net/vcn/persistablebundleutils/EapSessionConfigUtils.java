@@ -28,10 +28,10 @@ import android.net.eap.EapSessionConfig.EapMsChapV2Config;
 import android.net.eap.EapSessionConfig.EapSimConfig;
 import android.net.eap.EapSessionConfig.EapTtlsConfig;
 import android.net.eap.EapSessionConfig.EapUiccConfig;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;

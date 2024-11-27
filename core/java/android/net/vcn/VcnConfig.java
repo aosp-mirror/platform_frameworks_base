@@ -18,10 +18,10 @@ package android.net.vcn;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.util.PersistableBundleUtils.INTEGER_DESERIALIZER;
+import static android.net.vcn.util.PersistableBundleUtils.INTEGER_SERIALIZER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
-import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_DESERIALIZER;
-import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_SERIALIZER;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -37,7 +38,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
