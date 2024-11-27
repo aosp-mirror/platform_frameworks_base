@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarCompone
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder;
@@ -965,7 +966,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mOngoingCallController.addCallback(mOngoingCallListener);
         }
         // TODO(b/364653005): Do we also need to set the secondary activity chip?
-        mOngoingCallController.setChipView(mPrimaryOngoingActivityChip);
+        if (!StatusBarChipsModernization.isEnabled()) {
+            mOngoingCallController.setChipView(mPrimaryOngoingActivityChip);
+        }
     }
 
     @Override
