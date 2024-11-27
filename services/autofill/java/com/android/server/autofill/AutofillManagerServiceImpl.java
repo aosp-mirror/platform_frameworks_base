@@ -92,6 +92,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
@@ -192,6 +193,8 @@ final class AutofillManagerServiceImpl
 
     private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
 
+    private final UserManagerInternal mUserManagerInternal;
+
     private final DisabledInfoCache mDisabledInfoCache;
 
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
@@ -208,6 +211,7 @@ final class AutofillManagerServiceImpl
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mContentCaptureManagerInternal = LocalServices.getService(
                 ContentCaptureManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mDisabledInfoCache = disableCache;
         updateLocked(disabled);
     }
@@ -376,6 +380,13 @@ final class AutofillManagerServiceImpl
         boolean forAugmentedAutofillOnly = (flags
                 & FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY) != 0;
         if (!isEnabledLocked() && !forAugmentedAutofillOnly) {
+            return 0;
+        }
+
+        // TODO(b/376482880): remove this check once autofill service supports visible
+        // background users.
+        if (mUserManagerInternal.isVisibleBackgroundFullUser(mUserId)) {
+            Slog.d(TAG, "Currently, autofill service does not support visible background users.");
             return 0;
         }
 

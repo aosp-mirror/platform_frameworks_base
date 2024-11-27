@@ -189,17 +189,6 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         }
 
     @Test
-    fun iconContainer_isVisible_bypassEnabled() =
-        testScope.runTest {
-            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-            runCurrent()
-            deviceEntryRepository.setBypassEnabled(true)
-            runCurrent()
-
-            assertThat(isVisible?.value).isTrue()
-        }
-
-    @Test
     fun iconContainer_isNotVisible_pulseExpanding_notBypassing() =
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
@@ -288,20 +277,21 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
         }
 
     @Test
-    fun iconContainer_isNotVisible_bypassDisabled_onLockscreen() =
+    fun iconContainer_isNotVisible_notifsFullyHiddenThenVisible_bypassEnabled() =
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
             runCurrent()
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.AOD,
-                to = KeyguardState.LOCKSCREEN,
-                testScope,
-            )
             notificationsKeyguardInteractor.setPulseExpanding(false)
-            deviceEntryRepository.setBypassEnabled(false)
+            deviceEntryRepository.setBypassEnabled(true)
             whenever(dozeParameters.alwaysOn).thenReturn(true)
             whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)
             notificationsKeyguardInteractor.setNotificationsFullyHidden(true)
+            runCurrent()
+
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isTrue()
+
+            notificationsKeyguardInteractor.setNotificationsFullyHidden(false)
             runCurrent()
 
             assertThat(isVisible?.value).isFalse()
