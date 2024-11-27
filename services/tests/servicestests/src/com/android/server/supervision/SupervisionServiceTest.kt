@@ -16,11 +16,20 @@
 
 package com.android.server.supervision
 
+import android.app.Activity
+import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManagerInternal
+import android.app.supervision.flags.Flags
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.UserInfo
+import android.os.Handler
 import android.os.PersistableBundle
+import android.os.UserHandle
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -46,22 +55,20 @@ import org.mockito.kotlin.whenever
  */
 @RunWith(AndroidJUnit4::class)
 class SupervisionServiceTest {
-    companion object {
-        const val USER_ID = 100
-    }
-
-    @get:Rule val mocks: MockitoRule = MockitoJUnit.rule()
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+    @get:Rule val mocks: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var mockDpmInternal: DevicePolicyManagerInternal
     @Mock private lateinit var mockUserManagerInternal: UserManagerInternal
 
     private lateinit var context: Context
+    private lateinit var lifecycle: SupervisionService.Lifecycle
     private lateinit var service: SupervisionService
 
     @Before
     fun setUp() {
         context = InstrumentationRegistry.getInstrumentation().context
+        context = SupervisionContextWrapper(context)
 
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal::class.java)
         LocalServices.addService(DevicePolicyManagerInternal::class.java, mockDpmInternal)
@@ -70,43 +77,61 @@ class SupervisionServiceTest {
         LocalServices.addService(UserManagerInternal::class.java, mockUserManagerInternal)
 
         service = SupervisionService(context)
+        lifecycle = SupervisionService.Lifecycle(context, service)
+        lifecycle.registerProfileOwnerListener()
     }
 
     @Test
-    @RequiresFlagsEnabled(android.app.admin.flags.Flags.FLAG_ENABLE_SUPERVISION_SERVICE_SYNC)
-    fun syncStateWithDevicePolicyManager_supervisionAppIsProfileOwner_enablesSupervision() {
-        val supervisionPackageName =
-            context.getResources().getString(R.string.config_systemSupervision)
-
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun onUserStarting_supervisionAppIsProfileOwner_enablesSupervision() {
         whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
-            .thenReturn(ComponentName(supervisionPackageName, "MainActivity"))
+            .thenReturn(ComponentName(systemSupervisionPackage, "MainActivity"))
 
-        service.syncStateWithDevicePolicyManager(newTargetUser(USER_ID))
+        simulateUserStarting(USER_ID)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
     }
 
     @Test
-    @RequiresFlagsEnabled(android.app.admin.flags.Flags.FLAG_ENABLE_SUPERVISION_SERVICE_SYNC)
-    fun syncStateWithDevicePolicyManager_userPreCreated_doesNotEnableSupervision() {
-        val supervisionPackageName =
-            context.getResources().getString(R.string.config_systemSupervision)
-
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun onUserStarting_userPreCreated_doesNotEnableSupervision() {
         whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
-            .thenReturn(ComponentName(supervisionPackageName, "MainActivity"))
+            .thenReturn(ComponentName(systemSupervisionPackage, "MainActivity"))
 
-        service.syncStateWithDevicePolicyManager(newTargetUser(USER_ID, preCreated = true))
+        simulateUserStarting(USER_ID, preCreated = true)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
     }
 
     @Test
-    @RequiresFlagsEnabled(android.app.admin.flags.Flags.FLAG_ENABLE_SUPERVISION_SERVICE_SYNC)
-    fun syncStateWithDevicePolicyManager_supervisionAppIsNotProfileOwner_doesNotEnableSupervision() {
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun onUserStarting_supervisionAppIsNotProfileOwner_doesNotEnableSupervision() {
         whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
             .thenReturn(ComponentName("other.package", "MainActivity"))
 
-        service.syncStateWithDevicePolicyManager(newTargetUser(USER_ID))
+        simulateUserStarting(USER_ID)
+
+        assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun profileOwnerChanged_supervisionAppIsProfileOwner_enablesSupervision() {
+        whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
+            .thenReturn(ComponentName(systemSupervisionPackage, "MainActivity"))
+
+        broadcastProfileOwnerChanged(USER_ID)
+
+        assertThat(service.isSupervisionEnabledForUser(USER_ID)).isTrue()
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_SYNC_WITH_DPM)
+    fun profileOwnerChanged_supervisionAppIsNotProfileOwner_doesNotEnableSupervision() {
+        whenever(mockDpmInternal.getProfileOwnerAsUser(USER_ID))
+            .thenReturn(ComponentName("other.package", "MainActivity"))
+
+        broadcastProfileOwnerChanged(USER_ID)
 
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
     }
@@ -150,9 +175,62 @@ class SupervisionServiceTest {
         assertThat(userData.supervisionLockScreenOptions).isNull()
     }
 
-    private fun newTargetUser(userId: Int, preCreated: Boolean = false): TargetUser {
+    private val systemSupervisionPackage: String
+        get() = context.getResources().getString(R.string.config_systemSupervision)
+
+    private fun simulateUserStarting(userId: Int, preCreated: Boolean = false) {
         val userInfo = UserInfo(userId, /* name= */ "tempUser", /* flags= */ 0)
         userInfo.preCreated = preCreated
-        return TargetUser(userInfo)
+        lifecycle.onUserStarting(TargetUser(userInfo))
+    }
+
+    private fun broadcastProfileOwnerChanged(userId: Int) {
+        val intent = Intent(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED)
+        context.sendBroadcastAsUser(intent, UserHandle.of(userId))
+    }
+
+    private companion object {
+        const val USER_ID = 100
+    }
+}
+
+/**
+ * A context wrapper that allows broadcast intents to immediately invoke the receivers without
+ * performing checks on the sending user.
+ */
+private class SupervisionContextWrapper(val context: Context) : ContextWrapper(context) {
+    val interceptors = mutableListOf<Pair<BroadcastReceiver, IntentFilter>>()
+
+    override fun registerReceiverForAllUsers(
+        receiver: BroadcastReceiver?,
+        filter: IntentFilter,
+        broadcastPermission: String?,
+        scheduler: Handler?,
+    ): Intent? {
+        if (receiver != null) {
+            interceptors.add(Pair(receiver, filter))
+        }
+        return null
+    }
+
+    override fun sendBroadcastAsUser(intent: Intent, user: UserHandle) {
+        val pendingResult =
+            BroadcastReceiver.PendingResult(
+                Activity.RESULT_OK,
+                /* resultData= */ "",
+                /* resultExtras= */ null,
+                /* type= */ 0,
+                /* ordered= */ true,
+                /* sticky= */ false,
+                /* token= */ null,
+                user.identifier,
+                /* flags= */ 0,
+            )
+        for ((receiver, filter) in interceptors) {
+            if (filter.match(contentResolver, intent, false, "") > 0) {
+                receiver.setPendingResult(pendingResult)
+                receiver.onReceive(context, intent)
+            }
+        }
     }
 }
