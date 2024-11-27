@@ -58,6 +58,7 @@ import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
+import android.util.Log_ravenwood;
 import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -217,6 +218,9 @@ public class RavenwoodRuntimeEnvironmentController {
         // Some process-wide initialization. (maybe redirect stdout/stderr)
         RavenwoodCommonUtils.loadJniLibrary(LIBRAVENWOOD_INITIALIZER_NAME);
 
+        // Redirect stdout/stdin to the Log API.
+        RuntimeInit.redirectLogStreams();
+
         dumpCommandLineArgs();
 
         // We haven't initialized liblog yet, so directly write to System.out here.
@@ -229,6 +233,8 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Make sure libravenwood_runtime is loaded.
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
+
+        Log_ravenwood.onRavenwoodRuntimeNativeReady();
 
         // Do the basic set up for the android sysprops.
         RavenwoodSystemProperties.initialize();
@@ -246,9 +252,6 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
-
-        // Redirect stdout/stdin to liblog.
-        RuntimeInit.redirectLogStreams();
 
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
