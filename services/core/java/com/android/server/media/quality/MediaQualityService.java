@@ -218,6 +218,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
+        public boolean setDefaultPictureProfile(String profileId, int userId) {
+            // TODO: pass the profile ID to MediaQuality HAL when ready.
+            return false;
+        }
+
+        @Override
         public List<String> getPictureProfilePackageNames(int userId) {
             String [] column = {BaseParameters.PARAMETER_NAME};
             List<PictureProfile> pictureProfiles = getPictureProfilesBasedOnConditions(column,
@@ -324,6 +330,12 @@ public class MediaQualityService extends SystemService {
         @Override
         public List<SoundProfile> getAvailableSoundProfiles(int userId) {
             return new ArrayList<>();
+        }
+
+        @Override
+        public boolean setDefaultSoundProfile(String profileId, int userId) {
+            // TODO: pass the profile ID to MediaQuality HAL when ready.
+            return false;
         }
 
         @Override
