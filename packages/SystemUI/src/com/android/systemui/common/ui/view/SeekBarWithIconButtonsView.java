@@ -179,6 +179,14 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     }
 
     /**
+     * Only for testing. Get mSeekBarListener to the seekbar.
+     */
+    @VisibleForTesting
+    public SeekBarChangeListener getSeekBarChangeListener() {
+        return mSeekBarListener;
+    }
+
+    /**
      * Only for testing. Get {@link #mSeekbar} in the layout.
      */
     @VisibleForTesting
@@ -289,8 +297,10 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
         void onUserInteractionFinalized(SeekBar seekBar, @ControlUnitType int control);
     }
 
-    private class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+    @VisibleForTesting
+    public class SeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
         private OnSeekBarWithIconButtonsChangeListener mOnSeekBarChangeListener = null;
+        private boolean mSeekByTouch = false;
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -308,6 +318,14 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
                             seekBar, OnSeekBarWithIconButtonsChangeListener.ControlUnitType.BUTTON);
                 } else {
                     mOnSeekBarChangeListener.onProgressChanged(seekBar, progress, fromUser);
+                    if (!mSeekByTouch) {
+                        // Accessibility users could change the progress of the seekbar without
+                        // touching the seekbar or clicking the buttons. We will consider the
+                        // interaction has finished in this case.
+                        mOnSeekBarChangeListener.onUserInteractionFinalized(
+                                seekBar,
+                                OnSeekBarWithIconButtonsChangeListener.ControlUnitType.SLIDER);
+                    }
                 }
             }
             updateIconViewIfNeeded(progress);
@@ -315,6 +333,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
+            mSeekByTouch = true;
             if (mOnSeekBarChangeListener != null) {
                 mOnSeekBarChangeListener.onStartTrackingTouch(seekBar);
             }
@@ -322,6 +341,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            mSeekByTouch = false;
             if (mOnSeekBarChangeListener != null) {
                 mOnSeekBarChangeListener.onStopTrackingTouch(seekBar);
                 mOnSeekBarChangeListener.onUserInteractionFinalized(
