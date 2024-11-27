@@ -243,6 +243,7 @@ java_library_static {
         "powerstats_flags_lib",
         "locksettings_flags_lib",
         "profiling_flags_lib",
+        "android.adpf.sessionmanager_aidl-java",
     ],
     javac_shard_size: 50,
     javacflags: [
