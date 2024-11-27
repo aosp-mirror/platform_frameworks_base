@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vcn.util;
+package android.net.vcn.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

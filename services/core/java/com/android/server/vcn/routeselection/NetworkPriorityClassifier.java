@@ -23,9 +23,9 @@ import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

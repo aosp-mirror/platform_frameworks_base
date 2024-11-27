@@ -34,11 +34,11 @@ import android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequestIpv4Netma
 import android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequestIpv6Address;
 import android.net.ipsec.ike.TunnelModeChildSessionParams.ConfigRequestIpv6DnsServer;
 import android.net.ipsec.ike.TunnelModeChildSessionParams.TunnelModeChildConfigRequest;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;

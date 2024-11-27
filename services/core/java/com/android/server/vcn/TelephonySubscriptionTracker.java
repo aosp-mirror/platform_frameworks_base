@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.vcn.VcnManager;
+import android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
@@ -45,7 +46,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
-import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
