@@ -28,6 +28,7 @@ import com.android.server.ServiceThread;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataAggregator {
     private static final String TAG = "IntrusionDetection DataAggregator";
@@ -36,11 +37,10 @@ public class DataAggregator {
     private static final int MSG_DISABLE = 2;
 
     private static final int STORED_EVENTS_SIZE_LIMIT = 1024;
-    private static final IntrusionDetectionAdminReceiver ADMIN_RECEIVER =
-            new IntrusionDetectionAdminReceiver();
 
     private final IntrusionDetectionService mIntrusionDetectionService;
     private final ArrayList<DataSource> mDataSources;
+    private final AtomicBoolean mIsLoggingInitialized = new AtomicBoolean(false);
 
     private Context mContext;
     private List<IntrusionDetectionEvent> mStoredEvents = new ArrayList<>();
@@ -59,30 +59,20 @@ public class DataAggregator {
         mHandler = new EventHandler(looper, this);
     }
 
-    /**
-     * Initialize DataSources
-     * @return Whether the initialization succeeds.
-     */
-    public boolean initialize() {
-        SecurityLogSource securityLogSource = new SecurityLogSource(mContext, this);
-        mDataSources.add(securityLogSource);
-
-        NetworkLogSource networkLogSource = new NetworkLogSource(mContext, this);
-        ADMIN_RECEIVER.setNetworkLogEventCallback(networkLogSource);
-        mDataSources.add(networkLogSource);
-
-        for (DataSource ds : mDataSources) {
-            if (!ds.initialize()) {
-                return false;
-            }
-        }
-        return true;
+    /** Initialize DataSources */
+    private void initialize() {
+        mDataSources.add(new SecurityLogSource(mContext, this));
+        mDataSources.add(new NetworkLogSource(mContext, this));
     }
 
     /**
      * Enable the data collection of all DataSources.
      */
     public void enable() {
+        if (!mIsLoggingInitialized.get()) {
+            initialize();
+            mIsLoggingInitialized.set(true);
+        }
         mHandlerThread = new ServiceThread(TAG, android.os.Process.THREAD_PRIORITY_BACKGROUND,
                 /* allowIo */ false);
         mHandlerThread.start();
@@ -111,9 +101,6 @@ public class DataAggregator {
      */
     public void disable() {
         mHandler.obtainMessage(MSG_DISABLE).sendToTarget();
-        for (DataSource ds : mDataSources) {
-            ds.disable();
-        }
     }
 
     private void onNewSingleData(IntrusionDetectionEvent event) {
