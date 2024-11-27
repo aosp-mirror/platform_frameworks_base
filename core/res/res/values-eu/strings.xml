@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Deitzailearen identitatea adierazteko zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe."</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Zerbitzua ez da hornitu."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ezin duzu aldatu deitzailearen identitatearen ezarpena."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> operadorearen datu-konexiora aldatu zara"</string>
@@ -421,8 +427,8 @@
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datu-erabilera areago lezake."</string>
     <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"antolatu ekintzak une zehatzetan gerta daitezen"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Aplikazio honek ekintzak programa ditzake etorkizunean egin daitezen. Horrek esan nahi du gailua aktiboki erabiltzen ari ez zarenean ere exekuta daitekeela aplikazioa."</string>
-    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-abisuak"</string>
-    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikazioak hainbat ekintza programa ditzake; adibidez, alarmak eta abisuak, etorkizuneko une batean jakinarazpen bat jaso dezazun."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-gogorarazpenak"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikazioak hainbat ekintza programa ditzake; adibidez, alarmak eta gogorarazpenak, etorkizuneko une batean jakinarazpen bat jaso dezazun."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Bere zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen dio aplikazioari. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Bere zati batzuk memorian modu iraunkorrean ezartzeko baimena ematen dio aplikazioari. Ondorioz, beste aplikazioek memoria gutxiago izan lezakete erabilgarri, eta Android TV gailuak motelago funtziona lezake."</string>
@@ -1947,8 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g> (<xliff:g id="TIMES">%2$s</xliff:g>)"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Edozein egutegi"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> soinu batzuk isilarazten ari da"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Barneko arazo bat dago zure gailuan eta agian ezegonkor egongo da jatorrizko datuak berrezartzen dituzun arte."</string>
