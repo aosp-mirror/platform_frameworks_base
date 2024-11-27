@@ -30,6 +30,7 @@ import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.back.BackAnimationController
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.isExitDesktopModeTransition
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.TransitionUtil
@@ -48,6 +49,7 @@ class DesktopTasksTransitionObserver(
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val desktopMixedTransitionHandler: DesktopMixedTransitionHandler,
+    private val backAnimationController: BackAnimationController,
     shellInit: ShellInit,
 ) : Transitions.TransitionObserver {
 
@@ -128,21 +130,80 @@ class DesktopTasksTransitionObserver(
                     )
                 }
             }
+        } else if (info.type == TRANSIT_CLOSE) {
+            // In some cases app will be closing as a result of back navigation but we would like
+            // to minimize. Mark the task closing as minimized.
+            var hasWallpaperClosing = false
+            var minimizingTask: Int? = null
+            for (change in info.changes) {
+                val taskInfo = change.taskInfo
+                if (taskInfo == null || taskInfo.taskId == -1) continue
+                if (change.mode != TRANSIT_CLOSE) continue
+
+                if (minimizingTask == null) {
+                    minimizingTask = getMinimizingTaskForClosingTransition(taskInfo)
+                }
+
+                if (DesktopWallpaperActivity.isWallpaperTask(taskInfo)) {
+                    hasWallpaperClosing = true
+                }
+            }
+
+            if (minimizingTask == null) return
+            // If the transition has wallpaper closing, it means we are moving out of desktop.
+            desktopMixedTransitionHandler.addPendingMixedTransition(
+                DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
+                    transition,
+                    minimizingTask,
+                    isLastTask = hasWallpaperClosing,
+                )
+            )
         }
+    }
+
+    /**
+     * Given this a closing task in a closing transition, a task is assumed to be closed by back
+     * navigation if:
+     * 1) Desktop mode is visible.
+     * 2) Task is in freeform.
+     * 3) Task is the latest task that the back gesture is triggered on.
+     * 4) It's not marked as a closing task as a result of closing it by the app header.
+     *
+     * This doesn't necessarily mean all the cases are because of back navigation but those cases
+     * will be rare. E.g. triggering back navigation on an app that pops up a close dialog, and
+     * closing it will minimize it here.
+     */
+    private fun getMinimizingTaskForClosingTransition(
+        taskInfo: ActivityManager.RunningTaskInfo
+    ): Int? {
+        val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
+        val visibleTaskCount = desktopRepository.getVisibleTaskCount(taskInfo.displayId)
+        if (
+            visibleTaskCount > 0 &&
+                taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
+                backAnimationController.latestTriggerBackTask == taskInfo.taskId &&
+                !desktopRepository.isClosingTask(taskInfo.taskId)
+        ) {
+            desktopRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
+            return taskInfo.taskId
+        }
+        return null
     }
 
     private fun removeWallpaperOnLastTaskClosingIfNeeded(
         transition: IBinder,
         info: TransitionInfo,
     ) {
+        // TODO: 380868195 - Smooth animation for wallpaper activity closing just by itself
         for (change in info.changes) {
             val taskInfo = change.taskInfo
             if (taskInfo == null || taskInfo.taskId == -1) {
                 continue
             }
+
             val desktopRepository = desktopUserRepositories.getProfile(taskInfo.userId)
             if (
-                desktopRepository.getVisibleTaskCount(taskInfo.displayId) == 1 &&
+                desktopRepository.getVisibleTaskCount(taskInfo.displayId) == 0 &&
                     change.mode == TRANSIT_CLOSE &&
                     taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
                     desktopRepository.wallpaperActivityToken != null
