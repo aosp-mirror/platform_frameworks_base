@@ -152,6 +152,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
@@ -2163,7 +2164,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     @Inject
     protected KeyguardUpdateMonitor(
-            Context context,
+            @ShadeDisplayAware Context context,
             UserTracker userTracker,
             @Main Looper mainLooper,
             BroadcastDispatcher broadcastDispatcher,

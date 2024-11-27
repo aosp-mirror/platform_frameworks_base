@@ -42,6 +42,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -78,7 +79,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             BatteryController batteryController,
             LocationController locationController
     ) {

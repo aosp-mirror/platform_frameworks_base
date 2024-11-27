@@ -31,9 +31,12 @@ interface ShadeDisplayPolicy {
 
 @Module
 interface ShadeDisplayPolicyModule {
+
+    @Binds fun provideDefaultPolicy(impl: StatusBarTouchShadeDisplayPolicy): ShadeDisplayPolicy
+
     @IntoSet
     @Binds
-    fun provideDefaultPolicyToSet(impl: DefaultShadeDisplayPolicy): ShadeDisplayPolicy
+    fun provideDefaultDisplayPolicyToSet(impl: DefaultDisplayShadePolicy): ShadeDisplayPolicy
 
     @IntoSet
     @Binds
@@ -46,6 +49,4 @@ interface ShadeDisplayPolicyModule {
     fun provideStatusBarTouchShadeDisplayPolicy(
         impl: StatusBarTouchShadeDisplayPolicy
     ): ShadeDisplayPolicy
-
-    @Binds fun provideDefaultPolicy(impl: DefaultShadeDisplayPolicy): ShadeDisplayPolicy
 }
