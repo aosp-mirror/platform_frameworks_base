@@ -41,9 +41,8 @@ public class RavenwoodLogLevelTest {
         assertEquals(true, Log.isLoggable("TAG1", Log.INFO));
         assertEquals(true, Log.isLoggable("TAG2", Log.INFO));
 
-        var verboseEnabled = RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
-        assertEquals(verboseEnabled, Log.isLoggable("TAG1", Log.DEBUG));
-        assertEquals(verboseEnabled, Log.isLoggable("TAG2", Log.VERBOSE));
+        assertEquals(true, Log.isLoggable("TAG1", Log.DEBUG));
+        assertEquals(true, Log.isLoggable("TAG2", Log.VERBOSE));
     }
 
     @Test

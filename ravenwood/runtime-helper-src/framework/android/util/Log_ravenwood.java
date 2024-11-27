@@ -62,8 +62,7 @@ public class Log_ravenwood {
             sTagLogLevels.putAll(map);
 
             var def = map.get("*");
-            sDefaultLogLevel = def != null ? def
-                    : RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING ?  Log.VERBOSE : Log.INFO;
+            sDefaultLogLevel = def != null ? def : Log.VERBOSE;
         }
     }
 
@@ -80,7 +79,7 @@ public class Log_ravenwood {
             if (parts.length == 2) {
                 String tag = parts[0];
                 try {
-                    int priority = switch (parts[1]) {
+                    int priority = switch (parts[1].toUpperCase(Locale.ROOT)) {
                         case "V": yield Log.VERBOSE;
                         case "D": yield Log.DEBUG;
                         case "I": yield Log.INFO;
