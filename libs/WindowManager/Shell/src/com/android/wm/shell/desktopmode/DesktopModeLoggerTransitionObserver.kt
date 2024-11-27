@@ -60,7 +60,7 @@ class DesktopModeLoggerTransitionObserver(
     context: Context,
     shellInit: ShellInit,
     private val transitions: Transitions,
-    private val desktopModeEventLogger: DesktopModeEventLogger
+    private val desktopModeEventLogger: DesktopModeEventLogger,
 ) : Transitions.TransitionObserver {
 
     init {
@@ -89,7 +89,8 @@ class DesktopModeLoggerTransitionObserver(
         transitions.registerObserver(this)
         SystemProperties.set(
             VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
-            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE)
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE,
+        )
         desktopModeEventLogger.logTaskInfoStateInit()
     }
 
@@ -97,13 +98,13 @@ class DesktopModeLoggerTransitionObserver(
         transition: IBinder,
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
-        finishTransaction: SurfaceControl.Transaction
+        finishTransaction: SurfaceControl.Transaction,
     ) {
         // this was a new recents animation
         if (info.isExitToRecentsTransition() && tasksSavedForRecents.isEmpty()) {
             ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: Recents animation running, saving tasks for later"
+                "DesktopModeLogger: Recents animation running, saving tasks for later",
             )
             // TODO (b/326391303) - avoid logging session exit if we can identify a cancelled
             // recents animation
@@ -129,7 +130,7 @@ class DesktopModeLoggerTransitionObserver(
         ) {
             ProtoLog.v(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: Canceled recents animation, restoring tasks"
+                "DesktopModeLogger: Canceled recents animation, restoring tasks",
             )
             // restore saved tasks in the updated set and clear for next use
             postTransitionVisibleFreeformTasks += tasksSavedForRecents
@@ -140,7 +141,7 @@ class DesktopModeLoggerTransitionObserver(
         identifyLogEventAndUpdateState(
             transitionInfo = info,
             preTransitionVisibleFreeformTasks = visibleFreeformTaskInfos,
-            postTransitionVisibleFreeformTasks = postTransitionVisibleFreeformTasks
+            postTransitionVisibleFreeformTasks = postTransitionVisibleFreeformTasks,
         )
         wasPreviousTransitionExitToOverview = info.isExitToRecentsTransition()
     }
@@ -200,7 +201,7 @@ class DesktopModeLoggerTransitionObserver(
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: taskInfo map after processing changes %s",
-            postTransitionFreeformTasks.size()
+            postTransitionFreeformTasks.size(),
         )
 
         return postTransitionFreeformTasks
@@ -226,7 +227,7 @@ class DesktopModeLoggerTransitionObserver(
     private fun identifyLogEventAndUpdateState(
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
-        postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
+        postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
     ) {
         if (
             postTransitionVisibleFreeformTasks.isEmpty() &&
@@ -236,12 +237,10 @@ class DesktopModeLoggerTransitionObserver(
             // Sessions is finishing, log task updates followed by an exit event
             identifyAndLogTaskUpdates(
                 preTransitionVisibleFreeformTasks,
-                postTransitionVisibleFreeformTasks
+                postTransitionVisibleFreeformTasks,
             )
 
-            desktopModeEventLogger.logSessionExit(
-                getExitReason(transitionInfo)
-            )
+            desktopModeEventLogger.logSessionExit(getExitReason(transitionInfo))
             isSessionActive = false
         } else if (
             postTransitionVisibleFreeformTasks.isNotEmpty() &&
@@ -250,19 +249,17 @@ class DesktopModeLoggerTransitionObserver(
         ) {
             // Session is starting, log enter event followed by task updates
             isSessionActive = true
-            desktopModeEventLogger.logSessionEnter(
-                getEnterReason(transitionInfo)
-            )
+            desktopModeEventLogger.logSessionEnter(getEnterReason(transitionInfo))
 
             identifyAndLogTaskUpdates(
                 preTransitionVisibleFreeformTasks,
-                postTransitionVisibleFreeformTasks
+                postTransitionVisibleFreeformTasks,
             )
         } else if (isSessionActive) {
             // Session is neither starting, nor finishing, log task updates if there are any
             identifyAndLogTaskUpdates(
                 preTransitionVisibleFreeformTasks,
-                postTransitionVisibleFreeformTasks
+                postTransitionVisibleFreeformTasks,
             )
         }
 
@@ -274,11 +271,11 @@ class DesktopModeLoggerTransitionObserver(
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
-        postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>
+        postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
     ) {
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
-            val currentTaskUpdate = buildTaskUpdateForTask(taskInfo,
-                postTransitionVisibleFreeformTasks.size())
+            val currentTaskUpdate =
+                buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size())
             val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
             when {
                 // new tasks added
@@ -287,16 +284,20 @@ class DesktopModeLoggerTransitionObserver(
                     Trace.setCounter(
                         Trace.TRACE_TAG_WINDOW_MANAGER,
                         VISIBLE_TASKS_COUNTER_NAME,
-                        postTransitionVisibleFreeformTasks.size().toLong()
+                        postTransitionVisibleFreeformTasks.size().toLong(),
                     )
-                    SystemProperties.set(VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
-                        postTransitionVisibleFreeformTasks.size().toString())
+                    SystemProperties.set(
+                        VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+                        postTransitionVisibleFreeformTasks.size().toString(),
+                    )
                 }
                 // old tasks that were resized or repositioned
                 // TODO(b/347935387): Log changes only once they are stable.
-                buildTaskUpdateForTask(previousTaskInfo, postTransitionVisibleFreeformTasks.size())
-                        != currentTaskUpdate ->
-                            desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
+                buildTaskUpdateForTask(
+                    previousTaskInfo,
+                    postTransitionVisibleFreeformTasks.size(),
+                ) != currentTaskUpdate ->
+                    desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
             }
         }
 
@@ -304,14 +305,17 @@ class DesktopModeLoggerTransitionObserver(
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
                 desktopModeEventLogger.logTaskRemoved(
-                    buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size()))
+                    buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size())
+                )
                 Trace.setCounter(
                     Trace.TRACE_TAG_WINDOW_MANAGER,
                     VISIBLE_TASKS_COUNTER_NAME,
-                    postTransitionVisibleFreeformTasks.size().toLong()
+                    postTransitionVisibleFreeformTasks.size().toLong(),
                 )
-                SystemProperties.set(VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
-                    postTransitionVisibleFreeformTasks.size().toString())
+                SystemProperties.set(
+                    VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+                    postTransitionVisibleFreeformTasks.size().toString(),
+                )
             }
         }
     }
@@ -332,45 +336,50 @@ class DesktopModeLoggerTransitionObserver(
 
     /** Get [EnterReason] for this session enter */
     private fun getEnterReason(transitionInfo: TransitionInfo): EnterReason {
-       val enterReason = when {
-            transitionInfo.type == WindowManager.TRANSIT_WAKE
-                   // If there is a screen lock, desktop window entry is after dismissing keyguard
-                   || (transitionInfo.type == WindowManager.TRANSIT_TO_BACK
-                   && wasPreviousTransitionExitByScreenOff) -> EnterReason.SCREEN_ON
-            transitionInfo.type == Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
-                EnterReason.APP_HANDLE_DRAG
-            transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
-                EnterReason.APP_HANDLE_MENU_BUTTON
-            transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW ->
-                EnterReason.APP_FROM_OVERVIEW
-            transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT ->
-                EnterReason.KEYBOARD_SHORTCUT_ENTER
-            // NOTE: the below condition also applies for EnterReason quickswitch
-            transitionInfo.type == WindowManager.TRANSIT_TO_FRONT -> EnterReason.OVERVIEW
-            // Enter desktop mode from cancelled recents has no transition. Enter is detected on the
-            // next transition involving freeform windows.
-            // TODO(b/346564416): Modify logging for cancelled recents once it transition is
-            //  changed. Also see how to account to time difference between actual enter time and
-            //  time of this log. Also account for the missed session when exit happens just after
-            //  a cancelled recents.
-            wasPreviousTransitionExitToOverview -> EnterReason.OVERVIEW
-            transitionInfo.type == WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
-            else -> {
-                ProtoLog.w(
-                    WM_SHELL_DESKTOP_MODE,
-                    "Unknown enter reason for transition type: %s",
-                    transitionInfo.type
-                )
-                EnterReason.UNKNOWN_ENTER
+        val enterReason =
+            when {
+                transitionInfo.type == WindowManager.TRANSIT_WAKE
+                // If there is a screen lock, desktop window entry is after dismissing keyguard
+                ||
+                    (transitionInfo.type == WindowManager.TRANSIT_TO_BACK &&
+                        wasPreviousTransitionExitByScreenOff) -> EnterReason.SCREEN_ON
+                transitionInfo.type == Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
+                    EnterReason.APP_HANDLE_DRAG
+                transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
+                    EnterReason.APP_HANDLE_MENU_BUTTON
+                transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW ->
+                    EnterReason.APP_FROM_OVERVIEW
+                transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT ->
+                    EnterReason.KEYBOARD_SHORTCUT_ENTER
+                // NOTE: the below condition also applies for EnterReason quickswitch
+                transitionInfo.type == WindowManager.TRANSIT_TO_FRONT -> EnterReason.OVERVIEW
+                // Enter desktop mode from cancelled recents has no transition. Enter is detected on
+                // the
+                // next transition involving freeform windows.
+                // TODO(b/346564416): Modify logging for cancelled recents once it transition is
+                //  changed. Also see how to account to time difference between actual enter time
+                // and
+                //  time of this log. Also account for the missed session when exit happens just
+                // after
+                //  a cancelled recents.
+                wasPreviousTransitionExitToOverview -> EnterReason.OVERVIEW
+                transitionInfo.type == WindowManager.TRANSIT_OPEN -> EnterReason.APP_FREEFORM_INTENT
+                else -> {
+                    ProtoLog.w(
+                        WM_SHELL_DESKTOP_MODE,
+                        "Unknown enter reason for transition type: %s",
+                        transitionInfo.type,
+                    )
+                    EnterReason.UNKNOWN_ENTER
+                }
             }
-        }
         wasPreviousTransitionExitByScreenOff = false
         return enterReason
     }
 
     /** Get [ExitReason] for this session exit */
     private fun getExitReason(transitionInfo: TransitionInfo): ExitReason =
-         when {
+        when {
             transitionInfo.type == WindowManager.TRANSIT_SLEEP -> {
                 wasPreviousTransitionExitByScreenOff = true
                 ExitReason.SCREEN_OFF
@@ -387,7 +396,7 @@ class DesktopModeLoggerTransitionObserver(
                 ProtoLog.w(
                     WM_SHELL_DESKTOP_MODE,
                     "Unknown exit reason for transition type: %s",
-                    transitionInfo.type
+                    transitionInfo.type,
                 )
                 ExitReason.UNKNOWN_EXIT
             }
@@ -413,8 +422,7 @@ class DesktopModeLoggerTransitionObserver(
     }
 
     companion object {
-        @VisibleForTesting
-        const val VISIBLE_TASKS_COUNTER_NAME = "desktop_mode_visible_tasks"
+        @VisibleForTesting const val VISIBLE_TASKS_COUNTER_NAME = "desktop_mode_visible_tasks"
         @VisibleForTesting
         const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY =
             "debug.tracing." + VISIBLE_TASKS_COUNTER_NAME

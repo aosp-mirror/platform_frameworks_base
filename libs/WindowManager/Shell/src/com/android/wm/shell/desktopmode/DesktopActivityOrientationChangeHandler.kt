@@ -49,15 +49,17 @@ class DesktopActivityOrientationChangeHandler(
     }
 
     private fun onInit() {
-        taskStackListener.addListener(object : TaskStackListenerCallback {
-            override fun onActivityRequestedOrientationChanged(
-                taskId: Int,
-                @ScreenOrientation requestedOrientation: Int
-            ) {
-                // Handle requested screen orientation changes at runtime.
-                handleActivityOrientationChange(taskId, requestedOrientation)
+        taskStackListener.addListener(
+            object : TaskStackListenerCallback {
+                override fun onActivityRequestedOrientationChanged(
+                    taskId: Int,
+                    @ScreenOrientation requestedOrientation: Int,
+                ) {
+                    // Handle requested screen orientation changes at runtime.
+                    handleActivityOrientationChange(taskId, requestedOrientation)
+                }
             }
-        })
+        )
     }
 
     /**
@@ -77,7 +79,7 @@ class DesktopActivityOrientationChangeHandler(
 
     private fun handleActivityOrientationChange(
         taskId: Int,
-        @ScreenOrientation requestedOrientation: Int
+        @ScreenOrientation requestedOrientation: Int,
     ) {
         if (!Flags.respectOrientationChangeForUnresizeable()) return
         val task = shellTaskOrganizer.getRunningTaskInfo(taskId) ?: return
@@ -93,10 +95,12 @@ class DesktopActivityOrientationChangeHandler(
             if (taskWidth > taskHeight) ORIENTATION_LANDSCAPE else ORIENTATION_PORTRAIT
 
         // Non-resizeable activity requested opposite orientation.
-        if (orientation == ORIENTATION_PORTRAIT
-                && ActivityInfo.isFixedOrientationLandscape(requestedOrientation)
-            || orientation == ORIENTATION_LANDSCAPE
-                && ActivityInfo.isFixedOrientationPortrait(requestedOrientation)) {
+        if (
+            orientation == ORIENTATION_PORTRAIT &&
+                ActivityInfo.isFixedOrientationLandscape(requestedOrientation) ||
+                orientation == ORIENTATION_LANDSCAPE &&
+                    ActivityInfo.isFixedOrientationPortrait(requestedOrientation)
+        ) {
 
             val finalSize = Size(taskHeight, taskWidth)
             // Use the center x as the resizing anchor point.
