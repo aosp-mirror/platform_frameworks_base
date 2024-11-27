@@ -21,7 +21,8 @@
     android:layout_height="wrap_content"
     android:layout_weight="1"
     android:paddingVertical="@dimen/settingslib_expressive_space_small1"
-    android:paddingHorizontal="@dimen/settingslib_expressive_space_small1"
+    android:paddingStart="@dimen/settingslib_expressive_space_none"
+    android:paddingEnd="@dimen/settingslib_expressive_space_small1"
     android:filterTouchesWhenObscured="false">
 
     <TextView
