@@ -96,7 +96,7 @@ import java.util.function.Supplier;
  * Responsible for initializing and the environment.
  */
 public class RavenwoodRuntimeEnvironmentController {
-    private static final String TAG = "RavenwoodRuntimeEnvironmentController";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     private RavenwoodRuntimeEnvironmentController() {
     }

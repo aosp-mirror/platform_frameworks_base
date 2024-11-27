@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  */
 @Deprecated
 public final class RavenwoodRule implements TestRule {
-    private static final String TAG = "RavenwoodRule";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
