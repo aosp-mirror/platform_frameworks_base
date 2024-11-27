@@ -85,6 +85,9 @@ public class SplitScreenConstants {
     public @interface SplitIndex {
     }
 
+    /** Signifies that user is currently not in split screen. */
+    public static final int NOT_IN_SPLIT = -1;
+
     /**
      * A snap target for two apps, where the split is 33-66. With FLAG_ENABLE_FLEXIBLE_SPLIT,
      * only used on tablets.
@@ -150,6 +153,23 @@ public class SplitScreenConstants {
             SNAP_TO_3_10_45_45,
     })
     public @interface PersistentSnapPosition {}
+
+    /**
+     * These are all the valid "states" that split screen can be in. It's the set of
+     * {@link PersistentSnapPosition} + {@link #NOT_IN_SPLIT}.
+     */
+    @IntDef(value = {
+            NOT_IN_SPLIT,
+            SNAP_TO_2_33_66,
+            SNAP_TO_2_50_50,
+            SNAP_TO_2_66_33,
+            SNAP_TO_2_90_10,
+            SNAP_TO_2_10_90,
+            SNAP_TO_3_33_33_33,
+            SNAP_TO_3_45_45_10,
+            SNAP_TO_3_10_45_45,
+    })
+    public @interface SplitScreenState {}
 
     /**
      * Checks if the snapPosition in question is a {@link PersistentSnapPosition}.

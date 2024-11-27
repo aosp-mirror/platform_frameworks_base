@@ -69,6 +69,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.common.transition.TransitionStateHolder;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
 import com.android.wm.shell.compatui.letterbox.LetterboxController;
@@ -503,6 +504,7 @@ public abstract class WMShellModule {
             Optional<WindowDecorViewModel> windowDecorViewModel,
             Optional<DesktopTasksController> desktopTasksController,
             MultiInstanceHelper multiInstanceHelper,
+            SplitState splitState,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new SplitScreenController(
@@ -526,6 +528,7 @@ public abstract class WMShellModule {
                 desktopTasksController,
                 null /* stageCoordinator */,
                 multiInstanceHelper,
+                splitState,
                 mainExecutor,
                 mainHandler);
     }
