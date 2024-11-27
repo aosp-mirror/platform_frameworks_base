@@ -16264,6 +16264,7 @@ package android.telephony {
     method @FlaggedApi("android.permission.flags.get_emergency_role_holder_api_enabled") @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getEmergencyAssistancePackageName();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
+    method @FlaggedApi("com.android.internal.telephony.flags.get_group_id_level2") @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getGroupIdLevel2();
     method @FlaggedApi("com.android.internal.telephony.flags.support_isim_record") @NonNull @RequiresPermission(value=android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, conditional=true) public java.util.List<java.lang.String> getImsPcscfAddresses();
     method @FlaggedApi("com.android.internal.telephony.flags.support_isim_record") @Nullable @RequiresPermission(android.Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER) public String getImsPrivateUserIdentity();
     method @FlaggedApi("com.android.internal.telephony.flags.support_isim_record") @NonNull @RequiresPermission(value=android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, conditional=true) public java.util.List<android.net.Uri> getImsPublicUserIdentities();
