@@ -286,6 +286,16 @@ flag {
 }
 
 flag {
+    name: "unsuspend_not_suspended"
+    namespace: "enterprise"
+    description: "When admin unsuspends packages, pass previously not suspended packages to PM too"
+    bug: "378766314"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "backup_connected_apps_settings"
     namespace: "enterprise"
     description: "backup and restore connected work and personal apps user settings across devices"
