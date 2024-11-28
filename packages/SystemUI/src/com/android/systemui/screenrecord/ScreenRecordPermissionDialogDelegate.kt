@@ -280,6 +280,18 @@ class ScreenRecordPermissionDialogDelegate(
         private const val DELAY_MS: Long = 3000
         private const val INTERVAL_MS: Long = 1000
 
+        private val RECORDABLE_DISPLAY_TYPES =
+            intArrayOf(
+                Display.TYPE_OVERLAY,
+                Display.TYPE_EXTERNAL,
+                Display.TYPE_INTERNAL,
+                Display.TYPE_WIFI,
+            )
+
+        private val filterDeviceTypeFlag: Boolean =
+            com.android.media.projection.flags.Flags
+                .mediaProjectionConnectedDisplayNoVirtualDevice()
+
         private fun createOptionList(displayManager: DisplayManager): List<ScreenShareOption> {
             if (!com.android.media.projection.flags.Flags.mediaProjectionConnectedDisplay()) {
                 return listOf(
@@ -302,6 +314,7 @@ class ScreenRecordPermissionDialogDelegate(
                     ),
                 )
             }
+
             return listOf(
                 ScreenShareOption(
                     SINGLE_APP,
@@ -322,7 +335,10 @@ class ScreenRecordPermissionDialogDelegate(
                 ),
             ) +
                 displayManager.displays
-                    .filter { it.displayId != Display.DEFAULT_DISPLAY }
+                    .filter {
+                        it.displayId != Display.DEFAULT_DISPLAY &&
+                            (!filterDeviceTypeFlag || it.type in RECORDABLE_DISPLAY_TYPES)
+                    }
                     .map {
                         ScreenShareOption(
                             ENTIRE_SCREEN,
