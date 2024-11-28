@@ -295,7 +295,7 @@ public class DisplayRotation {
                 && mDeviceStateController
                         .shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay()) {
             mDisplayRotationCoordinator.setDefaultDisplayRotationChangedCallback(
-                    mDefaultDisplayRotationChangedCallback);
+                    displayContent.getDisplayId(), mDefaultDisplayRotationChangedCallback);
         }
 
         if (isDefaultDisplay) {
@@ -1659,7 +1659,8 @@ public class DisplayRotation {
 
     void removeDefaultDisplayRotationChangedCallback() {
         if (DisplayRotationCoordinator.isSecondaryInternalDisplay(mDisplayContent)) {
-            mDisplayRotationCoordinator.removeDefaultDisplayRotationChangedCallback();
+            mDisplayRotationCoordinator.removeDefaultDisplayRotationChangedCallback(
+                    mDefaultDisplayRotationChangedCallback);
         }
     }
 

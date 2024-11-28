@@ -1865,7 +1865,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mRootWindowContainer.getDisplayRotationCoordinator();
         final DisplayContent defaultDisplayContent = mDisplayContent;
         final DisplayRotation defaultDisplayRotation = defaultDisplayContent.getDisplayRotation();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -1922,7 +1921,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
