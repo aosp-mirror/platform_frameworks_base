@@ -216,20 +216,13 @@ constructor(
             "handleKeyGestureEvent: Received OPEN_NOTES gesture event from keycodes: " +
                 event.keycodes.contentToString()
         }
-        if (
-            event.keycodes.contains(KEYCODE_N) &&
-                event.hasModifiers(KeyEvent.META_CTRL_ON or KeyEvent.META_META_ON)
-        ) {
-            debugLog { "Note task triggered by keyboard shortcut" }
-            backgroundExecutor.execute { controller.showNoteTask(KEYBOARD_SHORTCUT) }
-            return true
-        }
         if (event.keycodes.size == 1 && event.keycodes[0] == KEYCODE_STYLUS_BUTTON_TAIL) {
             debugLog { "Note task triggered by stylus tail button" }
             backgroundExecutor.execute { controller.showNoteTask(TAIL_BUTTON) }
             return true
         }
-        return false
+        backgroundExecutor.execute { controller.showNoteTask(KEYBOARD_SHORTCUT) }
+        return true
     }
 
     private fun isKeyGestureSupported(gestureType: Int): Boolean {
