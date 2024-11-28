@@ -445,7 +445,8 @@ public class DisplayRotation {
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
         mDefaultFixedToUserRotation =
-                (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode()
+                (isCar || isTv || mService.mIsPc
+                        || mDisplayContent.isPublicSecondaryDisplayWithDesktopModeForceEnabled()
                         || !mDisplayContent.shouldRotateWithContent())
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
