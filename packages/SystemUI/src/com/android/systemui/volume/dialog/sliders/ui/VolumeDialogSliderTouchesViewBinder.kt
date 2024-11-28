@@ -20,14 +20,14 @@ import android.annotation.SuppressLint
 import android.view.View
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
-import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderTouchesViewModel
+import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderInputEventsViewModel
 import com.google.android.material.slider.Slider
 import javax.inject.Inject
 
 @VolumeDialogSliderScope
 class VolumeDialogSliderTouchesViewBinder
 @Inject
-constructor(private val viewModel: VolumeDialogSliderTouchesViewModel) {
+constructor(private val viewModel: VolumeDialogSliderInputEventsViewModel) {
 
     @SuppressLint("ClickableViewAccessibility")
     fun bind(view: View) {

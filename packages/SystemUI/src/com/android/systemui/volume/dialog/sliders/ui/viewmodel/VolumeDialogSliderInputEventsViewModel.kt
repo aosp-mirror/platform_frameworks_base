@@ -17,14 +17,25 @@
 package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInputEventsInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
 
 @VolumeDialogSliderScope
-class VolumeDialogSliderTouchesViewModel
+class VolumeDialogSliderInputEventsViewModel
 @Inject
-constructor(private val interactor: VolumeDialogSliderInputEventsInteractor) {
+constructor(
+    @VolumeDialog private val coroutineScope: CoroutineScope,
+    private val interactor: VolumeDialogSliderInputEventsInteractor,
+) {
+
+    val event =
+        interactor.event.stateIn(coroutineScope, SharingStarted.Eagerly, null).filterNotNull()
 
     fun onTouchEvent(event: MotionEvent) {
         interactor.onTouchEvent(event)
