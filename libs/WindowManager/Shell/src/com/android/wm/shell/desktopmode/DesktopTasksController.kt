@@ -136,6 +136,7 @@ import com.android.wm.shell.windowdecor.tiling.DesktopTilingDecorViewModel
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 /** Handles moving tasks in and out of desktop */
@@ -465,12 +466,15 @@ class DesktopTasksController(
         taskSurface: SurfaceControl,
     ) {
         logV("startDragToDesktop taskId=%d", taskInfo.taskId)
-        interactionJankMonitor.begin(
-            taskSurface,
-            context,
-            handler,
-            CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD,
-        )
+        val jankConfigBuilder =
+            InteractionJankMonitor.Configuration.Builder.withSurface(
+                    CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD,
+                    context,
+                    taskSurface,
+                    handler,
+                )
+                .setTimeout(APP_HANDLE_DRAG_HOLD_CUJ_TIMEOUT_MS)
+        interactionJankMonitor.begin(jankConfigBuilder)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
             taskInfo.taskId,
             dragToDesktopValueAnimator,
@@ -2634,6 +2638,10 @@ class DesktopTasksController(
         @JvmField
         val DESKTOP_MODE_INITIAL_BOUNDS_SCALE =
             SystemProperties.getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
+
+        // Timeout used for CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD, this is longer than the
+        // default timeout to avoid timing out in the middle of a drag action.
+        private val APP_HANDLE_DRAG_HOLD_CUJ_TIMEOUT_MS: Long = TimeUnit.SECONDS.toMillis(10L)
 
         private const val TAG = "DesktopTasksController"
     }
