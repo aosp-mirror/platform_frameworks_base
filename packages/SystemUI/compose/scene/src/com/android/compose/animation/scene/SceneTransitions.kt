@@ -266,19 +266,26 @@ internal class TransformationSpecImpl(
     override val distance: UserActionDistance?,
     override val transformationMatchers: List<TransformationMatcher>,
 ) : TransformationSpec {
-    private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations>>()
+    private val cache = mutableMapOf<ElementKey, MutableMap<ContentKey, ElementTransformations?>>()
 
-    internal fun transformations(element: ElementKey, content: ContentKey): ElementTransformations {
+    internal fun transformations(
+        element: ElementKey,
+        content: ContentKey,
+    ): ElementTransformations? {
         return cache
             .getOrPut(element) { mutableMapOf() }
             .getOrPut(content) { computeTransformations(element, content) }
+    }
+
+    internal fun hasTransformation(element: ElementKey, content: ContentKey): Boolean {
+        return transformations(element, content) != null
     }
 
     /** Filter [transformationMatchers] to compute the [ElementTransformations] of [element]. */
     private fun computeTransformations(
         element: ElementKey,
         content: ContentKey,
-    ): ElementTransformations {
+    ): ElementTransformations? {
         var shared: TransformationWithRange<SharedElementTransformation>? = null
         var offset: TransformationWithRange<PropertyTransformation<Offset>>? = null
         var size: TransformationWithRange<PropertyTransformation<IntSize>>? = null
@@ -338,7 +345,13 @@ internal class TransformationSpecImpl(
             }
         }
 
-        return ElementTransformations(shared, offset, size, drawScale, alpha)
+        return if (
+            shared == null && offset == null && size == null && drawScale == null && alpha == null
+        ) {
+            null
+        } else {
+            ElementTransformations(shared, offset, size, drawScale, alpha)
+        }
     }
 
     private fun throwIfNotNull(
