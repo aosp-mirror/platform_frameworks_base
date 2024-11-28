@@ -21,9 +21,7 @@ import android.hardware.input.InputManager
 import android.hardware.input.KeyGlyphMap
 import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.KEYCODE_BACK
-import android.view.KeyEvent.KEYCODE_DEL
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
-import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_ESCAPE
 import android.view.KeyEvent.KEYCODE_H
 import android.view.KeyEvent.KEYCODE_HOME
@@ -129,12 +127,8 @@ constructor(@Main private val resources: Resources, private val inputManager: In
             },
             // Access home screen:
             //  - Meta + H
-            //  - Meta + Enter
             shortcutInfo(resources.getString(R.string.group_system_access_home_screen)) {
                 command(META_META_ON, KEYCODE_H)
-            },
-            shortcutInfo(resources.getString(R.string.group_system_access_home_screen)) {
-                command(META_META_ON, KEYCODE_ENTER)
             },
             // Overview of open apps:
             //  - Meta + Tab
@@ -153,13 +147,9 @@ constructor(@Main private val resources: Resources, private val inputManager: In
             },
             // Back: go back to previous state (back button)
             //  - Meta + Escape OR
-            //  - Meta + Backspace OR
             //  - Meta + Left arrow
             shortcutInfo(resources.getString(R.string.group_system_go_back)) {
                 command(META_META_ON, KEYCODE_ESCAPE)
-            },
-            shortcutInfo(resources.getString(R.string.group_system_go_back)) {
-                command(META_META_ON, KEYCODE_DEL)
             },
             shortcutInfo(resources.getString(R.string.group_system_go_back)) {
                 command(META_META_ON, KEYCODE_DPAD_LEFT)
