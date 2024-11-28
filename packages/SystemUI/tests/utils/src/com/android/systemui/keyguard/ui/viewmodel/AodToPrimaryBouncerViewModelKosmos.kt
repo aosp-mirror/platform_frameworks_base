@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
@@ -23,9 +21,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.primaryBouncerToLockscreenTransitionViewModel by Fixture {
-    PrimaryBouncerToLockscreenTransitionViewModel(
-        animationFlow = keyguardTransitionAnimationFlow,
-        shadeDependentFlows = shadeDependentFlows,
-    )
+@OptIn(ExperimentalCoroutinesApi::class)
+val Kosmos.aodToPrimaryBouncerTransitionViewModel by Fixture {
+    AodToPrimaryBouncerTransitionViewModel(animationFlow = keyguardTransitionAnimationFlow)
 }
