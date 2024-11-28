@@ -6,6 +6,7 @@ flag {
     namespace: "wallet_integration"
     description: "Option to launch the Wallet app on double-tap of the power button"
     bug: "378469025"
+    is_exported: true
 }
 
 flag {
