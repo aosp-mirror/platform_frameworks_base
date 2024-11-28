@@ -31,7 +31,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
@@ -52,6 +51,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import java.util.concurrent.Semaphore
@@ -355,7 +355,7 @@ class BubbleStackViewTest {
 
     @Test
     fun removeFromWindow_stopMonitoringSwipeUpGesture() {
-        spyOn(bubbleStackView)
+        bubbleStackView = Mockito.spy(bubbleStackView)
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             // No way to add to window in the test environment right now so just pretend
             bubbleStackView.onDetachedFromWindow()
