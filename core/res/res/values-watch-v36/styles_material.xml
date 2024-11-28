@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2024 The Android Open Source Project
   ~
@@ -17,13 +17,13 @@
 
 <resources>
     <!--  Button Styles  -->
-    <!-- Material Button - Filled  -->
+    <!-- Material Button - Filled (primary colored) -->
     <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button.WearMaterial3">
         <item name="android:background">@drawable/btn_background_material_filled</item>
         <item name="textAppearance">@style/TextAppearance.Widget.Button.Material.Filled</item>
     </style>
 
-    <!-- Material Button - Filled Tonal(Override system default button styles) -->
+    <!-- Material Button - Filled Tonal (Override system default button styles) -->
     <style name="Widget.DeviceDefault.Button.WearMaterial3">
         <item name="background">@drawable/btn_background_material_filled_tonal</item>
         <item name="textAppearance">@style/TextAppearance.Widget.Button.Material</item>
@@ -41,9 +41,19 @@
         <item name="gravity">center_vertical</item>
     </style>
 
+    <!-- Material Button - Outlined -->
+    <style name="Widget.DeviceDefault.Button.Outlined" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_outlined</item>
+    </style>
+
+    <!-- Material Button - Text -->
+    <style name="Widget.DeviceDefault.Button.Text" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_text</item>
+    </style>
+
     <!--  Text Styles  -->
     <!-- TextAppearance for Material Button - Filled  -->
-    <style name="TextAppearance.Widget.Button.Material.Filled" parent="TextAppearance.Widget.Button.Material">
+    <style name="TextAppearance.Widget.Button.Material.Filled">
         <item name="textColor">@color/btn_material_filled_content_color</item>
     </style>
 
