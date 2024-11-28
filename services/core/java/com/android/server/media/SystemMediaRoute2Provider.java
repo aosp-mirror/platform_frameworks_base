@@ -90,7 +90,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private volatile SessionCreationOrTransferRequest mPendingTransferRequest;
 
     SystemMediaRoute2Provider(Context context, UserHandle user, Looper looper) {
-        super(COMPONENT_NAME, /* isSystemRouteProvider= */ true);
+        this(context, COMPONENT_NAME, user, looper);
+    }
+
+    protected SystemMediaRoute2Provider(
+            Context context, ComponentName componentName, UserHandle user, Looper looper) {
+        super(componentName, /* isSystemRouteProvider= */ true);
         mContext = context;
         mUser = user;
         mHandler = new Handler(looper);
@@ -588,7 +593,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @Override
     protected String getDebugString() {
         return TextUtils.formatSimple(
-                "SystemMR2Provider - package: %s, selected route id: %s, bluetooth impl: %s",
+                "%s - package: %s, selected route id: %s, bluetooth impl: %s",
+                getClass().getSimpleName(),
                 mComponentName.getPackageName(),
                 mSelectedRouteId,
                 mBluetoothRouteController.getClass().getSimpleName());

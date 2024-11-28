@@ -658,12 +658,15 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED = 42;
 
     /**
      * Event for listening to changes in carrier roaming non-terrestrial network eligibility.
      *
-     * @see CarrierRoamingNtnModeListener
+     * @see CarrierRoamingNtnModeListener#onCarrierRoamingNtnEligibleStateChanged(boolean)
      *
      * Device is eligible for satellite communication if all the following conditions are met:
      * <ul>
@@ -679,11 +682,15 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED = 43;
 
     /**
      * Event for listening to changes in carrier roaming non-terrestrial network available services
-     * via callback onCarrierRoamingNtnAvailableServicesChanged().
+     * via callback {@link
+     * CarrierRoamingNtnModeListener#onCarrierRoamingNtnAvailableServicesChanged(List)}
      * This callback is triggered when the available services provided by the carrier roaming
      * satellite changes. The carrier roaming satellite is defined by the following conditions.
      * <ul>
@@ -693,15 +700,22 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED = 44;
 
     /**
      * Event for listening to carrier roaming non-terrestrial network signal strength changes.
      *
-     * @see CarrierRoamingNtnModeListener
+     * @see CarrierRoamingNtnModeListener#onCarrierRoamingNtnSignalStrengthChanged(
+     * NtnSignalStrength)
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED = 45;
 
     /**
@@ -1803,6 +1817,8 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public interface CarrierRoamingNtnModeListener {
         /**
          * Callback invoked when carrier roaming non-terrestrial network mode changes.
@@ -1836,10 +1852,10 @@ public class TelephonyCallback {
          * Callback invoked when carrier roaming non-terrestrial network available
          * service changes.
          *
-         * @param availableServices The list of the supported services.
+         * @param availableServices array of supported services.
          */
         default void onCarrierRoamingNtnAvailableServicesChanged(
-                @NetworkRegistrationInfo.ServiceType List<Integer> availableServices) {}
+                @NonNull @NetworkRegistrationInfo.ServiceType int[] availableServices) {}
 
         /**
          * Callback invoked when carrier roaming non-terrestrial network signal strength changes.
@@ -2343,10 +2359,8 @@ public class TelephonyCallback {
                     (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
-            List<Integer> ServiceList = Arrays.stream(availableServices).boxed()
-                    .collect(Collectors.toList());
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onCarrierRoamingNtnAvailableServicesChanged(ServiceList)));
+                    () -> listener.onCarrierRoamingNtnAvailableServicesChanged(availableServices)));
         }
 
         public void onCarrierRoamingNtnSignalStrengthChanged(

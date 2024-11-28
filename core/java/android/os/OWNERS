@@ -93,10 +93,9 @@ per-file CpuHeadroom*.aidl = file:/ADPF_OWNERS
 per-file GpuHeadroom*.aidl = file:/ADPF_OWNERS
 per-file CpuHeadroom*.java = file:/ADPF_OWNERS
 per-file GpuHeadroom*.java = file:/ADPF_OWNERS
-per-file PerformanceHintManager.java = file:/ADPF_OWNERS
 per-file WorkDuration.java = file:/ADPF_OWNERS
-per-file IHintManager.aidl = file:/ADPF_OWNERS
-per-file IHintSession.aidl = file:/ADPF_OWNERS
+per-file *Hint* = file:/ADPF_OWNERS
+per-file *Session* = file:/ADPF_OWNERS
 
 # IThermal interfaces
 per-file IThermal* = file:/THERMAL_OWNERS

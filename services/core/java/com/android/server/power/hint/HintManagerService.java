@@ -23,6 +23,7 @@ import static com.android.server.power.hint.Flags.adpfSessionTag;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 import static com.android.server.power.hint.Flags.resetOnForkEnabled;
 
+import android.adpf.ISessionManager;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -193,6 +194,7 @@ public final class HintManagerService extends SystemService {
 
     private final Object mCpuHeadroomLock = new Object();
 
+    private ISessionManager mSessionManager;
 
     // this cache tracks the expiration time of the items and performs cleanup on lookup
     private static class HeadroomCache<K, V> {
@@ -818,6 +820,23 @@ public final class HintManagerService extends SystemService {
                     for (int i = tokenMap.size() - 1; i >= 0; i--) {
                         // Will remove the session from tokenMap
                         ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(i);
+                        IntArray closedSessionsForSf = new IntArray();
+                        // Batch the closure call to SF for all the sessions that die
+                        for (int j = sessionSet.size() - 1; j >= 0; j--) {
+                            AppHintSession session = sessionSet.valueAt(j);
+                            if (session.isTrackedBySf()) {
+                                // Mark it as untracked so we don't untrack again on close
+                                session.setTrackedBySf(false);
+                                closedSessionsForSf.add(session.getSessionId());
+                            }
+                        }
+                        if (mSessionManager != null) {
+                            try {
+                                mSessionManager.trackedSessionsDied(closedSessionsForSf.toArray());
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Failed to communicate with SessionManager");
+                            }
+                        }
                         for (int j = sessionSet.size() - 1; j >= 0; j--) {
                             sessionSet.valueAt(j).close();
                         }
@@ -1350,9 +1369,9 @@ public final class HintManagerService extends SystemService {
                     }
                 }
 
-                final long sessionId = config.id != -1 ? config.id : halSessionPtr;
+                final long sessionIdForTracing = config.id != -1 ? config.id : halSessionPtr;
                 logPerformanceHintSessionAtom(
-                        callingUid, sessionId, durationNanos, tids, tag);
+                        callingUid, sessionIdForTracing, durationNanos, tids, tag);
 
                 synchronized (mSessionSnapshotMapLock) {
                     // Update session snapshot upon session creation
@@ -1362,8 +1381,12 @@ public final class HintManagerService extends SystemService {
                 }
                 AppHintSession hs = null;
                 synchronized (mLock) {
+                    Integer configId = null;
+                    if (config.id != -1) {
+                        configId = new Integer((int) config.id);
+                    }
                     hs = new AppHintSession(callingUid, callingTgid, tag, tids,
-                            token, halSessionPtr, durationNanos);
+                            token, halSessionPtr, durationNanos, configId);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
                             mActiveSessions.get(callingUid);
                     if (tokenMap == null) {
@@ -1388,6 +1411,11 @@ public final class HintManagerService extends SystemService {
                             }
                             hs.setMode(sessionMode, true);
                         }
+                    }
+
+                    if (creationConfig.layerTokens != null
+                            && creationConfig.layerTokens.length > 0) {
+                        hs.associateToLayers(creationConfig.layerTokens);
                     }
 
                     synchronized (mThreadsUsageObject) {
@@ -1566,6 +1594,15 @@ public final class HintManagerService extends SystemService {
         }
 
         @Override
+        public void passSessionManagerBinder(IBinder sessionManager) {
+            // Ensure caller is internal
+            if (Process.myUid() != Binder.getCallingUid()) {
+                return;
+            }
+            mSessionManager = ISessionManager.Stub.asInterface(sessionManager);
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
                 return;
@@ -1688,6 +1725,8 @@ public final class HintManagerService extends SystemService {
         protected boolean mHasBeenPowerEfficient;
         protected boolean mHasBeenGraphicsPipeline;
         protected boolean mShouldForcePause;
+        protected Integer mSessionId;
+        protected boolean mTrackedBySF;
 
         enum SessionModes {
             POWER_EFFICIENCY,
@@ -1696,7 +1735,7 @@ public final class HintManagerService extends SystemService {
 
         protected AppHintSession(
                 int uid, int pid, int sessionTag, int[] threadIds, IBinder token,
-                long halSessionPtr, long durationNanos) {
+                long halSessionPtr, long durationNanos, Integer sessionId) {
             mUid = uid;
             mPid = pid;
             mTag = sessionTag;
@@ -1710,6 +1749,8 @@ public final class HintManagerService extends SystemService {
             mHasBeenPowerEfficient = false;
             mHasBeenGraphicsPipeline = false;
             mShouldForcePause = false;
+            mSessionId = sessionId;
+            mTrackedBySF = false;
             final boolean allowed = mUidObserver.isUidForeground(mUid);
             updateHintAllowedByProcState(allowed);
             try {
@@ -1799,6 +1840,19 @@ public final class HintManagerService extends SystemService {
                 } catch (NoSuchElementException ignored) {
                     Slogf.d(TAG, "Death link does not exist for session with UID " + mUid);
                 }
+                if (mTrackedBySF) {
+                    if (mSessionManager != null) {
+                        try {
+                            mSessionManager.trackedSessionsDied(new int[]{mSessionId});
+                        } catch (RemoteException e) {
+                            throw new IllegalStateException(
+                                    "Could not communicate with SessionManager", e);
+                        }
+                        mTrackedBySF = false;
+                    } else {
+                        Slog.e(TAG, "SessionManager is null but there are tracked sessions");
+                    }
+                }
             }
             synchronized (mLock) {
                 ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(mUid);
@@ -1872,6 +1926,24 @@ public final class HintManagerService extends SystemService {
                 Preconditions.checkArgument(hint >= 0, "the hint ID value should be"
                         + " greater than zero.");
                 mNativeWrapper.halSendHint(mHalSessionPtr, hint);
+            }
+        }
+
+        @Override
+        public void associateToLayers(IBinder[] layerTokens) {
+            synchronized (this) {
+                if (mSessionManager != null && mSessionId != null && layerTokens != null) {
+                    // Sf only untracks a session when it dies
+                    if (layerTokens.length > 0) {
+                        mTrackedBySF = true;
+                    }
+                    try {
+                        mSessionManager.associateSessionToLayers(mSessionId, mUid, layerTokens);
+                    } catch (RemoteException e) {
+                        throw new IllegalStateException(
+                                "Could not communicate with SessionManager", e);
+                    }
+                }
             }
         }
 
@@ -2124,8 +2196,25 @@ public final class HintManagerService extends SystemService {
             return mUid;
         }
 
+        public boolean isTrackedBySf() {
+            synchronized (this) {
+                return mTrackedBySF;
+            }
+        }
+
+        public void setTrackedBySf(boolean tracked) {
+            synchronized (this) {
+                mTrackedBySF = tracked;
+            }
+        }
+
+
         public int getTag() {
             return mTag;
+        }
+
+        public Integer getSessionId() {
+            return mSessionId;
         }
 
         public long getTargetDurationNs() {

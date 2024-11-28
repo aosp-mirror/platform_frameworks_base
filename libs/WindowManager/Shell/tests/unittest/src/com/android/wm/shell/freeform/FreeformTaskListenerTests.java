@@ -47,8 +47,8 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.desktopmode.DesktopRepository;
-import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -212,10 +212,11 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     @DisableFlags(FLAG_ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS)
-    public void onTaskVanished_nonClosingTask_noTransitionObservers_isMinimized() {
+    public void onTaskVanished_minimizedTask_noTransitionObservers_isNotRemoved() {
         ActivityManager.RunningTaskInfo task =
                 new TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         task.isVisible = true;
+        when(mDesktopRepository.isMinimizedTask(task.taskId)).thenReturn(true);
 
         mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
 
@@ -223,7 +224,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         task.displayId = INVALID_DISPLAY;
         mFreeformTaskListener.onTaskVanished(task);
 
-        verify(mDesktopUserRepositories.getCurrent()).minimizeTask(task.displayId, task.taskId);
+        verify(mDesktopUserRepositories.getCurrent(), never()).removeFreeformTask(task.displayId,
+                task.taskId);
     }
 
     @Test

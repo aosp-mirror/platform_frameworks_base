@@ -29,13 +29,19 @@
 #include <aidl/android/os/SessionCreationConfig.h>
 #include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
+#include <android/binder_libbinder.h>
 #include <android/binder_manager.h>
 #include <android/binder_status.h>
+#include <android/native_window.h>
 #include <android/performance_hint.h>
+#include <android/surface_control.h>
 #include <android/trace.h>
 #include <android_os.h>
 #include <cutils/trace.h>
 #include <fmq/AidlMessageQueue.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
+#include <gui/SurfaceControl.h>
 #include <inttypes.h>
 #include <jni_wrappers.h>
 #include <performance_hint_private.h>
@@ -66,7 +72,12 @@ struct APerformanceHintSession;
 
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
 struct AWorkDuration : public hal::WorkDuration {};
-struct ASessionCreationConfig : public SessionCreationConfig {};
+struct ASessionCreationConfig : public SessionCreationConfig {
+    std::vector<wp<IBinder>> layers{};
+    bool hasMode(hal::SessionMode&& mode) {
+        return std::find(modesToEnable.begin(), modesToEnable.end(), mode) != modesToEnable.end();
+    }
+};
 
 bool kForceGraphicsPipeline = false;
 
@@ -158,6 +169,11 @@ public:
     FMQWrapper& getFMQWrapper();
     bool canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) REQUIRES(sHintMutex);
     void initJava(JNIEnv* _Nonnull env);
+    ndk::ScopedAIBinder_Weak x;
+    template <class T>
+    static void layersFromNativeSurfaces(ANativeWindow** windows, int numWindows,
+                                         ASurfaceControl** controls, int numSurfaceControls,
+                                         std::vector<T>& out);
 
 private:
     // Necessary to create an empty binder object
@@ -203,6 +219,8 @@ public:
     int setPreferPowerEfficiency(bool enabled);
     int reportActualWorkDuration(AWorkDuration* workDuration);
     bool isJava();
+    status_t setNativeSurfaces(ANativeWindow** windows, int numWindows, ASurfaceControl** controls,
+                               int numSurfaceControls);
 
 private:
     friend struct APerformanceHintManager;
@@ -231,7 +249,7 @@ private:
     static int64_t sIDCounter GUARDED_BY(sHintMutex);
     // The most recent set of thread IDs
     std::vector<int32_t> mLastThreadIDs GUARDED_BY(sHintMutex);
-    std::optional<hal::SessionConfig> mSessionConfig GUARDED_BY(sHintMutex);
+    std::optional<hal::SessionConfig> mSessionConfig;
     // Tracing helpers
     void traceThreads(const std::vector<int32_t>& tids) REQUIRES(sHintMutex);
     void tracePowerEfficient(bool powerEfficient);
@@ -329,14 +347,12 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     ndk::ScopedAStatus ret;
     hal::SessionConfig sessionConfig{.id = -1};
 
-    SessionCreationConfig creationConfig{
+    ASessionCreationConfig creationConfig{{
             .tids = std::vector<int32_t>(threadIds, threadIds + size),
             .targetWorkDurationNanos = initialTargetWorkDurationNanos,
-    };
+    }};
 
-    return APerformanceHintManager::createSessionUsingConfig(static_cast<ASessionCreationConfig*>(
-                                                                     &creationConfig),
-                                                             tag, isJava);
+    return APerformanceHintManager::createSessionUsingConfig(&creationConfig, tag, isJava);
 }
 
 APerformanceHintSession* APerformanceHintManager::createSessionUsingConfig(
@@ -345,10 +361,28 @@ APerformanceHintSession* APerformanceHintManager::createSessionUsingConfig(
     hal::SessionConfig sessionConfig{.id = -1};
     ndk::ScopedAStatus ret;
 
+    // Hold the tokens weakly until we actually need them,
+    // then promote them, then drop all strong refs after
+    if (!sessionCreationConfig->layers.empty()) {
+        for (auto&& layerIter = sessionCreationConfig->layers.begin();
+             layerIter != sessionCreationConfig->layers.end();) {
+            sp<IBinder> promoted = layerIter->promote();
+            if (promoted == nullptr) {
+                layerIter = sessionCreationConfig->layers.erase(layerIter);
+            } else {
+                sessionCreationConfig->layerTokens.push_back(
+                        ndk::SpAIBinder(AIBinder_fromPlatformBinder(promoted.get())));
+                ++layerIter;
+            }
+        }
+    }
+
     ret = mHintManager->createHintSessionWithConfig(mToken, tag,
                                                     *static_cast<SessionCreationConfig*>(
                                                             sessionCreationConfig),
                                                     &sessionConfig, &session);
+
+    sessionCreationConfig->layerTokens.clear();
 
     if (!ret.isOk() || !session) {
         ALOGE("%s: PerformanceHint cannot create session. %s", __FUNCTION__, ret.getMessage());
@@ -679,6 +713,57 @@ int APerformanceHintSession::reportActualWorkDurationInternal(AWorkDuration* wor
     return 0;
 }
 
+status_t APerformanceHintSession::setNativeSurfaces(ANativeWindow** windows, int numWindows,
+                                                    ASurfaceControl** controls,
+                                                    int numSurfaceControls) {
+    if (!mSessionConfig.has_value()) {
+        return ENOTSUP;
+    }
+
+    std::vector<sp<IBinder>> layerHandles;
+    APerformanceHintManager::layersFromNativeSurfaces<sp<IBinder>>(windows, numWindows, controls,
+                                                                   numSurfaceControls,
+                                                                   layerHandles);
+
+    std::vector<ndk::SpAIBinder> ndkLayerHandles;
+    for (auto&& handle : layerHandles) {
+        ndkLayerHandles.emplace_back(ndk::SpAIBinder(AIBinder_fromPlatformBinder(handle)));
+    }
+
+    mHintSession->associateToLayers(ndkLayerHandles);
+    return 0;
+}
+
+template <class T>
+void APerformanceHintManager::layersFromNativeSurfaces(ANativeWindow** windows, int numWindows,
+                                                       ASurfaceControl** controls,
+                                                       int numSurfaceControls,
+                                                       std::vector<T>& out) {
+    std::scoped_lock lock(sHintMutex);
+    if (windows != nullptr) {
+        std::vector<ANativeWindow*> windowVec(windows, windows + numWindows);
+        for (auto&& window : windowVec) {
+            Surface* surface = static_cast<Surface*>(window);
+            if (Surface::isValid(surface)) {
+                const sp<IBinder>& handle = surface->getSurfaceControlHandle();
+                if (handle != nullptr) {
+                    out.push_back(handle);
+                }
+            }
+        }
+    }
+
+    if (controls != nullptr) {
+        std::vector<ASurfaceControl*> controlVec(controls, controls + numSurfaceControls);
+        for (auto&& aSurfaceControl : controlVec) {
+            SurfaceControl* control = reinterpret_cast<SurfaceControl*>(aSurfaceControl);
+            if (control->isValid()) {
+                out.push_back(control->getHandle());
+            }
+        }
+    }
+}
+
 // ===================================== FMQ wrapper implementation
 
 bool FMQWrapper::isActive() {
@@ -963,8 +1048,7 @@ APerformanceHintSession* APerformanceHint_createSessionFromJava(
                                   hal::SessionTag::APP, true);
 }
 
-APerformanceHintSession* APerformanceHint_borrowSessionFromJava(JNIEnv* env,
-                                                                    jobject sessionObj) {
+APerformanceHintSession* APerformanceHint_borrowSessionFromJava(JNIEnv* env, jobject sessionObj) {
     VALIDATE_PTR(env)
     VALIDATE_PTR(sessionObj)
     return APerformanceHintManager::getInstance()->getSessionFromJava(env, sessionObj);
@@ -1063,6 +1147,14 @@ int APerformanceHint_notifyWorkloadReset(APerformanceHintSession* session, bool 
         return ENOTSUP;
     }
     return session->notifyWorkloadReset(cpu, gpu, debugName);
+}
+
+int APerformanceHint_setNativeSurfaces(APerformanceHintSession* session,
+                                       ANativeWindow** nativeWindows, int nativeWindowsSize,
+                                       ASurfaceControl** surfaceControls, int surfaceControlsSize) {
+    VALIDATE_PTR(session)
+    return session->setNativeSurfaces(nativeWindows, nativeWindowsSize, surfaceControls,
+                                      surfaceControlsSize);
 }
 
 AWorkDuration* AWorkDuration_create() {
@@ -1180,6 +1272,11 @@ int ASessionCreationConfig_setGraphicsPipeline(ASessionCreationConfig* config, b
         config->modesToEnable.push_back(hal::SessionMode::GRAPHICS_PIPELINE);
     } else {
         std::erase(config->modesToEnable, hal::SessionMode::GRAPHICS_PIPELINE);
+
+        // Remove automatic timing modes if we turn off GRAPHICS_PIPELINE,
+        // as it is a strict pre-requisite for these to run
+        std::erase(config->modesToEnable, hal::SessionMode::AUTO_CPU);
+        std::erase(config->modesToEnable, hal::SessionMode::AUTO_GPU);
     }
     return 0;
 }
@@ -1196,4 +1293,49 @@ void APerformanceHint_getRateLimiterPropertiesForTesting(int32_t* maxLoadHintsPe
 
 void APerformanceHint_setUseNewLoadHintBehaviorForTesting(bool newBehavior) {
     kForceNewHintBehavior = newBehavior;
+}
+
+int ASessionCreationConfig_setNativeSurfaces(ASessionCreationConfig* config,
+                                             ANativeWindow** nativeWindows, int nativeWindowsSize,
+                                             ASurfaceControl** surfaceControls,
+                                             int surfaceControlsSize) {
+    VALIDATE_PTR(config)
+
+    APerformanceHintManager::layersFromNativeSurfaces<wp<IBinder>>(nativeWindows, nativeWindowsSize,
+                                                                   surfaceControls,
+                                                                   surfaceControlsSize,
+                                                                   config->layers);
+
+    if (config->layers.empty()) {
+        return EINVAL;
+    }
+
+    return 0;
+}
+
+int ASessionCreationConfig_setUseAutoTiming(ASessionCreationConfig* _Nonnull config, bool cpu,
+                                            bool gpu) {
+    VALIDATE_PTR(config)
+    if ((cpu || gpu) && !config->hasMode(hal::SessionMode::GRAPHICS_PIPELINE)) {
+        ALOGE("Automatic timing is not supported unless graphics pipeline mode is enabled first");
+        return ENOTSUP;
+    }
+
+    if (config->hasMode(hal::SessionMode::AUTO_CPU)) {
+        if (!cpu) {
+            std::erase(config->modesToEnable, hal::SessionMode::AUTO_CPU);
+        }
+    } else if (cpu) {
+        config->modesToEnable.push_back(static_cast<hal::SessionMode>(hal::SessionMode::AUTO_CPU));
+    }
+
+    if (config->hasMode(hal::SessionMode::AUTO_GPU)) {
+        if (!gpu) {
+            std::erase(config->modesToEnable, hal::SessionMode::AUTO_GPU);
+        }
+    } else if (gpu) {
+        config->modesToEnable.push_back(static_cast<hal::SessionMode>(hal::SessionMode::AUTO_GPU));
+    }
+
+    return 0;
 }

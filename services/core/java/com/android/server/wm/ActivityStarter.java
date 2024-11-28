@@ -1838,7 +1838,7 @@ class ActivityStarter {
                     remoteTransition, null /* displayChange */);
         } else if (result == START_SUCCESS && mStartActivity.isState(RESUMED)) {
             // Do nothing if the activity is started and is resumed directly.
-        } else if (isStarted) {
+        } else if (isStarted && (mBalCode != BAL_BLOCK || mDoResume)) {
             // Make the collecting transition wait until this request is ready.
             if (transition != null) {
                 transition.setReady(started, false);

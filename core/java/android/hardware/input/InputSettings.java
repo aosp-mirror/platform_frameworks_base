@@ -27,6 +27,7 @@ import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
+import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
@@ -374,6 +375,15 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for disabling system gestures on touchpads is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadSystemGestureDisableFeatureFlagEnabled() {
+        return touchpadSystemGestureDisable();
+    }
+
+    /**
      * Returns true if the feature flag for touchpad visualizer is enabled.
      *
      * @hide
@@ -527,6 +537,40 @@ public class InputSettings {
                 KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED, UserHandle.USER_CURRENT);
         return customizedShortcut != KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED
                 && isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+    }
+
+    /**
+     * Returns true if system gestures (three- and four-finger swipes) should be enabled for
+     * touchpads.
+     *
+     * @param context The application context.
+     * @return Whether system gestures on touchpads are enabled
+     *
+     * @hide
+     */
+    public static boolean useTouchpadSystemGestures(@NonNull Context context) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return true;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, 1, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets whether system gestures are enabled for touchpads.
+     *
+     * @param context The application context.
+     * @param enabled True to enable system gestures.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadSystemGesturesEnabled(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, enabled ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     /**

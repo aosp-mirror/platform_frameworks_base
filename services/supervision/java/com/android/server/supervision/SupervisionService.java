@@ -19,11 +19,16 @@ package com.android.server.supervision;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.supervision.ISupervisionManager;
 import android.app.supervision.SupervisionManagerInternal;
+import android.app.supervision.flags.Flags;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -33,6 +38,7 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
@@ -42,6 +48,7 @@ import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /** Service for handling system supervision. */
 public class SupervisionService extends ISupervisionManager.Stub {
@@ -65,12 +72,10 @@ public class SupervisionService extends ISupervisionManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
     }
 
-    void syncStateWithDevicePolicyManager(TargetUser user) {
-        if (user.isPreCreated()) return;
-
+    private void syncStateWithDevicePolicyManager(@UserIdInt int userId) {
         // Ensure that supervision is enabled when supervision app is the profile owner.
-        if (android.app.admin.flags.Flags.enableSupervisionServiceSync() && isProfileOwner(user)) {
-            setSupervisionEnabledForUser(user.getUserIdentifier(), true);
+        if (Flags.enableSyncWithDpm() && isProfileOwner(userId)) {
+            setSupervisionEnabledForUser(userId, true);
         }
     }
 
@@ -103,7 +108,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
             pw.println("SupervisionService state:");
             pw.increaseIndent();
 
-            var users = mUserManagerInternal.getUsers(false);
+            List<UserInfo> users = mUserManagerInternal.getUsers(false);
             synchronized (getLockObject()) {
                 for (var user : users) {
                     getUserDataLocked(user.id).dump(pw);
@@ -136,8 +141,8 @@ public class SupervisionService extends ISupervisionManager.Stub {
     }
 
     /** Returns whether the supervision app has profile owner status. */
-    private boolean isProfileOwner(TargetUser user) {
-        ComponentName profileOwner = mDpmInternal.getProfileOwnerAsUser(user.getUserIdentifier());
+    private boolean isProfileOwner(@UserIdInt int userId) {
+        ComponentName profileOwner = mDpmInternal.getProfileOwnerAsUser(userId);
         if (profileOwner == null) {
             return false;
         }
@@ -154,15 +159,46 @@ public class SupervisionService extends ISupervisionManager.Stub {
             mSupervisionService = new SupervisionService(context);
         }
 
+        @VisibleForTesting
+        Lifecycle(Context context, SupervisionService supervisionService) {
+            super(context);
+            mSupervisionService = supervisionService;
+        }
+
         @Override
         public void onStart() {
             publishLocalService(SupervisionManagerInternal.class, mSupervisionService.mInternal);
             publishBinderService(Context.SUPERVISION_SERVICE, mSupervisionService);
+            if (Flags.enableSyncWithDpm()) {
+                registerProfileOwnerListener();
+            }
+        }
+
+        @VisibleForTesting
+        void registerProfileOwnerListener() {
+            IntentFilter poIntentFilter = new IntentFilter();
+            poIntentFilter.addAction(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED);
+            poIntentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+            getContext()
+                    .registerReceiverForAllUsers(
+                            new ProfileOwnerBroadcastReceiver(),
+                            poIntentFilter,
+                            /* brodcastPermission= */ null,
+                            /* scheduler= */ null);
         }
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
-            mSupervisionService.syncStateWithDevicePolicyManager(user);
+            if (!user.isPreCreated()) {
+                mSupervisionService.syncStateWithDevicePolicyManager(user.getUserIdentifier());
+            }
+        }
+
+        private final class ProfileOwnerBroadcastReceiver extends BroadcastReceiver {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mSupervisionService.syncStateWithDevicePolicyManager(getSendingUserId());
+            }
         }
     }
 

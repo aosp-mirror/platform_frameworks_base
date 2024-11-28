@@ -101,11 +101,16 @@ public class BackupAgentConnectionManager {
 
     private static final class BackupAgentConnection {
         public final ApplicationInfo appInfo;
+        public final int backupMode;
+        public final boolean inRestrictedMode;
         public IBackupAgent backupAgent;
         public boolean connecting = true; // Assume we are trying to connect on creation.
 
-        private BackupAgentConnection(ApplicationInfo appInfo) {
+        private BackupAgentConnection(ApplicationInfo appInfo, int backupMode,
+                boolean inRestrictedMode) {
             this.appInfo = appInfo;
+            this.backupMode = backupMode;
+            this.inRestrictedMode = inRestrictedMode;
         }
     }
 
@@ -113,26 +118,31 @@ public class BackupAgentConnectionManager {
      * Fires off a backup agent, blocking until it attaches (i.e. ActivityManager calls
      * {@link #agentConnected(String, IBinder)}) or until this operation times out.
      *
-     * @param mode a {@code BACKUP_MODE} from {@link android.app.ApplicationThreadConstants}.
+     * @param backupMode a {@code BACKUP_MODE} from {@link android.app.ApplicationThreadConstants}.
      */
     @Nullable
-    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode,
+    public IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int backupMode,
             @BackupAnnotations.BackupDestination int backupDestination) {
+        if (app == null) {
+            Slog.w(TAG, mUserIdMsg + "bindToAgentSynchronous for null app");
+            return null;
+        }
+
         synchronized (mAgentConnectLock) {
-            boolean useRestrictedMode = shouldUseRestrictedBackupModeForPackage(mode,
+            boolean useRestrictedMode = shouldUseRestrictedBackupModeForPackage(backupMode,
                     app.packageName);
             if (mCurrentConnection != null) {
                 Slog.e(TAG, mUserIdMsg + "binding to new agent before unbinding from old one: "
                         + mCurrentConnection.appInfo.packageName);
             }
-            mCurrentConnection = new BackupAgentConnection(app);
+            mCurrentConnection = new BackupAgentConnection(app, backupMode, useRestrictedMode);
 
             // bindBackupAgent() is an async API. It will kick off the app's process and call
             // agentConnected() when it receives the agent from the app.
             boolean startedBindSuccessfully = false;
             try {
-                startedBindSuccessfully = mActivityManager.bindBackupAgent(app.packageName, mode,
-                        mUserId, backupDestination, useRestrictedMode);
+                startedBindSuccessfully = mActivityManager.bindBackupAgent(app.packageName,
+                        backupMode, mUserId, backupDestination, useRestrictedMode);
             } catch (RemoteException e) {
                 // can't happen - ActivityManager is local
             }
@@ -173,26 +183,64 @@ public class BackupAgentConnectionManager {
     /**
      * Tell the ActivityManager that we are done with the {@link IBackupAgent} of this {@code app}.
      * It will tell the app to destroy the agent.
+     *
+     * <p>If {@code allowKill} is set, this will kill the app's process if the app is in restricted
+     * mode or if it was started for restore and specified {@code android:killAfterRestore} in its
+     * manifest.
+     *
+     * @see #shouldUseRestrictedBackupModeForPackage(int, String)
      */
-    public void unbindAgent(ApplicationInfo app) {
-        synchronized (mAgentConnectLock) {
-            if (mCurrentConnection == null) {
-                Slog.w(TAG, mUserIdMsg + "unbindAgent but no current connection");
-            } else if (!mCurrentConnection.appInfo.packageName.equals(app.packageName)) {
-                Slog.w(TAG, mUserIdMsg + "unbindAgent for unexpected package: " + app.packageName
-                        + " expected: " + mCurrentConnection.appInfo.packageName);
-            } else {
-                mCurrentConnection = null;
-            }
+    public void unbindAgent(ApplicationInfo app, boolean allowKill) {
+        if (app == null) {
+            Slog.w(TAG, mUserIdMsg + "unbindAgent for null app");
+            return;
+        }
 
+        synchronized (mAgentConnectLock) {
             // Even if we weren't expecting to be bound to this agent, we should still call
             // ActivityManager just in case. It will ignore the call if it also wasn't expecting it.
             try {
                 mActivityManager.unbindBackupAgent(app);
+
+                // Evaluate this before potentially setting mCurrentConnection = null.
+                boolean willKill = allowKill && shouldKillAppOnUnbind(app);
+
+                if (mCurrentConnection == null) {
+                    Slog.w(TAG, mUserIdMsg + "unbindAgent but no current connection");
+                } else if (!mCurrentConnection.appInfo.packageName.equals(app.packageName)) {
+                    Slog.w(TAG,
+                            mUserIdMsg + "unbindAgent for unexpected package: " + app.packageName
+                                    + " expected: " + mCurrentConnection.appInfo.packageName);
+                } else {
+                    mCurrentConnection = null;
+                }
+
+                if (willKill) {
+                    Slog.i(TAG, mUserIdMsg + "Killing agent host process");
+                    mActivityManager.killApplicationProcess(app.processName, app.uid);
+                }
             } catch (RemoteException e) {
                 // Can't happen - activity manager is local
             }
         }
+    }
+
+    @GuardedBy("mAgentConnectLock")
+    private boolean shouldKillAppOnUnbind(ApplicationInfo app) {
+        // We don't ask system UID processes to be killed.
+        if (UserHandle.isCore(app.uid)) {
+            return false;
+        }
+
+        // If the app is in restricted mode or if we're not sure if it is because our internal
+        // state is messed up, we need to avoid it being stuck in it.
+        if (mCurrentConnection == null || mCurrentConnection.inRestrictedMode) {
+            return true;
+        }
+
+        // App was doing restore and asked to be killed afterwards.
+        return isBackupModeRestore(mCurrentConnection.backupMode)
+                && (app.flags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0;
     }
 
     /**
@@ -307,14 +355,14 @@ public class BackupAgentConnectionManager {
      */
     private boolean shouldUseRestrictedBackupModeForPackage(
             @BackupAnnotations.OperationType int mode, String packageName) {
-        if (!Flags.enableRestrictedModeChanges()) {
-            return true;
-        }
-
         // Key/Value apps are never put in restricted mode.
         if (mode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
                 || mode == ApplicationThreadConstants.BACKUP_MODE_RESTORE) {
             return false;
+        }
+
+        if (!Flags.enableRestrictedModeChanges()) {
+            return true;
         }
 
         try {
@@ -350,6 +398,11 @@ public class BackupAgentConnectionManager {
             return false;
         }
         return true;
+    }
+
+    private static boolean isBackupModeRestore(int backupMode) {
+        return backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE
+                || backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL;
     }
 
     @VisibleForTesting

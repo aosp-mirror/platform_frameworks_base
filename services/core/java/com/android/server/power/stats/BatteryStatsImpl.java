@@ -409,11 +409,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 @Override
                 public long getWakelockDurationMillis() {
                     synchronized (BatteryStatsImpl.this) {
-                        long rawRealtimeUs = mClock.uptimeMillis() * 1000;
-                        long batteryUptimeUs = getBatteryUptime(rawRealtimeUs);
-                        long screenOnTimeUs = getScreenOnTime(rawRealtimeUs,
+                        long batteryUptimeUs = getBatteryUptime(mClock.uptimeMillis() * 1000);
+                        long screenOnTimeUs = getScreenOnTime(mClock.elapsedRealtime() * 1000,
                                 BatteryStats.STATS_SINCE_CHARGED);
-                        return (batteryUptimeUs - screenOnTimeUs) / 1000;
+                        return Math.max(0, (batteryUptimeUs - screenOnTimeUs) / 1000);
                     }
                 }
 
@@ -437,8 +436,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                 }
                             }
 
-                            if (wakeLockTimeUs != 0) {
-                                callback.onUidWakelockDuration(u.getUid(), wakeLockTimeUs / 1000);
+                            long wakelockTimeMs = wakeLockTimeUs / 1000;
+                            if (wakelockTimeMs != 0) {
+                                callback.onUidWakelockDuration(u.getUid(), wakelockTimeMs);
                             }
                         }
                     }

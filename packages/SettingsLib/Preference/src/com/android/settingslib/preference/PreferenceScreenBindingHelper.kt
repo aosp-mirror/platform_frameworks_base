@@ -60,6 +60,8 @@ class PreferenceScreenBindingHelper(
             override fun <T> findPreference(key: String) =
                 preferenceScreen.findPreference(key) as T?
 
+            override fun <T : Any> requirePreference(key: String) = findPreference<T>(key)!!
+
             override fun notifyPreferenceChange(key: String) =
                 notifyChange(key, CHANGE_REASON_STATE)
 

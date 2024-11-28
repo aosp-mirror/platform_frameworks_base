@@ -31,3 +31,4 @@ per-file input.cpp = file:/INPUT_OWNERS
 
 # PerformanceHint
 per-file performance_hint.cpp = file:/ADPF_OWNERS
+per-file thermal.cpp = file:/ADPF_OWNERS

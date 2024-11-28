@@ -21,8 +21,8 @@ import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserManager
 import android.util.SparseArray
-import com.android.window.flags.Flags
 import com.android.internal.protolog.ProtoLog
+import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -53,11 +53,9 @@ class DesktopUserRepositories(
             /** Gets [DesktopRepository] for existing [userId] or creates a new one. */
             fun getOrCreate(userId: Int): DesktopRepository =
                 this[userId]
-                    ?: DesktopRepository(
-                        persistentRepository,
-                        mainCoroutineScope,
-                        userId)
-                        .also { this[userId] = it }
+                    ?: DesktopRepository(persistentRepository, mainCoroutineScope, userId).also {
+                        this[userId] = it
+                    }
         }
 
     init {

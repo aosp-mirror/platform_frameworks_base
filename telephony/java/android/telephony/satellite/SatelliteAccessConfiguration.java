@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,7 +35,8 @@ import java.util.Objects;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public final class SatelliteAccessConfiguration implements Parcelable {
     /**
      * The list of satellites available at the current location.
@@ -54,6 +56,7 @@ public final class SatelliteAccessConfiguration implements Parcelable {
      * @param satelliteInfos The list of {@link SatelliteInfo} objects representing the satellites
      *                       accessible with this configuration.
      * @param tagIdList      The list of tag IDs associated with this configuration.
+     * @hide
      */
     public SatelliteAccessConfiguration(@NonNull List<SatelliteInfo> satelliteInfos,
             @NonNull List<Integer> tagIdList) {
@@ -61,12 +64,18 @@ public final class SatelliteAccessConfiguration implements Parcelable {
         mTagIdList = tagIdList;
     }
 
+    /**
+     * Constructor for {@link SatelliteAccessConfiguration}.
+     * @param in parcel used to create {@link SatelliteAccessConfiguration} object
+     * @hide
+     */
     public SatelliteAccessConfiguration(Parcel in) {
         mSatelliteInfoList = in.createTypedArrayList(SatelliteInfo.CREATOR);
         mTagIdList = new ArrayList<>();
         in.readList(mTagIdList, Integer.class.getClassLoader(), Integer.class);
     }
 
+    @NonNull
     public static final Creator<SatelliteAccessConfiguration> CREATOR =
             new Creator<SatelliteAccessConfiguration>() {
                 @Override

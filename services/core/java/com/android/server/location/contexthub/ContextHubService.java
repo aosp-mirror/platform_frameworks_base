@@ -155,6 +155,9 @@ public class ContextHubService extends IContextHubService.Stub {
     // The manager for sending messages to/from clients
     private ContextHubClientManager mClientManager;
 
+    // Manages endpoint and its sessions between apps and HAL
+    private ContextHubEndpointManager mEndpointManager;
+
     // The default client for old API clients
     private Map<Integer, IContextHubClient> mDefaultClientMap;
 
@@ -330,14 +333,17 @@ public class ContextHubService extends IContextHubService.Stub {
             HubInfoRegistry registry;
             try {
                 registry = new HubInfoRegistry(mContextHubWrapper);
+                mEndpointManager = new ContextHubEndpointManager(mContext, mContextHubWrapper);
                 Log.i(TAG, "Enabling generic offload API");
             } catch (UnsupportedOperationException e) {
+                mEndpointManager = null;
                 registry = null;
                 Log.w(TAG, "Generic offload API not supported, disabling");
             }
             mHubInfoRegistry = registry;
         } else {
             mHubInfoRegistry = null;
+            mEndpointManager = null;
             Log.i(TAG, "Disabling generic offload API");
         }
 
@@ -790,8 +796,11 @@ public class ContextHubService extends IContextHubService.Stub {
             HubEndpointInfo pendingHubEndpointInfo, IContextHubEndpointCallback callback)
             throws RemoteException {
         super.registerEndpoint_enforcePermission();
-        // TODO(b/375487784): Implement this
-        return null;
+        if (mEndpointManager == null) {
+            Log.e(TAG, "ContextHubService.registerEndpoint: endpoint manager failed to initialize");
+            throw new UnsupportedOperationException("Endpoint registration is not supported");
+        }
+        return mEndpointManager.registerEndpoint(pendingHubEndpointInfo, callback);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)

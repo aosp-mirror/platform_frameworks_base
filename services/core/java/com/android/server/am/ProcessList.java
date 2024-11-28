@@ -22,6 +22,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
+import static android.content.pm.Flags.appCompatOption16kb;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
@@ -2023,6 +2024,16 @@ public final class ProcessList {
             // Property defaults to true currently.
             if (!TextUtils.isEmpty(useAppImageCache) && !useAppImageCache.equals("false")) {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
+            }
+
+            if (appCompatOption16kb()) {
+                boolean is16KbDevice = Os.sysconf(OsConstants._SC_PAGESIZE) == 16384;
+                if (is16KbDevice
+                        && mService.mContext
+                        .getPackageManager()
+                        .isPageSizeCompatEnabled(app.info.packageName)) {
+                    runtimeFlags |= Zygote.ENABLE_PAGE_SIZE_APP_COMPAT;
+                }
             }
 
             String invokeWith = null;
