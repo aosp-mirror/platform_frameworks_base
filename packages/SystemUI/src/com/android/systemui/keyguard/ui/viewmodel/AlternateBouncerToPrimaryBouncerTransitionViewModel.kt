@@ -30,9 +30,11 @@ import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Com
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.transitions.TO_BOUNCER_FADE_FRACTION
+import com.android.systemui.window.flag.WindowBlurFlag
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * Breaks down ALTERNATE BOUNCER->PRIMARY BOUNCER transition into discrete steps for corresponding
@@ -64,11 +66,15 @@ constructor(
             else -> { step -> 1f - step }
         }
 
-    val lockscreenAlpha: Flow<Float> =
+    private val alphaFlow =
         transitionAnimation.sharedFlow(
             duration = FromAlternateBouncerTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
             onStep = alphaForAnimationStep,
         )
+
+    val lockscreenAlpha: Flow<Float> = if (WindowBlurFlag.isEnabled) alphaFlow else emptyFlow()
+
+    val notificationAlpha: Flow<Float> = alphaFlow
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
