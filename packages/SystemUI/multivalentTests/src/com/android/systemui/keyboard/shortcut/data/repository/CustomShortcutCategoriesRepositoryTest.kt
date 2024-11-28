@@ -88,7 +88,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
-    fun categories_emitsCorrectlyConvertedShortcutCategories() {
+    fun categories_correctlyConvertsAPIModelsToShortcutHelperModels() {
         testScope.runTest {
             whenever(inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
                 .thenReturn(allCustomizableInputGesturesWithSimpleShortcutCombinations)
