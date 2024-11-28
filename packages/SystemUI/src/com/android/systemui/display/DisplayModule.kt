@@ -30,6 +30,7 @@ import com.android.systemui.display.data.repository.FocusedDisplayRepository
 import com.android.systemui.display.data.repository.FocusedDisplayRepositoryImpl
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractorImpl
+import com.android.systemui.display.domain.interactor.DisplayWindowPropertiesInteractorModule
 import com.android.systemui.display.domain.interactor.RearDisplayStateInteractor
 import com.android.systemui.display.domain.interactor.RearDisplayStateInteractorImpl
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
@@ -41,7 +42,7 @@ import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
 /** Module binding display related classes. */
-@Module
+@Module(includes = [DisplayWindowPropertiesInteractorModule::class])
 interface DisplayModule {
     @Binds
     fun bindConnectedDisplayInteractor(

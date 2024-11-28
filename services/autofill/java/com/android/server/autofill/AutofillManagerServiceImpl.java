@@ -900,13 +900,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill selection when an authentication was selected.
      */
     void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState,
-            int uiType) {
+            int uiType, @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
                                 null, null, null, null, null, null,
-                                NO_SAVE_UI_REASON_NONE, uiType));
+                                NO_SAVE_UI_REASON_NONE, uiType, focusedId));
             }
         }
     }
@@ -915,13 +915,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill selection when an dataset authentication was selected.
      */
     void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState, int uiType) {
+            @Nullable Bundle clientState, int uiType, @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
                                 clientState, null, null, null, null, null, null, null, null,
-                                NO_SAVE_UI_REASON_NONE, uiType));
+                                NO_SAVE_UI_REASON_NONE, uiType, focusedId));
             }
         }
     }
@@ -933,7 +933,7 @@ final class AutofillManagerServiceImpl
         synchronized (mLock) {
             if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
-                        null, null, null, null, null, null, null));
+                        null, null, null, null, null, null, null, /* focusedId= */ null));
             }
         }
     }
@@ -942,13 +942,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill response when a dataset was selected.
      */
     void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState,  int uiType) {
+            @Nullable Bundle clientState,  int uiType, @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
                                 null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                uiType));
+                                uiType, focusedId));
             }
         }
     }
@@ -956,13 +956,14 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a dataset is shown.
      */
-    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType) {
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType,
+            @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetShown", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                                 null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                uiType));
+                                uiType, focusedId));
             }
         }
     }
@@ -970,7 +971,8 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a view was entered.
      */
-    void logViewEntered(int sessionId, @Nullable Bundle clientState) {
+    void logViewEntered(int sessionId, @Nullable Bundle clientState,
+            @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (!isValidEventLocked("logViewEntered", sessionId)) {
                 return;
@@ -988,7 +990,7 @@ final class AutofillManagerServiceImpl
 
             mEventHistory.addEvent(
                     new Event(Event.TYPE_VIEW_REQUESTED_AUTOFILL, null, clientState, null,
-                            null, null, null, null, null, null, null));
+                            null, null, null, null, null, null, null, focusedId));
         }
     }
 
@@ -1001,7 +1003,8 @@ final class AutofillManagerServiceImpl
             }
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                            clientState, null, null, null, null, null, null, null, null));
+                            clientState, null, null, null, null, null, null, null, null,
+                            /* focusedId= */ null));
         }
     }
 
@@ -1014,7 +1017,7 @@ final class AutofillManagerServiceImpl
             }
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_SELECTED, suggestionId, clientState, null, null,
-                            null, null, null, null, null, null));
+                            null, null, null, null, null, null, /* focusedId= */ null));
         }
     }
 
@@ -1029,7 +1032,7 @@ final class AutofillManagerServiceImpl
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                             null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                            UI_TYPE_INLINE));
+                            UI_TYPE_INLINE, /* focusedId= */ null));
 
         }
     }
@@ -1113,7 +1116,8 @@ final class AutofillManagerServiceImpl
                     clientState, selectedDatasets, ignoredDatasets,
                     changedFieldIds, changedDatasetIds,
                     manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason));
+                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason,
+                    /* focusedId= */ null));
         }
     }
 

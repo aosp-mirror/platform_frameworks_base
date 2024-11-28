@@ -20,6 +20,7 @@ import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.FixMethodOrder
@@ -53,6 +54,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 open class EnterPipViaAppUiButtonTest(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { pipApp.clickEnterPipButton(wmHelper) }
     }

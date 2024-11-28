@@ -445,7 +445,12 @@ final class ScanPackageUtils {
                                     pkgSetting.getLegacyNativeLibraryPath(),
                                     parsedPackage.isNativeLibraryRootRequiresIsa(),
                                     pkgSetting.getCpuAbiOverride());
-                    pkgSetting.setPageSizeAppCompatFlags(mode);
+                    if (mode >= ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED) {
+                        pkgSetting.setPageSizeAppCompatFlags(mode);
+                    } else {
+                        Slog.e(TAG, "Error occurred while checking alignment of package : "
+                                + parsedPackage.getPackageName());
+                    }
                 }
             }
         }

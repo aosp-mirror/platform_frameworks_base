@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
@@ -25,6 +26,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -33,12 +35,18 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Scheduler for Shell initiated PiP transitions and animations.
@@ -50,6 +58,8 @@ public class PipScheduler {
     private final PipBoundsState mPipBoundsState;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
+    private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private PipTransitionController mPipTransitionController;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
@@ -61,11 +71,15 @@ public class PipScheduler {
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
             ShellExecutor mainExecutor,
-            PipTransitionState pipTransitionState) {
+            PipTransitionState pipTransitionState,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
+        mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
         mSurfaceControlTransactionFactory =
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
@@ -87,7 +101,7 @@ public class PipScheduler {
         wct.setBounds(pipTaskToken, null);
         // if we are hitting a multi-activity case
         // windowing mode change will reparent to original host task
-        wct.setWindowingMode(pipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setWindowingMode(pipTaskToken, getOutPipWindowingMode());
         return wct;
     }
 
@@ -239,6 +253,47 @@ public class PipScheduler {
         }
         mPipBoundsState.setBounds(newBounds);
         maybeUpdateMovementBounds();
+    }
+
+    /** Returns whether the display is in freeform windowing mode. */
+    private boolean isDisplayInFreeform() {
+        final DisplayAreaInfo tdaInfo = mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(
+                Objects.requireNonNull(mPipTransitionState.getPipTaskInfo()).displayId);
+        if (tdaInfo != null) {
+            return tdaInfo.configuration.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM;
+        }
+        return false;
+    }
+
+    /** Returns whether PiP is exiting while we're in desktop mode. */
+    private boolean isPipExitingToDesktopMode() {
+        return Flags.enableDesktopWindowingPip() && mDesktopUserRepositoriesOptional.isPresent()
+                && (mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(
+                Objects.requireNonNull(mPipTransitionState.getPipTaskInfo()).displayId) > 0
+                || isDisplayInFreeform());
+    }
+
+    /**
+     * The windowing mode to restore to when resizing out of PIP direction. Defaults to undefined
+     * and can be overridden to restore to an alternate windowing mode.
+     */
+    private int getOutPipWindowingMode() {
+        // If we are exiting PiP while the device is in Desktop mode (the task should expand to
+        // freeform windowing mode):
+        // 1) If the display windowing mode is freeform, set windowing mode to undefined so it will
+        //    resolve the windowing mode to the display's windowing mode.
+        // 2) If the display windowing mode is not freeform, set windowing mode to freeform.
+        if (isPipExitingToDesktopMode()) {
+            if (isDisplayInFreeform()) {
+                return WINDOWING_MODE_UNDEFINED;
+            } else {
+                return WINDOWING_MODE_FREEFORM;
+            }
+        }
+
+        // By default, or if the task is going to fullscreen, reset the windowing mode to undefined.
+        return WINDOWING_MODE_UNDEFINED;
     }
 
     @VisibleForTesting

@@ -360,43 +360,44 @@ public class AccessibilityShortcutController {
 
         // Avoid non-a11y users accidentally turning shortcut on without reading this carefully.
         // Put "don't turn on" as the primary action.
-        final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(
-                        // Use SystemUI context so we pick up any theme set in a vendor overlay
-                        mFrameworkObjectProvider.getSystemUiContext())
-                .setTitle(getShortcutWarningTitle(targets))
-                .setMessage(getShortcutWarningMessage(targets))
-                .setCancelable(false)
-                .setNegativeButton(R.string.accessibility_shortcut_on,
-                        (DialogInterface d, int which) -> enableDefaultHardwareShortcut(userId))
-                .setPositiveButton(R.string.accessibility_shortcut_off,
-                        (DialogInterface d, int which) -> {
-                            Set<String> targetServices =
-                                    ShortcutUtils.getShortcutTargetsFromSettings(
-                                            mContext,
-                                            HARDWARE,
+        final AlertDialog alertDialog =
+                mFrameworkObjectProvider
+                        .getAlertDialogBuilder(
+                                // Use SystemUI context so we pick up any theme set in a vendor
+                                // overlay
+                                mFrameworkObjectProvider.getSystemUiContext())
+                        .setTitle(getShortcutWarningTitle(targets))
+                        .setMessage(getShortcutWarningMessage(targets))
+                        .setCancelable(false)
+                        .setNegativeButton(
+                                R.string.accessibility_shortcut_on,
+                                (DialogInterface d, int which) ->
+                                        enableDefaultHardwareShortcut(userId))
+                        .setPositiveButton(
+                                R.string.accessibility_shortcut_off,
+                                (DialogInterface d, int which) -> {
+                                    Set<String> targetServices =
+                                            ShortcutUtils.getShortcutTargetsFromSettings(
+                                                    mContext, HARDWARE, userId);
+                                    am.enableShortcutsForTargets(
+                                            false, HARDWARE, targetServices, userId);
+                                    // If canceled, treat as if the dialog has never been shown
+                                    Settings.Secure.putIntForUser(
+                                            mContext.getContentResolver(),
+                                            Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                                            DialogStatus.NOT_SHOWN,
                                             userId);
-                            if (Flags.migrateEnableShortcuts()) {
-                                am.enableShortcutsForTargets(
-                                        false, HARDWARE, targetServices, userId);
-                            } else {
-                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
-                                        userId);
-                                ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
-                                        mContext, targetServices, userId);
-                            }
-                            // If canceled, treat as if the dialog has never been shown
-                            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
-                                    DialogStatus.NOT_SHOWN, userId);
-                        })
-                .setOnCancelListener((DialogInterface d) -> {
-                    // If canceled, treat as if the dialog has never been shown
-                    Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                            Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
-                            DialogStatus.NOT_SHOWN, userId);
-                })
-                .create();
+                                })
+                        .setOnCancelListener(
+                                (DialogInterface d) -> {
+                                    // If canceled, treat as if the dialog has never been shown
+                                    Settings.Secure.putIntForUser(
+                                            mContext.getContentResolver(),
+                                            Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                                            DialogStatus.NOT_SHOWN,
+                                            userId);
+                                })
+                        .create();
         return alertDialog;
     }
 
@@ -531,14 +532,8 @@ public class AccessibilityShortcutController {
             // Default service is invalid, so nothing we can do here.
             return;
         }
-        if (Flags.migrateEnableShortcuts()) {
-            accessibilityManager.enableShortcutsForTargets(true, HARDWARE,
-                    Set.of(defaultServiceComponent.flattenToString()), userId);
-        } else {
-            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                    defaultServiceComponent.flattenToString(), userId);
-        }
+        accessibilityManager.enableShortcutsForTargets(true, HARDWARE,
+                Set.of(defaultServiceComponent.flattenToString()), userId);
     }
 
     private boolean performTtsPrompt(AlertDialog alertDialog) {

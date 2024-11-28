@@ -29,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Operation to deal with Text data */
-public class FloatConstant implements com.android.internal.widget.remotecompose.core.Operation {
+public class FloatConstant extends Operation {
     private static final int OP_CODE = Operations.DATA_FLOAT;
     private static final String CLASS_NAME = "FloatConstant";
     public int mTextId;
@@ -56,6 +56,11 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -73,6 +78,12 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
         buffer.writeFloat(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
 
@@ -80,6 +91,11 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
         operations.add(new FloatConstant(textId, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A float and its associated id")

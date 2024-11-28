@@ -53,6 +53,8 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         // nothing here
@@ -129,42 +131,67 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
             float maxHeight,
             @NonNull MeasurePass measure) {
         boolean hasWrap = true;
-        float measuredWidth =
-                Math.min(maxWidth, computeModifierDefinedWidth() - mMarginLeft - mMarginRight);
-        float measuredHeight =
-                Math.min(maxHeight, computeModifierDefinedHeight() - mMarginTop - mMarginBottom);
-        float insetMaxWidth = maxWidth - mMarginLeft - mMarginRight;
-        float insetMaxHeight = maxHeight - mMarginTop - mMarginBottom;
+
+        float measuredWidth = Math.min(maxWidth, computeModifierDefinedWidth());
+        float measuredHeight = Math.min(maxHeight, computeModifierDefinedHeight());
+        float insetMaxWidth = maxWidth - mPaddingLeft - mPaddingRight;
+        float insetMaxHeight = maxHeight - mPaddingTop - mPaddingBottom;
+
         if (mWidthModifier.isIntrinsicMin()) {
             maxWidth = intrinsicWidth();
         }
         if (mHeightModifier.isIntrinsicMin()) {
             maxHeight = intrinsicHeight();
         }
-        if (mWidthModifier.isWrap() || mHeightModifier.isWrap()) { // TODO: potential npe -- bbade@
+
+        boolean hasHorizontalWrap = mWidthModifier.isWrap();
+        boolean hasVerticalWrap = mHeightModifier.isWrap();
+        if (hasHorizontalWrap || hasVerticalWrap) { // TODO: potential npe -- bbade@
             mCachedWrapSize.setWidth(0f);
             mCachedWrapSize.setHeight(0f);
-            computeWrapSize(context, maxWidth, maxHeight, measure, mCachedWrapSize);
+            float wrapMaxWidth = insetMaxWidth;
+            float wrapMaxHeight = insetMaxHeight;
+            if (hasHorizontalWrap) {
+                wrapMaxWidth = insetMaxWidth - mPaddingLeft - mPaddingRight;
+            }
+            if (hasVerticalWrap) {
+                wrapMaxHeight = insetMaxHeight - mPaddingTop - mPaddingBottom;
+            }
+            computeWrapSize(
+                    context,
+                    wrapMaxWidth,
+                    wrapMaxHeight,
+                    mWidthModifier.isWrap(),
+                    mHeightModifier.isWrap(),
+                    measure,
+                    mCachedWrapSize);
             measuredWidth = mCachedWrapSize.getWidth();
+            if (hasHorizontalWrap) {
+                measuredWidth += mPaddingLeft + mPaddingRight;
+            }
             measuredHeight = mCachedWrapSize.getHeight();
+            if (hasVerticalWrap) {
+                measuredHeight += mPaddingTop + mPaddingBottom;
+            }
         } else {
             hasWrap = false;
         }
+
         if (isInHorizontalFill()) {
-            measuredWidth = insetMaxWidth;
+            measuredWidth = maxWidth;
         } else if (mWidthModifier.hasWeight()) {
             measuredWidth = Math.max(measuredWidth, computeModifierDefinedWidth());
         } else {
             measuredWidth = Math.max(measuredWidth, minWidth);
-            measuredWidth = Math.min(measuredWidth, insetMaxWidth);
+            measuredWidth = Math.min(measuredWidth, maxWidth);
         }
         if (isInVerticalFill()) { // todo: potential npe -- bbade@
-            measuredHeight = insetMaxHeight;
+            measuredHeight = maxHeight;
         } else if (mHeightModifier.hasWeight()) {
             measuredHeight = Math.max(measuredHeight, computeModifierDefinedHeight());
         } else {
             measuredHeight = Math.max(measuredHeight, minHeight);
-            measuredHeight = Math.min(measuredHeight, insetMaxHeight);
+            measuredHeight = Math.min(measuredHeight, maxHeight);
         }
         if (minWidth == maxWidth) {
             measuredWidth = maxWidth;
@@ -172,20 +199,27 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         if (minHeight == maxHeight) {
             measuredHeight = maxHeight;
         }
-        measuredWidth = Math.min(measuredWidth, insetMaxWidth);
-        measuredHeight = Math.min(measuredHeight, insetMaxHeight);
+
         if (!hasWrap) {
             if (hasHorizontalScroll()) {
                 mCachedWrapSize.setWidth(0f);
                 mCachedWrapSize.setHeight(0f);
-                computeWrapSize(context, Float.MAX_VALUE, maxHeight, measure, mCachedWrapSize);
+                computeWrapSize(
+                        context,
+                        Float.MAX_VALUE,
+                        maxHeight,
+                        false,
+                        false,
+                        measure,
+                        mCachedWrapSize);
                 float w = mCachedWrapSize.getWidth();
                 computeSize(context, 0f, w, 0, measuredHeight, measure);
                 mComponentModifiers.setHorizontalScrollDimension(measuredWidth, w);
             } else if (hasVerticalScroll()) {
                 mCachedWrapSize.setWidth(0f);
                 mCachedWrapSize.setHeight(0f);
-                computeWrapSize(context, maxWidth, Float.MAX_VALUE, measure, mCachedWrapSize);
+                computeWrapSize(
+                        context, maxWidth, Float.MAX_VALUE, false, false, measure, mCachedWrapSize);
                 float h = mCachedWrapSize.getHeight();
                 computeSize(context, 0f, measuredWidth, 0, h, measure);
                 mComponentModifiers.setVerticalScrollDimension(measuredHeight, h);
@@ -201,9 +235,6 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
             cm.setW(measuredWidth);
             cm.setH(measuredHeight);
         }
-
-        measuredWidth += mMarginLeft + mMarginRight;
-        measuredHeight += mMarginTop + mMarginBottom;
 
         ComponentMeasure m = measure.get(this);
         m.setW(measuredWidth);

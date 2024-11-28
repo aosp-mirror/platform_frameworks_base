@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.devicePosture
 import com.android.systemui.statusbar.policy.onConfigChanged
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
@@ -30,9 +31,7 @@ import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityMod
 import com.android.systemui.volume.dialog.shared.model.streamLabel
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSlidersInteractor
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -40,9 +39,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** Provides a state for the Volume Dialog. */
-@OptIn(ExperimentalCoroutinesApi::class)
+@VolumeDialogScope
 class VolumeDialogViewModel
-@AssistedInject
+@Inject
 constructor(
     private val context: Context,
     dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
@@ -83,10 +82,5 @@ constructor(
         val isLandscape = config.orientation == Configuration.ORIENTATION_LANDSCAPE
         val isHalfOpen = devicePosture == DevicePostureController.DEVICE_POSTURE_HALF_OPENED
         return isLandscape && isHalfOpen
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(): VolumeDialogViewModel
     }
 }

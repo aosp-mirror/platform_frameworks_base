@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.media.tv.flags.Flags.mediaQualityFw;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -2616,9 +2617,11 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
-            t.traceBegin("StartMediaQuality");
-            mSystemServiceManager.startService(MediaQualityService.class);
-            t.traceEnd();
+            if (mediaQualityFw() && isTv) {
+                t.traceBegin("StartMediaQuality");
+                mSystemServiceManager.startService(MediaQualityService.class);
+                t.traceEnd();
+            }
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
                 t.traceBegin("StartMediaResourceMonitor");

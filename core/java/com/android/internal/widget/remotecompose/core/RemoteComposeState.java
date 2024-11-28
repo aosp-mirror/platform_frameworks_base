@@ -131,6 +131,16 @@ public class RemoteComposeState implements CollectionsAccess {
         }
     }
 
+    private final IntMap<float[]> mPathData = new IntMap<>();
+
+    public void putPathData(int id, float[] data) {
+        mPathData.put(id, data);
+    }
+
+    public float[] getPathData(int id) {
+        return mPathData.get(id);
+    }
+
     /**
      * Adds a data Override.
      *

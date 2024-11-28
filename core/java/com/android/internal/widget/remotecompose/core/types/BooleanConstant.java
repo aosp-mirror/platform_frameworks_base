@@ -29,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Used to represent a boolean */
-public class BooleanConstant implements Operation {
+public class BooleanConstant extends Operation {
     private static final int OP_CODE = Operations.DATA_BOOLEAN;
     private boolean mValue = false;
     private int mId;
@@ -73,6 +73,11 @@ public class BooleanConstant implements Operation {
         return "OrigamiBoolean";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.DATA_BOOLEAN;
     }
@@ -90,6 +95,12 @@ public class BooleanConstant implements Operation {
         buffer.writeBoolean(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 

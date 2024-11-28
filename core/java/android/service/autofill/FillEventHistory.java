@@ -170,6 +170,9 @@ public final class FillEventHistory implements Parcelable {
                 }
                 parcel.writeInt(event.mSaveDialogNotShowReason);
                 parcel.writeInt(event.mUiType);
+                if (Flags.addLastFocusedIdToFillEventHistory()) {
+                    parcel.writeParcelable(event.mFocusedId, 0);
+                }
             }
         }
     }
@@ -375,6 +378,8 @@ public final class FillEventHistory implements Parcelable {
         @UiType
         private final int mUiType;
 
+        @Nullable private final AutofillId mFocusedId;
+
         /**
          * Returns the type of the event.
          *
@@ -388,7 +393,7 @@ public final class FillEventHistory implements Parcelable {
         @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
         @Nullable
         public AutofillId getFocusedId() {
-            return null;
+            return mFocusedId;
         }
 
         /**
@@ -624,6 +629,7 @@ public final class FillEventHistory implements Parcelable {
          * @param manuallyFilledDatasetIds The ids of datasets that had values matching the
          * respective entry on {@code manuallyFilledFieldIds}.
          * @param detectedFieldClassifications the field classification matches.
+         * @param focusedId the field which was focused at the time of event trigger
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -640,11 +646,12 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
-                @Nullable FieldClassification[] detectedFieldClassifications) {
+                @Nullable FieldClassification[] detectedFieldClassifications,
+                @Nullable AutofillId focusedId) {
             this(eventType, datasetId, clientState, selectedDatasetIds, ignoredDatasetIds,
                     changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                     manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    NO_SAVE_UI_REASON_NONE);
+                    NO_SAVE_UI_REASON_NONE, focusedId);
         }
 
         /**
@@ -665,6 +672,7 @@ public final class FillEventHistory implements Parcelable {
          * respective entry on {@code manuallyFilledFieldIds}.
          * @param detectedFieldClassifications the field classification matches.
          * @param saveDialogNotShowReason The reason why a save dialog was not shown.
+         * @param focusedId the field which was focused at the time of event trigger
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -682,11 +690,12 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications,
-                int saveDialogNotShowReason) {
+                int saveDialogNotShowReason,
+                @Nullable AutofillId focusedId) {
             this(eventType, datasetId, clientState, selectedDatasetIds, ignoredDatasetIds,
                     changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                     manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    saveDialogNotShowReason, UI_TYPE_UNKNOWN);
+                    saveDialogNotShowReason, UI_TYPE_UNKNOWN, focusedId);
         }
 
         /**
@@ -708,6 +717,7 @@ public final class FillEventHistory implements Parcelable {
          * @param detectedFieldClassifications the field classification matches.
          * @param saveDialogNotShowReason The reason why a save dialog was not shown.
          * @param uiType The ui presentation type for fill suggestion.
+         * @param focusedId the field which was focused at the time of event trigger
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -725,7 +735,7 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications,
-                int saveDialogNotShowReason, int uiType) {
+                int saveDialogNotShowReason, int uiType, @Nullable AutofillId focusedId) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0,
                     TYPE_VIEW_REQUESTED_AUTOFILL, "eventType");
             mDatasetId = datasetId;
@@ -756,6 +766,7 @@ public final class FillEventHistory implements Parcelable {
                     NO_SAVE_UI_REASON_NONE, NO_SAVE_UI_REASON_DATASET_MATCH,
                     "saveDialogNotShowReason");
             mUiType = uiType;
+            mFocusedId = focusedId;
         }
 
         @Override
@@ -852,13 +863,17 @@ public final class FillEventHistory implements Parcelable {
                                 : null;
                         final int saveDialogNotShowReason = parcel.readInt();
                         final int uiType = parcel.readInt();
+                        AutofillId focusedId = null;
+                        if (Flags.addLastFocusedIdToFillEventHistory()) {
+                            focusedId = parcel.readParcelable(null, AutofillId.class);
+                        }
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
                                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
                                 detectedFieldIds, detectedFieldClassifications,
-                                saveDialogNotShowReason, uiType));
+                                saveDialogNotShowReason, uiType, focusedId));
                     }
                     return selection;
                 }

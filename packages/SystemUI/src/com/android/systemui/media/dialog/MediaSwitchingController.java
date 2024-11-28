@@ -813,8 +813,15 @@ public class MediaSwitchingController
     }
 
     private void attachConnectNewDeviceItemIfNeeded(List<MediaItem> mediaItems) {
+        boolean isSelectedDeviceNotAGroup = getSelectedMediaDevice().size() == 1;
+        if (enableInputRouting()) {
+            // When input routing is enabled, there are expected to be at least 2 total selected
+            // devices: one output device and one input device.
+            isSelectedDeviceNotAGroup = getSelectedMediaDevice().size() <= 2;
+        }
+
         // Attach "Connect a device" item only when current output is not remote and not a group
-        if (!isCurrentConnectedDeviceRemote() && getSelectedMediaDevice().size() == 1) {
+        if (!isCurrentConnectedDeviceRemote() && isSelectedDeviceNotAGroup) {
             mediaItems.add(MediaItem.createPairNewDeviceMediaItem());
         }
     }

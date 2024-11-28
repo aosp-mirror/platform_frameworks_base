@@ -178,3 +178,10 @@ flag {
     description: "Enable the input routing control in device details and hearing devices dialog."
     bug: "349255906"
 }
+
+flag {
+    name: "hearing_device_set_connection_status_report"
+    namespace: "accessibility"
+    description: "Enable the connection status report for a set of hearing device."
+    bug: "357878944"
+}

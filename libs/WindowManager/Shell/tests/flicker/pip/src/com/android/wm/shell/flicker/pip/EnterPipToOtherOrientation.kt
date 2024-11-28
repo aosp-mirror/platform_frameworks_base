@@ -31,6 +31,7 @@ import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
 import com.android.wm.shell.Flags
@@ -72,6 +73,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
     private val testApp = FixedOrientationAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)

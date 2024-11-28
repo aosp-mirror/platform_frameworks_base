@@ -22,6 +22,7 @@ import android.view.SurfaceControl
 import android.window.TransitionInfo
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags.appCompatRefactoring
+import com.android.wm.shell.common.transition.TransitionStateHolder
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_APP_COMPAT
 import com.android.wm.shell.shared.TransitionUtil.isClosingType
 import com.android.wm.shell.sysui.ShellInit
@@ -33,12 +34,15 @@ import com.android.wm.shell.transition.Transitions
 class LetterboxTransitionObserver(
     shellInit: ShellInit,
     private val transitions: Transitions,
-    private val letterboxController: LetterboxController
+    private val letterboxController: LetterboxController,
+    private val transitionStateHolder: TransitionStateHolder
 ) : Transitions.TransitionObserver {
 
     companion object {
         @JvmStatic
         private val TAG = "LetterboxTransitionObserver"
+        @JvmStatic
+        private val EMPTY_BOUNDS = Rect()
     }
 
     init {
@@ -71,11 +75,11 @@ class LetterboxTransitionObserver(
                     change.endAbsBounds.height()
                 )
                 with(letterboxController) {
-                    if (isClosingType(change.mode)) {
-                        destroyLetterboxSurface(
-                            key,
-                            startTransaction
-                        )
+                    // TODO(b/380274087) Handle return to home from a recents transition.
+                    if (isClosingType(change.mode) &&
+                        !transitionStateHolder.isRecentsTransitionRunning()) {
+                        // For the other types of close we need to check the recents.
+                        destroyLetterboxSurface(key, finishTransaction)
                     } else {
                         val isTopActivityLetterboxed = ti.appCompatTaskInfo.isTopActivityLetterboxed
                         if (isTopActivityLetterboxed) {
@@ -84,10 +88,13 @@ class LetterboxTransitionObserver(
                                 startTransaction,
                                 change.leash
                             )
+                            val activityBounds =
+                                ti.appCompatTaskInfo.topActivityLetterboxBounds ?: EMPTY_BOUNDS
                             updateLetterboxSurfaceBounds(
                                 key,
                                 startTransaction,
-                                taskBounds
+                                taskBounds,
+                                activityBounds
                             )
                         }
                         updateLetterboxSurfaceVisibility(

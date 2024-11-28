@@ -47,6 +47,7 @@ public final class MediaQualityManager {
 
     private final IMediaQualityManager mService;
     private final Context mContext;
+    private final int mUserId;
     private final Object mLock = new Object();
     // @GuardedBy("mLock")
     private final List<PictureProfileCallbackRecord> mPpCallbackRecords = new ArrayList<>();
@@ -61,6 +62,7 @@ public final class MediaQualityManager {
      */
     public MediaQualityManager(Context context, IMediaQualityManager service) {
         mContext = context;
+        mUserId = context.getUserId();
         mService = service;
         IPictureProfileCallback ppCallback = new IPictureProfileCallback.Stub() {
             @Override
@@ -219,7 +221,7 @@ public final class MediaQualityManager {
     public PictureProfile getPictureProfile(
             @PictureProfile.ProfileType int type, @NonNull String name) {
         try {
-            return mService.getPictureProfile(type, name);
+            return mService.getPictureProfile(type, name, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -236,7 +238,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public List<PictureProfile> getPictureProfilesByPackage(@NonNull String packageName) {
         try {
-            return mService.getPictureProfilesByPackage(packageName);
+            return mService.getPictureProfilesByPackage(packageName, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -248,7 +250,7 @@ public final class MediaQualityManager {
     @NonNull
     public List<PictureProfile> getAvailablePictureProfiles() {
         try {
-            return mService.getAvailablePictureProfiles();
+            return mService.getAvailablePictureProfiles(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -265,7 +267,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public List<String> getPictureProfilePackageNames() {
         try {
-            return mService.getPictureProfilePackageNames();
+            return mService.getPictureProfilePackageNames(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -277,7 +279,7 @@ public final class MediaQualityManager {
      */
     public PictureProfileHandle getPictureProfileHandle(String id) {
         try {
-            return mService.getPictureProfileHandle(id);
+            return mService.getPictureProfileHandle(id, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -291,7 +293,7 @@ public final class MediaQualityManager {
      */
     public void createPictureProfile(@NonNull PictureProfile pp) {
         try {
-            mService.createPictureProfile(pp);
+            mService.createPictureProfile(pp, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -303,7 +305,7 @@ public final class MediaQualityManager {
      */
     public void updatePictureProfile(@NonNull String profileId, @NonNull PictureProfile pp) {
         try {
-            mService.updatePictureProfile(profileId, pp);
+            mService.updatePictureProfile(profileId, pp, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -315,7 +317,7 @@ public final class MediaQualityManager {
      */
     public void removePictureProfile(@NonNull String profileId) {
         try {
-            mService.removePictureProfile(profileId);
+            mService.removePictureProfile(profileId, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -362,7 +364,7 @@ public final class MediaQualityManager {
     public SoundProfile getSoundProfile(
             @SoundProfile.ProfileType int type, @NonNull String name) {
         try {
-            return mService.getSoundProfile(type, name);
+            return mService.getSoundProfile(type, name, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -379,7 +381,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<SoundProfile> getSoundProfilesByPackage(@NonNull String packageName) {
         try {
-            return mService.getSoundProfilesByPackage(packageName);
+            return mService.getSoundProfilesByPackage(packageName, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -391,7 +393,7 @@ public final class MediaQualityManager {
     @NonNull
     public List<SoundProfile> getAvailableSoundProfiles() {
         try {
-            return mService.getAvailableSoundProfiles();
+            return mService.getAvailableSoundProfiles(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -409,7 +411,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public List<String> getSoundProfilePackageNames() {
         try {
-            return mService.getSoundProfilePackageNames();
+            return mService.getSoundProfilePackageNames(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -424,7 +426,7 @@ public final class MediaQualityManager {
      */
     public void createSoundProfile(@NonNull SoundProfile sp) {
         try {
-            mService.createSoundProfile(sp);
+            mService.createSoundProfile(sp, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -436,7 +438,7 @@ public final class MediaQualityManager {
      */
     public void updateSoundProfile(@NonNull String profileId, @NonNull SoundProfile sp) {
         try {
-            mService.updateSoundProfile(profileId, sp);
+            mService.updateSoundProfile(profileId, sp, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -448,7 +450,7 @@ public final class MediaQualityManager {
      */
     public void removeSoundProfile(@NonNull String profileId) {
         try {
-            mService.removeSoundProfile(profileId);
+            mService.removeSoundProfile(profileId, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -460,7 +462,7 @@ public final class MediaQualityManager {
     @NonNull
     public List<ParamCapability> getParamCapabilities(@NonNull List<String> names) {
         try {
-            return mService.getParamCapabilities(names);
+            return mService.getParamCapabilities(names, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -478,7 +480,7 @@ public final class MediaQualityManager {
     @NonNull
     public List<String> getPictureProfileAllowList() {
         try {
-            return mService.getPictureProfileAllowList();
+            return mService.getPictureProfileAllowList(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -492,7 +494,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setPictureProfileAllowList(@NonNull List<String> packageNames) {
         try {
-            mService.setPictureProfileAllowList(packageNames);
+            mService.setPictureProfileAllowList(packageNames, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -510,7 +512,7 @@ public final class MediaQualityManager {
     @NonNull
     public List<String> getSoundProfileAllowList() {
         try {
-            return mService.getSoundProfileAllowList();
+            return mService.getSoundProfileAllowList(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -524,7 +526,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public void setSoundProfileAllowList(@NonNull List<String> packageNames) {
         try {
-            mService.setSoundProfileAllowList(packageNames);
+            mService.setSoundProfileAllowList(packageNames, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -536,7 +538,7 @@ public final class MediaQualityManager {
      */
     public boolean isSupported() {
         try {
-            return mService.isSupported();
+            return mService.isSupported(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -554,7 +556,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setAutoPictureQualityEnabled(boolean enabled) {
         try {
-            mService.setAutoPictureQualityEnabled(enabled);
+            mService.setAutoPictureQualityEnabled(enabled, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -565,7 +567,7 @@ public final class MediaQualityManager {
      */
     public boolean isAutoPictureQualityEnabled() {
         try {
-            return mService.isAutoPictureQualityEnabled();
+            return mService.isAutoPictureQualityEnabled(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -582,7 +584,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
     public void setSuperResolutionEnabled(boolean enabled) {
         try {
-            mService.setSuperResolutionEnabled(enabled);
+            mService.setSuperResolutionEnabled(enabled, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -593,7 +595,7 @@ public final class MediaQualityManager {
      */
     public boolean isSuperResolutionEnabled() {
         try {
-            return mService.isSuperResolutionEnabled();
+            return mService.isSuperResolutionEnabled(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -611,7 +613,7 @@ public final class MediaQualityManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
     public void setAutoSoundQualityEnabled(boolean enabled) {
         try {
-            mService.setAutoSoundQualityEnabled(enabled);
+            mService.setAutoSoundQualityEnabled(enabled, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -622,7 +624,7 @@ public final class MediaQualityManager {
      */
     public boolean isAutoSoundQualityEnabled() {
         try {
-            return mService.isAutoSoundQualityEnabled();
+            return mService.isAutoSoundQualityEnabled(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -668,7 +670,7 @@ public final class MediaQualityManager {
             @NonNull AmbientBacklightSettings settings) {
         Preconditions.checkNotNull(settings);
         try {
-            mService.setAmbientBacklightSettings(settings);
+            mService.setAmbientBacklightSettings(settings, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -679,7 +681,7 @@ public final class MediaQualityManager {
      */
     public boolean isAmbientBacklightEnabled() {
         try {
-            return mService.isAmbientBacklightEnabled();
+            return mService.isAmbientBacklightEnabled(mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -692,7 +694,7 @@ public final class MediaQualityManager {
      */
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
-            mService.setAmbientBacklightEnabled(enabled);
+            mService.setAmbientBacklightEnabled(enabled, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

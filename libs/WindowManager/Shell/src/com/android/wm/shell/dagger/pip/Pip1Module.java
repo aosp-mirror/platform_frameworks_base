@@ -42,7 +42,7 @@ import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
-import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
@@ -171,7 +171,7 @@ public abstract class Pip1Module {
             PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenControllerOptional,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
-            Optional<DesktopRepository> desktopRepositoryOptional,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
@@ -181,7 +181,7 @@ public abstract class Pip1Module {
                 pipBoundsAlgorithm, menuPhoneController, pipAnimationController,
                 pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
                 splitScreenControllerOptional, pipPerfHintControllerOptional,
-                desktopRepositoryOptional, rootTaskDisplayAreaOrganizer, displayController,
+                desktopUserRepositoriesOptional, rootTaskDisplayAreaOrganizer, displayController,
                 pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 

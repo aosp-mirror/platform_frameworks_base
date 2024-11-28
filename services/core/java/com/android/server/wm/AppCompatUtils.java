@@ -173,7 +173,8 @@ final class AppCompatUtils {
             appCompatTaskInfo.topActivityLetterboxHeight = bounds.height();
             appCompatTaskInfo.topActivityLetterboxAppWidth = appBounds.width();
             appCompatTaskInfo.topActivityLetterboxAppHeight = appBounds.height();
-
+            // TODO(b/379824541) Remove duplicate information.
+            appCompatTaskInfo.topActivityLetterboxBounds = bounds;
             // We need to consider if letterboxed or pillarboxed.
             // TODO(b/336807329) Encapsulate reachability logic
             appCompatTaskInfo.setLetterboxDoubleTapEnabled(reachabilityOverrides
@@ -282,6 +283,7 @@ final class AppCompatUtils {
         info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxAppHeight = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxAppWidth = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.topActivityLetterboxBounds = null;
         info.cameraCompatTaskInfo.freeformCameraCompatMode =
                 CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
         info.clearTopActivityFlags();

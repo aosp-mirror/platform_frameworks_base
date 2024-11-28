@@ -152,19 +152,20 @@ final class DevicePolicyEngine {
         mAdminPolicySize = new SparseArray<>();
     }
 
-    private void maybeForceEnforcementRefreshLocked(@NonNull PolicyDefinition<?> policyDefinition) {
+    private void forceEnforcementRefreshIfUserRestrictionLocked(
+            @NonNull PolicyDefinition<?> policyDefinition) {
         try {
-            if (shouldForceEnforcementRefresh(policyDefinition)) {
+            if (isUserRestrictionPolicy(policyDefinition)) {
                 // This is okay because it's only true for user restrictions which are all <Boolean>
                 forceEnforcementRefreshLocked((PolicyDefinition<Boolean>) policyDefinition);
             }
         } catch (Throwable e) {
             // Catch any possible exceptions just to be on the safe side
-            Log.e(TAG, "Exception throw during maybeForceEnforcementRefreshLocked", e);
+            Log.e(TAG, "Exception thrown during forceEnforcementRefreshIfUserRestrictionLocked", e);
         }
     }
 
-    private boolean shouldForceEnforcementRefresh(@NonNull PolicyDefinition<?> policyDefinition) {
+    private boolean isUserRestrictionPolicy(@NonNull PolicyDefinition<?> policyDefinition) {
         // These are all "not nullable" but for the purposes of maximum safety for a lightly tested
         // change we check here
         if (policyDefinition == null) {
@@ -257,7 +258,7 @@ final class DevicePolicyEngine {
             // No need to notify admins as no new policy is actually enforced, we're just filling in
             // the data structures.
             if (!skipEnforcePolicy) {
-                maybeForceEnforcementRefreshLocked(policyDefinition);
+                forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
                 if (policyChanged) {
                     onLocalPolicyChangedLocked(policyDefinition, enforcingAdmin, userId);
                 }
@@ -347,7 +348,7 @@ final class DevicePolicyEngine {
         Objects.requireNonNull(enforcingAdmin);
 
         synchronized (mLock) {
-            maybeForceEnforcementRefreshLocked(policyDefinition);
+            forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
             if (!hasLocalPolicyLocked(policyDefinition, userId)) {
                 return;
             }
@@ -517,7 +518,7 @@ final class DevicePolicyEngine {
             // No need to notify admins as no new policy is actually enforced, we're just filling in
             // the data structures.
             if (!skipEnforcePolicy) {
-                maybeForceEnforcementRefreshLocked(policyDefinition);
+                forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
                 if (policyChanged) {
                     onGlobalPolicyChangedLocked(policyDefinition, enforcingAdmin);
                 }
@@ -570,7 +571,7 @@ final class DevicePolicyEngine {
 
             boolean policyChanged = policyState.removePolicy(enforcingAdmin);
 
-            maybeForceEnforcementRefreshLocked(policyDefinition);
+            forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
             if (policyChanged) {
                 onGlobalPolicyChangedLocked(policyDefinition, enforcingAdmin);
             }

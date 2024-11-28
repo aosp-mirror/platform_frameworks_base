@@ -58,7 +58,8 @@ interface LetterboxController {
     fun updateLetterboxSurfaceBounds(
         key: LetterboxKey,
         transaction: Transaction,
-        taskBounds: Rect
+        taskBounds: Rect,
+        activityBounds: Rect
     )
 
     /**

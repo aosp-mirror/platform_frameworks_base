@@ -2491,6 +2491,27 @@ public class WallpaperManager {
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
 
+    /**
+     * Version of setBitmap that allows specification of wallpaper metadata including how the
+     * wallpaper will be positioned for different display sizes.
+     *
+     * @param fullImage   A bitmap that will supply the wallpaper imagery.
+     * @param description Wallpaper metadata including desired cropping
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *                    image for restore to a future device; {@code false} otherwise.
+     * @param which       Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @hide
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setBitmapWithDescription(@Nullable Bitmap fullImage,
+            @NonNull WallpaperDescription description, boolean allowBackup,
+            @SetWallpaperFlags int which) throws IOException {
+        return setBitmapWithCrops(fullImage, description.getCropHints(), allowBackup, which,
+                mContext.getUserId());
+    }
+
     private final void validateRect(Rect rect) {
         if (rect != null && rect.isEmpty()) {
             throw new IllegalArgumentException("visibleCrop rectangle must be valid and non-empty");
@@ -2697,6 +2718,27 @@ public class WallpaperManager {
             throw e.rethrowFromSystemServer();
         }
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
+    }
+
+    /**
+     * Version of setStream that allows specification of wallpaper metadata including how the
+     * wallpaper will be positioned for different display sizes.
+     *
+     * @param bitmapData  A stream containing the raw data to install as a wallpaper. This
+     *                    data can be in any format handled by {@link BitmapRegionDecoder}.
+     * @param description Wallpaper metadata including desired cropping
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *                    image for restore to a future device; {@code false} otherwise.
+     * @param which       Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @hide
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setStreamWithDescription(@NonNull InputStream bitmapData,
+            @NonNull WallpaperDescription description, boolean allowBackup,
+            @SetWallpaperFlags int which) throws IOException {
+        return setStreamWithCrops(bitmapData, description.getCropHints(), allowBackup, which);
     }
 
     /**

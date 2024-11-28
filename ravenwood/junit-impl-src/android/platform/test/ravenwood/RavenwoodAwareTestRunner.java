@@ -63,8 +63,6 @@ import java.util.function.BiConsumer;
  * - Handle {@link android.platform.test.annotations.DisabledOnRavenwood}.
  */
 public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase {
-    public static final String TAG = "Ravenwood";
-
     /** Scope of a hook. */
     public enum Scope {
         Class,

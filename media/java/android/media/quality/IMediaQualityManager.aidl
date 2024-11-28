@@ -30,42 +30,42 @@ import android.media.quality.SoundProfile;
  * @hide
  */
 interface IMediaQualityManager {
-    PictureProfile createPictureProfile(in PictureProfile pp);
-    void updatePictureProfile(in String id, in PictureProfile pp);
-    void removePictureProfile(in String id);
-    PictureProfile getPictureProfile(in int type, in String name);
-    List<PictureProfile> getPictureProfilesByPackage(in String packageName);
-    List<PictureProfile> getAvailablePictureProfiles();
-    List<String> getPictureProfilePackageNames();
-    List<String> getPictureProfileAllowList();
-    void setPictureProfileAllowList(in List<String> packages);
-    PictureProfileHandle getPictureProfileHandle(in String id);
+    PictureProfile createPictureProfile(in PictureProfile pp, int userId);
+    void updatePictureProfile(in String id, in PictureProfile pp, int userId);
+    void removePictureProfile(in String id, int userId);
+    PictureProfile getPictureProfile(in int type, in String name, int userId);
+    List<PictureProfile> getPictureProfilesByPackage(in String packageName, int userId);
+    List<PictureProfile> getAvailablePictureProfiles(int userId);
+    List<String> getPictureProfilePackageNames(int userId);
+    List<String> getPictureProfileAllowList(int userId);
+    void setPictureProfileAllowList(in List<String> packages, int userId);
+    PictureProfileHandle getPictureProfileHandle(in String id, int userId);
 
-    SoundProfile createSoundProfile(in SoundProfile pp);
-    void updateSoundProfile(in String id, in SoundProfile pp);
-    void removeSoundProfile(in String id);
-    SoundProfile getSoundProfile(in int type, in String name);
-    List<SoundProfile> getSoundProfilesByPackage(in String packageName);
-    List<SoundProfile> getAvailableSoundProfiles();
-    List<String> getSoundProfilePackageNames();
-    List<String> getSoundProfileAllowList();
-    void setSoundProfileAllowList(in List<String> packages);
+    SoundProfile createSoundProfile(in SoundProfile pp, int userId);
+    void updateSoundProfile(in String id, in SoundProfile pp, int userId);
+    void removeSoundProfile(in String id, int userId);
+    SoundProfile getSoundProfile(in int type, in String name, int userId);
+    List<SoundProfile> getSoundProfilesByPackage(in String packageName, int userId);
+    List<SoundProfile> getAvailableSoundProfiles(int userId);
+    List<String> getSoundProfilePackageNames(int userId);
+    List<String> getSoundProfileAllowList(int userId);
+    void setSoundProfileAllowList(in List<String> packages, int userId);
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
     void registerAmbientBacklightCallback(in IAmbientBacklightCallback cb);
 
-    List<ParamCapability> getParamCapabilities(in List<String> names);
+    List<ParamCapability> getParamCapabilities(in List<String> names, int userId);
 
-    boolean isSupported();
-    void setAutoPictureQualityEnabled(in boolean enabled);
-    boolean isAutoPictureQualityEnabled();
-    void setSuperResolutionEnabled(in boolean enabled);
-    boolean isSuperResolutionEnabled();
-    void setAutoSoundQualityEnabled(in boolean enabled);
-    boolean isAutoSoundQualityEnabled();
+    boolean isSupported(int userId);
+    void setAutoPictureQualityEnabled(in boolean enabled, int userId);
+    boolean isAutoPictureQualityEnabled(int userId);
+    void setSuperResolutionEnabled(in boolean enabled, int userId);
+    boolean isSuperResolutionEnabled(int userId);
+    void setAutoSoundQualityEnabled(in boolean enabled, int userId);
+    boolean isAutoSoundQualityEnabled(int userId);
 
-    void setAmbientBacklightSettings(in AmbientBacklightSettings settings);
-    void setAmbientBacklightEnabled(in boolean enabled);
-    boolean isAmbientBacklightEnabled();
+    void setAmbientBacklightSettings(in AmbientBacklightSettings settings, int userId);
+    void setAmbientBacklightEnabled(in boolean enabled, int userId);
+    boolean isAmbientBacklightEnabled(int userId);
 }

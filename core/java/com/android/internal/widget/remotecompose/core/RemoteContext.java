@@ -93,10 +93,18 @@ public abstract class RemoteContext {
     /**
      * Load a path under an id. Paths can be use in clip drawPath and drawTweenPath
      *
-     * @param instanceId
-     * @param floatPath
+     * @param instanceId the id to save this path under
+     * @param floatPath the path as a float array
      */
     public abstract void loadPathData(int instanceId, @NonNull float[] floatPath);
+
+    /**
+     * Load a path under an id. Paths can be use in clip drawPath and drawTweenPath
+     *
+     * @param instanceId
+     * @return the a
+     */
+    public abstract @Nullable float[] getPathData(int instanceId);
 
     /**
      * Associate a name with a give id.

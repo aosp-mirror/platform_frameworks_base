@@ -19,8 +19,9 @@ package android.content;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -29,6 +30,7 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.security.Flags;
+import android.util.ArraySet;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -40,6 +42,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  *  Build/Install/Run:
@@ -51,7 +54,6 @@ import java.util.List;
 public class IntentTest {
     private static final String TEST_ACTION = "android.content.IntentTest_test";
     private static final String TEST_EXTRA_NAME = "testExtraName";
-    private static final Uri TEST_URI = Uri.parse("content://com.example/people");
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -129,4 +131,111 @@ public class IntentTest {
         }
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PREVENT_INTENT_REDIRECT)
+    public void testFillInCreatorTokenInfo() {
+        // case 1: intent does not have creatorTokenInfo; fillinIntent contains creatorTokenInfo
+        Intent intent = new Intent();
+        Intent fillInIntent = new Intent();
+        fillInIntent.setCreatorToken(new Binder());
+        fillInIntent.putExtra("extraKey", new Intent());
+
+        fillInIntent.collectExtraIntentKeys();
+        intent.fillIn(fillInIntent, 0);
+
+        // extra intent keys are merged
+        assertThat(intent.getExtraIntentKeys()).isEqualTo(fillInIntent.getExtraIntentKeys());
+        // but creator token is not overwritten.
+        assertThat(intent.getCreatorToken()).isNull();
+
+
+        // case 2: Both intent and fillInIntent contains creatorToken, intent's creatorToken is not
+        // overwritten.
+        intent = new Intent();
+        IBinder creatorToken = new Binder();
+        intent.setCreatorToken(creatorToken);
+        fillInIntent = new Intent();
+        fillInIntent.setCreatorToken(new Binder());
+
+        intent.fillIn(fillInIntent, 0);
+
+        assertThat(intent.getCreatorToken()).isEqualTo(creatorToken);
+
+
+        // case 3: Contains duplicate extra keys
+        intent = new Intent();
+        intent.putExtra("key1", new Intent());
+        intent.putExtra("key2", new Intent());
+        fillInIntent = new Intent();
+        fillInIntent.putExtra("key1", new Intent());
+        fillInIntent.putExtra("key3", new Intent());
+
+        intent.collectExtraIntentKeys();
+        Set originalIntentKeys = new ArraySet<>(intent.getExtraIntentKeys());
+
+        fillInIntent.collectExtraIntentKeys();
+        intent.fillIn(fillInIntent, 0);
+
+        assertThat(intent.getExtraIntentKeys()).hasSize(3);
+        assertTrue(intent.getExtraIntentKeys().containsAll(originalIntentKeys));
+        assertTrue(intent.getExtraIntentKeys().containsAll(fillInIntent.getExtraIntentKeys()));
+
+
+        // case 4: Both contains a mixture of extras and clip data. NOT force to fill in clip data.
+        intent = new Intent();
+        ClipData clipData = ClipData.newIntent("clip", new Intent());
+        clipData.addItem(new ClipData.Item(new Intent()));
+        intent.setClipData(clipData);
+        intent.putExtra("key1", new Intent());
+        intent.putExtra("key2", new Intent());
+        fillInIntent = new Intent();
+        ClipData fillInClipData = ClipData.newIntent("clip", new Intent());
+        fillInClipData.addItem(new ClipData.Item(new Intent()));
+        fillInClipData.addItem(new ClipData.Item(new Intent()));
+        fillInIntent.setClipData(fillInClipData);
+        fillInIntent.putExtra("key1", new Intent());
+        fillInIntent.putExtra("key3", new Intent());
+
+        intent.collectExtraIntentKeys();
+        originalIntentKeys = new ArraySet<>(intent.getExtraIntentKeys());
+        fillInIntent.collectExtraIntentKeys();
+        intent.fillIn(fillInIntent, 0);
+
+        // size is 5 ( 3 extras merged from both + 2 clip data in the original.
+        assertThat(intent.getExtraIntentKeys()).hasSize(5);
+        // all keys from original are kept.
+        assertTrue(intent.getExtraIntentKeys().containsAll(originalIntentKeys));
+        // Not all keys from fillInIntent are kept - clip data keys are dropped.
+        assertFalse(intent.getExtraIntentKeys().containsAll(fillInIntent.getExtraIntentKeys()));
+
+
+        // case 5: Both contains a mixture of extras and clip data. Force to fill in clip data.
+        intent = new Intent();
+        clipData = ClipData.newIntent("clip", new Intent());
+        clipData.addItem(new ClipData.Item(new Intent()));
+        clipData.addItem(new ClipData.Item(new Intent()));
+        clipData.addItem(new ClipData.Item(new Intent()));
+        intent.setClipData(clipData);
+        intent.putExtra("key1", new Intent());
+        intent.putExtra("key2", new Intent());
+        fillInIntent = new Intent();
+        fillInClipData = ClipData.newIntent("clip", new Intent());
+        fillInClipData.addItem(new ClipData.Item(new Intent()));
+        fillInClipData.addItem(new ClipData.Item(new Intent()));
+        fillInIntent.setClipData(fillInClipData);
+        fillInIntent.putExtra("key1", new Intent());
+        fillInIntent.putExtra("key3", new Intent());
+
+        intent.collectExtraIntentKeys();
+        originalIntentKeys = new ArraySet<>(intent.getExtraIntentKeys());
+        fillInIntent.collectExtraIntentKeys();
+        intent.fillIn(fillInIntent, Intent.FILL_IN_CLIP_DATA);
+
+        // size is 6 ( 3 extras merged from both + 3 clip data in the fillInIntent.
+        assertThat(intent.getExtraIntentKeys()).hasSize(6);
+        // all keys from fillInIntent are kept.
+        assertTrue(intent.getExtraIntentKeys().containsAll(fillInIntent.getExtraIntentKeys()));
+        // Not all keys from intent are kept - clip data keys are dropped.
+        assertFalse(intent.getExtraIntentKeys().containsAll(originalIntentKeys));
+    }
 }

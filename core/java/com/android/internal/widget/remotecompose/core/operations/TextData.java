@@ -31,7 +31,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Operation to deal with Text data */
-public class TextData implements Operation, SerializableToString {
+public class TextData extends Operation implements SerializableToString {
     private static final int OP_CODE = Operations.DATA_TEXT;
     private static final String CLASS_NAME = "TextData";
     public final int mTextId;
@@ -59,6 +59,11 @@ public class TextData implements Operation, SerializableToString {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -69,6 +74,12 @@ public class TextData implements Operation, SerializableToString {
         buffer.writeUTF8(text);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
 
@@ -76,6 +87,11 @@ public class TextData implements Operation, SerializableToString {
         operations.add(new TextData(textId, text));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a string ")

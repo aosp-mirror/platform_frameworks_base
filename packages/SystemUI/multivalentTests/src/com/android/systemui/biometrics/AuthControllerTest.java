@@ -117,6 +117,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
@@ -1187,7 +1188,8 @@ public class AuthControllerTest extends SysuiTestCase {
         TestableAuthController(Context context) {
             super(context, null /* applicationCoroutineScope */,
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
-                    mFingerprintManager, mFaceManager, () -> mUdfpsController, mDisplayManager,
+                    mFingerprintManager, mFaceManager, Optional.empty(),
+                    () -> mUdfpsController, mDisplayManager,
                     mWakefulnessLifecycle, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
                     () -> mLogContextInteractor, () -> mPromptSelectionInteractor,
                     () -> mCredentialViewModel, () -> mPromptViewModel, mInteractionJankMonitor,

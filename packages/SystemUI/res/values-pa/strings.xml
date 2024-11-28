@@ -528,6 +528,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ਲਾਕ ਸਕ੍ਰੀਨ ਵਿਜੇਟ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ਵਿਜੇਟ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਐਪ ਖੋਲ੍ਹਣ ਲਈ, ਤੁਹਾਨੂੰ ਇਹ ਪੁਸ਼ਟੀ ਕਰਨ ਦੀ ਲੋੜ ਪਵੇਗੀ ਕਿ ਇਹ ਤੁਸੀਂ ਹੀ ਹੋ। ਨਾਲ ਹੀ, ਇਹ ਵੀ ਧਿਆਨ ਵਿੱਚ ਰੱਖੋ ਕਿ ਕੋਈ ਵੀ ਉਨ੍ਹਾਂ ਨੂੰ ਦੇਖ ਸਕਦਾ ਹੈ, ਭਾਵੇਂ ਤੁਹਾਡਾ ਟੈਬਲੈੱਟ ਲਾਕ ਹੋਵੇ। ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਵਿਜੇਟ ਤੁਹਾਡੀ ਲਾਕ ਸਕ੍ਰੀਨ ਲਈ ਨਾ ਬਣੇ ਹੋਣ ਅਤੇ ਉਨ੍ਹਾਂ ਨੂੰ ਇੱਥੇ ਸ਼ਾਮਲ ਕਰਨਾ ਅਸੁਰੱਖਿਅਤ ਹੋਵੇ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ਸਮਝ ਲਿਆ"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟੇ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।"</string>
@@ -780,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ਗੱਲਬਾਤ ਸੂਚਨਾਵਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਵਜੋਂ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਜੋ ਕਿ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੁਵਿਧਾ ਵਿੱਚ ਵਿਘਨ ਵੀ ਪਾ ਸਕਦੀਆਂ ਹਨ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"ਕਾਲ ਸੰਬੰਧੀ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ਉੱਚ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਲਈ, ਫ਼ੋਨ ਨੂੰ ਫਲਿੱਪ ਕਰੋ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ਮੋੜਨਯੋਗ ਡੀਵਾਈਸ ਨੂੰ ਆਲੇ-ਦੁਆਲੇ ਫਲਿੱਪ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"ਅਗਲੀ ਸਕ੍ਰੀਨ ਚਾਲੂ ਕੀਤੀ ਗਈ"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ਫੋਲਡਯੋਗ ਡੀਵਾਈਸ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ਅਣਫੋਲਡਯੋਗ ਡੀਵਾਈਸ"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1423,12 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ਪਹੁੰਚਯੋਗਤਾ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"ਸ਼ਾਰਟਕੱਟ ਨਿਰਧਾਰਿਤ ਕਰਨ ਲਈ ਕੁੰਜੀ ਦਬਾਓ"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ਸ਼ਾਰਟਕੱਟ ਖੋਜੋ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ਕੋਈ ਖੋਜ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ਪ੍ਰਤੀਕ ਨੂੰ ਸਮੇਟੋ"</string>
@@ -1431,9 +1441,16 @@
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ਘਸੀਟਣ ਵਾਲਾ ਹੈਂਡਲ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"ਕੀ-ਬੋਰਡ ਸੈਟਿੰਗਾਂ"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ਸ਼ਾਰਟਕੱਟ ਸੈੱਟ ਕਰੋ"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ਰੱਦ ਕਰੋ"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ਕੁੰਜੀ ਦਬਾਓ"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"ਕੁੰਜੀ ਸੁਮੇਲ ਪਹਿਲਾਂ ਹੀ ਵਰਤੋਂ ਵਿੱਚ ਹੈ। ਕੋਈ ਹੋਰ ਕੁੰਜੀ ਨੂੰ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_plus_symbol (4534843157353732011) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ਆਪਣੇ ਕੀ-ਬੋਰਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ਕੀ-ਬੋਰਡ ਦੇ ਸ਼ਾਰਟਕੱਟਾਂ ਬਾਰੇ ਜਾਣੋ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ਆਪਣੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>

@@ -1028,4 +1028,14 @@ interface IActivityManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DEVICE_POWER)")
     void noteAppRestrictionEnabled(in String packageName, int uid, int restrictionType,
             boolean enabled, int reason, in String subReason, int source, long threshold);
+
+    /**
+     * Creates and returns a new IntentCreatorToken that keeps the creatorUid and refreshes key
+     * fields of the intent passed in.
+     *
+     * @param intent The intent with key fields out of sync of the IntentCreatorToken it contains.
+     * @hide
+     */
+    @EnforcePermission("INTERACT_ACROSS_USERS_FULL")
+    IBinder refreshIntentCreatorToken(in Intent intent);
 }

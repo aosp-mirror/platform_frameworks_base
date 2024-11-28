@@ -108,14 +108,11 @@ sealed class DragToDesktopTransitionHandler(
      * Note that the transition handler for this transition doesn't call the finish callback until
      * after one of the "end" or "cancel" transitions is merged into this transition.
      */
-    fun startDragToDesktopTransition(
-        taskId: Int,
-        dragToDesktopAnimator: MoveToDesktopAnimator,
-    ) {
+    fun startDragToDesktopTransition(taskId: Int, dragToDesktopAnimator: MoveToDesktopAnimator) {
         if (inProgress) {
             ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                "DragToDesktop: Drag to desktop transition already in progress."
+                "DragToDesktop: Drag to desktop transition already in progress.",
             )
             return
         }
@@ -133,7 +130,7 @@ sealed class DragToDesktopTransitionHandler(
                 0 /* requestCode */,
                 launchHomeIntent,
                 FLAG_MUTABLE or FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or FILL_IN_COMPONENT,
-                options.toBundle()
+                options.toBundle(),
             )
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, Bundle())
@@ -149,13 +146,13 @@ sealed class DragToDesktopTransitionHandler(
                     draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken,
-                    otherSplitTask = otherTask
+                    otherSplitTask = otherTask,
                 )
             } else {
                 TransitionState.FromFullscreen(
                     draggedTaskId = taskId,
                     dragAnimator = dragToDesktopAnimator,
-                    startTransitionToken = startTransitionToken
+                    startTransitionToken = startTransitionToken,
                 )
             }
     }
@@ -244,7 +241,7 @@ sealed class DragToDesktopTransitionHandler(
     /** Calculate the bounds of a scaled task, then use those bounds to request split select. */
     private fun requestSplitFromScaledTask(
         @SplitPosition splitPosition: Int,
-        wct: WindowContainerTransaction
+        wct: WindowContainerTransaction,
     ) {
         val state = requireTransitionState()
         val taskInfo = state.draggedTaskChange?.taskInfo ?: error("Expected non-null taskInfo")
@@ -259,7 +256,7 @@ sealed class DragToDesktopTransitionHandler(
                 dragPosition.x.toInt(),
                 dragPosition.y.toInt(),
                 (dragPosition.x + scaledWidth).toInt(),
-                (dragPosition.y + scaledHeight).toInt()
+                (dragPosition.y + scaledHeight).toInt(),
             )
         requestSplitSelect(wct, taskInfo, splitPosition, animatedTaskBounds)
     }
@@ -268,14 +265,14 @@ sealed class DragToDesktopTransitionHandler(
         wct: WindowContainerTransaction,
         taskInfo: RunningTaskInfo,
         @SplitPosition splitPosition: Int,
-        taskBounds: Rect = Rect(taskInfo.configuration.windowConfiguration.bounds)
+        taskBounds: Rect = Rect(taskInfo.configuration.windowConfiguration.bounds),
     ) {
         // Prepare to exit split in order to enter split select.
         if (taskInfo.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
             splitScreenController.prepareExitSplitScreen(
                 wct,
                 splitScreenController.getStageOfTask(taskInfo.taskId),
-                SplitScreenController.EXIT_REASON_DESKTOP_MODE
+                SplitScreenController.EXIT_REASON_DESKTOP_MODE,
             )
             splitScreenController.transitionHandler.onSplitToDesktop()
         }
@@ -289,7 +286,7 @@ sealed class DragToDesktopTransitionHandler(
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
-        finishCallback: Transitions.TransitionFinishCallback
+        finishCallback: Transitions.TransitionFinishCallback,
     ): Boolean {
         val state = requireTransitionState()
 
@@ -387,7 +384,7 @@ sealed class DragToDesktopTransitionHandler(
                     taskDisplayAreaOrganizer.reparentToDisplayArea(
                         change.endDisplayId,
                         change.leash,
-                        startTransaction
+                        startTransaction,
                     )
                     val bounds = change.endAbsBounds
                     startTransaction.apply {
@@ -454,7 +451,7 @@ sealed class DragToDesktopTransitionHandler(
         info: TransitionInfo,
         t: SurfaceControl.Transaction,
         mergeTarget: IBinder,
-        finishCallback: Transitions.TransitionFinishCallback
+        finishCallback: Transitions.TransitionFinishCallback,
     ) {
         val state = requireTransitionState()
         // We don't want to merge the split select animation if that's what we requested.
@@ -483,7 +480,7 @@ sealed class DragToDesktopTransitionHandler(
             setupEndDragToDesktop(
                 info,
                 startTransaction = t,
-                finishTransaction = startTransactionFinishT
+                finishTransaction = startTransactionFinishT,
             )
             // Call finishCallback to merge animation before startTransitionFinishCb is called
             finishCallback.onTransitionFinished(null /* wct */)
@@ -503,7 +500,7 @@ sealed class DragToDesktopTransitionHandler(
     protected open fun setupEndDragToDesktop(
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
-        finishTransaction: SurfaceControl.Transaction
+        finishTransaction: SurfaceControl.Transaction,
     ) {
         val state = requireTransitionState()
         val freeformTaskChanges = mutableListOf<Change>()
@@ -545,7 +542,7 @@ sealed class DragToDesktopTransitionHandler(
 
     protected open fun animateEndDragToDesktop(
         startTransaction: SurfaceControl.Transaction,
-        startTransitionFinishCb: Transitions.TransitionFinishCallback
+        startTransitionFinishCb: Transitions.TransitionFinishCallback,
     ) {
         val state = requireTransitionState()
         val draggedTaskChange =
@@ -568,7 +565,7 @@ sealed class DragToDesktopTransitionHandler(
                 startPosition.x.toInt(),
                 startPosition.y.toInt(),
                 startPosition.x.toInt() + unscaledStartWidth,
-                startPosition.y.toInt() + unscaledStartHeight
+                startPosition.y.toInt() + unscaledStartHeight,
             )
 
         dragToDesktopStateListener?.onCommitToDesktopAnimationStart(startTransaction)
@@ -578,7 +575,7 @@ sealed class DragToDesktopTransitionHandler(
         onTaskResizeAnimationListener.onAnimationStart(
             state.draggedTaskId,
             startTransaction,
-            unscaledStartBounds
+            unscaledStartBounds,
         )
         val tx: SurfaceControl.Transaction = transactionSupplier.get()
         ValueAnimator.ofObject(rectEvaluator, unscaledStartBounds, endBounds)
@@ -594,21 +591,21 @@ sealed class DragToDesktopTransitionHandler(
                         setPosition(
                             draggedTaskLeash,
                             animBounds.left.toFloat(),
-                            animBounds.top.toFloat()
+                            animBounds.top.toFloat(),
                         )
                         setWindowCrop(draggedTaskLeash, animBounds.width(), animBounds.height())
                     }
                     onTaskResizeAnimationListener.onBoundsChange(
                         state.draggedTaskId,
                         tx,
-                        animBounds
+                        animBounds,
                     )
                 }
                 addListener(
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
                             onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
-                            startTransitionFinishCb.onTransitionFinished(/* wct = */ null)
+                            startTransitionFinishCb.onTransitionFinished(/* wct= */ null)
                             clearState()
                             interactionJankMonitor.end(
                                 CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
@@ -622,7 +619,7 @@ sealed class DragToDesktopTransitionHandler(
 
     override fun handleRequest(
         transition: IBinder,
-        request: TransitionRequestInfo
+        request: TransitionRequestInfo,
     ): WindowContainerTransaction? {
         // Only handle transitions started from shell.
         return null
@@ -631,7 +628,7 @@ sealed class DragToDesktopTransitionHandler(
     override fun onTransitionConsumed(
         transition: IBinder,
         aborted: Boolean,
-        finishTransaction: SurfaceControl.Transaction?
+        finishTransaction: SurfaceControl.Transaction?,
     ) {
         val state = transitionState ?: return
         if (!aborted) {
@@ -640,15 +637,13 @@ sealed class DragToDesktopTransitionHandler(
         if (state.startTransitionToken == transition) {
             ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
-                "DragToDesktop: onTransitionConsumed() start transition aborted"
+                "DragToDesktop: onTransitionConsumed() start transition aborted",
             )
             state.startAborted = true
             // The start-transition (DRAG_HOLD) is aborted, cancel its jank interaction.
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         } else if (state.cancelTransitionToken == transition) {
-            state.draggedTaskChange?.leash?.let {
-                state.startTransitionFinishTransaction?.show(it)
-            }
+            state.draggedTaskChange?.leash?.let { state.startTransitionFinishTransaction?.show(it) }
             state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
             clearState()
         } else {
@@ -724,7 +719,7 @@ sealed class DragToDesktopTransitionHandler(
 
     private fun restoreWindowOrder(
         wct: WindowContainerTransaction,
-        state: TransitionState = requireTransitionState()
+        state: TransitionState = requireTransitionState(),
     ) {
         when (state) {
             is TransitionState.FromFullscreen -> {
@@ -831,7 +826,7 @@ sealed class DragToDesktopTransitionHandler(
             override var surfaceLayers: DragToDesktopLayers? = null,
             override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
-            var otherRootChanges: MutableList<Change> = mutableListOf()
+            var otherRootChanges: MutableList<Change> = mutableListOf(),
         ) : TransitionState()
 
         data class FromSplit(
@@ -848,7 +843,7 @@ sealed class DragToDesktopTransitionHandler(
             override var cancelState: CancelState = CancelState.NO_CANCEL,
             override var startAborted: Boolean = false,
             var splitRootChange: Change? = null,
-            var otherSplitTask: Int
+            var otherSplitTask: Int,
         ) : TransitionState()
     }
 
@@ -861,7 +856,7 @@ sealed class DragToDesktopTransitionHandler(
         /** A cancel event where the task will request to enter split on the left side. */
         CANCEL_SPLIT_LEFT,
         /** A cancel event where the task will request to enter split on the right side. */
-        CANCEL_SPLIT_RIGHT
+        CANCEL_SPLIT_RIGHT,
     }
 
     companion object {
@@ -888,7 +883,7 @@ constructor(
         transitions,
         taskDisplayAreaOrganizer,
         interactionJankMonitor,
-        transactionSupplier
+        transactionSupplier,
     ) {
 
     /**
@@ -903,7 +898,7 @@ constructor(
             topAppLayer = info.changes.size,
             topHomeLayer = info.changes.size * 2,
             topWallpaperLayer = info.changes.size * 3,
-            dragLayer = info.changes.size * 3
+            dragLayer = info.changes.size * 3,
         )
 }
 
@@ -924,7 +919,7 @@ constructor(
         transitions,
         taskDisplayAreaOrganizer,
         interactionJankMonitor,
-        transactionSupplier
+        transactionSupplier,
     ) {
 
     private val positionSpringConfig =
@@ -945,13 +940,13 @@ constructor(
             topAppLayer = -1,
             topHomeLayer = info.changes.size - 1,
             topWallpaperLayer = info.changes.size * 2 - 1,
-            dragLayer = info.changes.size * 2
+            dragLayer = info.changes.size * 2,
         )
 
     override fun setupEndDragToDesktop(
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
-        finishTransaction: SurfaceControl.Transaction
+        finishTransaction: SurfaceControl.Transaction,
     ) {
         super.setupEndDragToDesktop(info, startTransaction, finishTransaction)
 
@@ -974,7 +969,7 @@ constructor(
 
     override fun animateEndDragToDesktop(
         startTransaction: SurfaceControl.Transaction,
-        startTransitionFinishCb: Transitions.TransitionFinishCallback
+        startTransitionFinishCb: Transitions.TransitionFinishCallback,
     ) {
         val state = requireTransitionState()
         val draggedTaskChange =
@@ -1002,7 +997,7 @@ constructor(
         onTaskResizeAnimationListener.onAnimationStart(
             state.draggedTaskId,
             startTransaction,
-            startBoundsWithOffset
+            startBoundsWithOffset,
         )
 
         val tx: SurfaceControl.Transaction = transactionSupplier.get()
@@ -1011,13 +1006,13 @@ constructor(
                 FloatProperties.RECT_X,
                 endBounds.left.toFloat(),
                 currentVelocity.x,
-                positionSpringConfig
+                positionSpringConfig,
             )
             .spring(
                 FloatProperties.RECT_Y,
                 endBounds.top.toFloat(),
                 currentVelocity.y,
-                positionSpringConfig
+                positionSpringConfig,
             )
             .spring(FloatProperties.RECT_WIDTH, endBounds.width().toFloat(), sizeSpringConfig)
             .spring(FloatProperties.RECT_HEIGHT, endBounds.height().toFloat(), sizeSpringConfig)
@@ -1050,7 +1045,7 @@ constructor(
                     setPosition(
                         draggedTaskLeash,
                         animBounds.left.toFloat(),
-                        animBounds.top.toFloat()
+                        animBounds.top.toFloat(),
                     )
                     // Update freeform tasks
                     freeformTaskChanges.forEach {
@@ -1069,7 +1064,7 @@ constructor(
             }
             .withEndActions({
                 onTaskResizeAnimationListener.onAnimationEnd(state.draggedTaskId)
-                startTransitionFinishCb.onTransitionFinished(/* wct = */ null)
+                startTransitionFinishCb.onTransitionFinished(/* wct= */ null)
                 clearState()
                 interactionJankMonitor.end(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE)
             })
@@ -1094,7 +1089,7 @@ constructor(
             propertyValue(
                 "position_damping_ratio",
                 scale = 100f,
-                default = SpringForce.DAMPING_RATIO_LOW_BOUNCY
+                default = SpringForce.DAMPING_RATIO_LOW_BOUNCY,
             )
 
         /** The spring force stiffness used to resize the window into the final bounds. */
@@ -1106,7 +1101,7 @@ constructor(
             propertyValue(
                 "size_damping_ratio",
                 scale = 100f,
-                default = SpringForce.DAMPING_RATIO_NO_BOUNCY
+                default = SpringForce.DAMPING_RATIO_NO_BOUNCY,
             )
 
         /** Drag to desktop transition system properties group. */
@@ -1123,7 +1118,7 @@ constructor(
         fun propertyValue(name: String, scale: Float = 1f, default: Float = 0f): Float =
             SystemProperties.getInt(
                 /* key= */ "$SYSTEM_PROPERTIES_GROUP.$name",
-                /* def= */ (default * scale).toInt()
+                /* def= */ (default * scale).toInt(),
             ) / scale
     }
 }

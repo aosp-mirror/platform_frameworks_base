@@ -29,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Operation to deal with Text data */
-public class TextMerge implements Operation {
+public class TextMerge extends Operation {
     private static final int OP_CODE = Operations.TEXT_MERGE;
     private static final String CLASS_NAME = "TextMerge";
     public int mTextId;
@@ -58,6 +58,11 @@ public class TextMerge implements Operation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -77,6 +82,12 @@ public class TextMerge implements Operation {
         buffer.writeInt(srcId2);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
         int srcId1 = buffer.readInt();
@@ -85,6 +96,11 @@ public class TextMerge implements Operation {
         operations.add(new TextMerge(textId, srcId1, srcId2));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Merge two string into one")

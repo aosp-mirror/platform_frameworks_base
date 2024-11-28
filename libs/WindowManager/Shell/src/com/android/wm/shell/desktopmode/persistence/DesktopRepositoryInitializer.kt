@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.desktopmode.persistence
 
-import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 
-/** Interface for initializing the [DesktopRepository]. */
+/** Interface for initializing the [DesktopUserRepositories]. */
 fun interface DesktopRepositoryInitializer {
-    fun initialize(repository: DesktopRepository)
+    fun initialize(userRepositories: DesktopUserRepositories)
 }

@@ -37,11 +37,22 @@ public class RoundedClipRectModifierOperation extends DrawBase4
     public static final int OP_CODE = Operations.MODIFIER_ROUNDED_CLIP_RECT;
     public static final String CLASS_NAME = "RoundedClipRectModifierOperation";
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         Maker m = RoundedClipRectModifierOperation::new;
         read(m, buffer, operations);
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }

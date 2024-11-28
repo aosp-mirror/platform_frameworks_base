@@ -28,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import java.util.List;
 
 /** Operation to measure the length of the text */
-public class TextLength implements Operation {
+public class TextLength extends Operation {
     private static final int OP_CODE = Operations.TEXT_LENGTH;
     private static final String CLASS_NAME = "TextLength";
     public int mLengthId;
@@ -54,6 +54,11 @@ public class TextLength implements Operation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -71,12 +76,23 @@ public class TextLength implements Operation {
         buffer.writeInt(textId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int lengthId = buffer.readInt();
         int textId = buffer.readInt();
         operations.add(new TextLength(lengthId, textId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("get the length of the text and store in float table")

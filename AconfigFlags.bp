@@ -23,7 +23,6 @@ aconfig_declarations_group {
         "aconfig_mediacodec_flags_java_lib",
         "aconfig_settingslib_flags_java_lib",
         "aconfig_trade_in_mode_flags_java_lib",
-        "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
         "android.app.assist.flags-aconfig-java",
@@ -63,6 +62,7 @@ aconfig_declarations_group {
         "android.os.vibrator.flags-aconfig-java",
         "android.permission.flags-aconfig-java",
         "android.provider.flags-aconfig-java",
+        "android.sdk.flags-aconfig-java",
         "android.security.flags-aconfig-java",
         "android.server.app.flags-aconfig-java",
         "android.service.autofill.flags-aconfig-java",
@@ -328,6 +328,7 @@ cc_aconfig_library {
     name: "android_nfc_flags_aconfig_c_lib",
     vendor_available: true,
     aconfig_declarations: "android.nfc.flags-aconfig",
+    min_sdk_version: "34",
     apex_available: [
         "//apex_available:platform",
         "com.android.nfcservices",
@@ -652,6 +653,8 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
+        "com.android.art",
+        "com.android.art.debug",
         "com.android.permission",
     ],
 }
@@ -963,6 +966,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.flags-aconfig-java",
     aconfig_declarations: "android.app.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.app.flags-aconfig-java-host",
+    aconfig_declarations: "android.app.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

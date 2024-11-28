@@ -323,7 +323,8 @@ public class FullBackupEngine {
 
     private void tearDown() {
         if (mPkg != null) {
-            backupManagerService.tearDownAgentAndKill(mPkg.applicationInfo);
+            backupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                    mPkg.applicationInfo, /* allowKill= */ true);
         }
     }
 }

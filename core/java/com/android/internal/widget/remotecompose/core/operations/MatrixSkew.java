@@ -31,11 +31,22 @@ public class MatrixSkew extends DrawBase2 {
     public static final int OP_CODE = Operations.MATRIX_SKEW;
     public static final String CLASS_NAME = "MatrixSkew";
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         Maker m = MatrixSkew::new;
         read(m, buffer, operations);
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -50,6 +61,11 @@ public class MatrixSkew extends DrawBase2 {
         apply(buffer, v1, v2);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Current matrix with the specified skew.")

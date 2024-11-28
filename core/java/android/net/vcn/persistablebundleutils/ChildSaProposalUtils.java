@@ -20,10 +20,10 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.NonNull;
 import android.net.ipsec.ike.ChildSaProposal;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.util.List;
 import java.util.Objects;

@@ -197,6 +197,11 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         return "RootLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_ROOT;
     }
@@ -206,6 +211,12 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         buffer.writeInt(componentId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         operations.add(new RootLayoutComponent(componentId, 0, 0, 0, 0, null, -1));

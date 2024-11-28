@@ -528,6 +528,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"上鎖畫面小工具"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"如要使用小工具開啟應用程式，系統會要求你驗證身分。請注意，所有人都能查看小工具，即使平板電腦已鎖定亦然。部分小工具可能不適用於上鎖畫面，新增至這裡可能會有安全疑慮。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"知道了"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會被刪除。"</string>
@@ -780,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"以對話氣泡形式顯示在對話通知頂部 (在上鎖畫面會顯示為個人檔案相片)，並會中斷「請勿打擾」模式"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"無法修改通話通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"無法在此設定這組通知"</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"如要提高解像度，請切換至手機後置鏡頭"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展開折疊式裝置"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻轉折疊式裝置"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"正面螢幕已開啟"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"已摺疊"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"已打開"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1423,12 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"無障礙功能"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"鍵盤快速鍵"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自訂鍵盤快速鍵"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"按鍵即可指派快速鍵"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"搜尋快速鍵"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"沒有相符的搜尋結果"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收合圖示"</string>
@@ -1431,9 +1441,16 @@
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"拖曳控點"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"鍵盤設定"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"設定快速鍵"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"取消"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"按鍵"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"此按鍵組合已在使用，請改用其他按鍵。"</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_plus_symbol (4534843157353732011) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用鍵盤導覽"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"瞭解鍵盤快速鍵"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"使用觸控板導覽"</string>

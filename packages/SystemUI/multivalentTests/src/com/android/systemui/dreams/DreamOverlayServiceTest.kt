@@ -62,6 +62,7 @@ import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
 import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
 import com.android.systemui.dreams.touch.CommunalTouchHandler
 import com.android.systemui.flags.andSceneContainer
@@ -119,8 +120,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val mComplicationComponentFactory = mock<ComplicationComponent.Factory>()
     private val mComplicationHostViewController = mock<ComplicationHostViewController>()
     private val mComplicationVisibilityController = mock<ComplicationLayoutEngine>()
-    private val mDreamComplicationComponentFactory =
-        mock<com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory>()
+    private val mDreamComplicationComponentFactory = mock<DreamComplicationComponent.Factory>()
     private val mHideComplicationTouchHandler = mock<HideComplicationTouchHandler>()
     private val mDreamOverlayComponentFactory = mock<DreamOverlayComponent.Factory>()
     private val mCommunalTouchHandler = mock<CommunalTouchHandler>()
@@ -160,8 +160,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private lateinit var mService: DreamOverlayService
 
     private class EnvironmentComponents(
-        val dreamsComplicationComponent:
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent,
+        val dreamsComplicationComponent: DreamComplicationComponent,
         val dreamOverlayComponent: DreamOverlayComponent,
         val complicationComponent: ComplicationComponent,
         val ambientTouchComponent: AmbientTouchComponent,
@@ -186,8 +185,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     }
 
     private fun setupComponentFactories(
-        dreamComplicationComponentFactory:
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory,
+        dreamComplicationComponentFactory: DreamComplicationComponent.Factory,
         dreamOverlayComponentFactory: DreamOverlayComponent.Factory,
         complicationComponentFactory: ComplicationComponent.Factory,
         ambientTouchComponentFactory: AmbientTouchComponent.Factory,
@@ -208,8 +206,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         whenever(complicationComponent.getVisibilityController())
             .thenReturn(mComplicationVisibilityController)
 
-        val dreamComplicationComponent =
-            mock<com.android.systemui.dreams.complication.dagger.ComplicationComponent>()
+        val dreamComplicationComponent = mock<DreamComplicationComponent>()
         whenever(dreamComplicationComponent.getHideComplicationTouchHandler())
             .thenReturn(mHideComplicationTouchHandler)
         whenever(dreamOverlayComponent.communalTouchHandler).thenReturn(mCommunalTouchHandler)

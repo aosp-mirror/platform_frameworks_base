@@ -33,7 +33,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Apply a value change on an float variable. */
-public class ValueFloatChangeActionOperation implements ActionOperation {
+public class ValueFloatChangeActionOperation extends Operation implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_FLOAT_CHANGE_ACTION;
 
     int mTargetValueId = -1;

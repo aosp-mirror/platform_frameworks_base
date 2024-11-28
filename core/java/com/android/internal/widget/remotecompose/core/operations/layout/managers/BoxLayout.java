@@ -108,6 +108,8 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         for (Component c : mChildrenComponents) {
@@ -175,6 +177,11 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         return "BoxLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_BOX;
     }
@@ -192,6 +199,12 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         buffer.writeInt(verticalPositioning);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();

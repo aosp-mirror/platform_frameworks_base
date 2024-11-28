@@ -41,6 +41,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 import dalvik.system.VMRuntime;
 
 import java.lang.annotation.Retention;
@@ -1546,6 +1548,57 @@ public class Build {
     }
 
     /**
+     * Convert a major.minor version String like "36.1" to an int that
+     * represents both major and minor version.
+     *
+     * @param version the String to parse
+     * @return an int encoding the major and minor version
+     * @throws IllegalArgumentException if the string could not be converted into an int
+     *
+     * @hide
+     */
+    @SuppressWarnings("FlaggedApi") // SDK_INT_MULTIPLIER is defined in this file
+    public static @SdkIntFull int parseFullVersion(@NonNull String version) {
+        int index = version.indexOf('.');
+        int major;
+        int minor = 0;
+        try {
+            if (index == -1) {
+                major = Integer.parseInt(version);
+            } else {
+                major = Integer.parseInt(version.substring(0, index));
+                minor = Integer.parseInt(version.substring(index + 1));
+            }
+            if (major < 0 || minor < 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("failed to parse '" + version
+                    + "' as a major.minor version code");
+        }
+        return major * VERSION_CODES_FULL.SDK_INT_MULTIPLIER + minor;
+    }
+
+    /**
+     * Convert an int representing a major.minor version like SDK_INT_FULL to a
+     * human readable string. The returned string is only intended for debug
+     * and error messages.
+     *
+     * @param version the int to convert to a string
+     * @return a String representing the same major.minor version as the int passed in
+     * @throws IllegalArgumentException if {@code version} is negative
+     *
+     * @hide
+     */
+    public static String fullVersionToString(@SdkIntFull int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("failed to convert '" + version
+                    + "' to string: not a valid major.minor version code");
+        }
+        return String.format("%d.%d", getMajorSdkVersion(version), getMinorSdkVersion(version));
+    }
+
+    /**
      * The vendor API for 2024 Q2
      *
      * <p>For Android 14-QPR3 and later, the vendor API level is completely decoupled from the SDK
@@ -1615,11 +1668,14 @@ public class Build {
      */
     @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
     public static @BackportedFixStatus int getBackportedFixStatus(long id) {
-        if (id <= 0 || id > 1023) {
-            return BACKPORTED_FIX_STATUS_UNKNOWN;
+        @BackportedFixStatus int status = BACKPORTED_FIX_STATUS_UNKNOWN;
+        int uid = Binder.getCallingUid();
+        if (id > 0 && id <= 1023) {
+            status = isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
+                    ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
         }
-        return isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
-                ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
+        FrameworkStatsLog.write(FrameworkStatsLog.BACKPORTED_FIX_STATUS_REPORTED, uid, id, status);
+        return status;
     }
 
     private static boolean isBitSet(List<Long> bitsetLongArray, int bitIndex) {

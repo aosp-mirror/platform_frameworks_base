@@ -60,6 +60,7 @@ import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController
 import com.android.wm.shell.desktopmode.education.AppToWebEducationController
@@ -108,7 +109,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     protected val mockTaskOrganizer = mock<ShellTaskOrganizer>()
     protected val mockDisplayController = mock<DisplayController>()
     protected val mockSplitScreenController = mock<SplitScreenController>()
-    protected val mockDesktopRepository = mock<DesktopRepository>()
+    protected val mockDesktopUserRepositories = mock<DesktopUserRepositories>()
     protected val mockDisplayLayout = mock<DisplayLayout>()
     protected val displayInsetsController = mock<DisplayInsetsController>()
     protected val mockSyncQueue = mock<SyncTransactionQueue>()
@@ -142,6 +143,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     protected val mockAppToWebEducationController = mock<AppToWebEducationController>()
     protected val mockFocusTransitionObserver = mock<FocusTransitionObserver>()
     protected val mockCaptionHandleRepository = mock<WindowDecorCaptionHandleRepository>()
+    protected val mockDesktopRepository: DesktopRepository = mock<DesktopRepository>()
     protected val motionEvent = mock<MotionEvent>()
     val displayController = mock<DisplayController>()
     val displayLayout = mock<DisplayLayout>()
@@ -168,6 +170,9 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
         windowDecorByTaskIdSpy.clear()
         spyContext.addMockSystemService(InputManager::class.java, mockInputManager)
         desktopModeEventLogger = mock<DesktopModeEventLogger>()
+        whenever(mockDesktopUserRepositories.current).thenReturn(mockDesktopRepository)
+        whenever(mockDesktopUserRepositories.getProfile(anyInt()))
+            .thenReturn(mockDesktopRepository)
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
             spyContext,
             testShellExecutor,
@@ -178,7 +183,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             mockShellCommandHandler,
             mockWindowManager,
             mockTaskOrganizer,
-            mockDesktopRepository,
+            mockDesktopUserRepositories,
             mockDisplayController,
             mockShellController,
             displayInsetsController,

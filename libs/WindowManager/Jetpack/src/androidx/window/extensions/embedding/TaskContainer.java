@@ -182,8 +182,15 @@ class TaskContainer {
 
     @NonNull
     List<ParcelableSplitContainerData> getParcelableSplitContainerDataList() {
-        final List<ParcelableSplitContainerData> data = new ArrayList<>(mSplitContainers.size());
+        final int size =
+                mSplitPinContainer != null ? mSplitContainers.size() - 1 : mSplitContainers.size();
+        final List<ParcelableSplitContainerData> data = new ArrayList<>(size);
         for (SplitContainer splitContainer : mSplitContainers) {
+            if (splitContainer == mSplitPinContainer) {
+                // Skip SplitPinContainer as it cannot be restored because the SplitPinRule is
+                // set while pinning the container in runtime.
+                continue;
+            }
             data.add(splitContainer.getParcelableData());
         }
         return data;

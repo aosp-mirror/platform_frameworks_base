@@ -685,14 +685,6 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         }
     }
 
-    ThreadedRendererWrapper getThreadedRenderer() {
-        return mRendererWrapper;
-    }
-
-    ViewRootWrapper getViewRoot() {
-        return mViewRoot;
-    }
-
     private boolean shouldTriggerPerfetto(int missedFramesCount, int maxFrameTimeNanos) {
         boolean overMissedFramesThreshold = mTraceThresholdMissedFrames != -1
                 && missedFramesCount >= mTraceThresholdMissedFrames;

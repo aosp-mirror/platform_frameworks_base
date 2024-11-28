@@ -60,6 +60,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
@@ -84,7 +85,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     @Mock
     lateinit var transitions: Transitions
     @Mock
-    lateinit var desktopRepository: DesktopRepository
+    lateinit var userRepositories: DesktopUserRepositories
     @Mock
     lateinit var freeformTaskTransitionHandler: FreeformTaskTransitionHandler
     @Mock
@@ -103,16 +104,21 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     lateinit var shellInit: ShellInit
     @Mock
     lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+    @Mock
+    private lateinit var desktopRepository: DesktopRepository
 
     private lateinit var mixedHandler: DesktopMixedTransitionHandler
 
+
     @Before
     fun setUp() {
+        whenever(userRepositories.current).thenReturn(desktopRepository)
+        whenever(userRepositories.getProfile(Mockito.anyInt())).thenReturn(desktopRepository)
         mixedHandler =
             DesktopMixedTransitionHandler(
                 context,
                 transitions,
-                desktopRepository,
+                userRepositories,
                 freeformTaskTransitionHandler,
                 closeDesktopTaskTransitionHandler,
                 desktopImmersiveController,

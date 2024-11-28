@@ -2626,10 +2626,12 @@ public final class InputMethodManager {
                         // The view is running on a different thread than our own, so
                         // we need to reschedule our work for over there.
                         if (DEBUG) Log.v(TAG, "Hiding soft input: reschedule to view thread");
+                        final var finalStatsToken = statsToken;
                         vh.post(() -> viewRootImpl.getInsetsController().hide(
-                                WindowInsets.Type.ime()));
+                                WindowInsets.Type.ime(), false /* fromIme */, finalStatsToken));
                     } else {
-                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime(),
+                                false /* fromIme */, statsToken);
                     }
                 }
                 return true;

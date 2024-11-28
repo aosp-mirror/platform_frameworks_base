@@ -528,6 +528,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgets en la pantalla de bloqueo"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para abrir una app usando un widget, debes verificar tu identidad. Además, ten en cuenta que cualquier persona podrá verlo, incluso cuando la tablet esté bloqueada. Es posible que algunos widgets no se hayan diseñados para la pantalla de bloqueo y podría ser peligroso agregarlos allí."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entendido"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar usuario"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú expandible"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
@@ -780,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece en forma de burbuja y como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo, y detiene el modo No interrumpir"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaria"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"No se pueden modificar las notificaciones de llamada."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"No se puede configurar aquí este grupo de notificaciones"</string>
@@ -1220,8 +1226,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Usa menos de <xliff:g id="LENGTH">%1$d</xliff:g> caracteres"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Se copió el número de compilación en el portapapeles."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"copiar en el portapapeles."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widgets de conversación"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Presiona una conversación para agregarla a tu pantalla principal"</string>
@@ -1418,7 +1423,12 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accesibilidad"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Combinaciones de teclas"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personaliza las combinaciones de teclas"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Presiona la tecla para asignar el acceso directo"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Buscar combinaciones de teclas"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"La búsqueda no arrojó resultados"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícono de contraer"</string>
@@ -1431,9 +1441,15 @@
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Controlador de arrastre"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Configuración del teclado"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Establecer combinación de teclas"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancelar"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Presiona una tecla"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"La combinación de teclas ya está en uso. Prueba con otra."</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navega con el teclado"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Aprende combinaciones de teclas"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navega con el panel táctil"</string>

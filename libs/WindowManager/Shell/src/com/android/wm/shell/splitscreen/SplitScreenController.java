@@ -94,6 +94,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.SplitDragPolicy;
@@ -199,6 +200,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
     private final Optional<DesktopTasksController> mDesktopTasksController;
     private final MultiInstanceHelper mMultiInstanceHelpher;
+    private final SplitState mSplitState;
     private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
 
     @VisibleForTesting
@@ -228,6 +230,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             Optional<DesktopTasksController> desktopTasksController,
             @Nullable StageCoordinator stageCoordinator,
             MultiInstanceHelper multiInstanceHelper,
+            SplitState splitState,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
         mShellCommandHandler = shellCommandHandler;
@@ -252,6 +255,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mDesktopTasksController = desktopTasksController;
         mStageCoordinator = stageCoordinator;
         mMultiInstanceHelpher = multiInstanceHelper;
+        mSplitState = splitState;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -296,7 +300,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
                 mMainExecutor, mMainHandler, mRecentTasksOptional, mLaunchAdjacentController,
-                mWindowDecorViewModel);
+                mWindowDecorViewModel, mSplitState);
     }
 
     @Override

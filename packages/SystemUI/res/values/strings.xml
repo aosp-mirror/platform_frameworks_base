@@ -2287,6 +2287,14 @@
     <string name="system_multitasking_replace">During split screen: replace an app from one to another</string>
     <!-- User visible title for the keyboard shortcut that moves a focused task to a next display [CHAR LIMIT=70] -->
     <string name="system_multitasking_move_to_next_display">Move active window between displays</string>
+    <!-- User visible title for the keyboard shortcut that snaps a task to the left in desktop mode [CHAR LIMIT=70] -->
+    <string name="system_desktop_mode_snap_left_window">Move window to the left</string>
+    <!-- User visible title for the keyboard shortcut that snaps a task to the right in desktop mode [CHAR LIMIT=70] -->
+    <string name="system_desktop_mode_snap_right_window">Move window to the right</string>
+    <!-- User visible title for the keyboard shortcut that toggles between maximizing and restoring a task's previous bounds in desktop mode [CHAR LIMIT=70] -->
+    <string name="system_desktop_mode_toggle_maximize_window">Maximize window</string>
+    <!-- User visible title for the keyboard shortcut that minimizes a task in desktop mode [CHAR LIMIT=70] -->
+    <string name="system_desktop_mode_minimize_window">Minimize window</string>
 
     <!-- User visible title for the input keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_input">Input</string>
@@ -3816,6 +3824,14 @@
          [CHAR LIMIT=NONE]
           -->
     <string name="shortcut_helper_key_combinations_or_separator">or</string>
+    <!-- Word that combines different possible key combinations of a shortcut. For example the
+         "Go to home screen" shortcut could be triggered using "ctrl" plus "h".
+         This is only used for accessibility content descriptions of the key combinations.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_key_combinations_and_conjunction">plus</string>
+    <!-- Word that represents the forward slash character "/". To be used only in accessibility
+         content descriptions. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_key_combinations_forward_slash">forward slash</string>
     <!-- Content description of the drag handle that allows to swipe to dismiss the shortcut helper.
          The helper is a  component that shows the  user which keyboard shortcuts they can
          use. The helper shows shortcuts in categories, which can be collapsed or expanded.

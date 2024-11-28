@@ -63,6 +63,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
@@ -119,8 +120,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
     public CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
+            @ShellMainThread ShellExecutor shellExecutor,
             @ShellBackgroundThread ShellExecutor bgExecutor,
-            ShellExecutor shellExecutor,
             Choreographer mainChoreographer,
             IWindowManager windowManager,
             ShellInit shellInit,

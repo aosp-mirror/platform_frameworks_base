@@ -16,6 +16,8 @@
 
 package android.preference;
 
+import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
+
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -54,6 +56,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.util.XmlUtils;
 
@@ -208,6 +212,8 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private int mPreferenceHeaderItemResId = 0;
     private boolean mPreferenceHeaderRemoveEmptyIcon = false;
+
+    private final OnBackInvokedCallback mOnBackInvokedCallback = this::onBackInvoked;
 
     /**
      * The starting request code given out to preference framework.
@@ -699,10 +705,26 @@ public abstract class PreferenceActivity extends ListActivity implements
                 skipButton.setVisibility(View.VISIBLE);
             }
         }
+        updateBackCallbackRegistrationState();
     }
 
     @Override
     public void onBackPressed() {
+        onBackInvoked();
+    }
+
+    private void updateBackCallbackRegistrationState() {
+        if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)) return;
+        if (mCurHeader != null && mSinglePane && getFragmentManager().getBackStackEntryCount() == 0
+                && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null) {
+            getOnBackInvokedDispatcher()
+                    .registerOnBackInvokedCallback(PRIORITY_DEFAULT, mOnBackInvokedCallback);
+        } else {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+        }
+    }
+
+    private void onBackInvoked() {
         if (mCurHeader != null && mSinglePane && getFragmentManager().getBackStackEntryCount() == 0
                 && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null) {
             mCurHeader = null;
@@ -713,9 +735,10 @@ public abstract class PreferenceActivity extends ListActivity implements
                 showBreadCrumbs(mActivityTitle, null);
             }
             getListView().clearChoices();
-        } else {
+        } else if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)) {
             super.onBackPressed();
         }
+        updateBackCallbackRegistrationState();
     }
 
     /**
@@ -1221,6 +1244,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             getListView().clearChoices();
         }
         showBreadCrumbs(header);
+        updateBackCallbackRegistrationState();
     }
 
     void showBreadCrumbs(Header header) {

@@ -34,7 +34,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Allows setting visibility on a component */
-public class ComponentVisibilityOperation
+public class ComponentVisibilityOperation extends Operation
         implements ModifierOperation, VariableSupport, DecoratorComponent {
     private static final int OP_CODE = Operations.MODIFIER_VISIBILITY;
 
@@ -79,6 +79,12 @@ public class ComponentVisibilityOperation
         buffer.writeInt(valueId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int valueId = buffer.readInt();
         operations.add(new ComponentVisibilityOperation(valueId));

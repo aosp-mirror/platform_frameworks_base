@@ -20,18 +20,24 @@ data class Shortcut(
     val label: String,
     val commands: List<ShortcutCommand>,
     val icon: ShortcutIcon? = null,
+    val contentDescription: String = "",
 ) {
     val containsCustomShortcutCommands: Boolean = commands.any { it.isCustom }
 }
 
 class ShortcutBuilder(private val label: String) {
     val commands = mutableListOf<ShortcutCommand>()
+    var contentDescription = ""
 
     fun command(builder: ShortcutCommandBuilder.() -> Unit) {
         commands += ShortcutCommandBuilder().apply(builder).build()
     }
 
-    fun build() = Shortcut(label, commands)
+    fun contentDescription(string: () -> String) {
+        contentDescription = string.invoke()
+    }
+
+    fun build() = Shortcut(label, commands, contentDescription = contentDescription)
 }
 
 fun shortcut(label: String, block: ShortcutBuilder.() -> Unit): Shortcut =

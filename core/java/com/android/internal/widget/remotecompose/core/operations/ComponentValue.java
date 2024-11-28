@@ -30,7 +30,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-public class ComponentValue implements Operation, SerializableToString {
+public class ComponentValue extends Operation implements SerializableToString {
     public static final int OP_CODE = Operations.COMPONENT_VALUE;
     public static final String CLASS_NAME = "ComponentValue";
 
@@ -41,6 +41,11 @@ public class ComponentValue implements Operation, SerializableToString {
     private int mComponentID = -1;
     private int mValueId = -1;
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -78,6 +83,12 @@ public class ComponentValue implements Operation, SerializableToString {
         // Nothing
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int type = buffer.readInt();
         int componentId = buffer.readInt();
@@ -86,6 +97,11 @@ public class ComponentValue implements Operation, SerializableToString {
         operations.add(op);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a component-related value (eg its width, height etc.)")

@@ -33,7 +33,7 @@ import java.util.List;
  * <p>It encodes the version of the document (following semantic versioning) as well as the
  * dimensions of the document in pixels.
  */
-public class RootContentBehavior implements RemoteComposeOperation {
+public class RootContentBehavior extends Operation implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.ROOT_CONTENT_BEHAVIOR;
     private static final String CLASS_NAME = "RootContentBehavior";
     int mScroll = NONE;
@@ -205,6 +205,11 @@ public class RootContentBehavior implements RemoteComposeOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -218,6 +223,12 @@ public class RootContentBehavior implements RemoteComposeOperation {
         buffer.writeInt(mode);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int scroll = buffer.readInt();
         int alignment = buffer.readInt();

@@ -30,7 +30,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Operation convert int index of a list to text */
-public class TextLookupInt implements Operation, VariableSupport {
+public class TextLookupInt extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.TEXT_LOOKUP_INT;
     private static final String CLASS_NAME = "TextFromINT";
     public int mTextId;
@@ -77,6 +77,11 @@ public class TextLookupInt implements Operation, VariableSupport {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -96,6 +101,12 @@ public class TextLookupInt implements Operation, VariableSupport {
         buffer.writeInt(indexId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
         int dataSetId = buffer.readInt();
@@ -103,6 +114,11 @@ public class TextLookupInt implements Operation, VariableSupport {
         operations.add(new TextLookupInt(textId, dataSetId, indexId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Look up an array and turn into a text object")

@@ -21,6 +21,7 @@ import android.content.res.Resources
 import android.hardware.devicestate.DeviceState
 import android.hardware.devicestate.DeviceStateManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.window.common.layout.CommonFoldingFeature
 import androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_FLAT
 import androidx.window.common.layout.CommonFoldingFeature.COMMON_STATE_HALF_OPENED
@@ -33,13 +34,14 @@ import androidx.window.common.layout.DisplayFoldFeatureCommon.DISPLAY_FOLD_FEATU
 import com.android.internal.R
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import java.util.concurrent.Executor
 import java.util.function.Consumer
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
@@ -69,14 +71,39 @@ class DeviceStateManagerFoldingFeatureProducerTest {
     }
 
     @Test
-    fun testRegisterCallback_usesMainExecutor() {
+    fun testRegisterCallback_initialCallbackOnMainThread_executesDirectly() {
         DeviceStateManagerFoldingFeatureProducer(
             mMockContext,
             mRawFoldSupplier,
             mMockDeviceStateManager,
         )
+        val callbackCaptor = argumentCaptor<DeviceStateManager.DeviceStateCallback>()
+        verify(mMockDeviceStateManager).registerCallback(any(), callbackCaptor.capture())
 
-        verify(mMockDeviceStateManager).registerCallback(eq(mMockContext.mainExecutor), any())
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            callbackCaptor.firstValue.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
+        }
+
+        verify(mMockContext, never()).getMainExecutor()
+    }
+
+    @Test
+    fun testRegisterCallback_subsequentCallbacks_postsToMainThread() {
+        val mockMainExecutor = mock<Executor>()
+        mMockContext.stub {
+            on { getMainExecutor() } doReturn mockMainExecutor
+        }
+        DeviceStateManagerFoldingFeatureProducer(
+            mMockContext,
+            mRawFoldSupplier,
+            mMockDeviceStateManager,
+        )
+        val callbackCaptor = argumentCaptor<DeviceStateManager.DeviceStateCallback>()
+        verify(mMockDeviceStateManager).registerCallback(any(), callbackCaptor.capture())
+
+        callbackCaptor.firstValue.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
+
+        verify(mockMainExecutor).execute(any())
     }
 
     @Test
@@ -86,7 +113,7 @@ class DeviceStateManagerFoldingFeatureProducerTest {
             mRawFoldSupplier,
             mMockDeviceStateManager,
         )
-        ffp.mDeviceStateCallback.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
+        ffp.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
 
         val currentData = ffp.getCurrentData()
 
@@ -209,7 +236,7 @@ class DeviceStateManagerFoldingFeatureProducerTest {
             mRawFoldSupplier,
             mMockDeviceStateManager,
         )
-        ffp.mDeviceStateCallback.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
+        ffp.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
         val storeFeaturesConsumer = mock<Consumer<List<CommonFoldingFeature>>>()
 
         ffp.getData(storeFeaturesConsumer)
@@ -229,8 +256,8 @@ class DeviceStateManagerFoldingFeatureProducerTest {
         ffp.getData(storeFeaturesConsumer)
 
         verify(storeFeaturesConsumer, never()).accept(any())
-        ffp.mDeviceStateCallback.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
-        ffp.mDeviceStateCallback.onDeviceStateChanged(DEVICE_STATE_OPENED)
+        ffp.onDeviceStateChanged(DEVICE_STATE_HALF_OPENED)
+        ffp.onDeviceStateChanged(DEVICE_STATE_OPENED)
         verify(storeFeaturesConsumer).accept(HALF_OPENED_FOLDING_FEATURES)
     }
 

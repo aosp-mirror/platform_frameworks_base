@@ -34,7 +34,7 @@ import java.util.Set;
  * A class to manage the core default system properties of the Ravenwood environment.
  */
 public class RavenwoodSystemProperties {
-    private static final String TAG = "RavenwoodSystemProperties";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     /** We pull in properties from this file. */
     private static final String RAVENWOOD_BUILD_PROP = "ravenwood-data/ravenwood-build.prop";
@@ -132,9 +132,10 @@ public class RavenwoodSystemProperties {
     }
 
     private static boolean isKeyReadable(String key) {
-        final String root = getKeyRoot(key);
+        // All writable keys are also readable
+        if (isKeyWritable(key)) return true;
 
-        if (root.startsWith("debug.")) return true;
+        final String root = getKeyRoot(key);
 
         // This set is carefully curated to help identify situations where a test may
         // accidentally depend on a default value of an obscure property whose owner hasn't
@@ -145,26 +146,24 @@ public class RavenwoodSystemProperties {
         if (root.startsWith("soc.")) return true;
         if (root.startsWith("system.")) return true;
 
-        // For PropertyInvalidatedCache
-        if (root.startsWith("cache_key.")) return true;
+        // All core values should be readable
+        if (sDefaultValues.containsKey(key)) return true;
 
-        switch (key) {
-            case "gsm.version.baseband":
-            case "no.such.thing":
-            case "qemu.sf.lcd_density":
-            case "ro.bootloader":
-            case "ro.debuggable":
-            case "ro.hardware":
-            case "ro.hw_timeout_multiplier":
-            case "ro.odm.build.media_performance_class":
-            case "ro.sf.lcd_density":
-            case "ro.treble.enabled":
-            case "ro.vndk.version":
-            case "ro.icu.data.path":
-                return true;
-        }
-
-        return false;
+        // Hardcoded allowlist
+        return switch (key) {
+            case "gsm.version.baseband",
+                 "no.such.thing",
+                 "qemu.sf.lcd_density",
+                 "ro.bootloader",
+                 "ro.hardware",
+                 "ro.hw_timeout_multiplier",
+                 "ro.odm.build.media_performance_class",
+                 "ro.sf.lcd_density",
+                 "ro.treble.enabled",
+                 "ro.vndk.version",
+                 "ro.icu.data.path" -> true;
+            default -> false;
+        };
     }
 
     private static boolean isKeyWritable(String key) {

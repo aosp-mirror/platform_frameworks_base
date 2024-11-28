@@ -818,7 +818,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showPrimaryBouncer(boolean scrimmed) {
-        hideAlternateBouncer(false);
+        hideAlternateBouncer(
+                /* updateScrim= */ false,
+                // When the scene framework is on, don't ever clear the pending dismiss action from
+                /* clearDismissAction= */ !SceneContainerFlag.isEnabled());
         if (mKeyguardStateController.isShowing() && !isBouncerShowing()) {
             if (SceneContainerFlag.isEnabled()) {
                 mSceneInteractorLazy.get().changeScene(
@@ -1005,6 +1008,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void hideAlternateBouncer(boolean updateScrim) {
+        hideAlternateBouncer(updateScrim, /* clearDismissAction= */ true);
+    }
+
+    @Override
+    public void hideAlternateBouncer(boolean updateScrim, boolean clearDismissAction) {
+        if (clearDismissAction) {
+            mKeyguardDismissActionInteractor.get().clearDismissAction();
+        }
+
         updateAlternateBouncerShowing(mAlternateBouncerInteractor.hide() && updateScrim);
     }
 

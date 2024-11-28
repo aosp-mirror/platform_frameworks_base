@@ -135,6 +135,8 @@
     <public name="pageSizeCompat" />
     <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
     <public name="shareRolePriority"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SUPPORT_MINOR_VERSIONS_IN_MINSDKVERSION) -->
+    <public name="minSdkVersionFull"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
@@ -149,6 +151,9 @@
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
          @hide @SystemApi -->
     <public name="config_systemDependencyInstaller" />
+    <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_CROSS_USER_ROLE_PLATFORM_API_ENABLED)
+         @hide @SystemApi -->
+    <public name="config_defaultReservedForTestingProfileGroupExclusivity" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">

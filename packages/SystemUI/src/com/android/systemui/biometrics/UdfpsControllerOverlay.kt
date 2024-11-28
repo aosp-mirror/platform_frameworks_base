@@ -41,6 +41,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
@@ -73,7 +74,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -245,7 +245,7 @@ constructor(
             return true
         }
 
-        Log.v(TAG, "showUdfpsOverlay | the overlay is already showing")
+        Log.d(TAG, "showUdfpsOverlay | the overlay is already showing")
         return false
     }
 

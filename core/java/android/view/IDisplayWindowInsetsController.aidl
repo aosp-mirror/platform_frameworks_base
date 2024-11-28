@@ -60,5 +60,5 @@ oneway interface IDisplayWindowInsetsController {
      * Reports the requested IME visibility of the IME input target to
      * the IDisplayWindowInsetsController
      */
-    void setImeInputTargetRequestedVisibility(boolean visible);
+    void setImeInputTargetRequestedVisibility(boolean visible, in ImeTracker.Token statsToken);
 }

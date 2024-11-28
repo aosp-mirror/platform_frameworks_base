@@ -324,6 +324,8 @@ public class PipAnimationController {
         private final @AnimationType int mAnimationType;
         private final Rect mDestinationBounds = new Rect();
 
+        private final Point mLeashOffset = new Point();
+
         private T mBaseValue;
         protected T mCurrentValue;
         protected T mStartValue;
@@ -338,13 +340,22 @@ public class PipAnimationController {
         // Flag to avoid double-end
         private boolean mHasRequestedEnd;
 
-        private PipTransitionAnimator(TaskInfo taskInfo, SurfaceControl leash,
-                @AnimationType int animationType,
-                Rect destinationBounds, T baseValue, T startValue, T endValue) {
+        private PipTransitionAnimator(@NonNull TaskInfo taskInfo, @NonNull SurfaceControl leash,
+                @AnimationType int animationType, @NonNull Rect destinationBounds,
+                @NonNull T baseValue, @NonNull T startValue, @NonNull T endValue) {
+            this(taskInfo, leash, animationType, destinationBounds, new Point(), baseValue,
+                    startValue, endValue);
+        }
+
+        private PipTransitionAnimator(@NonNull TaskInfo taskInfo, @NonNull SurfaceControl leash,
+                @AnimationType int animationType, @NonNull Rect destinationBounds,
+                @NonNull Point leashOffset, @NonNull T baseValue, @NonNull T startValue,
+                @NonNull T endValue) {
             mTaskInfo = taskInfo;
             mLeash = leash;
             mAnimationType = animationType;
             mDestinationBounds.set(destinationBounds);
+            mLeashOffset.set(leashOffset);
             mBaseValue = baseValue;
             mStartValue = startValue;
             mEndValue = endValue;
@@ -494,6 +505,15 @@ public class PipAnimationController {
             if (mAnimationType == ANIM_TYPE_ALPHA) {
                 onStartTransaction(mLeash, mSurfaceControlTransactionFactory.getTransaction());
             }
+        }
+
+        /**
+         * Returns the offset of the {@link #mLeash}.
+         */
+        @NonNull
+        Point getLeashOffset() {
+            // Use copy to prevent the leash to be modified unexpectedly.
+            return new Point(mLeashOffset);
         }
 
         void setCurrentValue(T value) {
@@ -692,8 +712,8 @@ public class PipAnimationController {
             final Rect zeroInsets = new Rect(0, 0, 0, 0);
 
             // construct new Rect instances in case they are recycled
-            return new PipTransitionAnimator<Rect>(taskInfo, leash, ANIM_TYPE_BOUNDS,
-                    endBounds, new Rect(baseBounds), new Rect(startBounds), new Rect(endBounds)) {
+            return new PipTransitionAnimator<Rect>(taskInfo, leash, ANIM_TYPE_BOUNDS, endBounds,
+                    leashOffset, new Rect(baseBounds), new Rect(startBounds), new Rect(endBounds)) {
                 private final RectEvaluator mRectEvaluator = new RectEvaluator(new Rect());
                 private final RectEvaluator mInsetsEvaluator = new RectEvaluator(new Rect());
 
@@ -720,6 +740,7 @@ public class PipAnimationController {
                             // Use the bounds relative to the task leash in case the leash does not
                             // start from (0, 0).
                             final Rect relativeEndBounds = new Rect(end);
+                            final Point leashOffset = getLeashOffset();
                             relativeEndBounds.offset(-leashOffset.x, -leashOffset.y);
                             getSurfaceTransactionHelper()
                                     .crop(tx, leash, relativeEndBounds)

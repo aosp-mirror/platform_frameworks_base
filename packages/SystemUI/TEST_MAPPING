@@ -55,14 +55,6 @@
           "exclude-filter": "android.platform.tests.HomeTest#testAssistantWidget"
         }
       ]
-    },
-    {
-      "name": "AndroidAutomotiveNotificationsTests",
-      "options" : [
-        {
-          "include-filter": "android.platform.tests.NotificationTest"
-        }
-      ]
     }
   ],
 

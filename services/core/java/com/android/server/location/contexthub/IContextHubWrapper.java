@@ -239,6 +239,10 @@ public abstract class IContextHubWrapper {
     public void registerEndpointCallback(android.hardware.contexthub.IEndpointCallback cb)
             throws RemoteException {}
 
+    /** Registers the endpoint with the ContextHub HAL */
+    public void registerEndpoint(android.hardware.contexthub.EndpointInfo info)
+            throws RemoteException {}
+
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
      */
@@ -669,6 +673,16 @@ public abstract class IContextHubWrapper {
                 Log.i(TAG, "registerEndpointCallback: cb=" + cb);
             }
             hub.registerEndpointCallback(cb);
+        }
+
+        @Override
+        public void registerEndpoint(android.hardware.contexthub.EndpointInfo info)
+                throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return;
+            }
+            hub.registerEndpoint(info);
         }
 
         public boolean supportsLocationSettingNotifications() {

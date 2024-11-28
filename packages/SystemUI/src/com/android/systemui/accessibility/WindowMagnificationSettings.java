@@ -574,13 +574,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 || (configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0
                 || (configDiff & ActivityInfo.CONFIG_FONT_SCALE) != 0
                 || (configDiff & ActivityInfo.CONFIG_LOCALE) != 0
-                || (configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
+                || (configDiff & ActivityInfo.CONFIG_DENSITY) != 0
+                || (configDiff & ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT) != 0) {
             // We listen to following config changes to trigger layout inflation:
             // CONFIG_UI_MODE: theme change
             // CONFIG_ASSETS_PATHS: wallpaper change
             // CONFIG_FONT_SCALE: font size change
             // CONFIG_LOCALE: language change
             // CONFIG_DENSITY: display size change
+            // CONFIG_FONT_WEIGHT_ADJUSTMENT: bold text setting change
             mParams.width = getPanelWidth(mContext);
             mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
 

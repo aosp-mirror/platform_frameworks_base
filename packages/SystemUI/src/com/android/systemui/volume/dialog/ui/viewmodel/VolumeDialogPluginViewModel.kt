@@ -17,14 +17,14 @@
 package com.android.systemui.volume.dialog.ui.viewmodel
 
 import com.android.systemui.volume.Events
-import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
+import com.android.systemui.volume.dialog.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
@@ -34,8 +34,8 @@ import kotlinx.coroutines.flow.mapLatest
 class VolumeDialogPluginViewModel
 @Inject
 constructor(
-    private val componentFactory: VolumeDialogComponent.Factory,
     private val dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
+    private val volumeDialogProvider: Provider<VolumeDialog>,
     private val logger: VolumeDialogLogger,
 ) {
 
@@ -45,7 +45,7 @@ constructor(
                 .mapLatest { visibilityModel ->
                     with(visibilityModel) {
                         if (this is VolumeDialogVisibilityModel.Visible) {
-                            showDialog(componentFactory)
+                            showDialog()
                             Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked)
                             logger.onShow(reason)
                         }
@@ -59,16 +59,14 @@ constructor(
         }
     }
 
-    private suspend fun showDialog(componentFactory: VolumeDialogComponent.Factory): Unit =
-        coroutineScope {
-            val volumeDialogComponent: VolumeDialogComponent = componentFactory.create(this)
-            val dialog =
-                volumeDialogComponent.volumeDialog().apply {
-                    setOnDismissListener {
-                        volumeDialogComponent.coroutineScope().cancel()
-                        dialogVisibilityInteractor.dismissDialog(Events.DISMISS_REASON_UNKNOWN)
-                    }
+    private fun showDialog() {
+        volumeDialogProvider
+            .get()
+            .apply {
+                setOnDismissListener {
+                    dialogVisibilityInteractor.dismissDialog(Events.DISMISS_REASON_UNKNOWN)
                 }
-            dialog.show()
-        }
+            }
+            .show()
+    }
 }

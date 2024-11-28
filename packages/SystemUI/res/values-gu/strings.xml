@@ -528,6 +528,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"લૉક સ્ક્રીન વિજેટ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"વિજેટનો ઉપયોગ કરીને ઍપ ખોલવા માટે, તમારે એ ચકાસણી કરવાની જરૂર રહેશે કે આ તમે જ છો. તે ઉપરાંત, ધ્યાનમાં રાખો કે તમારું ટૅબ્લેટ લૉક કરેલું હોય તો પણ કોઈપણ વ્યક્તિ તેમને જોઈ શકે છે. અમુક વિજેટ કદાચ તમારી લૉક સ્ક્રીન માટે બનાવવામાં આવ્યા ન હોઈ શકે છે અને તેમને અહીં ઉમેરવાનું અસલામત હોઈ શકે છે."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"સમજાઈ ગયું"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"વપરાશકર્તા સ્વિચ કરો"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"પુલડાઉન મેનૂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
@@ -672,9 +676,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ના, આભાર"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ઍપ પિન કરી"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ઍપ અનપિન કરી"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"કૉલ કરો"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"કૉલ"</string>
     <string name="stream_system" msgid="7663148785370565134">"સિસ્ટમ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"રિંગ વગાડો"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"રિંગ"</string>
     <string name="stream_music" msgid="2188224742361847580">"મીડિયા"</string>
     <string name="stream_alarm" msgid="16058075093011694">"અલાર્મ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"નોટિફિકેશન"</string>
@@ -780,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"વાતચીતના નોટિફિકેશન વિભાગની ટોચ પર અને લૉક કરેલી સ્ક્રીન પર પ્રોફાઇલ ફોટો તરીકે બતાવે છે, બબલ તરીકે દેખાય છે, ખલેલ પાડશો નહીં મોડમાં વિક્ષેપ ઊભો કરે છે"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"પ્રાધાન્યતા"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> વાતચીતની સુવિધાઓને સપોર્ટ આપતી નથી"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"કૉલના નોટિફિકેશનમાં કોઈ ફેરફાર કરી શકાતો નથી."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"નોટિફિકેશનના આ ગ્રૂપની ગોઠવણી અહીં કરી શકાશે નહીં"</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"વધુ રિઝોલ્યુશન માટે, ફોનને ફ્લિપ કરો"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"ફ્રન્ટ સ્ક્રીનની સુવિધા ચાલુ કરેલી છે"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ફોલ્ડ કરેલું"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"અનફોલ્ડ કરેલું"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1423,12 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ઍક્સેસિબિલિટી"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"કીબોર્ડ શૉર્ટકટ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"કીબોર્ડ શૉર્ટકટને કસ્ટમાઇઝ કરો"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"શૉર્ટકટ સોંપવા માટે દી દબાવો"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"શૉર્ટકટ શોધો"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"કોઈ શોધ પરિણામો નથી"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"\'નાનું કરો\'નું આઇકન"</string>
@@ -1431,9 +1441,16 @@
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ઑબ્જેક્ટ ખેંચવાનું હૅન્ડલ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"કીબોર્ડના સેટિંગ"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"શૉર્ટકટ સેટ કરો"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"રદ કરો"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"કી દબાવો"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"કી સંયોજન પેહલેથી ઉપયોગમાં છે. અન્ય કી અજમાવી જુઓ."</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_plus_symbol (4534843157353732011) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"તમારા કીબોર્ડ વડે નૅવિગેટ કરો"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"કીબોર્ડ શૉર્ટકર્ટ જાણો"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"તમારા ટચપૅડ વડે નૅવિગેટ કરો"</string>

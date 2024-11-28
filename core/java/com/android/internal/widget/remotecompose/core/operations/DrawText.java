@@ -101,6 +101,12 @@ public class DrawText extends PaintOperation implements VariableSupport {
                 + floatToString(mY, mOutY);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int text = buffer.readInt();
         int start = buffer.readInt();
@@ -120,6 +126,11 @@ public class DrawText extends PaintOperation implements VariableSupport {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -158,6 +169,11 @@ public class DrawText extends PaintOperation implements VariableSupport {
         buffer.writeBoolean(rtl);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", id(), CLASS_NAME)
                 .description("Draw a run of text, all in a single direction")

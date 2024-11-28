@@ -5845,7 +5845,7 @@ public final class ActiveServices {
             if (r.inSharedIsolatedProcess) {
                 app = mAm.mProcessList.getSharedIsolatedProcess(procName, r.appInfo.uid,
                         r.appInfo.packageName);
-                if (app != null) {
+                if (app != null && !app.isKilled()) {
                     final IApplicationThread thread = app.getThread();
                     final int pid = app.getPid();
                     final UidRecord uidRecord = app.getUidRecord();
@@ -5870,6 +5870,8 @@ public final class ActiveServices {
                         // If a dead object exception was thrown -- fall through to
                         // restart the application.
                     }
+                } else {
+                    app = null;
                 }
             } else {
                 // If this service runs in an isolated process, then each time

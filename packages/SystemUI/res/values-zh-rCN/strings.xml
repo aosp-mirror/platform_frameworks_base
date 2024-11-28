@@ -113,7 +113,7 @@
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"录制单个应用"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"录制整个屏幕"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"全屏录制：%s"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"录制整个屏幕时，屏幕上显示的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"录制整个屏幕时，屏幕上显示的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款详情、消息、照片、音频、视频等敏感信息。"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"录制单个应用时，该应用中显示或播放的所有内容均会被录制。因此，请务必小心操作，谨防泄露密码、付款信息、消息、照片、音频、视频等。"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"录制屏幕"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"选择要录制的应用"</string>
@@ -528,6 +528,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"锁屏微件"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"若要使用微件打开应用，您需要验证是您本人在操作。另外请注意，任何人都可以查看此类微件，即使您的平板电脑已锁定。有些微件可能不适合显示在锁定的屏幕中，因此添加到这里可能不安全。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"知道了"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切换用户"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉菜单"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
@@ -780,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"以气泡形式显示在对话通知顶部（屏幕锁定时显示为个人资料照片），并且会中断勿扰模式"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>不支持对话功能"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"无法修改这些通知。"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"无法修改来电通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"您无法在此处配置这组通知"</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"若要获得更高的分辨率，请翻转手机"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展开可折叠设备"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻转可折叠设备"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"前屏已开启"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"折叠状态"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"展开状态"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1418,7 +1423,12 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"无障碍功能"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"键盘快捷键"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自定义键盘快捷键"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"按下按键即可指定快捷键"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"搜索快捷键"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"无搜索结果"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收起图标"</string>
@@ -1431,9 +1441,16 @@
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"拖动手柄"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"键盘设置"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"设置快捷键"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"取消"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"按下按键"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"按键组合已被使用，请尝试使用其他按键。"</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_plus_symbol (4534843157353732011) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用键盘导航"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"了解键盘快捷键"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"使用触控板导航"</string>

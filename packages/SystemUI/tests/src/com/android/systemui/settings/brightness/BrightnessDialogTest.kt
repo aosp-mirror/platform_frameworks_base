@@ -31,6 +31,7 @@ import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.brightness.ui.viewmodel.brightnessSliderViewModelFactory
 import com.android.systemui.qs.flags.QSComposeFragment
+import com.android.systemui.qs.flags.QsInCompose
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
@@ -70,8 +71,8 @@ class BrightnessDialogTest(val flags: FlagsParameterization) : SysuiTestCase() {
         mSetFlagsRule.setFlagsParameterization(flags)
     }
 
-    val viewId by lazy {
-        if (QSComposeFragment.isEnabled) {
+    private val viewId by lazy {
+        if (QsInCompose.isEnabled) {
             R.id.brightness_dialog_slider
         } else {
             R.id.brightness_mirror_container

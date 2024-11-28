@@ -26,7 +26,6 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimateMeasure;
@@ -468,11 +467,6 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         value[0] += mX;
         value[1] += mY;
         if (mParent != null) {
-            if (mParent instanceof LayoutComponent) {
-                LayoutComponent parent = (LayoutComponent) mParent;
-                value[0] += parent.getMarginLeft() + parent.getPaddingLeft();
-                value[1] += parent.getMarginTop() + parent.getPaddingTop();
-            }
             mParent.getLocationInWindow(value);
         }
     }
@@ -658,12 +652,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             debugBox(this, context);
         }
         for (Operation op : mList) {
-            if (op instanceof BitmapData) {
-                ((BitmapData) op).apply(context.getContext());
-            }
-            if (op instanceof PaintOperation) {
-                ((PaintOperation) op).paint(context);
-            }
+            op.apply(context.getContext());
         }
         context.restore();
         context.getContext().mLastComponent = prev;
@@ -701,7 +690,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (applyAnimationAsNeeded(context)) {
             return;
         }
-        if (mVisibility == Visibility.GONE) {
+        if (mVisibility == Visibility.GONE || mVisibility == Visibility.INVISIBLE) {
             return;
         }
         paintingComponent(context);

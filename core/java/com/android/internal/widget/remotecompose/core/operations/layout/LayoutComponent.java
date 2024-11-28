@@ -19,8 +19,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
+import com.android.internal.widget.remotecompose.core.OperationInterface;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
+import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
@@ -47,12 +49,6 @@ public class LayoutComponent extends Component {
     @Nullable protected ZIndexModifierOperation mZIndexModifier = null;
     @Nullable protected GraphicsLayerModifierOperation mGraphicsLayerModifier = null;
 
-    // Margins
-    protected float mMarginLeft = 0f;
-    protected float mMarginRight = 0f;
-    protected float mMarginTop = 0f;
-    protected float mMarginBottom = 0f;
-
     protected float mPaddingLeft = 0f;
     protected float mPaddingRight = 0f;
     protected float mPaddingTop = 0f;
@@ -74,22 +70,6 @@ public class LayoutComponent extends Component {
             float width,
             float height) {
         super(parent, componentId, animationId, x, y, width, height);
-    }
-
-    public float getMarginLeft() {
-        return mMarginLeft;
-    }
-
-    public float getMarginRight() {
-        return mMarginRight;
-    }
-
-    public float getMarginTop() {
-        return mMarginTop;
-    }
-
-    public float getMarginBottom() {
-        return mMarginBottom;
     }
 
     public float getPaddingLeft() {
@@ -133,8 +113,7 @@ public class LayoutComponent extends Component {
 
     public void inflate() {
         ArrayList<TextData> data = new ArrayList<>();
-        ArrayList<TouchExpression> touchExpressions = new ArrayList<>();
-        ArrayList<PaintData> paintData = new ArrayList<>();
+        ArrayList<Operation> supportedOperations = new ArrayList<>();
 
         for (Operation op : mList) {
             if (op instanceof LayoutComponentContent) {
@@ -179,10 +158,10 @@ public class LayoutComponent extends Component {
                 mComponentModifiers.add((ModifierOperation) op);
             } else if (op instanceof TextData) {
                 data.add((TextData) op);
-            } else if (op instanceof TouchExpression) {
-                touchExpressions.add((TouchExpression) op);
-            } else if (op instanceof PaintData) {
-                paintData.add((PaintData) op);
+            } else if (op instanceof TouchExpression
+                    || (op instanceof PaintData)
+                    || (op instanceof FloatExpression)) {
+                supportedOperations.add(op);
             } else {
                 // nothing
             }
@@ -190,8 +169,7 @@ public class LayoutComponent extends Component {
 
         mList.clear();
         mList.addAll(data);
-        mList.addAll(touchExpressions);
-        mList.addAll(paintData);
+        mList.addAll(supportedOperations);
         mList.add(mComponentModifiers);
         for (Component c : mChildrenComponents) {
             c.mParent = this;
@@ -203,10 +181,6 @@ public class LayoutComponent extends Component {
 
         mX = 0f;
         mY = 0f;
-        mMarginLeft = 0f;
-        mMarginTop = 0f;
-        mMarginRight = 0f;
-        mMarginBottom = 0f;
         mPaddingLeft = 0f;
         mPaddingTop = 0f;
         mPaddingRight = 0f;
@@ -214,7 +188,7 @@ public class LayoutComponent extends Component {
 
         boolean applyHorizontalMargin = true;
         boolean applyVerticalMargin = true;
-        for (Operation op : mComponentModifiers.getList()) {
+        for (OperationInterface op : mComponentModifiers.getList()) {
             if (op instanceof PaddingModifierOperation) {
                 // We are accumulating padding modifiers to compute the margin
                 // until we hit a dimension; the computed padding for the
@@ -223,31 +197,17 @@ public class LayoutComponent extends Component {
                 float right = ((PaddingModifierOperation) op).getRight();
                 float top = ((PaddingModifierOperation) op).getTop();
                 float bottom = ((PaddingModifierOperation) op).getBottom();
-                if (applyHorizontalMargin) {
-                    mMarginLeft += left;
-                    mMarginRight += right;
-                }
-                if (applyVerticalMargin) {
-                    mMarginTop += top;
-                    mMarginBottom += bottom;
-                }
                 mPaddingLeft += left;
                 mPaddingTop += top;
                 mPaddingRight += right;
                 mPaddingBottom += bottom;
-            }
-            if (op instanceof WidthModifierOperation && mWidthModifier == null) {
+            } else if (op instanceof WidthModifierOperation && mWidthModifier == null) {
                 mWidthModifier = (WidthModifierOperation) op;
-                applyHorizontalMargin = false;
-            }
-            if (op instanceof HeightModifierOperation && mHeightModifier == null) {
+            } else if (op instanceof HeightModifierOperation && mHeightModifier == null) {
                 mHeightModifier = (HeightModifierOperation) op;
-                applyVerticalMargin = false;
-            }
-            if (op instanceof ZIndexModifierOperation) {
+            } else if (op instanceof ZIndexModifierOperation) {
                 mZIndexModifier = (ZIndexModifierOperation) op;
-            }
-            if (op instanceof GraphicsLayerModifierOperation) {
+            } else if (op instanceof GraphicsLayerModifierOperation) {
                 mGraphicsLayerModifier = (GraphicsLayerModifierOperation) op;
             }
         }
@@ -339,7 +299,7 @@ public class LayoutComponent extends Component {
         float s = 0f;
         float e = 0f;
         float w = 0f;
-        for (Operation c : mComponentModifiers.getList()) {
+        for (OperationInterface c : mComponentModifiers.getList()) {
             if (c instanceof WidthModifierOperation) {
                 WidthModifierOperation o = (WidthModifierOperation) c;
                 if (o.getType() == DimensionModifierOperation.Type.EXACT
@@ -366,7 +326,7 @@ public class LayoutComponent extends Component {
     public float computeModifierDefinedPaddingWidth(@NonNull float[] padding) {
         float s = 0f;
         float e = 0f;
-        for (Operation c : mComponentModifiers.getList()) {
+        for (OperationInterface c : mComponentModifiers.getList()) {
             if (c instanceof PaddingModifierOperation) {
                 PaddingModifierOperation pop = (PaddingModifierOperation) c;
                 s += pop.getLeft();
@@ -383,7 +343,7 @@ public class LayoutComponent extends Component {
         float t = 0f;
         float b = 0f;
         float h = 0f;
-        for (Operation c : mComponentModifiers.getList()) {
+        for (OperationInterface c : mComponentModifiers.getList()) {
             if (c instanceof HeightModifierOperation) {
                 HeightModifierOperation o = (HeightModifierOperation) c;
                 if (o.getType() == DimensionModifierOperation.Type.EXACT
@@ -410,7 +370,7 @@ public class LayoutComponent extends Component {
     public float computeModifierDefinedPaddingHeight(@NonNull float[] padding) {
         float t = 0f;
         float b = 0f;
-        for (Operation c : mComponentModifiers.getList()) {
+        for (OperationInterface c : mComponentModifiers.getList()) {
             if (c instanceof PaddingModifierOperation) {
                 PaddingModifierOperation pop = (PaddingModifierOperation) c;
                 t += pop.getTop();

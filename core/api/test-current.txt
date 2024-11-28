@@ -541,7 +541,9 @@ package android.app {
     method @Nullable public android.graphics.Rect peekBitmapDimensions();
     method @Nullable public android.graphics.Rect peekBitmapDimensions(int);
     method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setBitmapWithCrops(@Nullable android.graphics.Bitmap, @NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>, boolean, int) throws java.io.IOException;
+    method @FlaggedApi("android.app.live_wallpaper_content_handling") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setBitmapWithDescription(@Nullable android.graphics.Bitmap, @NonNull android.app.wallpaper.WallpaperDescription, boolean, int) throws java.io.IOException;
     method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithCrops(@NonNull java.io.InputStream, @NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>, boolean, int) throws java.io.IOException;
+    method @FlaggedApi("android.app.live_wallpaper_content_handling") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithDescription(@NonNull java.io.InputStream, @NonNull android.app.wallpaper.WallpaperDescription, boolean, int) throws java.io.IOException;
     method public void setWallpaperZoomOut(@NonNull android.os.IBinder, float);
     method public boolean shouldEnableWideColorGamut();
     method public boolean wallpaperSupportsWcg(int);
@@ -907,6 +909,15 @@ package android.app.usage {
 
 }
 
+package android.app.wallpaper {
+
+  public static final class WallpaperDescription.Builder {
+    method @NonNull public android.app.wallpaper.WallpaperDescription.Builder setCropHints(@NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>);
+    method @NonNull public android.app.wallpaper.WallpaperDescription.Builder setCropHints(@NonNull android.util.SparseArray<android.graphics.Rect>);
+  }
+
+}
+
 package android.appwidget {
 
   public class AppWidgetManager {
@@ -923,6 +934,7 @@ package android.companion {
     method @NonNull public android.companion.AssociationInfo build();
     method @NonNull public android.companion.AssociationInfo.Builder setAssociatedDevice(@Nullable android.companion.AssociatedDevice);
     method @FlaggedApi("android.companion.association_device_icon") @NonNull public android.companion.AssociationInfo.Builder setDeviceIcon(@Nullable android.graphics.drawable.Icon);
+    method @FlaggedApi("android.companion.association_tag") @NonNull public android.companion.AssociationInfo.Builder setDeviceId(@Nullable android.companion.DeviceId);
     method @NonNull public android.companion.AssociationInfo.Builder setDeviceMacAddress(@Nullable android.net.MacAddress);
     method @NonNull public android.companion.AssociationInfo.Builder setDeviceProfile(@Nullable String);
     method @NonNull public android.companion.AssociationInfo.Builder setDisplayName(@Nullable CharSequence);
@@ -931,7 +943,6 @@ package android.companion {
     method @NonNull public android.companion.AssociationInfo.Builder setRevoked(boolean);
     method @NonNull public android.companion.AssociationInfo.Builder setSelfManaged(boolean);
     method @NonNull public android.companion.AssociationInfo.Builder setSystemDataSyncFlags(int);
-    method @FlaggedApi("android.companion.association_tag") @NonNull public android.companion.AssociationInfo.Builder setTag(@Nullable String);
     method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
   }
 

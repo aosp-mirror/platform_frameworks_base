@@ -60,6 +60,11 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -68,6 +73,12 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
         buffer.start(OP_CODE);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ClipRectModifierOperation());
     }

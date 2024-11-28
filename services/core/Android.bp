@@ -178,6 +178,7 @@ java_library_static {
 
     static_libs: [
         "android.frameworks.vibrator-V1-java", // AIDL
+        "android.frameworks.devicestate-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",
         "android.hardware.boot-V1.0-java", // HIDL
@@ -188,7 +189,7 @@ java_library_static {
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
-        "android.hardware.health-V3-java", // AIDL
+        "android.hardware.health-V4-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
         "android.hardware.security.authgraph-V1-java",
@@ -238,11 +239,11 @@ java_library_static {
         "connectivity_flags_lib",
         "device_config_service_flags_java",
         "dreams_flags_lib",
-        "aconfig_flags_java",
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
         "locksettings_flags_lib",
         "profiling_flags_lib",
+        "android.adpf.sessionmanager_aidl-java",
     ],
     javac_shard_size: 50,
     javacflags: [

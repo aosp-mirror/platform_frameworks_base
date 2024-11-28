@@ -18,7 +18,6 @@ package com.android.wm.shell.common.transition
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.server.testutils.any
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
@@ -35,6 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 
 /**

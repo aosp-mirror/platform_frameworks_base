@@ -36,7 +36,7 @@ import java.util.List;
  * Operation to deal with bitmap data On getting an Image during a draw call the bitmap is
  * compressed and saved in playback the image is decompressed
  */
-public class BitmapData implements Operation, SerializableToString {
+public class BitmapData extends Operation implements SerializableToString {
     private static final int OP_CODE = Operations.DATA_BITMAP;
     private static final String CLASS_NAME = "BitmapData";
     int mImageId;
@@ -85,6 +85,11 @@ public class BitmapData implements Operation, SerializableToString {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -119,6 +124,12 @@ public class BitmapData implements Operation, SerializableToString {
         buffer.writeBuffer(bitmap);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
         int width = buffer.readInt();
@@ -133,6 +144,11 @@ public class BitmapData implements Operation, SerializableToString {
         operations.add(new BitmapData(imageId, width, height, bitmap));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Bitmap data")

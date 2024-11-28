@@ -25,7 +25,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-public class ComponentEnd implements Operation {
+public class ComponentEnd extends Operation {
 
     @Override
     public void write(@NonNull WireBuffer buffer) {
@@ -54,6 +54,11 @@ public class ComponentEnd implements Operation {
         return "ComponentEnd";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.COMPONENT_END;
     }
@@ -66,6 +71,12 @@ public class ComponentEnd implements Operation {
         return 1 + 4 + 4 + 4;
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ComponentEnd());
     }

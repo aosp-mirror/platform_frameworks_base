@@ -528,6 +528,10 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widżety na ekranie blokady"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Aby otworzyć aplikację za pomocą widżetu, musisz potwierdzić swoją tożsamość. Pamiętaj też, że każdy będzie mógł wyświetlić widżety nawet wtedy, gdy tablet będzie zablokowany. Niektóre widżety mogą nie być przeznaczone do umieszczenia na ekranie blokady i ich dodanie w tym miejscu może być niebezpieczne."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_label (1461611028615752141) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (511359420883794513) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wszystkie aplikacje i dane w tej sesji zostaną usunięte."</string>
@@ -780,6 +784,8 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Wyświetla się u góry powiadomień w rozmowach oraz jako zdjęcie profilowe na ekranie blokady, jako dymek, przerywa działanie trybu Nie przeszkadzać"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorytetowe"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje funkcji rozmów"</string>
+    <!-- no translation found for notification_guts_bundle_feedback (5393570876655201459) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tych powiadomień nie można zmodyfikować."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Powiadomień o połączeniach nie można modyfikować."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Tej grupy powiadomień nie można tu skonfigurować"</string>
@@ -1220,8 +1226,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Wpisz mniej znaków niż <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numer kompilacji"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numer kompilacji został skopiowany do schowka."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"Kopiuj do schowka"</string>
     <string name="basic_status" msgid="2315371112182658176">"Otwarta rozmowa"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Widżety rozmów"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Kliknij rozmowę, aby dodać ją do ekranu głównego"</string>
@@ -1357,8 +1362,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Odwróć telefon, aby uzyskać wyższą rozdzielczość"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Składane urządzenie jest rozkładane"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Składane urządzenie jest obracane"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Ekran przedni jest włączony"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"po zamknięciu"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"po otwarciu"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1422,12 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Ułatwienia dostępu"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Skróty klawiszowe"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Dostosuj skróty klawiszowe"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Naciśnij klawisz, aby przypisać skrót"</string>
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_dialog_title (7106420484940737208) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (6866025005347407696) -->
+    <skip />
+    <!-- no translation found for shortcut_customize_mode_remove_shortcut_description (6851287900585057128) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Skróty do wyszukiwania"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Brak wyników wyszukiwania"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona zwijania"</string>
@@ -1431,9 +1440,15 @@
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Uchwyt do przeciągania"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Ustawienia klawiatury"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Ustaw skrót"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_remove_button_label (6546386970440176552) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Anuluj"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Naciśnij klawisz"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Kombinacja klawiszy jest już używana. Użyj innego klawisza."</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (7693234470526626327) -->
+    <skip />
+    <!-- no translation found for shortcut_customizer_generic_error_message (3128454624049722741) -->
+    <skip />
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Nawiguj za pomocą klawiatury"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Dowiedz się więcej o skrótach klawiszowych"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Nawiguj za pomocą touchpada"</string>

@@ -160,6 +160,11 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -192,6 +197,12 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         buffer.writeInt(shapeType);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float x = buffer.readFloat();
         float y = buffer.readFloat();

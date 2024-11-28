@@ -49,6 +49,7 @@ import androidx.test.filters.SmallTest;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.views.NavigationBar;
 import com.android.systemui.recents.OverviewProxyService;
@@ -56,7 +57,7 @@ import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.AutoHideControllerStore;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -89,6 +90,11 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
 
     private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+
+    private final AutoHideControllerStore mAutoHideControllerStore =
+            mKosmos.getAutoHideControllerStore();
+
     @Mock
     private CommandQueue mCommandQueue;
     @Mock
@@ -113,7 +119,7 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
                         mTaskbarDelegate,
                         mNavigationBarFactory,
                         mock(DumpManager.class),
-                        mock(AutoHideController.class),
+                        mAutoHideControllerStore,
                         mock(LightBarController.class),
                         TaskStackChangeListeners.getTestInstance(),
                         Optional.of(mock(Pip.class)),

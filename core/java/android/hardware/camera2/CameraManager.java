@@ -1699,17 +1699,18 @@ public final class CameraManager {
         }
 
         if (context != null) {
-            final ActivityManager activityManager =
-                    context.getSystemService(ActivityManager.class);
-            for (ActivityManager.AppTask appTask : activityManager.getAppTasks()) {
-                final TaskInfo taskInfo = appTask.getTaskInfo();
-                final int freeformCameraCompatMode =
-                        taskInfo.appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode;
-                if (freeformCameraCompatMode != 0
-                        && taskInfo.topActivity != null
-                        && taskInfo.topActivity.getPackageName().equals(packageName)) {
-                    // WindowManager has requested rotation override.
-                    return getRotationOverrideForCompatFreeform(freeformCameraCompatMode);
+            final ActivityManager activityManager = context.getSystemService(ActivityManager.class);
+            if (activityManager != null) {
+                for (ActivityManager.AppTask appTask : activityManager.getAppTasks()) {
+                    final TaskInfo taskInfo = appTask.getTaskInfo();
+                    final int freeformCameraCompatMode = taskInfo.appCompatTaskInfo
+                            .cameraCompatTaskInfo.freeformCameraCompatMode;
+                    if (freeformCameraCompatMode != 0
+                            && taskInfo.topActivity != null
+                            && taskInfo.topActivity.getPackageName().equals(packageName)) {
+                        // WindowManager has requested rotation override.
+                        return getRotationOverrideForCompatFreeform(freeformCameraCompatMode);
+                    }
                 }
             }
         }
