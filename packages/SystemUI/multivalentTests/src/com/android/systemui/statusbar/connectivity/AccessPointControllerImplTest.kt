@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.connectivity
 import android.content.Context
 import android.os.UserHandle
 import android.os.UserManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
@@ -251,9 +252,25 @@ class AccessPointControllerImplTest : SysuiTestCase() {
         val primaryUserMockContext = mock<Context>()
         mContext.prepareCreateContextAsUser(UserHandle.of(PRIMARY_USER_ID), primaryUserMockContext)
         controller.onUserSwitched(PRIMARY_USER_ID)
+
         // Create is expected to be called once when the test starts and a second time when the user
-        // is switched.
+        // is switched. The first WifiPickerTracker should have its onStop() method called prior to
+        // the new WifiPickerTracker being created.
         verify(wifiPickerTrackerFactory, times(2)).create(any(), any(), any(), any())
+        verify(wifiPickerTracker).onStop()
+    }
+
+    @Test
+    @DisableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
+    fun switchUsers_flagDisabled() {
+        val primaryUserMockContext = mock<Context>()
+        mContext.prepareCreateContextAsUser(UserHandle.of(PRIMARY_USER_ID), primaryUserMockContext)
+        controller.onUserSwitched(PRIMARY_USER_ID)
+
+        // Create is expected to only be called once when the test starts, switching users should
+        // have no effects.
+        verify(wifiPickerTrackerFactory, times(1)).create(any(), any(), any(), any())
+        verify(wifiPickerTracker, never()).onStop()
     }
 
     private companion object {

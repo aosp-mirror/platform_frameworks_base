@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vcn.util;
+package android.net.vcn.util;
 
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_CBC;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_12;
@@ -22,10 +22,10 @@ import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_16;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_GCM_8;
 import static android.net.ipsec.ike.SaProposal.INTEGRITY_ALGORITHM_HMAC_SHA2_256_128;
 import static android.net.ipsec.ike.SaProposal.KEY_LEN_AES_256;
+import static android.net.vcn.util.MtuUtils.getMtu;
 
 import static com.android.net.module.util.NetworkStackConstants.ETHER_MTU;
 import static com.android.net.module.util.NetworkStackConstants.IPV6_MIN_MTU;
-import static com.android.server.vcn.util.MtuUtils.getMtu;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

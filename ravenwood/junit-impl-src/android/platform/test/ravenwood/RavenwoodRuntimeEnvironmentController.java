@@ -58,6 +58,7 @@ import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
+import android.util.Log_ravenwood;
 import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -95,15 +96,17 @@ import java.util.function.Supplier;
  * Responsible for initializing and the environment.
  */
 public class RavenwoodRuntimeEnvironmentController {
-    private static final String TAG = "RavenwoodRuntimeEnvironmentController";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     private RavenwoodRuntimeEnvironmentController() {
     }
 
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
     private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
-    private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
+
+    private static final String ANDROID_LOG_TAGS = "ANDROID_LOG_TAGS";
+    private static final String RAVENWOOD_ANDROID_LOG_TAGS = "RAVENWOOD_" + ANDROID_LOG_TAGS;
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
@@ -214,41 +217,44 @@ public class RavenwoodRuntimeEnvironmentController {
             Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
         }
 
-        // Some process-wide initialization. (maybe redirect stdout/stderr)
-        RavenwoodCommonUtils.loadJniLibrary(LIBRAVENWOOD_INITIALIZER_NAME);
+        // Some process-wide initialization:
+        // - maybe redirect stdout/stderr
+        // - override native system property functions
+        var lib = RavenwoodCommonUtils.getJniLibraryPath(LIBRAVENWOOD_INITIALIZER_NAME);
+        System.load(lib);
+        RavenwoodRuntimeNative.reloadNativeLibrary(lib);
+
+        // Redirect stdout/stdin to the Log API.
+        RuntimeInit.redirectLogStreams();
 
         dumpCommandLineArgs();
 
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "globalInitInner()");
 
-        // Load libravenwood_sysprop before other libraries that may use SystemProperties.
-        var libProp = RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_SYSPROP_NAME);
-        System.load(libProp);
-        RavenwoodRuntimeNative.reloadNativeLibrary(libProp);
-
         // Make sure libravenwood_runtime is loaded.
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
+
+        Log_ravenwood.setLogLevels(getLogTags());
+        Log_ravenwood.onRavenwoodRuntimeNativeReady();
 
         // Do the basic set up for the android sysprops.
         RavenwoodSystemProperties.initialize();
 
+        // Enable all log levels for native logging, until we'll have a way to change the native
+        // side log level at runtime.
         // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
         // before loadFrameworkNativeCode() (which uses $ANDROID_LOG_TAGS).
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
-            try {
-                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
-            } catch (ErrnoException e) {
-                throw new RuntimeException(e);
-            }
+        // This would also prevent libbase from crashing the process (b/381112373) because
+        // the string format it accepts is very limited.
+        try {
+            Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
         }
 
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
-
-        // Redirect stdout/stdin to liblog.
-        RuntimeInit.redirectLogStreams();
 
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
@@ -330,6 +336,18 @@ public class RavenwoodRuntimeEnvironmentController {
         RavenwoodSystemServer.init(systemServerContext);
 
         initializeCompatIds();
+    }
+
+    /**
+     * Get log tags from environmental variable.
+     */
+    @Nullable
+    private static String getLogTags() {
+        var logTags = System.getenv(RAVENWOOD_ANDROID_LOG_TAGS);
+        if (logTags == null) {
+            logTags = System.getenv(ANDROID_LOG_TAGS);
+        }
+        return logTags;
     }
 
     private static void loadRavenwoodProperties() {

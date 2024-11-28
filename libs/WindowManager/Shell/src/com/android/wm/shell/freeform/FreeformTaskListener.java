@@ -30,8 +30,8 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.desktopmode.DesktopRepository;
-import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
@@ -116,20 +116,18 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
         if (!DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS.isTrue() &&
                 DesktopModeStatus.canEnterDesktopMode(mContext)
-                    && mDesktopUserRepositories.isPresent()) {
+                && mDesktopUserRepositories.isPresent()) {
             DesktopRepository repository =
                     mDesktopUserRepositories.get().getProfile(taskInfo.userId);
             // TODO: b/370038902 - Handle Activity#finishAndRemoveTask.
             if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()
-                    || repository.isClosingTask(taskInfo.taskId)) {
+                    || !repository.isMinimizedTask(taskInfo.taskId)) {
                 // A task that's vanishing should be removed:
-                // - If it's closed by the X button which means it's marked as a closing task.
+                // - If it's not yet minimized. It can be minimized when a back navigation is
+                // triggered on a task and the task is closing. It will be marked as minimized in
+                // [DesktopTasksTransitionObserver] before it gets here.
                 repository.removeClosingTask(taskInfo.taskId);
                 repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
-            } else {
-                repository.updateTask(taskInfo.displayId, taskInfo.taskId, /* isVisible= */
-                        false);
-                repository.minimizeTask(taskInfo.displayId, taskInfo.taskId);
             }
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);

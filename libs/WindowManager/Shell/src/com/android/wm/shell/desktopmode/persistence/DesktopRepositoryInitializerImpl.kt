@@ -59,29 +59,27 @@ class DesktopRepositoryInitializerImpl(
                         .reversed()
                         .mapNotNull { taskId -> persistentDesktop.tasksByTaskIdMap[taskId] }
                         .forEach { task ->
-                            if (task.desktopTaskState == DesktopTaskState.VISIBLE
-                                    && visibleTasksCount < maxTasks) {
+                            if (
+                                task.desktopTaskState == DesktopTaskState.VISIBLE &&
+                                    visibleTasksCount < maxTasks
+                            ) {
                                 visibleTasksCount++
                                 repository.addTask(
                                     persistentDesktop.displayId,
                                     task.taskId,
-                                    isVisible = false
+                                    isVisible = false,
                                 )
                             } else {
                                 repository.addTask(
                                     persistentDesktop.displayId,
                                     task.taskId,
-                                    isVisible = false
+                                    isVisible = false,
                                 )
-                                repository.minimizeTask(
-                                    persistentDesktop.displayId,
-                                    task.taskId
-                                )
+                                repository.minimizeTask(persistentDesktop.displayId, task.taskId)
                             }
                         }
-                    }
                 }
+            }
         }
-
     }
 }

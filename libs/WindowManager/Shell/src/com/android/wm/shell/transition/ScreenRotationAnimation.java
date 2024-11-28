@@ -347,21 +347,21 @@ class ScreenRotationAnimation {
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateEnterAnimation, getEnterSurface(), finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */, false /* isActivity */);
+                null /* clipRect */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */, false /* isActivity */);
+                null /* clipRect */);
     }
 
     private void buildScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
         buildSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
-                null /* clipRect */, false /* isActivity */);
+                null /* clipRect */);
     }
 
     private void buildLumaAnimation(@NonNull ArrayList<Animator> animations,

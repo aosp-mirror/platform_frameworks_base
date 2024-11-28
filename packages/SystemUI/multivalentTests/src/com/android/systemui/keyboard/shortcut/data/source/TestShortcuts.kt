@@ -35,6 +35,7 @@ import android.view.KeyEvent.META_SHIFT_RIGHT_ON
 import android.view.KeyEvent.META_SYM_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperKeys
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
@@ -47,6 +48,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomization
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.res.R
 
@@ -558,14 +560,14 @@ object TestShortcuts {
             ),
         )
 
-    val standardAddCustomShortcutRequestInfo =
+    val allAppsShortcutAddRequest =
         ShortcutCustomizationRequestInfo.Add(
             label = "Open apps list",
             categoryType = System,
             subCategoryLabel = "System controls",
         )
 
-    val standardDeleteCustomShortcutRequestInfo =
+    val allAppsShortcutDeleteRequest =
         ShortcutCustomizationRequestInfo.Delete(
             label = "Open apps list",
             categoryType = System,
@@ -609,6 +611,20 @@ object TestShortcuts {
                 )
             )
             .build()
+
+    val allAppsShortcutCategory =
+        shortcutCategory(System) {
+            subCategory("System controls") {
+                shortcut("Open apps list") {
+                    command {
+                        isCustom(true)
+                        key(ShortcutHelperKeys.metaModifierIconResId)
+                        key("Shift")
+                        key("A")
+                    }
+                }
+            }
+        }
 
     val expectedStandardDeleteShortcutUiState =
         ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)

@@ -3049,6 +3049,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
                 SystemSettingsProto.Touchpad.THREE_FINGER_TAP_CUSTOMIZATION);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES,
+                SystemSettingsProto.Touchpad.SYSTEM_GESTURES);
         p.end(touchpadToken);
 
         dumpSetting(s, p,

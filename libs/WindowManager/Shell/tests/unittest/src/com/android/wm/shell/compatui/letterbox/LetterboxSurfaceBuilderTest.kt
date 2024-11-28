@@ -30,9 +30,7 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.never
 import org.mockito.kotlin.times
-import org.mockito.verification.VerificationMode
 
 /**
  * Tests for [LetterboxSurfaceBuilder].
@@ -140,7 +138,5 @@ class LetterboxSurfaceBuilderTest : ShellTestCase() {
             val components = letterboxConfiguration.getBackgroundColorRgbArray()
             verify(tx, expected.asMode()).setColor(anyOrNull(), eq(components))
         }
-
-        private fun Boolean.asMode(): VerificationMode = if (this) times(1) else never()
     }
 }

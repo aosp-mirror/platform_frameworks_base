@@ -80,7 +80,6 @@ import kotlinx.coroutines.launch
 @Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
-    startDragImmediately: (pointersDown: PointersInfo.PointersDown) -> Boolean,
     onDragStarted: (pointersDown: PointersInfo.PointersDown, overSlop: Float) -> DragController,
     onFirstPointerDown: () -> Unit = {},
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
@@ -89,7 +88,6 @@ internal fun Modifier.multiPointerDraggable(
     this.then(
         MultiPointerDraggableElement(
             orientation,
-            startDragImmediately,
             onDragStarted,
             onFirstPointerDown,
             swipeDetector,
@@ -99,7 +97,6 @@ internal fun Modifier.multiPointerDraggable(
 
 private data class MultiPointerDraggableElement(
     private val orientation: Orientation,
-    private val startDragImmediately: (pointersDown: PointersInfo.PointersDown) -> Boolean,
     private val onDragStarted:
         (pointersDown: PointersInfo.PointersDown, overSlop: Float) -> DragController,
     private val onFirstPointerDown: () -> Unit,
@@ -109,7 +106,6 @@ private data class MultiPointerDraggableElement(
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
             orientation = orientation,
-            startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
             onFirstPointerDown = onFirstPointerDown,
             swipeDetector = swipeDetector,
@@ -118,7 +114,6 @@ private data class MultiPointerDraggableElement(
 
     override fun update(node: MultiPointerDraggableNode) {
         node.orientation = orientation
-        node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
         node.onFirstPointerDown = onFirstPointerDown
         node.swipeDetector = swipeDetector
@@ -127,16 +122,11 @@ private data class MultiPointerDraggableElement(
 
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
-    var startDragImmediately: (pointersDown: PointersInfo.PointersDown) -> Boolean,
     var onDragStarted: (pointersDown: PointersInfo.PointersDown, overSlop: Float) -> DragController,
     var onFirstPointerDown: () -> Unit,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     private val dispatcher: NestedScrollDispatcher,
-) :
-    DelegatingNode(),
-    PointerInputModifierNode,
-    CompositionLocalConsumerModifierNode,
-    SpaceVectorConverter {
+) : DelegatingNode(), PointerInputModifierNode, CompositionLocalConsumerModifierNode {
     private val pointerTracker = delegate(SuspendingPointerInputModifierNode { pointerTracker() })
     private val pointerInput = delegate(SuspendingPointerInputModifierNode { pointerInput() })
     private val velocityTracker = VelocityTracker()
@@ -151,13 +141,13 @@ internal class MultiPointerDraggableNode(
 
     private var converter = SpaceVectorConverter(orientation)
 
-    override fun Offset.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
+    fun Offset.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
 
-    override fun Velocity.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
+    fun Velocity.toFloat(): Float = with(converter) { this@toFloat.toFloat() }
 
-    override fun Float.toOffset(): Offset = with(converter) { this@toOffset.toOffset() }
+    fun Float.toOffset(): Offset = with(converter) { this@toOffset.toOffset() }
 
-    override fun Float.toVelocity(): Velocity = with(converter) { this@toVelocity.toVelocity() }
+    fun Float.toVelocity(): Velocity = with(converter) { this@toVelocity.toVelocity() }
 
     var orientation: Orientation = orientation
         set(value) {
@@ -297,7 +287,6 @@ internal class MultiPointerDraggableNode(
                 try {
                     detectDragGestures(
                         orientation = orientation,
-                        startDragImmediately = startDragImmediately,
                         onDragStart = { pointersDown, overSlop ->
                             onDragStarted(pointersDown, overSlop)
                         },
@@ -438,13 +427,11 @@ internal class MultiPointerDraggableNode(
      * Detect drag gestures in the given [orientation].
      *
      * This function is a mix of [androidx.compose.foundation.gestures.awaitDownAndSlop] and
-     * [androidx.compose.foundation.gestures.detectVerticalDragGestures] to add support for:
-     * 1) starting the gesture immediately without requiring a drag >= touch slope;
-     * 2) passing the number of pointers down to [onDragStart].
+     * [androidx.compose.foundation.gestures.detectVerticalDragGestures] to add support for passing
+     * the number of pointers down to [onDragStart].
      */
     private suspend fun AwaitPointerEventScope.detectDragGestures(
         orientation: Orientation,
-        startDragImmediately: (pointersDown: PointersInfo.PointersDown) -> Boolean,
         onDragStart: (pointersDown: PointersInfo.PointersDown, overSlop: Float) -> DragController,
         onDrag: (controller: DragController, dragAmount: Float) -> Unit,
         onDragEnd: (controller: DragController) -> Unit,
@@ -470,71 +457,49 @@ internal class MultiPointerDraggableNode(
                 .first()
 
         var overSlop = 0f
-        var lastPointersDown: PointersInfo.PointersDown =
+        val onSlopReached = { change: PointerInputChange, over: Float ->
+            if (swipeDetector.detectSwipe(change)) {
+                change.consume()
+                overSlop = over
+            }
+        }
+
+        // TODO(b/291055080): Replace by await[Orientation]PointerSlopOrCancellation once it
+        // is public.
+        val drag =
+            when (orientation) {
+                Orientation.Horizontal ->
+                    awaitHorizontalTouchSlopOrCancellation(consumablePointer.id, onSlopReached)
+                Orientation.Vertical ->
+                    awaitVerticalTouchSlopOrCancellation(consumablePointer.id, onSlopReached)
+            } ?: return
+
+        val lastPointersDown =
             checkNotNull(pointersInfo()) {
                 "We should have pointers down, last event: $currentEvent"
             }
                 as PointersInfo.PointersDown
-
-        val drag =
-            if (startDragImmediately(lastPointersDown)) {
-                consumablePointer.consume()
-                consumablePointer
-            } else {
-                val onSlopReached = { change: PointerInputChange, over: Float ->
-                    if (swipeDetector.detectSwipe(change)) {
-                        change.consume()
-                        overSlop = over
-                    }
+        // Make sure that overSlop is not 0f. This can happen when the user drags by exactly
+        // the touch slop. However, the overSlop we pass to onDragStarted() is used to
+        // compute the direction we are dragging in, so overSlop should never be 0f.
+        if (overSlop == 0f) {
+            // If the user drags in the opposite direction, the delta becomes zero because
+            // we return to the original point. Therefore, we should use the previous event
+            // to calculate the direction.
+            val delta = (drag.position - drag.previousPosition).toFloat()
+            check(delta != 0f) {
+                buildString {
+                    append("delta is equal to 0 ")
+                    append("touchSlop ${currentValueOf(LocalViewConfiguration).touchSlop} ")
+                    append("consumablePointer.position ${consumablePointer.position} ")
+                    append("drag.position ${drag.position} ")
+                    append("drag.previousPosition ${drag.previousPosition}")
                 }
-
-                // TODO(b/291055080): Replace by await[Orientation]PointerSlopOrCancellation once it
-                // is public.
-                val drag =
-                    when (orientation) {
-                        Orientation.Horizontal ->
-                            awaitHorizontalTouchSlopOrCancellation(
-                                consumablePointer.id,
-                                onSlopReached,
-                            )
-                        Orientation.Vertical ->
-                            awaitVerticalTouchSlopOrCancellation(
-                                consumablePointer.id,
-                                onSlopReached,
-                            )
-                    } ?: return
-
-                lastPointersDown =
-                    checkNotNull(pointersInfo()) {
-                        "We should have pointers down, last event: $currentEvent"
-                    }
-                        as PointersInfo.PointersDown
-                // Make sure that overSlop is not 0f. This can happen when the user drags by exactly
-                // the touch slop. However, the overSlop we pass to onDragStarted() is used to
-                // compute the direction we are dragging in, so overSlop should never be 0f unless
-                // we intercept an ongoing swipe transition (i.e. startDragImmediately() returned
-                // true).
-                if (overSlop == 0f) {
-                    // If the user drags in the opposite direction, the delta becomes zero because
-                    // we return to the original point. Therefore, we should use the previous event
-                    // to calculate the direction.
-                    val delta = (drag.position - drag.previousPosition).toFloat()
-                    check(delta != 0f) {
-                        buildString {
-                            append("delta is equal to 0 ")
-                            append("touchSlop ${currentValueOf(LocalViewConfiguration).touchSlop} ")
-                            append("consumablePointer.position ${consumablePointer.position} ")
-                            append("drag.position ${drag.position} ")
-                            append("drag.previousPosition ${drag.previousPosition}")
-                        }
-                    }
-                    overSlop = delta.sign
-                }
-                drag
             }
+            overSlop = delta.sign
+        }
 
         val controller = onDragStart(lastPointersDown, overSlop)
-
         val successful: Boolean
         try {
             onDrag(controller, overSlop)

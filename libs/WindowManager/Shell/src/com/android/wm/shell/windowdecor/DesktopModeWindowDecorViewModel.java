@@ -831,7 +831,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         private boolean mIsResizeGesture;
         private boolean mIsDragging;
         private boolean mTouchscreenInUse;
-        private boolean mHasLongClicked;
         private int mDragPointerId = -1;
         private MotionEvent mMotionEvent;
 
@@ -990,7 +989,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 if (decoration.isMaximizeMenuActive()) {
                     decoration.closeMaximizeMenu();
                 } else {
-                    mHasLongClicked = true;
                     mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
                             DesktopUiEventEnum.DESKTOP_WINDOW_MAXIMIZE_BUTTON_REVEAL_MENU);
                     decoration.createMaximizeMenu();
@@ -1101,7 +1099,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         updateDragStatus(e.getActionMasked());
                         mOnDragStartInitialBounds.set(initialBounds);
                     }
-                    mHasLongClicked = false;
                     // Do not consume input event if a button is touched, otherwise it would
                     // prevent the button's ripple effect from showing.
                     return !touchingButton;
@@ -1158,7 +1155,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             newTaskBounds, decoration.calculateValidDragArea(),
                             new Rect(mOnDragStartInitialBounds), e,
                             mWindowDecorByTaskId.get(taskInfo.taskId));
-                    if (touchingButton && !mHasLongClicked) {
+                    if (touchingButton) {
                         // We need the input event to not be consumed here to end the ripple
                         // effect on the touched button. We will reset drag state in the ensuing
                         // onClick call that results.

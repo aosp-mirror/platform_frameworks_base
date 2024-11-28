@@ -24,7 +24,7 @@ import java.util.List;
 *
 * {@hide}
 */
-oneway interface IDependencyInstallerCallback {
+interface IDependencyInstallerCallback {
     /**
      * Callback to indicate that all the requested dependencies have been resolved and have been
      * committed for installation. See {@link  DependencyInstallerService#onDependenciesRequired}.

@@ -19,6 +19,7 @@ package android.telephony.satellite;
 import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -40,7 +41,8 @@ import java.util.Objects;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public final class EarfcnRange implements Parcelable {
 
     /**
@@ -74,6 +76,7 @@ public final class EarfcnRange implements Parcelable {
      *
      * @param startEarfcn The starting earfcn value.
      * @param endEarfcn   The ending earfcn value.
+     * @hide
      */
     public EarfcnRange(@IntRange(from = 0, to = 65535) int startEarfcn,
             @IntRange(from = 0, to = 65535) int endEarfcn) {

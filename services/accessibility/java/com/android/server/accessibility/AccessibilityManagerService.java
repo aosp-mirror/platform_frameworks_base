@@ -1028,8 +1028,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
-        Handler receiverHandler =
-                Flags.managerAvoidReceiverTimeout() ? BackgroundThread.getHandler() : null;
+        Handler receiverHandler = BackgroundThread.getHandler();
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -6648,28 +6647,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 final AccessibilityUserState userState = mManagerService.getUserStateLocked(userId);
 
-                if (Flags.managerPackageMonitorLogicFix()) {
-                    if (!doit) {
-                        // if we're not handling the stop here, then we only need to know
-                        // if any of the force-stopped packages are currently enabled.
-                        return userState.mEnabledServices.stream().anyMatch(
-                                (comp) -> Arrays.stream(packages).anyMatch(
-                                        (pkg) -> pkg.equals(comp.getPackageName()))
-                        );
-                    } else if (mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
-                        mManagerService.onUserStateChangedLocked(userState);
-                    }
-                    return false;
-                } else {
-                    // this old logic did not properly indicate when base packageMonitor's routine
-                    // should handle stopping the package.
-                    if (doit && mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
-                        mManagerService.onUserStateChangedLocked(userState);
-                        return false;
-                    } else {
-                        return true;
-                    }
+                if (!doit) {
+                    // if we're not handling the stop here, then we only need to know
+                    // if any of the force-stopped packages are currently enabled.
+                    return userState.mEnabledServices.stream().anyMatch(
+                            (comp) -> Arrays.stream(packages).anyMatch(
+                                    (pkg) -> pkg.equals(comp.getPackageName()))
+                    );
+                } else if (mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
+                    mManagerService.onUserStateChangedLocked(userState);
                 }
+                return false;
             }
         }
 

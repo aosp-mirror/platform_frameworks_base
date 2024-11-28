@@ -97,7 +97,7 @@ public class InstallDependencyHelper {
 
         if (missing.isEmpty()) {
             if (DEBUG) {
-                Slog.i(TAG, "No missing dependency for " + pkg);
+                Slog.d(TAG, "No missing dependency for " + pkg);
             }
             // No need for dependency resolution. Move to installation directly.
             callback.onResult(null);
@@ -110,7 +110,7 @@ public class InstallDependencyHelper {
         }
 
         IDependencyInstallerCallback serviceCallback =
-                new DependencyInstallerCallbackCallOnce(handler, callback);
+                new DependencyInstallerCallbackCallOnce(handler, callback, userId);
         boolean scheduleSuccess;
         synchronized (mRemoteServiceLock) {
             scheduleSuccess = mRemoteService.run(service -> {
@@ -125,7 +125,7 @@ public class InstallDependencyHelper {
 
     void notifySessionComplete(int sessionId, boolean success) {
         if (DEBUG) {
-            Slog.i(TAG, "Session complete for " + sessionId + " result: " + success);
+            Slog.d(TAG, "Session complete for " + sessionId + " result: " + success);
         }
         synchronized (mTrackers) {
             List<DependencyInstallTracker> completedTrackers = new ArrayList<>();
@@ -292,79 +292,130 @@ public class InstallDependencyHelper {
 
         private final Handler mHandler;
         private final CallOnceProxy mCallback;
+        private final int mUserId;
 
         @GuardedBy("this")
-        private boolean mCalled = false;
+        private boolean mDependencyInstallerCallbackInvoked = false;
 
-        DependencyInstallerCallbackCallOnce(Handler handler, CallOnceProxy callback) {
+        DependencyInstallerCallbackCallOnce(Handler handler, CallOnceProxy callback, int userId) {
             mHandler = handler;
             mCallback = callback;
+            mUserId = userId;
         }
 
-        // TODO(b/372862145): Consider turning the binder call to two-way so that we can
-        //  throw IllegalArgumentException
         @Override
         public void onAllDependenciesResolved(int[] sessionIds) throws RemoteException {
             synchronized (this) {
-                if (mCalled) {
-                    return;
+                if (mDependencyInstallerCallbackInvoked) {
+                    throw new IllegalStateException(
+                            "Callback is being or has been already processed");
                 }
-                mCalled = true;
+                mDependencyInstallerCallbackInvoked = true;
             }
 
-            ArraySet<Integer> set = new ArraySet<>();
-            for (int i = 0; i < sessionIds.length; i++) {
-                if (DEBUG) {
-                    Slog.i(TAG, "onAllDependenciesResolved called with " + sessionIds[i]);
-                }
-                set.add(sessionIds[i]);
+
+            if (DEBUG) {
+                Slog.d(TAG, "onAllDependenciesResolved started");
             }
 
-            DependencyInstallTracker tracker = new DependencyInstallTracker(mCallback, set);
+            // Before creating any tracker, validate the arguments
+            ArraySet<Integer> validSessionIds = validateSessionIds(sessionIds);
+
+            if (validSessionIds.isEmpty()) {
+                mCallback.onResult(null);
+                return;
+            }
+
+            // Create a tracker now if there are any pending sessions remaining.
+            DependencyInstallTracker tracker = new DependencyInstallTracker(
+                    mCallback, validSessionIds);
             synchronized (mTrackers) {
                 mTrackers.add(tracker);
             }
 
-            // In case any of the session ids have already been installed, check if they
-            // are valid.
-            mHandler.post(() -> {
-                if (DEBUG) {
-                    Slog.i(TAG, "onAllDependenciesResolved cleaning up invalid sessions");
+            // By the time the tracker was created, some of the sessions in validSessionIds
+            // could have finished. Avoid waiting for them indefinitely.
+            for (int sessionId : validSessionIds) {
+                SessionInfo sessionInfo = mPackageInstallerService.getSessionInfo(sessionId);
+
+                // Don't wait for sessions that finished already
+                if (sessionInfo == null) {
+                    notifySessionComplete(sessionId, /*success=*/ true);
                 }
-
-                for (int i = 0; i < sessionIds.length; i++) {
-                    int sessionId = sessionIds[i];
-                    SessionInfo sessionInfo = mPackageInstallerService.getSessionInfo(sessionId);
-
-                    // Continue waiting if session exists and hasn't passed or failed yet.
-                    if (sessionInfo != null && !sessionInfo.isSessionApplied
-                            && !sessionInfo.isSessionFailed) {
-                        continue;
-                    }
-
-                    if (DEBUG) {
-                        Slog.i(TAG, "onAllDependenciesResolved cleaning up finished"
-                                + " session: " + sessionId);
-                    }
-
-                    // If session info is null, we assume it to be success.
-                    // TODO(b/372862145): Check historical sessions to be more precise.
-                    boolean success = sessionInfo == null || sessionInfo.isSessionApplied;
-
-                    notifySessionComplete(sessionId, /*success=*/success);
-                }
-            });
+            }
         }
 
         @Override
         public void onFailureToResolveAllDependencies() throws RemoteException {
             synchronized (this) {
-                if (mCalled) {
-                    return;
+                if (mDependencyInstallerCallbackInvoked) {
+                    throw new IllegalStateException(
+                            "Callback is being or has been already processed");
                 }
-                onError(mCallback, "Failed to resolve all dependencies automatically");
-                mCalled = true;
+                mDependencyInstallerCallbackInvoked = true;
             }
+            onError(mCallback, "Failed to resolve all dependencies automatically");
+        }
+
+        private ArraySet<Integer> validateSessionIds(int[] sessionIds) {
+            // Before creating any tracker, validate the arguments
+            ArraySet<Integer> validSessionIds = new ArraySet<>();
+
+            List<SessionInfo> historicalSessions = null;
+            for (int i = 0; i < sessionIds.length; i++) {
+                int sessionId = sessionIds[i];
+                SessionInfo sessionInfo = mPackageInstallerService.getSessionInfo(sessionId);
+
+                // Continue waiting if session exists and hasn't passed or failed yet.
+                if (sessionInfo != null) {
+                    if (sessionInfo.isSessionFailed) {
+                        throwValidationError("Session already finished: " + sessionId);
+                    }
+
+                    // Wait for session to finish install if it's not already successful.
+                    if (!sessionInfo.isSessionApplied) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "onAllDependenciesResolved pending session: " + sessionId);
+                        }
+                        validSessionIds.add(sessionId);
+                    }
+
+                    // An applied session found. No need to check historical session anymore.
+                    continue;
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "onAllDependenciesResolved cleaning up finished"
+                            + " session: " + sessionId);
+                }
+
+                if (historicalSessions == null) {
+                    historicalSessions = mPackageInstallerService.getHistoricalSessions(
+                            mUserId).getList();
+                }
+
+                sessionInfo = historicalSessions.stream().filter(
+                        s -> s.sessionId == sessionId).findFirst().orElse(null);
+
+                if (sessionInfo == null) {
+                    throwValidationError("Failed to find session: " + sessionId);
+                }
+
+                // Historical session must have been successful, otherwise throw IAE.
+                if (!sessionInfo.isSessionApplied) {
+                    throwValidationError("Session already finished: " + sessionId);
+                }
+            }
+
+            return validSessionIds;
+        }
+
+        private void throwValidationError(String msg) {
+            // Allow client to invoke callback again.
+            synchronized (this) {
+                mDependencyInstallerCallbackInvoked = false;
+            }
+            throw new IllegalArgumentException(msg);
         }
     }
 
@@ -377,6 +428,7 @@ public class InstallDependencyHelper {
     // TODO(b/372862145): Determine and add support for rebooting while dependency is being resolved
     private static class DependencyInstallTracker {
         private final CallOnceProxy mCallback;
+        @GuardedBy("this")
         private final ArraySet<Integer> mPendingSessionIds;
 
         DependencyInstallTracker(CallOnceProxy callback, ArraySet<Integer> pendingSessionIds) {
@@ -399,7 +451,6 @@ public class InstallDependencyHelper {
                 if (!success) {
                     // If one of the dependency fails, the orig session would fail too.
                     onError(mCallback, "Failed to install all dependencies");
-                    // TODO(b/372862145): Abandon the rest of the pending sessions.
                     return false; // No point in tracking anymore
                 }
 
@@ -411,6 +462,5 @@ public class InstallDependencyHelper {
                 return true; // Keep on tracking
             }
         }
-
     }
 }

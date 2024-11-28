@@ -147,6 +147,8 @@ interface NativeInputManagerService {
 
     void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
 
+    void setTouchpadSystemGesturesEnabled(boolean enabled);
+
     void setShowTouches(boolean enabled);
 
     void setNonInteractiveDisplays(int[] displayIds);
@@ -435,6 +437,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadSystemGesturesEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);

@@ -25,10 +25,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Base64;
-import android.webkit.UserPackage;
+import android.webkit.Flags;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
@@ -175,8 +177,6 @@ public class WebViewUpdateServiceTest {
             // no flag means invalid
             p.applicationInfo.metaData.putString(WEBVIEW_LIBRARY_FLAG, "blah");
         }
-        // Default to this package being valid in terms of targetSdkVersion.
-        p.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
         return p;
     }
 
@@ -1238,20 +1238,21 @@ public class WebViewUpdateServiceTest {
     }
 
     /**
-     * Ensure that packages with a targetSdkVersion targeting the current platform are valid, and
+     * Ensure that packages with a targetSdkVersion targeting the correct platform are valid, and
      * that packages targeting an older version are not valid.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_USE_B_ENTRY_POINT)
     public void testTargetSdkVersionValidity() {
         PackageInfo newSdkPackage = createPackageInfo("newTargetSdkPackage",
-            true /* enabled */, true /* valid */, true /* installed */);
-        newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+                true /* enabled */, true /* valid */, true /* installed */);
+        newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
         PackageInfo currentSdkPackage = createPackageInfo("currentTargetSdkPackage",
-            true /* enabled */, true /* valid */, true /* installed */);
-        currentSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK;
+                true /* enabled */, true /* valid */, true /* installed */);
+        currentSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.TIRAMISU;
         PackageInfo oldSdkPackage = createPackageInfo("oldTargetSdkPackage",
-            true /* enabled */, true /* valid */, true /* installed */);
-        oldSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK - 1;
+                true /* enabled */, true /* valid */, true /* installed */);
+        oldSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.S;
 
         WebViewProviderInfo newSdkProviderInfo =
                 new WebViewProviderInfo(newSdkPackage.packageName, "", true, false, null);
@@ -1264,6 +1265,9 @@ public class WebViewUpdateServiceTest {
                     newSdkProviderInfo
                 };
         setupWithPackages(packages);
+        // Mock the compatibility predicate, requiring T as targetSdkVersion.
+        mTestSystemImpl.setCompatibilityPredicate(
+                pi -> pi.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.TIRAMISU);
         // Start with the setting pointing to the invalid package
         mTestSystemImpl.updateUserSetting(oldSdkPackage.packageName);
 
@@ -1277,6 +1281,54 @@ public class WebViewUpdateServiceTest {
         runWebViewBootPreparationOnMainSync();
 
         checkPreparationPhasesForPackage(currentSdkPackage.packageName,
+                1 /* first preparation phase */);
+    }
+
+    /**
+     * Ensure that packages with a versionCode new enough for the current platform are valid, and
+     * that older packages are not valid.
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_USE_B_ENTRY_POINT)
+    public void testVersionCodeOSCompatValidity() {
+        PackageInfo newVersionPackage = createPackageInfo("newVersionPackage",
+                true /* enabled */, true /* valid */, true /* installed */);
+        newVersionPackage.setLongVersionCode(200L);
+        PackageInfo currentVersionPackage = createPackageInfo("currentVersionPackage",
+                true /* enabled */, true /* valid */, true /* installed */);
+        currentVersionPackage.setLongVersionCode(100L);
+        PackageInfo oldVersionPackage = createPackageInfo("oldVersionPackage",
+                true /* enabled */, true /* valid */, true /* installed */);
+        oldVersionPackage.setLongVersionCode(50L);
+
+        WebViewProviderInfo newVersionProviderInfo =
+                new WebViewProviderInfo(newVersionPackage.packageName, "", true, false, null);
+        WebViewProviderInfo currentVersionProviderInfo =
+                new WebViewProviderInfo(currentVersionPackage.packageName, "", true, false, null);
+        WebViewProviderInfo[] packages =
+                new WebViewProviderInfo[] {
+                    currentVersionProviderInfo,
+                    new WebViewProviderInfo(oldVersionPackage.packageName, "", true, false, null),
+                    newVersionProviderInfo
+                };
+        setupWithPackages(packages);
+        // Mock the compatibility predicate as requiring 100 as versionCode.
+        mTestSystemImpl.setCompatibilityPredicate(
+                pi -> pi.getLongVersionCode() >= 100L);
+        // Start with the setting pointing to the invalid package
+        mTestSystemImpl.updateUserSetting(oldVersionPackage.packageName);
+
+        mTestSystemImpl.setPackageInfo(newVersionPackage);
+        mTestSystemImpl.setPackageInfo(currentVersionPackage);
+        mTestSystemImpl.setPackageInfo(oldVersionPackage);
+
+        assertArrayEquals(
+                new WebViewProviderInfo[] { currentVersionProviderInfo, newVersionProviderInfo },
+                mWebViewUpdateServiceImpl.getValidWebViewPackages());
+
+        runWebViewBootPreparationOnMainSync();
+
+        checkPreparationPhasesForPackage(currentVersionPackage.packageName,
                 1 /* first preparation phase */);
     }
 

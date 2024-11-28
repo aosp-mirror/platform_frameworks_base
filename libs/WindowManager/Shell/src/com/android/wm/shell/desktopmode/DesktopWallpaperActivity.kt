@@ -49,7 +49,6 @@ class DesktopWallpaperActivity : Activity() {
             taskInfo.baseIntent.component?.let(::isWallpaperComponent) ?: false
 
         @JvmStatic
-        fun isWallpaperComponent(component: ComponentName) =
-            component == wallpaperActivityComponent
+        fun isWallpaperComponent(component: ComponentName) = component == wallpaperActivityComponent
     }
 }

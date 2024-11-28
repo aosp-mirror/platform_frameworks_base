@@ -23,18 +23,19 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_ANY;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.getMatchCriteriaString;
+import static android.net.vcn.util.PersistableBundleUtils.INTEGER_DESERIALIZER;
+import static android.net.vcn.util.PersistableBundleUtils.INTEGER_SERIALIZER;
+import static android.net.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
+import static android.net.vcn.util.PersistableBundleUtils.STRING_SERIALIZER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
-import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_DESERIALIZER;
-import static com.android.server.vcn.util.PersistableBundleUtils.INTEGER_SERIALIZER;
-import static com.android.server.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
-import static com.android.server.vcn.util.PersistableBundleUtils.STRING_SERIALIZER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.net.NetworkCapabilities;
 import android.net.vcn.VcnUnderlyingNetworkTemplate.MatchCriteria;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -44,7 +45,6 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;

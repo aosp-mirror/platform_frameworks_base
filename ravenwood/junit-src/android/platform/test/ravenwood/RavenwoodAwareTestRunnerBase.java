@@ -35,7 +35,7 @@ import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.TestClass;
 
 abstract class RavenwoodAwareTestRunnerBase extends Runner implements Filterable, Orderable {
-    private static final String TAG = "Ravenwood";
+    public static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     boolean mRealRunnerTakesRunnerBuilder = false;
 

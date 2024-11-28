@@ -328,6 +328,7 @@ cc_aconfig_library {
     name: "android_nfc_flags_aconfig_c_lib",
     vendor_available: true,
     aconfig_declarations: "android.nfc.flags-aconfig",
+    min_sdk_version: "34",
     apex_available: [
         "//apex_available:platform",
         "com.android.nfcservices",
@@ -652,6 +653,8 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
+        "com.android.art",
+        "com.android.art.debug",
         "com.android.permission",
     ],
 }

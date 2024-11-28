@@ -81,6 +81,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadHardwareStateNotificationsEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_SYSTEM_GESTURES),
+                        (reason) -> updateTouchpadSystemGesturesEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
                         (reason) -> updateShowTouches()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_LOCATION),
@@ -211,6 +213,10 @@ class InputSettingsObserver extends ContentObserver {
     private void updateTouchpadThreeFingerTapShortcutEnabled() {
         mNative.setTouchpadThreeFingerTapShortcutEnabled(
                 InputSettings.useTouchpadThreeFingerTapShortcut(mContext));
+    }
+
+    private void updateTouchpadSystemGesturesEnabled() {
+        mNative.setTouchpadSystemGesturesEnabled(InputSettings.useTouchpadSystemGestures(mContext));
     }
 
     private void updateShowTouches() {

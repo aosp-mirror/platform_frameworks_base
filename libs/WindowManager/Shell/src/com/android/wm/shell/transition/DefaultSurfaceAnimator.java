@@ -41,9 +41,9 @@ public class DefaultSurfaceAnimator {
             @NonNull Animation anim, @NonNull SurfaceControl leash,
             @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @Nullable Point position, float cornerRadius,
-            @Nullable Rect clipRect, boolean isActivity) {
+            @Nullable Rect clipRect) {
         final DefaultAnimationAdapter adapter = new DefaultAnimationAdapter(anim, leash,
-                position, clipRect, cornerRadius, isActivity);
+                position, clipRect, cornerRadius);
         buildSurfaceAnimation(animations, anim, finishCallback, pool, mainExecutor, adapter);
     }
 
@@ -138,11 +138,9 @@ public class DefaultSurfaceAnimator {
         @Nullable final Rect mClipRect;
         @Nullable private final Rect mAnimClipRect;
         final float mCornerRadius;
-        final boolean mIsActivity;
 
         DefaultAnimationAdapter(@NonNull Animation anim, @NonNull SurfaceControl leash,
-                @Nullable Point position, @Nullable Rect clipRect, float cornerRadius,
-                boolean isActivity) {
+                @Nullable Point position, @Nullable Rect clipRect, float cornerRadius) {
             super(leash);
             mAnim = anim;
             mPosition = (position != null && (position.x != 0 || position.y != 0))
@@ -150,7 +148,6 @@ public class DefaultSurfaceAnimator {
             mClipRect = (clipRect != null && !clipRect.isEmpty()) ? clipRect : null;
             mAnimClipRect = mClipRect != null ? new Rect() : null;
             mCornerRadius = cornerRadius;
-            mIsActivity = isActivity;
         }
 
         @Override
@@ -160,10 +157,6 @@ public class DefaultSurfaceAnimator {
             final SurfaceControl leash = mLeash;
             transformation.clear();
             mAnim.getTransformation(currentPlayTime, transformation);
-            if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
-                    && mIsActivity && mAnim.getExtensionEdges() != 0) {
-                t.setEdgeExtensionEffect(leash, mAnim.getExtensionEdges());
-            }
             if (mPosition != null) {
                 transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
             }
