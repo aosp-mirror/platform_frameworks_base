@@ -100,6 +100,7 @@ package android.content {
     method @NonNull public android.content.Context createContextForSdkInSandbox(@NonNull android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int BIND_FOREGROUND_SERVICE = 67108864; // 0x4000000
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
     field @FlaggedApi("android.os.mainline_vcn_platform_api") public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
@@ -129,6 +130,7 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method @NonNull public String getSdkSandboxPackageName();
+    method @FlaggedApi("android.content.pm.cloud_compilation_pm") @NonNull public static android.content.pm.SigningInfo getVerifiedSigningInfo(@NonNull String, int) throws android.content.pm.SigningInfoException;
     method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     field public static final String EXTRA_VERIFICATION_ROOT_HASH = "android.content.pm.extra.VERIFICATION_ROOT_HASH";
     field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
@@ -137,6 +139,18 @@ package android.content.pm {
   @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public class SignedPackage {
     method @NonNull public byte[] getCertificateDigest();
     method @NonNull public String getPackageName();
+  }
+
+  public final class SigningInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.cloud_compilation_pm") public boolean signersMatchExactly(@NonNull android.content.pm.SigningInfo);
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_JAR = 1; // 0x1
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_SIGNING_BLOCK_V2 = 2; // 0x2
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_SIGNING_BLOCK_V3 = 3; // 0x3
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_SIGNING_BLOCK_V4 = 4; // 0x4
+  }
+
+  @FlaggedApi("android.content.pm.cloud_compilation_pm") public class SigningInfoException extends java.lang.Exception {
+    method @FlaggedApi("android.content.pm.cloud_compilation_pm") public int getCode();
   }
 
 }

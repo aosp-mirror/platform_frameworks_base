@@ -410,9 +410,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         final @AccessibilityService.SoftKeyboardController.EnableImeResult int checkResult;
         final long identity = Binder.clearCallingIdentity();
         try {
-            synchronized (mLock) {
-                checkResult = mSecurityPolicy.canEnableDisableInputMethod(imeId, this);
-            }
+            checkResult = mSecurityPolicy.canEnableDisableInputMethod(imeId, this, callingUserId);
             if (checkResult != ENABLE_IME_SUCCESS) {
                 return checkResult;
             }

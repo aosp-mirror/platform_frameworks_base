@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vcn.util;
+package android.net.vcn.util;
 
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_3DES;
 import static android.net.ipsec.ike.SaProposal.ENCRYPTION_ALGORITHM_AES_CBC;

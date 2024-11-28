@@ -40,7 +40,7 @@ import java.util.Set;
  * All members must be called from the runner's main thread.
  */
 public final class RavenwoodRunnerState {
-    private static final String TAG = "RavenwoodRunnerState";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
     private static final String RAVENWOOD_RULE_ERROR =
             "RavenwoodRule(s) are not executed in the correct order";
 

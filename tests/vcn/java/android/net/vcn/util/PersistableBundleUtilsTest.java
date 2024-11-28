@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vcn.util;
+package android.net.vcn.util;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

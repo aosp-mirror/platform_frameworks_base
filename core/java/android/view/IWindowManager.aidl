@@ -62,6 +62,7 @@ import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
+import android.view.inputmethod.ImeTracker;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
@@ -765,7 +766,8 @@ interface IWindowManager
      * container.
      */
     @EnforcePermission("MANAGE_APP_TOKENS")
-    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
+    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes,
+            in @nullable ImeTracker.Token statsToken);
 
     /**
      * Called to get the expected window insets.

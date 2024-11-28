@@ -25,7 +25,6 @@ import android.aconfig.nano.Aconfig.parsed_flags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Flags;
-import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Process;
 import android.util.ArrayMap;
@@ -247,13 +246,12 @@ public class AconfigFlags {
             negated = true;
             featureFlag = featureFlag.substring(1).strip();
         }
-        final Boolean flagValue = getFlagValue(featureFlag);
-        boolean shouldSkip = false;
+        Boolean flagValue = getFlagValue(featureFlag);
         if (flagValue == null) {
-            Slog.w(LOG_TAG, "Skipping element " + parser.getName()
-                    + " due to unknown feature flag " + featureFlag);
-            shouldSkip = true;
-        } else if (flagValue == negated) {
+            flagValue = false;
+        }
+        boolean shouldSkip = false;
+        if (flagValue == negated) {
             // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
             Slog.i(LOG_TAG, "Skipping element " + parser.getName()
                     + " behind feature flag " + featureFlag + " = " + flagValue);

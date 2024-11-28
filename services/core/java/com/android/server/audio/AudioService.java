@@ -9554,9 +9554,11 @@ public class AudioService extends IAudioService.Stub
                             index = (mIndexMap.valueAt(i) + 5)/10;
                         }
 
-                        sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION,
-                                SENDMSG_REPLACE, device,  isAbsoluteVolume ? 1 : 0, this,
-                                /*delay=*/0);
+                        if (mStreamType == AudioSystem.STREAM_MUSIC) {
+                            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION,
+                                    SENDMSG_QUEUE, device, isAbsoluteVolume ? 1 : 0, this,
+                                    /*delay=*/0);
+                        }
 
                         setStreamVolumeIndex(index, device);
                     }
@@ -10103,7 +10105,7 @@ public class AudioService extends IAudioService.Stub
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
 
         synchronized (VolumeStreamState.class) {
-            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION, SENDMSG_REPLACE,
+            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION, SENDMSG_QUEUE,
                     device, (isAbsoluteVolumeDevice(device) || isA2dpAbsoluteVolumeDevice(device)
                             || AudioSystem.isLeAudioDeviceType(device) ? 1 : 0),
                     streamState, /*delay=*/0);

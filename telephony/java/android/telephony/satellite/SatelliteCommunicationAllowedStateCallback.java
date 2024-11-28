@@ -18,6 +18,8 @@ package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+
 
 import com.android.internal.telephony.flags.Flags;
 
@@ -27,19 +29,19 @@ import com.android.internal.telephony.flags.Flags;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public interface SatelliteCommunicationAllowedStateCallback {
 
     /**
      * Telephony does not guarantee that whenever there is a change in communication allowed state,
      * this API will be called. Telephony does its best to detect the changes and notify its
-     * listeners accordingly.
+     * listeners accordingly. Satellite communication is allowed at a location when it is legally
+     * allowed by the local authority and satellite signal coverage is available.
      *
-     * @param isAllowed {@code true} means satellite allow state is changed,
-     *                  {@code false} satellite allow state is not changed
-     * @hide
+     * @param isAllowed {@code true} means satellite is allowed,
+     *                  {@code false} satellite is not allowed.
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteCommunicationAllowedStateChanged(boolean isAllowed);
 
     /**
@@ -49,9 +51,7 @@ public interface SatelliteCommunicationAllowedStateCallback {
      *                                       the current location. When satellite is not allowed at
      *                                       the current location,
      *                                       {@code satelliteRegionalConfiguration} will be null.
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
     default void onSatelliteAccessConfigurationChanged(
             @Nullable SatelliteAccessConfiguration satelliteAccessConfiguration) {};
 }

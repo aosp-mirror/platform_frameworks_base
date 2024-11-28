@@ -6995,21 +6995,44 @@ public final class ActivityThread extends ClientTransactionHandler
 
     final void handleProfilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
         if (start) {
-            try {
-                switch (profileType) {
-                    default:
+            switch (profileType) {
+                case ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD:
+                    if (!com.android.art.flags.Flags.alwaysEnableProfileCode()) {
+                        Slog.w(TAG, "Low overhead tracing feature is not enabled");
+                        break;
+                    }
+                    VMDebug.startLowOverheadTrace();
+                    break;
+                default:
+                    try {
                         mProfiler.setProfiler(profilerInfo);
                         mProfiler.startProfiling();
                         break;
-                }
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
-                        + " -- can the process access this path?");
-            } finally {
-                profilerInfo.closeFd();
+                    } catch (RuntimeException e) {
+                        Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
+                                + " -- can the process access this path?");
+                    } finally {
+                        profilerInfo.closeFd();
+                    }
             }
         } else {
             switch (profileType) {
+                case ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD:
+                    if (!com.android.art.flags.Flags.alwaysEnableProfileCode()) {
+                        if (profilerInfo != null) {
+                            profilerInfo.closeFd();
+                        }
+                        Slog.w(TAG, "Low overhead tracing feature is not enabled");
+                        break;
+                    }
+                    if (profilerInfo != null) {
+                        FileDescriptor fd = profilerInfo.profileFd.getFileDescriptor();
+                        VMDebug.TraceDestination dst =
+                                VMDebug.TraceDestination.fromFileDescriptor(fd);
+                        VMDebug.dumpLowOverheadTrace(dst);
+                    }
+                    VMDebug.stopLowOverheadTrace();
+                    break;
                 default:
                     mProfiler.stopProfiling();
                     break;

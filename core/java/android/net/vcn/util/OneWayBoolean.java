@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vcn.util;
+package android.net.vcn.util;
 
 /**
  * OneWayBoolean is an abstraction for a boolean that MUST only ever be flipped from false to true
