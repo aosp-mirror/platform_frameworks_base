@@ -560,7 +560,9 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                 .startedTransition(
                     to = KeyguardState.LOCKSCREEN,
                     from = KeyguardState.GONE,
-                    ownerName = "FromGoneTransitionInteractor",
+                    ownerName =
+                        "FromGoneTransitionInteractor" +
+                            "(keyguard interactor says keyguard is showing)",
                     animatorAssertion = { it.isNotNull() },
                 )
 
@@ -640,7 +642,9 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
                 .startedTransition(
                     to = KeyguardState.GLANCEABLE_HUB,
                     from = KeyguardState.GONE,
-                    ownerName = FromGoneTransitionInteractor::class.simpleName,
+                    ownerName =
+                        FromGoneTransitionInteractor::class.simpleName +
+                            "(keyguard interactor says keyguard is showing)",
                     animatorAssertion = { it.isNotNull() },
                 )
 

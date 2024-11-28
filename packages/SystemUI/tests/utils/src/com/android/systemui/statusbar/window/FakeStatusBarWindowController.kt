@@ -27,12 +27,19 @@ class FakeStatusBarWindowController : StatusBarWindowController {
     var isAttached = false
         private set
 
+    var isStopped = false
+        private set
+
     override val statusBarHeight: Int = 0
 
     override fun refreshStatusBarHeight() {}
 
     override fun attach() {
         isAttached = true
+    }
+
+    override fun stop() {
+        isStopped = true
     }
 
     override fun addViewToWindow(view: View, layoutParams: ViewGroup.LayoutParams) {}

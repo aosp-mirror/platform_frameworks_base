@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -28,34 +30,45 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.easin
 /**
  * Basic interpolation manager between two ComponentMeasures
  *
- * Handles position, size and visibility
+ * <p>Handles position, size and visibility
  */
 public class AnimateMeasure {
-    long mStartTime = System.currentTimeMillis();
-    Component mComponent;
-    ComponentMeasure mOriginal;
-    ComponentMeasure mTarget;
-    int mDuration;
-    int mDurationVisibilityChange = mDuration;
-    AnimationSpec.ANIMATION mEnterAnimation = AnimationSpec.ANIMATION.FADE_IN;
-    AnimationSpec.ANIMATION mExitAnimation = AnimationSpec.ANIMATION.FADE_OUT;
-    int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
-    int mVisibilityEasingType = GeneralEasing.CUBIC_ACCELERATE;
+    private long mStartTime = System.currentTimeMillis();
+    private final @NonNull Component mComponent;
+    private final @NonNull ComponentMeasure mOriginal;
+    private final @NonNull ComponentMeasure mTarget;
+    private int mDuration;
+    private int mDurationVisibilityChange = mDuration;
+    private @NonNull AnimationSpec.ANIMATION mEnterAnimation = AnimationSpec.ANIMATION.FADE_IN;
+    private @NonNull AnimationSpec.ANIMATION mExitAnimation = AnimationSpec.ANIMATION.FADE_OUT;
+    private int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
+    private int mVisibilityEasingType = GeneralEasing.CUBIC_ACCELERATE;
 
-    float mP = 0f;
-    float mVp = 0f;
-    FloatAnimation mMotionEasing = new FloatAnimation(mMotionEasingType,
-            mDuration / 1000f, null, 0f, Float.NaN);
-    FloatAnimation mVisibilityEasing = new FloatAnimation(mVisibilityEasingType,
-            mDurationVisibilityChange / 1000f,
-            null, 0f, Float.NaN);
-    ParticleAnimation mParticleAnimation;
+    private float mP = 0f;
+    private float mVp = 0f;
 
-    public AnimateMeasure(long startTime, Component component, ComponentMeasure original,
-                          ComponentMeasure target, int duration, int durationVisibilityChange,
-                          AnimationSpec.ANIMATION enterAnimation,
-                          AnimationSpec.ANIMATION exitAnimation,
-                          int motionEasingType, int visibilityEasingType) {
+    @NonNull
+    private FloatAnimation mMotionEasing =
+            new FloatAnimation(mMotionEasingType, mDuration / 1000f, null, 0f, Float.NaN);
+
+    @NonNull
+    private FloatAnimation mVisibilityEasing =
+            new FloatAnimation(
+                    mVisibilityEasingType, mDurationVisibilityChange / 1000f, null, 0f, Float.NaN);
+
+    private ParticleAnimation mParticleAnimation;
+
+    public AnimateMeasure(
+            long startTime,
+            @NonNull Component component,
+            @NonNull ComponentMeasure original,
+            @NonNull ComponentMeasure target,
+            int duration,
+            int durationVisibilityChange,
+            @NonNull AnimationSpec.ANIMATION enterAnimation,
+            @NonNull AnimationSpec.ANIMATION exitAnimation,
+            int motionEasingType,
+            int visibilityEasingType) {
         this.mStartTime = startTime;
         this.mComponent = component;
         this.mOriginal = original;
@@ -64,23 +77,33 @@ public class AnimateMeasure {
         this.mDurationVisibilityChange = durationVisibilityChange;
         this.mEnterAnimation = enterAnimation;
         this.mExitAnimation = exitAnimation;
+        this.mMotionEasingType = motionEasingType;
+        this.mVisibilityEasingType = visibilityEasingType;
+
+        float motionDuration = mDuration / 1000f;
+        float visibilityDuration = mDurationVisibilityChange / 1000f;
+
+        mMotionEasing = new FloatAnimation(mMotionEasingType, motionDuration, null, 0f, Float.NaN);
+        mVisibilityEasing =
+                new FloatAnimation(mVisibilityEasingType, visibilityDuration, null, 0f, Float.NaN);
 
         mMotionEasing.setTargetValue(1f);
         mVisibilityEasing.setTargetValue(1f);
+
         component.mVisibility = target.getVisibility();
     }
 
     public void update(long currentTime) {
         long elapsed = currentTime - mStartTime;
-        mP = Math.min(elapsed / (float) mDuration, 1f);
-        //mP = motionEasing.get(mP);
-        mVp = Math.min(elapsed / (float) mDurationVisibilityChange, 1f);
-       // mVp = mVisibilityEasing.get(mVp);
+        float motionProgress = elapsed / (float) mDuration;
+        float visibilityProgress = elapsed / (float) mDurationVisibilityChange;
+        mP = mMotionEasing.get(motionProgress);
+        mVp = mVisibilityEasing.get(visibilityProgress);
     }
 
-    public PaintBundle paint = new PaintBundle();
+    @NonNull public PaintBundle paint = new PaintBundle();
 
-    public void apply(PaintContext context) {
+    public void apply(@NonNull PaintContext context) {
         update(context.getContext().currentTime);
 
         mComponent.setX(getX());
@@ -117,8 +140,11 @@ public class AnimateMeasure {
                         paint.reset();
                         paint.setColor(0f, 0f, 0f, 1f - mVp);
                         context.applyPaint(paint);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restorePaint();
@@ -127,8 +153,11 @@ public class AnimateMeasure {
                     case SLIDE_LEFT:
                         context.save();
                         context.translate(-mVp * mComponent.getParent().getWidth(), 0f);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
@@ -140,8 +169,11 @@ public class AnimateMeasure {
                         paint.setColor(0f, 0f, 0f, 1f);
                         context.applyPaint(paint);
                         context.translate(mVp * mComponent.getParent().getWidth(), 0f);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restorePaint();
@@ -149,20 +181,24 @@ public class AnimateMeasure {
                         break;
                     case SLIDE_TOP:
                         context.save();
-                        context.translate(0f,
-                                -mVp * mComponent.getParent().getHeight());
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.translate(0f, -mVp * mComponent.getParent().getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
                         break;
                     case SLIDE_BOTTOM:
                         context.save();
-                        context.translate(0f,
-                                mVp * mComponent.getParent().getHeight());
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.translate(0f, mVp * mComponent.getParent().getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
@@ -189,8 +225,11 @@ public class AnimateMeasure {
                         paint.reset();
                         paint.setColor(0f, 0f, 0f, mVp);
                         context.applyPaint(paint);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restorePaint();
@@ -202,8 +241,11 @@ public class AnimateMeasure {
                         paint.reset();
                         paint.setColor(0f, 0f, 0f, mVp);
                         context.applyPaint(paint);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restorePaint();
@@ -211,40 +253,48 @@ public class AnimateMeasure {
                         break;
                     case SLIDE_LEFT:
                         context.save();
-                        context.translate(
-                                (1f - mVp) * mComponent.getParent().getWidth(), 0f);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.translate((1f - mVp) * mComponent.getParent().getWidth(), 0f);
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
                         break;
                     case SLIDE_RIGHT:
                         context.save();
-                        context.translate(
-                                -(1f - mVp) * mComponent.getParent().getWidth(), 0f);
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.translate(-(1f - mVp) * mComponent.getParent().getWidth(), 0f);
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
                         break;
                     case SLIDE_TOP:
                         context.save();
-                        context.translate(0f,
-                                (1f - mVp) * mComponent.getParent().getHeight());
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.translate(0f, (1f - mVp) * mComponent.getParent().getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
                         break;
                     case SLIDE_BOTTOM:
                         context.save();
-                        context.translate(0f,
-                                -(1f - mVp) * mComponent.getParent().getHeight());
-                        context.saveLayer(mComponent.getX(), mComponent.getY(),
-                                mComponent.getWidth(), mComponent.getHeight());
+                        context.translate(0f, -(1f - mVp) * mComponent.getParent().getHeight());
+                        context.saveLayer(
+                                mComponent.getX(),
+                                mComponent.getY(),
+                                mComponent.getWidth(),
+                                mComponent.getHeight());
                         mComponent.paintingComponent(context);
                         context.restore();
                         context.restore();
@@ -295,16 +345,27 @@ public class AnimateMeasure {
         }
     }
 
-    public void updateTarget(ComponentMeasure measure, long currentTime) {
+    public void updateTarget(@NonNull ComponentMeasure measure, long currentTime) {
         mOriginal.setX(getX());
         mOriginal.setY(getY());
         mOriginal.setW(getWidth());
         mOriginal.setH(getHeight());
-        mTarget.setX(measure.getX());
-        mTarget.setY(measure.getY());
-        mTarget.setW(measure.getW());
-        mTarget.setH(measure.getH());
-        mTarget.setVisibility(measure.getVisibility());
-        mStartTime = currentTime;
+        float targetX = mTarget.getX();
+        float targetY = mTarget.getY();
+        float targetW = mTarget.getW();
+        float targetH = mTarget.getH();
+        Component.Visibility targetVisibility = mTarget.getVisibility();
+        if (targetX != measure.getX()
+                || targetY != measure.getY()
+                || targetW != measure.getW()
+                || targetH != measure.getH()
+                || targetVisibility != measure.getVisibility()) {
+            mTarget.setX(measure.getX());
+            mTarget.setY(measure.getY());
+            mTarget.setW(measure.getW());
+            mTarget.setH(measure.getH());
+            mTarget.setVisibility(measure.getVisibility());
+            mStartTime = currentTime;
+        }
     }
 }

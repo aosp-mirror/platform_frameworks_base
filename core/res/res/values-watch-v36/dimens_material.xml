@@ -22,7 +22,18 @@
     <dimen name="btn_lineHeight">18sp</dimen>
     <dimen name="btn_textSize">15sp</dimen>
 
+    <!-- values for material3 AlertDialog -->
+    <dimen name="dialog_btn_negative_width">60dp</dimen>
+    <dimen name="dialog_btn_negative_height">60dp</dimen>
+    <dimen name="dialog_btn_confirm_width">62dp</dimen>
+    <dimen name="dialog_btn_confirm_height">60dp</dimen>
+
     <!-- Opacity factor for disabled material3 widget -->
     <dimen name="disabled_alpha_device_default">0.12</dimen>
     <dimen name="primary_content_alpha_device_default">0.38</dimen>
+
+    <!--  values for material3 progress bar(progress indicator)  -->
+    <item name="progressbar_inner_radius_ratio" format="float" type="dimen">2.12</item>
+    <dimen name="progressbar_thickness">8dp</dimen>
+    <dimen name="progressbar_elevation">0.1dp</dimen>
 </resources>

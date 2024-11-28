@@ -538,7 +538,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     public void testConsecutiveLaunchNewTask() {
         final IBinder launchCookie = mock(IBinder.class);
         final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
-        mTrampolineActivity.noDisplay = true;
+        mTrampolineActivity.setIsNoDisplay(true);
         mTrampolineActivity.mLaunchCookie = launchCookie;
         mTrampolineActivity.mLaunchRootTask = launchRootTask;
         onActivityLaunched(mTrampolineActivity);

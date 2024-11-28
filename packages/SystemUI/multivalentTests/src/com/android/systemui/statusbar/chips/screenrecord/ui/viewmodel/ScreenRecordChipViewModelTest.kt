@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
 import android.content.DialogInterface
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
 import com.android.systemui.SysuiTestCase
@@ -25,9 +26,8 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
@@ -43,11 +43,13 @@ import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
+import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -57,8 +59,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ScreenRecordChipViewModelTest : SysuiTestCase() {
-    private val kosmos = Kosmos().also { it.testCase = this }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val screenRecordRepo = kosmos.screenRecordRepository
     private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
@@ -251,7 +254,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.SingleTask(
                     "host.package",
                     hostDeviceName = null,
-                    FakeActivityTaskManager.createTask(taskId = 1)
+                    FakeActivityTaskManager.createTask(taskId = 1),
                 )
 
             // THEN the start time is still the old start time
@@ -272,12 +275,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             clickListener!!.onClick(chipView)
             // EndScreenRecordingDialogDelegate will test that the dialog has the right message
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockSystemUIDialog),
-                    eq(chipBackgroundView),
-                    any(),
-                    anyBoolean(),
-                )
+                .showFromView(eq(mockSystemUIDialog), eq(chipBackgroundView), any(), anyBoolean())
         }
 
     @Test
@@ -294,12 +292,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             clickListener!!.onClick(chipView)
             // EndScreenRecordingDialogDelegate will test that the dialog has the right message
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockSystemUIDialog),
-                    eq(chipBackgroundView),
-                    any(),
-                    anyBoolean(),
-                )
+                .showFromView(eq(mockSystemUIDialog), eq(chipBackgroundView), any(), anyBoolean())
         }
 
     @Test
@@ -311,7 +304,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
                 MediaProjectionState.Projecting.SingleTask(
                     "host.package",
                     hostDeviceName = null,
-                    FakeActivityTaskManager.createTask(taskId = 1)
+                    FakeActivityTaskManager.createTask(taskId = 1),
                 )
 
             val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
@@ -320,12 +313,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             clickListener!!.onClick(chipView)
             // EndScreenRecordingDialogDelegate will test that the dialog has the right message
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockSystemUIDialog),
-                    eq(chipBackgroundView),
-                    any(),
-                    anyBoolean(),
-                )
+                .showFromView(eq(mockSystemUIDialog), eq(chipBackgroundView), any(), anyBoolean())
         }
 
     @Test
@@ -341,12 +329,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             val cujCaptor = argumentCaptor<DialogCuj>()
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    any(),
-                    any(),
-                    cujCaptor.capture(),
-                    anyBoolean(),
-                )
+                .showFromView(any(), any(), cujCaptor.capture(), anyBoolean())
 
             assertThat(cujCaptor.firstValue.cujType)
                 .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)

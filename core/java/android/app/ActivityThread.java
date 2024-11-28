@@ -1747,7 +1747,7 @@ public final class ActivityThread extends ClientTransactionHandler
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
                     "WebViews:", webviewInstanceCount);
 
-            if (com.android.libcore.Flags.nativeMetrics()) {
+            if (com.android.libcore.readonly.Flags.nativeMetrics()) {
                 dumpMemInfoNativeAllocations(pw);
             }
 
@@ -1961,12 +1961,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
-            try {
-                PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
-                BroadcastStickyCache.dump(pfd);
-            } finally {
-                IoUtils.closeQuietly(pfd);
-            }
+            PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
+            IoUtils.closeQuietly(pfd);
         }
 
         private File getDatabasesDir(Context context) {
@@ -3098,6 +3094,19 @@ public final class ActivityThread extends ClientTransactionHandler
     @UnsupportedAppUsage
     ActivityThread() {
         mResourcesManager = ResourcesManager.getInstance();
+    }
+
+    /**
+     * Creates and initialize a new system activity thread, to be used for testing. This does not
+     * call {@link #attach}, so it does not modify static state.
+     */
+    @VisibleForTesting
+    @NonNull
+    public static ActivityThread createSystemActivityThreadForTesting() {
+        final var thread = new ActivityThread();
+        thread.mSystemThread = true;
+        initializeSystemThread(thread);
+        return thread;
     }
 
     @UnsupportedAppUsage
@@ -6806,6 +6815,16 @@ public final class ActivityThread extends ClientTransactionHandler
             LoadedApk.makePaths(this, resApk.getApplicationInfo(), oldPaths);
             resApk.updateApplicationInfo(ai, oldPaths);
         }
+        if (android.content.res.Flags.systemContextHandleAppInfoChanged() && mSystemThread) {
+            final var systemContext = getSystemContext();
+            if (systemContext.getPackageName().equals(ai.packageName)) {
+                // The system package is not tracked directly, but still needs to receive updates to
+                // its application info.
+                final ArrayList<String> oldPaths = new ArrayList<>();
+                LoadedApk.makePaths(this, systemContext.getApplicationInfo(), oldPaths);
+                systemContext.mPackageInfo.updateApplicationInfo(ai, oldPaths);
+            }
+        }
 
         ResourcesImpl beforeImpl = getApplication().getResources().getImpl();
 
@@ -6976,21 +6995,44 @@ public final class ActivityThread extends ClientTransactionHandler
 
     final void handleProfilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
         if (start) {
-            try {
-                switch (profileType) {
-                    default:
+            switch (profileType) {
+                case ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD:
+                    if (!com.android.art.flags.Flags.alwaysEnableProfileCode()) {
+                        Slog.w(TAG, "Low overhead tracing feature is not enabled");
+                        break;
+                    }
+                    VMDebug.startLowOverheadTrace();
+                    break;
+                default:
+                    try {
                         mProfiler.setProfiler(profilerInfo);
                         mProfiler.startProfiling();
                         break;
-                }
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
-                        + " -- can the process access this path?");
-            } finally {
-                profilerInfo.closeFd();
+                    } catch (RuntimeException e) {
+                        Slog.w(TAG, "Profiling failed on path " + profilerInfo.profileFile
+                                + " -- can the process access this path?");
+                    } finally {
+                        profilerInfo.closeFd();
+                    }
             }
         } else {
             switch (profileType) {
+                case ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD:
+                    if (!com.android.art.flags.Flags.alwaysEnableProfileCode()) {
+                        if (profilerInfo != null) {
+                            profilerInfo.closeFd();
+                        }
+                        Slog.w(TAG, "Low overhead tracing feature is not enabled");
+                        break;
+                    }
+                    if (profilerInfo != null) {
+                        FileDescriptor fd = profilerInfo.profileFd.getFileDescriptor();
+                        VMDebug.TraceDestination dst =
+                                VMDebug.TraceDestination.fromFileDescriptor(fd);
+                        VMDebug.dumpLowOverheadTrace(dst);
+                    }
+                    VMDebug.stopLowOverheadTrace();
+                    break;
                 default:
                     mProfiler.stopProfiling();
                     break;
@@ -7681,7 +7723,9 @@ public final class ActivityThread extends ClientTransactionHandler
         });
 
         // Register callback to report native memory metrics post GC cleanup
-        if (Flags.reportPostgcMemoryMetrics() &&
+        // Note: we do not report memory metrics of isolated processes unless
+        // their native allocations become more significant
+        if (!Process.isIsolated() && Flags.reportPostgcMemoryMetrics() &&
             com.android.libcore.readonly.Flags.postCleanupApis()) {
             VMRuntime.addPostCleanupCallback(new Runnable() {
                 @Override public void run() {
@@ -8558,17 +8602,7 @@ public final class ActivityThread extends ClientTransactionHandler
             // we can't display an alert, we just want to die die die.
             android.ddm.DdmHandleAppName.setAppName("system_process",
                     UserHandle.myUserId());
-            try {
-                mInstrumentation = new Instrumentation();
-                mInstrumentation.basicInit(this);
-                ContextImpl context = ContextImpl.createAppContext(
-                        this, getSystemContext().mPackageInfo);
-                mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
-                mInitialApplication.onCreate();
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Unable to instantiate Application():" + e.toString(), e);
-            }
+            initializeSystemThread(this);
         }
 
         ViewRootImpl.ConfigChangedCallback configChangedCallback = (Configuration globalConfig) -> {
@@ -8591,6 +8625,28 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         };
         ViewRootImpl.addConfigCallback(configChangedCallback);
+    }
+
+    /**
+     * Initializes the given system activity thread, setting up its instrumentation and initial
+     * application. This only has an effect if the given thread is a {@link #mSystemThread}.
+     *
+     * @param thread the given system activity thread to initialize.
+     */
+    private static void initializeSystemThread(@NonNull ActivityThread thread) {
+        if (!thread.mSystemThread) {
+            return;
+        }
+        try {
+            thread.mInstrumentation = new Instrumentation();
+            thread.mInstrumentation.basicInit(thread);
+            ContextImpl context = ContextImpl.createAppContext(
+                    thread, thread.getSystemContext().mPackageInfo);
+            thread.mInitialApplication = context.mPackageInfo.makeApplicationInner(true, null);
+            thread.mInitialApplication.onCreate();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to instantiate Application():" + e, e);
+        }
     }
 
     @UnsupportedAppUsage
@@ -8810,9 +8866,9 @@ public final class ActivityThread extends ClientTransactionHandler
         // Call per-process mainline module initialization.
         initializeMainlineModules();
 
-        Process.setArgV0("<pre-initialized>");
-
         Looper.prepareMainLooper();
+
+        Process.setArgV0("<pre-initialized>");
 
         // Find the value for {@link #PROC_START_SEQ_IDENT} if provided on the command line.
         // It will be in the format "seq=114"

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.VibrationEffect;
+import android.os.VibrationEffect.Composition.DelayType;
 import android.os.VibrationEffect.Composition.PrimitiveType;
 
 import java.lang.annotation.Retention;
@@ -51,6 +52,7 @@ public final class XmlConstants {
     public static final String ATTRIBUTE_AMPLITUDE = "amplitude";
     public static final String ATTRIBUTE_SCALE = "scale";
     public static final String ATTRIBUTE_DELAY_MS = "delayMs";
+    public static final String ATTRIBUTE_DELAY_TYPE = "delayType";
 
     public static final String VALUE_AMPLITUDE_DEFAULT = "default";
 
@@ -87,7 +89,7 @@ public final class XmlConstants {
 
         /**
          * Return the {@link PrimitiveEffectName} that represents given primitive id, or null if
-         * none of the available names maps to the given id.
+         * none of the available names map to the given id.
          */
         @Nullable
         public static PrimitiveEffectName findById(int primitiveId) {
@@ -193,6 +195,55 @@ public final class XmlConstants {
 
         public int getEffectId() {
             return mEffectId;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    /** Represent supported values for attribute delay type in {@link #TAG_PRIMITIVE_EFFECT}  */
+    public enum PrimitiveDelayType {
+        PAUSE(VibrationEffect.Composition.DELAY_TYPE_PAUSE),
+        RELATIVE_START_OFFSET(VibrationEffect.Composition.DELAY_TYPE_RELATIVE_START_OFFSET);
+
+        @DelayType private final int mDelayType;
+
+        PrimitiveDelayType(@DelayType int type) {
+            mDelayType = type;
+        }
+
+        /**
+         * Return the {@link PrimitiveEffectName} that represents given primitive id, or null if
+         * none of the available names maps to the given id.
+         */
+        @Nullable
+        public static PrimitiveDelayType findByType(int delayType) {
+            for (PrimitiveDelayType type : PrimitiveDelayType.values()) {
+                if (type.mDelayType == delayType) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Return the {@link PrimitiveEffectName} that represents given primitive name, or null if
+         * none of the available names maps to the given name.
+         */
+        @Nullable
+        public static PrimitiveDelayType findByName(@NonNull String delayType) {
+            try {
+                return PrimitiveDelayType.valueOf(delayType.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        @DelayType
+        public int getDelayType() {
+            return mDelayType;
         }
 
         @Override

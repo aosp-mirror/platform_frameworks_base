@@ -141,6 +141,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -163,6 +164,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
@@ -181,10 +183,14 @@ import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
+import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
+import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlin.math.max
 import kotlin.math.min
@@ -203,6 +209,7 @@ fun CommunalHub(
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
+    sceneScope: SceneScope? = null,
 ) {
     val communalContent by
         viewModel.communalContent.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -412,6 +419,7 @@ fun CommunalHub(
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
                             widgetSection = widgetSection,
+                            sceneScope = sceneScope,
                         )
                     }
                 }
@@ -665,6 +673,7 @@ private fun ResizableItemFrameWrapper(
     maxHeightPx: Int,
     modifier: Modifier = Modifier,
     alpha: () -> Float = { 1f },
+    viewModel: ResizeableItemFrameViewModel,
     onResize: (info: ResizeInfo) -> Unit = {},
     content: @Composable (modifier: Modifier) -> Unit,
 ) {
@@ -680,6 +689,7 @@ private fun ResizableItemFrameWrapper(
             enabled = enabled,
             alpha = alpha,
             modifier = modifier,
+            viewModel = viewModel,
             onResize = onResize,
             minHeightPx = minHeightPx,
             maxHeightPx = maxHeightPx,
@@ -711,7 +721,7 @@ fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): Widge
             WidgetSizeInfo(minHeightPx, maxHeightPx)
         }
     } else {
-        WidgetSizeInfo(0, Int.MAX_VALUE)
+        WidgetSizeInfo(0, 0)
     }
 }
 
@@ -731,6 +741,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
+    sceneScope: SceneScope?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -796,6 +807,13 @@ private fun BoxScope.CommunalHubLazyGrid(
                     false
                 }
 
+            val resizeableItemFrameViewModel =
+                rememberViewModel(
+                    key = item.size.span,
+                    traceName = "ResizeableItemFrame.viewModel.$index",
+                ) {
+                    ResizeableItemFrameViewModel()
+                }
             if (viewModel.isEditMode && dragDropState != null) {
                 val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by
@@ -821,6 +839,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                                 )
                             }
                             .thenIf(isItemDragging) { Modifier.zIndex(1f) },
+                    viewModel = resizeableItemFrameViewModel,
                     onResize = { resizeInfo -> contentListState.resize(index, resizeInfo) },
                     minHeightPx = widgetSizeInfo.minHeightPx,
                     maxHeightPx = widgetSizeInfo.maxHeightPx,
@@ -843,6 +862,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                             contentListState = contentListState,
                             interactionHandler = interactionHandler,
                             widgetSection = widgetSection,
+                            resizeableItemFrameViewModel = resizeableItemFrameViewModel,
                         )
                     }
                 }
@@ -857,6 +877,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
                     widgetSection = widgetSection,
+                    resizeableItemFrameViewModel = resizeableItemFrameViewModel,
+                    sceneScope = sceneScope,
                 )
             }
         }
@@ -881,11 +903,17 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val titleForEmptyStateCTA = stringResource(R.string.title_for_empty_state_cta)
             Text(
-                text = stringResource(R.string.title_for_empty_state_cta),
+                text = titleForEmptyStateCTA,
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
                 color = colors.secondary,
+                modifier =
+                    Modifier.focusable().semantics(mergeDescendants = true) {
+                        contentDescription = titleForEmptyStateCTA
+                        heading()
+                    },
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(
@@ -1080,6 +1108,8 @@ private fun CommunalContent(
     contentListState: ContentListState,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
+    resizeableItemFrameViewModel: ResizeableItemFrameViewModel,
+    sceneScope: SceneScope? = null,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -1093,6 +1123,7 @@ private fun CommunalContent(
                 index,
                 contentListState,
                 widgetSection,
+                resizeableItemFrameViewModel,
             )
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
         is CommunalContentModel.WidgetContent.DisabledWidget ->
@@ -1102,7 +1133,7 @@ private fun CommunalContent(
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
-        is CommunalContentModel.Umo -> Umo(viewModel, modifier)
+        is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
     }
 }
 
@@ -1223,7 +1254,9 @@ private fun WidgetContent(
     index: Int,
     contentListState: ContentListState,
     widgetSection: CommunalAppWidgetSection,
+    resizeableItemFrameViewModel: ResizeableItemFrameViewModel,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val accessibilityLabel =
         remember(model, context) {
@@ -1234,6 +1267,10 @@ private fun WidgetContent(
     val placeWidgetActionLabel = stringResource(R.string.accessibility_action_label_place_widget)
     val unselectWidgetActionLabel =
         stringResource(R.string.accessibility_action_label_unselect_widget)
+
+    val shrinkWidgetLabel = stringResource(R.string.accessibility_action_label_shrink_widget)
+    val expandWidgetLabel = stringResource(R.string.accessibility_action_label_expand_widget)
+
     val selectedKey by viewModel.selectedKey.collectAsStateWithLifecycle()
     val selectedIndex =
         selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
@@ -1292,6 +1329,29 @@ private fun WidgetContent(
                                 true
                             }
                         val actions = mutableListOf(deleteAction)
+
+                        if (communalWidgetResizing() && resizeableItemFrameViewModel.canShrink()) {
+                            actions.add(
+                                CustomAccessibilityAction(shrinkWidgetLabel) {
+                                    coroutineScope.launch {
+                                        resizeableItemFrameViewModel.shrinkToNextAnchor()
+                                    }
+                                    true
+                                }
+                            )
+                        }
+
+                        if (communalWidgetResizing() && resizeableItemFrameViewModel.canExpand()) {
+                            actions.add(
+                                CustomAccessibilityAction(expandWidgetLabel) {
+                                    coroutineScope.launch {
+                                        resizeableItemFrameViewModel.expandToNextAnchor()
+                                    }
+                                    true
+                                }
+                            )
+                        }
+
                         if (selectedIndex != null && selectedIndex != index) {
                             actions.add(
                                 CustomAccessibilityAction(placeWidgetActionLabel) {
@@ -1484,7 +1544,25 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
+private fun Umo(
+    viewModel: BaseCommunalViewModel,
+    sceneScope: SceneScope?,
+    modifier: Modifier = Modifier,
+) {
+    if (SceneContainerFlag.isEnabled && sceneScope != null) {
+        sceneScope.MediaCarousel(
+            modifier = modifier.fillMaxSize(),
+            isVisible = true,
+            mediaHost = viewModel.mediaHost,
+            carouselController = viewModel.mediaCarouselController,
+        )
+    } else {
+        UmoLegacy(viewModel, modifier)
+    }
+}
+
+@Composable
+private fun UmoLegacy(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
         modifier =
             modifier.pointerInput(Unit) {

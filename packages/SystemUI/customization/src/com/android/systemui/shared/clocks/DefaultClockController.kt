@@ -33,8 +33,8 @@ import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
 import com.android.systemui.plugins.clocks.ThemeConfig
@@ -55,7 +55,6 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
-    private val hasStepClockAnimation: Boolean = false,
     private val migratedClocks: Boolean = false,
     messageBuffers: ClockMessageBuffers? = null,
 ) : ClockController {
@@ -197,12 +196,11 @@ class DefaultClockController(
                 views[0].id =
                     resources.getIdentifier("lockscreen_clock_view_large", "id", ctx.packageName)
             }
-        override val config =
-            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
+        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
 
         init {
             view.migratedClocks = migratedClocks
-            view.hasCustomPositionUpdatedAnimation = hasStepClockAnimation
+            view.hasCustomPositionUpdatedAnimation = true
             animations = LargeClockAnimations(view, 0f, 0f)
         }
 
@@ -264,7 +262,7 @@ class DefaultClockController(
 
         override fun onZenDataChanged(data: ZenData) {}
 
-        override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
+        override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {}
     }
 
     open inner class DefaultClockAnimations(

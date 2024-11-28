@@ -110,7 +110,6 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_B
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
-import static android.view.accessibility.Flags.fixMergedContentChangeEventV2;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
 import static android.view.flags.Flags.addSchandleToVriSurface;
@@ -140,6 +139,8 @@ import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -185,7 +186,6 @@ import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.SyncFence;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.input.InputManagerGlobal;
@@ -1132,6 +1132,8 @@ public final class ViewRootImpl implements ViewParent,
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
+    // timeout for surface replaced.
+    private static final int FRAME_RATE_SURFACE_REPLACED_TIME = 3000;
 
     /*
      * The variables below are used to update frame rate category
@@ -1234,6 +1236,8 @@ public final class ViewRootImpl implements ViewParent,
     private @ActivityInfo.ColorMode int mCurrentColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
     private long mColorModeLastSetMillis = -1;
 
+    private final boolean mIsSubscribeGranularDisplayEventsEnabled;
+
     public ViewRootImpl(Context context, Display display) {
         this(context, display, WindowManagerGlobal.getWindowSession(), new WindowLayout());
     }
@@ -1249,7 +1253,6 @@ public final class ViewRootImpl implements ViewParent,
         mExtraDisplayListenerLogging = !TextUtils.isEmpty(name) && name.equals(mBasePackageName);
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
-        mLocation.fillInStackTrace();
         mWidth = -1;
         mHeight = -1;
         mDirty = new Rect();
@@ -1332,6 +1335,8 @@ public final class ViewRootImpl implements ViewParent,
         // Disable DRAW_WAKE_LOCK starting U.
         mDisableDrawWakeLock =
                 CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock();
+        mIsSubscribeGranularDisplayEventsEnabled =
+                com.android.server.display.feature.flags.Flags.subscribeGranularDisplayEvents();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1809,14 +1814,22 @@ public final class ViewRootImpl implements ViewParent,
                 mAccessibilityInteractionConnectionManager, mHandler);
         mAccessibilityManager.addHighContrastTextStateChangeListener(
                 mExecutor, mHighContrastTextManager);
+
+
+        long eventsToBeRegistered =
+                (mIsSubscribeGranularDisplayEventsEnabled)
+                ? DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_STATE
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED
+                : DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         DisplayManagerGlobal
                 .getInstance()
                 .registerDisplayListener(
                         mDisplayListener,
                         mHandler,
-                        DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED,
+                        eventsToBeRegistered,
                         mBasePackageName);
 
         if (forceInvertColor()) {
@@ -2513,7 +2526,16 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public void notifyInsetsAnimationRunningStateChanged(boolean running) {
         if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.instant(Trace.TRACE_TAG_VIEW,
+                        TextUtils.formatSimple("notifyInsetsAnimationRunningStateChanged(%s)",
+                        Boolean.toString(running)));
+            }
             mInsetsAnimationRunning = running;
+            try {
+                mWindowSession.notifyInsetsAnimationRunningStateChanged(mWindow, running);
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -2757,6 +2779,9 @@ public final class ViewRootImpl implements ViewParent,
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
         mSurface.transferFrom(blastSurface);
+
+        // Since the SurfaceControl is a VRI, indicate that it can recover from buffer stuffing.
+        mTransaction.setRecoverableFromBufferStuffing(mSurfaceControl).applyAsyncUnsafe();
     }
 
     private void setBoundsLayerCrop(Transaction t) {
@@ -3831,6 +3856,9 @@ public final class ViewRootImpl implements ViewParent,
                 if (surfaceReplaced) {
                     mSurfaceReplaced = true;
                     mSurfaceSequenceId++;
+                    mHandler.removeMessages(MSG_SURFACE_REPLACED_TIMEOUT);
+                    mHandler.sendEmptyMessageDelayed(MSG_SURFACE_REPLACED_TIMEOUT,
+                            FRAME_RATE_SURFACE_REPLACED_TIME);
                 }
                 if (alwaysConsumeSystemBarsChanged) {
                     mAttachInfo.mAlwaysConsumeSystemBars = mPendingAlwaysConsumeSystemBars;
@@ -6544,7 +6572,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         Configuration globalConfig = mergedConfiguration.getGlobalConfiguration();
-        final Configuration overrideConfig = mergedConfiguration.getOverrideConfiguration();
+        Configuration overrideConfig = mergedConfiguration.getOverrideConfiguration();
         if (DEBUG_CONFIGURATION) Log.v(mTag,
                 "Applying new config to window " + mWindowAttributes.getTitle()
                         + ", globalConfig: " + globalConfig
@@ -6553,7 +6581,9 @@ public final class ViewRootImpl implements ViewParent,
         final CompatibilityInfo ci = mDisplay.getDisplayAdjustments().getCompatibilityInfo();
         if (!ci.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
             globalConfig = new Configuration(globalConfig);
+            overrideConfig = new Configuration(overrideConfig);
             ci.applyToConfiguration(mNoncompatDensity, globalConfig);
+            ci.applyToConfiguration(mNoncompatDensity, overrideConfig);
         }
 
         synchronized (sConfigCallbacks) {
@@ -6694,6 +6724,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_CHECK_INVALIDATION_IDLE = 40;
     private static final int MSG_REFRESH_POINTER_ICON = 41;
     private static final int MSG_FRAME_RATE_SETTING = 42;
+    private static final int MSG_SURFACE_REPLACED_TIMEOUT = 43;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -6765,6 +6796,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_TOUCH_BOOST_TIMEOUT";
                 case MSG_FRAME_RATE_SETTING:
                     return "MSG_FRAME_RATE_SETTING";
+                case MSG_SURFACE_REPLACED_TIMEOUT:
+                    return "MSG_SURFACE_REPLACED_TIMEOUT";
             }
             return super.getMessageName(message);
         }
@@ -7036,6 +7069,9 @@ public final class ViewRootImpl implements ViewParent,
                      */
                     mIsFrameRateBoosting = false;
                     mIsTouchBoosting = false;
+                    if (!mDrawnThisFrame) {
+                        setPreferredFrameRateCategory(FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                    }
                     break;
                 case MSG_REFRESH_POINTER_ICON:
                     if (mPointerIconEvent == null) {
@@ -7046,6 +7082,9 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_FRAME_RATE_SETTING:
                     mPreferredFrameRate = 0;
                     mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                    break;
+                case MSG_SURFACE_REPLACED_TIMEOUT:
+                    mSurfaceReplaced = false;
                     break;
             }
         }
@@ -8849,11 +8888,6 @@ public final class ViewRootImpl implements ViewParent,
 
         SyntheticTouchNavigationHandler() {
             super(true);
-            int gestureDetectorVelocityStrategy =
-                    android.companion.virtual.flags.Flags
-                            .impulseVelocityStrategyForTouchNavigation()
-                    ? VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE
-                    : VelocityTracker.VELOCITY_TRACKER_STRATEGY_DEFAULT;
             mGestureDetector = new GestureDetector(mContext,
                     new GestureDetector.OnGestureListener() {
                         @Override
@@ -8893,7 +8927,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                     },
                     /* handler= */ null,
-                    gestureDetectorVelocityStrategy);
+                    VelocityTracker.VELOCITY_TRACKER_STRATEGY_IMPULSE);
         }
 
         public void process(MotionEvent event) {
@@ -9323,7 +9357,7 @@ public final class ViewRootImpl implements ViewParent,
             boolean insetsPending) throws RemoteException {
         final WindowConfiguration winConfigFromAm = getConfiguration().windowConfiguration;
         final WindowConfiguration winConfigFromWm =
-                mLastReportedMergedConfiguration.getGlobalConfiguration().windowConfiguration;
+                mLastReportedMergedConfiguration.getMergedConfiguration().windowConfiguration;
         final WindowConfiguration winConfig = getCompatWindowConfiguration();
         final int measuredWidth = mMeasuredWidth;
         final int measuredHeight = mMeasuredHeight;
@@ -9936,11 +9970,13 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        if (!mIsDrawing) {
-            destroyHardwareRenderer();
-        } else {
-            Log.e(mTag, "Attempting to destroy the window while drawing!\n" +
-                    "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+        if (!com.android.graphics.hwui.flags.Flags.removeVriSketchyDestroy()) {
+            if (!mIsDrawing) {
+                destroyHardwareRenderer();
+            } else {
+                Log.e(mTag, "Attempting to destroy the window while drawing!\n"
+                        + "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+            }
         }
         mHandler.sendEmptyMessage(MSG_DIE);
         return true;
@@ -9961,9 +9997,9 @@ public final class ViewRootImpl implements ViewParent,
                 dispatchDetachedFromWindow();
             }
 
-            if (mAdded && !mFirst) {
-                destroyHardwareRenderer();
+            destroyHardwareRenderer();
 
+            if (mAdded && !mFirst) {
                 if (mView != null) {
                     int viewVisibility = mView.getVisibility();
                     boolean viewVisibilityChanged = mViewVisibility != viewVisibility;
@@ -11880,6 +11916,20 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @NonNull
+    @Override
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_JANK_API)
+    public SurfaceControl.OnJankDataListenerRegistration registerOnJankDataListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SurfaceControl.OnJankDataListener listener) {
+        SurfaceControl.OnJankDataListener wrapped = (data) ->
+                executor.execute(() -> listener.onJankDataAvailable(data));
+        return mSurfaceControl.addOnJankDataListener(wrapped);
+    }
+
+    /**
      * Class for managing the accessibility interaction connection
      * based on the global accessibility state.
      */
@@ -12250,31 +12300,20 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSource != null) {
-                if (fixMergedContentChangeEventV2()) {
-                    View newSource = getCommonPredecessor(mSource, source);
-                    if (newSource != null) {
-                        newSource = newSource.getSelfOrParentImportantForA11y();
-                    }
-                    if (newSource == null) {
-                        // If there is no common predecessor, then mSource points to
-                        // a removed view, hence in this case always prefer the source.
-                        newSource = source;
-                    }
-
-                    mChangeTypes |= changeType;
-                    if (mSource != newSource) {
-                        mChangeTypes |= AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
-                        mSource = newSource;
-                    }
-                } else {
+                View newSource = getCommonPredecessor(mSource, source);
+                if (newSource != null) {
+                    newSource = newSource.getSelfOrParentImportantForA11y();
+                }
+                if (newSource == null) {
                     // If there is no common predecessor, then mSource points to
                     // a removed view, hence in this case always prefer the source.
-                    View predecessor = getCommonPredecessor(mSource, source);
-                    if (predecessor != null) {
-                        predecessor = predecessor.getSelfOrParentImportantForA11y();
-                    }
-                    mSource = (predecessor != null) ? predecessor : source;
-                    mChangeTypes |= changeType;
+                    newSource = source;
+                }
+
+                mChangeTypes |= changeType;
+                if (mSource != newSource) {
+                    mChangeTypes |= AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
+                    mSource = newSource;
                 }
 
                 final int performingAction = mAccessibilityManager.getPerformingAction();
@@ -13390,6 +13429,7 @@ public final class ViewRootImpl implements ViewParent,
     private void removeVrrMessages() {
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+        mHandler.removeMessages(MSG_SURFACE_REPLACED_TIMEOUT);
         if (mInvalidationIdleMessagePosted && sSurfaceFlingerBugfixFlagValue) {
             mInvalidationIdleMessagePosted = false;
             mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);

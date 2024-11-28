@@ -83,7 +83,6 @@ filegroup {
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
         ":framework-telephony-sources",
-        ":framework-vcn-util-sources",
         ":framework-wifi-annotations",
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
@@ -103,11 +102,10 @@ filegroup {
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.keymaster-V4-java-source",
-        ":android.hardware.radio-V3-java-source",
-        ":android.hardware.radio.data-V3-java-source",
-        ":android.hardware.radio.network-V3-java-source",
-        ":android.hardware.radio.voice-V3-java-source",
-        ":android.hardware.security.keymint-V3-java-source",
+        ":android.hardware.radio-V4-java-source",
+        ":android.hardware.radio.data-V4-java-source",
+        ":android.hardware.radio.network-V4-java-source",
+        ":android.hardware.radio.voice-V4-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.thermal-V3-java-source",
         ":android.hardware.tv.tuner-V3-java-source",
@@ -116,7 +114,6 @@ filegroup {
         ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
         ":android.security.metrics-java-source",
-        ":android.system.keystore2-V4-java-source",
         ":android.hardware.cas-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
@@ -144,15 +141,21 @@ filegroup {
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
 
-        // Java/AIDL sources to be moved out to CrashRecovery module
-        ":framework-crashrecovery-sources",
-
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":statslog-hwui-java-gen", // HwuiStatsLog.java
         ":audio_policy_configuration_V7_0",
-    ],
+    ] + select(release_flag("RELEASE_ATTEST_MODULES"), {
+        true: [
+            ":android.hardware.security.keymint-V4-java-source",
+            ":android.system.keystore2-V5-java-source",
+        ],
+        default: [
+            ":android.hardware.security.keymint-V3-java-source",
+            ":android.system.keystore2-V4-java-source",
+        ],
+    }),
 }
 
 java_library {
@@ -223,18 +226,18 @@ java_library {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.contexthub-V1.1-java",
         "android.hardware.contexthub-V1.2-java",
-        "android.hardware.contexthub-V3-java",
+        "android.hardware.contexthub-V4-java",
         "android.hardware.gnss-V1.0-java",
         "android.hardware.gnss-V2.1-java",
         "android.hardware.health-V1.0-java-constants",
         "android.hardware.radio-V1.6-java",
-        "android.hardware.radio.data-V3-java",
-        "android.hardware.radio.ims-V2-java",
-        "android.hardware.radio.messaging-V3-java",
-        "android.hardware.radio.modem-V3-java",
-        "android.hardware.radio.network-V3-java",
-        "android.hardware.radio.sim-V3-java",
-        "android.hardware.radio.voice-V3-java",
+        "android.hardware.radio.data-V4-java",
+        "android.hardware.radio.ims-V3-java",
+        "android.hardware.radio.messaging-V4-java",
+        "android.hardware.radio.modem-V4-java",
+        "android.hardware.radio.network-V4-java",
+        "android.hardware.radio.sim-V4-java",
+        "android.hardware.radio.voice-V4-java",
         "android.hardware.thermal-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java",
         "android.hardware.thermal-V1.1-java",
@@ -309,7 +312,6 @@ java_defaults {
             ":framework-telecomm-sources",
             ":framework-telephony-common-sources",
             ":framework-telephony-sources",
-            ":framework-vcn-util-sources",
             ":framework-wifi-annotations",
             ":framework-wifi-non-updatable-sources",
             ":PacProcessor-aidl-sources",
@@ -367,6 +369,7 @@ java_defaults {
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
         "error_prone_android_framework",
+        "systemfeatures-metadata-processor",
     ],
     // Exports needed for staledataclass-annotation-processor, see b/139342589.
     javacflags: [
@@ -393,6 +396,8 @@ java_defaults {
         "ext",
         "framework-updatable-stubs-module_libs_api",
         "unsupportedappusage",
+        // TODO(b/379770939): remove prod version of flags from other containers in framework
+        "aconfig_storage_stub",
     ],
     sdk_version: "core_platform",
     static_libs: [
@@ -401,7 +406,9 @@ java_defaults {
         "bouncycastle-repackaged-unbundled",
         "com.android.sysprop.foldlockbehavior",
         "com.android.sysprop.view",
+        "configinfra_framework_flags_java_lib",
         "framework-internal-utils",
+        "dynamic_instrumentation_manager_aidl-java",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
@@ -432,7 +439,12 @@ java_library {
     name: "framework-non-updatable-unbundled-impl-libs",
     static_libs: [
         "framework-location.impl",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [],
+        default: [
+            "framework-platformcrashrecovery.impl",
+        ],
+    }),
     sdk_version: "core_platform",
     installable: false,
 }
@@ -565,7 +577,12 @@ java_library {
         "documents-ui-compat-config",
         "calendar-provider-compat-config",
         "contacts-provider-platform-compat-config",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [],
+        default: [
+            "framework-platformcrashrecovery-compat-config",
+        ],
+    }),
 }
 
 platform_compat_config {
@@ -579,7 +596,7 @@ filegroup {
     srcs: [
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
-        "services/core/java/com/android/server/vcn/util/PersistableBundleUtils.java",
+        "core/java/android/net/vcn/util/PersistableBundleUtils.java",
         "telephony/java/android/telephony/Annotation.java",
     ],
 }

@@ -106,7 +106,7 @@ static jobjectArray android_hardware_OverlayProperties_getLutProperties(JNIEnv* 
                                                                         jlong nativeObject) {
     gui::OverlayProperties* overlayProperties =
             reinterpret_cast<gui::OverlayProperties*>(nativeObject);
-    if (overlayProperties->lutProperties.has_value()) {
+    if (!overlayProperties || !overlayProperties->lutProperties) {
         return NULL;
     }
     auto& lutProperties = overlayProperties->lutProperties.value();

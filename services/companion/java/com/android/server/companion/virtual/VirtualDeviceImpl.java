@@ -312,6 +312,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
         }
 
+        @Override
+        public void onSecureWindowHidden(int displayId) {
+            if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                try {
+                    mActivityListener.onSecureWindowHidden(displayId);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
+                }
+            }
+        }
+
         /**
          * Intercepts intent when matching any of the IntentFilter of any interceptor. Returns true
          * if the intent matches any filter notifying the DisplayPolicyController to abort the
@@ -1465,28 +1476,28 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public int createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
             @NonNull IVirtualDisplayCallback callback) {
         checkCallerIsDeviceOwner();
+
+        int displayId;
+        boolean showPointer;
+        boolean isTrustedDisplay;
         GenericWindowPolicyController gwpc;
         synchronized (mVirtualDeviceLock) {
             gwpc = createWindowPolicyControllerLocked(virtualDisplayConfig.getDisplayCategories());
-        }
-        int displayId;
-        displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig, callback,
-                this, gwpc, mOwnerPackageName);
-        boolean isMirrorDisplay =
-                mDisplayManagerInternal.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
-        gwpc.setDisplayId(displayId, isMirrorDisplay);
-        boolean isTrustedDisplay =
-                (mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
-                        == Display.FLAG_TRUSTED;
-        if (!isTrustedDisplay) {
-            if (getDevicePolicy(POLICY_TYPE_CLIPBOARD) != DEVICE_POLICY_DEFAULT) {
-                throw new SecurityException("All displays must be trusted for devices with custom"
-                        + "clipboard policy.");
+            displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig,
+                    callback, this, gwpc, mOwnerPackageName);
+            boolean isMirrorDisplay =
+                    mDisplayManagerInternal.getDisplayIdToMirror(displayId)
+                            != Display.INVALID_DISPLAY;
+            gwpc.setDisplayId(displayId, isMirrorDisplay);
+            isTrustedDisplay =
+                    (mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
+                            == Display.FLAG_TRUSTED;
+            if (!isTrustedDisplay
+                    && getDevicePolicy(POLICY_TYPE_CLIPBOARD) != DEVICE_POLICY_DEFAULT) {
+                throw new SecurityException("All displays must be trusted for devices with "
+                        + "custom clipboard policy.");
             }
-        }
 
-        boolean showPointer;
-        synchronized (mVirtualDeviceLock) {
             if (mVirtualDisplays.contains(displayId)) {
                 gwpc.unregisterRunningAppsChangedListener(this);
                 throw new IllegalStateException(
@@ -1523,6 +1534,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     private PowerManager.WakeLock createAndAcquireWakeLockForDisplay(int displayId) {
+        if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()) {
+            return null;
+        }
         final long token = Binder.clearCallingIdentity();
         try {
             PowerManager powerManager = mContext.getSystemService(PowerManager.class);
@@ -1679,6 +1693,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     int getOwnerUid() {
         return mOwnerUid;
+    }
+
+    long getDimDurationMillis() {
+        return mParams.getDimDuration().toMillis();
+    }
+
+    long getScreenOffTimeoutMillis() {
+        return mParams.getScreenOffTimeout().toMillis();
     }
 
     @Override  // Binder call

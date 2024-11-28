@@ -99,10 +99,11 @@ class BubbleViewInfoTest : ShellTestCase() {
         val shellController = ShellController(context, shellInit, shellCommandHandler,
 					      mock<DisplayInsetsController>(), mainExecutor)
         bubblePositioner = BubblePositioner(context, windowManager)
+        val bubbleLogger = mock<BubbleLogger>()
         val bubbleData =
             BubbleData(
                 context,
-                mock<BubbleLogger>(),
+                bubbleLogger,
                 bubblePositioner,
                 BubbleEducationController(context),
                 mainExecutor,
@@ -125,7 +126,7 @@ class BubbleViewInfoTest : ShellTestCase() {
                 WindowManagerShellWrapper(mainExecutor),
                 mock<UserManager>(),
                 mock<LauncherApps>(),
-                mock<BubbleLogger>(),
+                bubbleLogger,
                 mock<TaskStackListenerImpl>(),
                 ShellTaskOrganizer(mainExecutor),
                 bubblePositioner,
@@ -154,7 +155,7 @@ class BubbleViewInfoTest : ShellTestCase() {
                 bubbleController,
                 mainExecutor
             )
-        bubbleBarLayerView = BubbleBarLayerView(context, bubbleController, bubbleData)
+        bubbleBarLayerView = BubbleBarLayerView(context, bubbleController, bubbleData, bubbleLogger)
     }
 
     @Test

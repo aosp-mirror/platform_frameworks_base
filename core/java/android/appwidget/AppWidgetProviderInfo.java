@@ -93,11 +93,26 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public static final int WIDGET_CATEGORY_SEARCHBOX = 4;
 
+    /**
+     * Indicates that the widget should never be shown on the keyguard.
+     *
+     * <p>Some keyguard style features may decide that {@link #WIDGET_CATEGORY_KEYGUARD} isn't
+     * required to be added by an app to show on the feature when chosen by a user.
+     * This category allows for a stronger statement about placement of the widget that, even in the
+     * above case, this widget should not be offered on the keyguard.
+     *
+     * <p>Setting this category doesn't change the behavior of AppWidgetManager queries, it is the
+     * responsibility of the widget surface to respect this value.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_NOT_KEYGUARD_CATEGORY)
+    public static final int WIDGET_CATEGORY_NOT_KEYGUARD = 8;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             WIDGET_CATEGORY_HOME_SCREEN,
             WIDGET_CATEGORY_KEYGUARD,
             WIDGET_CATEGORY_SEARCHBOX,
+            WIDGET_CATEGORY_NOT_KEYGUARD,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CategoryFlags {}

@@ -653,7 +653,9 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             // by drawing the rotated content before applying projection transaction of display.
             // And it will fade in after the display transition is finished.
             if (mTransitionOp == OP_APP_SWITCH && !mIsStartTransactionCommitted
-                    && canBeAsync(w.mToken) && !mDisplayContent.hasFixedRotationTransientLaunch()) {
+                    && canBeAsync(w.mToken) && !mDisplayContent.hasFixedRotationTransientLaunch()
+                    && !mService.mAtmService.mBackNavigationController.hasFixedRotationAnimation(
+                            mDisplayContent)) {
                 hideImmediately(w.mToken, Operation.ACTION_FADE);
                 if (DEBUG) Slog.d(TAG, "Hide on finishDrawing " + w.mToken.getTopChild());
             }

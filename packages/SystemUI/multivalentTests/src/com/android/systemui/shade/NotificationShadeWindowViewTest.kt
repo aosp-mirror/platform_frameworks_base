@@ -15,8 +15,10 @@
  */
 package com.android.systemui.shade
 
+import android.content.res.Configuration
 import android.os.SystemClock
 import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.widget.FrameLayout
@@ -40,6 +42,8 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.res.R
+import com.android.systemui.settings.brightness.data.repository.BrightnessMirrorShowingRepository
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.DragDownHelper
@@ -54,6 +58,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.ConfigurationForwarder
 import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -76,9 +81,11 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -123,8 +130,13 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
+    @Mock lateinit var configurationForwarder: ConfigurationForwarder
     @Captor
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
+
+    private val brightnessMirrorShowingRepository = BrightnessMirrorShowingRepository()
+    private val brightnessMirrorShowingInteractor =
+        BrightnessMirrorShowingInteractor(brightnessMirrorShowingRepository)
 
     private lateinit var underTest: NotificationShadeWindowView
     private lateinit var controller: NotificationShadeWindowViewController
@@ -191,6 +203,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mock(),
+                { configurationForwarder },
+                brightnessMirrorShowingInteractor,
             )
 
         controller.setupExpandedStatusBar()
@@ -221,6 +235,23 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
             // THEN we shouldn't intercept touch
             assertThat(interactionEventHandler.shouldInterceptTouchEvent(mock())).isFalse()
         }
+
+    @Test
+    @DisableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun onConfigurationChanged_configForwarderNotSet() {
+        underTest.onConfigurationChanged(Configuration())
+
+        verify(configurationForwarder, never()).onConfigurationChanged(any())
+    }
+
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun onConfigurationChanged_configForwarderSet_propagatesConfig() {
+        val config = Configuration()
+        underTest.onConfigurationChanged(config)
+
+        verify(configurationForwarder).onConfigurationChanged(eq(config))
+    }
 
     private fun captureInteractionEventHandler() {
         verify(underTest).setInteractionEventHandler(interactionEventHandlerCaptor.capture())

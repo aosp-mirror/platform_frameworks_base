@@ -50,6 +50,7 @@ import com.android.systemui.util.kotlin.JavaAdapterKt;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
+import kotlinx.coroutines.DisposableHandle;
 import kotlinx.coroutines.flow.StateFlow;
 
 import java.io.PrintWriter;
@@ -106,6 +107,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mMediaVisibleFromInteractor = mediaVisible;
         setLayoutForMediaInScene();
     };
+
+    private DisposableHandle mJavaAdapterDisposableHandle;
 
     private boolean mLastListening;
 
@@ -221,6 +224,9 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mView.removeTile(record);
         }
         mRecords.clear();
+        if (mJavaAdapterDisposableHandle != null) {
+            mJavaAdapterDisposableHandle.dispose();
+        }
     }
 
     @Override
@@ -234,6 +240,12 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
         }
         mView.addOnConfigurationChangedListener(mOnConfigurationChangedListener);
+        // We were not attached and the configuration may have changed, trigger the listener.
+        if (mView.hadConfigurationChangeWhileDetached()) {
+            mOnConfigurationChangedListener.onConfigurationChange(
+                    getContext().getResources().getConfiguration()
+            );
+        }
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
         mLastScreenLayout = getResources().getConfiguration().screenLayout;
@@ -249,7 +261,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void registerForMediaInteractorChanges() {
-        JavaAdapterKt.collectFlow(
+        mJavaAdapterDisposableHandle = JavaAdapterKt.collectFlow(
                 mView,
                 getMediaVisibleFlow(),
                 mMediaOrRecommendationVisibleConsumer

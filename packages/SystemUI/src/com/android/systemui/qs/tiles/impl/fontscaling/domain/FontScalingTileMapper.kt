@@ -29,23 +29,13 @@ import javax.inject.Inject
 /** Maps [FontScalingTileModel] to [QSTileState]. */
 class FontScalingTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<FontScalingTileModel> {
+constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
+    QSTileDataToStateMapper<FontScalingTileModel> {
 
     override fun map(config: QSTileConfig, data: FontScalingTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             iconRes = R.drawable.ic_qs_font_scaling
-            val icon =
-                Icon.Loaded(
-                    resources.getDrawable(
-                        iconRes!!,
-                        theme,
-                    ),
-                    contentDescription = null
-                )
-            this.icon = { icon }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             contentDescription = label
             activationState = QSTileState.ActivationState.ACTIVE
             sideViewIcon = QSTileState.SideViewIcon.Chevron

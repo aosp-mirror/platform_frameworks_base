@@ -16,48 +16,55 @@
 
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
+import android.view.View
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.statusbar.chips.notification.domain.interactor.StatusBarNotificationChipsInteractor
+import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
-import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /** A view model for status bar chips for promoted ongoing notifications. */
 @SysUISingleton
 class NotifChipsViewModel
 @Inject
-constructor(activeNotificationsInteractor: ActiveNotificationsInteractor) {
+constructor(
+    @Application private val applicationScope: CoroutineScope,
+    private val notifChipsInteractor: StatusBarNotificationChipsInteractor,
+) {
     /**
      * A flow modeling the notification chips that should be shown. Emits an empty list if there are
      * no notifications that should show a status bar chip.
      */
     val chips: Flow<List<OngoingActivityChipModel.Shown>> =
-        activeNotificationsInteractor.promotedOngoingNotifications.map { notifications ->
-            notifications.mapNotNull { it.toChipModel() }
+        notifChipsInteractor.notificationChips.map { notifications ->
+            notifications.map { it.toActivityChipModel() }
         }
 
-    /**
-     * Converts the notification to the [OngoingActivityChipModel] object. Returns null if the
-     * notification has invalid data such that it can't be displayed as a chip.
-     */
-    private fun ActiveNotificationModel.toChipModel(): OngoingActivityChipModel.Shown? {
-        // TODO(b/364653005): Log error if there's no icon view.
-        val rawIcon = this.statusBarChipIconView ?: return null
-        val icon = OngoingActivityChipModel.ChipIcon.StatusBarView(rawIcon)
+    /** Converts the notification to the [OngoingActivityChipModel] object. */
+    private fun NotificationChipModel.toActivityChipModel(): OngoingActivityChipModel.Shown {
+        StatusBarNotifChips.assertInNewMode()
+        val icon = OngoingActivityChipModel.ChipIcon.StatusBarView(this.statusBarChipIconView)
         // TODO(b/364653005): Use the notification color if applicable.
         val colors = ColorsModel.Themed
-        // TODO(b/364653005): When the chip is clicked, show the HUN.
-        val onClickListener = null
-        return OngoingActivityChipModel.Shown.ShortTimeDelta(
-            icon,
-            colors,
-            time = this.whenTime,
-            onClickListener,
-        )
-        // TODO(b/364653005): If Notification.showWhen = false, don't show the time delta.
+        val onClickListener =
+            View.OnClickListener {
+                // The notification pipeline needs everything to run on the main thread, so keep
+                // this event on the main thread.
+                applicationScope.launch {
+                    notifChipsInteractor.onPromotedNotificationChipTapped(
+                        this@toActivityChipModel.key
+                    )
+                }
+            }
+        return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        // TODO(b/364653005): Use Notification.showWhen to determine if we should show the time.
         // TODO(b/364653005): If Notification.whenTime is in the past, show "ago" in the text.
         // TODO(b/364653005): If Notification.shortCriticalText is set, use that instead of `when`.
         // TODO(b/364653005): If the app that posted the notification is in the foreground, don't

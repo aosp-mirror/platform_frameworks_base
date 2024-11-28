@@ -24,6 +24,7 @@ import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 @SysUISingleton
@@ -31,7 +32,7 @@ class NaturalScrollingSettingObserver
 @Inject
 constructor(
     @Main private val handler: Handler,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
 ) {
     var isNaturalScrollingEnabled = true
         get() {

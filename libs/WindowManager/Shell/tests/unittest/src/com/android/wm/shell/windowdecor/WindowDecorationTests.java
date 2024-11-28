@@ -60,6 +60,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -113,6 +114,7 @@ public class WindowDecorationTests extends ShellTestCase {
     private static final Rect TASK_BOUNDS = new Rect(100, 300, 400, 400);
     private static final Point TASK_POSITION_IN_PARENT = new Point(40, 60);
     private static final int CORNER_RADIUS = 20;
+    private static final int SHADOW_RADIUS = 10;
     private static final int STATUS_BAR_INSET_SOURCE_ID = 0;
 
     @Rule
@@ -161,7 +163,7 @@ public class WindowDecorationTests extends ShellTestCase {
         mRelayoutParams.mLayoutResId = 0;
         mRelayoutParams.mCaptionHeightId = R.dimen.test_freeform_decor_caption_height;
         mCaptionMenuWidthId = R.dimen.test_freeform_decor_caption_menu_width;
-        mRelayoutParams.mShadowRadiusId = R.dimen.test_window_decor_shadow_radius;
+        mRelayoutParams.mShadowRadius = SHADOW_RADIUS;
         mRelayoutParams.mCornerRadius = CORNER_RADIUS;
 
         when(mMockDisplayController.getDisplay(Display.DEFAULT_DISPLAY))
@@ -217,8 +219,6 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(taskBackgroundSurfaceBuilder, never()).build();
         verify(captionContainerSurfaceBuilder, never()).build();
         verify(mMockSurfaceControlViewHostFactory, never()).create(any(), any(), any());
-
-        verify(mMockSurfaceControlFinishT).hide(mMockTaskSurface);
 
         assertNull(mRelayoutResult.mRootView);
     }
@@ -281,9 +281,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlFinishT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
-        verify(mMockSurfaceControlStartT)
-                .show(mMockTaskSurface);
-        verify(mMockSurfaceControlStartT).setShadowRadius(mMockTaskSurface, 10);
+        verify(mMockSurfaceControlStartT).setShadowRadius(mMockTaskSurface, SHADOW_RADIUS);
 
         assertEquals(300, mRelayoutResult.mWidth);
         assertEquals(100, mRelayoutResult.mHeight);
@@ -512,7 +510,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
         windowDecor.relayout(taskInfo, true /* applyStartTransactionOnDraw */,
-                true /* hasGlobalFocus */);
+                true /* hasGlobalFocus */, Region.obtain());
 
         verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockSurfaceControlStartT);
     }
@@ -529,7 +527,7 @@ public class WindowDecorationTests extends ShellTestCase {
         mRelayoutParams.mCaptionTopPadding = 50;
 
         windowDecor.relayout(taskInfo, false /* applyStartTransactionOnDraw */,
-                true /* hasGlobalFocus */);
+                true /* hasGlobalFocus */, Region.obtain());
 
         assertEquals(50, mRelayoutResult.mCaptionTopPadding);
     }
@@ -863,7 +861,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
 
-        mRelayoutParams.mSetTaskPositionAndCrop = false;
+        mRelayoutParams.mSetTaskVisibilityPositionAndCrop = false;
         windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockSurfaceControlStartT, never()).setWindowCrop(
@@ -891,7 +889,7 @@ public class WindowDecorationTests extends ShellTestCase {
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
-        mRelayoutParams.mSetTaskPositionAndCrop = true;
+        mRelayoutParams.mSetTaskVisibilityPositionAndCrop = true;
         windowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
         verify(mMockSurfaceControlStartT).setWindowCrop(
@@ -948,7 +946,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         decor.onInsetsStateChanged(createInsetsState(statusBars(), false /* visible */));
 
-        verify(decor, times(2)).relayout(task, true /* hasGlobalFocus */);
+        verify(decor, times(2)).relayout(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -962,7 +960,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         decor.onInsetsStateChanged(createInsetsState(statusBars(), true /* visible */));
 
-        verify(decor, times(1)).relayout(task, true /* hasGlobalFocus */);
+        verify(decor, times(1)).relayout(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -977,7 +975,7 @@ public class WindowDecorationTests extends ShellTestCase {
         decor.onKeyguardStateChanged(true /* visible */, true /* occluding */);
 
         assertTrue(decor.mIsKeyguardVisibleAndOccluded);
-        verify(decor, times(2)).relayout(task, true /* hasGlobalFocus */);
+        verify(decor, times(2)).relayout(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -991,7 +989,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         decor.onKeyguardStateChanged(false /* visible */, true /* occluding */);
 
-        verify(decor, times(1)).relayout(task, true /* hasGlobalFocus */);
+        verify(decor, times(1)).relayout(any(), any(), any(), any(), any(), any());
     }
 
     private ActivityManager.RunningTaskInfo createTaskInfo() {
@@ -1065,9 +1063,16 @@ public class WindowDecorationTests extends ShellTestCase {
                     surfaceControlViewHostFactory, desktopModeEventLogger);
         }
 
-        @Override
         void relayout(ActivityManager.RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
-            relayout(taskInfo, false /* applyStartTransactionOnDraw */, hasGlobalFocus);
+            relayout(taskInfo, false /* applyStartTransactionOnDraw */, hasGlobalFocus,
+                    Region.obtain());
+        }
+
+        @Override
+        void relayout(ActivityManager.RunningTaskInfo taskInfo, boolean hasGlobalFocus,
+                @NonNull Region displayExclusionRegion) {
+            relayout(taskInfo, false /* applyStartTransactionOnDraw */, hasGlobalFocus,
+                    displayExclusionRegion);
         }
 
         @Override
@@ -1089,11 +1094,13 @@ public class WindowDecorationTests extends ShellTestCase {
         }
 
         void relayout(ActivityManager.RunningTaskInfo taskInfo,
-                boolean applyStartTransactionOnDraw, boolean hasGlobalFocus) {
+                boolean applyStartTransactionOnDraw, boolean hasGlobalFocus,
+                @NonNull Region displayExclusionRegion) {
             mRelayoutParams.mRunningTaskInfo = taskInfo;
             mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
             mRelayoutParams.mLayoutResId = R.layout.caption_layout;
             mRelayoutParams.mHasGlobalFocus = hasGlobalFocus;
+            mRelayoutParams.mDisplayExclusionRegion.set(displayExclusionRegion);
             relayout(mRelayoutParams, mMockSurfaceControlStartT, mMockSurfaceControlFinishT,
                     mMockWindowContainerTransaction, mMockView, mRelayoutResult);
         }

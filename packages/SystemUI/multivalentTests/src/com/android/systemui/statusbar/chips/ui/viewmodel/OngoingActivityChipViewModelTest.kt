@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
 import com.android.systemui.SysuiTestCase
@@ -28,6 +29,7 @@ import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import kotlin.test.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -35,6 +37,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class OngoingActivityChipViewModelTest : SysuiTestCase() {
     private val mockSystemUIDialog = mock<SystemUIDialog>()
     private val dialogDelegate = SystemUIDialog.Delegate { mockSystemUIDialog }

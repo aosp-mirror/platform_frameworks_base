@@ -20,6 +20,7 @@ import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.data.repository.bouncerRepository
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -39,5 +40,6 @@ val Kosmos.bouncerInteractor by Fixture {
         uiEventLogger = uiEventLogger,
         sessionTracker = sessionTracker,
         sceneBackInteractor = sceneBackInteractor,
+        configurationInteractor = configurationInteractor,
     )
 }

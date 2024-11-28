@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 #include <utils/misc.h>
 
@@ -173,6 +174,15 @@ static void Linux_setenv(JNIEnv* env, jobject, jstring javaName, jstring javaVal
     throwIfMinusOne(env, "setenv", setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0));
 }
 
+static jint Linux_getpid(JNIEnv* env, jobject) {
+    return getpid();
+}
+
+static jint Linux_gettid(JNIEnv* env, jobject) {
+    // gettid(2() was added in glibc 2.30 but Android uses an older version in prebuilt.
+    return syscall(__NR_gettid);
+}
+
 // ---- Registration ----
 
 extern void register_android_system_OsConstants(JNIEnv* env);
@@ -189,6 +199,8 @@ static const JNINativeMethod sMethods[] =
     { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
     { "nOpen", "(Ljava/lang/String;II)I", (void*)Linux_open },
     { "setenv", "(Ljava/lang/String;Ljava/lang/String;Z)V", (void*)Linux_setenv },
+    { "getpid", "()I", (void*)Linux_getpid },
+    { "gettid", "()I", (void*)Linux_gettid },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {

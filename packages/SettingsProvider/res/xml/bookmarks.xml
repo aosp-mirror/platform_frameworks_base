@@ -32,6 +32,9 @@
        'y': YouTube
 -->
 <bookmarks>
+    <!-- TODO(b/358569822): Remove this from Settings DB
+         This is legacy implementation to store bookmarks in Settings DB, which is deprecated and
+         no longer used -->
     <bookmark
         role="android.app.role.BROWSER"
         shortcut="b" />

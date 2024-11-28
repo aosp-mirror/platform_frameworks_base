@@ -52,7 +52,7 @@ val Kosmos.customTileViewModelFactory: QSTileViewModelFactory.Component by
                     )
                 object : QSTileViewModel {
                     override val state: StateFlow<QSTileState?> =
-                        MutableStateFlow(QSTileState.build({ null }, tileSpec.spec) {})
+                        MutableStateFlow(QSTileState.build(null, tileSpec.spec) {})
                     override val config: QSTileConfig = config
                     override val isAvailable: StateFlow<Boolean> = MutableStateFlow(true)
 

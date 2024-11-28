@@ -178,6 +178,11 @@ oneway interface ITaskStackListener {
     void onRecentTaskListFrozenChanged(boolean frozen);
 
     /**
+     *  Called when a task is removed from the recent tasks list as a result of adding a new task.
+     */
+    void onRecentTaskRemovedForAddTask(int taskId);
+
+    /**
      * Called when a task gets or loses focus.
      *
      * @param taskId id of the task.

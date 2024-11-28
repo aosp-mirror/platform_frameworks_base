@@ -26,10 +26,11 @@ import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedul
 import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.settings.userTracker
+import com.android.systemui.statusbar.commandline.commandRegistry
+import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.FakeTouchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
@@ -60,7 +61,7 @@ import org.mockito.kotlin.verify
 class TutorialNotificationCoordinatorTest : SysuiTestCase() {
 
     private lateinit var underTest: TutorialNotificationCoordinator
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyboardRepository = FakeKeyboardRepository()
     private val touchpadRepository = FakeTouchpadRepository()
@@ -85,6 +86,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
                 touchpadRepository,
                 repository,
                 kosmos.inputDeviceTutorialLogger,
+                kosmos.commandRegistry,
             )
         underTest =
             TutorialNotificationCoordinator(
@@ -100,7 +102,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
 
     @After
     fun clear() {
-        runBlocking { repository.clearDataStore() }
+        runBlocking { repository.clear() }
         dataStoreScope.cancel()
     }
 

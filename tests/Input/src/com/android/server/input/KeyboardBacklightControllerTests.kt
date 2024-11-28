@@ -19,6 +19,7 @@ package com.android.server.input
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Resources
 import android.graphics.Color
 import android.hardware.input.IKeyboardBacklightListener
 import android.hardware.input.IKeyboardBacklightState
@@ -28,11 +29,12 @@ import android.os.UEventObserver
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.view.InputDevice
+import android.util.TypedValue
 import androidx.test.annotation.UiThreadTest
 import androidx.test.core.app.ApplicationProvider
+import com.android.internal.R
 import com.android.server.input.KeyboardBacklightController.DEFAULT_BRIGHTNESS_VALUE_FOR_LEVEL
 import com.android.server.input.KeyboardBacklightController.MAX_BRIGHTNESS_CHANGE_STEPS
-import com.android.server.input.KeyboardBacklightController.USER_INACTIVITY_THRESHOLD_MILLIS
 import com.android.test.input.MockInputManagerRule
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -49,6 +51,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.spy
@@ -94,6 +97,7 @@ class KeyboardBacklightControllerTests {
         const val LIGHT_ID = 2
         const val SECOND_LIGHT_ID = 3
         const val MAX_BRIGHTNESS = 255
+        const val USER_INACTIVITY_THRESHOLD_MILLIS = 30000
     }
 
     @get:Rule
@@ -105,6 +109,8 @@ class KeyboardBacklightControllerTests {
     private lateinit var native: NativeInputManagerService
     @Mock
     private lateinit var uEventManager: UEventManager
+    @Mock
+    private lateinit var resources: Resources
     private lateinit var keyboardBacklightController: KeyboardBacklightController
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
@@ -117,6 +123,7 @@ class KeyboardBacklightControllerTests {
     @Before
     fun setup() {
         context = spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
+        `when`(context.resources).thenReturn(resources)
         dataStore = PersistentDataStore(object : PersistentDataStore.Injector() {
             override fun openRead(): InputStream? {
                 throw FileNotFoundException()
@@ -129,6 +136,7 @@ class KeyboardBacklightControllerTests {
             override fun finishWrite(fos: FileOutputStream?, success: Boolean) {}
         })
         testLooper = TestLooper()
+        setupConfig()
         keyboardBacklightController = KeyboardBacklightController(context, native, dataStore,
                 testLooper.looper, FakeAnimatorFactory(), uEventManager)
         val inputManager = InputManager(context)
@@ -147,7 +155,31 @@ class KeyboardBacklightControllerTests {
             sysfsNodeChanges++
         }
     }
-
+    private fun setupConfig() {
+        val brightnessValues = intArrayOf(100, 200, 0)
+        val decreaseThresholds = intArrayOf(-1, 900, 1900)
+        val increaseThresholds = intArrayOf(1000, 2000, -1)
+        `when`(resources.getIntArray(R.array.config_autoKeyboardBacklightBrightnessValues))
+            .thenReturn(brightnessValues)
+        `when`(resources.getIntArray(R.array.config_autoKeyboardBacklightDecreaseLuxThreshold))
+            .thenReturn(decreaseThresholds)
+        `when`(resources.getIntArray(R.array.config_autoKeyboardBacklightIncreaseLuxThreshold))
+            .thenReturn(increaseThresholds)
+        `when`(resources.getInteger(R.integer.config_keyboardBacklightTimeoutMs))
+            .thenReturn(USER_INACTIVITY_THRESHOLD_MILLIS)
+        `when`(
+            resources.getValue(
+                eq(R.dimen.config_autoKeyboardBrightnessSmoothingConstant),
+                any(TypedValue::class.java),
+                anyBoolean()
+            )
+        ).then {
+            val args = it.arguments
+            val outValue = args[1] as TypedValue
+            outValue.data = java.lang.Float.floatToRawIntBits(1.0f)
+            Unit
+        }
+    }
     @Test
     fun testKeyboardBacklightIncrementDecrement() {
         KeyboardBacklightFlags(
@@ -365,7 +397,7 @@ class KeyboardBacklightControllerTests {
                 lightColorMap[LIGHT_ID]
             )
 
-            testLooper.moveTimeForward(USER_INACTIVITY_THRESHOLD_MILLIS + 1000)
+            testLooper.moveTimeForward((USER_INACTIVITY_THRESHOLD_MILLIS + 1000).toLong())
             testLooper.dispatchNext()
             assertEquals(
                 "Keyboard backlight level should be turned off after inactivity",

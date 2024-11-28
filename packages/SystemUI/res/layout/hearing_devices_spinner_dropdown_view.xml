@@ -1,0 +1,45 @@
+<!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/bluetooth_dialog_device_height"
+    android:paddingStart="@dimen/hearing_devices_preset_spinner_padding"
+    android:paddingEnd="@dimen/hearing_devices_preset_spinner_padding"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/hearing_devices_spinner_check_icon"
+        android:layout_width="@dimen/hearing_devices_preset_spinner_icon_size"
+        android:layout_height="@dimen/hearing_devices_preset_spinner_icon_size"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/hearing_devices_layout_margin"
+        android:tint="?androidprv:attr/materialColorOnPrimaryContainer"
+        android:src="@drawable/ic_check"
+        android:contentDescription="@string/hearing_devices_spinner_item_selected"/>
+    <TextView
+        android:id="@+id/hearing_devices_spinner_text"
+        style="?android:attr/spinnerDropDownItemStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textDirection="locale"
+        android:paddingStart="0dp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>

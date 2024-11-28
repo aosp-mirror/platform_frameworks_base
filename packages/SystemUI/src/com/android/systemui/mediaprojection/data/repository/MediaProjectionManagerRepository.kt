@@ -20,9 +20,11 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
+import android.media.projection.StopReason
 import android.os.Handler
 import android.view.ContentRecordingSession
 import android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY
+import com.android.systemui.Flags
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -71,7 +73,7 @@ constructor(
         }
     }
 
-    override suspend fun stopProjecting() {
+    override suspend fun stopProjecting(@StopReason stopReason: Int) {
         withContext(backgroundDispatcher) {
             logger.log(
                 TAG,
@@ -79,7 +81,7 @@ constructor(
                 {},
                 { "Requesting MediaProjectionManager#stopActiveProjection" },
             )
-            mediaProjectionManager.stopActiveProjection()
+            mediaProjectionManager.stopActiveProjection(stopReason)
         }
     }
 
@@ -94,7 +96,7 @@ constructor(
                                 {},
                                 { "MediaProjectionManager.Callback#onStart" },
                             )
-                            trySendWithFailureLogging(CallbackEvent.OnStart, TAG)
+                            trySendWithFailureLogging(CallbackEvent.OnStart(info), TAG)
                         }
 
                         override fun onStop(info: MediaProjectionInfo?) {
@@ -109,7 +111,7 @@ constructor(
 
                         override fun onRecordingSessionSet(
                             info: MediaProjectionInfo,
-                            session: ContentRecordingSession?
+                            session: ContentRecordingSession?,
                         ) {
                             logger.log(
                                 TAG,
@@ -142,7 +144,21 @@ constructor(
             // #onRecordingSessionSet and we don't emit "Projecting".
             .mapLatest {
                 when (it) {
-                    is CallbackEvent.OnStart,
+                    is CallbackEvent.OnStart -> {
+                        if (!Flags.statusBarShowAudioOnlyProjectionChip()) {
+                            return@mapLatest MediaProjectionState.NotProjecting
+                        }
+                        // It's possible for a projection to be audio-only, in which case `OnStart`
+                        // will occur but `OnRecordingSessionSet` will not. We should still consider
+                        // us to be projecting even if only audio is projecting. See b/373308507.
+                        if (it.info != null) {
+                            MediaProjectionState.Projecting.NoScreen(
+                                hostPackage = it.info.packageName
+                            )
+                        } else {
+                            MediaProjectionState.NotProjecting
+                        }
+                    }
                     is CallbackEvent.OnStop -> MediaProjectionState.NotProjecting
                     is CallbackEvent.OnRecordingSessionSet -> stateForSession(it.info, it.session)
                 }
@@ -155,7 +171,7 @@ constructor(
 
     private suspend fun stateForSession(
         info: MediaProjectionInfo,
-        session: ContentRecordingSession?
+        session: ContentRecordingSession?,
     ): MediaProjectionState {
         if (session == null) {
             return MediaProjectionState.NotProjecting
@@ -184,7 +200,7 @@ constructor(
      * the correct callback ordering.
      */
     sealed interface CallbackEvent {
-        data object OnStart : CallbackEvent
+        data class OnStart(val info: MediaProjectionInfo?) : CallbackEvent
 
         data object OnStop : CallbackEvent
 

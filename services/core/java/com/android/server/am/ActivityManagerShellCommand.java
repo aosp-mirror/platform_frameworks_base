@@ -39,6 +39,8 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRI
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MODERATE;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
+import static com.android.media.flags.Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange;
+import static com.android.media.flags.Flags.FLAG_ENABLE_NOTIFYING_ACTIVITY_MANAGER_WITH_MEDIA_SESSION_STATUS_CHANGE;
 import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -445,12 +447,61 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runCapabilities(pw);
                 case "set-app-zygote-preload-timeout":
                     return runSetAppZygotePreloadTimeout(pw);
+                case "set-media-foreground-service":
+                    return runSetMediaForegroundService(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
         } catch (RemoteException e) {
             pw.println("Remote exception: " + e);
         }
+        return -1;
+    }
+
+    int runSetMediaForegroundService(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(
+                android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE,
+                "runSetMediaForegroundService()");
+        final PrintWriter err = getErrPrintWriter();
+        if (!enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            err.println("Error: flag "
+                    + FLAG_ENABLE_NOTIFYING_ACTIVITY_MANAGER_WITH_MEDIA_SESSION_STATUS_CHANGE
+                    + " not enabled");
+            return -1;
+        }
+        int userId = UserHandle.USER_CURRENT;
+        final String cmd = getNextArgRequired();
+        if ("inactive".equals(cmd) || "active".equals(cmd)) {
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                if (opt.equals("--user")) {
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    if (userId == UserHandle.USER_ALL) {
+                        err.println(
+                                "Error: Can't set media fgs with user 'all'");
+                        return -1;
+                    }
+                } else {
+                    err.println("Error: Unknown option: " + opt);
+                    return -1;
+                }
+            }
+            final String pkgName = getNextArgRequired();
+            final int notificationId = Integer.parseInt(getNextArgRequired());
+            if (notificationId == 0) {
+                err.println("Error: notification id cannot be zero");
+                return -1;
+            }
+            if ("inactive".equals(cmd)) {
+                mInternal.mInternal.notifyInactiveMediaForegroundService(pkgName,
+                        userId, notificationId);
+            } else {
+                mInternal.mInternal.notifyActiveMediaForegroundService(pkgName,
+                        userId, notificationId);
+            }
+            return 0;
+        }
+        err.println("Error: Unknown set-media-foreground-service command: " + cmd);
         return -1;
     }
 
@@ -806,6 +857,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
                 options.setDismissKeyguardIfInsecure();
             }
+            intent.collectExtraIntentKeys();
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
                         mimeType, null, null, 0, mStartFlags, profilerInfo,
@@ -924,6 +976,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         pw.println("Starting service: " + intent);
         pw.flush();
+        intent.collectExtraIntentKeys();
         ComponentName cn = mInterface.startService(null, intent, intent.getType(),
                 asForeground, SHELL_PACKAGE_NAME, null, mUserId);
         if (cn == null) {
@@ -956,6 +1009,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         pw.println("Stopping service: " + intent);
         pw.flush();
+        intent.collectExtraIntentKeys();
         int result = mInterface.stopService(null, intent, intent.getType(), mUserId);
         if (result == 0) {
             err.println("Service not stopped: was not running.");
@@ -1101,7 +1155,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String profileFile = null;
         boolean start = false;
         int userId = UserHandle.USER_CURRENT;
-        int profileType = 0;
+        int profileType = ProfilerInfo.PROFILE_TYPE_REGULAR;
         mSamplingInterval = 0;
         mStreaming = false;
         mClockType = ProfilerInfo.CLOCK_TYPE_DEFAULT;
@@ -1143,6 +1197,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
             }
             process = getNextArgRequired();
+        } else if ("lowoverhead".equals(cmd)) {
+            // This is an experimental low overhead profiling.
+            profileType = ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD;
+            cmd = getNextArgRequired();
+            if ("start".equals(cmd)) {
+                start = true;
+            } else if ("stop".equals(cmd)) {
+                start = false;
+            } else {
+                throw new IllegalArgumentException("Profile command not valid");
+            }
+            process = getNextArgRequired();
         } else {
             // Compatibility with old syntax: process is specified first.
             process = cmd;
@@ -1162,7 +1228,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
         ParcelFileDescriptor fd = null;
         ProfilerInfo profilerInfo = null;
 
-        if (start) {
+        // For regular method tracing  profileFile should be provided with the start command. For
+        // low overhead method tracing the profileFile is optional and provided with the stop
+        // command.
+        if ((start && profileType == ProfilerInfo.PROFILE_TYPE_REGULAR)
+                || (profileType == ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD
+                  && !start && getRemainingArgsCount() > 0)) {
             profileFile = getNextArgRequired();
             fd = openFileForSystem(profileFile, "w");
             if (fd == null) {
@@ -1351,6 +1422,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             LocalDateTime localDateTime = LocalDateTime.now(Clock.systemDefaultZone());
             String logNameTimeString = LOG_NAME_TIME_FORMATTER.format(localDateTime);
             heapFile = "/data/local/tmp/heapdump-" + logNameTimeString + ".prof";
+        }
+
+        String argAfterHeapFile = getNextArg();
+        if (argAfterHeapFile != null) {
+            err.println("Error: Arguments cannot be placed after the heap file");
+            return -1;
         }
 
         // Writes an error message to stderr on failure
@@ -4637,6 +4714,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         --protobuf: format output using protobuffer");
             pw.println("  set-app-zygote-preload-timeout <TIMEOUT_IN_MS>");
             pw.println("         Set the timeout for preloading code in the app-zygote");
+            pw.println("  set-media-foreground-service inactive|active [--user USER_ID] <PACKAGE>"
+                            + " <NOTIFICATION_ID>");
+            pw.println("         Set an app's media service inactive or active.");
             Intent.printIntentArgsHelp(pw, "");
         }
     }

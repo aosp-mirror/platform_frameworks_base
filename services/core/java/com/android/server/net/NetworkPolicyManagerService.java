@@ -513,12 +513,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private boolean mLoadedRestrictBackground;
 
     /**
-     * Whether or not network for apps in proc-states greater than
-     * {@link NetworkPolicyManager#BACKGROUND_THRESHOLD_STATE} is always blocked.
-     */
-    private boolean mBackgroundNetworkRestricted;
-
-    /**
      * Whether or not metered firewall chains should be used for uid policy controlling access to
      * metered networks.
      */
@@ -1117,14 +1111,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         writePolicyAL();
                     }
 
-                    // The flag is boot-stable.
-                    mBackgroundNetworkRestricted = Flags.networkBlockedForTopSleepingAndAbove();
-                    if (mBackgroundNetworkRestricted) {
-                        // Firewall rules and UidBlockedState will get updated in
-                        // updateRulesForGlobalChangeAL below.
-                        enableFirewallChainUL(FIREWALL_CHAIN_BACKGROUND, true);
-                    }
-
+                    enableFirewallChainUL(FIREWALL_CHAIN_BACKGROUND, true);
                     setRestrictBackgroundUL(mLoadedRestrictBackground, "init_service");
                     updateRulesForGlobalChangeAL(false);
                     updateNotificationsNL();
@@ -1135,11 +1122,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final int changes = ActivityManager.UID_OBSERVER_PROCSTATE
                         | ActivityManager.UID_OBSERVER_GONE
                         | ActivityManager.UID_OBSERVER_CAPABILITY;
-
-                final int cutpoint = mBackgroundNetworkRestricted ? PROCESS_STATE_UNKNOWN
-                        : NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE;
                 mActivityManagerInternal.registerNetworkPolicyUidObserver(mUidObserver, changes,
-                        cutpoint, "android");
+                        PROCESS_STATE_UNKNOWN, "android");
                 mNetworkManager.registerObserver(mAlertObserver);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
@@ -1280,21 +1264,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // different chains may change.
                 return true;
             }
-            if (mBackgroundNetworkRestricted) {
-                if ((previousProcState >= BACKGROUND_THRESHOLD_STATE)
+            if ((previousProcState >= BACKGROUND_THRESHOLD_STATE)
                     != (newProcState >= BACKGROUND_THRESHOLD_STATE)) {
-                    // Proc-state change crossed BACKGROUND_THRESHOLD_STATE: The network rules will
-                    // need to be re-evaluated for the background chain.
-                    return true;
-                }
-                if (mUseDifferentDelaysForBackgroundChain
-                        && newProcState >= BACKGROUND_THRESHOLD_STATE
-                        && getBackgroundTransitioningDelay(newProcState)
-                        < getBackgroundTransitioningDelay(previousProcState)) {
-                    // The old and new proc-state both are in the blocked state but the background
-                    // transition delay is reduced, so we may have to update the rules sooner.
-                    return true;
-                }
+                // Proc-state change crossed BACKGROUND_THRESHOLD_STATE: The network rules will
+                // need to be re-evaluated for the background chain.
+                return true;
+            }
+            if (mUseDifferentDelaysForBackgroundChain
+                    && newProcState >= BACKGROUND_THRESHOLD_STATE
+                    && getBackgroundTransitioningDelay(newProcState)
+                    < getBackgroundTransitioningDelay(previousProcState)) {
+                // The old and new proc-state both are in the blocked state but the background
+                // transition delay is reduced, so we may have to update the rules sooner.
+                return true;
             }
             final int networkCapabilities = PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
                     | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
@@ -1367,9 +1349,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and POWER_SAVE_WHITELIST_CHANGED is protected
             synchronized (mUidRulesFirstLock) {
                 updatePowerSaveAllowlistUL();
-                if (mBackgroundNetworkRestricted) {
-                    updateRulesForBackgroundChainUL();
-                }
+                updateRulesForBackgroundChainUL();
                 updateRulesForRestrictPowerUL();
                 updateRulesForAppIdleUL();
             }
@@ -4100,8 +4080,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 fout.println();
                 fout.println("Flags:");
-                fout.println(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE + ": "
-                        + mBackgroundNetworkRestricted);
                 fout.println(Flags.FLAG_USE_METERED_FIREWALL_CHAINS + ": "
                         + mUseMeteredFirewallChains);
                 fout.println(Flags.FLAG_USE_DIFFERENT_DELAYS_FOR_BACKGROUND_CHAIN + ": "
@@ -4251,35 +4229,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
 
-                if (mBackgroundNetworkRestricted) {
+                fout.println();
+                if (mUseDifferentDelaysForBackgroundChain) {
+                    fout.print("Background restrictions short delay: ");
+                    TimeUtils.formatDuration(mBackgroundRestrictionShortDelayMs, fout);
                     fout.println();
-                    if (mUseDifferentDelaysForBackgroundChain) {
-                        fout.print("Background restrictions short delay: ");
-                        TimeUtils.formatDuration(mBackgroundRestrictionShortDelayMs, fout);
-                        fout.println();
 
-                        fout.print("Background restrictions long delay: ");
-                        TimeUtils.formatDuration(mBackgroundRestrictionLongDelayMs, fout);
-                        fout.println();
-                    }
-
-                    size = mBackgroundTransitioningUids.size();
-                    if (size > 0) {
-                        final long nowUptime = SystemClock.uptimeMillis();
-                        fout.println("Uids transitioning to background:");
-                        fout.increaseIndent();
-                        for (int i = 0; i < size; i++) {
-                            fout.print("UID=");
-                            fout.print(mBackgroundTransitioningUids.keyAt(i));
-                            fout.print(", ");
-                            TimeUtils.formatDuration(mBackgroundTransitioningUids.valueAt(i),
-                                    nowUptime, fout);
-                            fout.println();
-                        }
-                        fout.decreaseIndent();
-                    }
+                    fout.print("Background restrictions long delay: ");
+                    TimeUtils.formatDuration(mBackgroundRestrictionLongDelayMs, fout);
                     fout.println();
                 }
+
+                size = mBackgroundTransitioningUids.size();
+                if (size > 0) {
+                    final long nowUptime = SystemClock.uptimeMillis();
+                    fout.println("Uids transitioning to background:");
+                    fout.increaseIndent();
+                    for (int i = 0; i < size; i++) {
+                        fout.print("UID=");
+                        fout.print(mBackgroundTransitioningUids.keyAt(i));
+                        fout.print(", ");
+                        TimeUtils.formatDuration(mBackgroundTransitioningUids.valueAt(i),
+                                nowUptime, fout);
+                        fout.println();
+                    }
+                    fout.decreaseIndent();
+                }
+                fout.println();
 
                 final SparseBooleanArray knownUids = new SparseBooleanArray();
                 collectKeys(mUidState, knownUids);
@@ -4465,50 +4441,48 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     updatePowerRestrictionRules = true;
                 }
-                if (mBackgroundNetworkRestricted) {
-                    final boolean wasAllowed = isProcStateAllowedNetworkWhileBackground(
-                            oldUidState);
-                    final boolean isAllowed = isProcStateAllowedNetworkWhileBackground(newUidState);
-                    if (!wasAllowed && isAllowed) {
-                        mBackgroundTransitioningUids.delete(uid);
-                        updateRuleForBackgroundUL(uid);
-                        updatePowerRestrictionRules = true;
-                    } else if (!isAllowed) {
-                        final int transitionIdx = mBackgroundTransitioningUids.indexOfKey(uid);
-                        final long completionTimeMs = SystemClock.uptimeMillis()
-                                + getBackgroundTransitioningDelay(procState);
-                        boolean completionTimeUpdated = false;
-                        if (wasAllowed) {
-                            // Rules need to transition from allowed to blocked after the respective
-                            // delay.
-                            if (transitionIdx < 0) {
-                                // This is just a defensive check in case the upstream code ever
-                                // makes multiple calls for the same process state change.
-                                mBackgroundTransitioningUids.put(uid, completionTimeMs);
-                                completionTimeUpdated = true;
-                            }
-                        } else if (mUseDifferentDelaysForBackgroundChain) {
-                            // wasAllowed was false, but the transition delay may have reduced.
-                            // Currently, this can happen when the uid transitions from
-                            // LAST_ACTIVITY to CACHED_ACTIVITY, for example.
-                            if (transitionIdx >= 0
-                                    && completionTimeMs < mBackgroundTransitioningUids.valueAt(
-                                    transitionIdx)) {
-                                mBackgroundTransitioningUids.setValueAt(transitionIdx,
-                                        completionTimeMs);
-                                completionTimeUpdated = true;
-                            }
+                final boolean wasAllowed = isProcStateAllowedNetworkWhileBackground(
+                        oldUidState);
+                final boolean isAllowed = isProcStateAllowedNetworkWhileBackground(newUidState);
+                if (!wasAllowed && isAllowed) {
+                    mBackgroundTransitioningUids.delete(uid);
+                    updateRuleForBackgroundUL(uid);
+                    updatePowerRestrictionRules = true;
+                } else if (!isAllowed) {
+                    final int transitionIdx = mBackgroundTransitioningUids.indexOfKey(uid);
+                    final long completionTimeMs = SystemClock.uptimeMillis()
+                            + getBackgroundTransitioningDelay(procState);
+                    boolean completionTimeUpdated = false;
+                    if (wasAllowed) {
+                        // Rules need to transition from allowed to blocked after the respective
+                        // delay.
+                        if (transitionIdx < 0) {
+                            // This is just a defensive check in case the upstream code ever
+                            // makes multiple calls for the same process state change.
+                            mBackgroundTransitioningUids.put(uid, completionTimeMs);
+                            completionTimeUpdated = true;
                         }
-                        if (completionTimeUpdated
-                                && completionTimeMs < mNextProcessBackgroundUidsTime) {
-                            // Many uids may be in this "transitioning" state at the same time,
-                            // so we always keep one message to process transition completion at
-                            // the earliest time.
-                            mHandler.removeMessages(MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS);
-                            mHandler.sendEmptyMessageAtTime(
-                                    MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS, completionTimeMs);
-                            mNextProcessBackgroundUidsTime = completionTimeMs;
+                    } else if (mUseDifferentDelaysForBackgroundChain) {
+                        // wasAllowed was false, but the transition delay may have reduced.
+                        // Currently, this can happen when the uid transitions from
+                        // LAST_ACTIVITY to CACHED_ACTIVITY, for example.
+                        if (transitionIdx >= 0
+                                && completionTimeMs < mBackgroundTransitioningUids.valueAt(
+                                transitionIdx)) {
+                            mBackgroundTransitioningUids.setValueAt(transitionIdx,
+                                    completionTimeMs);
+                            completionTimeUpdated = true;
                         }
+                    }
+                    if (completionTimeUpdated
+                            && completionTimeMs < mNextProcessBackgroundUidsTime) {
+                        // Many uids may be in this "transitioning" state at the same time,
+                        // so we always keep one message to process transition completion at
+                        // the earliest time.
+                        mHandler.removeMessages(MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS);
+                        mHandler.sendEmptyMessageAtTime(
+                                MSG_PROCESS_BACKGROUND_TRANSITIONING_UIDS, completionTimeMs);
+                        mNextProcessBackgroundUidsTime = completionTimeMs;
                     }
                 }
                 if (mLowPowerStandbyActive) {
@@ -4545,12 +4519,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (mRestrictPower) {
                     updateRuleForRestrictPowerUL(uid);
                 }
-                if (mBackgroundNetworkRestricted) {
-                    // Uid is no longer running, there is no point in any grace period of network
-                    // access during transitions to lower importance proc-states.
-                    mBackgroundTransitioningUids.delete(uid);
-                    updateRuleForBackgroundUL(uid);
-                }
+                // Uid is no longer running, there is no point in any grace period of network
+                // access during transitions to lower importance proc-states.
+                mBackgroundTransitioningUids.delete(uid);
+                updateRuleForBackgroundUL(uid);
                 updateRulesForPowerRestrictionsUL(uid);
                 if (mLowPowerStandbyActive) {
                     updateRuleForLowPowerStandbyUL(uid);
@@ -5021,9 +4993,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     "updateRulesForGlobalChangeAL: " + (restrictedNetworksChanged ? "R" : "-"));
         }
         try {
-            if (mBackgroundNetworkRestricted) {
-                updateRulesForBackgroundChainUL();
-            }
+            updateRulesForBackgroundChainUL();
             updateRulesForAppIdleUL();
             updateRulesForRestrictPowerUL();
             updateRulesForRestrictBackgroundUL();
@@ -5183,9 +5153,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateRuleForAppIdleUL(uid, PROCESS_STATE_UNKNOWN);
             updateRuleForDeviceIdleUL(uid);
             updateRuleForRestrictPowerUL(uid);
-            if (mBackgroundNetworkRestricted) {
-                updateRuleForBackgroundUL(uid);
-            }
+            updateRuleForBackgroundUL(uid);
             // Update internal rules.
             updateRulesForPowerRestrictionsUL(uid);
         }
@@ -5358,9 +5326,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         updateRuleForDeviceIdleUL(uid);
         updateRuleForAppIdleUL(uid, PROCESS_STATE_UNKNOWN);
         updateRuleForRestrictPowerUL(uid);
-        if (mBackgroundNetworkRestricted) {
-            updateRuleForBackgroundUL(uid);
-        }
+        updateRuleForBackgroundUL(uid);
 
         // If the uid has the necessary permissions, then it should be added to the restricted mode
         // firewall allowlist.
@@ -5611,7 +5577,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             newBlockedReasons |= (mLowPowerStandbyActive ? BLOCKED_REASON_LOW_POWER_STANDBY : 0);
             newBlockedReasons |= (isUidIdle ? BLOCKED_REASON_APP_STANDBY : 0);
             newBlockedReasons |= (uidBlockedState.blockedReasons & BLOCKED_REASON_RESTRICTED_MODE);
-            newBlockedReasons |= mBackgroundNetworkRestricted ? BLOCKED_REASON_APP_BACKGROUND : 0;
+            newBlockedReasons |= BLOCKED_REASON_APP_BACKGROUND;
 
             newAllowedReasons |= (isSystem(uid) ? ALLOWED_REASON_SYSTEM : 0);
             newAllowedReasons |= (isForeground ? ALLOWED_REASON_FOREGROUND : 0);
@@ -5624,8 +5590,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     & ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS);
             newAllowedReasons |= (isAllowlistedFromLowPowerStandbyUL(uid))
                     ? ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST : 0;
-            newAllowedReasons |= (mBackgroundNetworkRestricted
-                    && isUidExemptFromBackgroundRestrictions(uid))
+            newAllowedReasons |= isUidExemptFromBackgroundRestrictions(uid)
                     ? ALLOWED_REASON_NOT_IN_BACKGROUND : 0;
 
             uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons

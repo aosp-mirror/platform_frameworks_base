@@ -3,9 +3,8 @@ package com.android.systemui.statusbar.notification.stack
 import android.annotation.DimenRes
 import android.content.pm.PackageManager
 import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.widget.FrameLayout
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.systemui.Flags
@@ -16,7 +15,9 @@ import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
@@ -25,32 +26,29 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView.FooterViewState
+import com.android.systemui.statusbar.notification.headsup.AvalancheController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.policy.AvalancheController
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertFalse
-import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.any
-import org.mockito.Mockito.eq
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class StackScrollAlgorithmTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @JvmField @Rule var expect: Expect = Expect.create()
 
@@ -99,6 +97,18 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val bigGap = notifSectionDividerGap
     private val smallGap = px(R.dimen.notification_section_divider_height_lockscreen)
 
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     @Before
     fun setUp() {
         Assume.assumeFalse(isTv())
@@ -142,22 +152,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    fun resetViewStates_defaultHun_yTranslationIsInset() {
-        whenever(notificationRow.isPinned).thenReturn(true)
-        whenever(notificationRow.isHeadsUp).thenReturn(true)
-        resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
-    }
-
-    @Test
-    @DisableSceneContainer
-    fun resetViewStates_defaultHunWithStackMargin_changesHunYTranslation() {
-        whenever(notificationRow.isPinned).thenReturn(true)
-        whenever(notificationRow.isHeadsUp).thenReturn(true)
-        resetViewStates_stackMargin_changesHunYTranslation()
-    }
-
-    @Test
-    @DisableSceneContainer
     fun resetViewStates_defaultHunWhenShadeIsOpening_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
@@ -171,24 +165,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_yTranslationIsInset() {
-        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
-        resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_StackMarginChangesHunYTranslation() {
-        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
-        resetViewStates_stackMargin_changesHunYTranslation()
-    }
-
-    @Test
-    @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_defaultHun_newHeadsUpAnim_yTranslationIsInset() {
+    fun resetViewStates_defaultHun_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
@@ -196,8 +173,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_defaultHunWithStackMargin_newHeadsUpAnim_changesHunYTranslation() {
+    fun resetViewStates_defaultHunWithStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         resetViewStates_stackMargin_changesHunYTranslation()
@@ -387,8 +363,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_defaultHun_showingQS_newHeadsUpAnim_hunTranslatedToMax() {
+    fun resetViewStates_defaultHun_showingQS_hunTranslatedToMax() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
         val maxHunTranslation = 2000f
         ambientState.maxHeadsUpTranslation = maxHunTranslation
@@ -404,8 +379,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_showingQS_newHeadsUpAnim_hunTranslatedToBottomOfScreen() {
+    fun resetViewStates_hunAnimatingAway_showingQS_hunTranslatedToBottomOfScreen() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
         val bottomOfScreen = 2600f
         val maxHunTranslation = 2000f
@@ -425,8 +399,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_newHeadsUpAnim_hunTranslatedToTopOfScreen() {
+    fun resetViewStates_hunAnimatingAway_hunTranslatedToTopOfScreen() {
         val topMargin = 100f
         ambientState.maxHeadsUpTranslation = 2000f
         ambientState.stackTopMargin = topMargin.toInt()
@@ -449,7 +422,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAwayWhileDozing_yTranslationIsInset() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
 
@@ -460,7 +432,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAwayWhileDozing_hasStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
 
@@ -477,18 +448,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(topHun.isPinned).thenReturn(true)
         whenever(bottomHun.isHeadsUp).thenReturn(true)
         whenever(bottomHun.isPinned).thenReturn(true)
-
-        resetViewStates_hunsOverlapping_bottomHunClipped(topHun, bottomHun)
-    }
-
-    @Test
-    @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunsOverlappingAndBottomHunAnimatingAway_bottomHunClipped() {
-        val topHun = mockExpandableNotificationRow()
-        val bottomHun = mockExpandableNotificationRow()
-        whenever(topHun.isHeadsUp).thenReturn(true)
-        whenever(topHun.isPinned).thenReturn(true)
-        whenever(bottomHun.isHeadsUpAnimatingAway).thenReturn(true)
 
         resetViewStates_hunsOverlapping_bottomHunClipped(topHun, bottomHun)
     }
@@ -614,7 +573,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Test
     fun resetViewStates_isOnKeyguard_viewBecomesTransparent() {
-        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.fakeShowingStackOnLockscreen()
         ambientState.hideAmount = 0.25f
         whenever(notificationRow.isHeadsUpState).thenReturn(true)
 
@@ -676,7 +635,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(row1.isHeadsUpState).thenReturn(true)
         whenever(row2.isHeadsUpState).thenReturn(false)
 
-        ambientState.setStatusBarState(StatusBarState.KEYGUARD)
+        ambientState.fakeShowingStackOnLockscreen()
         ambientState.hideAmount = 0.25f
         ambientState.dozeAmount = 0.33f
         notificationShelf.viewState.hidden = true
@@ -729,9 +688,24 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun resetViewStates_noSpaceForFooter_footerHidden() {
         ambientState.isShadeExpanded = true
         ambientState.stackEndHeight = 0f // no space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
+    }
+
+    @Test
+    @EnableSceneContainer
+    fun resetViewStates_noSpaceForFooter_footerHidden_withSceneContainer() {
+        ambientState.isShadeExpanded = true
+        ambientState.stackTop = 0f
+        ambientState.stackCutoff = 100f
+        val footerView = mockFooterView(height = 200) // no space for the footer in the stack
         hostView.addView(footerView)
 
         stackScrollAlgorithm.resetViewStates(ambientState, 0)
@@ -815,7 +789,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val viewStart = 0f
         val shelfStart = 1f
 
-        val expandableView = mock(ExpandableView::class.java)
+        val expandableView = mock<ExpandableView>()
         whenever(expandableView.isExpandAnimationRunning).thenReturn(false)
         whenever(expandableView.hasExpandingChild()).thenReturn(false)
 
@@ -823,7 +797,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = viewStart
 
         stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
-        assertFalse(expandableViewState.hidden)
+        assertThat(expandableViewState.hidden).isFalse()
     }
 
     @Test
@@ -831,7 +805,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val shelfStart = 0f
         val viewStart = 1f
 
-        val expandableView = mock(ExpandableView::class.java)
+        val expandableView = mock<ExpandableView>()
         whenever(expandableView.isExpandAnimationRunning).thenReturn(false)
         whenever(expandableView.hasExpandingChild()).thenReturn(false)
 
@@ -839,7 +813,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = viewStart
 
         stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
-        assertTrue(expandableViewState.hidden)
+        assertThat(expandableViewState.hidden).isTrue()
     }
 
     @Test
@@ -847,7 +821,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val shelfStart = 0f
         val viewStart = 1f
 
-        val expandableView = mock(ExpandableView::class.java)
+        val expandableView = mock<ExpandableView>()
         whenever(expandableView.isExpandAnimationRunning).thenReturn(true)
         whenever(expandableView.hasExpandingChild()).thenReturn(true)
 
@@ -855,7 +829,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         expandableViewState.yTranslation = viewStart
 
         stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
-        assertFalse(expandableViewState.hidden)
+        assertThat(expandableViewState.hidden).isFalse()
     }
 
     @Test
@@ -867,12 +841,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             expandableViewState,
             /* isShadeExpanded= */ true,
             /* mustStayOnScreen= */ true,
-            /* isViewEndVisible= */ true,
+            /* topVisible = */ true,
             /* viewEnd= */ 0f,
-            /* maxHunY= */ 10f,
+            /* hunMax = */ 10f,
         )
 
-        assertTrue(expandableViewState.headsUpIsVisible)
+        assertThat(expandableViewState.headsUpIsVisible).isTrue()
     }
 
     @Test
@@ -884,12 +858,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             expandableViewState,
             /* isShadeExpanded= */ true,
             /* mustStayOnScreen= */ true,
-            /* isViewEndVisible= */ true,
+            /* topVisible = */ true,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 0f,
+            /* hunMax = */ 0f,
         )
 
-        assertFalse(expandableViewState.headsUpIsVisible)
+        assertThat(expandableViewState.headsUpIsVisible).isFalse()
     }
 
     @Test
@@ -901,12 +875,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             expandableViewState,
             /* isShadeExpanded= */ false,
             /* mustStayOnScreen= */ true,
-            /* isViewEndVisible= */ true,
+            /* topVisible = */ true,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 1f,
+            /* hunMax = */ 1f,
         )
 
-        assertTrue(expandableViewState.headsUpIsVisible)
+        assertThat(expandableViewState.headsUpIsVisible).isTrue()
     }
 
     @Test
@@ -918,12 +892,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             expandableViewState,
             /* isShadeExpanded= */ true,
             /* mustStayOnScreen= */ false,
-            /* isViewEndVisible= */ true,
+            /* topVisible = */ true,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 1f,
+            /* hunMax = */ 1f,
         )
 
-        assertTrue(expandableViewState.headsUpIsVisible)
+        assertThat(expandableViewState.headsUpIsVisible).isTrue()
     }
 
     @Test
@@ -935,12 +909,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             expandableViewState,
             /* isShadeExpanded= */ true,
             /* mustStayOnScreen= */ true,
-            /* isViewEndVisible= */ false,
+            /* topVisible = */ false,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 1f,
+            /* hunMax = */ 1f,
         )
 
-        assertTrue(expandableViewState.headsUpIsVisible)
+        assertThat(expandableViewState.headsUpIsVisible).isTrue()
     }
 
     @Test
@@ -955,7 +929,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         )
 
         // qqs (10 + 0) < viewY (50)
-        assertEquals(50f, expandableViewState.yTranslation)
+        assertThat(expandableViewState.yTranslation).isEqualTo(50f)
     }
 
     @Test
@@ -970,7 +944,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         )
 
         // qqs (10 + 0) > viewY (-10)
-        assertEquals(10f, expandableViewState.yTranslation)
+        assertThat(expandableViewState.yTranslation).isEqualTo(10f)
     }
 
     @Test
@@ -988,7 +962,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // newTranslation = max(10, -100) = 10
         // distToRealY = 10 - (-100f) = 110
         // height = max(20 - 110, 10f)
-        assertEquals(10, expandableViewState.height)
+        assertThat(expandableViewState.height).isEqualTo(10)
     }
 
     @Test
@@ -1006,7 +980,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // newTranslation = max(10, 5) = 10
         // distToRealY = 10 - 5 = 5
         // height = max(20 - 5, 10) = 15
-        assertEquals(15, expandableViewState.height)
+        assertThat(expandableViewState.height).isEqualTo(15)
     }
 
     @Test
@@ -1016,9 +990,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 110f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 0f,
+                /* originalCornerRadius = */ 0f,
             )
-        assertEquals(1f, currentRoundness)
+        assertThat(currentRoundness).isEqualTo(1f)
     }
 
     @Test
@@ -1028,9 +1002,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 90f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 0f,
+                /* originalCornerRadius = */ 0f,
             )
-        assertEquals(0.5f, currentRoundness)
+        assertThat(currentRoundness).isEqualTo(0.5f)
     }
 
     @Test
@@ -1040,9 +1014,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 0f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 0f,
+                /* originalCornerRadius = */ 0f,
             )
-        assertEquals(0f, currentRoundness)
+        assertThat(currentRoundness).isZero()
     }
 
     @Test
@@ -1052,9 +1026,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 0f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 1f,
+                /* originalCornerRadius = */ 1f,
             )
-        assertEquals(1f, currentRoundness)
+        assertThat(currentRoundness).isEqualTo(1f)
     }
 
     @Test
@@ -1074,13 +1048,14 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updateChildZValue(
             /* i= */ 0,
             /* childrenOnTop= */ 0.0f,
-            /* StackScrollAlgorithmState= */ algorithmState,
+            /* algorithmState = */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true,
+            /* isTopHun = */ true,
         )
 
         // Then: full shadow would be applied
-        assertEquals(px(R.dimen.heads_up_pinned_elevation), childHunView.viewState.zTranslation)
+        assertThat(childHunView.viewState.zTranslation)
+            .isEqualTo(px(R.dimen.heads_up_pinned_elevation))
     }
 
     @Test
@@ -1102,9 +1077,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updateChildZValue(
             /* i= */ 0,
             /* childrenOnTop= */ 0.0f,
-            /* StackScrollAlgorithmState= */ algorithmState,
+            /* algorithmState = */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true,
+            /* isTopHun = */ true,
         )
 
         // Then: HUN should have shadow, but not as full size
@@ -1135,13 +1110,13 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updateChildZValue(
             /* i= */ 0,
             /* childrenOnTop= */ 0.0f,
-            /* StackScrollAlgorithmState= */ algorithmState,
+            /* algorithmState = */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true,
+            /* isTopHun = */ true,
         )
 
         // Then: HUN should not have shadow
-        assertEquals(0f, childHunView.viewState.zTranslation)
+        assertThat(childHunView.viewState.zTranslation).isZero()
     }
 
     @Test
@@ -1164,13 +1139,14 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updateChildZValue(
             /* i= */ 0,
             /* childrenOnTop= */ 0.0f,
-            /* StackScrollAlgorithmState= */ algorithmState,
+            /* algorithmState = */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true,
+            /* isTopHun = */ true,
         )
 
         // Then: HUN should have full shadow
-        assertEquals(px(R.dimen.heads_up_pinned_elevation), childHunView.viewState.zTranslation)
+        assertThat(childHunView.viewState.zTranslation)
+            .isEqualTo(px(R.dimen.heads_up_pinned_elevation))
     }
 
     @Test
@@ -1194,9 +1170,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updateChildZValue(
             /* i= */ 0,
             /* childrenOnTop= */ 0.0f,
-            /* StackScrollAlgorithmState= */ algorithmState,
+            /* algorithmState = */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true,
+            /* isTopHun = */ true,
         )
 
         // Then: HUN should have shadow, but not as full size
@@ -1220,7 +1196,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
 
         // Then: ambientState.pulsingRow should still be pulsingNotificationView
-        assertTrue(ambientState.isPulsingRow(pulsingNotificationView))
+        assertThat(ambientState.isPulsingRow(pulsingNotificationView)).isTrue()
     }
 
     @Test
@@ -1237,7 +1213,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
 
         // Then: ambientState.pulsingRow should record the pulsingNotificationView
-        assertTrue(ambientState.isPulsingRow(pulsingNotificationView))
+        assertThat(ambientState.isPulsingRow(pulsingNotificationView)).isTrue()
     }
 
     @Test
@@ -1256,7 +1232,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.updatePulsingStates(algorithmState, ambientState)
 
         // Then: ambientState.pulsingRow should be null
-        assertTrue(ambientState.isPulsingRow(null))
+        assertThat(ambientState.isPulsingRow(null)).isTrue()
     }
 
     @Test
@@ -1279,10 +1255,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.resetViewStates(ambientState, 0)
 
         // Then: pulsingNotificationView should show at full height
-        assertEquals(
-            stackScrollAlgorithm.getMaxAllowedChildHeight(pulsingNotificationView),
-            pulsingNotificationView.viewState.height,
-        )
+        assertThat(pulsingNotificationView.viewState.height)
+            .isEqualTo(stackScrollAlgorithm.getMaxAllowedChildHeight(pulsingNotificationView))
 
         // After: reset dozeAmount and expansionFraction
         ambientState.dozeAmount = 0f
@@ -1387,7 +1361,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 yTranslation = ambientState.maxHeadsUpTranslation - height // move it to the max
             }
 
-        assertTrue(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState))
+        assertThat(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState)).isTrue()
     }
 
     @Test
@@ -1400,7 +1374,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     ambientState.maxHeadsUpTranslation - height - 1 // move it below the max
             }
 
-        assertFalse(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState))
+        assertThat(stackScrollAlgorithm.shouldHunAppearFromBottom(ambientState, viewState))
+            .isFalse()
     }
 
     // endregion
@@ -1548,7 +1523,23 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 }
 
 private fun mockExpandableNotificationRow(): ExpandableNotificationRow {
-    return mock(ExpandableNotificationRow::class.java).apply {
+    return mock<ExpandableNotificationRow>().apply {
         whenever(viewState).thenReturn(ExpandableViewState())
+    }
+}
+
+private fun mockFooterView(height: Int): FooterView {
+    return mock<FooterView>().apply {
+        whenever(viewState).thenReturn(FooterViewState())
+        whenever(intrinsicHeight).thenReturn(height)
+    }
+}
+
+private fun AmbientState.fakeShowingStackOnLockscreen() {
+    if (SceneContainerFlag.isEnabled) {
+        isShowingStackOnLockscreen = true
+        lockscreenStackFadeInProgress = 1f // stack is fully opaque
+    } else {
+        setStatusBarState(StatusBarState.KEYGUARD)
     }
 }

@@ -18,6 +18,9 @@ package com.android.server.location.contexthub;
 
 import android.Manifest;
 import android.content.Context;
+import android.hardware.contexthub.EndpointInfo;
+import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
@@ -414,5 +417,52 @@ import java.util.List;
     /* package */
     static String formatDateFromTimestamp(long timeStampInMs) {
         return DATE_FORMATTER.format(Instant.ofEpochMilli(timeStampInMs));
+    }
+
+    /**
+     * Converts a context hub HAL EndpointInfo object based on the provided HubEndpointInfo.
+     *
+     * @param info the HubEndpointInfo object
+     * @return the equivalent EndpointInfo object
+     */
+    /* package */
+    static EndpointInfo convertHalEndpointInfo(HubEndpointInfo info) {
+        return createHalEndpointInfo(
+                info, info.getIdentifier().getEndpoint(), info.getIdentifier().getHub());
+    }
+
+    /**
+     * Creates a context hub HAL EndpointInfo object based on the provided HubEndpointInfo. As
+     * opposed to convertHalEndpointInfo, this method can be used to overwrite/specify the endpoint
+     * and hub ID.
+     *
+     * @param info the HubEndpointInfo object
+     * @param endpointId the endpoint ID of this object
+     * @param hubId the hub ID of this object
+     * @return the equivalent EndpointInfo object
+     */
+    /* package */
+    static EndpointInfo createHalEndpointInfo(HubEndpointInfo info, long endpointId, long hubId) {
+        EndpointInfo outputInfo = new EndpointInfo();
+        outputInfo.id = new android.hardware.contexthub.EndpointId();
+        outputInfo.id.id = endpointId;
+        outputInfo.id.hubId = hubId;
+        outputInfo.name = info.getName();
+        outputInfo.version = info.getVersion();
+        outputInfo.tag = info.getTag();
+        Collection<String> permissions = info.getRequiredPermissions();
+        outputInfo.requiredPermissions = permissions.toArray(new String[permissions.size()]);
+        Collection<HubServiceInfo> services = info.getServiceInfoCollection();
+        outputInfo.services = new android.hardware.contexthub.Service[services.size()];
+        int i = 0;
+        for (HubServiceInfo service : services) {
+            outputInfo.services[i] = new android.hardware.contexthub.Service();
+            outputInfo.services[i].format = service.getFormat();
+            outputInfo.services[i].serviceDescriptor = service.getServiceDescriptor();
+            outputInfo.services[i].majorVersion = service.getMajorVersion();
+            outputInfo.services[i].minorVersion = service.getMinorVersion();
+            i++;
+        }
+        return outputInfo;
     }
 }

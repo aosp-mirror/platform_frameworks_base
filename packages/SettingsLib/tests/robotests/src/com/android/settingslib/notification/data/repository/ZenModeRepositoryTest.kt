@@ -23,12 +23,10 @@ import android.content.Context
 import android.content.Intent
 import android.database.ContentObserver
 import android.os.Parcelable
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings.Global
 import androidx.test.filters.SmallTest
-import com.android.settingslib.flags.Flags
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.settingslib.notification.modes.ZenModesBackend
@@ -93,26 +91,7 @@ class ZenModeRepositoryTest {
             )
     }
 
-    @DisableFlags(Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
-    @Test
-    fun consolidatedPolicyChanges_repositoryEmits_flagsOff() {
-        testScope.runTest {
-            val values = mutableListOf<NotificationManager.Policy?>()
-            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy1)
-            underTest.consolidatedNotificationPolicy
-                .onEach { values.add(it) }
-                .launchIn(backgroundScope)
-            runCurrent()
-
-            `when`(notificationManager.consolidatedNotificationPolicy).thenReturn(testPolicy2)
-            triggerIntent(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED)
-            runCurrent()
-
-            assertThat(values).containsExactly(null, testPolicy1, testPolicy2).inOrder()
-        }
-    }
-
-    @EnableFlags(android.app.Flags.FLAG_MODES_API, Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
     @Test
     fun consolidatedPolicyChanges_repositoryEmits_flagsOn() {
         testScope.runTest {
@@ -131,7 +110,7 @@ class ZenModeRepositoryTest {
         }
     }
 
-    @EnableFlags(android.app.Flags.FLAG_MODES_API, Flags.FLAG_VOLUME_PANEL_BROADCAST_FIX)
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
     @Test
     fun consolidatedPolicyChanges_repositoryEmitsFromExtras() {
         testScope.runTest {

@@ -21,26 +21,26 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
 
 import java.util.Set;
 
-/**
- * Internal view handling the actual painting / interactions
- */
+/** Internal view handling the actual painting / interactions */
 public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachStateChangeListener {
 
     static final boolean USE_VIEW_AREA_CLICK = true; // Use views to represent click areas
     RemoteComposeDocument mDocument = null;
     int mTheme = Theme.LIGHT;
     boolean mInActionDown = false;
-    boolean mDebug = false;
+    int mDebug = 0;
     boolean mHasClickAreas = false;
     Point mActionDownPoint = new Point(0, 0);
     AndroidRemoteContext mARContext = new AndroidRemoteContext();
@@ -67,14 +67,14 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         }
     }
 
-    public void setDebug(boolean value) {
+    public void setDebug(int value) {
         if (mDebug != value) {
             mDebug = value;
             if (USE_VIEW_AREA_CLICK) {
                 for (int i = 0; i < getChildCount(); i++) {
                     View child = getChildAt(i);
                     if (child instanceof ClickAreaView) {
-                        ((ClickAreaView) child).setDebug(mDebug);
+                        ((ClickAreaView) child).setDebug(mDebug == 1);
                     }
                 }
             }
@@ -102,13 +102,17 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     private void updateClickAreas() {
         if (USE_VIEW_AREA_CLICK && mDocument != null) {
             mHasClickAreas = false;
-            Set<CoreDocument.ClickAreaRepresentation> clickAreas = mDocument
-                    .getDocument().getClickAreas();
+            Set<CoreDocument.ClickAreaRepresentation> clickAreas =
+                    mDocument.getDocument().getClickAreas();
             removeAllViews();
             for (CoreDocument.ClickAreaRepresentation area : clickAreas) {
-                ClickAreaView viewArea = new ClickAreaView(getContext(), mDebug,
-                        area.getId(), area.getContentDescription(),
-                        area.getMetadata());
+                ClickAreaView viewArea =
+                        new ClickAreaView(
+                                getContext(),
+                                mDebug == 1,
+                                area.getId(),
+                                area.getContentDescription(),
+                                area.getMetadata());
                 int w = (int) area.width();
                 int h = (int) area.height();
                 FrameLayout.LayoutParams param = new FrameLayout.LayoutParams(w, h);
@@ -116,14 +120,18 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                 param.height = h;
                 param.leftMargin = (int) area.getLeft();
                 param.topMargin = (int) area.getTop();
-                viewArea.setOnClickListener(view1
-                        -> mDocument.getDocument().performClick(area.getId()));
+                viewArea.setOnClickListener(
+                        view1 -> mDocument.getDocument().performClick(area.getId()));
                 addView(viewArea, param);
             }
             if (!clickAreas.isEmpty()) {
                 mHasClickAreas = true;
             }
         }
+    }
+
+    public void setHapticEngine(CoreDocument.HapticEngine engine) {
+        mDocument.getDocument().setHapticEngine(engine);
     }
 
     @Override
@@ -133,6 +141,16 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     public String[] getNamedColors() {
         return mDocument.getNamedColors();
+    }
+
+    /**
+     * Gets a array of Names of the named variables of a specific type defined in the loaded doc.
+     *
+     * @param type the type of variable NamedVariable.COLOR_TYPE, STRING_TYPE, etc
+     * @return array of name or null
+     */
+    public String[] getNamedVariables(int type) {
+        return mDocument.getNamedVariables(type);
     }
 
     /**
@@ -177,6 +195,20 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         }
     }
 
+    public int hasSensorListeners(int[] ids) {
+        int count = 0;
+        for (int id = RemoteContext.ID_ACCELERATION_X; id <= RemoteContext.ID_LIGHT; id++) {
+            if (mARContext.mRemoteComposeState.hasListener(id)) {
+                ids[count++] = id;
+            }
+        }
+        return count;
+    }
+
+    public void setExternalFloat(int id, float value) {
+        mARContext.loadFloat(id, value);
+    }
+
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
@@ -196,28 +228,65 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         this.mTheme = theme;
     }
 
+    private VelocityTracker mVelocityTracker = null;
+
     public boolean onTouchEvent(MotionEvent event) {
+        int index = event.getActionIndex();
+        int action = event.getActionMasked();
+        int pointerId = event.getPointerId(index);
         if (USE_VIEW_AREA_CLICK && mHasClickAreas) {
             return super.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN: {
+            case MotionEvent.ACTION_DOWN:
                 mActionDownPoint.x = (int) event.getX();
                 mActionDownPoint.y = (int) event.getY();
                 mInActionDown = true;
+                CoreDocument doc = mDocument.getDocument();
+                if (doc.hasTouchListener()) {
+                    if (mVelocityTracker == null) {
+                        mVelocityTracker = VelocityTracker.obtain();
+                    } else {
+                        mVelocityTracker.clear();
+                    }
+                    mVelocityTracker.addMovement(event);
+                    doc.touchDown(mARContext, event.getX(), event.getY());
+                }
                 return true;
-            }
-            case MotionEvent.ACTION_CANCEL: {
+
+            case MotionEvent.ACTION_CANCEL:
                 mInActionDown = false;
+                doc = mDocument.getDocument();
+                if (doc.hasTouchListener()) {
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float dx = mVelocityTracker.getXVelocity(pointerId);
+                    float dy = mVelocityTracker.getYVelocity(pointerId);
+                    doc.touchCancel(mARContext, event.getX(), event.getY(), dx, dy);
+                }
                 return true;
-            }
-            case MotionEvent.ACTION_UP: {
+            case MotionEvent.ACTION_UP:
                 mInActionDown = false;
                 performClick();
+                doc = mDocument.getDocument();
+                if (doc.hasTouchListener()) {
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float dx = mVelocityTracker.getXVelocity(pointerId);
+                    float dy = mVelocityTracker.getYVelocity(pointerId);
+                    doc.touchUp(mARContext, event.getX(), event.getY(), dx, dy);
+                }
                 return true;
-            }
-            case MotionEvent.ACTION_MOVE: {
-            }
+
+            case MotionEvent.ACTION_MOVE:
+                if (mInActionDown) {
+                    if (mVelocityTracker != null) {
+                        mVelocityTracker.addMovement(event);
+                        doc = mDocument.getDocument();
+                        boolean repaint = doc.touchDrag(mARContext, event.getX(), event.getY());
+                        if (repaint) {
+                            invalidate();
+                        }
+                    }
+                }
         }
         return false;
     }
@@ -227,8 +296,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (USE_VIEW_AREA_CLICK && mHasClickAreas) {
             return super.performClick();
         }
-        mDocument.getDocument().onClick(mARContext,
-                 (float) mActionDownPoint.x, (float) mActionDownPoint.y);
+        mDocument
+                .getDocument()
+                .onClick(mARContext, (float) mActionDownPoint.x, (float) mActionDownPoint.y);
         super.performClick();
         invalidate();
         return true;
@@ -279,6 +349,27 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     private int mCount;
     private long mTime = System.nanoTime();
+    private long mDuration;
+    private boolean mEvalTime = false;
+
+    /**
+     * This returns the amount of time in ms the player used to evalueate a pass it is averaged over
+     * a number of evaluations.
+     *
+     * @return time in ms
+     */
+    public float getEvalTime() {
+        if (!mEvalTime) {
+            mEvalTime = true;
+            return 0.0f;
+        }
+        double avg = mDuration / (double) mCount;
+        if (mCount > 100) {
+            mDuration /= 2;
+            mCount /= 2;
+        }
+        return (float) (avg * 1E-6); // ms
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -286,14 +377,17 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
+        long start = mEvalTime ? System.nanoTime() : 0;
         mARContext.setAnimationEnabled(true);
         mARContext.currentTime = System.currentTimeMillis();
         mARContext.setDebug(mDebug);
+        float density = getContext().getResources().getDisplayMetrics().density;
         mARContext.useCanvas(canvas);
+        mARContext.setDensity(density);
         mARContext.mWidth = getWidth();
         mARContext.mHeight = getHeight();
         mDocument.paint(mARContext, mTheme);
-        if (mDebug) {
+        if (mDebug == 1) {
             mCount++;
             if (System.nanoTime() - mTime > 1000000000L) {
                 System.out.println(" count " + mCount + " fps");
@@ -304,7 +398,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument.needsRepaint() > 0) {
             invalidate();
         }
+        if (mEvalTime) {
+            mDuration += System.nanoTime() - start;
+            mCount++;
+        }
     }
-
 }
-

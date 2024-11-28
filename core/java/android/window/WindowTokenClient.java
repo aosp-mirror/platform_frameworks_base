@@ -19,6 +19,8 @@ import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -104,7 +106,7 @@ public class WindowTokenClient extends Binder {
      * @param newConfig the updated {@link Configuration}
      * @param newDisplayId the updated {@link android.view.Display} ID
      */
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     @MainThread
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
         onConfigurationChanged(newConfig, newDisplayId, true /* shouldReportConfigChange */);
@@ -113,7 +115,7 @@ public class WindowTokenClient extends Binder {
     /**
      * Posts an {@link #onConfigurationChanged} to the main thread.
      */
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     public void postOnConfigurationChanged(@NonNull Configuration newConfig, int newDisplayId) {
         mHandler.post(PooledLambda.obtainRunnable(this::onConfigurationChanged, newConfig,
                 newDisplayId, true /* shouldReportConfigChange */).recycleOnUse());
@@ -232,7 +234,7 @@ public class WindowTokenClient extends Binder {
     /**
      * Called when the attached window is removed from the display.
      */
-    @VisibleForTesting
+    @VisibleForTesting(visibility = PACKAGE)
     @MainThread
     public void onWindowTokenRemoved() {
         final Context context = mContextRef.get();

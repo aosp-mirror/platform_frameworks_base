@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
@@ -96,6 +97,7 @@ public class BackupManagerServiceRoboTest {
     @UserIdInt private int mUserTwoId;
     @Mock private UserBackupManagerService mUserSystemService;
     @Mock private UserBackupManagerService mUserOneService;
+    @Mock private BackupAgentConnectionManager mUserOneBackupAgentConnectionManager;
     @Mock private UserBackupManagerService mUserTwoService;
 
     /** Setup */
@@ -115,6 +117,9 @@ public class BackupManagerServiceRoboTest {
 
         mShadowContext.grantPermissions(BACKUP);
         mShadowContext.grantPermissions(INTERACT_ACROSS_USERS_FULL);
+
+        when(mUserOneService.getBackupAgentConnectionManager()).thenReturn(
+                mUserOneBackupAgentConnectionManager);
 
         ShadowBinder.setCallingUid(Process.SYSTEM_UID);
     }
@@ -226,7 +231,7 @@ public class BackupManagerServiceRoboTest {
 
         backupManagerService.agentConnected(mUserOneId, TEST_PACKAGE, agentBinder);
 
-        verify(mUserOneService).agentConnected(TEST_PACKAGE, agentBinder);
+        verify(mUserOneBackupAgentConnectionManager).agentConnected(TEST_PACKAGE, agentBinder);
     }
 
     /** Test that the backup service does not route methods for non-registered users. */
@@ -239,7 +244,8 @@ public class BackupManagerServiceRoboTest {
 
         backupManagerService.agentConnected(mUserTwoId, TEST_PACKAGE, agentBinder);
 
-        verify(mUserOneService, never()).agentConnected(TEST_PACKAGE, agentBinder);
+        verify(mUserOneBackupAgentConnectionManager, never()).agentConnected(TEST_PACKAGE,
+                agentBinder);
     }
 
     /** Test that the backup service routes methods correctly to the user that requests it. */

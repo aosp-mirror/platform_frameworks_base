@@ -29,17 +29,15 @@ import javax.inject.Inject
 /** Maps [OneHandedModeTileModel] to [QSTileState]. */
 class OneHandedModeTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<OneHandedModeTileModel> {
+constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
+    QSTileDataToStateMapper<OneHandedModeTileModel> {
 
     override fun map(config: QSTileConfig, data: OneHandedModeTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             val subtitleArray = resources.getStringArray(R.array.tile_states_onehanded)
             label = resources.getString(R.string.quick_settings_onehanded_label)
             iconRes = com.android.internal.R.drawable.ic_qs_one_handed_mode
-            icon = { Icon.Loaded(resources.getDrawable(iconRes!!, theme), null) }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = subtitleArray[2]

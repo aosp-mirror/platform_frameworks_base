@@ -17,8 +17,6 @@
 package com.android.systemui.shade;
 
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
@@ -27,16 +25,14 @@ import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Binder;
-import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.View;
@@ -78,6 +74,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
 
@@ -135,6 +132,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private final SysuiColorExtractor mColorExtractor;
     private final NotificationShadeWindowModel mNotificationShadeWindowModel;
+    private final SecureSettings mSecureSettings;
     /**
      * Layout params would be aggregated and dispatched all at once if this is > 0.
      *
@@ -148,13 +146,13 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Inject
     public NotificationShadeWindowControllerImpl(
-            Context context,
+            @ShadeDisplayAware Context context,
             WindowRootViewComponent.Factory windowRootViewComponentFactory,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             IActivityManager activityManager,
             DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             KeyguardViewMediator keyguardViewMediator,
             KeyguardBypassController keyguardBypassController,
             @Main Executor mainExecutor,
@@ -168,6 +166,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             Lazy<SelectedUserInteractor> userInteractor,
             UserTracker userTracker,
             NotificationShadeWindowModel notificationShadeWindowModel,
+            SecureSettings secureSettings,
             Lazy<CommunalInteractor> communalInteractor) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
@@ -183,6 +182,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mBackgroundExecutor = backgroundExecutor;
         mColorExtractor = colorExtractor;
         mNotificationShadeWindowModel = notificationShadeWindowModel;
+        mSecureSettings = secureSettings;
         // prefix with {slow} to make sure this dumps at the END of the critical section.
         dumpManager.registerCriticalDumpable("{slow}NotificationShadeWindowControllerImpl", this);
         mAuthController = authController;
@@ -271,33 +271,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         // Now that the notification shade encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
-        mLp = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_NOTIFICATION_SHADE,
-                LayoutParams.FLAG_NOT_FOCUSABLE
-                        | LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                        | LayoutParams.FLAG_SPLIT_TOUCH
-                        | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
-                PixelFormat.TRANSLUCENT);
-        mLp.token = new Binder();
-        mLp.gravity = Gravity.TOP;
-        mLp.setFitInsetsTypes(0 /* types */);
-        mLp.setTitle("NotificationShade");
-        mLp.packageName = mContext.getPackageName();
-        mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        mLp.privateFlags |= PRIVATE_FLAG_OPTIMIZE_MEASURE;
-
-        if (SceneContainerFlag.isEnabled()) {
-            // This prevents the appearance and disappearance of the software keyboard (also known
-            // as the "IME") from scrolling/panning the window to make room for the keyboard.
-            //
-            // The scene container logic does its own adjustment and animation when the IME appears
-            // or disappears.
-            mLp.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-        }
-
+        mLp = ShadeWindowLayoutParams.INSTANCE.create(mContext);
         mWindowManager.addView(mWindowRootView, mLp);
 
         // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
@@ -431,7 +405,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                     (long) mLpChanged.preferredMaxDisplayRefreshRate);
         }
 
-        if (state.bouncerShowing && !isDebuggable()) {
+        if (state.bouncerShowing && !isSecureWindowsDisabled()) {
             mLpChanged.flags |= LayoutParams.FLAG_SECURE;
         } else {
             mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
@@ -444,8 +418,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         }
     }
 
-    protected boolean isDebuggable() {
-        return Build.IS_DEBUGGABLE;
+    private boolean isSecureWindowsDisabled() {
+        return mSecureSettings.getIntForUser(
+            Settings.Secure.DISABLE_SECURE_WINDOWS,
+            0,
+            UserHandle.USER_CURRENT) == 1;
     }
 
     private void adjustScreenOrientation(NotificationShadeWindowState state) {

@@ -16,6 +16,10 @@
 
 package android.app;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.service.notification.Flags.notificationClassification;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -37,6 +41,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -752,6 +757,11 @@ public class NotificationManager {
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
 
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(notification.getChannelId())) {
+            return;
+        }
+
         try {
             if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
@@ -1131,6 +1141,10 @@ public class NotificationManager {
      * had before it was deleted.
      */
     public void deleteNotificationChannel(String channelId) {
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(channelId)) {
+            return;
+        }
         INotificationManager service = getService();
         try {
             service.deleteNotificationChannel(mContext.getPackageName(), channelId);
@@ -1333,10 +1347,14 @@ public class NotificationManager {
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean areAutomaticZenRulesUserManaged() {
-        // modes ui is dependent on modes api
-        return Flags.modesApi() && Flags.modesUi();
+        if (Flags.modesApi() && Flags.modesUi()) {
+            PackageManager pm = mContext.getPackageManager();
+            return !pm.hasSystemFeature(PackageManager.FEATURE_WATCH)
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+        } else {
+            return false;
+        }
     }
-
 
     /**
      * Returns AutomaticZenRules owned by the caller.
@@ -1581,11 +1599,15 @@ public class NotificationManager {
      * Returns whether notifications from the calling package are enabled.
      */
     public boolean areNotificationsEnabled() {
-        INotificationManager service = getService();
-        try {
-            return service.areNotificationsEnabled(mContext.getPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfPermissionCheck()) {
+            return mContext.checkSelfPermission(POST_NOTIFICATIONS) == PERMISSION_GRANTED;
+        } else {
+            INotificationManager service = getService();
+            try {
+                return service.areNotificationsEnabled(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -1824,6 +1846,33 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.isNotificationPolicyAccessGrantedForPackage(pkg);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void setAssistantAdjustmentKeyTypeState(@Adjustment.Types int type, boolean enabled) {
+        INotificationManager service = getService();
+        try {
+            service.setAssistantAdjustmentKeyTypeState(type, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+    public void setTypeAdjustmentForPackageState(@NonNull String pkg, boolean enabled) {
+        INotificationManager service = getService();
+        try {
+            service.setTypeAdjustmentForPackageState(pkg, enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

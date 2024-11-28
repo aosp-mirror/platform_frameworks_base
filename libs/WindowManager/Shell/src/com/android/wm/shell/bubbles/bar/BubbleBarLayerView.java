@@ -19,6 +19,7 @@ package com.android.wm.shell.bubbles.bar;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_OUT;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
+import static com.android.wm.shell.shared.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -34,10 +35,12 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
+import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
@@ -64,11 +67,10 @@ public class BubbleBarLayerView extends FrameLayout
 
     private static final String TAG = BubbleBarLayerView.class.getSimpleName();
 
-    private static final float SCRIM_ALPHA = 0.2f;
-
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
     private final BubblePositioner mPositioner;
+    private final BubbleLogger mBubbleLogger;
     private final BubbleBarAnimationHelper mAnimationHelper;
     private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
@@ -93,11 +95,13 @@ public class BubbleBarLayerView extends FrameLayout
     private TouchDelegate mHandleTouchDelegate;
     private final Rect mHandleTouchBounds = new Rect();
 
-    public BubbleBarLayerView(Context context, BubbleController controller, BubbleData bubbleData) {
+    public BubbleBarLayerView(Context context, BubbleController controller, BubbleData bubbleData,
+            BubbleLogger bubbleLogger) {
         super(context);
         mBubbleController = controller;
         mBubbleData = bubbleData;
         mPositioner = mBubbleController.getPositioner();
+        mBubbleLogger = bubbleLogger;
 
         mAnimationHelper = new BubbleBarAnimationHelper(context,
                 this, mPositioner);
@@ -119,18 +123,7 @@ public class BubbleBarLayerView extends FrameLayout
 
         mBubbleExpandedViewPinController = new BubbleExpandedViewPinController(
                 context, this, mPositioner);
-        mBubbleExpandedViewPinController.setListener(
-                new BaseBubblePinController.LocationChangeListener() {
-                    @Override
-                    public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
-                        mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
-                    }
-
-                    @Override
-                    public void onRelease(@NonNull BubbleBarLocation location) {
-                        mBubbleController.setBubbleBarLocation(location);
-                    }
-                });
+        mBubbleExpandedViewPinController.setListener(new LocationChangeListener());
 
         setOnClickListener(view -> hideModalOrCollapse());
     }
@@ -233,6 +226,7 @@ public class BubbleBarLayerView extends FrameLayout
             DragListener dragListener = inDismiss -> {
                 if (inDismiss && mExpandedBubble != null) {
                     mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                    logBubbleEvent(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_EXP_VIEW);
                 }
             };
             mDragController = new BubbleBarExpandedViewDragController(
@@ -391,7 +385,7 @@ public class BubbleBarLayerView extends FrameLayout
         if (show) {
             mScrimView.animate()
                     .setInterpolator(ALPHA_IN)
-                    .alpha(SCRIM_ALPHA)
+                    .alpha(BUBBLE_EXPANDED_SCRIM_ALPHA)
                     .start();
         } else {
             mScrimView.animate()
@@ -413,4 +407,48 @@ public class BubbleBarLayerView extends FrameLayout
         }
     }
 
+    /**
+     * Log the event only if {@link #mExpandedBubble} is a {@link Bubble}.
+     * <p>
+     * Skips logging if it is {@link BubbleOverflow}.
+     */
+    private void logBubbleEvent(BubbleLogger.Event event) {
+        if (mExpandedBubble != null && mExpandedBubble instanceof Bubble bubble) {
+            mBubbleLogger.log(bubble, event);
+        }
+    }
+
+    @Nullable
+    @VisibleForTesting
+    public BubbleBarExpandedViewDragController getDragController() {
+        return mDragController;
+    }
+
+    private class LocationChangeListener implements
+            BaseBubblePinController.LocationChangeListener {
+
+        private BubbleBarLocation mInitialLocation;
+
+        @Override
+        public void onStart(@NonNull BubbleBarLocation location) {
+            mInitialLocation = location;
+        }
+
+        @Override
+        public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
+            mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
+        }
+
+        @Override
+        public void onRelease(@NonNull BubbleBarLocation location) {
+            mBubbleController.setBubbleBarLocation(location,
+                    BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW);
+            if (location != mInitialLocation) {
+                BubbleLogger.Event event = location.isOnLeft(isLayoutRtl())
+                        ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_EXP_VIEW
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_EXP_VIEW;
+                logBubbleEvent(event);
+            }
+        }
+    }
 }

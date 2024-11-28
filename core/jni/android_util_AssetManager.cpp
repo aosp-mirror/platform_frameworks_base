@@ -21,11 +21,9 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <linux/capability.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include <sstream>
@@ -54,9 +52,6 @@
 #include "utils/String8.h"
 #include "utils/Trace.h"
 #include "utils/misc.h"
-
-extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
-extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
 using ::android::base::StringPrintf;
 
@@ -105,10 +100,21 @@ static struct arraymap_offsets_t {
 
 static struct parcel_file_descriptor_offsets_t {
   jclass mClass;
-  jmethodID mAdoptFd;
+  jmethodID mConstructor;
 } gParcelFileDescriptorOffsets;
 
+static struct file_descriptor_offsets_t {
+    jclass mClass;
+    jmethodID mConstructor;
+    jfieldID mHandle;
+} gFileDescriptorOffsets;
+
 static jclass g_stringClass = nullptr;
+
+// Duplicates a file descriptor. On Linux/Mac, this wraps fcntl(fd, F_DUPFD_CLOEXEC).
+// On windows, since file descriptors are not inherited by child processes by default, this
+// wraps dup()
+extern int DupFdCloExec(int fd);
 
 // ----------------------------------------------------------------------------
 
@@ -272,9 +278,14 @@ static jobject ReturnParcelFileDescriptor(JNIEnv* env, std::unique_ptr<Asset> as
 
   env->ReleasePrimitiveArrayCritical(out_offsets, offsets, 0);
 
-  return env->CallStaticObjectMethod(gParcelFileDescriptorOffsets.mClass,
-                                     gParcelFileDescriptorOffsets.mAdoptFd,
-                                     fd);
+  jobject fdescObj =
+          env->NewObject(gFileDescriptorOffsets.mClass, gFileDescriptorOffsets.mConstructor, fd);
+#ifdef _WIN32
+  env->SetLongField(fdescObj, gFileDescriptorOffsets.mHandle, _get_osfhandle(fd));
+#endif
+
+  return env->NewObject(gParcelFileDescriptorOffsets.mClass,
+                        gParcelFileDescriptorOffsets.mConstructor, fdescObj);
 }
 
 static jint NativeGetGlobalAssetCount(JNIEnv* /*env*/, jobject /*clazz*/) {
@@ -644,7 +655,7 @@ static jlong NativeOpenXmlAssetFd(JNIEnv* env, jobject /*clazz*/, jlong ptr, int
     return 0;
   }
 
-  base::unique_fd dup_fd(::fcntl(fd, F_DUPFD_CLOEXEC, 0));
+  base::unique_fd dup_fd(DupFdCloExec(fd));
   if (dup_fd < 0) {
     jniThrowIOException(env, errno);
     return 0;
@@ -1682,8 +1693,17 @@ int register_android_content_AssetManager(JNIEnv* env) {
 
   jclass pfdClass = FindClassOrDie(env, "android/os/ParcelFileDescriptor");
   gParcelFileDescriptorOffsets.mClass = MakeGlobalRefOrDie(env, pfdClass);
-  gParcelFileDescriptorOffsets.mAdoptFd =
-      GetStaticMethodIDOrDie(env, pfdClass, "adoptFd", "(I)Landroid/os/ParcelFileDescriptor;");
+  gParcelFileDescriptorOffsets.mConstructor =
+          GetMethodIDOrDie(env, pfdClass, "<init>", "(Ljava/io/FileDescriptor;)V");
+
+  jclass fdClass = FindClassOrDie(env, "java/io/FileDescriptor");
+  gFileDescriptorOffsets.mClass = MakeGlobalRefOrDie(env, fdClass);
+  gFileDescriptorOffsets.mConstructor =
+          GetMethodIDOrDie(env, gFileDescriptorOffsets.mClass, "<init>", "(I)V");
+#ifdef _WIN32
+  gFileDescriptorOffsets.mHandle =
+          GetFieldIDOrDie(env, gFileDescriptorOffsets.mClass, "handle", "J");
+#endif
 
   return RegisterMethodsOrDie(env, "android/content/res/AssetManager", gAssetManagerMethods,
                               NELEM(gAssetManagerMethods));

@@ -33,7 +33,8 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -42,10 +43,12 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,10 +57,22 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.List;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TaskViewTransitionsTest extends ShellTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(
+                Flags.FLAG_ENABLE_TASK_VIEW_CONTROLLER_CLEANUP);
+    }
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
 
     @Mock
     Transitions mTransitions;
@@ -69,6 +84,10 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     WindowContainerToken mToken;
 
     TaskViewTransitions mTaskViewTransitions;
+
+    public TaskViewTransitionsTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(flags);
+    }
 
     @Before
     public void setUp() {

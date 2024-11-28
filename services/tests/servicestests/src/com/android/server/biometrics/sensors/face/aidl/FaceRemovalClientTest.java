@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -119,6 +120,6 @@ public class FaceRemovalClientTest {
         return new FaceRemovalClient(mContext, () -> aidl, mToken,
                 mClientMonitorCallbackConverter, biometricIds, USER_ID,
                 "own-it", mUtils /* utils */, 5 /* sensorId */, mBiometricLogger, mBiometricContext,
-                mAuthenticatorIds);
+                mAuthenticatorIds, BiometricsProtoEnums.UNENROLL_REASON_UNKNOWN);
     }
 }

@@ -126,6 +126,7 @@ java_library_static {
         "platform_service_defaults",
         "android.hardware.power-java_shared",
         "latest_android_hardware_broadcastradio_java_static",
+        "services_crashrecovery_stubs_conditionally",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -157,6 +158,7 @@ java_library_static {
         "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V3-java",
         "app-compat-annotations",
+        "art_exported_aconfig_flags_lib",
         "framework-tethering.stubs.module_lib",
         "keepanno-annotations",
         "service-art.stubs.system_server",
@@ -176,6 +178,7 @@ java_library_static {
 
     static_libs: [
         "android.frameworks.vibrator-V1-java", // AIDL
+        "android.frameworks.devicestate-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",
         "android.hardware.boot-V1.0-java", // HIDL
@@ -186,7 +189,7 @@ java_library_static {
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
-        "android.hardware.health-V3-java", // AIDL
+        "android.hardware.health-V4-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
         "android.hardware.security.authgraph-V1-java",
@@ -239,6 +242,8 @@ java_library_static {
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
         "locksettings_flags_lib",
+        "profiling_flags_lib",
+        "android.adpf.sessionmanager_aidl-java",
     ],
     javac_shard_size: 50,
     javacflags: [
@@ -254,6 +259,13 @@ java_library_static {
             "FlaggedApi",
         ],
     },
+    jarjar_rules: ":services-jarjar-rules",
+    apex_available: ["//apex_available:platform"],
+}
+
+filegroup {
+    name: "services-jarjar-rules",
+    srcs: ["services-jarjar-rules.txt"],
 }
 
 java_genrule {

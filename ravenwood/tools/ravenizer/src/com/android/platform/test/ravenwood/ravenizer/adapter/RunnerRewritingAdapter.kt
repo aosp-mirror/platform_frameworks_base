@@ -15,7 +15,6 @@
  */
 package com.android.platform.test.ravenwood.ravenizer.adapter
 
-import android.platform.test.ravenwood.RavenwoodAwareTestRunner
 import com.android.hoststubgen.ClassParseException
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
@@ -28,8 +27,8 @@ import com.android.hoststubgen.log
 import com.android.hoststubgen.visitors.OPCODE_VERSION
 import com.android.platform.test.ravenwood.ravenizer.RavenizerInternalException
 import com.android.platform.test.ravenwood.ravenizer.classRuleAnotType
-import com.android.platform.test.ravenwood.ravenizer.isTestLookingClass
 import com.android.platform.test.ravenwood.ravenizer.innerRunnerAnotType
+import com.android.platform.test.ravenwood.ravenizer.isTestLookingClass
 import com.android.platform.test.ravenwood.ravenizer.noRavenizerAnotType
 import com.android.platform.test.ravenwood.ravenizer.ravenwoodTestRunnerType
 import com.android.platform.test.ravenwood.ravenizer.ruleAnotType
@@ -50,7 +49,7 @@ import org.objectweb.asm.tree.ClassNode
  * Class visitor to update the RunWith and inject some necessary rules.
  *
  * - Change the @RunWith(RavenwoodAwareTestRunner.class).
- * - If the original class has a @RunWith(...), then change it to an @OrigRunWith(...).
+ * - If the original class has a @RunWith(...), then change it to an @InnerRunner(...).
  * - Add RavenwoodAwareTestRunner's member rules as junit rules.
  * - Update the order of the existing JUnit rules to make sure they don't use the MIN or MAX.
  */
@@ -146,7 +145,7 @@ class RunnerRewritingAdapter private constructor(
 
     /**
      * Inject `@RunWith(RavenwoodAwareTestRunner.class)`. If the class already has
-     * a `@RunWith`, then change it to add a `@OrigRunWith`.
+     * a `@RunWith`, then change it to add a `@InnerRunner`.
      */
     private fun injectRunWithAnnotation() {
         // Extract the original RunWith annotation and its value.
@@ -172,7 +171,7 @@ class RunnerRewritingAdapter private constructor(
                         + " in class ${classInternalName.toHumanReadableClassName()}")
             }
 
-            // Inject an @OrigRunWith.
+            // Inject an @InnerRunner.
             visitAnnotation(innerRunnerAnotType.desc, true)!!.let { av ->
                 av.visit("value", runWithClass)
                 av.visitEnd()
@@ -302,7 +301,7 @@ class RunnerRewritingAdapter private constructor(
         override fun visitCode() {
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_CLASS_OUTER_RULE_NAME,
+                IMPLICIT_CLASS_OUTER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTSTATIC,
@@ -313,7 +312,7 @@ class RunnerRewritingAdapter private constructor(
 
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_CLASS_INNER_RULE_NAME,
+                IMPLICIT_CLASS_INNER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTSTATIC,
@@ -361,7 +360,7 @@ class RunnerRewritingAdapter private constructor(
             visitVarInsn(ALOAD, 0)
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_INST_OUTER_RULE_NAME,
+                IMPLICIT_INST_OUTER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTFIELD,
@@ -373,7 +372,7 @@ class RunnerRewritingAdapter private constructor(
             visitVarInsn(ALOAD, 0)
             visitFieldInsn(Opcodes.GETSTATIC,
                 ravenwoodTestRunnerType.internlName,
-                RavenwoodAwareTestRunner.IMPLICIT_INST_INNER_RULE_NAME,
+                IMPLICIT_INST_INNER_RULE_NAME,
                 testRuleType.desc
             )
             visitFieldInsn(Opcodes.PUTFIELD,
@@ -435,6 +434,11 @@ class RunnerRewritingAdapter private constructor(
     }
 
     companion object {
+        const val IMPLICIT_CLASS_OUTER_RULE_NAME = "sImplicitClassOuterRule"
+        const val IMPLICIT_CLASS_INNER_RULE_NAME = "sImplicitClassInnerRule"
+        const val IMPLICIT_INST_OUTER_RULE_NAME = "sImplicitInstOuterRule"
+        const val IMPLICIT_INST_INNER_RULE_NAME = "sImplicitInstInnerRule"
+
         fun shouldProcess(classes: ClassNodes, className: String): Boolean {
             if (!isTestLookingClass(classes, className)) {
                 return false

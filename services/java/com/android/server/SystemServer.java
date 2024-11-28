@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.media.tv.flags.Flags.mediaQualityFw;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -27,7 +28,9 @@ import static android.system.OsConstants.O_CLOEXEC;
 import static android.system.OsConstants.O_RDONLY;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.hardware.input.Flags.inputManagerLifecycleSupport;
 import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_TAG;
+import static com.android.tradeinmode.flags.Flags.enableTradeInMode;
 
 import android.annotation.NonNull;
 import android.annotation.StringRes;
@@ -118,7 +121,6 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accounts.AccountManagerService;
-import com.android.server.adaptiveauth.AdaptiveAuthService;
 import com.android.server.adb.AdbService;
 import com.android.server.alarm.AlarmManagerService;
 import com.android.server.am.ActivityManagerService;
@@ -190,6 +192,7 @@ import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
 import com.android.server.media.projection.MediaProjectionManagerService;
+import com.android.server.media.quality.MediaQualityService;
 import com.android.server.midi.MidiService;
 import com.android.server.musicrecognition.MusicRecognitionManagerService;
 import com.android.server.net.NetworkManagementService;
@@ -203,6 +206,7 @@ import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
+import com.android.server.os.instrumentation.DynamicInstrumentationManagerService;
 import com.android.server.pdb.PersistentDataBlockService;
 import com.android.server.people.PeopleService;
 import com.android.server.permission.access.AccessCheckingService;
@@ -248,6 +252,9 @@ import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.advancedprotection.AdvancedProtectionService;
+import com.android.server.security.authenticationpolicy.AuthenticationPolicyService;
+import com.android.server.security.authenticationpolicy.SecureLockDeviceService;
+import com.android.server.security.intrusiondetection.IntrusionDetectionService;
 import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
@@ -416,6 +423,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.wifi.aware.WifiAwareService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
+    private static final String WIFI_USD_SERVICE_CLASS =
+            "com.android.server.wifi.usd.UsdService";
     private static final String CONNECTIVITY_SERVICE_APEX_PATH =
             "/apex/com.android.tethering/javalib/service-connectivity.jar";
     private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
@@ -1399,10 +1408,6 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(BatteryService.class);
         t.traceEnd();
 
-        t.traceBegin("StartTradeInModeService");
-        mSystemServiceManager.startService(TradeInModeService.class);
-        t.traceEnd();
-
         // Tracks application usage stats.
         t.traceBegin("StartUsageService");
         mSystemServiceManager.startService(UsageStatsService.class);
@@ -1622,7 +1627,8 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
-            if (!isWatch && android.app.supervision.flags.Flags.supervisionApi()) {
+            if (android.app.supervision.flags.Flags.supervisionApi()
+                    && (!isWatch || android.app.supervision.flags.Flags.supervisionApiOnWear())) {
                 t.traceBegin("StartSupervisionService");
                 mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
                 t.traceEnd();
@@ -1652,7 +1658,12 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
 
             t.traceBegin("StartInputManagerService");
-            inputManager = new InputManagerService(context);
+            if (inputManagerLifecycleSupport()) {
+                inputManager = mSystemServiceManager.startService(
+                        InputManagerService.Lifecycle.class).getService();
+            } else {
+                inputManager = new InputManagerService(context);
+            }
             t.traceEnd();
 
             t.traceBegin("DeviceStateManagerService");
@@ -1673,8 +1684,10 @@ public final class SystemServer implements Dumpable {
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_HIGH
                             | DUMP_FLAG_PROTO);
-            ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
-                    /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
+            if (!inputManagerLifecycleSupport()) {
+                ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
+                        /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
+            }
             t.traceEnd();
 
             t.traceBegin("SetWindowManagerService");
@@ -1760,6 +1773,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
+            if (!isWatch && !isTv && !isAutomotive
+                    && android.security.Flags.aflApi()) {
+                t.traceBegin("StartIntrusionDetectionService");
+                mSystemServiceManager.startService(IntrusionDetectionService.class);
+                t.traceEnd();
+            }
+
             if (AppFunctionManagerConfiguration.isSupported(context)) {
                 t.traceBegin("StartAppFunctionManager");
                 mSystemServiceManager.startService(AppFunctionManagerService.class);
@@ -1772,6 +1792,13 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(AdvancedProtectionService.Lifecycle.class);
                 t.traceEnd();
             }
+
+            if (!isWatch && !isTv && !isAutomotive && enableTradeInMode()) {
+                t.traceBegin("StartTradeInModeService");
+                mSystemServiceManager.startService(TradeInModeService.class);
+                t.traceEnd();
+            }
+
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
@@ -2121,6 +2148,13 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startServiceFromJar(
                         WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
+                // Start USD service
+                if (android.net.wifi.flags.Flags.usd()) {
+                    t.traceBegin("StartUsd");
+                    mSystemServiceManager.startServiceFromJar(
+                            WIFI_USD_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
+                    t.traceEnd();
+                }
             }
 
             if (context.getPackageManager().hasSystemFeature(
@@ -2583,6 +2617,12 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             }
 
+            if (mediaQualityFw() && isTv) {
+                t.traceBegin("StartMediaQuality");
+                mSystemServiceManager.startService(MediaQualityService.class);
+                t.traceEnd();
+            }
+
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
                 t.traceBegin("StartMediaResourceMonitor");
                 mSystemServiceManager.startService(MediaResourceMonitorService.class);
@@ -2640,9 +2680,15 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(AuthService.class);
             t.traceEnd();
 
+            if (android.security.Flags.secureLockdown()) {
+                t.traceBegin("StartSecureLockDeviceService.Lifecycle");
+                mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
+                t.traceEnd();
+            }
+
             if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
-                t.traceBegin("StartAdaptiveAuthService");
-                mSystemServiceManager.startService(AdaptiveAuthService.class);
+                t.traceBegin("StartAuthenticationPolicyService");
+                mSystemServiceManager.startService(AuthenticationPolicyService.class);
                 t.traceEnd();
             }
 
@@ -2750,8 +2796,9 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(WEAR_MODE_SERVICE_CLASS);
             t.traceEnd();
 
-            boolean enableWristOrientationService = SystemProperties.getBoolean(
-                    "config.enable_wristorientation", false);
+            boolean enableWristOrientationService =
+                    !android.server.Flags.migrateWristOrientation()
+                    && SystemProperties.getBoolean("config.enable_wristorientation", false);
             if (enableWristOrientationService) {
                 t.traceBegin("StartWristOrientationService");
                 mSystemServiceManager.startService(WRIST_ORIENTATION_SERVICE_CLASS);
@@ -2880,6 +2927,13 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("startTracingServiceProxy");
         mSystemServiceManager.startService(TracingServiceProxy.class);
         t.traceEnd();
+
+        // UprobeStats DynamicInstrumentationManager
+        if (com.android.art.flags.Flags.executableMethodFileOffsets()) {
+            t.traceBegin("StartDynamicInstrumentationManager");
+            mSystemServiceManager.startService(DynamicInstrumentationManagerService.class);
+            t.traceEnd();
+        }
 
         // It is now time to start up the app processes...
 
@@ -3035,10 +3089,18 @@ public final class SystemServer implements Dumpable {
         if (com.android.ranging.flags.Flags.rangingStackEnabled()) {
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)
                     || context.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_WIFI_RTT)) {
+                            PackageManager.FEATURE_WIFI_RTT)
+                    || (com.android.ranging.flags.Flags.rangingCsEnabled()
+                            && context.getPackageManager().hasSystemFeature(
+                                    PackageManager.FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING))) {
                 t.traceBegin("RangingService");
-                mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
-                        RANGING_APEX_SERVICE_JAR_PATH);
+                // TODO: b/375264320 - Remove after RELEASE_RANGING_STACK is ramped to next.
+                try {
+                    mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
+                            RANGING_APEX_SERVICE_JAR_PATH);
+                } catch (Throwable e) {
+                    Slog.d(TAG, "service-ranging.jar not found, not starting RangingService");
+                }
                 t.traceEnd();
             }
         }
@@ -3308,16 +3370,18 @@ public final class SystemServer implements Dumpable {
                 reportWtf("Notifying NetworkTimeService running", e);
             }
             t.traceEnd();
-            t.traceBegin("MakeInputManagerServiceReady");
-            try {
-                // TODO(BT) Pass parameter to input manager
-                if (inputManagerF != null) {
-                    inputManagerF.systemRunning();
+            if (!inputManagerLifecycleSupport()) {
+                t.traceBegin("MakeInputManagerServiceReady");
+                try {
+                    // TODO(BT) Pass parameter to input manager
+                    if (inputManagerF != null) {
+                        inputManagerF.systemRunning();
+                    }
+                } catch (Throwable e) {
+                    reportWtf("Notifying InputManagerService running", e);
                 }
-            } catch (Throwable e) {
-                reportWtf("Notifying InputManagerService running", e);
+                t.traceEnd();
             }
-            t.traceEnd();
             t.traceBegin("MakeTelephonyRegistryReady");
             try {
                 if (telephonyRegistryF != null) {

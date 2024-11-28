@@ -15,8 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -24,30 +26,31 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
+public class DataListFloat extends Operation implements VariableSupport, ArrayAccess {
     private static final int OP_CODE = Operations.FLOAT_LIST;
     private static final String CLASS_NAME = "IdListData";
-    int mId;
-    float[] mValues;
+    private final int mId;
+    @NonNull private final float[] mValues;
     private static final int MAX_FLOAT_ARRAY = 2000;
 
-    public DataListFloat(int id, float[] values) {
+    public DataListFloat(int id, @NonNull float[] values) {
         mId = id;
         mValues = values;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         // TODO add support for variables in arrays
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         context.addCollection(mId, this);
         for (float value : mValues) {
             if (Utils.isVariable(value)) {
@@ -57,16 +60,17 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mValues);
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "DataListFloat[A_" + (mId & 0xFFFF) + "] " + Arrays.toString(mValues);
+        return "DataListFloat[" + Utils.idString(mId) + "] " + Arrays.toString(mValues);
     }
 
-    public static void apply(WireBuffer buffer, int id, float[] values) {
+    public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] values) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(values.length);
@@ -75,7 +79,13 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         if (len > MAX_FLOAT_ARRAY) {
@@ -89,24 +99,27 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         operations.add(data);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("a list of Floats")
-                .field(INT, "id", "id the array (2xxxxx)")
+                .field(DocumentedOperation.INT, "id", "id the array (2xxxxx)")
                 .field(INT, "length", "number of floats")
-                .field(FLOAT_ARRAY, "values", "length",
-                        "array of floats");
+                .field(FLOAT_ARRAY, "values", "length", "array of floats");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.addCollection(mId, this);
     }
 
@@ -115,13 +128,14 @@ public class DataListFloat implements VariableSupport, ArrayAccess, Operation {
         return mValues[index];
     }
 
+    @NonNull
     @Override
     public float[] getFloats() {
         return mValues;
     }
 
     @Override
-    public int getFloatsLength() {
+    public int getLength() {
         return mValues.length;
     }
 }

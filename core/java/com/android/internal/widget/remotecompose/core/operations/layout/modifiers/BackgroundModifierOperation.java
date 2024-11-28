@@ -15,7 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -28,9 +30,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Component size-aware background draw
- */
+/** Component size-aware background draw */
 public class BackgroundModifierOperation extends DecoratorModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_BACKGROUND;
     private static final String CLASS_NAME = "BackgroundModifierOperation";
@@ -44,11 +44,18 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
     float mA;
     int mShapeType = ShapeType.RECTANGLE;
 
-    public PaintBundle mPaint = new PaintBundle();
+    @NonNull public PaintBundle mPaint = new PaintBundle();
 
-    public BackgroundModifierOperation(float x, float y, float width, float height,
-                                       float r, float g, float b, float a,
-                                       int shapeType) {
+    public BackgroundModifierOperation(
+            float x,
+            float y,
+            float width,
+            float height,
+            float r,
+            float g,
+            float b,
+            float a,
+            int shapeType) {
         this.mX = x;
         this.mY = y;
         this.mWidth = width;
@@ -61,39 +68,72 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mX, mY, mWidth, mHeight, mR, mG, mB, mA, mShapeType);
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, "BACKGROUND = [" + mX + ", "
-                + mY + ", " + mWidth + ", " + mHeight
-                + "] color [" + mR + ", " + mG + ", " + mB + ", " + mA
-                + "] shape [" + mShapeType + "]");
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
+        serializer.append(
+                indent,
+                "BACKGROUND = ["
+                        + mX
+                        + ", "
+                        + mY
+                        + ", "
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + "] color ["
+                        + mR
+                        + ", "
+                        + mG
+                        + ", "
+                        + mB
+                        + ", "
+                        + mA
+                        + "] shape ["
+                        + mShapeType
+                        + "]");
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(@NonNull RemoteContext context, float width, float height) {
         this.mWidth = width;
         this.mHeight = height;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BackgroundModifierOperation(" + mWidth + " x " + mHeight + ")";
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, float x, float y, float width, float height,
-                             float r, float g, float b, float a, int shapeType) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            float x,
+            float y,
+            float width,
+            float height,
+            float r,
+            float g,
+            float b,
+            float a,
+            int shapeType) {
         buffer.start(OP_CODE);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
@@ -107,7 +147,13 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         buffer.writeInt(shapeType);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float x = buffer.readFloat();
         float y = buffer.readFloat();
         float width = buffer.readFloat();
@@ -118,13 +164,11 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         float a = buffer.readFloat();
         // shape type
         int shapeType = buffer.readInt();
-        operations.add(new BackgroundModifierOperation(x, y, width, height,
-                r, g, b, a, shapeType));
+        operations.add(new BackgroundModifierOperation(x, y, width, height, r, g, b, a, shapeType));
     }
 
-
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.savePaint();
         mPaint.reset();
         mPaint.setStyle(PaintBundle.STYLE_FILL);
@@ -133,16 +177,13 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         if (mShapeType == ShapeType.RECTANGLE) {
             context.drawRect(0f, 0f, mWidth, mHeight);
         } else if (mShapeType == ShapeType.CIRCLE) {
-            context.drawCircle(mWidth / 2f, mHeight / 2f,
-                    Math.min(mWidth, mHeight) / 2f);
+            context.drawCircle(mWidth / 2f, mHeight / 2f, Math.min(mWidth, mHeight) / 2f);
         }
         context.restorePaint();
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Background Modifier")
                 .field(FLOAT, "x", "")
                 .field(FLOAT, "y", "")

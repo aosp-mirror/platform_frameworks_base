@@ -36,36 +36,33 @@ constructor(
     @Main private val resources: Resources,
     private val theme: Resources.Theme,
     private val devicePostureController: DevicePostureController,
-    private val deviceStateManager: DeviceStateManager
+    private val deviceStateManager: DeviceStateManager,
 ) : QSTileDataToStateMapper<RotationLockTileModel> {
     override fun map(config: QSTileConfig, data: RotationLockTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            this.label = resources.getString(R.string.quick_settings_rotation_unlocked_label)
-            this.contentDescription =
-                resources.getString(R.string.accessibility_quick_settings_rotation)
+            label = resources.getString(R.string.quick_settings_rotation_unlocked_label)
+            contentDescription = resources.getString(R.string.accessibility_quick_settings_rotation)
 
             if (data.isRotationLocked) {
                 activationState = QSTileState.ActivationState.INACTIVE
-                this.secondaryLabel = EMPTY_SECONDARY_STRING
+                secondaryLabel = EMPTY_SECONDARY_STRING
                 iconRes = R.drawable.qs_auto_rotate_icon_off
             } else {
                 activationState = QSTileState.ActivationState.ACTIVE
-                this.secondaryLabel =
+                secondaryLabel =
                     if (data.isCameraRotationEnabled) {
                         resources.getString(R.string.rotation_lock_camera_rotation_on)
                     } else {
                         EMPTY_SECONDARY_STRING
                     }
-                this.iconRes = R.drawable.qs_auto_rotate_icon_on
+                iconRes = R.drawable.qs_auto_rotate_icon_on
             }
-            this.icon = {
-                Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
-            }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             if (isDeviceFoldable(resources, deviceStateManager)) {
-                this.secondaryLabel = getSecondaryLabelWithPosture(this.activationState)
+                secondaryLabel = getSecondaryLabelWithPosture(activationState)
             }
-            this.stateDescription = this.secondaryLabel
-            this.sideViewIcon = QSTileState.SideViewIcon.None
+            stateDescription = secondaryLabel
+            sideViewIcon = QSTileState.SideViewIcon.None
             supportedActions =
                 setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
         }
@@ -86,7 +83,7 @@ constructor(
         return resources.getString(
             R.string.rotation_tile_with_posture_secondary_label_template,
             stateName,
-            posture
+            posture,
         )
     }
 

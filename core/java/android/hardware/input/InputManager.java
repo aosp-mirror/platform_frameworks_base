@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
 import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
+import static com.android.hardware.input.Flags.enableCustomizableInputGestures;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
 import static com.android.hardware.input.Flags.keyboardGlyphMap;
 
@@ -33,6 +34,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
@@ -256,6 +258,52 @@ public final class InputManager {
         int REMAPPABLE_MODIFIER_KEY_SHIFT_RIGHT = KeyEvent.KEYCODE_SHIFT_RIGHT;
         int REMAPPABLE_MODIFIER_KEY_CAPS_LOCK = KeyEvent.KEYCODE_CAPS_LOCK;
     }
+
+    /**
+     * Custom input gesture result success
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_SUCCESS = 1;
+
+    /**
+     * Custom input gesture error: Input gesture already exists
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS = 2;
+
+    /**
+     * Custom input gesture error: Input gesture does not exist
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST = 3;
+
+    /**
+     * Custom input gesture error: Input gesture is reserved for system action
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE = 4;
+
+    /**
+     * Custom input gesture error: Failure error code for all other errors/warnings
+     *
+     * @hide
+     */
+    public static final int CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER = 5;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CUSTOM_INPUT_GESTURE_RESULT_" }, value = {
+            CUSTOM_INPUT_GESTURE_RESULT_SUCCESS,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE,
+            CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER,
+    })
+    public @interface CustomInputGestureResult {}
 
     /**
      * Switch State: Unknown.
@@ -1430,6 +1478,130 @@ public final class InputManager {
     @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
     public void unregisterKeyGestureEventHandler(@NonNull KeyGestureEventHandler handler) {
         mGlobal.unregisterKeyGestureEventHandler(handler);
+    }
+
+    /** Adds a new custom input gesture
+     *
+     * @param inputGestureData gesture data to add as custom gesture
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @CustomInputGestureResult
+    @UserHandleAware
+    public int addCustomInputGesture(@NonNull InputGestureData inputGestureData) {
+        if (!enableCustomizableInputGestures()) {
+            return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
+        }
+        try {
+            return mIm.addCustomInputGesture(mContext.getUserId(), inputGestureData.getAidlData());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Removes an existing custom gesture
+     *
+     * <p> NOTE: Should not be used to remove system gestures. This API is only to be used to
+     * remove gestures added using {@link #addCustomInputGesture(InputGestureData)}
+     *
+     * @param inputGestureData gesture data for the existing custom gesture to remove
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @CustomInputGestureResult
+    @UserHandleAware
+    public int removeCustomInputGesture(@NonNull InputGestureData inputGestureData) {
+        if (!enableCustomizableInputGestures()) {
+            return CUSTOM_INPUT_GESTURE_RESULT_ERROR_OTHER;
+        }
+        try {
+            return mIm.removeCustomInputGesture(mContext.getUserId(),
+                    inputGestureData.getAidlData());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Removes all custom input gestures
+     *
+     * @param filter for removing all gestures of a category. If {@code null}, all custom input
+     *               gestures will be removed
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_KEY_GESTURES)
+    @UserHandleAware
+    public void removeAllCustomInputGestures(@Nullable InputGestureData.Filter filter) {
+        if (!enableCustomizableInputGestures()) {
+            return;
+        }
+        try {
+            mIm.removeAllCustomInputGestures(mContext.getUserId(),
+                    filter == null ? -1 : filter.getTag());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Get all custom input gestures
+     *
+     * @param filter for fetching all gestures of a category. If {@code null}, then will return
+     *               all custom input gestures
+     *
+     * @hide
+     */
+    @UserHandleAware
+    public List<InputGestureData> getCustomInputGestures(@Nullable InputGestureData.Filter filter) {
+        List<InputGestureData> result = new ArrayList<>();
+        if (!enableCustomizableInputGestures()) {
+            return result;
+        }
+        try {
+            for (AidlInputGestureData data : mIm.getCustomInputGestures(mContext.getUserId(),
+                    filter == null ? -1 : filter.getTag())) {
+                result.add(new InputGestureData(data));
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return result;
+    }
+
+    /**
+     * Return the set of application launch bookmarks handled by the input framework.
+     *
+     * @return list of {@link InputGestureData} containing the application launch shortcuts parsed
+     * at boot time from {@code bookmarks.xml}.
+     *
+     * @hide
+     */
+    public List<InputGestureData> getAppLaunchBookmarks() {
+        try {
+            List<InputGestureData> result = new ArrayList<>();
+            for (AidlInputGestureData data : mIm.getAppLaunchBookmarks()) {
+                result.add(new InputGestureData(data));
+            }
+            return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resets locked modifier state (i.e.. Caps Lock, Num Lock, Scroll Lock state)
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public void resetLockedModifierState() {
+        try {
+            mIm.resetLockedModifierState();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

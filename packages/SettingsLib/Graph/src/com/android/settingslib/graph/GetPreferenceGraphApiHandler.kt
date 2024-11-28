@@ -21,11 +21,14 @@ import android.os.Bundle
 import com.android.settingslib.graph.proto.PreferenceGraphProto
 import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.MessageCodec
+import com.android.settingslib.metadata.PreferenceScreenRegistry
+import com.android.settingslib.preference.PreferenceScreenProvider
 import java.util.Locale
 
 /** API to get preference graph. */
-abstract class GetPreferenceGraphApiHandler(private val activityClasses: Set<String>) :
-    ApiHandler<GetPreferenceGraphRequest, PreferenceGraphProto> {
+abstract class GetPreferenceGraphApiHandler(
+    private val preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>>
+) : ApiHandler<GetPreferenceGraphRequest, PreferenceGraphProto> {
 
     override val requestCodec: MessageCodec<GetPreferenceGraphRequest>
         get() = GetPreferenceGraphRequestCodec
@@ -39,54 +42,62 @@ abstract class GetPreferenceGraphApiHandler(private val activityClasses: Set<Str
         callingUid: Int,
         request: GetPreferenceGraphRequest,
     ): PreferenceGraphProto {
-        val builderRequest =
-            if (request.activityClasses.isEmpty()) {
-                GetPreferenceGraphRequest(activityClasses, request.visitedScreens, request.locale)
-            } else {
-                request
+        val builder = PreferenceGraphBuilder.of(application, myUid, callingUid, request)
+        if (request.screenKeys.isEmpty()) {
+            for (key in PreferenceScreenRegistry.preferenceScreens.keys) {
+                builder.addPreferenceScreenFromRegistry(key)
             }
-        return PreferenceGraphBuilder.of(application, builderRequest).build()
+            for (provider in preferenceScreenProviders) {
+                builder.addPreferenceScreenProvider(provider)
+            }
+        }
+        return builder.build()
     }
 }
 
 /**
  * Request of [GetPreferenceGraphApiHandler].
  *
- * @param activityClasses activities of the preference graph
+ * @param screenKeys screen keys of the preference graph
  * @param visitedScreens keys of the visited preference screen
  * @param locale locale of the preference graph
  */
 data class GetPreferenceGraphRequest
 @JvmOverloads
 constructor(
-    val activityClasses: Set<String> = setOf(),
+    val screenKeys: Set<String> = setOf(),
     val visitedScreens: Set<String> = setOf(),
     val locale: Locale? = null,
-    val includeValue: Boolean = true,
+    val flags: Int = PreferenceGetterFlags.ALL,
+    val includeValue: Boolean = true, // TODO: clean up
+    val includeValueDescriptor: Boolean = true,
 )
 
 object GetPreferenceGraphRequestCodec : MessageCodec<GetPreferenceGraphRequest> {
     override fun encode(data: GetPreferenceGraphRequest): Bundle =
-        Bundle(3).apply {
-            putStringArray(KEY_ACTIVITIES, data.activityClasses.toTypedArray())
-            putStringArray(KEY_PREF_KEYS, data.visitedScreens.toTypedArray())
+        Bundle(4).apply {
+            putStringArray(KEY_SCREEN_KEYS, data.screenKeys.toTypedArray())
+            putStringArray(KEY_VISITED_KEYS, data.visitedScreens.toTypedArray())
             putString(KEY_LOCALE, data.locale?.toLanguageTag())
+            putInt(KEY_FLAGS, data.flags)
         }
 
     override fun decode(data: Bundle): GetPreferenceGraphRequest {
-        val activities = data.getStringArray(KEY_ACTIVITIES) ?: arrayOf()
-        val visitedScreens = data.getStringArray(KEY_PREF_KEYS) ?: arrayOf()
+        val screenKeys = data.getStringArray(KEY_SCREEN_KEYS) ?: arrayOf()
+        val visitedScreens = data.getStringArray(KEY_VISITED_KEYS) ?: arrayOf()
         fun String?.toLocale() = if (this != null) Locale.forLanguageTag(this) else null
         return GetPreferenceGraphRequest(
-            activities.toSet(),
+            screenKeys.toSet(),
             visitedScreens.toSet(),
             data.getString(KEY_LOCALE).toLocale(),
+            data.getInt(KEY_FLAGS),
         )
     }
 
-    private const val KEY_ACTIVITIES = "activities"
-    private const val KEY_PREF_KEYS = "keys"
-    private const val KEY_LOCALE = "locale"
+    private const val KEY_SCREEN_KEYS = "k"
+    private const val KEY_VISITED_KEYS = "v"
+    private const val KEY_LOCALE = "l"
+    private const val KEY_FLAGS = "f"
 }
 
 object PreferenceGraphProtoCodec : MessageCodec<PreferenceGraphProto> {
@@ -96,5 +107,5 @@ object PreferenceGraphProtoCodec : MessageCodec<PreferenceGraphProto> {
     override fun decode(data: Bundle): PreferenceGraphProto =
         PreferenceGraphProto.parseFrom(data.getByteArray(KEY_GRAPH)!!)
 
-    private const val KEY_GRAPH = "graph"
+    private const val KEY_GRAPH = "g"
 }

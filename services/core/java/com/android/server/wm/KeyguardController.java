@@ -329,7 +329,7 @@ class KeyguardController {
         // If the client has requested to dismiss the keyguard and the Activity has the flag to
         // turn the screen on, wakeup the screen if it's the top Activity.
         if (activityRecord.getTurnScreenOnFlag() && activityRecord.isTopRunningActivity()) {
-            mTaskSupervisor.wakeUp("dismissKeyguard");
+            mTaskSupervisor.wakeUp(activityRecord.getDisplayId(), "dismissKeyguard");
         }
 
         mWindowManager.dismissKeyguard(callback, message);
@@ -765,26 +765,27 @@ class KeyguardController {
             }
 
             if (mTopTurnScreenOnActivity != null
-                    && !mService.mWindowManager.mPowerManager.isInteractive()
+                    && !mService.mWindowManager.mPowerManager.isInteractive(display.getDisplayId())
                     && (mRequestDismissKeyguard || mOccluded)) {
-                controller.mTaskSupervisor.wakeUp("handleTurnScreenOn");
+                controller.mTaskSupervisor.wakeUp(display.getDisplayId(), "handleTurnScreenOn");
                 mTopTurnScreenOnActivity.setCurrentLaunchCanTurnScreenOn(false);
             }
 
-            boolean hasChange = false;
-            if (!lastKeyguardGoingAway && mKeyguardGoingAway) {
+            final boolean startedGoingAway = (!lastKeyguardGoingAway && mKeyguardGoingAway);
+            final boolean occludedChanged = (lastOccluded != mOccluded);
+
+            if (startedGoingAway) {
                 writeEventLog("dismissIfInsecure");
                 controller.handleDismissInsecureKeyguard(display);
                 controller.scheduleGoingAwayTimeout(mDisplayId);
-                hasChange = true;
-            } else if (lastOccluded != mOccluded) {
+            }
+            if (occludedChanged && (reduceKeyguardTransitions() || !startedGoingAway)) {
                 controller.handleOccludedChanged(mDisplayId, mTopOccludesActivity);
-                hasChange = true;
             }
 
             // Collect the participants for shell transition, so that transition won't happen too
             // early since the transition was set ready.
-            if (hasChange && top != null && (mOccluded || mKeyguardGoingAway)) {
+            if (top != null && (startedGoingAway || (occludedChanged && mOccluded))) {
                 display.mTransitionController.collect(top);
             }
         }

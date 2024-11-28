@@ -204,6 +204,13 @@ public class TestModeBuilder {
         return this;
     }
 
+    public TestModeBuilder implicitForPackage(String pkg) {
+        setPackage(pkg);
+        setId(ZenModeConfig.implicitRuleId(pkg));
+        setName("Do Not Disturb (" + pkg + ")");
+        return this;
+    }
+
     public TestModeBuilder setActive(boolean active) {
         if (active) {
             mConfigZenRule.enabled = true;

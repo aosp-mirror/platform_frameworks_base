@@ -15,8 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -44,12 +46,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     int mDescriptionId = 0;
 
     public DrawBitmap(
-            int imageId,
-            float left,
-            float top,
-            float right,
-            float bottom,
-            int descriptionId) {
+            int imageId, float left, float top, float right, float bottom, int descriptionId) {
         mLeft = left;
         mTop = top;
         mRight = right;
@@ -59,19 +56,15 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
-        mOutputLeft = (Float.isNaN(mLeft))
-                ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
-        mOutputTop = (Float.isNaN(mTop))
-                ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
-        mOutputRight = (Float.isNaN(mRight))
-                ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
-        mOutputBottom = (Float.isNaN(mBottom))
-                ? context.getFloat(Utils.idFromNan(mBottom)) : mBottom;
+    public void updateVariables(@NonNull RemoteContext context) {
+        mOutputLeft = Float.isNaN(mLeft) ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
+        mOutputTop = Float.isNaN(mTop) ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
+        mOutputRight = Float.isNaN(mRight) ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
+        mOutputBottom = Float.isNaN(mBottom) ? context.getFloat(Utils.idFromNan(mBottom)) : mBottom;
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mLeft)) {
             context.listensTo(Utils.idFromNan(mLeft), this);
         }
@@ -87,43 +80,66 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mLeft, mTop, mRight, mBottom, mDescriptionId);
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "DrawBitmap (desc=" + mDescriptionId + ")" + mLeft + " " + mTop
-                + " " + mRight + " " + mBottom + ";";
+        return "DrawBitmap (desc="
+                + mDescriptionId
+                + ")"
+                + mLeft
+                + " "
+                + mTop
+                + " "
+                + mRight
+                + " "
+                + mBottom
+                + ";";
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         float sLeft = buffer.readFloat();
         float srcTop = buffer.readFloat();
         float srcRight = buffer.readFloat();
         float srcBottom = buffer.readFloat();
-        int discriptionId = buffer.readInt();
+        int descriptionId = buffer.readInt();
 
-        DrawBitmap op = new DrawBitmap(id, sLeft, srcTop, srcRight, srcBottom, discriptionId);
+        DrawBitmap op = new DrawBitmap(id, sLeft, srcTop, srcRight, srcBottom, descriptionId);
         operations.add(op);
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer,
-                             int id,
-                             float left,
-                             float top,
-                             float right,
-                             float bottom,
-                             int descriptionId) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int id,
+            float left,
+            float top,
+            float right,
+            float bottom,
+            int descriptionId) {
         buffer.start(Operations.DRAW_BITMAP);
         buffer.writeInt(id);
         buffer.writeFloat(left);
@@ -133,27 +149,24 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
         buffer.writeInt(descriptionId);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Draw Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap")
                 .field(INT, "id", "id of float")
-                .field(FLOAT, "left",
-                        "The left side of the image")
-                .field(FLOAT, "top",
-                        "The top of the image")
-                .field(FLOAT, "right",
-                        "The right side of the image")
-                .field(FLOAT, "bottom",
-                        "The bottom of the image")
+                .field(FLOAT, "left", "The left side of the image")
+                .field(FLOAT, "top", "The top of the image")
+                .field(FLOAT, "right", "The right side of the image")
+                .field(FLOAT, "bottom", "The bottom of the image")
                 .field(INT, "descriptionId", "id of string");
     }
 
-    public void paint(PaintContext context) {
-        context.drawBitmap(mId, mOutputLeft,
-                mOutputTop,
-                mOutputRight,
-                mOutputBottom);
+    @Override
+    public void paint(@NonNull PaintContext context) {
+        context.drawBitmap(mId, mOutputLeft, mOutputTop, mOutputRight, mOutputBottom);
     }
 }

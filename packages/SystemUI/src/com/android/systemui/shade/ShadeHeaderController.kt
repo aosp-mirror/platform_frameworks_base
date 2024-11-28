@@ -91,7 +91,7 @@ constructor(
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProviderStore: StatusBarContentInsetsProviderStore,
-    private val configurationController: ConfigurationController,
+    @ShadeDisplayAware private val configurationController: ConfigurationController,
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(SHADE_HEADER) private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,

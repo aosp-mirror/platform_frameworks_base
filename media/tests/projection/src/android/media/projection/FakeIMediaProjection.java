@@ -22,6 +22,7 @@ import android.annotation.EnforcePermission;
 import android.app.ActivityOptions.LaunchCookie;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
+import android.view.Display;
 
 /**
  * The connection between MediaProjection and system server is represented by IMediaProjection;
@@ -32,6 +33,7 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     boolean mIsStarted = false;
     LaunchCookie mLaunchCookie = null;
     IMediaProjectionCallback mIMediaProjectionCallback = null;
+    int mDisplayId = Display.DEFAULT_DISPLAY;
 
     FakeIMediaProjection(PermissionEnforcer enforcer) {
         super(enforcer);
@@ -44,7 +46,7 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     }
 
     @Override
-    public void stop() throws RemoteException {
+    public void stop(@StopReason int stopReason) throws RemoteException {
         // Pass along to the client's callback wrapper.
         mIMediaProjectionCallback.onStop();
     }
@@ -91,6 +93,10 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     public int getTaskId() throws RemoteException {
         getTaskId_enforcePermission();
         return mTaskId;
+    }
+
+    public int getDisplayId() {
+        return mDisplayId;
     }
 
     @Override

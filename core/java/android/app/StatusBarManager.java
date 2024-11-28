@@ -602,6 +602,15 @@ public class StatusBarManager {
     @LoggingOnly
     private static final long MEDIA_CONTROL_BLANK_TITLE = 274775190L;
 
+    /**
+     * Media controls based on {@link android.app.Notification.MediaStyle} notifications will have
+     * actions from the associated {@link androidx.media3.MediaController}, if available.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    // TODO(b/360196209): Set target SDK to Baklava once available
+    private static final long MEDIA_CONTROL_MEDIA3_ACTIONS = 360196209L;
+
     @UnsupportedAppUsage
     private Context mContext;
     private IStatusBarService mService;
@@ -1267,6 +1276,21 @@ public class StatusBarManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks whether the media controls for a given package should use a Media3 controller
+     *
+     * @param packageName App posting media controls
+     * @param user Current user handle
+     * @return true if Media3 should be used
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {android.Manifest.permission.READ_COMPAT_CHANGE_CONFIG,
+            android.Manifest.permission.LOG_COMPAT_CHANGE})
+    public static boolean useMedia3ControllerForApp(String packageName, UserHandle user) {
+        return CompatChanges.isChangeEnabled(MEDIA_CONTROL_MEDIA3_ACTIONS, packageName, user);
     }
 
     /**

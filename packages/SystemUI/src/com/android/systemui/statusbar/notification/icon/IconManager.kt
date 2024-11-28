@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.Flags
@@ -44,7 +45,6 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -152,13 +152,7 @@ constructor(
                 setIcon(entry, sensitiveIconDescriptor, shelfIcon)
                 setIcon(entry, sensitiveIconDescriptor, aodIcon)
                 entry.icons =
-                    IconPack.buildPack(
-                        sbIcon,
-                        sbChipIcon,
-                        shelfIcon,
-                        aodIcon,
-                        entry.icons,
-                    )
+                    IconPack.buildPack(sbIcon, sbChipIcon, shelfIcon, aodIcon, entry.icons)
             } catch (e: InflationException) {
                 entry.icons = IconPack.buildEmptyPack(entry.icons)
                 throw e
@@ -182,7 +176,7 @@ constructor(
                 Log.wtf(
                     TAG,
                     "Updating using the cache is not supported when the " +
-                        "notifications_background_icons flag is off"
+                        "notifications_background_icons flag is off",
                 )
             }
             if (!usingCache || !Flags.notificationsBackgroundIcons()) {
@@ -249,10 +243,6 @@ constructor(
         val (icon: Icon?, type: StatusBarIcon.Type) =
             if (showPeopleAvatar) {
                 createPeopleAvatar(entry) to StatusBarIcon.Type.PeopleAvatar
-            } else if (
-                android.app.Flags.notificationsUseMonochromeAppIcon() && n.shouldUseAppIcon()
-            ) {
-                n.smallIcon to StatusBarIcon.Type.MaybeMonochromeAppIcon
             } else {
                 n.smallIcon to StatusBarIcon.Type.NotifSmallIcon
             }
@@ -267,33 +257,25 @@ constructor(
 
     private fun getCachedIconDescriptor(
         entry: NotificationEntry,
-        showPeopleAvatar: Boolean
+        showPeopleAvatar: Boolean,
     ): StatusBarIcon? {
         val peopleAvatarDescriptor = entry.icons.peopleAvatarDescriptor
-        val appIconDescriptor = entry.icons.appIconDescriptor
         val smallIconDescriptor = entry.icons.smallIconDescriptor
 
         // If cached, return corresponding cached values
         return when {
             showPeopleAvatar && peopleAvatarDescriptor != null -> peopleAvatarDescriptor
-            android.app.Flags.notificationsUseMonochromeAppIcon() && appIconDescriptor != null ->
-                appIconDescriptor
             smallIconDescriptor != null -> smallIconDescriptor
             else -> null
         }
     }
 
     private fun cacheIconDescriptor(entry: NotificationEntry, descriptor: StatusBarIcon) {
-        if (
-            android.app.Flags.notificationsUseAppIcon() ||
-                android.app.Flags.notificationsUseMonochromeAppIcon()
-        ) {
-            // If either of the new icon flags is enabled, we cache the icon all the time.
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            // Although we're not actually using the app icon in the status bar, let's make sure
+            // we cache the icon all the time when the flag is on.
             when (descriptor.type) {
                 StatusBarIcon.Type.PeopleAvatar -> entry.icons.peopleAvatarDescriptor = descriptor
-                // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
-                StatusBarIcon.Type.MaybeMonochromeAppIcon ->
-                    entry.icons.appIconDescriptor = descriptor
                 // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
                 // But either way, it's a good idea to cache the descriptor.
                 else -> entry.icons.smallIconDescriptor = descriptor
@@ -312,7 +294,7 @@ constructor(
     private fun setIcon(
         entry: NotificationEntry,
         iconDescriptor: StatusBarIcon,
-        iconView: StatusBarIconView
+        iconView: StatusBarIconView,
     ) {
         iconView.setShowsConversation(showsConversation(entry, iconView, iconDescriptor))
         iconView.setTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP)
@@ -323,7 +305,7 @@ constructor(
 
     private fun Icon.toStatusBarIcon(
         entry: NotificationEntry,
-        type: StatusBarIcon.Type
+        type: StatusBarIcon.Type,
     ): StatusBarIcon {
         val n = entry.sbn.notification
         return StatusBarIcon(
@@ -333,7 +315,7 @@ constructor(
             n.iconLevel,
             n.number,
             iconBuilder.getIconContentDescription(n),
-            type
+            type,
         )
     }
 
@@ -347,7 +329,7 @@ constructor(
                 } catch (e: Exception) {
                     Log.e(
                         TAG,
-                        "Error calling LauncherApps#getShortcutIcon for notification $entry: $e"
+                        "Error calling LauncherApps#getShortcutIcon for notification $entry: $e",
                     )
                 }
             }
@@ -431,7 +413,7 @@ constructor(
     private fun showsConversation(
         entry: NotificationEntry,
         iconView: StatusBarIconView,
-        iconDescriptor: StatusBarIcon
+        iconDescriptor: StatusBarIcon,
     ): Boolean {
         val usedInSensitiveContext =
             iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon

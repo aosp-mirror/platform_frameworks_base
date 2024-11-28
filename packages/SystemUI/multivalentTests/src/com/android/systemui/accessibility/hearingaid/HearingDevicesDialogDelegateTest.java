@@ -45,9 +45,9 @@ import android.os.Handler;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Space;
 import android.widget.Spinner;
 
@@ -166,6 +166,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mCachedDevice.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
         when(mCachedDevice.isConnectedHearingAidDevice()).thenReturn(true);
         when(mCachedDevice.isConnectedHapClientDevice()).thenReturn(true);
+        when(mCachedDevice.getDrawableWithDescription()).thenReturn(new Pair<>(mDrawable, ""));
         when(mHearingDeviceItem.getCachedBluetoothDevice()).thenReturn(mCachedDevice);
 
         mContext.setMockPackageManager(mPackageManager);
@@ -217,6 +218,18 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
+    public void showDialog_noLiveCaption_noRelatedToolsInConfig_relatedToolLayoutGone() {
+        mContext.getOrCreateTestableResources().addOverride(
+                R.array.config_quickSettingsHearingDevicesRelatedToolName, new String[]{});
+
+        setUpPairNewDeviceDialog();
+        mDialog.show();
+
+        assertToolsUi(0);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
     public void showDialog_hasLiveCaption_noRelatedToolsInConfig_showOneRelatedTool() {
         when(mPackageManager.queryIntentActivities(
                 eq(LIVE_CAPTION_INTENT), anyInt())).thenReturn(
@@ -227,8 +240,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         setUpPairNewDeviceDialog();
         mDialog.show();
 
-        LinearLayout relatedToolsView = (LinearLayout) getRelatedToolsView(mDialog);
-        assertThat(countChildWithoutSpace(relatedToolsView)).isEqualTo(1);
+        assertToolsUi(1);
     }
 
     @Test
@@ -251,8 +263,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         setUpPairNewDeviceDialog();
         mDialog.show();
 
-        LinearLayout relatedToolsView = (LinearLayout) getRelatedToolsView(mDialog);
-        assertThat(countChildWithoutSpace(relatedToolsView)).isEqualTo(2);
+        assertToolsUi(2);
     }
 
     @Test
@@ -263,8 +274,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         setUpDeviceListDialog();
         mDialog.show();
 
-        Spinner spinner = (Spinner) getPresetSpinner(mDialog);
-        assertThat(spinner.getVisibility()).isEqualTo(View.GONE);
+        ViewGroup presetLayout = getPresetLayout(mDialog);
+        assertThat(presetLayout.getVisibility()).isEqualTo(View.GONE);
     }
 
     @Test
@@ -276,8 +287,9 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         setUpDeviceListDialog();
         mDialog.show();
 
-        Spinner spinner = (Spinner) getPresetSpinner(mDialog);
-        assertThat(spinner.getVisibility()).isEqualTo(View.VISIBLE);
+        ViewGroup presetLayout = getPresetLayout(mDialog);
+        assertThat(presetLayout.getVisibility()).isEqualTo(View.VISIBLE);
+        Spinner spinner = getPresetSpinner(mDialog);
         assertThat(spinner.getSelectedItemPosition()).isEqualTo(0);
     }
 
@@ -292,8 +304,9 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mDialogDelegate.onActiveDeviceChanged(mCachedDevice, BluetoothProfile.LE_AUDIO);
         mTestableLooper.processAllMessages();
 
-        Spinner spinner = (Spinner) getPresetSpinner(mDialog);
-        assertThat(spinner.getVisibility()).isEqualTo(View.VISIBLE);
+        ViewGroup presetLayout = getPresetLayout(mDialog);
+        assertThat(presetLayout.getVisibility()).isEqualTo(View.VISIBLE);
+        Spinner spinner = getPresetSpinner(mDialog);
         assertThat(spinner.getSelectedItemPosition()).isEqualTo(0);
     }
 
@@ -359,13 +372,22 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         return dialog.requireViewById(R.id.pair_new_device_button);
     }
 
-    private View getRelatedToolsView(SystemUIDialog dialog) {
-        return dialog.requireViewById(R.id.related_tools_container);
+    private ViewGroup getToolsContainer(SystemUIDialog dialog) {
+        return dialog.requireViewById(R.id.tools_container);
     }
 
-    private View getPresetSpinner(SystemUIDialog dialog) {
+    private ViewGroup getToolsLayout(SystemUIDialog dialog) {
+        return dialog.requireViewById(R.id.tools_layout);
+    }
+
+    private Spinner getPresetSpinner(SystemUIDialog dialog) {
         return dialog.requireViewById(R.id.preset_spinner);
     }
+
+    private ViewGroup getPresetLayout(SystemUIDialog dialog) {
+        return dialog.requireViewById(R.id.preset_layout);
+    }
+
 
     private int countChildWithoutSpace(ViewGroup viewGroup) {
         int spaceCount = 0;
@@ -375,6 +397,15 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
             }
         }
         return viewGroup.getChildCount() - spaceCount;
+    }
+
+    private void assertToolsUi(int childCount) {
+        ViewGroup toolsContainer = getToolsContainer(mDialog);
+        assertThat(countChildWithoutSpace(toolsContainer)).isEqualTo(childCount);
+
+        int targetVisibility = childCount == 0 ? View.GONE : View.VISIBLE;
+        ViewGroup toolsLayout = getToolsLayout(mDialog);
+        assertThat(toolsLayout.getVisibility()).isEqualTo(targetVisibility);
     }
 
     @After

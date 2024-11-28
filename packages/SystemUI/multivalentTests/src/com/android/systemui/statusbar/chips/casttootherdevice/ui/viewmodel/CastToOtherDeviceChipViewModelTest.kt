@@ -17,9 +17,12 @@
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.DialogInterface
+import android.platform.test.annotations.EnableFlags
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
+import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.mockDialogTransitionAnimator
@@ -51,6 +54,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -60,6 +64,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos().also { it.testCase = this }
     private val testScope = kosmos.testScope
@@ -132,6 +137,29 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
             assertThat((icon.contentDescription as ContentDescription.Resource).res)
                 .isEqualTo(R.string.cast_screen_to_other_device_chip_accessibility_label)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun chip_projectionIsAudioOnly_otherDevicePackage_isShownAsIconOnly() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaRouterRepo.castDevices.value = emptyList()
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.NoScreen(
+                    hostPackage = CAST_TO_OTHER_DEVICES_PACKAGE
+                )
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            val icon =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
+                    .impl as Icon.Resource
+            assertThat(icon.res).isEqualTo(R.drawable.ic_cast_connected)
+            // This content description is just generic "Casting", not "Casting screen"
+            assertThat((icon.contentDescription as ContentDescription.Resource).res)
+                .isEqualTo(R.string.accessibility_casting)
         }
 
     @Test
@@ -292,6 +320,18 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP)
+    fun chip_projectionIsNoScreenState_normalPackage_isHidden() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.NoScreen(NORMAL_PACKAGE)
+
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+        }
+
+    @Test
     fun chip_projectionIsSingleTaskState_normalPackage_isHidden() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -387,12 +427,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             clickListener!!.onClick(chipView)
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockScreenCastDialog),
-                    eq(chipBackgroundView),
-                    any(),
-                    anyBoolean(),
-                )
+                .showFromView(eq(mockScreenCastDialog), eq(chipBackgroundView), any(), anyBoolean())
         }
 
     @Test
@@ -412,12 +447,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             clickListener!!.onClick(chipView)
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    eq(mockScreenCastDialog),
-                    eq(chipBackgroundView),
-                    any(),
-                    anyBoolean(),
-                )
+                .showFromView(eq(mockScreenCastDialog), eq(chipBackgroundView), any(), anyBoolean())
         }
 
     @Test
@@ -461,12 +491,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             val cujCaptor = argumentCaptor<DialogCuj>()
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    any(),
-                    any(),
-                    cujCaptor.capture(),
-                    anyBoolean(),
-                )
+                .showFromView(any(), any(), cujCaptor.capture(), anyBoolean())
 
             assertThat(cujCaptor.firstValue.cujType)
                 .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
@@ -494,12 +519,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             val cujCaptor = argumentCaptor<DialogCuj>()
             verify(kosmos.mockDialogTransitionAnimator)
-                .showFromView(
-                    any(),
-                    any(),
-                    cujCaptor.capture(),
-                    anyBoolean(),
-                )
+                .showFromView(any(), any(), cujCaptor.capture(), anyBoolean())
 
             assertThat(cujCaptor.firstValue.cujType)
                 .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)

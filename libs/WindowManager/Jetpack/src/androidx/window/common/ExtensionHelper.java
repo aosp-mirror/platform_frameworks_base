@@ -23,7 +23,6 @@ import android.annotation.SuppressLint;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerGlobal;
 import android.util.RotationUtils;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -31,7 +30,6 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.UiContext;
-import androidx.annotation.VisibleForTesting;
 
 /**
  * Util class for both Sidecar and Extensions.
@@ -46,24 +44,15 @@ public final class ExtensionHelper {
      * Rotates the input rectangle specified in default display orientation to the current display
      * rotation.
      *
-     * @param displayId the display id.
+     * @param displayInfo the display information.
      * @param rotation the target rotation relative to the default display orientation.
      * @param inOutRect the input/output Rect as specified in the default display orientation.
      */
-    public static void rotateRectToDisplayRotation(
-            int displayId, @Surface.Rotation int rotation, @NonNull Rect inOutRect) {
-        final DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
-        final DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
-
-        rotateRectToDisplayRotation(displayInfo, rotation, inOutRect);
-    }
-
     // We suppress the Lint error CheckResult for Rect#intersect because in case the displayInfo and
     // folding features are out of sync, e.g. when a foldable devices is unfolding, it is acceptable
     // to provide the original folding feature Rect even if they don't intersect.
     @SuppressLint("RectIntersectReturnValueIgnored")
-    @VisibleForTesting
-    static void rotateRectToDisplayRotation(@NonNull DisplayInfo displayInfo,
+    public static void rotateRectToDisplayRotation(@NonNull DisplayInfo displayInfo,
             @Surface.Rotation int rotation, @NonNull Rect inOutRect) {
         // The inOutRect is specified in the default display orientation, so here we need to get
         // the display width and height in the default orientation to perform the intersection and

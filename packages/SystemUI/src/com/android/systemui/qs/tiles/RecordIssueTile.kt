@@ -111,10 +111,12 @@ constructor(
 
     override fun handleSetListening(listening: Boolean) {
         super.handleSetListening(listening)
-        if (listening) {
-            issueRecordingState.addListener(onRecordingChangeListener)
-        } else {
-            issueRecordingState.removeListener(onRecordingChangeListener)
+        bgExecutor.execute {
+            if (listening) {
+                issueRecordingState.addListener(onRecordingChangeListener)
+            } else {
+                issueRecordingState.removeListener(onRecordingChangeListener)
+            }
         }
     }
 

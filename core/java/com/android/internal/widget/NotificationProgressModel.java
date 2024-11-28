@@ -96,6 +96,10 @@ public final class NotificationProgressModel {
         return mProgress;
     }
 
+    public int getProgressMax() {
+        return mSegments.stream().mapToInt(Notification.ProgressStyle.Segment::getLength).sum();
+    }
+
     public boolean isStyledByProgress() {
         return mIsStyledByProgress;
     }

@@ -41,7 +41,8 @@ fun SceneScope.QuickQuickSettings(
     viewModel: QuickQuickSettingsViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val sizedTiles by viewModel.tileViewModels.collectAsStateWithLifecycle()
+
+    val sizedTiles = viewModel.tileViewModels
     val tiles = sizedTiles.fastMap { it.tile }
     val bounceables = remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
     val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
@@ -52,7 +53,7 @@ fun SceneScope.QuickQuickSettings(
         tiles.forEach { it.startListening(token) }
         onDispose { tiles.forEach { it.stopListening(token) } }
     }
-    val columns by viewModel.columns.collectAsStateWithLifecycle()
+    val columns = viewModel.columns
     var cellIndex = 0
     Box(modifier = modifier) {
         GridAnchor()
@@ -73,6 +74,9 @@ fun SceneScope.QuickQuickSettings(
                 squishiness = { squishiness },
                 coroutineScope = scope,
                 bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                tileHapticsViewModelFactoryProvider = viewModel.tileHapticsViewModelFactoryProvider,
+                // There should be no QuickQuickSettings when the details view is enabled.
+                detailsViewModel = null,
             )
         }
     }

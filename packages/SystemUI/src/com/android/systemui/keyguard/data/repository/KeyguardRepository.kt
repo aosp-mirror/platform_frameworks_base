@@ -269,6 +269,8 @@ interface KeyguardRepository {
     /** The top of shortcut in screen, used by wallpaper to find remaining space in lockscreen */
     val shortcutAbsoluteTop: StateFlow<Float>
 
+    val notificationStackAbsoluteBottom: StateFlow<Float>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -339,6 +341,12 @@ interface KeyguardRepository {
     fun isShowKeyguardWhenReenabled(): Boolean
 
     fun setShortcutAbsoluteTop(top: Float)
+
+    /**
+     * Set bottom of notifications from notification stack, and Magic Portrait will layout base on
+     * this value
+     */
+    fun setNotificationStackAbsoluteBottom(bottom: Float)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -635,6 +643,9 @@ constructor(
     private val _shortcutAbsoluteTop = MutableStateFlow(0F)
     override val shortcutAbsoluteTop = _shortcutAbsoluteTop.asStateFlow()
 
+    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
+    override val notificationStackAbsoluteBottom = _notificationStackAbsoluteBottom.asStateFlow()
+
     init {
         val callback =
             object : KeyguardStateController.Callback {
@@ -715,6 +726,10 @@ constructor(
 
     override fun setShortcutAbsoluteTop(top: Float) {
         _shortcutAbsoluteTop.value = top
+    }
+
+    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        _notificationStackAbsoluteBottom.value = bottom
     }
 
     private fun dozeMachineStateToModel(state: DozeMachine.State): DozeStateModel {

@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -134,6 +135,9 @@ public class SystemUIApplication extends Application implements
 
         if (Flags.enableLayoutTracing()) {
             View.setTraceLayoutSteps(true);
+        }
+        if (com.android.window.flags.Flags.systemUiPostAnimationEnd()) {
+            Animator.setPostNotifyEndListenerEnabled(true);
         }
 
         if (mProcessWrapper.isSystemUser()) {

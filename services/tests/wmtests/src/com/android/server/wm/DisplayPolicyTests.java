@@ -16,10 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -57,14 +55,11 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
-import android.view.DisplayShape;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.PrivacyIndicatorBounds;
 import android.view.Surface;
 import android.view.WindowInsets;
-import android.view.WindowInsets.Side;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -493,44 +488,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
         bar2.removeIfPossible();
         assertEquals(0, displayPolicy.getDecorInsetsInfo(di.rotation, di.logicalWidth,
                 di.logicalHeight).mNonDecorInsets.bottom);
-    }
-
-    @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
-    @Test
-    public void testImeMinimalSourceFrame() {
-        Assume.assumeFalse("Behavior no longer needed with ENABLE_HIDE_IME_CAPTION_BAR",
-                ENABLE_HIDE_IME_CAPTION_BAR);
-
-        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-
-        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
-        displayPolicy.addWindowLw(mNavBarWindow, attrs);
-        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
-        mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
-        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        mImeWindow.mAboveInsetsState.set(state);
-        mDisplayContent.mDisplayFrames = new DisplayFrames(
-                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds(),
-                DisplayShape.NONE);
-
-        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
-        mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
-        mImeWindow.mGivenContentInsets.set(0, displayInfo.logicalHeight, 0, 0);
-        mImeWindow.getControllableInsetProvider().setServerVisible(true);
-
-        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
-        displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
-
-        final InsetsSource imeSource = state.peekSource(ID_IME);
-        final InsetsSource navBarSource = state.peekSource(
-                mNavBarWindow.getControllableInsetProvider().getSource().getId());
-
-        assertNotNull(imeSource);
-        assertNotNull(navBarSource);
-        assertFalse(imeSource.getFrame().isEmpty());
-        assertFalse(navBarSource.getFrame().isEmpty());
-        assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
     }
 
     @SetupWindows(addWindows = W_INPUT_METHOD)

@@ -37,7 +37,6 @@ import com.google.common.truth.Truth.assertThat
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -63,20 +62,16 @@ class CommunalBackupHelperTest : SysuiTestCase() {
             Room.inMemoryDatabaseBuilder(context, CommunalDatabase::class.java)
                 .allowMainThreadQueries()
                 .build()
+        onTeardown { database.close() }
         CommunalDatabase.setInstance(database)
 
         dao = database.communalWidgetDao()
         backupUtils = CommunalBackupUtils(context)
 
         backupDataFile = File(context.cacheDir, "backup_data_file")
+        onTeardown { backupDataFile.delete() }
 
         underTest = CommunalBackupHelper(UserHandle.SYSTEM, backupUtils)
-    }
-
-    @After
-    fun teardown() {
-        backupDataFile.delete()
-        database.close()
     }
 
     @Test

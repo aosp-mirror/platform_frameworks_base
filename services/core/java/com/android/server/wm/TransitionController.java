@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -524,6 +525,23 @@ class TransitionController {
         return false;
     }
 
+    /**
+     * @return A pair of the transition and restore-behind target for the given {@param container}.
+     * @param container An ancestor of a transient-launch activity
+     */
+    @Nullable
+    Pair<Transition, Task> getTransientLaunchTransitionAndTarget(
+            @NonNull WindowContainer container) {
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mPlayingTransitions.get(i);
+            final Task restoreBehindTask = transition.getTransientLaunchRestoreTarget(container);
+            if (restoreBehindTask != null) {
+                return new Pair<>(transition, restoreBehindTask);
+            }
+        }
+        return null;
+    }
+
     /** Returns {@code true} if the display contains a transient-launch transition. */
     boolean hasTransientLaunch(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.hasTransientLaunch()
@@ -640,8 +658,8 @@ class TransitionController {
         }
         // Always allow WindowState to assign layers since it won't affect transition.
         return wc.asWindowState() != null || (!isPlaying()
-                // Don't assign task while collecting.
-                && !(wc.asTask() != null && isCollecting()));
+                // Don't assign task or display area layers while collecting.
+                && !((wc.asTask() != null || wc.asDisplayArea() != null) && isCollecting()));
     }
 
     @WindowConfiguration.WindowingMode

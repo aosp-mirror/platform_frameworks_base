@@ -133,8 +133,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * If an ACTION_UUID intent comes in within
      * MAX_UUID_DELAY_FOR_AUTO_CONNECT milliseconds, we will try auto-connect
      * again with the new UUIDs
+     * The value is reset if a manual disconnection happens.
      */
-    private long mConnectAttempted;
+    private long mConnectAttempted = -1;
 
     // Active device state
     private boolean mIsActiveDeviceA2dp = false;
@@ -322,18 +323,27 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     private void updatePreferredTransport() {
-        if (mProfiles.stream().noneMatch(p -> p instanceof LeAudioProfile)
-                || mProfiles.stream().noneMatch(p -> p instanceof HidProfile)) {
+        LeAudioProfile leAudioProfile =
+                (LeAudioProfile)
+                        mProfiles.stream()
+                                .filter(p -> p instanceof LeAudioProfile)
+                                .findFirst()
+                                .orElse(null);
+        HidProfile hidProfile =
+                (HidProfile)
+                        mProfiles.stream()
+                                .filter(p -> p instanceof HidProfile)
+                                .findFirst()
+                                .orElse(null);
+        if (leAudioProfile == null || hidProfile == null) {
             return;
         }
         // Both LeAudioProfile and HidProfile are connectable.
-        if (!mProfileManager
-                .getHidProfile()
-                .setPreferredTransport(
-                        mDevice,
-                        mProfileManager.getLeAudioProfile().isEnabled(mDevice)
-                                ? BluetoothDevice.TRANSPORT_LE
-                                : BluetoothDevice.TRANSPORT_BREDR)) {
+        if (!hidProfile.setPreferredTransport(
+                mDevice,
+                leAudioProfile.isEnabled(mDevice)
+                        ? BluetoothDevice.TRANSPORT_LE
+                        : BluetoothDevice.TRANSPORT_BREDR)) {
             Log.w(TAG, "Fail to set preferred transport");
         }
     }
@@ -360,6 +370,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public void disconnect() {
+        mConnectAttempted = -1;
         synchronized (mProfileLock) {
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
@@ -974,15 +985,19 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         if (BluetoothUtils.D) {
-            Log.d(TAG, "onUuidChanged: Time since last connect="
-                    + (SystemClock.elapsedRealtime() - mConnectAttempted));
+            long lastConnectAttempted = mConnectAttempted == -1 ? 0 : mConnectAttempted;
+            Log.d(
+                    TAG,
+                    "onUuidChanged: Time since last connect/manual disconnect="
+                            + (SystemClock.elapsedRealtime() - lastConnectAttempted));
         }
 
         /*
          * If a connect was attempted earlier without any UUID, we will do the connect now.
          * Otherwise, allow the connect on UUID change.
          */
-        if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
+        if (mConnectAttempted != -1
+                && (mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
             Log.d(TAG, "onUuidChanged: triggering connectDevice");
             connectDevice();
         }
@@ -1236,7 +1251,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public String getConnectionSummary(boolean shortSummary) {
         CharSequence summary = null;
-        if (BluetoothUtils.isAudioSharingEnabled()) {
+        if (BluetoothUtils.isAudioSharingUIAvailable(mContext)) {
             if (mBluetoothManager == null) {
                 mBluetoothManager = LocalBluetoothManager.getInstance(mContext, null);
             }

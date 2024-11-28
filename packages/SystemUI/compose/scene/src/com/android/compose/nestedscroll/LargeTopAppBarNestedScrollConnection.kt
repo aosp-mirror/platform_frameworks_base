@@ -16,8 +16,10 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
 
@@ -40,6 +42,7 @@ fun LargeTopAppBarNestedScrollConnection(
     onHeightChanged: (Float) -> Unit,
     minHeight: () -> Float,
     maxHeight: () -> Float,
+    flingBehavior: FlingBehavior,
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
@@ -54,23 +57,46 @@ fun LargeTopAppBarNestedScrollConnection(
             offsetAvailable > 0 && height() < maxHeight()
         },
         canStartPostFling = { false },
-        canStopOnPreFling = { false },
-        onStart = { /* do nothing */ },
-        onScroll = { offsetAvailable, _ ->
-            val currentHeight = height()
-            val amountConsumed =
-                if (offsetAvailable > 0) {
-                    val amountLeft = maxHeight() - currentHeight
-                    offsetAvailable.fastCoerceAtMost(amountLeft)
-                } else {
-                    val amountLeft = minHeight() - currentHeight
-                    offsetAvailable.fastCoerceAtLeast(amountLeft)
-                }
-            onHeightChanged(currentHeight + amountConsumed)
-            amountConsumed
+        onStart = {
+            LargeTopAppBarScrollController(
+                height = height,
+                maxHeight = maxHeight,
+                minHeight = minHeight,
+                onHeightChanged = onHeightChanged,
+                flingBehavior = flingBehavior,
+            )
         },
-        // Don't consume the velocity on pre/post fling
-        onStop = { 0f },
-        onCancel = { /* do nothing */ },
     )
+}
+
+private class LargeTopAppBarScrollController(
+    val height: () -> Float,
+    val maxHeight: () -> Float,
+    val minHeight: () -> Float,
+    val onHeightChanged: (Float) -> Unit,
+    val flingBehavior: FlingBehavior,
+) : ScrollController {
+    override fun onScroll(deltaScroll: Float, source: NestedScrollSource): Float {
+        val currentHeight = height()
+        val amountConsumed =
+            if (deltaScroll > 0) {
+                val amountLeft = maxHeight() - currentHeight
+                deltaScroll.fastCoerceAtMost(amountLeft)
+            } else {
+                val amountLeft = minHeight() - currentHeight
+                deltaScroll.fastCoerceAtLeast(amountLeft)
+            }
+        onHeightChanged(currentHeight + amountConsumed)
+        return amountConsumed
+    }
+
+    override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
+        return flingToScroll(initialVelocity, flingBehavior)
+    }
+
+    override fun onCancel() {
+        // do nothing
+    }
+
+    override fun canStopOnPreFling() = false
 }

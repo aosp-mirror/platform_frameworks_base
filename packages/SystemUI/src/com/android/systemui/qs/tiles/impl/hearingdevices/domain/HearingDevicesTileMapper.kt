@@ -36,9 +36,7 @@ constructor(@Main private val resources: Resources, private val theme: Resources
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_hearing_devices_label)
             iconRes = R.drawable.qs_hearing_devices_icon
-            val loadedIcon =
-                Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
-            icon = { loadedIcon }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             if (data.isAnyActiveHearingDevice) {

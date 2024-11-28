@@ -70,8 +70,10 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
-import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
+import static android.os.Flags.binderFrozenStateChangeCallback;
 import static android.permission.flags.Flags.checkOpValidatePackage;
+import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
+import static android.permission.flags.Flags.useFrozenAwareRemoteCallbackList;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED;
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION;
@@ -182,6 +184,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.policy.AppOpsPolicy;
+import com.android.server.selinux.RateLimiter;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -201,6 +204,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -350,6 +354,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     final SparseArray<UidState> mUidStates = new SparseArray<>();
     @GuardedBy("this")
     private boolean mUidStatesInitialized;
+
+    // A rate limiter to prevent excessive Atom pushing. Used by noteOperation.
+    private static final Duration RATE_LIMITER_WINDOW = Duration.ofMillis(10);
+    private final RateLimiter mRateLimiter = new RateLimiter(RATE_LIMITER_WINDOW);
 
     volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
 
@@ -990,6 +998,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     @Override
                     public void onUidModeChanged(int uid, int code, int mode,
                             String persistentDeviceId) {
+                        AppOpsManager.invalidateAppOpModeCache();
                         mHandler.sendMessage(PooledLambda.obtainMessage(
                                 AppOpsService::notifyOpChangedForAllPkgsInUid, AppOpsService.this,
                                 code, uid, false, persistentDeviceId));
@@ -998,6 +1007,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     @Override
                     public void onPackageModeChanged(String packageName, int userId, int code,
                             int mode) {
+                        AppOpsManager.invalidateAppOpModeCache();
                         mHandler.sendMessage(PooledLambda.obtainMessage(
                                 AppOpsService::notifyOpChangedForPkg, AppOpsService.this,
                                 packageName, code, mode, userId));
@@ -1024,6 +1034,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         // To migrate storageFile to recentAccessesFile, these reads must be called in this order.
         readRecentAccesses();
         mAppOpsCheckingService.readState();
+        // The system property used by the cache is created the first time it is written, that only
+        // happens inside invalidateCache().  Until the service calls invalidateCache() the property
+        // will not exist and the nonce will be UNSET.
+        AppOpsManager.invalidateAppOpModeCache();
+        AppOpsManager.disableAppOpModeCache();
     }
 
     public void publish() {
@@ -2822,6 +2837,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int checkOperationRaw(int code, int uid, String packageName,
             @Nullable String attributionTag) {
+        if (Binder.getCallingPid() != Process.myPid()
+                && Flags.appopAccessTrackingLoggingEnabled()) {
+            FrameworkStatsLog.write(
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
+                    false);
+        }
         return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
                 Context.DEVICE_ID_DEFAULT, true /*raw*/);
     }
@@ -2829,6 +2851,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int checkOperationRawForDevice(int code, int uid, @Nullable String packageName,
             @Nullable String attributionTag, int virtualDeviceId) {
+        if (Binder.getCallingPid() != Process.myPid()
+                && Flags.appopAccessTrackingLoggingEnabled()) {
+            FrameworkStatsLog.write(
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
+                    false);
+        }
         return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
                 virtualDeviceId, true /*raw*/);
     }
@@ -2847,7 +2876,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId) {
+    public int checkOperationForDevice(int code, int uid, String packageName,
+            @Nullable String attributionTag, int virtualDeviceId) {
         if (Binder.getCallingPid() != Process.myPid()
                 && Flags.appopAccessTrackingLoggingEnabled()) {
             FrameworkStatsLog.write(
@@ -2855,7 +2885,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
                     false);
         }
-        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
                 virtualDeviceId, false /*raw*/);
     }
 
@@ -2886,8 +2916,14 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return AppOpsManager.MODE_IGNORED;
             }
         }
-        return checkOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
-                virtualDeviceId, raw);
+
+        if (Flags.appopModeCachingEnabled()) {
+            return getAppOpMode(code, uid, resolvedPackageName, attributionTag, virtualDeviceId,
+                    raw, true);
+        } else {
+            return checkOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
+                    virtualDeviceId, raw);
+        }
     }
 
     /**
@@ -2952,6 +2988,54 @@ public class AppOpsService extends IAppOpsService.Stub {
                         /* rawUidMode= */ packageMode);
         }
     }
+
+    /**
+     * This method unifies mode checking logic between checkOperationUnchecked and
+     * noteOperationUnchecked. It can replace those two methods once the flag is fully rolled out.
+     *
+     * @param isCheckOp This param is only used in user's op restriction. When checking if a package
+     *                  can bypass user's restriction we should account for attributionTag as well.
+     *                  But existing checkOp APIs don't accept attributionTag so we added a hack to
+     *                  skip attributionTag check for checkOp. After we add an overload of checkOp
+     *                  that accepts attributionTag we should remove this param.
+     */
+    private @Mode int getAppOpMode(int code, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, int virtualDeviceId, boolean raw, boolean isCheckOp) {
+        PackageVerificationResult pvr;
+        try {
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag);
+        } catch (SecurityException e) {
+            logVerifyAndGetBypassFailure(uid, e, "getAppOpMode");
+            return MODE_IGNORED;
+        }
+
+        if (isOpRestrictedDueToSuspend(code, packageName, uid)) {
+            return MODE_IGNORED;
+        }
+
+        synchronized (this) {
+            if (isOpRestrictedLocked(uid, code, packageName, attributionTag, virtualDeviceId,
+                    pvr.bypass, isCheckOp)) {
+                return MODE_IGNORED;
+            }
+            if (isOpAllowedForUid(uid)) {
+                return MODE_ALLOWED;
+            }
+
+            int switchCode = AppOpsManager.opToSwitch(code);
+            int rawUidMode = mAppOpsCheckingService.getUidMode(uid,
+                    getPersistentId(virtualDeviceId), switchCode);
+
+            if (rawUidMode != AppOpsManager.opToDefaultMode(switchCode)) {
+                return raw ? rawUidMode : evaluateForegroundMode(uid, switchCode, rawUidMode);
+            }
+
+            int rawPackageMode = mAppOpsCheckingService.getPackageMode(packageName, switchCode,
+                    UserHandle.getUserId(uid));
+            return raw ? rawPackageMode : evaluateForegroundMode(uid, switchCode, rawPackageMode);
+        }
+    }
+
 
     @Override
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
@@ -3135,10 +3219,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage) {
         if (Binder.getCallingPid() != Process.myPid()
                 && Flags.appopAccessTrackingLoggingEnabled()) {
-            FrameworkStatsLog.write(
-                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
-                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION,
-                    attributionTag != null);
+            if (mRateLimiter.tryAcquire()) {
+                FrameworkStatsLog.write(
+                        APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
+                        APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION,
+                        attributionTag != null);
+            }
         }
         return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
                 attributionTag, Context.DEVICE_ID_DEFAULT, shouldCollectAsyncNotedOp, message,
@@ -3203,7 +3289,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         PackageVerificationResult pvr;
         try {
             pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
-            boolean wasNull = attributionTag == null;
             if (!pvr.isAttributionTagValid) {
                 attributionTag = null;
             }
@@ -3543,20 +3628,23 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         synchronized (this) {
             RemoteCallbackList<IAppOpsAsyncNotedCallback> callbacks = mAsyncOpWatchers.get(key);
+            if (callbacks == null && binderFrozenStateChangeCallback()
+                    && useFrozenAwareRemoteCallbackList()) {
+                callbacks = new RemoteCallbackList.Builder<IAppOpsAsyncNotedCallback>(
+                        RemoteCallbackList.FROZEN_CALLEE_POLICY_DROP)
+                        .setInterfaceDiedCallback((rcl, cb, cookie) ->
+                            stopWatchingAsyncNoted(packageName, callback)
+                        ).build();
+            }
             if (callbacks == null) {
                 callbacks = new RemoteCallbackList<IAppOpsAsyncNotedCallback>() {
-                    @Override
-                    public void onCallbackDied(IAppOpsAsyncNotedCallback callback) {
-                        synchronized (AppOpsService.this) {
-                            if (getRegisteredCallbackCount() == 0) {
-                                mAsyncOpWatchers.remove(key);
-                            }
+                        @Override
+                        public void onCallbackDied(IAppOpsAsyncNotedCallback cb) {
+                            stopWatchingAsyncNoted(packageName, callback);
                         }
-                    }
-                };
-                mAsyncOpWatchers.put(key, callbacks);
+                    };
             }
-
+            mAsyncOpWatchers.put(key, callbacks);
             callbacks.register(callback);
         }
     }

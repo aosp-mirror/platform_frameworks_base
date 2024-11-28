@@ -296,6 +296,12 @@ public class TaskInfo {
     public boolean isVisibleRequested;
 
     /**
+     * Whether the top activity is to be displayed. See {@link android.R.attr#windowNoDisplay}.
+     * @hide
+     */
+    public boolean isTopActivityNoDisplay;
+
+    /**
      * Whether this task is sleeping due to sleeping display.
      * @hide
      */
@@ -306,12 +312,6 @@ public class TaskInfo {
      * @hide
      */
     public boolean isTopActivityTransparent;
-
-    /**
-     * Whether the top activity has specified style floating.
-     * @hide
-     */
-    public boolean isTopActivityStyleFloating;
 
     /**
      * The last non-fullscreen bounds the task was launched in or resized to.
@@ -340,6 +340,12 @@ public class TaskInfo {
     public int requestedVisibleTypes;
 
     /**
+     * The timestamp of the top activity's last request to show the "Open in Browser" education.
+     * @hide
+     */
+    public long topActivityRequestOpenInBrowserEducationTimestamp;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
@@ -358,8 +364,9 @@ public class TaskInfo {
         // Do nothing
     }
 
-    private TaskInfo(Parcel source) {
-        readFromParcel(source);
+    /** @hide */
+    public TaskInfo(Parcel source) {
+        readTaskFromParcel(source);
     }
 
     /**
@@ -476,16 +483,18 @@ public class TaskInfo {
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
                 && isVisibleRequested == that.isVisibleRequested
+                && isTopActivityNoDisplay == that.isTopActivityNoDisplay
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
                 && parentTaskId == that.parentTaskId
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
-                && isTopActivityStyleFloating == that.isTopActivityStyleFloating
-                && lastNonFullscreenBounds == this.lastNonFullscreenBounds
+                && Objects.equals(lastNonFullscreenBounds, that.lastNonFullscreenBounds)
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && requestedVisibleTypes == that.requestedVisibleTypes
+                && topActivityRequestOpenInBrowserEducationTimestamp
+                    == that.topActivityRequestOpenInBrowserEducationTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo)
                 && Objects.equals(topActivityMainWindowFrame, that.topActivityMainWindowFrame);
     }
@@ -516,7 +525,7 @@ public class TaskInfo {
     /**
      * Reads the TaskInfo from a parcel.
      */
-    void readFromParcel(Parcel source) {
+    void readTaskFromParcel(Parcel source) {
         userId = source.readInt();
         taskId = source.readInt();
         effectiveUid = source.readInt();
@@ -553,23 +562,25 @@ public class TaskInfo {
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
         isVisibleRequested = source.readBoolean();
+        isTopActivityNoDisplay = source.readBoolean();
         isSleeping = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
-        isTopActivityStyleFloating = source.readBoolean();
         lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
         requestedVisibleTypes = source.readInt();
+        topActivityRequestOpenInBrowserEducationTimestamp = source.readLong();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
         topActivityMainWindowFrame = source.readTypedObject(Rect.CREATOR);
     }
 
     /**
      * Writes the TaskInfo to a parcel.
+     * @hide
      */
-    void writeToParcel(Parcel dest, int flags) {
+    public void writeTaskToParcel(Parcel dest, int flags) {
         dest.writeInt(userId);
         dest.writeInt(taskId);
         dest.writeInt(effectiveUid);
@@ -607,15 +618,16 @@ public class TaskInfo {
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
         dest.writeBoolean(isVisibleRequested);
+        dest.writeBoolean(isTopActivityNoDisplay);
         dest.writeBoolean(isSleeping);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
-        dest.writeBoolean(isTopActivityStyleFloating);
         dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
         dest.writeInt(requestedVisibleTypes);
+        dest.writeLong(topActivityRequestOpenInBrowserEducationTimestamp);
         dest.writeTypedObject(appCompatTaskInfo, flags);
         dest.writeTypedObject(topActivityMainWindowFrame, flags);
     }
@@ -651,15 +663,17 @@ public class TaskInfo {
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
                 + " isVisibleRequested=" + isVisibleRequested
+                + " isTopActivityNoDisplay=" + isTopActivityNoDisplay
                 + " isSleeping=" + isSleeping
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
-                + " isTopActivityStyleFloating=" + isTopActivityStyleFloating
                 + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " requestedVisibleTypes=" + requestedVisibleTypes
+                + " topActivityRequestOpenInBrowserEducationTimestamp="
+                + topActivityRequestOpenInBrowserEducationTimestamp
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + " topActivityMainWindowFrame=" + topActivityMainWindowFrame
                 + "}";

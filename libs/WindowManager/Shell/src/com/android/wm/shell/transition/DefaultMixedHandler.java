@@ -40,6 +40,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
@@ -369,7 +370,8 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
         if (mRecentsHandler != null) {
             if (mSplitHandler.isSplitScreenVisible()) {
                 return this::setRecentsTransitionDuringSplit;
-            } else if (mKeyguardHandler.isKeyguardShowing()) {
+            } else if (mKeyguardHandler.isKeyguardShowing()
+                    && !mKeyguardHandler.isKeyguardAnimating()) {
                 return this::setRecentsTransitionDuringKeyguard;
             } else if (mDesktopTasksController != null
                     // Check on the default display. Recents/gesture nav is only available there
@@ -419,7 +421,9 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
         for (int i = 0; i < info.getRootCount(); ++i) {
             out.addRoot(info.getRoot(i));
         }
-        out.setAnimationOptions(info.getAnimationOptions());
+        if (!Flags.moveAnimationOptionsToChange()) {
+            out.setAnimationOptions(info.getAnimationOptions());
+        }
         return out;
     }
 

@@ -1,0 +1,10 @@
+{
+  "postsubmit": [
+    {
+      "name": "FrameworksVcnTests"
+    },
+    {
+      "name": "CtsVcnTestCases"
+    }
+  ]
+}

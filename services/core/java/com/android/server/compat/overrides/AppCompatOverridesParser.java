@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 final class AppCompatOverridesParser {
     /**
      * Flag for specifying all compat change IDs owned by a namespace. See {@link

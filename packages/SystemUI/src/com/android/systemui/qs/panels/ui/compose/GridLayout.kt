@@ -27,12 +27,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 
 /** A layout of tiles, indicating how they should be composed when showing in QS or in edit mode. */
 interface GridLayout {
-    @Composable
-    fun SceneScope.TileGrid(
-        tiles: List<TileViewModel>,
-        modifier: Modifier,
-        editModeStart: () -> Unit,
-    )
+    @Composable fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier)
 
     @Composable
     fun EditTileGrid(

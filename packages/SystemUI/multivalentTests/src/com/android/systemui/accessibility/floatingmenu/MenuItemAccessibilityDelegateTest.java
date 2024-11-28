@@ -83,8 +83,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                mSecureSettings);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mSecureSettings);
 
         final int halfScreenHeight =
                 stubWindowManager.getCurrentWindowMetrics().getBounds().height() / 2;

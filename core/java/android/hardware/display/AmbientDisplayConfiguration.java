@@ -16,6 +16,8 @@
 
 package android.hardware.display;
 
+import static android.provider.Settings.Secure.SCREEN_OFF_UNLOCK_UDFPS_ENABLED;
+
 import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.biometrics.Flags;
@@ -151,8 +153,8 @@ public class AmbientDisplayConfiguration {
     public boolean screenOffUdfpsEnabled(int user) {
         return !TextUtils.isEmpty(udfpsLongPressSensorType())
                 && ((mScreenOffUdfpsEnabledByDefault && Flags.screenOffUnlockUdfps())
-                ? boolSettingDefaultOn("screen_off_udfps_enabled", user)
-                : boolSettingDefaultOff("screen_off_udfps_enabled", user));
+                ? boolSettingDefaultOn(SCREEN_OFF_UNLOCK_UDFPS_ENABLED, user)
+                : boolSettingDefaultOff(SCREEN_OFF_UNLOCK_UDFPS_ENABLED, user));
     }
 
     /** @hide */

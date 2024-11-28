@@ -63,9 +63,8 @@ public class HybridGroupManager {
     private HybridNotificationView inflateHybridView(View contentView, ViewGroup parent) {
         Trace.beginSection("HybridGroupManager#inflateHybridView");
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        int layout = contentView instanceof ConversationLayout
-                ? R.layout.hybrid_conversation_notification
-                : R.layout.hybrid_notification;
+        int layout = HybridNotificationView.getLayoutResource(
+                /* isConversation = */ contentView instanceof ConversationLayout);
         HybridNotificationView hybrid = (HybridNotificationView)
                 inflater.inflate(layout, parent, false);
         parent.addView(hybrid);

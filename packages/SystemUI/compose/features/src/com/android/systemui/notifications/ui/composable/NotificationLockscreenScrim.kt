@@ -21,7 +21,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -99,12 +98,18 @@ fun SceneScope.NotificationLockscreenScrim(
         }
     }
 
+    val isBouncerToLockscreen =
+        layoutState.currentTransition?.isTransitioning(
+            from = Scenes.Bouncer,
+            to = Scenes.Lockscreen,
+        ) ?: false
+
     Box(
         modifier
             .fillMaxSize()
-            .element(Notifications.Elements.NotificationScrim)
+            .element(viewModel.element.key)
             .graphicsLayer { alpha = alphaAnimatable.value }
-            .background(MaterialTheme.colorScheme.surface)
+            .background(viewModel.element.color(isBouncerToLockscreen))
     )
 }
 
@@ -112,7 +117,7 @@ private fun shouldShowScrimFadeOut(
     currentTransition: TransitionState.Transition,
     shadeMode: ShadeMode,
 ): Boolean {
-    return shadeMode == ShadeMode.Single &&
+    return shadeMode != ShadeMode.Dual &&
         currentTransition.isInitiatedByUserInput &&
         (currentTransition.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen) ||
             currentTransition.isTransitioning(from = Scenes.Bouncer, to = Scenes.Lockscreen))

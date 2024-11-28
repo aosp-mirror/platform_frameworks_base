@@ -15,7 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -28,9 +30,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Component size-aware border draw
- */
+/** Component size-aware border draw */
 public class BorderModifierOperation extends DecoratorModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_BORDER;
     public static final String CLASS_NAME = "BorderModifierOperation";
@@ -47,11 +47,20 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     float mA;
     int mShapeType = ShapeType.RECTANGLE;
 
-    public PaintBundle paint = new PaintBundle();
+    @NonNull public PaintBundle paint = new PaintBundle();
 
-    public BorderModifierOperation(float x, float y, float width, float height,
-                                   float borderWidth, float roundedCorner,
-                                   float r, float g, float b, float a, int shapeType) {
+    public BorderModifierOperation(
+            float x,
+            float y,
+            float width,
+            float height,
+            float borderWidth,
+            float roundedCorner,
+            float r,
+            float g,
+            float b,
+            float a,
+            int shapeType) {
         this.mX = x;
         this.mY = y;
         this.mWidth = width;
@@ -66,46 +75,113 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
-        serializer.append(indent, "BORDER = [" + mX + ", " + mY + ", "
-                + mWidth + ", " + mHeight + "] "
-                + "color [" + mR + ", " + mG + ", " + mB + ", " + mA + "] "
-                + "border [" + mBorderWidth + ", " + mRoundedCorner + "] "
-                + "shape [" + mShapeType + "]");
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
+        serializer.append(
+                indent,
+                "BORDER = ["
+                        + mX
+                        + ", "
+                        + mY
+                        + ", "
+                        + mWidth
+                        + ", "
+                        + mHeight
+                        + "] "
+                        + "color ["
+                        + mR
+                        + ", "
+                        + mG
+                        + ", "
+                        + mB
+                        + ", "
+                        + mA
+                        + "] "
+                        + "border ["
+                        + mBorderWidth
+                        + ", "
+                        + mRoundedCorner
+                        + "] "
+                        + "shape ["
+                        + mShapeType
+                        + "]");
     }
 
     @Override
-    public void write(WireBuffer buffer) {
-        apply(buffer, mX, mY, mWidth, mHeight, mBorderWidth, mRoundedCorner,
-                mR, mG, mB, mA, mShapeType);
+    public void write(@NonNull WireBuffer buffer) {
+        apply(
+                buffer,
+                mX,
+                mY,
+                mWidth,
+                mHeight,
+                mBorderWidth,
+                mRoundedCorner,
+                mR,
+                mG,
+                mB,
+                mA,
+                mShapeType);
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(@NonNull RemoteContext context, float width, float height) {
         this.mWidth = width;
         this.mHeight = height;
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "BorderModifierOperation(" + mX + "," + mY + " - " + mWidth + " x " + mHeight + ") "
-                + "borderWidth(" + mBorderWidth + ") "
-                + "color(" + mR + "," + mG + "," + mB + "," + mA + ")";
+        return "BorderModifierOperation("
+                + mX
+                + ","
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ") "
+                + "borderWidth("
+                + mBorderWidth
+                + ") "
+                + "color("
+                + mR
+                + ","
+                + mG
+                + ","
+                + mB
+                + ","
+                + mA
+                + ")";
     }
 
-
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, float x, float y, float width, float height,
-                             float borderWidth, float roundedCorner,
-                             float r, float g, float b, float a,
-                             int shapeType) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            float x,
+            float y,
+            float width,
+            float height,
+            float borderWidth,
+            float roundedCorner,
+            float r,
+            float g,
+            float b,
+            float a,
+            int shapeType) {
         buffer.start(OP_CODE);
         buffer.writeFloat(x);
         buffer.writeFloat(y);
@@ -121,7 +197,13 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         buffer.writeInt(shapeType);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float x = buffer.readFloat();
         float y = buffer.readFloat();
         float width = buffer.readFloat();
@@ -134,13 +216,12 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         float a = buffer.readFloat();
         // shape type
         int shapeType = buffer.readInt();
-        operations.add(new BorderModifierOperation(x, y, width, height, bw,
-                rc, r, g, b, a, shapeType));
+        operations.add(
+                new BorderModifierOperation(x, y, width, height, bw, rc, r, g, b, a, shapeType));
     }
 
-
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.savePaint();
         paint.reset();
         paint.setColor(mR, mG, mB, mA);
@@ -159,10 +240,8 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
         context.restorePaint();
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Border Modifier")
                 .field(FLOAT, "x", "")
                 .field(FLOAT, "y", "")

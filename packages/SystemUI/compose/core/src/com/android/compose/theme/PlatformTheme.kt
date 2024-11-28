@@ -63,6 +63,9 @@ private fun platformColorScheme(isDarkTheme: Boolean, context: Context): ColorSc
     return if (isDarkTheme) {
         dynamicDarkColorScheme(context)
             .copy(
+                inverseSurface = color(context, R.color.system_inverse_surface_dark),
+                inverseOnSurface = color(context, R.color.system_inverse_on_surface_dark),
+                inversePrimary = color(context, R.color.system_inverse_primary_dark),
                 error = color(context, R.color.system_error_dark),
                 onError = color(context, R.color.system_on_error_dark),
                 errorContainer = color(context, R.color.system_error_container_dark),
@@ -71,6 +74,9 @@ private fun platformColorScheme(isDarkTheme: Boolean, context: Context): ColorSc
     } else {
         dynamicLightColorScheme(context)
             .copy(
+                inverseSurface = color(context, R.color.system_inverse_surface_light),
+                inverseOnSurface = color(context, R.color.system_inverse_on_surface_light),
+                inversePrimary = color(context, R.color.system_inverse_primary_light),
                 error = color(context, R.color.system_error_light),
                 onError = color(context, R.color.system_on_error_light),
                 errorContainer = color(context, R.color.system_error_container_light),

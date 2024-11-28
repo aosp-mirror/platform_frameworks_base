@@ -16,8 +16,9 @@
 
 package com.android.server.vcn.routeselection;
 
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -147,12 +148,6 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         super(vcnContext, network, carrierConfig, callback);
 
         Objects.requireNonNull(deps, "Missing deps");
-
-        if (!vcnContext.isFlagIpSecTransformStateEnabled()) {
-            // Caller error
-            logWtf("ipsecTransformState flag disabled");
-            throw new IllegalAccessException("ipsecTransformState flag disabled");
-        }
 
         mHandler = new Handler(getVcnContext().getLooper());
 

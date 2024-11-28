@@ -23,6 +23,7 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
+import android.app.PropertyInvalidatedCache.Args;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -257,6 +258,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @TestApi
 @SystemApi(client=SystemApi.Client.MODULE_LIBRARIES)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query, Result> {
     /**
      * {@inheritDoc}
@@ -340,7 +342,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     public IpcDataCache(int maxEntries, @NonNull @IpcDataCacheModule String module,
             @NonNull String api, @NonNull String cacheName,
             @NonNull QueryHandler<Query, Result> computer) {
-        super(maxEntries, module, api, cacheName, computer);
+        super(new Args(module).maxEntries(maxEntries).api(api), cacheName, computer);
     }
 
     /**
@@ -562,7 +564,8 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
      * @hide
      */
     public IpcDataCache(@NonNull Config config, @NonNull QueryHandler<Query, Result> computer) {
-        super(config.maxEntries(), config.module(), config.api(), config.name(), computer);
+      super(new Args(config.module()).maxEntries(config.maxEntries()).api(config.api()),
+          config.name(), computer);
     }
 
     /**

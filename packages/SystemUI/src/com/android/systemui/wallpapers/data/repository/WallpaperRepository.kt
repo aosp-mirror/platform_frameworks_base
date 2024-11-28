@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -64,12 +63,6 @@ interface WallpaperRepository {
 
     /** Set rootView to get its windowToken afterwards */
     var rootView: View?
-
-    /**
-     * Set bottom of notifications from notification stack, and Magic Portrait will layout base on
-     * this value
-     */
-    fun setNotificationStackAbsoluteBottom(bottom: Float)
 }
 
 @SysUISingleton
@@ -106,7 +99,8 @@ constructor(
             .filter { it.selectionStatus == SelectionStatus.SELECTION_COMPLETE }
 
     /** The bottom of notification stack respect to the top of screen. */
-    private val notificationStackAbsoluteBottom: MutableStateFlow<Float> = MutableStateFlow(0F)
+    private val notificationStackAbsoluteBottom: StateFlow<Float> =
+        keyguardRepository.notificationStackAbsoluteBottom
 
     /** The top of shortcut respect to the top of screen. */
     private val shortcutAbsoluteTop: StateFlow<Float> = keyguardRepository.shortcutAbsoluteTop
@@ -205,10 +199,6 @@ constructor(
                 else SharingStarted.Lazily,
                 initialValue = false,
             )
-
-    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        notificationStackAbsoluteBottom.value = bottom
-    }
 
     private suspend fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
         return withContext(bgDispatcher) {

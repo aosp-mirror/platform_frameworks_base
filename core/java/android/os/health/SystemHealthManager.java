@@ -17,14 +17,22 @@
 package android.os.health;
 
 import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.power.CpuHeadroomResult;
+import android.hardware.power.GpuHeadroomResult;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CpuHeadroomParams;
+import android.os.CpuHeadroomParamsInternal;
+import android.os.GpuHeadroomParams;
+import android.os.GpuHeadroomParamsInternal;
+import android.os.IHintManager;
 import android.os.IPowerStatsService;
 import android.os.OutcomeReceiver;
 import android.os.PowerMonitor;
@@ -68,6 +76,8 @@ public class SystemHealthManager {
     private final IBatteryStats mBatteryStats;
     @Nullable
     private final IPowerStatsService mPowerStats;
+    @Nullable
+    private final IHintManager mHintManager;
     private List<PowerMonitor> mPowerMonitorsInfo;
     private final Object mPowerMonitorsLock = new Object();
     private static final long TAKE_UID_SNAPSHOT_TIMEOUT_MILLIS = 10_000;
@@ -88,14 +98,119 @@ public class SystemHealthManager {
     public SystemHealthManager() {
         this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)),
                 IPowerStatsService.Stub.asInterface(
-                        ServiceManager.getService(Context.POWER_STATS_SERVICE)));
+                        ServiceManager.getService(Context.POWER_STATS_SERVICE)),
+                IHintManager.Stub.asInterface(
+                        ServiceManager.getService(Context.PERFORMANCE_HINT_SERVICE)));
     }
 
     /** {@hide} */
     public SystemHealthManager(@NonNull IBatteryStats batteryStats,
-            @Nullable IPowerStatsService powerStats) {
+            @Nullable IPowerStatsService powerStats, @Nullable IHintManager hintManager) {
         mBatteryStats = batteryStats;
         mPowerStats = powerStats;
+        mHintManager = hintManager;
+    }
+
+    /**
+     * Provides an estimate of global available CPU headroom.
+     * <p>
+     *
+     * @param  params params to customize the CPU headroom calculation, null to use default params.
+     * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable.
+     *         A valid value is ranged from [0, 100], where 0 indicates no more CPU resources can be
+     *         granted.
+     * @throws UnsupportedOperationException if the API is unsupported.
+     * @throws SecurityException if the TIDs of the params don't belong to the same process.
+     * @throws IllegalStateException if the TIDs of the params don't have the same affinity setting.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    public @FloatRange(from = 0f, to = 100f) float getCpuHeadroom(
+            @Nullable CpuHeadroomParams params) {
+        if (mHintManager == null) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            final CpuHeadroomResult ret = mHintManager.getCpuHeadroom(
+                    params != null ? params.getInternal() : new CpuHeadroomParamsInternal());
+            if (ret == null || ret.getTag() != CpuHeadroomResult.globalHeadroom) {
+                return Float.NaN;
+            }
+            return ret.getGlobalHeadroom();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+
+
+    /**
+     * Provides an estimate of global available GPU headroom of the device.
+     * <p>
+     *
+     * @param  params params to customize the GPU headroom calculation, null to use default params.
+     * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable.
+     *         A valid value is ranged from [0, 100], where 0 indicates no more GPU resources can be
+     *         granted.
+     * @throws UnsupportedOperationException if the API is unsupported.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    public @FloatRange(from = 0f, to = 100f) float getGpuHeadroom(
+            @Nullable GpuHeadroomParams params) {
+        if (mHintManager == null) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            final GpuHeadroomResult ret = mHintManager.getGpuHeadroom(
+                    params != null ? params.getInternal() : new GpuHeadroomParamsInternal());
+            if (ret == null || ret.getTag() != GpuHeadroomResult.globalHeadroom) {
+                return Float.NaN;
+            }
+            return ret.getGlobalHeadroom();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Minimum polling interval for calling {@link #getCpuHeadroom(CpuHeadroomParams)} in
+     * milliseconds.
+     * <p>
+     * The {@link #getCpuHeadroom(CpuHeadroomParams)} API may return cached result if called more
+     * frequent than the interval.
+     *
+     * @throws UnsupportedOperationException if the API is unsupported.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    public long getCpuHeadroomMinIntervalMillis() {
+        if (mHintManager == null) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return mHintManager.getCpuHeadroomMinIntervalMillis();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Minimum polling interval for calling {@link #getGpuHeadroom(GpuHeadroomParams)} in
+     * milliseconds.
+     * <p>
+     * The {@link #getGpuHeadroom(GpuHeadroomParams)} API may return cached result if called more
+     * frequent than the interval.
+     *
+     * @throws UnsupportedOperationException if the API is unsupported.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    public long getGpuHeadroomMinIntervalMillis() {
+        if (mHintManager == null) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return mHintManager.getGpuHeadroomMinIntervalMillis();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -261,7 +376,7 @@ public class SystemHealthManager {
                         mPowerMonitorsInfo = result;
                     }
                     if (executor != null) {
-                        executor.execute(()-> onResult.accept(result));
+                        executor.execute(() -> onResult.accept(result));
                     } else {
                         onResult.accept(result);
                     }

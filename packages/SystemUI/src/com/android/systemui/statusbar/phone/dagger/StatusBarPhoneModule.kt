@@ -30,10 +30,15 @@ import com.android.systemui.statusbar.core.StatusBarInitializer
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl
 import com.android.systemui.statusbar.core.StatusBarInitializerStore
 import com.android.systemui.statusbar.core.StatusBarOrchestrator
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.core.StatusBarRootModernization
+import com.android.systemui.statusbar.data.repository.PrivacyDotViewControllerStoreModule
+import com.android.systemui.statusbar.data.repository.PrivacyDotWindowControllerStoreModule
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.events.PrivacyDotViewControllerModule
+import com.android.systemui.statusbar.phone.AutoHideControllerStore
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks
+import com.android.systemui.statusbar.phone.MultiDisplayAutoHideControllerStore
+import com.android.systemui.statusbar.phone.SingleDisplayAutoHideControllerStore
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStoreImpl
@@ -46,7 +51,14 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineScope
 
 /** Similar in purpose to [StatusBarModule], but scoped only to phones */
-@Module(includes = [PrivacyDotViewControllerModule::class])
+@Module(
+    includes =
+        [
+            PrivacyDotViewControllerModule::class,
+            PrivacyDotWindowControllerStoreModule::class,
+            PrivacyDotViewControllerStoreModule::class,
+        ]
+)
 interface StatusBarPhoneModule {
 
     @Binds
@@ -78,8 +90,11 @@ interface StatusBarPhoneModule {
             return if (StatusBarConnectedDisplays.isEnabled) {
                 // Will be started through MultiDisplayStatusBarStarter
                 CoreStartable.NOP
-            } else {
+            } else if (StatusBarRootModernization.isEnabled) {
                 defaultInitializerLazy.get()
+            } else {
+                // Will be started through CentralSurfaces
+                CoreStartable.NOP
             }
         }
 
@@ -91,8 +106,12 @@ interface StatusBarPhoneModule {
         fun statusBarInitializerImpl(
             implFactory: StatusBarInitializerImpl.Factory,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
+            statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
         ): StatusBarInitializerImpl {
-            return implFactory.create(statusBarWindowControllerStore.defaultDisplay)
+            return implFactory.create(
+                statusBarWindowControllerStore.defaultDisplay,
+                statusBarModeRepositoryStore.defaultDisplay,
+            )
         }
 
         @Provides
@@ -104,6 +123,7 @@ interface StatusBarPhoneModule {
             statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
             initializerStore: StatusBarInitializerStore,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
+            autoHideControllerStore: AutoHideControllerStore,
             statusBarOrchestratorFactory: StatusBarOrchestrator.Factory,
         ): StatusBarOrchestrator {
             return statusBarOrchestratorFactory.create(
@@ -113,25 +133,8 @@ interface StatusBarPhoneModule {
                 statusBarModeRepositoryStore.defaultDisplay,
                 initializerStore.defaultDisplay,
                 statusBarWindowControllerStore.defaultDisplay,
+                autoHideControllerStore.defaultDisplay,
             )
-        }
-
-        @Provides
-        @SysUISingleton
-        @IntoMap
-        @ClassKey(StatusBarOrchestrator::class)
-        fun orchestratorCoreStartable(
-            @Default orchestratorLazy: Lazy<StatusBarOrchestrator>
-        ): CoreStartable {
-            return if (StatusBarConnectedDisplays.isEnabled) {
-                // Will be started through MultiDisplayStatusBarStarter
-                CoreStartable.NOP
-            } else if (StatusBarSimpleFragment.isEnabled) {
-                orchestratorLazy.get()
-            } else {
-                // Will be started through CentralSurfacesImpl
-                CoreStartable.NOP
-            }
         }
 
         @Provides
@@ -155,7 +158,7 @@ interface StatusBarPhoneModule {
         fun commandQueueInitializerCoreStartable(
             initializerLazy: Lazy<CommandQueueInitializer>
         ): CoreStartable {
-            return if (StatusBarSimpleFragment.isEnabled) {
+            return if (StatusBarConnectedDisplays.isEnabled) {
                 initializerLazy.get()
             } else {
                 CoreStartable.NOP
@@ -186,6 +189,33 @@ interface StatusBarPhoneModule {
                 multiDisplayStoreLazy.get()
             } else {
                 singleDisplayStoreLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun autoHideStore(
+            singleDisplayLazy: Lazy<SingleDisplayAutoHideControllerStore>,
+            multiDisplayLazy: Lazy<MultiDisplayAutoHideControllerStore>,
+        ): AutoHideControllerStore {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                singleDisplayLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(AutoHideControllerStore::class)
+        fun storeAsCoreStartable(
+            multiDisplayLazy: Lazy<MultiDisplayAutoHideControllerStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                CoreStartable.NOP
             }
         }
     }

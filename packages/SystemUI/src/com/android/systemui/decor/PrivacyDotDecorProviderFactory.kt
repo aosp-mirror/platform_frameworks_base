@@ -81,7 +81,7 @@ class PrivacyDotCornerDecorProviderImpl(
     override val viewId: Int,
     @DisplayCutout.BoundsPosition override val alignedBound1: Int,
     @DisplayCutout.BoundsPosition override val alignedBound2: Int,
-    private val layoutId: Int,
+    val layoutId: Int,
 ) : CornerDecorProvider() {
 
     override fun onReloadResAndMeasure(

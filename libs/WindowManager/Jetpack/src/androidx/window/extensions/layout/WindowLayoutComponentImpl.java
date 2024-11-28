@@ -34,11 +34,14 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
@@ -96,8 +99,29 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
     private final SupportedWindowFeatures mSupportedWindowFeatures;
 
+    private final DisplayStateProvider mDisplayStateProvider;
+
     public WindowLayoutComponentImpl(@NonNull Context context,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
+        this(context, foldingFeatureProducer, new DisplayStateProvider() {
+            @Override
+            public int getDisplayRotation(@NonNull WindowConfiguration windowConfiguration) {
+                return windowConfiguration.getDisplayRotation();
+            }
+
+            @NonNull
+            @Override
+            public DisplayInfo getDisplayInfo(int displayId) {
+                return DisplayManagerGlobal.getInstance().getDisplayInfo(displayId);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    WindowLayoutComponentImpl(@NonNull Context context,
+            @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer,
+            @NonNull DisplayStateProvider displayStateProvider) {
+        mDisplayStateProvider = displayStateProvider;
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
         mFoldingFeatureProducer = foldingFeatureProducer;
@@ -145,21 +169,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                     || containsConsumer(consumer)) {
                 return;
             }
-            final IllegalArgumentException exception = new IllegalArgumentException(
-                    "Context must be a UI Context with display association, which should be"
-                    + " an Activity, WindowContext or InputMethodService");
-            if (!context.isUiContext()) {
-                throw exception;
-            }
-            if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
-                // This is to identify if #isUiContext of a non-UI Context is overridden.
-                // #isUiContext is more likely to be overridden than #getAssociatedDisplayId
-                // since #isUiContext is a public API.
-                StrictMode.onIncorrectContextUsed("The registered Context is a UI Context "
-                        + "but not associated with any display. "
-                        + "This Context may not receive any WindowLayoutInfo update. "
-                        + dumpAllBaseContextToString(context), exception);
-            }
+            assertUiContext(context);
             Log.d(TAG, "Register WindowLayoutInfoListener on "
                     + dumpAllBaseContextToString(context));
             mFoldingFeatureProducer.getData((features) -> {
@@ -339,6 +349,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @Override
     @NonNull
     public WindowLayoutInfo getCurrentWindowLayoutInfo(@NonNull @UiContext Context context) {
+        assertUiContext(context);
         synchronized (mLock) {
             return getWindowLayoutInfo(context, mLastReportedFoldingFeatures);
         }
@@ -351,6 +362,25 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @NonNull
     public SupportedWindowFeatures getSupportedWindowFeatures() {
         return mSupportedWindowFeatures;
+    }
+
+    private void assertUiContext(@NonNull Context context) {
+        final IllegalArgumentException exception = new IllegalArgumentException(
+                "Context must be a UI Context with display association, which should be "
+                        + "an Activity, WindowContext or InputMethodService");
+        if (!context.isUiContext()) {
+            throw exception;
+        }
+        if (context.getAssociatedDisplayId() == INVALID_DISPLAY) {
+            // This is to identify if #isUiContext of a non-UI Context is overridden.
+            // #isUiContext is more likely to be overridden than #getAssociatedDisplayId
+            // since #isUiContext is a public API.
+            StrictMode.onIncorrectContextUsed("The given context is a UI context, "
+                    + "but it is not associated with any display. "
+                    + "This context may not receive WindowLayoutInfo updates and "
+                    + "may get an empty WindowLayoutInfo return value. "
+                    + dumpAllBaseContextToString(context), exception);
+        }
     }
 
     /** @see #getWindowLayoutInfo(Context, List) */
@@ -401,15 +431,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
 
         // We will transform the feature bounds to the Activity window, so using the rotation
         // from the same source (WindowConfiguration) to make sure they are synchronized.
-        final int rotation = windowConfiguration.getDisplayRotation();
+        final int rotation = mDisplayStateProvider.getDisplayRotation(windowConfiguration);
+        final DisplayInfo displayInfo = mDisplayStateProvider.getDisplayInfo(displayId);
 
         for (CommonFoldingFeature baseFeature : storedFeatures) {
             Integer state = convertToExtensionState(baseFeature.getState());
             if (state == null) {
                 continue;
             }
-            Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, rotation, featureRect);
+            final Rect featureRect = baseFeature.getRect();
+            rotateRectToDisplayRotation(displayInfo, rotation, featureRect);
             transformToWindowSpaceRect(windowConfiguration, featureRect);
 
             if (isZero(featureRect)) {
@@ -529,5 +560,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         @Override
         public void onLowMemory() {
         }
+    }
+
+    @VisibleForTesting
+    interface DisplayStateProvider {
+        @Surface.Rotation
+        int getDisplayRotation(@NonNull WindowConfiguration windowConfiguration);
+
+        @NonNull
+        DisplayInfo getDisplayInfo(int displayId);
     }
 }

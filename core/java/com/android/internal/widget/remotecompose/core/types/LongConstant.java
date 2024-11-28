@@ -15,23 +15,23 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.LONG;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.LONG;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
-/**
- * Used to represent a long
- */
-public class LongConstant implements Operation {
+/** Used to represent a long */
+public class LongConstant extends Operation {
     private static final int OP_CODE = Operations.DATA_LONG;
-    long mValue;
+    private long mValue;
     private int mId;
 
     public LongConstant(int id, long value) {
@@ -39,20 +39,32 @@ public class LongConstant implements Operation {
         mValue = value;
     }
 
+    /**
+     * Get the value of the long constant
+     *
+     * @return the value of the long
+     */
+    public long getValue() {
+        return mValue;
+    }
+
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mValue);
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
+        context.putObject(mId, this);
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return toString();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "LongConstant[" + mId + "] = " + mValue + "";
@@ -65,28 +77,29 @@ public class LongConstant implements Operation {
      * @param id
      * @param value
      */
-    public static void apply(WireBuffer buffer, int id, long value) {
+    public static void apply(@NonNull WireBuffer buffer, int id, long value) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeLong(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 
         long value = buffer.readLong();
         operations.add(new LongConstant(id, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        "LongConstant")
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Expressions Operations", OP_CODE, "LongConstant")
                 .description("A boolean and its associated id")
-                .field(INT, "id", "id of Int")
-                .field(LONG, "value",
-                        "The long Value");
-
+                .field(DocumentedOperation.INT, "id", "id of Int")
+                .field(LONG, "value", "The long Value");
     }
-
 }

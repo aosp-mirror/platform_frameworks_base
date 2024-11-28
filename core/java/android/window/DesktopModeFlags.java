@@ -49,10 +49,12 @@ public enum DesktopModeFlags {
     ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
             Flags::enableCaptionCompatInsetForceConsumptionAlways, true),
     ENABLE_CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
+    ENABLE_TILE_RESIZING(Flags::enableTileResizing, true),
     ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY(
             Flags::enableDesktopWindowingWallpaperActivity, true),
     ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
     ENABLE_THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),
+    ENABLE_HOLD_TO_DRAG_APP_HANDLE(Flags::enableHoldToDragAppHandle, true),
     ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
     ENABLE_APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
     ENABLE_TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
@@ -69,7 +71,13 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
     ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
-            Flags::enableWindowingTransitionHandlersObservers, false);
+            Flags::enableWindowingTransitionHandlersObservers, false),
+    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS(
+            Flags::enableDesktopAppLaunchAlttabTransitions, false),
+    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS(
+            Flags::enableDesktopAppLaunchTransitions, false),
+    ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false),
+    ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.

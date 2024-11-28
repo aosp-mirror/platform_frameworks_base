@@ -20,6 +20,7 @@ interface IAppOpsUserClient {
     void noteSyncOpNative();
     void noteNonPermissionSyncOpNative();
     oneway void noteSyncOpOnewayNative();
+    void freezeAndNoteSyncOp();
     void noteSyncOpOtherUidNative();
     void noteAsyncOpNative();
     void noteAsyncOpNativeWithCustomMessage();

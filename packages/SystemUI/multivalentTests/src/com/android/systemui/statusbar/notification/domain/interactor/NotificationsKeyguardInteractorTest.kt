@@ -58,19 +58,4 @@ class NotificationsKeyguardInteractorTest : SysuiTestCase() {
 
             assertThat(notifsFullyHidden).isTrue()
         }
-
-    @Test
-    fun isPulseExpanding_reflectsRepository() =
-        testComponent.runTest {
-            underTest.setPulseExpanding(false)
-            val isPulseExpanding by collectLastValue(underTest.isPulseExpanding)
-            runCurrent()
-
-            assertThat(isPulseExpanding).isFalse()
-
-            underTest.setPulseExpanding(true)
-            runCurrent()
-
-            assertThat(isPulseExpanding).isTrue()
-        }
 }

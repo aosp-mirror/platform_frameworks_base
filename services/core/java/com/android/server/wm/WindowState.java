@@ -157,6 +157,7 @@ import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.WindowStateProto.ATTRIBUTES;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
+import static com.android.server.wm.WindowStateProto.DIM_BOUNDS;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
 import static com.android.server.wm.WindowStateProto.FORCE_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
@@ -181,8 +182,6 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
-import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
 import android.annotation.CallSuper;
@@ -213,6 +212,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -258,6 +258,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.RefreshRatePolicy.FrameRateVote;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.wm.utils.RegionUtils;
 import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -792,6 +793,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
     private final List<DrawHandler> mDrawHandlers = new ArrayList<>();
 
+    /**
+     * Indicates whether inset animations are currently running within the Window.
+     * This value is used by (@link com.android.server.wm.RefreshRatePolicy.java)
+     * to omit setting a frame rate on the WindowState. Insets Animation is unique in that
+     * sense that an app might drive an insets animation for a Window owned by a different
+     * app (such as IME). In that case, we need the app that drives the insets animation
+     * to be able to vote for high refresh rate from VRI.
+     */
+    private boolean mInsetsAnimationRunning;
+
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
         updateSurfacePosition(t);
@@ -1186,9 +1197,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
             getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
         }
-        if (secureWindowState()) {
-            getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
-        }
+        getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
         // All apps should be considered as occluding when computing TrustedPresentation Thresholds.
         final boolean canOccludePresentation = !mSession.mCanAddInternalSystemWindow;
         getPendingTransaction().setCanOccludePresentation(mSurfaceControl, canOccludePresentation);
@@ -2327,7 +2336,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (mStartingData != null && mStartingData.mAssociatedTask == null
                     && mTempConfiguration.windowConfiguration.getRotation()
                             == selfConfiguration.windowConfiguration.getRotation()
-                    && !mTempConfiguration.windowConfiguration.getBounds().equals(getBounds())) {
+                    && !RegionUtils.sizeEquals(
+                            mTempConfiguration.windowConfiguration.getBounds(), getBounds())) {
                 mStartingData.mResizedFromTransfer = true;
                 // Lock the starting window to task, so it won't resize from transfer anymore.
                 mActivityRecord.associateStartingWindowWithTaskIfNeeded();
@@ -2862,12 +2872,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             if (allowTheaterMode && canTurnScreenOn
                     && (mWmService.mAtmService.isDreaming()
-                            || !mWmService.mPowerManager.isInteractive())) {
+                            || !mWmService.mPowerManager.isInteractive(getDisplayId()))) {
                 if (DEBUG_VISIBILITY || DEBUG_POWER) {
                     Slog.v(TAG, "Relayout window turning screen on: " + this);
                 }
                 mWmService.mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_APPLICATION, "android.server.wm:SCREEN_ON_FLAG");
+                        PowerManager.WAKE_REASON_APPLICATION, "android.server.wm:SCREEN_ON_FLAG",
+                        getDisplayId());
             }
 
             if (mActivityRecord != null) {
@@ -2986,15 +2997,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
-    @Override
-    void resolveOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveOverrideConfiguration(newParentConfig);
-        if (mActivityRecord != null) {
-            // Let the activity decide whether to apply the size override.
-            return;
-        }
-        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
-        resolvedConfig.seq = newParentConfig.seq;
+    void applySizeOverride(Configuration newParentConfig, Configuration resolvedConfig) {
         applySizeOverrideIfNeeded(
                 getDisplayContent(),
                 mSession.mProcess.mInfo,
@@ -3377,8 +3380,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (cleanupOnResume) {
                 requestUpdateWallpaperIfNeeded();
             }
-            mDestroying = false;
-            destroyedSomething = true;
+            if (!mHasSurface) {
+                mDestroying = false;
+                destroyedSomething = true;
+            }
 
             // Since mDestroying will affect ActivityRecord#allDrawn, we need to perform another
             // traversal in case we are waiting on this window to start the transition.
@@ -3431,7 +3436,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mAttrs.type != TYPE_PRIVATE_PRESENTATION
                 && !(mAttrs.type == TYPE_PRESENTATION && isOnVirtualDisplay())
         ) {
-            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
+            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid,
+                    mAttrs.type, shown);
         }
     }
 
@@ -4113,6 +4119,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mMergedLocalInsetsSources != null) {
             for (int i = 0; i < mMergedLocalInsetsSources.size(); ++i) {
                 mMergedLocalInsetsSources.valueAt(i).dumpDebug(proto, MERGED_LOCAL_INSETS_SOURCES);
+            }
+        }
+        if (getDimController() != null) {
+            final Rect dimBounds = getDimController().getDimBounds();
+            if (dimBounds != null) {
+                dimBounds.dumpDebug(proto, DIM_BOUNDS);
             }
         }
         proto.end(token);
@@ -5294,12 +5306,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (voteChanged) {
             getPendingTransaction()
                     .setFrameRate(mSurfaceControl, mFrameRateVote.mRefreshRate,
-                        mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
-            if (explicitRefreshRateHints()) {
-                getPendingTransaction().setFrameRateSelectionStrategy(mSurfaceControl,
-                        mFrameRateVote.mSelectionStrategy);
-            }
-
+                            mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS)
+                    .setFrameRateSelectionStrategy(mSurfaceControl,
+                            mFrameRateVote.mSelectionStrategy);
         }
     }
 
@@ -6174,21 +6183,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setSecureLocked(boolean isSecure) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, getName());
-        if (secureWindowState()) {
-            if (mSurfaceControl == null) {
-                return;
-            }
-            getPendingTransaction().setSecure(mSurfaceControl, isSecure);
-        } else {
-            if (mWinAnimator.mSurfaceControl == null) {
-                return;
-            }
-            getPendingTransaction().setSecure(mWinAnimator.mSurfaceControl,
-                    isSecure);
+        if (mSurfaceControl == null) {
+            return;
         }
+        getPendingTransaction().setSecure(mSurfaceControl, isSecure);
         if (mDisplayContent != null) {
             mDisplayContent.refreshImeSecureFlag(getSyncTransaction());
         }
         mWmService.scheduleAnimationLocked();
+    }
+
+    void notifyInsetsAnimationRunningStateChanged(boolean running) {
+        if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                    TextUtils.formatSimple("%s: notifyInsetsAnimationRunningStateChanged(%s)",
+                    getName(),
+                    Boolean.toString(running)));
+        }
+        mInsetsAnimationRunning = running;
+        mWmService.scheduleAnimationLocked();
+    }
+
+    boolean isInsetsAnimationRunning() {
+        return mInsetsAnimationRunning;
     }
 }

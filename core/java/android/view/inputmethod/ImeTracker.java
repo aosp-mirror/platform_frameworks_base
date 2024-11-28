@@ -221,6 +221,9 @@ public interface ImeTracker {
             PHASE_WM_INVOKING_IME_REQUESTED_LISTENER,
             PHASE_CLIENT_ALREADY_HIDDEN,
             PHASE_CLIENT_VIEW_HANDLER_AVAILABLE,
+            PHASE_SERVER_UPDATE_CLIENT_VISIBILITY,
+            PHASE_WM_DISPLAY_IME_CONTROLLER_SET_IME_REQUESTED_VISIBLE,
+            PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface Phase {}
@@ -430,6 +433,17 @@ public interface ImeTracker {
      * continue without.
      */
     int PHASE_CLIENT_VIEW_HANDLER_AVAILABLE = ImeProtoEnums.PHASE_CLIENT_VIEW_HANDLER_AVAILABLE;
+    /**
+     * ImeInsetsSourceProvider sets the reported visibility of the caller/client window (either the
+     * app or the RemoteInsetsControlTarget).
+     */
+    int PHASE_SERVER_UPDATE_CLIENT_VISIBILITY = ImeProtoEnums.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY;
+    /** DisplayImeController received the requested visibility for the IME and stored it. */
+    int PHASE_WM_DISPLAY_IME_CONTROLLER_SET_IME_REQUESTED_VISIBLE =
+            ImeProtoEnums.PHASE_WM_DISPLAY_IME_CONTROLLER_SET_IME_REQUESTED_VISIBLE;
+    /** The control target reported its requestedVisibleTypes back to WindowManagerService. */
+    int PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES =
+            ImeProtoEnums.PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES;
 
     /**
      * Called when an IME request is started.

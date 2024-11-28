@@ -623,6 +623,22 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun showNextSecurityScreenOrFinish_calledWithNoAuthentication_butRequiresSimPin() {
+        // GIVEN trust is true (extended unlock)
+        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true)
+
+        // WHEN SIMPIN is the next required screen
+        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID))
+            .thenReturn(SecurityMode.SimPin)
+
+        // WHEN a request is made to dismiss
+        underTest.dismiss(TARGET_USER_ID)
+
+        // THEN we will show the SIM PIN screen
+        verify(viewFlipperController).getSecurityView(eq(SecurityMode.SimPin), any(), any())
+    }
+
+    @Test
     fun onSwipeUp_forwardsItToFaceAuthInteractor() {
         val registeredSwipeListener = registeredSwipeListener
         setupGetSecurityView(SecurityMode.Password)

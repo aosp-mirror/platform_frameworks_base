@@ -151,8 +151,14 @@ class ShadeTouchHandlerTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     // Verifies that a swipe down forwards captured touches to the window root view for handling.
     @Test
-    @EnableFlags(Flags.FLAG_COMMUNAL_HUB, Flags.FLAG_SCENE_CONTAINER)
+    @EnableFlags(
+        Flags.FLAG_COMMUNAL_HUB,
+        Flags.FLAG_SCENE_CONTAINER,
+        Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX,
+    )
     fun testSwipeDown_sceneContainerEnabled_sentToWindowRootView() {
+        mTouchHandler.onGlanceableTouchAvailable(true)
+
         swipe(Direction.DOWN)
 
         // Both motion events are sent for central surfaces to process.
@@ -165,8 +171,7 @@ class ShadeTouchHandlerTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_SCENE_CONTAINER)
     @DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun testSwipeDown_dreaming_sentToWindowRootView() {
-        whenever(mDreamManager.isDreaming).thenReturn(true)
+    fun testSwipeDown_sceneContainerEnabledFullscreenSwipeDisabled_sentToWindowRootView() {
         swipe(Direction.DOWN)
 
         // Both motion events are sent for the shade view to process.

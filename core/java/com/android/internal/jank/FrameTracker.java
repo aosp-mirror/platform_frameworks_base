@@ -16,13 +16,9 @@
 
 package com.android.internal.jank;
 
-import static android.view.SurfaceControl.JankData.DISPLAY_HAL;
-import static android.view.SurfaceControl.JankData.JANK_APP_DEADLINE_MISSED;
+import static android.view.SurfaceControl.JankData.JANK_APPLICATION;
+import static android.view.SurfaceControl.JankData.JANK_COMPOSER;
 import static android.view.SurfaceControl.JankData.JANK_NONE;
-import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_DEADLINE_MISSED;
-import static android.view.SurfaceControl.JankData.JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED;
-import static android.view.SurfaceControl.JankData.PREDICTION_ERROR;
-import static android.view.SurfaceControl.JankData.SURFACE_FLINGER_SCHEDULING;
 
 import static com.android.internal.jank.DisplayRefreshRate.UNKNOWN_REFRESH_RATE;
 import static com.android.internal.jank.DisplayRefreshRate.VARIABLE_REFRESH_RATE;
@@ -58,6 +54,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -142,7 +139,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         }
 
         static JankInfo createFromSurfaceControlCallback(SurfaceControl.JankData jankStat) {
-            return new JankInfo(jankStat.frameVsyncId).update(jankStat);
+            return new JankInfo(jankStat.getVsyncId()).update(jankStat);
         }
 
         private JankInfo(long frameVsyncId) {
@@ -157,10 +154,10 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
 
         private JankInfo update(SurfaceControl.JankData jankStat) {
             this.surfaceControlCallbackFired = true;
-            this.jankType = jankStat.jankType;
-            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.frameIntervalNs);
+            this.jankType = jankStat.getJankType();
+            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.getFrameIntervalNanos());
             if (Flags.useSfFrameDuration()) {
-                this.totalDurationNanos = jankStat.actualAppFrameTimeNs;
+                this.totalDurationNanos = jankStat.getActualAppFrameTimeNanos();
             }
             return this;
         }
@@ -181,23 +178,11 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 case JANK_NONE:
                     str.append("JANK_NONE");
                     break;
-                case JANK_APP_DEADLINE_MISSED:
-                    str.append("JANK_APP_DEADLINE_MISSED");
+                case JANK_APPLICATION:
+                    str.append("JANK_APPLICATION");
                     break;
-                case JANK_SURFACEFLINGER_DEADLINE_MISSED:
-                    str.append("JANK_SURFACEFLINGER_DEADLINE_MISSED");
-                    break;
-                case JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED:
-                    str.append("JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED");
-                    break;
-                case DISPLAY_HAL:
-                    str.append("DISPLAY_HAL");
-                    break;
-                case PREDICTION_ERROR:
-                    str.append("PREDICTION_ERROR");
-                    break;
-                case SURFACE_FLINGER_SCHEDULING:
-                    str.append("SURFACE_FLINGER_SCHEDULING");
+                case JANK_COMPOSER:
+                    str.append("JANK_COMPOSER");
                     break;
                 default:
                     str.append("UNKNOWN: ").append(jankType);
@@ -464,7 +449,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     }
 
     @Override
-    public void onJankDataAvailable(SurfaceControl.JankData[] jankData) {
+    public void onJankDataAvailable(List<SurfaceControl.JankData> jankData) {
         postCallback(() -> {
             try {
                 Trace.beginSection("FrameTracker#onJankDataAvailable");
@@ -473,14 +458,14 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 }
 
                 for (SurfaceControl.JankData jankStat : jankData) {
-                    if (!isInRange(jankStat.frameVsyncId)) {
+                    if (!isInRange(jankStat.getVsyncId())) {
                         continue;
                     }
-                    JankInfo info = findJankInfo(jankStat.frameVsyncId);
+                    JankInfo info = findJankInfo(jankStat.getVsyncId());
                     if (info != null) {
                         info.update(jankStat);
                     } else {
-                        mJankInfos.put((int) jankStat.frameVsyncId,
+                        mJankInfos.put((int) jankStat.getVsyncId(),
                                 JankInfo.createFromSurfaceControlCallback(jankStat));
                     }
                 }
@@ -628,16 +613,12 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
             if (info.surfaceControlCallbackFired) {
                 totalFramesCount++;
                 boolean missedFrame = false;
-                if ((info.jankType & JANK_APP_DEADLINE_MISSED) != 0) {
+                if ((info.jankType & JANK_APPLICATION) != 0) {
                     Log.w(TAG, "Missed App frame:" + info + ", CUJ=" + name);
                     missedAppFramesCount++;
                     missedFrame = true;
                 }
-                if ((info.jankType & DISPLAY_HAL) != 0
-                        || (info.jankType & JANK_SURFACEFLINGER_DEADLINE_MISSED) != 0
-                        || (info.jankType & JANK_SURFACEFLINGER_GPU_DEADLINE_MISSED) != 0
-                        || (info.jankType & SURFACE_FLINGER_SCHEDULING) != 0
-                        || (info.jankType & PREDICTION_ERROR) != 0) {
+                if ((info.jankType & JANK_COMPOSER) != 0) {
                     Log.w(TAG, "Missed SF frame:" + info + ", CUJ=" + name);
                     missedSfFramesCount++;
                     missedFrame = true;
@@ -702,14 +683,6 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                     missedAppFramesCount,
                     maxSuccessiveMissedFramesCount);
         }
-    }
-
-    ThreadedRendererWrapper getThreadedRenderer() {
-        return mRendererWrapper;
-    }
-
-    ViewRootWrapper getViewRoot() {
-        return mViewRoot;
     }
 
     private boolean shouldTriggerPerfetto(int missedFramesCount, int maxFrameTimeNanos) {
@@ -852,7 +825,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         /** adds the jank listener to the given surface */
         public SurfaceControl.OnJankDataListenerRegistration addJankStatsListener(
                 SurfaceControl.OnJankDataListener listener, SurfaceControl surfaceControl) {
-            return surfaceControl.addJankDataListener(listener);
+            return surfaceControl.addOnJankDataListener(listener);
         }
     }
 

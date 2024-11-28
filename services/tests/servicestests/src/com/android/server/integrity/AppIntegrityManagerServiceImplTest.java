@@ -68,7 +68,6 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.server.compat.PlatformCompat;
-import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.testutils.TestUtils;
 
 import org.junit.After;

@@ -27,6 +27,7 @@ import android.view.InputEvent
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags
@@ -54,7 +55,6 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Monitor for tracking touches on the DreamOverlay to bring up the bouncer. */
 class BouncerSwipeTouchHandler

@@ -20,12 +20,13 @@ import android.annotation.UiThread
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.animation.Animator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.annotations.GuardedBy
+import com.android.systemui.ScreenDecorationsThread
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -34,7 +35,12 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
+import com.android.systemui.statusbar.events.PrivacyDotCorner.BottomLeft
+import com.android.systemui.statusbar.events.PrivacyDotCorner.BottomRight
+import com.android.systemui.statusbar.events.PrivacyDotCorner.TopLeft
+import com.android.systemui.statusbar.events.PrivacyDotCorner.TopRight
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -52,7 +58,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Understands how to keep the persistent privacy dot in the corner of the screen in
@@ -70,14 +75,15 @@ import com.android.app.tracing.coroutines.launchTraced as launch
  */
 interface PrivacyDotViewController {
 
+    /**
+     * Called when the [PrivacyDotViewController] should stop doing any work and clean up if needed.
+     */
+    fun stop()
+
     // Only can be modified on @UiThread
     var currentViewState: ViewState
 
     var showingListener: ShowingListener?
-
-    fun setUiExecutor(e: DelayableExecutor)
-
-    fun getUiExecutor(): DelayableExecutor?
 
     @UiThread fun setNewRotation(rot: Int)
 
@@ -111,6 +117,7 @@ constructor(
     @Assisted private val contentInsetsProvider: StatusBarContentInsetsProvider,
     private val animationScheduler: SystemStatusAnimationScheduler,
     shadeInteractor: ShadeInteractor?,
+    @ScreenDecorationsThread val uiExecutor: DelayableExecutor,
 ) : PrivacyDotViewController {
     private lateinit var tl: View
     private lateinit var tr: View
@@ -130,53 +137,50 @@ constructor(
     private val lock = Object()
     private var cancelRunnable: Runnable? = null
 
-    // Privacy dots are created in ScreenDecoration's UiThread, which is not the main thread
-    private var uiExecutor: DelayableExecutor? = null
-
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
     override var showingListener: PrivacyDotViewController.ShowingListener? = null
 
-    init {
-        contentInsetsProvider.addCallback(
-            object : StatusBarContentInsetsChangedListener {
-                override fun onStatusBarContentInsetsChanged() {
-                    dlog("onStatusBarContentInsetsChanged: ")
-                    setNewLayoutRects()
-                }
+    private val insetsChangedListener =
+        object : StatusBarContentInsetsChangedListener {
+            override fun onStatusBarContentInsetsChanged() {
+                dlog("onStatusBarContentInsetsChanged: ")
+                setNewLayoutRects()
             }
-        )
+        }
 
-        configurationController.addCallback(
-            object : ConfigurationController.ConfigurationListener {
-                override fun onLayoutDirectionChanged(isRtl: Boolean) {
-                    uiExecutor?.execute {
-                        // If rtl changed, hide all dotes until the next state resolves
-                        setCornerVisibilities(View.INVISIBLE)
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onLayoutDirectionChanged(isRtl: Boolean) {
+                uiExecutor.execute {
+                    // If rtl changed, hide all dots until the next state resolves
+                    setCornerVisibilities(View.INVISIBLE)
 
-                        synchronized(this) {
-                            val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
-                            nextViewState =
-                                nextViewState.copy(layoutRtl = isRtl, designatedCorner = corner)
-                        }
+                    synchronized(this) {
+                        val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
+                        nextViewState =
+                            nextViewState.copy(layoutRtl = isRtl, designatedCorner = corner)
                     }
                 }
             }
-        )
+        }
 
-        stateController.addCallback(
-            object : StatusBarStateController.StateListener {
-                override fun onExpandedChanged(isExpanded: Boolean) {
-                    updateStatusBarState()
-                }
-
-                override fun onStateChanged(newState: Int) {
-                    updateStatusBarState()
-                }
+    private val statusBarStateListener =
+        object : StatusBarStateController.StateListener {
+            override fun onExpandedChanged(isExpanded: Boolean) {
+                updateStatusBarState()
             }
-        )
 
+            override fun onStateChanged(newState: Int) {
+                updateStatusBarState()
+            }
+        }
+
+    init {
+        contentInsetsProvider.addCallback(insetsChangedListener)
+        configurationController.addCallback(configurationListener)
+        stateController.addCallback(statusBarStateListener)
         scope.launch {
             shadeInteractor?.isQsExpanded?.collect { isQsExpanded ->
                 dlog("setQsExpanded $isQsExpanded")
@@ -185,12 +189,11 @@ constructor(
         }
     }
 
-    override fun setUiExecutor(e: DelayableExecutor) {
-        uiExecutor = e
-    }
-
-    override fun getUiExecutor(): DelayableExecutor? {
-        return uiExecutor
+    override fun stop() {
+        StatusBarConnectedDisplays.assertInNewMode()
+        contentInsetsProvider.removeCallback(insetsChangedListener)
+        configurationController.removeCallback(configurationListener)
+        stateController.removeCallback(statusBarStateListener)
     }
 
     @UiThread
@@ -209,8 +212,8 @@ constructor(
         // If we rotated, hide all dotes until the next state resolves
         setCornerVisibilities(View.INVISIBLE)
 
-        val newCorner = selectDesignatedCorner(rot, isRtl)
-        val index = newCorner.cornerIndex()
+        val newCornerView = selectDesignatedCorner(rot, isRtl)
+        val corner = newCornerView.corner()
         val paddingTop = contentInsetsProvider.getStatusBarPaddingTop(rot)
 
         synchronized(lock) {
@@ -218,8 +221,8 @@ constructor(
                 nextViewState.copy(
                     rotation = rot,
                     paddingTop = paddingTop,
-                    designatedCorner = newCorner,
-                    cornerIndex = index,
+                    designatedCorner = newCornerView,
+                    corner = corner,
                 )
         }
     }
@@ -271,24 +274,15 @@ constructor(
         views.forEach { corner ->
             corner.setPadding(0, paddingTop, 0, 0)
 
-            val rotatedCorner = rotatedCorner(cornerForView(corner), rotation)
+            val rotatedCorner = cornerForView(corner).rotatedCorner(rotation)
             (corner.layoutParams as FrameLayout.LayoutParams).apply {
-                gravity = rotatedCorner.toGravity()
+                gravity = rotatedCorner.gravity
             }
 
             // Set the dot's view gravity to hug the status bar
             (corner.requireViewById<View>(R.id.privacy_dot).layoutParams
                     as FrameLayout.LayoutParams)
-                .gravity = rotatedCorner.innerGravity()
-        }
-    }
-
-    @UiThread
-    private fun updateCornerSizes(l: Int, r: Int, rotation: Int) {
-        views.forEach { corner ->
-            val rotatedCorner = rotatedCorner(cornerForView(corner), rotation)
-            val w = widthForCorner(rotatedCorner, l, r)
-            (corner.layoutParams as FrameLayout.LayoutParams).width = w
+                .gravity = rotatedCorner.innerGravity
         }
     }
 
@@ -406,23 +400,14 @@ constructor(
         }
     }
 
-    private fun cornerForView(v: View): Int {
+    private fun cornerForView(v: View): PrivacyDotCorner {
         return when (v) {
-            tl -> TOP_LEFT
-            tr -> TOP_RIGHT
-            bl -> BOTTOM_LEFT
-            br -> BOTTOM_RIGHT
+            tl -> TopLeft
+            tr -> TopRight
+            bl -> BottomLeft
+            br -> BottomRight
             else -> throw IllegalArgumentException("not a corner view")
         }
-    }
-
-    private fun rotatedCorner(corner: Int, rotation: Int): Int {
-        var modded = corner - rotation
-        if (modded < 0) {
-            modded += 4
-        }
-
-        return modded
     }
 
     @Rotation
@@ -433,16 +418,6 @@ constructor(
             tl -> if (rtl) ROTATION_NONE else ROTATION_SEASCAPE
             br -> if (rtl) ROTATION_UPSIDE_DOWN else ROTATION_LANDSCAPE
             else /* bl */ -> if (rtl) ROTATION_SEASCAPE else ROTATION_UPSIDE_DOWN
-        }
-    }
-
-    private fun widthForCorner(corner: Int, left: Int, right: Int): Int {
-        return when (corner) {
-            TOP_LEFT,
-            BOTTOM_LEFT -> left
-            TOP_RIGHT,
-            BOTTOM_RIGHT -> right
-            else -> throw IllegalArgumentException("Unknown corner")
         }
     }
 
@@ -465,9 +440,9 @@ constructor(
 
         val rtl = configurationController.isLayoutRtl
         val currentRotation = RotationUtils.getExactRotation(tl.context)
-        val dc = selectDesignatedCorner(currentRotation, rtl)
+        val designatedCornerView = selectDesignatedCorner(currentRotation, rtl)
 
-        val index = dc.cornerIndex()
+        val corner = designatedCornerView.corner()
 
         mainExecutor.execute { animationScheduler.addCallback(systemStatusAnimationCallback) }
 
@@ -481,8 +456,8 @@ constructor(
             nextViewState =
                 nextViewState.copy(
                     viewInitialized = true,
-                    designatedCorner = dc,
-                    cornerIndex = index,
+                    designatedCorner = designatedCornerView,
+                    corner = corner,
                     seascapeRect = left,
                     portraitRect = top,
                     landscapeRect = right,
@@ -511,7 +486,7 @@ constructor(
         dlog("scheduleUpdate: ")
 
         cancelRunnable?.run()
-        cancelRunnable = uiExecutor?.executeDelayed({ processNextViewState() }, 100)
+        cancelRunnable = uiExecutor.executeDelayed({ processNextViewState() }, 100)
     }
 
     @UiThread
@@ -600,11 +575,11 @@ constructor(
             }
         }
 
-    private fun View?.cornerIndex(): Int {
+    private fun View?.corner(): PrivacyDotCorner? {
         if (this != null) {
             return cornerForView(this)
         }
-        return -1
+        return null
     }
 
     // Returns [left, top, right, bottom] aka [seascape, none, landscape, upside-down]
@@ -653,34 +628,10 @@ private fun vlog(s: String) {
     }
 }
 
-const val TOP_LEFT = 0
-const val TOP_RIGHT = 1
-const val BOTTOM_RIGHT = 2
-const val BOTTOM_LEFT = 3
 private const val DURATION = 160L
 private const val TAG = "PrivacyDotViewController"
 private const val DEBUG = false
 private const val DEBUG_VERBOSE = false
-
-private fun Int.toGravity(): Int {
-    return when (this) {
-        TOP_LEFT -> Gravity.TOP or Gravity.LEFT
-        TOP_RIGHT -> Gravity.TOP or Gravity.RIGHT
-        BOTTOM_LEFT -> Gravity.BOTTOM or Gravity.LEFT
-        BOTTOM_RIGHT -> Gravity.BOTTOM or Gravity.RIGHT
-        else -> throw IllegalArgumentException("Not a corner")
-    }
-}
-
-private fun Int.innerGravity(): Int {
-    return when (this) {
-        TOP_LEFT -> Gravity.CENTER_VERTICAL or Gravity.RIGHT
-        TOP_RIGHT -> Gravity.CENTER_VERTICAL or Gravity.LEFT
-        BOTTOM_LEFT -> Gravity.CENTER_VERTICAL or Gravity.RIGHT
-        BOTTOM_RIGHT -> Gravity.CENTER_VERTICAL or Gravity.LEFT
-        else -> throw IllegalArgumentException("Not a corner")
-    }
-}
 
 data class ViewState(
     val viewInitialized: Boolean = false,
@@ -694,7 +645,7 @@ data class ViewState(
     val layoutRtl: Boolean = false,
     val rotation: Int = 0,
     val paddingTop: Int = 0,
-    val cornerIndex: Int = -1,
+    val corner: PrivacyDotCorner? = null,
     val designatedCorner: View? = null,
     val contentDescription: String? = null,
 ) {

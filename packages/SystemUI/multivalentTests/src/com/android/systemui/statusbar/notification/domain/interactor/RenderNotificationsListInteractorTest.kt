@@ -16,22 +16,25 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.app.Notification
-import android.os.Bundle
+import android.app.Notification.FLAG_PROMOTED_ONGOING
+import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
+import com.android.systemui.statusbar.notification.promoted.promotedNotificationsProvider
 import com.android.systemui.statusbar.notification.shared.byKey
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,16 +42,16 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class RenderNotificationsListInteractorTest : SysuiTestCase() {
-    private val backgroundDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(backgroundDispatcher)
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
-    private val notifsRepository = ActiveNotificationListRepository()
-    private val notifsInteractor =
-        ActiveNotificationsInteractor(notifsRepository, backgroundDispatcher)
+    private val notifsRepository = kosmos.activeNotificationListRepository
+    private val notifsInteractor = kosmos.activeNotificationsInteractor
     private val underTest =
         RenderNotificationListInteractor(
             notifsRepository,
             sectionStyleProvider = mock(),
+            promotedNotificationsProvider = kosmos.promotedNotificationsProvider,
         )
 
     @Test
@@ -85,12 +88,7 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
 
             assertThat(ranks)
                 .containsExactlyEntriesIn(
-                    mapOf(
-                        "single" to 0,
-                        "summary" to 1,
-                        "child0" to 2,
-                        "child1" to 3,
-                    )
+                    mapOf("single" to 0, "summary" to 1, "child0" to 2, "child1" to 3)
                 )
         }
 
@@ -126,6 +124,53 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
 
             assertThat(actual).containsAtLeastEntriesIn(expected)
         }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
+    fun setRenderList_setsPromotionStatus() =
+        testScope.runTest {
+            val actual by collectLastValue(notifsInteractor.topLevelRepresentativeNotifications)
+
+            val notPromoted1 = mockNotificationEntry("key1", flag = null)
+            val promoted2 = mockNotificationEntry("key2", flag = FLAG_PROMOTED_ONGOING)
+
+            underTest.setRenderedList(listOf(notPromoted1, promoted2))
+
+            assertThat(actual!!.size).isEqualTo(2)
+
+            val first = actual!![0]
+            assertThat(first.key).isEqualTo("key1")
+            assertThat(first.isPromoted).isFalse()
+
+            val second = actual!![1]
+            assertThat(second.key).isEqualTo("key2")
+            assertThat(second.isPromoted).isTrue()
+        }
+
+    private fun mockNotificationEntry(
+        key: String,
+        rank: Int = 0,
+        flag: Int? = null,
+    ): NotificationEntry {
+        val nBuilder = Notification.Builder(context, "a")
+        if (flag != null) {
+            nBuilder.setFlag(flag, true)
+        }
+        val notification = nBuilder.build()
+
+        val mockSbn =
+            mock<StatusBarNotification>() {
+                whenever(this.notification).thenReturn(notification)
+                whenever(packageName).thenReturn("com.android")
+            }
+        return mock<NotificationEntry> {
+            whenever(this.key).thenReturn(key)
+            whenever(this.icons).thenReturn(mock())
+            whenever(this.representativeEntry).thenReturn(this)
+            whenever(this.ranking).thenReturn(RankingBuilder().setRank(rank).build())
+            whenever(this.sbn).thenReturn(mockSbn)
+        }
+    }
 }
 
 private fun mockGroupEntry(
@@ -137,21 +182,5 @@ private fun mockGroupEntry(
         whenever(this.key).thenReturn(key)
         whenever(this.summary).thenReturn(summary)
         whenever(this.children).thenReturn(children)
-    }
-}
-
-private fun mockNotificationEntry(key: String, rank: Int = 0): NotificationEntry {
-    val mockNotification = mock<Notification> { this.extras = Bundle() }
-    val mockSbn =
-        mock<StatusBarNotification>() {
-            whenever(notification).thenReturn(mockNotification)
-            whenever(packageName).thenReturn("com.android")
-        }
-    return mock<NotificationEntry> {
-        whenever(this.key).thenReturn(key)
-        whenever(this.icons).thenReturn(mock())
-        whenever(this.representativeEntry).thenReturn(this)
-        whenever(this.ranking).thenReturn(RankingBuilder().setRank(rank).build())
-        whenever(this.sbn).thenReturn(mockSbn)
     }
 }

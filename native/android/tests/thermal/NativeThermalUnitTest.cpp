@@ -67,6 +67,14 @@ public:
     MOCK_METHOD(Status, getThermalHeadroomThresholds, (::std::vector<float> * _aidl_return),
                 (override));
     MOCK_METHOD(IBinder*, onAsBinder, (), (override));
+    MOCK_METHOD(Status, registerThermalHeadroomListener,
+                (const ::android::sp<::android::os::IThermalHeadroomListener>& listener,
+                 bool* _aidl_return),
+                (override));
+    MOCK_METHOD(Status, unregisterThermalHeadroomListener,
+                (const ::android::sp<::android::os::IThermalHeadroomListener>& listener,
+                 bool* _aidl_return),
+                (override));
 };
 
 class NativeThermalUnitTest : public Test {

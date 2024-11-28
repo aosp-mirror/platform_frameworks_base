@@ -20,6 +20,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.systemui.Flags.FLAG_CLIPBOARD_SHARED_TRANSITIONS;
 import static com.android.systemui.Flags.FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE;
+import static com.android.systemui.Flags.FLAG_SHOW_CLIPBOARD_INDICATION;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED;
@@ -121,6 +122,24 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
+    private class FakeClipboardIndicationProvider implements ClipboardIndicationProvider {
+        private ClipboardIndicationCallback mIndicationCallback;
+
+        public void notifyIndicationTextChanged(CharSequence indicationText) {
+            if (mIndicationCallback != null) {
+                mIndicationCallback.onIndicationTextChanged(indicationText);
+            }
+        }
+
+        @Override
+        public void getIndicationText(ClipboardIndicationCallback callback) {
+            mIndicationCallback = callback;
+        }
+    }
+
+    private FakeClipboardIndicationProvider mClipboardIndicationProvider =
+            new FakeClipboardIndicationProvider();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -156,6 +175,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
                 mExecutor,
                 mClipboardImageLoader,
                 mClipboardTransitionExecutor,
+                mClipboardIndicationProvider,
                 mUiEventLogger);
         verify(mClipboardOverlayView).setCallbacks(mOverlayCallbacksCaptor.capture());
         mCallbacks = mOverlayCallbacksCaptor.getValue();
@@ -302,6 +322,17 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mOverlayController.setClipData(mSampleClipData, "");
 
         verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    @EnableFlags(FLAG_SHOW_CLIPBOARD_INDICATION)
+    public void test_onIndicationTextChanged_setIndicationTextCorrectly() {
+        initController();
+        mOverlayController.setClipData(mSampleClipData, "");
+
+        mClipboardIndicationProvider.notifyIndicationTextChanged("copied");
+
+        verify(mClipboardOverlayView).setIndicationText("copied");
     }
 
     @Test

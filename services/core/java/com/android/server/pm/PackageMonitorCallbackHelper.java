@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ import java.util.function.BiFunction;
 
 /** Helper class to handle PackageMonitorCallback and notify the registered client. This is mainly
  * used by PackageMonitor to improve the broadcast latency. */
-class PackageMonitorCallbackHelper {
+@VisibleForTesting
+public class PackageMonitorCallbackHelper {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "PackageMonitorCallbackHelper";

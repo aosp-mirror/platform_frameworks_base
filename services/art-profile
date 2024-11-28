@@ -5657,7 +5657,7 @@ Lcom/android/server/utils/WatchedSparseSetArray;
 Lcom/android/server/utils/Watcher;
 Lcom/android/server/vibrator/VibratorController$NativeWrapper;
 Lcom/android/server/vibrator/VibratorController$OnVibrationCompleteListener;
-Lcom/android/server/vibrator/VibratorManagerService$OnSyncedVibrationCompleteListener;
+Lcom/android/server/vibrator/VibratorManagerService$VibratorManagerNativeCallbacks;
 Lcom/android/server/vibrator/VibratorManagerService;
 Lcom/android/server/vr/EnabledComponentsObserver$EnabledComponentChangeListener;
 Lcom/android/server/vr/VrManagerService;

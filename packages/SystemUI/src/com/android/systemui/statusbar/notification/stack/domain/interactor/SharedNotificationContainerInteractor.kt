@@ -25,7 +25,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.LargeScreenHeaderHelper
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.Lazy
 import javax.inject.Inject
@@ -45,10 +45,9 @@ import kotlinx.coroutines.flow.map
 class SharedNotificationContainerInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val splitShadeStateController: Lazy<SplitShadeStateController>,
-    private val shadeInteractor: Lazy<ShadeInteractor>,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     keyguardInteractor: KeyguardInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
@@ -66,23 +65,14 @@ constructor(
      * distinctUntilChanged() to this would cause configurationBasedDimensions to miss configuration
      * updates that affect other resources, like margins or the large screen header flag.
      */
-    private val dimensionsUpdateEventsWithShouldUseSplitShade: Flow<Boolean> =
-        if (SceneContainerFlag.isEnabled) {
-            combine(
-                configurationInteractor.onAnyConfigurationChange,
-                shadeInteractor.get().isShadeLayoutWide,
-            ) { _, isShadeLayoutWide ->
-                isShadeLayoutWide
-            }
-        } else {
-            configurationInteractor.onAnyConfigurationChange.map {
-                splitShadeStateController.get().shouldUseSplitNotificationShade(context.resources)
-            }
-        }
-
+    @Deprecated("Use SharedNotificationContainerViewModel.ConfigurationBasedDimensions instead")
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
-        dimensionsUpdateEventsWithShouldUseSplitShade
-            .map { shouldUseSplitShade ->
+        configurationInteractor.onAnyConfigurationChange
+            .map {
+                val shouldUseSplitShade =
+                    splitShadeStateController
+                        .get()
+                        .shouldUseSplitNotificationShade(context.resources)
                 with(context.resources) {
                     ConfigurationBasedDimensions(
                         useSplitShade = shouldUseSplitShade,
@@ -101,6 +91,10 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+        get() {
+            SceneContainerFlag.assertInLegacyMode()
+            return field
+        }
 
     /**
      * The notification shelf can extend over the lock icon area if:
@@ -125,6 +119,7 @@ constructor(
         _notificationStackChanged.value = _notificationStackChanged.value + 1
     }
 
+    @Deprecated("Use SharedNotificationContainerViewModel.ConfigurationBasedDimensions instead")
     data class ConfigurationBasedDimensions(
         val useSplitShade: Boolean,
         val useLargeScreenHeader: Boolean,

@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -27,49 +29,61 @@ import java.util.List;
 public class MatrixRestore extends PaintOperation {
     private static final int OP_CODE = Operations.MATRIX_RESTORE;
     private static final String CLASS_NAME = "MatrixRestore";
-    public MatrixRestore() {
-    }
+
+    public MatrixRestore() {}
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer);
     }
 
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         MatrixRestore op = new MatrixRestore();
         operations.add(op);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "MatrixRestore";
     }
 
-
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
-
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer) {
+    public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Restore the matrix and clip");
     }
 
-
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.matrixRestore();
     }
 }

@@ -19,17 +19,20 @@ package com.android.ravenwoodtest.servicestest;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.hardware.SerialManager;
 import android.hardware.SerialManagerInternal;
-import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 
-import org.junit.Rule;
+import com.google.common.collect.Lists;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,18 +40,19 @@ import org.junit.runner.RunWith;
 public class RavenwoodServicesTest {
     private static final String TEST_VIRTUAL_PORT = "virtual:example";
 
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
-            .setProcessSystem()
-            .setServicesRequired(SerialManager.class)
-            .build();
+    private Context mContext;
+
+    @Before
+    public void setUp() {
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
+    }
 
     @Test
     public void testDefined() {
         final SerialManager fromName = (SerialManager)
-                mRavenwood.getContext().getSystemService(Context.SERIAL_SERVICE);
+                mContext.getSystemService(Context.SERIAL_SERVICE);
         final SerialManager fromClass =
-                mRavenwood.getContext().getSystemService(SerialManager.class);
+                mContext.getSystemService(SerialManager.class);
         assertNotNull(fromName);
         assertNotNull(fromClass);
         assertEquals(fromName, fromClass);
@@ -61,9 +65,9 @@ public class RavenwoodServicesTest {
         // Verify that we can obtain a manager, and talk to the backend service, and that no
         // serial ports are configured by default
         final SerialManager service = (SerialManager)
-                mRavenwood.getContext().getSystemService(Context.SERIAL_SERVICE);
+                mContext.getSystemService(Context.SERIAL_SERVICE);
         final String[] ports = service.getSerialPorts();
-        final String[] refPorts = mRavenwood.getContext().getResources().getStringArray(
+        final String[] refPorts = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_serialPorts);
         assertArrayEquals(refPorts, ports);
     }
@@ -71,7 +75,7 @@ public class RavenwoodServicesTest {
     @Test
     public void testDriven() {
         final SerialManager service = (SerialManager)
-                mRavenwood.getContext().getSystemService(Context.SERIAL_SERVICE);
+                mContext.getSystemService(Context.SERIAL_SERVICE);
         final SerialManagerInternal internal = LocalServices.getService(
                 SerialManagerInternal.class);
 
@@ -79,8 +83,17 @@ public class RavenwoodServicesTest {
             throw new UnsupportedOperationException(
                     "Needs socketpair() to offer accurate emulation");
         });
-        final String[] ports = service.getSerialPorts();
-        assertEquals(1, ports.length);
-        assertEquals(TEST_VIRTUAL_PORT, ports[0]);
+        try {
+            final String[] ports = service.getSerialPorts();
+            for (var port : ports) {
+                if (TEST_VIRTUAL_PORT.equals(port)) {
+                    return; // Pass
+                }
+            }
+            fail("Virtual port " + TEST_VIRTUAL_PORT + " not found. Actual="
+                    + Lists.newArrayList(ports));
+        } finally {
+            internal.removeVirtualSerialPortForTest(TEST_VIRTUAL_PORT);
+        }
     }
 }

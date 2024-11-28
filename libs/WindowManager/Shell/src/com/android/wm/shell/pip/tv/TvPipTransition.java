@@ -23,7 +23,6 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.transitTypeToString;
 
 import static com.android.wm.shell.common.pip.PipMenuController.ALPHA_NO_CHANGE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
@@ -35,6 +34,7 @@ import static com.android.wm.shell.pip.PipTransitionState.EXITING_PIP;
 import static com.android.wm.shell.pip.PipTransitionState.UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
+import static com.android.wm.shell.transition.Transitions.transitTypeToString;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
@@ -338,7 +338,7 @@ public class TvPipTransition extends PipTransitionController {
         final Rect pipBounds = mPipBoundsState.getBounds();
         mSurfaceTransactionHelper
                 .resetScale(startTransaction, pipLeash, pipBounds)
-                .crop(startTransaction, pipLeash, pipBounds)
+                .cropAndPosition(startTransaction, pipLeash, pipBounds)
                 .shadow(startTransaction, pipLeash, false);
 
         final SurfaceControl.Transaction transaction = mTransactionFactory.getTransaction();
@@ -420,7 +420,7 @@ public class TvPipTransition extends PipTransitionController {
 
         mSurfaceTransactionHelper
                 .resetScale(finishTransaction, leash, pipBounds)
-                .crop(finishTransaction, leash, pipBounds)
+                .cropAndPosition(finishTransaction, leash, pipBounds)
                 .shadow(finishTransaction, leash, false);
 
         final Rect currentBounds = pipChange.getStartAbsBounds();
@@ -443,7 +443,7 @@ public class TvPipTransition extends PipTransitionController {
                 SurfaceControl.Transaction tx = mTransactionFactory.getTransaction();
                 mSurfaceTransactionHelper
                         .resetScale(tx, leash, pipBounds)
-                        .crop(tx, leash, pipBounds)
+                        .cropAndPosition(tx, leash, pipBounds)
                         .shadow(tx, leash, false);
                 mShellTaskOrganizer.applyTransaction(resizePipWct);
                 tx.apply();

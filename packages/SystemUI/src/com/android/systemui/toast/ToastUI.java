@@ -135,8 +135,8 @@ public class ToastUI implements
                 return;
             }
             Context displayContext = context.createDisplayContext(display);
-            mToast = mToastFactory.createToast(displayContext /* sysuiContext */, text, packageName,
-                    userHandle.getIdentifier(), mOrientation);
+            mToast = mToastFactory.createToast(mContext, displayContext /* sysuiContext */, text,
+                    packageName, userHandle.getIdentifier(), mOrientation);
 
             if (mToast.getInAnimation() != null) {
                 mToast.getInAnimation().start();

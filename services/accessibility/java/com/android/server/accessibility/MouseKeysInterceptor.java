@@ -625,7 +625,9 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         });
 
         mHandler.removeCallbacksAndMessages(null);
-        mVirtualDevice.close();
+        if (mVirtualDevice != null) {
+            mVirtualDevice.close();
+        }
     }
 
     @Override

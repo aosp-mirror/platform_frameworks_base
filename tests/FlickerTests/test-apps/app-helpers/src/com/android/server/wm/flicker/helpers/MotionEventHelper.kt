@@ -54,7 +54,15 @@ class MotionEventHelper(
         injectMotionEvent(ACTION_UP, x, y, downTime = downTime)
     }
 
-    fun actionMove(startX: Int, startY: Int, endX: Int, endY: Int, steps: Int, downTime: Long) {
+    fun actionMove(
+        startX: Int,
+        startY: Int,
+        endX: Int,
+        endY: Int,
+        steps: Int,
+        downTime: Long,
+        withMotionEventInjectDelay: Boolean = false
+    ) {
         val incrementX = (endX - startX).toFloat() / (steps - 1)
         val incrementY = (endY - startY).toFloat() / (steps - 1)
 
@@ -65,7 +73,31 @@ class MotionEventHelper(
 
             val moveEvent = getMotionEvent(downTime, time, ACTION_MOVE, x, y)
             injectMotionEvent(moveEvent)
+            if (withMotionEventInjectDelay) {
+                SystemClock.sleep(MOTION_EVENT_INJECTION_DELAY_MILLIS)
+            }
         }
+    }
+
+    /**
+     * Drag from [startX], [startY] to [endX], [endY] with a "hold" period after touching down
+     * and before moving.
+     */
+    fun holdToDrag(startX: Int, startY: Int, endX: Int, endY: Int, steps: Int) {
+        val downTime = SystemClock.uptimeMillis()
+        actionDown(startX, startY, time = downTime)
+        SystemClock.sleep(100L) // Hold before dragging.
+        actionMove(
+            startX,
+            startY,
+            endX,
+            endY,
+            steps,
+            downTime,
+            withMotionEventInjectDelay = true
+        )
+        SystemClock.sleep(REGULAR_CLICK_LENGTH)
+        actionUp(startX, endX, downTime)
     }
 
     private fun injectMotionEvent(
@@ -119,5 +151,10 @@ class MotionEventHelper(
             )
         event.displayId = 0
         return event
+    }
+
+    companion object {
+        private const val MOTION_EVENT_INJECTION_DELAY_MILLIS = 5L
+        private const val REGULAR_CLICK_LENGTH = 100L
     }
 }

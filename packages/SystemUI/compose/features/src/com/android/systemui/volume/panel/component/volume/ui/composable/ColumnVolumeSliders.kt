@@ -78,9 +78,7 @@ fun ColumnVolumeSliders(
 ) {
     require(viewModels.isNotEmpty())
     Column(modifier = modifier) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
             val sliderViewModel: SliderViewModel = viewModels.first()
             val sliderState by viewModels.first().slider.collectAsStateWithLifecycle()
             val sliderPadding by topSliderPadding(isExpandable)
@@ -94,6 +92,7 @@ fun ColumnVolumeSliders(
                 onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                 onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
+                hapticsViewModelFactory = sliderViewModel.getSliderHapticsViewModelFactory(),
             )
 
             ExpandButton(
@@ -143,6 +142,8 @@ fun ColumnVolumeSliders(
                             onValueChangeFinished = { sliderViewModel.onValueChangeFinished() },
                             onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                             sliderColors = sliderColors,
+                            hapticsViewModelFactory =
+                                sliderViewModel.getSliderHapticsViewModelFactory(),
                         )
                     }
                 }
@@ -181,7 +182,7 @@ private fun ExpandButton(
             colors =
                 IconButtonDefaults.filledIconButtonColors(
                     containerColor = sliderColors.indicatorColor,
-                    contentColor = sliderColors.iconColor
+                    contentColor = sliderColors.iconColor,
                 ),
         ) {
             Icon(
@@ -211,9 +212,7 @@ private fun enterTransition(index: Int, totalCount: Int): EnterTransition {
             animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
             clip = false,
         ) +
-        fadeIn(
-            animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay),
-        )
+        fadeIn(animationSpec = tween(durationMillis = enterDuration, delayMillis = enterDelay))
 }
 
 private fun exitTransition(index: Int, totalCount: Int): ExitTransition {
@@ -286,6 +285,6 @@ private fun topSliderPadding(isExpandable: Boolean): State<Dp> {
                 0.dp
             },
         animationSpec = animationSpec,
-        label = "TopVolumeSliderPadding"
+        label = "TopVolumeSliderPadding",
     )
 }

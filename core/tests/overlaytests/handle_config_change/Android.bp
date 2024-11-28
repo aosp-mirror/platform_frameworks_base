@@ -38,7 +38,7 @@ java_test_host {
         "device-tests",
     ],
     // All APKs required by the tests
-    data: [
+    device_common_data: [
         ":OverlayResApp",
     ],
     per_testcase_directory: true,

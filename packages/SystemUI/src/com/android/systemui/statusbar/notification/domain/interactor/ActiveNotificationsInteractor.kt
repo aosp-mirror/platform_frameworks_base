@@ -83,6 +83,9 @@ constructor(
             // TODO(b/364653005): [ongoingCallNotification] should be incorporated into this flow
             // instead of being separate.
             topLevelRepresentativeNotifications
+                .map { notifs -> notifs.filter { it.isPromoted } }
+                .distinctUntilChanged()
+                .flowOn(backgroundDispatcher)
         } else {
             flowOf(emptyList())
         }

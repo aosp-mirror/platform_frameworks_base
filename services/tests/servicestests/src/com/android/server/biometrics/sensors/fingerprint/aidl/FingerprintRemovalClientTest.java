@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
@@ -91,7 +92,8 @@ public class FingerprintRemovalClientTest {
 
         mClient = new FingerprintRemovalClient(mContext, () -> mAidlSession, mToken, mListener,
                 mBiometricIds, USER_ID, TAG, mBiometricUtils, SENSOR_ID,
-                mBiometricLogger, mBiometricContext, mAuthenticatorIds);
+                mBiometricLogger, mBiometricContext, mAuthenticatorIds,
+                BiometricsProtoEnums.UNENROLL_REASON_UNKNOWN);
     }
 
     @Test

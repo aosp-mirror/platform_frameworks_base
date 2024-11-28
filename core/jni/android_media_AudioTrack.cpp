@@ -1190,15 +1190,23 @@ static jboolean android_media_AudioTrack_setOutputDevice(
     }
     return lpTrack->setOutputDevice(device_id) == NO_ERROR;
 }
-
-static jint android_media_AudioTrack_getRoutedDeviceId(
-                JNIEnv *env,  jobject thiz) {
-
+static jintArray android_media_AudioTrack_getRoutedDeviceIds(JNIEnv *env, jobject thiz) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
-        return 0;
+        return NULL;
     }
-    return (jint)lpTrack->getRoutedDeviceId();
+    DeviceIdVector deviceIds = lpTrack->getRoutedDeviceIds();
+    jintArray result;
+    result = env->NewIntArray(deviceIds.size());
+    if (result == NULL) {
+        return NULL;
+    }
+    jint *values = env->GetIntArrayElements(result, 0);
+    for (unsigned int i = 0; i < deviceIds.size(); i++) {
+        values[i++] = static_cast<jint>(deviceIds[i]);
+    }
+    env->ReleaseIntArrayElements(result, values, 0);
+    return result;
 }
 
 static void android_media_AudioTrack_enableDeviceCallback(
@@ -1503,7 +1511,7 @@ static const JNINativeMethod gMethods[] = {
          (void *)android_media_AudioTrack_setAuxEffectSendLevel},
         {"native_attachAuxEffect", "(I)I", (void *)android_media_AudioTrack_attachAuxEffect},
         {"native_setOutputDevice", "(I)Z", (void *)android_media_AudioTrack_setOutputDevice},
-        {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioTrack_getRoutedDeviceId},
+        {"native_getRoutedDeviceIds", "()[I", (void *)android_media_AudioTrack_getRoutedDeviceIds},
         {"native_enableDeviceCallback", "()V",
          (void *)android_media_AudioTrack_enableDeviceCallback},
         {"native_disableDeviceCallback", "()V",

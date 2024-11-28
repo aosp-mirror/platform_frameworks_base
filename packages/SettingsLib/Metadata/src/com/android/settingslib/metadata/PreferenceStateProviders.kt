@@ -133,8 +133,18 @@ interface PreferenceLifecycleProvider {
  */
 abstract class PreferenceLifecycleContext(context: Context) : ContextWrapper(context) {
 
-    /** Notifies that preference state is changed and update preference widget UI. */
-    abstract fun notifyPreferenceChange(preference: PreferenceMetadata)
+    /** Returns the preference widget object associated with given key. */
+    abstract fun <T> findPreference(key: String): T?
+
+    /**
+     * Returns the preference widget object associated with given key.
+     *
+     * @throws NullPointerException if preference is not found
+     */
+    abstract fun <T : Any> requirePreference(key: String): T
+
+    /** Notifies that preference state of given key is changed and updates preference widget UI. */
+    abstract fun notifyPreferenceChange(key: String)
 
     /**
      * Starts activity for result, see [android.app.Activity.startActivityForResult].

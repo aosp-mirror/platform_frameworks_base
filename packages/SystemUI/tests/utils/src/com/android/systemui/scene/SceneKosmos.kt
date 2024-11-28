@@ -13,10 +13,12 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
+import com.android.systemui.scene.ui.composable.SceneContainerTransitions
 import com.android.systemui.scene.ui.viewmodel.SceneContainerHapticsViewModel
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.domain.interactor.remoteInputInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.mockito.kotlin.mock
 
@@ -59,6 +61,7 @@ var Kosmos.sceneContainerConfig by Fixture {
     SceneContainerConfig(
         sceneKeys = sceneKeys,
         initialSceneKey = initialSceneKey,
+        transitions = SceneContainerTransitions,
         overlayKeys = overlayKeys,
         navigationDistances = navigationDistances,
     )
@@ -87,6 +90,7 @@ val Kosmos.sceneContainerViewModelFactory by Fixture {
                 falsingInteractor = falsingInteractor,
                 powerInteractor = powerInteractor,
                 shadeInteractor = shadeInteractor,
+                remoteInputInteractor = remoteInputInteractor,
                 splitEdgeDetector = splitEdgeDetector,
                 logger = sceneLogger,
                 hapticsViewModelFactory = sceneContainerHapticsViewModelFactory,

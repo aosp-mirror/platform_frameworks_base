@@ -15,13 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.List;
 
@@ -29,35 +30,46 @@ public class MatrixTranslate extends DrawBase2 {
     public static final int OP_CODE = Operations.MATRIX_TRANSLATE;
     public static final String CLASS_NAME = "MatrixTranslate";
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         Maker m = MatrixTranslate::new;
         read(m, buffer, operations);
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
-    protected void write(WireBuffer buffer,
-                         float v1,
-                         float v2) {
+    @Override
+    protected void write(@NonNull WireBuffer buffer, float v1, float v2) {
         apply(buffer, v1, v2);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        "MatrixTranslate")
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Canvas Operations", OP_CODE, "MatrixTranslate")
                 .description("Preconcat the current matrix with the specified translation")
-                .field(FLOAT, "dx",
-                        "The distance to translate in X")
-                .field(FLOAT, "dy",
-                        "The distance to translate in Y");
-
+                .field(DocumentedOperation.FLOAT, "dx", "The distance to translate in X")
+                .field(DocumentedOperation.FLOAT, "dy", "The distance to translate in Y");
     }
 
     public MatrixTranslate(float translateX, float translateY) {
@@ -66,7 +78,7 @@ public class MatrixTranslate extends DrawBase2 {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.matrixTranslate(mV1, mV2);
     }
 
@@ -74,12 +86,10 @@ public class MatrixTranslate extends DrawBase2 {
      * Writes out the DrawOval to the buffer
      *
      * @param buffer buffer to write to
-     * @param x1     start x of DrawOval
-     * @param y1     start y of the DrawOval
+     * @param x1 start x of DrawOval
+     * @param y1 start y of the DrawOval
      */
-    public static void apply(WireBuffer buffer,
-                             float x1,
-                             float y1) {
+    public static void apply(@NonNull WireBuffer buffer, float x1, float y1) {
         write(buffer, OP_CODE, x1, y1);
     }
 }

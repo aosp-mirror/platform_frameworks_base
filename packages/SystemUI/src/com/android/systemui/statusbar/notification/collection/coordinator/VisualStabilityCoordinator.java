@@ -45,7 +45,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.BooleanFlowOperators;
 import com.android.systemui.util.kotlin.JavaAdapter;

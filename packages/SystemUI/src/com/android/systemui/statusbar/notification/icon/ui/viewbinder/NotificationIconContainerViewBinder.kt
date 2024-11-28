@@ -24,6 +24,7 @@ import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.collection.ArrayMap
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.internal.R as RInternal
 import com.android.internal.statusbar.StatusBarIcon
@@ -54,12 +55,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a view-model to a [NotificationIconContainer]. */
 object NotificationIconContainerViewBinder {
 
     suspend fun bind(
+        displayId: Int,
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerStatusBarViewModel,
         configuration: ConfigurationState,
@@ -70,7 +71,10 @@ object NotificationIconContainerViewBinder {
         launch {
             val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
             val iconColors: StateFlow<NotificationIconColors> =
-                viewModel.iconColors.mapNotNull { it.iconColors(view.viewBounds) }.stateIn(this)
+                viewModel
+                    .iconColors(displayId)
+                    .mapNotNull { it.iconColors(view.viewBounds) }
+                    .stateIn(this)
             viewModel.icons.bindIcons(
                 logTag = "statusbar",
                 view = view,
@@ -79,11 +83,7 @@ object NotificationIconContainerViewBinder {
                 notifyBindingFailures = { failureTracker.statusBarFailures = it },
                 viewStore = viewStore,
             ) { _, sbiv ->
-                StatusBarIconViewBinder.bindIconColors(
-                    sbiv,
-                    iconColors,
-                    contrastColorUtil,
-                )
+                StatusBarIconViewBinder.bindIconColors(sbiv, iconColors, contrastColorUtil)
             }
         }
         launch { viewModel.bindIsolatedIcon(view, viewStore) }
@@ -194,8 +194,7 @@ object NotificationIconContainerViewBinder {
             combine(iconSizeFlow, iconHorizontalPaddingFlow, systemBarUtilsState.statusBarHeight) {
                     iconSize,
                     iconHPadding,
-                    statusBarHeight,
-                    ->
+                    statusBarHeight ->
                     FrameLayout.LayoutParams(iconSize + 2 * iconHPadding, statusBarHeight)
                 }
                 .stateIn(this)
@@ -251,10 +250,7 @@ object NotificationIconContainerViewBinder {
                     traceSection("addIcon") {
                         (sbiv.parent as? ViewGroup)?.run {
                             if (this !== view) {
-                                Log.wtf(
-                                    TAG,
-                                    "[$logTag] SBIV($notifKey) has an unexpected parent",
-                                )
+                                Log.wtf(TAG, "[$logTag] SBIV($notifKey) has an unexpected parent")
                             }
                             // If the container was re-inflated and re-bound, then SBIVs might still
                             // be attached to the prior view.
@@ -271,7 +267,7 @@ object NotificationIconContainerViewBinder {
                                 launch {
                                     launch {
                                         layoutParams.collectTracingEach(
-                                            tag = { "[$logTag] SBIV#bindLayoutParams" },
+                                            tag = { "[$logTag] SBIV#bindLayoutParams" }
                                         ) {
                                             if (it != sbiv.layoutParams) {
                                                 sbiv.layoutParams = it
@@ -344,7 +340,7 @@ object NotificationIconContainerViewBinder {
     //  a single SBIV instance for the group. Then this whole concept can go away.
     private inline fun <R> NotificationIconContainer.withIconReplacements(
         replacements: ArrayMap<String, StatusBarIcon>,
-        block: () -> R
+        block: () -> R,
     ): R {
         setReplacingIcons(replacements)
         return block().also { setReplacingIcons(null) }

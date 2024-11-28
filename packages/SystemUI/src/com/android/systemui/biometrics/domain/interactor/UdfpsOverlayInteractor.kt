@@ -36,8 +36,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlin.math.max
 
 /** Encapsulates business logic for interacting with the UDFPS overlay. */
 @SysUISingleton
@@ -48,14 +50,14 @@ constructor(
     private val authController: AuthController,
     private val selectedUserInteractor: SelectedUserInteractor,
     private val fingerprintManager: FingerprintManager?,
-    @Application scope: CoroutineScope
+    @Application scope: CoroutineScope,
 ) {
     private fun calculateIconSize(): Int {
         val pixelPitch = context.resources.getFloat(R.dimen.pixel_pitch)
         if (pixelPitch <= 0) {
             Log.e(
                 "UdfpsOverlayInteractor",
-                "invalid pixelPitch: $pixelPitch. Pixel pitch must be updated per device."
+                "invalid pixelPitch: $pixelPitch. Pixel pitch must be updated per device.",
             )
         }
         return (context.resources.getFloat(R.dimen.udfps_icon_size) / pixelPitch).toInt()
@@ -83,12 +85,11 @@ constructor(
 
     /** Sets whether Udfps overlay should handle touches */
     fun setHandleTouches(shouldHandle: Boolean = true) {
-        if (authController.isUdfpsSupported
-                && shouldHandle != _shouldHandleTouches.value) {
+        if (authController.isUdfpsSupported && shouldHandle != _shouldHandleTouches.value) {
             fingerprintManager?.setIgnoreDisplayTouches(
                 requestId.value,
                 authController.udfpsProps!!.get(0).sensorId,
-                !shouldHandle
+                !shouldHandle,
             )
         }
         _shouldHandleTouches.value = shouldHandle
@@ -107,10 +108,11 @@ constructor(
                         override fun onUdfpsLocationChanged(
                             udfpsOverlayParams: UdfpsOverlayParams
                         ) {
+                            Log.d(TAG, "udfpsOverlayParams updated $udfpsOverlayParams")
                             trySendWithFailureLogging(
                                 udfpsOverlayParams,
                                 TAG,
-                                "update udfpsOverlayParams"
+                                "update udfpsOverlayParams",
                             )
                         }
                     }
@@ -124,8 +126,9 @@ constructor(
         udfpsOverlayParams.map { params ->
             val sensorWidth = params.nativeSensorBounds.right - params.nativeSensorBounds.left
             val nativePadding = (sensorWidth - iconSize) / 2
-            (nativePadding * params.scaleFactor).toInt()
-        }
+            // padding can be negative when udfpsOverlayParams has not been initialized yet.
+            max(0, (nativePadding * params.scaleFactor).toInt())
+        }.distinctUntilChanged()
 
     companion object {
         private const val TAG = "UdfpsOverlayInteractor"

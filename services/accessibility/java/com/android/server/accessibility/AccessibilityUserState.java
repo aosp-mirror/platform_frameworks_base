@@ -29,6 +29,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
@@ -106,21 +107,17 @@ class AccessibilityUserState {
 
     final Set<ComponentName> mTouchExplorationGrantedServices = new HashSet<>();
 
-    private final ArraySet<String> mAccessibilityShortcutKeyTargets = new ArraySet<>();
-
-    private final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
-    private final ArraySet<String> mAccessibilityGestureTargets = new ArraySet<>();
-    private final ArraySet<String> mAccessibilityQsTargets = new ArraySet<>();
+    private final HashMap<Integer, ArraySet<String>> mShortcutTargets = new HashMap<>();
 
     /**
-     * The QuickSettings tiles in the QS Panel. This can be different from
-     * {@link #mAccessibilityQsTargets} in that {@link #mA11yTilesInQsPanel} stores the
+     * The QuickSettings tiles in the QS Panel. This can be different from the QS targets in
+     * {@link #mShortcutTargets} in that {@link #mA11yTilesInQsPanel} stores the
      * TileService's or the a11y framework tile component names (e.g.
      * {@link AccessibilityShortcutController#COLOR_INVERSION_TILE_COMPONENT_NAME}) instead of the
      * A11y Feature's component names.
      * <p/>
      * In addition, {@link #mA11yTilesInQsPanel} stores what's on the QS Panel, whereas
-     * {@link #mAccessibilityQsTargets} stores the targets that configured qs as their shortcut and
+     * {@link #mShortcutTargets} stores the targets that configured qs as their shortcut and
      * also grant full device control permission.
      */
     private final ArraySet<ComponentName> mA11yTilesInQsPanel = new ArraySet<>();
@@ -208,6 +205,12 @@ class AccessibilityUserState {
         mSupportWindowMagnification = mContext.getResources().getBoolean(
                 R.bool.config_magnification_area) && mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WINDOW_MAGNIFICATION);
+
+        mShortcutTargets.put(HARDWARE, new ArraySet<>());
+        mShortcutTargets.put(SOFTWARE, new ArraySet<>());
+        mShortcutTargets.put(GESTURE, new ArraySet<>());
+        mShortcutTargets.put(QUICK_SETTINGS, new ArraySet<>());
+        mShortcutTargets.put(KEY_GESTURE, new ArraySet<>());
     }
 
     boolean isHandlingAccessibilityEventsLocked() {
@@ -233,10 +236,7 @@ class AccessibilityUserState {
         // Clear state persisted in settings.
         mEnabledServices.clear();
         mTouchExplorationGrantedServices.clear();
-        mAccessibilityShortcutKeyTargets.clear();
-        mAccessibilityButtonTargets.clear();
-        mAccessibilityGestureTargets.clear();
-        mAccessibilityQsTargets.clear();
+        mShortcutTargets.forEach((type, targets) -> targets.clear());
         mA11yTilesInQsPanel.clear();
         mTargetAssignedToAccessibilityButton = null;
         mIsTouchExplorationEnabled = false;
@@ -541,7 +541,7 @@ class AccessibilityUserState {
     private void dumpShortcutTargets(
             PrintWriter pw, @UserShortcutType int shortcutType, String name) {
         pw.append("     ").append(name).append(":{");
-        ArraySet<String> targets = getShortcutTargetsInternalLocked(shortcutType);
+        ArraySet<String> targets = getShortcutTargetsLocked(shortcutType);
         int size = targets.size();
         for (int i = 0; i < size; i++) {
             if (i > 0) {
@@ -712,7 +712,7 @@ class AccessibilityUserState {
      */
     public boolean isShortcutMagnificationEnabledLocked() {
         for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
-            if (getShortcutTargetsInternalLocked(shortcutType)
+            if (getShortcutTargetsLocked(shortcutType)
                     .contains(MAGNIFICATION_CONTROLLER_NAME)) {
                 return true;
             }
@@ -788,43 +788,29 @@ class AccessibilityUserState {
     }
 
     /**
-     * Disable both shortcuts' magnification function.
-     */
-    public void disableShortcutMagnificationLocked() {
-        mAccessibilityShortcutKeyTargets.remove(MAGNIFICATION_CONTROLLER_NAME);
-        mAccessibilityButtonTargets.remove(MAGNIFICATION_CONTROLLER_NAME);
-    }
-
-    /**
      * Returns a set which contains the flattened component names and the system class names
-     * assigned to the given shortcut. The set is a defensive copy. To apply any changes to the set,
-     * use {@link #updateShortcutTargetsLocked(Set, int)}
+     * assigned to the given shortcut. <strong>The set is a defensive copy.</strong>
+     * To apply any changes to the set, use {@link #updateShortcutTargetsLocked(Set, int)}
      *
-     * @param shortcutType The shortcut type.
+     * @param shortcutTypes The shortcut type or types (in bitmask format).
      * @return The array set of the strings
      */
-    public ArraySet<String> getShortcutTargetsLocked(@UserShortcutType int shortcutType) {
-        return new ArraySet<>(getShortcutTargetsInternalLocked(shortcutType));
-    }
-
-    private ArraySet<String> getShortcutTargetsInternalLocked(@UserShortcutType int shortcutType) {
-        if (shortcutType == HARDWARE) {
-            return mAccessibilityShortcutKeyTargets;
-        } else if (shortcutType == SOFTWARE) {
-            return mAccessibilityButtonTargets;
-        } else if (shortcutType == GESTURE) {
-            return mAccessibilityGestureTargets;
-        } else if (shortcutType == QUICK_SETTINGS) {
-            return mAccessibilityQsTargets;
-        } else if ((shortcutType == TRIPLETAP
-                && isMagnificationSingleFingerTripleTapEnabledLocked()) || (
-                shortcutType == TWOFINGER_DOUBLETAP
-                        && isMagnificationTwoFingerTripleTapEnabledLocked())) {
-            ArraySet<String> targets = new ArraySet<>();
-            targets.add(MAGNIFICATION_CONTROLLER_NAME);
-            return targets;
+    public ArraySet<String> getShortcutTargetsLocked(int shortcutTypes) {
+        ArraySet<String> targets = new ArraySet<>();
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            if ((shortcutTypes & shortcutType) != shortcutType) {
+                continue;
+            }
+            if ((shortcutType == TRIPLETAP
+                    && isMagnificationSingleFingerTripleTapEnabledLocked()) || (
+                    shortcutType == TWOFINGER_DOUBLETAP
+                            && isMagnificationTwoFingerTripleTapEnabledLocked())) {
+                targets.add(MAGNIFICATION_CONTROLLER_NAME);
+            } else if (mShortcutTargets.containsKey(shortcutType)) {
+                targets.addAll(mShortcutTargets.get(shortcutType));
+            }
         }
-        return new ArraySet<>();
+        return targets;
     }
 
     /**
@@ -843,8 +829,10 @@ class AccessibilityUserState {
         if ((shortcutType & mask) != 0) {
             throw new IllegalArgumentException("Tap shortcuts cannot be updated with target sets.");
         }
-
-        final Set<String> currentTargets = getShortcutTargetsInternalLocked(shortcutType);
+        if (!mShortcutTargets.containsKey(shortcutType)) {
+            mShortcutTargets.put(shortcutType, new ArraySet<>());
+        }
+        ArraySet<String> currentTargets = mShortcutTargets.get(shortcutType);
         if (newTargets.equals(currentTargets)) {
             return false;
         }
@@ -904,7 +892,7 @@ class AccessibilityUserState {
         }
 
         // getting internal set lets us directly modify targets, as it's not a copy.
-        Set<String> targets = getShortcutTargetsInternalLocked(shortcutType);
+        Set<String> targets = mShortcutTargets.get(shortcutType);
         return targets.removeIf(name -> {
             ComponentName componentName;
             if (name == null
@@ -1167,13 +1155,6 @@ class AccessibilityUserState {
                     }
                 }
         );
-    }
-
-    /**
-     * Returns a copy of the targets which has qs shortcut turned on
-     */
-    public ArraySet<String> getA11yQsTargets() {
-        return new ArraySet<>(mAccessibilityQsTargets);
     }
 
     public void updateA11yTilesInQsPanelLocked(Set<ComponentName> componentNames) {

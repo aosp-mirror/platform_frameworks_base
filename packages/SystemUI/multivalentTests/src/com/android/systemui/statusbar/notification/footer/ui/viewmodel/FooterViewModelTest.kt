@@ -18,6 +18,7 @@
 
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
@@ -230,6 +232,7 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     fun manageButton_whenHistoryDisabled() =
         testScope.runTest {
             val buttonLabel by collectLastValue(underTest.manageOrHistoryButton.labelId)
@@ -243,6 +246,7 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     fun historyButton_whenHistoryEnabled() =
         testScope.runTest {
             val buttonLabel by collectLastValue(underTest.manageOrHistoryButton.labelId)
@@ -255,8 +259,9 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(buttonLabel).isEqualTo(R.string.manage_notifications_history_text)
         }
 
-    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
     @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     fun manageButtonOnClick_whenHistoryDisabled() =
         testScope.runTest {
             val onClick by collectLastValue(underTest.manageOrHistoryButtonClick)
@@ -271,8 +276,9 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(onClick?.backStack).isEmpty()
         }
 
-    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
     @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     fun historyButtonOnClick_whenHistoryEnabled() =
         testScope.runTest {
             val onClick by collectLastValue(underTest.manageOrHistoryButtonClick)
@@ -289,6 +295,7 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     fun manageButtonVisible_whenMessageVisible() =
         testScope.runTest {
             val visible by collectLastValue(underTest.manageOrHistoryButton.isVisible)
@@ -299,6 +306,7 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(NotifRedesignFooter.FLAG_NAME)
     fun manageButtonVisible_whenMessageNotVisible() =
         testScope.runTest {
             val visible by collectLastValue(underTest.manageOrHistoryButton.isVisible)
@@ -306,5 +314,31 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
 
             assertThat(visible?.value).isTrue()
+        }
+
+    @Test
+    @EnableFlags(NotifRedesignFooter.FLAG_NAME)
+    fun settingsAndHistoryButtonsNotVisible_whenMessageVisible() =
+        testScope.runTest {
+            val settingsVisible by collectLastValue(underTest.settingsButtonVisible)
+            val historyVisible by collectLastValue(underTest.historyButtonVisible)
+
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
+
+            assertThat(settingsVisible).isFalse()
+            assertThat(historyVisible).isFalse()
+        }
+
+    @Test
+    @EnableFlags(NotifRedesignFooter.FLAG_NAME)
+    fun settingsAndHistoryButtonsNotVisible_whenMessageNotVisible() =
+        testScope.runTest {
+            val settingsVisible by collectLastValue(underTest.settingsButtonVisible)
+            val historyVisible by collectLastValue(underTest.historyButtonVisible)
+
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
+
+            assertThat(settingsVisible).isTrue()
+            assertThat(historyVisible).isTrue()
         }
 }

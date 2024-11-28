@@ -24,7 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -75,9 +75,9 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             configurationController,
             context,
             testScope.backgroundScope,
-            mock()
+            mock(),
         )
-    private val configurationInteractor = ConfigurationInteractor(configurationRepository)
+    private val configurationInteractor = ConfigurationInteractorImpl(configurationRepository)
 
     private val unfoldTransitionRepository =
         UnfoldTransitionRepositoryImpl(Optional.of(unfoldTransitionProgressProvider))
@@ -103,7 +103,7 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
                 unfoldTransitionInteractor,
                 configurationInteractor,
                 animationStatus,
-                powerInteractor
+                powerInteractor,
             )
     }
 
@@ -140,7 +140,7 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
             updateDisplay(
                 width = INITIAL_DISPLAY_HEIGHT,
                 height = INITIAL_DISPLAY_WIDTH,
-                rotation = ROTATION_90
+                rotation = ROTATION_90,
             )
             runCurrent()
 
@@ -284,7 +284,7 @@ open class HideNotificationsInteractorTest : SysuiTestCase() {
     private fun updateDisplay(
         width: Int = INITIAL_DISPLAY_WIDTH,
         height: Int = INITIAL_DISPLAY_HEIGHT,
-        @Surface.Rotation rotation: Int = ROTATION_0
+        @Surface.Rotation rotation: Int = ROTATION_0,
     ) {
         configuration.windowConfiguration.maxBounds.set(Rect(0, 0, width, height))
         configuration.windowConfiguration.displayRotation = rotation

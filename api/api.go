@@ -28,6 +28,7 @@ const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
 const virtualization = "framework-virtualization"
 const location = "framework-location"
+const platformCrashrecovery = "framework-platformcrashrecovery"
 
 var core_libraries_modules = []string{art, conscrypt, i18n}
 
@@ -39,7 +40,7 @@ var core_libraries_modules = []string{art, conscrypt, i18n}
 // APIs.
 // In addition, the modules in this list are allowed to contribute to test APIs
 // stubs.
-var non_updatable_modules = []string{virtualization, location}
+var non_updatable_modules = []string{virtualization, location, platformCrashrecovery}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -428,8 +429,9 @@ func createMergedFrameworkSystemServerExportableStubs(ctx android.LoadHookContex
 
 func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules proptools.Configurable[[]string]) {
 	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
-	props.Device_common_srcs = createSrcs(modules, "{.public.stubs.source}")
+	props.Name = proptools.StringPtr("all-modules-public-stubs-source-exportable")
+	transformConfigurableArray(modules, "", ".stubs.source")
+	props.Device_common_srcs = createSrcs(modules, "{.exportable}")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }

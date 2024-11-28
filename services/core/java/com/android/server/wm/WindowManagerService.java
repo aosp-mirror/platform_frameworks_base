@@ -1022,12 +1022,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            final boolean disableSecureWindows;
+            boolean disableSecureWindows;
             try {
                 disableSecureWindows = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                         Settings.Secure.DISABLE_SECURE_WINDOWS, 0) != 0;
             } catch (Settings.SettingNotFoundException e) {
-                return;
+                disableSecureWindows = false;
             }
             if (mDisableSecureWindows == disableSecureWindows) {
                 return;
@@ -3030,8 +3030,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
 
-                final WindowToken token = wc.asWindowToken();
-                if (token != null && token.isFromClient()) {
+                final WindowToken token = wc != null ? wc.asWindowToken() : null;
+                if (token != null && token.isFromClient() && token.getDisplayContent() != null) {
                     removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
             }
@@ -3421,9 +3421,11 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
         synchronized (mGlobalLock) {
+            final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             if (!dreamHandlesConfirmKeys()
-                    && getDefaultDisplayContentLocked().getDisplayPolicy().isShowingDreamLw()) {
-                mAtmService.mTaskSupervisor.wakeUp("leaveDream");
+                    && defaultDisplayContent.getDisplayPolicy().isShowingDreamLw()) {
+                mAtmService.mTaskSupervisor.wakeUp(
+                        defaultDisplayContent.getDisplayId(), "leaveDream");
             }
             mPolicy.dismissKeyguardLw(callback, message);
         }
@@ -4666,21 +4668,25 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
-    public void updateDisplayWindowRequestedVisibleTypes(
-            int displayId, @InsetsType int requestedVisibleTypes) {
+    public void updateDisplayWindowRequestedVisibleTypes(int displayId,
+            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token statsToken) {
         updateDisplayWindowRequestedVisibleTypes_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES);
                     return;
                 }
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES);
                 dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
                 // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
-                //  IME provider. Check if we have to create a new request here
+                //  IME provider. Check if we have to create a new request here, if null.
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
-                        dc.mRemoteInsetsControlTarget, null /* statsToken */);
+                        dc.mRemoteInsetsControlTarget, statsToken);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -8382,6 +8388,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setIgnoreActivitySizeRestrictionsOnDisplay(@NonNull String displayUniqueId,
+                int displayType, boolean enabled) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    mDisplayWindowSettings.setIgnoreActivitySizeRestrictionsOnDisplayLocked(
+                            displayUniqueId, displayType, enabled);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
+        @Override
         public void clearDisplaySettings(String displayUniqueId, int displayType) {
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -10217,6 +10237,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Resets the spatial ordering of recents for testing purposes.
+     */
+    void resetFreezeRecentTaskListReordering() {
+        if (!checkCallingPermission(permission.MANAGE_ACTIVITY_TASKS,
+                "resetFreezeRecentTaskListReordering()")) {
+            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
+        }
+        mAtmService.getRecentTasks().resetFreezeTaskListReorderingOnTimeout();
+    }
+
     @Override
     public void registerTrustedPresentationListener(IBinder window,
             ITrustedPresentationListener listener,
@@ -10287,7 +10318,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.post(() -> {
                 Toast.makeText(mContext, Looper.getMainLooper(),
                                 mContext.getString(R.string.screen_not_shared_sensitive_content),
-                                Toast.LENGTH_SHORT)
+                                Toast.LENGTH_LONG)
                         .show();
             });
             // If blocked due to notification protection (null window token) log protection applied

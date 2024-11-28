@@ -271,6 +271,12 @@ public final class WMShell implements
                         // No op.
                     }
                 }, mSysUiMainExecutor);
+        pip.addOnIsInPipStateChangedListener((isInPip) -> {
+            if (!isInPip) {
+                mSysUiState.setFlag(SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING, false)
+                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+            }
+        });
         mSysUiState.addCallback(sysUiStateFlag -> {
             mIsSysUiStateValid = (sysUiStateFlag & INVALID_SYSUI_STATE_MASK) == 0;
             pip.onSystemUiStateChanged(mIsSysUiStateValid, sysUiStateFlag);

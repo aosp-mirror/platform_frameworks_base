@@ -20,6 +20,7 @@ import android.app.PendingIntent
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
 import com.android.systemui.SysuiTestCase
@@ -40,11 +41,13 @@ import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class CallChipViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope

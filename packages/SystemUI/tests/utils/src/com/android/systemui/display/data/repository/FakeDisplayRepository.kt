@@ -48,6 +48,7 @@ fun createPendingDisplay(id: Int = 0): DisplayRepository.PendingDisplay =
 /** Fake [DisplayRepository] implementation for testing. */
 class FakeDisplayRepository @Inject constructor() : DisplayRepository {
     private val flow = MutableStateFlow<Set<Display>>(emptySet())
+    private val displayIdFlow = MutableStateFlow<Set<Int>>(emptySet())
     private val pendingDisplayFlow =
         MutableSharedFlow<DisplayRepository.PendingDisplay?>(replay = 1)
     private val displayAdditionEventFlow = MutableSharedFlow<Display?>(replay = 0)
@@ -57,13 +58,19 @@ class FakeDisplayRepository @Inject constructor() : DisplayRepository {
         addDisplay(display(type, id = displayId))
     }
 
+    suspend fun addDisplays(vararg displays: Display) {
+        displays.forEach { addDisplay(it) }
+    }
+
     suspend fun addDisplay(display: Display) {
         flow.value += display
+        displayIdFlow.value += display.displayId
         displayAdditionEventFlow.emit(display)
     }
 
     suspend fun removeDisplay(displayId: Int) {
         flow.value = flow.value.filter { it.displayId != displayId }.toSet()
+        displayIdFlow.value = displayIdFlow.value.filter { it != displayId }.toSet()
         displayRemovalEventFlow.emit(displayId)
     }
 
@@ -79,10 +86,13 @@ class FakeDisplayRepository @Inject constructor() : DisplayRepository {
     override val displays: StateFlow<Set<Display>>
         get() = flow
 
+    override val displayIds: StateFlow<Set<Int>>
+        get() = displayIdFlow
+
     override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?>
         get() = pendingDisplayFlow
 
-    val _defaultDisplayOff: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val _defaultDisplayOff: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val defaultDisplayOff: Flow<Boolean>
         get() = _defaultDisplayOff.asStateFlow()
 

@@ -40,6 +40,13 @@ flag {
 }
 
 flag {
+    name: "a11y_character_in_window_api"
+    namespace: "accessibility"
+    description: "Enables new extra data key for an AccessibilityService to request character bounds in unmagnified window coordinates."
+    bug: "375429616"
+}
+
+flag {
     namespace: "accessibility"
     name: "allow_shortcut_chooser_on_lockscreen"
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
@@ -78,12 +85,16 @@ flag {
 
 flag {
     namespace: "accessibility"
-    name: "fix_merged_content_change_event_v2"
-    description: "Fixes event type and source of content change event merged in ViewRootImpl"
-    bug: "277305460"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
+    name: "deprecate_accessibility_announcement_apis"
+    description: "Controls the deprecation of platform APIs related to disruptive accessibility announcements"
+    bug: "376727542"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "deprecate_ani_label_for_apis"
+    description: "Controls the deprecation of AccessibilityNodeInfo labelFor apis"
+    bug: "333783827"
 }
 
 flag {
@@ -215,6 +226,13 @@ flag {
 }
 
 flag {
+    name: "supplemental_description"
+    namespace: "accessibility"
+    description: "Feature flag for supplemental description api"
+    bug: "375266174"
+}
+
+flag {
     name: "support_multiple_labeledby"
     namespace: "accessibility"
     description: "Feature flag for supporting multiple labels in AccessibilityNodeInfo labeledby api"
@@ -243,4 +261,11 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+ }
+
+ flag {
+    name: "indeterminate_range_info"
+    namespace: "accessibility"
+    description: "Creates a way to create an INDETERMINATE RangeInfo"
+    bug: "376108874"
  }

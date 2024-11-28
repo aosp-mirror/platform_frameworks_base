@@ -78,8 +78,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testAvailableMediaDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem = availableMediaDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
@@ -89,8 +88,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testConnectedDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem = connectedDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
@@ -100,8 +98,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testSavedDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
         `when`(cachedDevice.connectionSummary).thenReturn(CONNECTION_SUMMARY)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem = savedDeviceItemFactory.create(context, cachedDevice)
 
         assertDeviceItem(deviceItem, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
@@ -111,8 +108,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     @Test
     fun testAvailableAudioSharingMediaDeviceItemFactory_createFromCachedDevice() {
         `when`(cachedDevice.name).thenReturn(DEVICE_NAME)
-        `when`(BluetoothUtils.getBtClassDrawableWithDescription(any(), any()))
-            .thenReturn(Pair.create(drawable, ""))
+        `when`(cachedDevice.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
         val deviceItem =
             AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager)
                 .create(context, cachedDevice)

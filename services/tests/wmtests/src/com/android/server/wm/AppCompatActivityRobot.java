@@ -143,6 +143,10 @@ class AppCompatActivityRobot {
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
     }
 
+    void setDisplayIgnoreActivitySizeRestrictions(boolean enabled) {
+        doReturn(enabled).when(mDisplayContent).isDisplayIgnoreActivitySizeRestrictions();
+    }
+
     void configureTaskBounds(@NonNull Rect taskBounds) {
         doReturn(taskBounds).when(mTaskStack.top()).getBounds();
     }
@@ -243,12 +247,20 @@ class AppCompatActivityRobot {
         doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
     }
 
+    void setIsInLetterboxAnimation(boolean inAnimation) {
+        doReturn(inAnimation).when(mActivityStack.top()).isInLetterboxAnimation();
+    }
+
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
         doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityHasLetterboxedBounds(boolean letterboxed) {
+        doReturn(letterboxed).when(mActivityStack.top()).areBoundsLetterboxed();
     }
 
     void setTopActivityVisible(boolean isVisible) {
@@ -282,6 +294,10 @@ class AppCompatActivityRobot {
         if (freeformWindowingMode) {
             doReturn(WINDOWING_MODE_FREEFORM).when(mActivityStack.top()).getWindowingMode();
         }
+    }
+
+    void setFixedRotationTransformDisplayBounds(@Nullable Rect bounds) {
+        doReturn(bounds).when(mActivityStack.top()).getFixedRotationTransformDisplayBounds();
     }
 
     void destroyTopActivity() {

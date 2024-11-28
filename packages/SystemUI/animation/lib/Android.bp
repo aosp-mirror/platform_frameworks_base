@@ -48,6 +48,19 @@ java_library {
 }
 
 filegroup {
+    name: "PlatformAnimationLib-client-srcs",
+    srcs: [
+        "src/com/android/systemui/animation/OriginRemoteTransition.java",
+        "src/com/android/systemui/animation/OriginTransitionSession.java",
+        "src/com/android/systemui/animation/SurfaceUIComponent.java",
+        "src/com/android/systemui/animation/Transactions.java",
+        "src/com/android/systemui/animation/UIComponent.java",
+        "src/com/android/systemui/animation/ViewUIComponent.java",
+        ":PlatformAnimationLib-aidl",
+    ],
+}
+
+filegroup {
     name: "PlatformAnimationLib-aidl",
     srcs: [
         "src/**/*.aidl",

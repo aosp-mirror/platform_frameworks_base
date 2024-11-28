@@ -114,6 +114,10 @@ interface KeyedObservable<K> {
     fun notifyChange(key: K, reason: Int)
 }
 
+/** Delegation of [KeyedObservable]. */
+open class KeyedObservableDelegate<K>(delegate: KeyedObservable<K>) :
+    KeyedObservable<K> by delegate
+
 /** A thread safe implementation of [KeyedObservable]. */
 open class KeyedDataObservable<K> : KeyedObservable<K> {
     // Instead of @GuardedBy("this"), guarded by itself because KeyedDataObservable object could be
@@ -197,6 +201,12 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
             val observer = entry.key // avoid reference "entry"
             entry.value.execute { observer.onKeyChanged(key, reason) }
         }
+    }
+
+    fun hasAnyObserver(): Boolean {
+        synchronized(observers) { if (observers.isNotEmpty()) return true }
+        synchronized(keyedObservers) { if (keyedObservers.isNotEmpty()) return true }
+        return false
     }
 }
 

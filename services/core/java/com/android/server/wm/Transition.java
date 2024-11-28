@@ -237,15 +237,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private final ArraySet<WindowToken> mVisibleAtTransitionEndTokens = new ArraySet<>();
 
     /**
-     * Set of transient activities (lifecycle initially tied to this transition) and their
+     * Map of transient activities (lifecycle initially tied to this transition) to their
      * restore-below tasks.
      */
     private ArrayMap<ActivityRecord, Task> mTransientLaunches = null;
 
     /**
      * The tasks that may be occluded by the transient activity. Assume the task stack is
-     * [Home, A(opaque), B(opaque), C(translucent)] (bottom to top), then A is the restore-below
-     * task, and [B, C] are the transient-hide tasks.
+     * [Home, A(opaque), B(opaque), C(translucent)] (bottom to top), and Home is started in a
+     * transient-launch activity, then A is the restore-below task, and [B, C] are the
+     * transient-hide tasks.
      */
     private ArrayList<Task> mTransientHideTasks;
 
@@ -401,18 +402,26 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mTransientLaunches.put(activity, restoreBelow);
         setTransientLaunchToChanges(activity);
 
-        final Task transientRootTask = activity.getRootTask();
+        final int restoreBelowTaskId = restoreBelow != null ? restoreBelow.mTaskId : -1;
+        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
+                + "transient-launch restoreBelowTaskId=%d", mSyncId, activity, restoreBelowTaskId);
+
+        final Task transientLaunchRootTask = activity.getRootTask();
         final WindowContainer<?> parent = restoreBelow != null ? restoreBelow.getParent()
-                : (transientRootTask != null ? transientRootTask.getParent() : null);
+                : (transientLaunchRootTask != null ? transientLaunchRootTask.getParent() : null);
         if (parent != null) {
             // Collect all visible tasks which can be occluded by the transient activity to
             // make sure they are in the participants so their visibilities can be updated when
             // finishing transition.
+            // Note: This currently assumes that the parent is a DA containing the full set of
+            //       visible tasks
             parent.forAllTasks(t -> {
                 // Skip transient-launch task
-                if (t == transientRootTask) return false;
+                if (t == transientLaunchRootTask) return false;
                 if (t.isVisibleRequested() && !t.isAlwaysOnTop()) {
                     if (t.isRootTask()) {
+                        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                                "  transient hide: taskId=%d", t.mTaskId);
                         mTransientHideTasks.add(t);
                     }
                     if (t.isLeafTask()) {
@@ -442,9 +451,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // the gesture threshold.
             activity.getTask().setCanAffectSystemUiFlags(false);
         }
-
-        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
-                + "transient-launch", mSyncId, activity);
     }
 
     /** @return whether `wc` is a descendent of a transient-hide window. */
@@ -459,9 +465,36 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
+    /**
+     * This ensures that all changes for previously transient-hide containers are flagged such that
+     * they will report changes and be included in this transition.
+     */
+    void updateChangesForRestoreTransientHideTasks(Transition transientLaunchTransition) {
+        if (transientLaunchTransition.mTransientHideTasks == null) {
+            // Skip if the transient-launch transition has no transient-hide tasks
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Skipping update changes for restore transient hide tasks");
+            return;
+        }
+
+        // For each change, if it was previously transient-hidden, then we should force a flag to
+        // ensure that it is included in the next transition
+        for (int i = 0; i < mChanges.size(); i++) {
+            final WindowContainer container = mChanges.keyAt(i);
+            if (transientLaunchTransition.isInTransientHide(container)) {
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Force update transient hide task for restore %d: %s", mSyncId, container);
+                final ChangeInfo info = mChanges.valueAt(i);
+                info.mRestoringTransientHide = true;
+            }
+        }
+    }
+
     /** Returns {@code true} if the task should keep visible if this is a transient transition. */
     boolean isTransientVisible(@NonNull Task task) {
         if (mTransientLaunches == null) return false;
+
+        // Check if all the transient-launch activities are occluded
         int occludedCount = 0;
         final int numTransient = mTransientLaunches.size();
         for (int i = numTransient - 1; i >= 0; --i) {
@@ -469,23 +502,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (transientRoot == null) continue;
             final WindowContainer<?> rootParent = transientRoot.getParent();
             if (rootParent == null || rootParent.getTopChild() == transientRoot) continue;
-            final ActivityRecord topOpaque = mController.mAtm.mTaskSupervisor.mOpaqueActivityHelper
-                    .getOpaqueActivity(rootParent, true /* ignoringKeyguard */);
-            if (transientRoot.compareTo(topOpaque.getRootTask()) < 0) {
-                occludedCount++;
+            for (int j = rootParent.getChildCount() - 1; j >= 0; --j) {
+                final WindowContainer<?> sibling = rootParent.getChildAt(j);
+                if (sibling == transientRoot) break;
+                if (!sibling.getWindowConfiguration().isAlwaysOnTop() && mController.mAtm
+                        .mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(sibling) != null) {
+                    occludedCount++;
+                    break;
+                }
             }
         }
         if (occludedCount == numTransient) {
-            for (int i = mTransientLaunches.size() - 1; i >= 0; --i) {
-                if (mTransientLaunches.keyAt(i).isDescendantOf(task)) {
-                    // Keep transient activity visible until transition finished, so it won't pause
-                    // with transient-hide tasks that may delay resuming the next top.
-                    return true;
-                }
-            }
             // Let transient-hide activities pause before transition is finished.
             return false;
         }
+
+        // If this task is currently transient-hide, then keep it visible
         return isInTransientHide(task);
     }
 
@@ -557,6 +589,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         });
     }
 
+    /** Set a transition to be a back gesture animation. */
+    void setBackGestureAnimation(@NonNull WindowContainer wc, boolean isTop) {
+        final ChangeInfo info = mChanges.get(wc);
+        if (info == null) return;
+        info.mFlags = info.mFlags | (isTop ? ChangeInfo.FLAG_BACK_GESTURE_ANIMATION
+                : ChangeInfo.FLAG_BELOW_BACK_GESTURE_ANIMATION);
+    }
+
     /** Set a transition to be a seamless-rotation. */
     void setSeamlessRotation(@NonNull WindowContainer wc) {
         final ChangeInfo info = mChanges.get(wc);
@@ -600,7 +640,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     /**
-     * Only set flag to the parent tasks and activity itself.
+     * Sets the FLAG_TRANSIENT_LAUNCH flag to all changes associated with the given activity
+     * container and parent tasks.
      */
     private void setTransientLaunchToChanges(@NonNull WindowContainer wc) {
         for (WindowContainer curr = wc; curr != null && mChanges.containsKey(curr);
@@ -766,7 +807,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Only look at tasks, taskfragments, or activities
         if (wc.asTaskFragment() == null && wc.asActivityRecord() == null) return;
         if (!isInTransientHide(wc)) return;
-        info.mFlags |= ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH;
+        info.mFlags |= ChangeInfo.FLAG_TRANSIENT_HIDE;
     }
 
     private void recordDisplay(DisplayContent dc) {
@@ -2440,6 +2481,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         sb.append(" type=" + transitTypeToString(mType));
         sb.append(" flags=0x" + Integer.toHexString(mFlags));
         sb.append(" overrideAnimOptions=" + mOverrideOptions);
+        if (!mChanges.isEmpty()) {
+            sb.append(" c=[");
+            for (int i = 0; i < mChanges.size(); i++) {
+                sb.append("\n").append("   ").append(mChanges.valueAt(i).toString());
+            }
+            sb.append("\n]\n");
+        }
         sb.append('}');
         return sb.toString();
     }
@@ -3388,8 +3436,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
          * seamless rotation. This is currently only used by DisplayContent during fixed-rotation.
          */
         private static final int FLAG_SEAMLESS_ROTATION = 1;
+        /**
+         * Identifies the associated WindowContainer as a transient-launch task or activity.
+         */
         private static final int FLAG_TRANSIENT_LAUNCH = 2;
-        private static final int FLAG_ABOVE_TRANSIENT_LAUNCH = 4;
+        /**
+         * Identifies the associated WindowContainer as a transient-hide task or activity.
+         */
+        private static final int FLAG_TRANSIENT_HIDE = 4;
 
         /** This container explicitly requested no-animation (usually Activity level). */
         private static final int FLAG_CHANGE_NO_ANIMATION = 0x8;
@@ -3405,18 +3459,32 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         /** Whether this change contains config-at-end members. */
         private static final int FLAG_CHANGE_CONFIG_AT_END = 0x40;
 
+        /**
+         * Whether this change is forced participant transition because it is current top target
+         * of predictive back animation.
+         */
+        private static final int FLAG_BACK_GESTURE_ANIMATION = 0x80;
+
+        /**
+         * Whether this change is forced participant transition because it is previous target of
+         * predictive back animation
+         */
+        private static final int FLAG_BELOW_BACK_GESTURE_ANIMATION = 0x100;
+
         @IntDef(prefix = { "FLAG_" }, value = {
                 FLAG_NONE,
                 FLAG_SEAMLESS_ROTATION,
                 FLAG_TRANSIENT_LAUNCH,
-                FLAG_ABOVE_TRANSIENT_LAUNCH,
+                FLAG_TRANSIENT_HIDE,
                 FLAG_CHANGE_NO_ANIMATION,
                 FLAG_CHANGE_YES_ANIMATION,
                 FLAG_CHANGE_MOVED_TO_TOP,
-                FLAG_CHANGE_CONFIG_AT_END
+                FLAG_CHANGE_CONFIG_AT_END,
+                FLAG_BACK_GESTURE_ANIMATION,
+                FLAG_BELOW_BACK_GESTURE_ANIMATION
         })
         @Retention(RetentionPolicy.SOURCE)
-        @interface Flag {}
+        @interface ChangeInfoFlag {}
 
         @NonNull final WindowContainer mContainer;
         /**
@@ -3435,6 +3503,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // State tracking
         boolean mExistenceChanged = false;
+        // This state indicates that we are restoring transient order as a part of an
+        // end-transition. Because the visibility for transient hide containers has not actually
+        // changed, we need to ensure that hasChanged() still reports the relevant changes
+        boolean mRestoringTransientHide = false;
         // before change state
         boolean mVisible;
         int mWindowingMode;
@@ -3445,7 +3517,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         @ActivityInfo.Config int mKnownConfigChanges;
 
         /** Extra information about this change. */
-        @Flag int mFlags = FLAG_NONE;
+        @ChangeInfoFlag int mFlags = FLAG_NONE;
 
         /** Snapshot surface and luma, if relevant. */
         SurfaceControl mSnapshot;
@@ -3480,14 +3552,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         @Override
         public String toString() {
-            return mContainer.toString();
+            StringBuilder sb = new StringBuilder(64);
+            sb.append("ChangeInfo{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(" container=").append(mContainer);
+            sb.append(" flags=0x").append(Integer.toHexString(mFlags));
+            sb.append('}');
+            return sb.toString();
         }
 
         boolean hasChanged() {
             final boolean currVisible = mContainer.isVisibleRequested();
             // the task including transient launch must promote to root task
             if (currVisible && ((mFlags & ChangeInfo.FLAG_TRANSIENT_LAUNCH) != 0
-                    || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0)) {
+                    || (mFlags & ChangeInfo.FLAG_TRANSIENT_HIDE) != 0)
+                    || (mFlags & ChangeInfo.FLAG_BACK_GESTURE_ANIMATION) != 0
+                    || (mFlags & ChangeInfo.FLAG_BELOW_BACK_GESTURE_ANIMATION) != 0) {
                 return true;
             }
             // If it's invisible and hasn't changed visibility, always return false since even if
@@ -3501,16 +3581,28 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     || !mContainer.getBounds().equals(mAbsoluteBounds)
                     || mRotation != mContainer.getWindowConfiguration().getRotation()
                     || mDisplayId != getDisplayId(mContainer)
-                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0;
+                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0
+                    // If we are restoring transient-hide containers, then we should consider them
+                    // important for the transition as well (their requested visibilities would not
+                    // have changed for the checks below to consider it).
+                    || mRestoringTransientHide;
         }
 
         @TransitionInfo.TransitionMode
         int getTransitMode(@NonNull WindowContainer wc) {
-            if ((mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
+            if ((mFlags & ChangeInfo.FLAG_TRANSIENT_HIDE) != 0) {
                 return mExistenceChanged ? TRANSIT_CLOSE : TRANSIT_TO_BACK;
+            }
+            if ((mFlags & ChangeInfo.FLAG_BELOW_BACK_GESTURE_ANIMATION) != 0) {
+                return TRANSIT_TO_FRONT;
             }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
+                if (mRestoringTransientHide) {
+                    // The requested visibility has not changed for transient-hide containers, but
+                    // we are restoring them so we should considering them moving to front again
+                    return TRANSIT_TO_FRONT;
+                }
                 return TRANSIT_CHANGE;
             }
             if (mExistenceChanged) {
@@ -3532,6 +3624,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wc.mWmService.mAtmService.mBackNavigationController.isMonitorTransitionTarget(wc)) {
                 flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
             }
+            final TaskDisplayArea tda = wc.asTaskDisplayArea();
+            if (tda != null) {
+                flags |= TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA;
+            }
             final Task task = wc.asTask();
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
@@ -3540,7 +3636,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             && topActivity.mStartingData.hasImeSurface()) {
                         flags |= FLAG_WILL_IME_SHOWN;
                     }
-                    if (topActivity.mLaunchTaskBehind) {
+                    if (topActivity.mLaunchTaskBehind
+                            && !topActivity.isAnimating(PARENTS, ANIMATION_TYPE_PREDICT_BACK)) {
                         Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
                         flags |= FLAG_TASK_LAUNCHING_BEHIND;
                     }

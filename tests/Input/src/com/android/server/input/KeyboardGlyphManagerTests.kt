@@ -59,6 +59,9 @@ class KeyboardGlyphManagerTests {
         const val DEVICE_ID = 1
         const val VENDOR_ID = 0x1234
         const val PRODUCT_ID = 0x3456
+        const val DEVICE_ID2 = 2
+        const val VENDOR_ID2 = 0x1235
+        const val PRODUCT_ID2 = 0x3457
         const val PACKAGE_NAME = "KeyboardLayoutManagerTests"
         const val RECEIVER_NAME = "DummyReceiver"
     }
@@ -96,8 +99,11 @@ class KeyboardGlyphManagerTests {
             .thenReturn(inputManager)
 
         keyboardDevice = createKeyboard(DEVICE_ID, VENDOR_ID, PRODUCT_ID, 0, "", "")
-        Mockito.`when`(inputManagerRule.mock.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
+        Mockito.`when`(inputManagerRule.mock.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID, DEVICE_ID2))
         Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
+
+        val keyboardDevice2 = createKeyboard(DEVICE_ID2, VENDOR_ID2, PRODUCT_ID2, 0, "", "")
+        Mockito.`when`(inputManagerRule.mock.getInputDevice(DEVICE_ID2)).thenReturn(keyboardDevice2)
     }
 
     private fun setupBroadcastReceiver() {
@@ -143,6 +149,10 @@ class KeyboardGlyphManagerTests {
             "Glyph map for test keyboard(deviceId=$DEVICE_ID) must exist",
             keyboardGlyphManager.getKeyGlyphMap(DEVICE_ID)
         )
+        assertNotNull(
+            "Glyph map for test keyboard(deviceId=$DEVICE_ID2) must exist",
+            keyboardGlyphManager.getKeyGlyphMap(DEVICE_ID2)
+        )
         assertNull(
             "Glyph map for non-existing keyboard must be null",
             keyboardGlyphManager.getKeyGlyphMap(-2)
@@ -158,6 +168,7 @@ class KeyboardGlyphManagerTests {
 
         assertNotNull(glyphMap.getDrawableForModifier(context, KeyEvent.KEYCODE_META_LEFT))
         assertNotNull(glyphMap.getDrawableForModifier(context, KeyEvent.KEYCODE_META_RIGHT))
+        assertNotNull(glyphMap.getDrawableForModifierState(context, KeyEvent.META_META_ON))
 
         val functionRowKeys = glyphMap.functionRowKeys
         assertEquals(1, functionRowKeys.size)

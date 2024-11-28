@@ -26,6 +26,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,6 +60,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -67,7 +69,11 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -128,6 +134,9 @@ public class ActivityThreadTest {
 
     @Rule(order = 1)
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private ActivityWindowInfoListener mActivityWindowInfoListener;
     private WindowTokenClientController mOriginalWindowTokenClientController;
@@ -909,6 +918,32 @@ public class ActivityThreadTest {
             // The same ActivityWindowInfo won't trigger duplicated callback.
             verify(mActivityWindowInfoListener, never()).accept(any(), any());
         });
+    }
+
+    /**
+     * Verifies that {@link ActivityThread#handleApplicationInfoChanged} does send updates to the
+     * system context, when given the system application info.
+     */
+    @RequiresFlagsEnabled(android.content.res.Flags.FLAG_SYSTEM_CONTEXT_HANDLE_APP_INFO_CHANGED)
+    @Test
+    public void testHandleApplicationInfoChanged_systemContext() {
+        Looper.prepare();
+        final var systemThread = ActivityThread.createSystemActivityThreadForTesting();
+
+        final Context systemContext = systemThread.getSystemContext();
+        final var appInfo = systemContext.getApplicationInfo();
+        // sourceDir must not be null, and contain at least a '/', for handleApplicationInfoChanged.
+        appInfo.sourceDir = "/";
+
+        // Create a copy of the application info.
+        final var newAppInfo = new ApplicationInfo(appInfo);
+        newAppInfo.sourceDir = "/";
+        assertWithMessage("New application info is a separate instance")
+                .that(systemContext.getApplicationInfo()).isNotSameInstanceAs(newAppInfo);
+
+        systemThread.handleApplicationInfoChanged(newAppInfo);
+        assertWithMessage("Application info was updated successfully")
+                .that(systemContext.getApplicationInfo()).isSameInstanceAs(newAppInfo);
     }
 
     /**

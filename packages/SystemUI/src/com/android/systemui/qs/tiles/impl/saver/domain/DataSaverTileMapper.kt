@@ -29,10 +29,8 @@ import javax.inject.Inject
 /** Maps [DataSaverTileModel] to [QSTileState]. */
 class DataSaverTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<DataSaverTileModel> {
+constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
+    QSTileDataToStateMapper<DataSaverTileModel> {
     override fun map(config: QSTileConfig, data: DataSaverTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             with(data) {
@@ -45,9 +43,7 @@ constructor(
                     iconRes = R.drawable.qs_data_saver_icon_off
                     secondaryLabel = resources.getStringArray(R.array.tile_states_saver)[1]
                 }
-                val loadedIcon =
-                    Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
-                icon = { loadedIcon }
+                icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
                 contentDescription = label
                 supportedActions =
                     setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)

@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.applicationContext
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.volume.domain.interactor.audioVolumeInteractor
@@ -40,6 +41,7 @@ val Kosmos.audioStreamSliderViewModelFactory by
                     zenModeInteractor,
                     uiEventLogger,
                     volumePanelLogger,
+                    sliderHapticsViewModelFactory,
                 )
             }
         }

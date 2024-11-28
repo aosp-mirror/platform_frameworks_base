@@ -499,8 +499,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         // Check if the package is listed among the system modules or is an
         // APK inside an updatable APEX.
         try {
-            final PackageInfo pkg = mContext.getPackageManager()
-                    .getPackageInfo(packageName, 0 /* flags */);
+            PackageManager pm = mContext.getPackageManager();
+            final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
             String apexPackageName = pkg.getApexPackageName();
             if (apexPackageName != null) {
                 packageName = apexPackageName;

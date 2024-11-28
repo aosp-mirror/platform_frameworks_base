@@ -21,6 +21,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.shared.model.fakeGlanceableHubMultiUserHelper
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -61,6 +62,7 @@ class CommunalAppWidgetHostTest : SysuiTestCase() {
                 backgroundScope = kosmos.applicationCoroutineScope,
                 hostId = 116,
                 logBuffer = logcatLogBuffer("CommunalAppWidgetHostTest"),
+                glanceableHubMultiUserHelper = kosmos.fakeGlanceableHubMultiUserHelper,
             )
     }
 

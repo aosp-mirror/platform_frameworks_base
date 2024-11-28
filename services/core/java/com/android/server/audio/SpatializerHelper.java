@@ -59,6 +59,8 @@ import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -1098,6 +1100,23 @@ public class SpatializerHelper {
         logd("canBeSpatialized usage:" + attributes.getUsage()
                 + " format:" + format.toLogFriendlyString() + " returning " + able);
         return able;
+    }
+
+    synchronized @NonNull List<Integer> getSpatializedChannelMasks() {
+        if (!checkSpatializer("getSpatializedChannelMasks")) {
+            return Collections.emptyList();
+        }
+        try {
+            final int[] nativeMasks = new int[0]; // FIXME mSpat query goes here
+            for (int i = 0; i < nativeMasks.length; i++) {
+                nativeMasks[i] = AudioFormat.convertNativeChannelMaskToOutMask(nativeMasks[i]);
+            }
+            final List<Integer> masks = Arrays.stream(nativeMasks).boxed().toList();
+            return masks;
+        } catch (Exception e) { // just catch Exception in case nativeMasks is null
+            Log.e(TAG, "Error calling getSpatializedChannelMasks", e);
+            return Collections.emptyList();
+        }
     }
 
     //------------------------------------------------------

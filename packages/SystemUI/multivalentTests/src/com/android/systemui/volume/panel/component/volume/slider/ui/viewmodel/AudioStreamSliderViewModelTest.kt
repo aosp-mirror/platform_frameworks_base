@@ -28,6 +28,7 @@ import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
@@ -73,6 +74,7 @@ class AudioStreamSliderViewModelTest : SysuiTestCase() {
             kosmos.zenModeInteractor,
             kosmos.uiEventLogger,
             kosmos.volumePanelLogger,
+            kosmos.sliderHapticsViewModelFactory,
         )
     }
 

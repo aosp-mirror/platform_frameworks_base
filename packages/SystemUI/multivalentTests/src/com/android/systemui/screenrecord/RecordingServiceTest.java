@@ -310,6 +310,13 @@ public class RecordingServiceTest extends SysuiTestCase {
         verify(mNotificationManager).cancelAsUser(any(), anyInt(), any());
     }
 
+    @Test
+        public void testSecondaryDisplayRecording() throws IOException {
+        Intent startIntent =
+                RecordingService.getStartIntent(mContext, 0, 0, false, 200, null);
+        assertEquals(startIntent.getIntExtra("extra_displayId", -1), 200);
+    }
+
     private void assertUpdateState(boolean state) {
         // Then the state is set to not recording, and we cancel the notification
         // non SYSTEM user doesn't have the reference to the correct controller,

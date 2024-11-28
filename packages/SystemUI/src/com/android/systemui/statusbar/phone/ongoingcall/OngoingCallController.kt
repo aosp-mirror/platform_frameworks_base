@@ -25,6 +25,7 @@ import android.app.UidObserver
 import android.content.Context
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
@@ -58,7 +59,6 @@ import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** A controller to handle the ongoing call chip in the collapsed status bar. */
 @SysUISingleton
@@ -122,9 +122,9 @@ constructor(
                             entry.sbn.uid,
                             entry.sbn.notification.extras.getInt(
                                 Notification.EXTRA_CALL_TYPE,
-                                -1
+                                -1,
                             ) == CALL_TYPE_ONGOING,
-                            statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false
+                            statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false,
                         )
                     if (newOngoingCallInfo == callNotificationInfo) {
                         return
@@ -236,7 +236,7 @@ constructor(
                     bool1 = Flags.statusBarCallChipNotificationIcon()
                     bool2 = currentInfo.notificationIconView != null
                 },
-                { "Creating OngoingCallModel.InCall. notifIconFlag=$bool1 hasIcon=$bool2" }
+                { "Creating OngoingCallModel.InCall. notifIconFlag=$bool1 hasIcon=$bool2" },
             )
             val icon =
                 if (Flags.statusBarCallChipNotificationIcon()) {
@@ -288,7 +288,7 @@ constructor(
                     str1 = notifModel.callType.name
                     bool1 = notifModel.statusBarChipIconView != null
                 },
-                { "NotifInteractorCallModel: key=$str1 when=$long1 callType=$str2 hasIcon=$bool1" }
+                { "NotifInteractorCallModel: key=$str1 when=$long1 callType=$str2 hasIcon=$bool1" },
             )
 
             val newOngoingCallInfo =
@@ -299,7 +299,7 @@ constructor(
                     notifModel.contentIntent,
                     notifModel.uid,
                     isOngoing = true,
-                    statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false
+                    statusBarSwipedAway = callNotificationInfo?.statusBarSwipedAway ?: false,
                 )
             if (newOngoingCallInfo == callNotificationInfo) {
                 return
@@ -378,7 +378,7 @@ constructor(
                     ActivityTransitionAnimator.Controller.fromView(
                         backgroundView,
                         InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                    )
+                    ),
                 )
             }
         }
@@ -455,7 +455,7 @@ constructor(
         /** True if the call is currently ongoing (as opposed to incoming, screening, etc.). */
         val isOngoing: Boolean,
         /** True if the user has swiped away the status bar while in this phone call. */
-        val statusBarSwipedAway: Boolean
+        val statusBarSwipedAway: Boolean,
     ) {
         /**
          * Returns true if the notification information has a valid call start time. See
@@ -472,6 +472,9 @@ constructor(
     /**
      * Observer to tell us when the app that posted the ongoing call notification is visible so that
      * we don't show the call chip at the same time (since the timers could be out-of-sync).
+     *
+     * For a more recommended architecture implementation, see
+     * [com.android.systemui.activity.data.repository.ActivityManagerRepository].
      */
     inner class CallAppUidObserver : UidObserver() {
         /** True if the application managing the call is visible to the user. */
@@ -512,7 +515,7 @@ constructor(
                     uidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE,
                     ActivityManager.PROCESS_STATE_UNKNOWN,
-                    context.opPackageName
+                    context.opPackageName,
                 )
                 isRegistered = true
             } catch (se: SecurityException) {
@@ -537,7 +540,7 @@ constructor(
             uid: Int,
             procState: Int,
             procStateSeq: Long,
-            capability: Int
+            capability: Int,
         ) {
             val currentCallAppUid = callAppUid ?: return
             if (uid != currentCallAppUid) {

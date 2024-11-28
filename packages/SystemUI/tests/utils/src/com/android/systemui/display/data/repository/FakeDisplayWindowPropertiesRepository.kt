@@ -31,7 +31,13 @@ class FakeDisplayWindowPropertiesRepository : DisplayWindowPropertiesRepository 
                     windowType = windowType,
                     context = mock(),
                     windowManager = mock(),
+                    layoutInflater = mock(),
                 )
                 .also { properties.put(displayId, windowType, it) }
+    }
+
+    /** Sets an instance, just for testing purposes. */
+    fun insert(instance: DisplayWindowProperties) {
+        properties.put(instance.displayId, instance.windowType, instance)
     }
 }

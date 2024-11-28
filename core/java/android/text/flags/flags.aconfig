@@ -163,10 +163,12 @@ flag {
 }
 
 flag {
-  name: "typeface_redesign"
+  name: "typeface_redesign_readonly"
   namespace: "text"
   description: "Decouple variation settings, weight and style information from Typeface class"
   bug: "361260253"
+  # This feature does not support runtime flag switch which leads crash in System UI.
+  is_fixed_read_only: true
 }
 
 flag {
@@ -194,4 +196,18 @@ flag {
   namespace: "text"
   description: "Feature flag for adding a TYPE_DURATION to TtsSpan"
   bug: "337103893"
+}
+
+flag {
+  name: "deprecate_elegant_text_height_api"
+  namespace: "text"
+  description: "Deprecate the Paint#elegantTextHeight API and stick it to true"
+  bug: "349519475"
+}
+
+flag {
+  name: "vertical_text_layout"
+  namespace: "text"
+  description: "Make Paint class work for vertical layout text."
+  bug: "355296926"
 }

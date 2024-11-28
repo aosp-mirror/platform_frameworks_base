@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -35,13 +37,10 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.easin
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a click modifier + actions
- */
+/** Represents a click modifier + actions */
 public class ClickModifierOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent {
+        implements ModifierOperation, DecoratorComponent, ClickHandler {
     private static final int OP_CODE = Operations.MODIFIER_CLICK;
-
 
     long mAnimateRippleStart = 0;
     float mAnimateRippleX = 0f;
@@ -51,33 +50,36 @@ public class ClickModifierOperation extends PaintOperation
     float mWidth = 0;
     float mHeight = 0;
 
-    public float[] locationInWindow = new float[2];
+    @NonNull public float[] locationInWindow = new float[2];
 
-    PaintBundle mPaint = new PaintBundle();
+    @NonNull PaintBundle mPaint = new PaintBundle();
 
     public void animateRipple(float x, float y) {
         mAnimateRippleStart = System.currentTimeMillis();
         mAnimateRippleX = x;
         mAnimateRippleY = y;
     }
-    public ArrayList<Operation> mList = new ArrayList<>();
 
+    @NonNull public ArrayList<Operation> mList = new ArrayList<>();
+
+    @NonNull
     public ArrayList<Operation> getList() {
         return mList;
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ClickModifier";
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         for (Operation op : mList) {
             if (op instanceof TextData) {
                 op.apply(context);
@@ -85,13 +87,14 @@ public class ClickModifierOperation extends PaintOperation
         }
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         if (mAnimateRippleStart == 0) {
             return;
         }
@@ -107,14 +110,14 @@ public class ClickModifierOperation extends PaintOperation
         context.savePaint();
         mPaint.reset();
 
-        FloatAnimation anim1 = new FloatAnimation(Easing.CUBIC_STANDARD, 1f,
-                null, Float.NaN, Float.NaN);
+        FloatAnimation anim1 =
+                new FloatAnimation(Easing.CUBIC_STANDARD, 1f, null, Float.NaN, Float.NaN);
         anim1.setInitialValue(0f);
         anim1.setTargetValue(1f);
         float tween = anim1.get(progress);
 
-        FloatAnimation anim2 = new FloatAnimation(Easing.CUBIC_STANDARD, 0.5f,
-                null, Float.NaN, Float.NaN);
+        FloatAnimation anim2 =
+                new FloatAnimation(Easing.CUBIC_STANDARD, 0.5f, null, Float.NaN, Float.NaN);
         anim2.setInitialValue(0f);
         anim2.setTargetValue(1f);
         float tweenRadius = anim2.get(progress);
@@ -133,13 +136,13 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(@NonNull RemoteContext context, float width, float height) {
         mWidth = width;
         mHeight = height;
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, "CLICK_MODIFIER");
         for (Operation o : mList) {
             if (o instanceof ActionOperation) {
@@ -149,8 +152,15 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(
+            @NonNull RemoteContext context,
+            @NonNull CoreDocument document,
+            @NonNull Component component,
+            float x,
+            float y) {
+        if (!component.isVisible()) {
+            return;
+        }
         locationInWindow[0] = 0f;
         locationInWindow[1] = 0f;
         component.getLocationInWindow(locationInWindow);
@@ -160,23 +170,32 @@ public class ClickModifierOperation extends PaintOperation
                 ((ActionOperation) o).runAction(context, document, component, x, y);
             }
         }
+        context.hapticEffect(3);
     }
 
+    @NonNull
     public static String name() {
         return "ClickModifier";
     }
 
-    public static void apply(WireBuffer buffer) {
+    public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ClickModifierOperation());
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, name())
-                .description("Click modifier. This operation contains"
-                        + " a list of action executed on click");
+                .description(
+                        "Click modifier. This operation contains"
+                                + " a list of action executed on click");
     }
 }

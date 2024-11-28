@@ -16,6 +16,8 @@
 
 package com.android.server.profcollect;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -26,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.camera2.CameraManager;
+import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -67,6 +70,9 @@ public final class ProfcollectForwardingService extends SystemService {
     private int mUsageSetting;
     private boolean mUploadEnabled;
 
+    private static boolean sVerityEnforced;
+    private boolean mAdbActive;
+
     private IProfCollectd mIProfcollect;
     private static ProfcollectForwardingService sSelfService;
     private final Handler mHandler = new ProfcollectdHandler(IoThread.getHandler().getLooper());
@@ -83,6 +89,15 @@ public final class ProfcollectForwardingService extends SystemService {
             if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
                 Log.d(LOG_TAG, "Received broadcast to pack and upload reports");
                 createAndUploadReport(sSelfService);
+            }
+            if (UsbManager.ACTION_USB_STATE.equals(intent.getAction())) {
+                boolean isADB = intent.getBooleanExtra(UsbManager.USB_FUNCTION_ADB, false);
+                if (isADB) {
+                    boolean connected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
+                    Log.d(LOG_TAG, "Received broadcast that ADB became " + connected
+                            + ", was " + mAdbActive);
+                    mAdbActive = connected;
+                }
             }
         }
     };
@@ -103,11 +118,19 @@ public final class ProfcollectForwardingService extends SystemService {
             mUsageSetting = -1;
         }
 
+        // Check verity, disable profile upload if not enforced.
+        final String verityMode = SystemProperties.get("ro.boot.veritymode");
+        sVerityEnforced = verityMode.equals("enforcing");
+        if (!sVerityEnforced) {
+            Log.d(LOG_TAG, "verity is not enforced: " + verityMode);
+        }
+
         mUploadEnabled =
             context.getResources().getBoolean(R.bool.config_profcollectReportUploaderEnabled);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_UPLOAD_PROFILES);
+        filter.addAction(UsbManager.ACTION_USB_STATE);
         context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
@@ -125,7 +148,17 @@ public final class ProfcollectForwardingService extends SystemService {
     }
 
     @Override
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
     public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            UsbManager usbManager = getContext().getSystemService(UsbManager.class);
+            if (usbManager == null) {
+                mAdbActive = false;
+                return;
+            }
+            mAdbActive = ((usbManager.getCurrentFunctions() & UsbManager.FUNCTION_ADB) == 1);
+            Log.d(LOG_TAG, "ADB is " + mAdbActive + " on system startup");
+        }
         if (phase == PHASE_BOOT_COMPLETED) {
             if (mIProfcollect == null) {
                 return;
@@ -281,6 +314,9 @@ public final class ProfcollectForwardingService extends SystemService {
             if (mIProfcollect == null) {
                 return;
             }
+            if (mAdbActive) {
+                return;
+            }
             if (Utils.withFrequency("applaunch_trace_freq", 5)) {
                 Utils.traceSystem(mIProfcollect, "applaunch");
             }
@@ -301,6 +337,9 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private void traceOnDex2oatStart() {
         if (mIProfcollect == null) {
+            return;
+        }
+        if (mAdbActive) {
             return;
         }
         if (Utils.withFrequency("dex2oat_trace_freq", 25)) {
@@ -340,6 +379,10 @@ public final class ProfcollectForwardingService extends SystemService {
             }
             if (!pfs.mUploadEnabled) {
                 Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
+            if (!sVerityEnforced) {
+                Log.i(LOG_TAG, "Verity is not enforced.");
                 return;
             }
             Intent intent = new Intent()

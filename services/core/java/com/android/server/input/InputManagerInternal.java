@@ -23,11 +23,13 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.SparseBooleanArray;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
+import com.android.internal.policy.IShortcutService;
 
 import java.util.List;
 
@@ -126,6 +128,13 @@ public abstract class InputManagerInternal {
      * Notify the input manager that an IME connection is becoming active or is no longer active.
      */
     public abstract void notifyInputMethodConnectionActive(boolean connectionIsActive);
+
+    /**
+     * Notify user id changes to input.
+     *
+     * TODO(b/362473586): Cleanup after input shifts to Lifecycle with user change callbacks
+     */
+    public abstract void setCurrentUser(@UserIdInt int newUserId);
 
     /** Callback interface for notifications relating to the lid switch. */
     public interface LidSwitchCallback {
@@ -270,6 +279,15 @@ public abstract class InputManagerInternal {
      * @param scaleFactor the new scale factor to be applied for pointer icons.
      */
     public abstract void setAccessibilityPointerIconScaleFactor(int displayId, float scaleFactor);
+
+
+    /**
+     * Register shortcuts for input manager to dispatch.
+     * Shortcut code is packed as (metaState << Integer.SIZE) | keyCode
+     * @hide
+     */
+    public abstract void registerShortcutKey(long shortcutCode,
+            IShortcutService shortcutKeyReceiver) throws RemoteException;
 
     /**
      * Set whether the given input device can wake up the kernel from sleep

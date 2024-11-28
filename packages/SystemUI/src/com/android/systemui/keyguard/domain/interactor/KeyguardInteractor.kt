@@ -49,6 +49,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
@@ -85,7 +86,7 @@ constructor(
     private val repository: KeyguardRepository,
     powerInteractor: PowerInteractor,
     bouncerRepository: KeyguardBouncerRepository,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
@@ -284,7 +285,7 @@ constructor(
         }
 
     /** Observable for the [StatusBarState] */
-    val statusBarState: Flow<StatusBarState> = repository.statusBarState
+    val statusBarState: StateFlow<StatusBarState> = repository.statusBarState
 
     /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
     val biometricUnlockState: StateFlow<BiometricUnlockModel> = repository.biometricUnlockState
@@ -350,23 +351,21 @@ constructor(
     val dismissAlpha: Flow<Float> =
         shadeRepository.legacyShadeExpansion
             .sampleCombine(
-                statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
                 keyguardTransitionInteractor.transitionState,
                 isKeyguardDismissible,
                 keyguardTransitionInteractor.isFinishedIn(Scenes.Communal, GLANCEABLE_HUB),
             )
-            .filter { (_, _, _, step, _, _) -> !step.transitionState.isTransitioning() }
+            .filter { (_, _, step, _, _) -> !step.transitionState.isTransitioning() }
             .transform {
                 (
                     legacyShadeExpansion,
-                    statusBarState,
                     currentKeyguardState,
                     step,
                     isKeyguardDismissible,
                     onGlanceableHub) ->
                 if (
-                    statusBarState == StatusBarState.KEYGUARD &&
+                    statusBarState.value == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
                         currentKeyguardState == LOCKSCREEN &&
                         legacyShadeExpansion != 1f
@@ -543,6 +542,10 @@ constructor(
 
     fun setIsKeyguardGoingAway(isGoingAway: Boolean) {
         repository.isKeyguardGoingAway.value = isGoingAway
+    }
+
+    fun setNotificationStackAbsoluteBottom(bottom: Float) {
+        repository.setNotificationStackAbsoluteBottom(bottom)
     }
 
     companion object {

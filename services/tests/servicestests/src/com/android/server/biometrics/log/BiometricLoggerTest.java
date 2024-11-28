@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.log;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyFloat;
@@ -45,9 +47,13 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Presubmit
 @SmallTest
@@ -136,12 +142,53 @@ public class BiometricLoggerTest {
         final int targetUserId = 4;
         final long latency = 44;
         final boolean enrollSuccessful = true;
+        final int templateId = 4;
 
-        mLogger.logOnEnrolled(targetUserId, latency, enrollSuccessful, -1);
+        mLogger.logOnEnrolled(targetUserId, latency, enrollSuccessful, -1, templateId);
 
         verify(mSink).enroll(
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT),
-                eq(targetUserId), eq(latency), eq(enrollSuccessful), anyFloat(), anyInt());
+                eq(targetUserId), eq(latency), eq(enrollSuccessful), anyFloat(), anyInt(),
+                eq(templateId));
+    }
+
+    @Test
+    public void testUnEnroll() {
+        mLogger = createLogger();
+
+        final int targetUserId = 4;
+        final int reason = BiometricsProtoEnums.UNENROLL_REASON_DANGLING_FRAMEWORK;
+        final int templateId = 4;
+
+        mLogger.logOnUnEnrolled(targetUserId, reason, templateId);
+
+        verify(mSink).unenrolled(
+                eq(DEFAULT_MODALITY), eq(targetUserId), eq(reason), eq(templateId));
+    }
+
+    @Test
+    public void testEnumeration() {
+        mLogger = createLogger();
+
+        final int targetUserId = 4;
+        final int result = BiometricsProtoEnums.ENUMERATION_RESULT_OK;
+        final int[] templateIdsHal = {1, 2};
+        final int[] templateIdsFw = {2, 3};
+        mLogger.logOnEnumerated(targetUserId, result, templateIdsHal, templateIdsFw);
+
+        final ArgumentCaptor<int[]> captorHalIds = ArgumentCaptor.forClass(int[].class);
+        final ArgumentCaptor<int[]> captorFwIds = ArgumentCaptor.forClass(int[].class);
+        verify(mSink).enumerated(
+                eq(DEFAULT_MODALITY), eq(targetUserId), eq(result), captorHalIds.capture(),
+                captorFwIds.capture());
+        assertThat(captorHalIds.getAllValues().stream()
+                .flatMap(x -> Arrays.stream(x).boxed())
+                .collect(Collectors.toList()))
+                .containsExactly(1, 2);
+        assertThat(captorFwIds.getAllValues().stream()
+                .flatMap(x -> Arrays.stream(x).boxed())
+                .collect(Collectors.toList()))
+                .containsExactly(2, 3);
     }
 
     @Test
@@ -193,7 +240,8 @@ public class BiometricLoggerTest {
         mLogger.logOnEnrolled(2 /* targetUserId */,
                 10 /* latency */,
                 true /* enrollSuccessful */,
-                30 /* source */);
+                30 /* source */,
+                1 /* templateId */);
         mLogger.logOnError(mContext, mOpContext,
                 4 /* error */,
                 0 /* vendorCode */,
@@ -207,7 +255,7 @@ public class BiometricLoggerTest {
                 anyLong(), anyInt(), anyBoolean(), anyInt(), anyFloat());
         verify(mSink, never()).enroll(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyBoolean(), anyFloat(),
-                anyInt());
+                anyInt(), anyInt());
         verify(mSink, never()).error(eq(mOpContext),
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
                 anyLong(), anyInt(), anyInt(), anyInt());

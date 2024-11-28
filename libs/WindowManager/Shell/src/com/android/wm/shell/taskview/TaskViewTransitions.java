@@ -37,11 +37,14 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 
 /**
  * Handles Shell Transitions that involve TaskView tasks.
@@ -49,8 +52,15 @@ import java.util.Objects;
 public class TaskViewTransitions implements Transitions.TransitionHandler {
     static final String TAG = "TaskViewTransitions";
 
-    private final ArrayMap<TaskViewTaskController, TaskViewRequestedState> mTaskViews =
-            new ArrayMap<>();
+    /**
+     * Map of {@link TaskViewTaskController} to {@link TaskViewRequestedState}.
+     * <p>
+     * {@link TaskView} keeps a reference to the {@link TaskViewTaskController} instance and
+     * manages its lifecycle.
+     * Only keep a weak reference to the controller instance here to allow for it to be cleaned
+     * up when its TaskView is no longer used.
+     */
+    private final Map<TaskViewTaskController, TaskViewRequestedState> mTaskViews;
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
     private final Transitions mTransitions;
     private final boolean[] mRegistered = new boolean[]{false};
@@ -95,6 +105,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
 
     public TaskViewTransitions(Transitions transitions) {
         mTransitions = transitions;
+        if (Flags.enableTaskViewControllerCleanup()) {
+            mTaskViews = new WeakHashMap<>();
+        } else {
+            mTaskViews = new ArrayMap<>();
+        }
         // Defer registration until the first TaskView because we want this to be the "first" in
         // priority when handling requests.
         // TODO(210041388): register here once we have an explicit ordering mechanism.
@@ -208,10 +223,21 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     private TaskViewTaskController findTaskView(ActivityManager.RunningTaskInfo taskInfo) {
-        for (int i = 0; i < mTaskViews.size(); ++i) {
-            if (mTaskViews.keyAt(i).getTaskInfo() == null) continue;
-            if (taskInfo.token.equals(mTaskViews.keyAt(i).getTaskInfo().token)) {
-                return mTaskViews.keyAt(i);
+        if (Flags.enableTaskViewControllerCleanup()) {
+            for (TaskViewTaskController controller : mTaskViews.keySet()) {
+                if (controller.getTaskInfo() == null) continue;
+                if (taskInfo.token.equals(controller.getTaskInfo().token)) {
+                    return controller;
+                }
+            }
+        } else {
+            ArrayMap<TaskViewTaskController, TaskViewRequestedState> taskViews =
+                    (ArrayMap<TaskViewTaskController, TaskViewRequestedState>) mTaskViews;
+            for (int i = 0; i < taskViews.size(); ++i) {
+                if (taskViews.keyAt(i).getTaskInfo() == null) continue;
+                if (taskInfo.token.equals(taskViews.keyAt(i).getTaskInfo().token)) {
+                    return taskViews.keyAt(i);
+                }
             }
         }
         return null;

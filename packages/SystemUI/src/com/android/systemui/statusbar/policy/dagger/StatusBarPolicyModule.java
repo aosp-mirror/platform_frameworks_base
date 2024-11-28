@@ -206,12 +206,14 @@ public interface StatusBarPolicyModule {
     @SysUISingleton
     @Provides
     static AccessPointControllerImpl  provideAccessPointControllerImpl(
+            @Application Context context,
             UserManager userManager,
             UserTracker userTracker,
             @Main Executor mainExecutor,
             WifiPickerTrackerFactory wifiPickerTrackerFactory
     ) {
         AccessPointControllerImpl controller = new AccessPointControllerImpl(
+                context,
                 userManager,
                 userTracker,
                 mainExecutor,

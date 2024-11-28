@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.graphics.Rect;
+import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
@@ -261,4 +262,25 @@ interface IInputManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
     void unregisterKeyGestureHandler(IKeyGestureHandler handler);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    int addCustomInputGesture(int userId, in AidlInputGestureData data);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    int removeCustomInputGesture(int userId, in AidlInputGestureData data);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    void removeAllCustomInputGestures(int userId, int tag);
+
+    AidlInputGestureData[] getCustomInputGestures(int userId, int tag);
+
+    AidlInputGestureData[] getAppLaunchBookmarks();
+
+    void resetLockedModifierState();
 }

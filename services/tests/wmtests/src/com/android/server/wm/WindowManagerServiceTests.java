@@ -42,7 +42,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -85,7 +84,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -97,7 +95,6 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
@@ -1190,55 +1187,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mTransaction).setInputWindowInfo(
                 eq(surfaceControl),
                 argThat(h -> (h.inputConfig & InputConfig.SENSITIVE_FOR_PRIVACY) != 0));
-    }
-
-    @RequiresFlagsDisabled(Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
-    @Test
-    public void testDrawMagnifiedViewport() {
-        final int displayId = mDisplayContent.mDisplayId;
-        // Use real surface, so ViewportWindow's BlastBufferQueue can be created.
-        final ArrayList<SurfaceControl> surfaceControls = new ArrayList<>();
-        mWm.mSurfaceControlFactory = () -> new SurfaceControl.Builder() {
-            @Override
-            public SurfaceControl build() {
-                final SurfaceControl sc = super.build();
-                surfaceControls.add(sc);
-                return sc;
-            }
-        };
-        mWm.mAccessibilityController.setMagnificationCallbacks(displayId,
-                mock(WindowManagerInternal.MagnificationCallbacks.class));
-        final boolean[] lockCanvasInWmLock = { false };
-        final Surface surface = mWm.mAccessibilityController.forceShowMagnifierSurface(displayId);
-        spyOn(surface);
-        doAnswer(invocationOnMock -> {
-            lockCanvasInWmLock[0] |= Thread.holdsLock(mWm.mGlobalLock);
-            invocationOnMock.callRealMethod();
-            return null;
-        }).when(surface).lockCanvas(any());
-        mWm.mAccessibilityController
-                .recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(displayId);
-        waitUntilHandlersIdle();
-        try {
-            verify(surface).lockCanvas(any());
-
-            clearInvocations(surface);
-            // Invalidate and redraw.
-            mWm.mAccessibilityController.onDisplaySizeChanged(mDisplayContent);
-            mWm.mAccessibilityController
-                    .recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(displayId);
-            // Turn off magnification to release surface.
-            mWm.mAccessibilityController.setMagnificationCallbacks(displayId, null);
-            waitUntilHandlersIdle();
-            // lockCanvas must not be called after releasing.
-            verify(surface, never()).lockCanvas(any());
-            verify(surface).release();
-            assertFalse(lockCanvasInWmLock[0]);
-        } finally {
-            for (int i = surfaceControls.size() - 1; i >= 0; --i) {
-                surfaceControls.get(i).release();
-            }
-        }
     }
 
     @Test

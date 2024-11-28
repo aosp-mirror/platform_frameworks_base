@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.view.View.GONE;
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.RUBBER_BAND_FACTOR_NORMAL;
@@ -54,6 +55,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.util.MathUtils;
@@ -64,13 +66,13 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
 import android.widget.TextView;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.BrokenWithSceneContainer;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -91,6 +93,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
+import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -100,7 +103,7 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.policy.AvalancheController;
+import com.android.systemui.statusbar.notification.headsup.AvalancheController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor;
 
@@ -117,15 +120,24 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 /**
  * Tests for {@link NotificationStackScrollLayout}.
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationStackScrollLayoutTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return parameterizeSceneContainerFlag();
+    }
 
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private NotificationStackScrollLayout mStackScroller;  // Normally test this
@@ -152,6 +164,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     @Mock private AvalancheController mAvalancheController;
+
+    public NotificationStackScrollLayoutTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -352,6 +369,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateStackEndHeightAndStackHeight_onlyUpdatesStackHeightDuringSwipeUp() {
         final float expansionFraction = 0.5f;
         mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
@@ -365,6 +383,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void setPanelFlinging_updatesStackEndHeightOnlyOnFinish() {
         final float expansionFraction = 0.5f;
         mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
@@ -559,7 +578,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void manageNotifications_visible() {
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
@@ -572,7 +591,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void clearAll_visible() {
         FooterView view = mock(FooterView.class);
         mStackScroller.setFooterView(view);
@@ -585,7 +604,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testInflateFooterView() {
         mStackScroller.inflateFooterView();
         ArgumentCaptor<FooterView> captor = ArgumentCaptor.forClass(FooterView.class);
@@ -596,7 +615,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testUpdateFooter_noNotifications() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -608,7 +627,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_remoteInput() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -625,7 +645,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testUpdateFooter_withoutNotifications() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -641,7 +661,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_oneClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -657,7 +678,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_withoutHistory() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -674,7 +696,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void testUpdateFooter_oneClearableNotification_beforeUserSetup() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(false);
@@ -690,7 +712,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
+    @DisableSceneContainer
     public void testUpdateFooter_oneNonClearableNotification() {
         setBarStateForTest(StatusBarState.SHADE);
         mStackScroller.setCurrentUserSetup(true);
@@ -724,7 +747,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, ModesEmptyShadeFix.FLAG_NAME})
+    @DisableFlags({FooterViewRefactor.FLAG_NAME,
+        ModesEmptyShadeFix.FLAG_NAME,
+        NotifRedesignFooter.FLAG_NAME})
     public void testReInflatesFooterViews() {
         when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
         clearInvocations(mStackScroller);
@@ -1181,7 +1206,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
     public void hasFilteredOutSeenNotifs_updateFooter() {
         mStackScroller.setCurrentUserSetup(true);
 
@@ -1206,6 +1231,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testWindowInsetAnimationProgress_updatesBottomInset() {
         int imeInset = 100;
         WindowInsets windowInsets = new WindowInsets.Builder()
@@ -1423,6 +1449,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    @BrokenWithSceneContainer(bugId = 332732878) // because NSSL#mAnimationsEnabled is always true
     public void testGenerateHeadsUpAnimation_isSeenInShade_noAnimation() {
         // GIVEN NSSL is ready for HUN animations
         Consumer<Boolean> headsUpAnimatingAwayListener = mock(BooleanConsumer.class);

@@ -54,7 +54,6 @@ val Kosmos.communalInteractor by Fixture {
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         communalSettingsInteractor = communalSettingsInteractor,
-        appWidgetHost = mock(),
         editWidgetsActivityStarter = editWidgetsActivityStarter,
         userTracker = userTracker,
         activityStarter = activityStarter,
@@ -62,7 +61,7 @@ val Kosmos.communalInteractor by Fixture {
         sceneInteractor = sceneInteractor,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
-        managedProfileController = fakeManagedProfileController
+        managedProfileController = fakeManagedProfileController,
     )
 }
 

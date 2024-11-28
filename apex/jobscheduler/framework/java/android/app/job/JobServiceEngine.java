@@ -165,11 +165,11 @@ public abstract class JobServiceEngine {
                 case MSG_EXECUTE_JOB: {
                     final JobParameters params = (JobParameters) msg.obj;
                     try {
-                        if (Flags.cleanupEmptyJobs()) {
+                        if (Flags.handleAbandonedJobs()) {
                             params.enableCleaner();
                         }
                         boolean workOngoing = JobServiceEngine.this.onStartJob(params);
-                        if (Flags.cleanupEmptyJobs() && !workOngoing) {
+                        if (Flags.handleAbandonedJobs() && !workOngoing) {
                             params.disableCleaner();
                         }
                         ackStartMessage(params, workOngoing);
@@ -196,7 +196,7 @@ public abstract class JobServiceEngine {
                     IJobCallback callback = params.getCallback();
                     if (callback != null) {
                         try {
-                            if (Flags.cleanupEmptyJobs()) {
+                            if (Flags.handleAbandonedJobs()) {
                                 params.disableCleaner();
                             }
                             callback.jobFinished(params.getJobId(), needsReschedule);

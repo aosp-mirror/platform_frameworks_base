@@ -23,7 +23,8 @@ import android.graphics.Rect
 import android.view.WindowManager
 import android.window.TaskSnapshot
 import androidx.compose.ui.graphics.toArgb
-import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
@@ -53,11 +54,8 @@ class DesktopHandleManageWindowsMenu(
     private var menuViewContainer: AdditionalViewContainer? = null
 
     init {
-        show(snapshotList, onIconClickListener, onOutsideClickListener)
-    }
-
-    override fun close() {
-        menuViewContainer?.releaseView()
+        createMenu(snapshotList, onIconClickListener, onOutsideClickListener)
+        animateOpen()
     }
 
     private fun calculateMenuPosition(): Point {
@@ -104,6 +102,11 @@ class DesktopHandleManageWindowsMenu(
             flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             view = menuView.rootView,
+            ignoreCutouts = DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context),
         )
+    }
+
+    override fun removeFromContainer() {
+        menuViewContainer?.releaseView()
     }
 }

@@ -24,6 +24,7 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.common.MultiInstanceHelper.getComponent;
 import static com.android.wm.shell.common.MultiInstanceHelper.getShortcutComponent;
 import static com.android.wm.shell.common.MultiInstanceHelper.samePackage;
@@ -33,6 +34,9 @@ import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMes
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.KEY_EXTRA_WIDGET_INTENT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_0;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_1;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -98,6 +102,7 @@ import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
+import com.android.wm.shell.shared.split.SplitScreenConstants.SplitIndex;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
@@ -325,7 +330,6 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     /**
      * @return an Array of RunningTaskInfo's ordered by leftToRight or topTopBottom
      */
-    @Nullable
     public ActivityManager.RunningTaskInfo[] getAllTaskInfos() {
         // TODO(b/349828130) Add the third stage task info and not rely on positions
         ActivityManager.RunningTaskInfo topLeftTask = getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
@@ -335,7 +339,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             return new ActivityManager.RunningTaskInfo[]{topLeftTask, bottomRightTask};
         }
 
-        return null;
+        return new ActivityManager.RunningTaskInfo[0];
     }
 
     /** Check task is under split or not by taskId. */
@@ -405,7 +409,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     public void prepareEnterSplitScreen(WindowContainerTransaction wct,
             ActivityManager.RunningTaskInfo taskInfo, int startPosition) {
         mStageCoordinator.prepareEnterSplitScreen(wct, taskInfo, startPosition,
-                false /* resizeAnim */);
+                false /* resizeAnim */, SPLIT_INDEX_UNDEFINED);
     }
 
     /**
@@ -448,6 +452,24 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             return SPLIT_POSITION_BOTTOM_OR_RIGHT;
         } else {
             return SPLIT_POSITION_TOP_OR_LEFT;
+        }
+    }
+
+    /**
+     * Determines which split index a new instance of a task should take.
+     * @param callingTask The task requesting a new instance.
+     * @return the split index of the new instance
+     */
+    @SplitIndex
+    public int determineNewInstanceIndex(@NonNull ActivityManager.RunningTaskInfo callingTask) {
+        if (!enableFlexibleSplit()) {
+            throw new IllegalStateException("Use determineNewInstancePosition");
+        }
+        if (callingTask.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                || getSplitPosition(callingTask.taskId) == SPLIT_POSITION_TOP_OR_LEFT) {
+            return SPLIT_INDEX_1;
+        } else {
+            return SPLIT_INDEX_0;
         }
     }
 
@@ -560,6 +582,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             @Nullable WindowContainerToken hideTaskToken) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                 "Legacy startTask does not support hide task token");
+        if (isTaskInSplitScreenForeground(taskId)) return;
         final int[] result = new int[1];
         IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
             @Override
@@ -685,7 +708,10 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "startIntentWithInstanceId: reason=%d",
                 ENTER_REASON_LAUNCHER);
         mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
-        startIntent(intent, userId, fillInIntent, position, options, null /* hideTaskToken */);
+        // TODO(b/349828130) currently pass in index_undefined until we can revisit these
+        //  specific cases in the future. Only focusing on parity with starting intent/task
+        startIntent(intent, userId, fillInIntent, position, options, null /* hideTaskToken */,
+                SPLIT_INDEX_UNDEFINED);
     }
 
     private void startIntentAndTask(PendingIntent pendingIntent, int userId1,
@@ -775,9 +801,9 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     @Override
     public void startIntent(PendingIntent intent, int userId1, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options,
-            @Nullable WindowContainerToken hideTaskToken) {
+            @Nullable WindowContainerToken hideTaskToken, @SplitIndex int index) {
         startIntent(intent, userId1, fillInIntent, position, options, hideTaskToken,
-                false /* forceLaunchNewTask */);
+                false /* forceLaunchNewTask */, index);
     }
 
     /**
@@ -790,7 +816,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
      */
     public void startIntent(PendingIntent intent, int userId1, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options,
-            @Nullable WindowContainerToken hideTaskToken, boolean forceLaunchNewTask) {
+            @Nullable WindowContainerToken hideTaskToken, boolean forceLaunchNewTask,
+            @SplitIndex int index) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                 "startIntent(): intent=%s user=%d fillInIntent=%s position=%d", intent, userId1,
                 fillInIntent, position);
@@ -816,7 +843,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         if (taskInfo != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "Found suitable background task=%s", taskInfo);
-            mStageCoordinator.startTask(taskInfo.taskId, position, options, hideTaskToken);
+            mStageCoordinator.startTask(taskInfo.taskId, position, options, hideTaskToken, index);
 
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Start task in background");
             return;
@@ -841,7 +868,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             }
         }
 
-        mStageCoordinator.startIntent(intent, fillInIntent, position, options, hideTaskToken);
+        mStageCoordinator.startIntent(intent, fillInIntent, position, options, hideTaskToken,
+                index);
     }
 
     /**

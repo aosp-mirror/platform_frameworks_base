@@ -18,10 +18,12 @@ package android.os;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Size;
@@ -72,16 +74,18 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     /**
      * Status when the Bundle can <b>assert</b> that the underlying Parcel DOES NOT contain
      * Binder object(s).
-     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int STATUS_BINDERS_NOT_PRESENT = 0;
 
     /**
      * Status when the Bundle can <b>assert</b> that there are Binder object(s) in the Parcel.
-     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int STATUS_BINDERS_PRESENT = 1;
 
     /**
@@ -94,9 +98,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * object to the Bundle but it is not possible to assert this fact unless the Bundle is written
      * to a Parcel.
      * </p>
-     *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int STATUS_BINDERS_UNKNOWN = 2;
 
     /** @hide */
@@ -281,7 +286,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     }
 
     /** {@hide} */
-    public void setIsIntentExtra() {
+    public void enableTokenVerification() {
         mFlags |= FLAG_VERIFY_TOKENS_PRESENT;
     }
 
@@ -417,6 +422,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * Returns a status indicating whether the bundle contains any parcelled Binder objects.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_HAS_BINDERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public @HasBinderStatus int hasBinders() {
         if ((mFlags & FLAG_HAS_BINDERS_KNOWN) != 0) {
             if ((mFlags & FLAG_HAS_BINDERS) != 0) {

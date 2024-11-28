@@ -80,7 +80,7 @@ class DesktopWindowingEducationTooltipController(
    * @param tooltipViewConfig features of tooltip.
    * @param taskId is used in the title of popup window created for the tooltip view.
    */
-  fun showEducationTooltip(tooltipViewConfig: EducationViewConfig, taskId: Int) {
+  fun showEducationTooltip(tooltipViewConfig: TooltipEducationViewConfig, taskId: Int) {
     hideEducationTooltip()
     tooltipView = createEducationTooltipView(tooltipViewConfig, taskId)
     animator = createAnimator()
@@ -93,7 +93,7 @@ class DesktopWindowingEducationTooltipController(
 
   /** Create education view by inflating layout provided. */
   private fun createEducationTooltipView(
-      tooltipViewConfig: EducationViewConfig,
+      tooltipViewConfig: TooltipEducationViewConfig,
       taskId: Int,
   ): View {
     val tooltipView =
@@ -271,7 +271,7 @@ class DesktopWindowingEducationTooltipController(
    * @property onEducationClickAction Lambda to be executed when the tooltip is clicked.
    * @property onDismissAction Lambda to be executed when the tooltip is dismissed.
    */
-  data class EducationViewConfig(
+  data class TooltipEducationViewConfig(
       @LayoutRes val tooltipViewLayout: Int,
       val tooltipColorScheme: TooltipColorScheme,
       val tooltipViewGlobalCoordinates: Point,

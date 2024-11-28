@@ -614,6 +614,12 @@ class WindowToken extends WindowContainer<WindowState> {
         final int rotation = getRelativeDisplayRotation();
         if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
         if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
+        if (ActivityTaskManagerService.isPip2ExperimentEnabled() && asActivityRecord() != null
+                && mTransitionController.getWindowingModeAtStart(
+                asActivityRecord()) == WINDOWING_MODE_PINNED) {
+            // PiP handles fixed rotation animation in Shell, so do not create the rotation leash.
+            return null;
+        }
 
         final SurfaceControl leash = makeSurface().setContainerLayer()
                 .setParent(getParentSurfaceControl())
@@ -665,6 +671,15 @@ class WindowToken extends WindowContainer<WindowState> {
             // override configuration can update to the same state.
             getResolvedOverrideConfiguration().updateFrom(
                     mFixedRotationTransformState.mRotatedOverrideConfiguration);
+        }
+        if (asActivityRecord() == null) {
+            // Let ActivityRecord override the config if there is one. Otherwise, override here.
+            // Resolve WindowToken's configuration by the latest window.
+            final WindowState win = getTopChild();
+            if (win != null) {
+                final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+                win.applySizeOverride(newParentConfig, resolvedConfig);
+            }
         }
     }
 

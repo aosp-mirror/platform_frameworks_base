@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.VerticalSplit
 import com.android.compose.ui.graphics.painter.DrawablePainter
+import com.android.systemui.Flags.keyboardShortcutHelperShortcutCustomizer
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
@@ -86,6 +87,7 @@ constructor(
                         searchQuery = query,
                         shortcutCategories = shortcutCategoriesUi,
                         defaultSelectedCategory = getDefaultSelectedCategory(filteredCategories),
+                        isShortcutCustomizerFlagEnabled = keyboardShortcutHelperShortcutCustomizer(),
                     )
                 }
             }
@@ -121,7 +123,7 @@ constructor(
                         userContext.packageManager.getApplicationIcon(type.packageName)
                     IconSource(painter = DrawablePainter(drawable = iconDrawable))
                 } catch (e: NameNotFoundException) {
-                    Log.wtf(
+                    Log.w(
                         "ShortcutHelperViewModel",
                         "Package not found when retrieving icon for ${type.packageName}",
                     )
@@ -151,7 +153,7 @@ constructor(
                 packageManagerForUser.getApplicationInfo(type.packageName, /* flags= */ 0)
             return packageManagerForUser.getApplicationLabel(currentAppInfo).toString()
         } catch (e: NameNotFoundException) {
-            Log.wtf(
+            Log.w(
                 "ShortcutHelperViewModel",
                 "Package Not found when retrieving Label for ${type.packageName}",
             )

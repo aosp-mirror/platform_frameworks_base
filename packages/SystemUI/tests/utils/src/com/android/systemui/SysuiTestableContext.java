@@ -29,6 +29,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.view.Display;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.res.R;
 
@@ -42,6 +44,9 @@ public class SysuiTestableContext extends TestableContext {
     private final Set<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
     private final Map<UserHandle, Context> mContextForUser = new HashMap<>();
     private final Map<String, Context> mContextForPackage = new HashMap<>();
+
+    @Nullable
+    private Display mCustomDisplay;
 
     public SysuiTestableContext(Context base) {
         super(base);
@@ -62,6 +67,18 @@ public class SysuiTestableContext extends TestableContext {
         SysuiTestableContext context =
                 new SysuiTestableContext(getBaseContext().createDisplayContext(display));
         return context;
+    }
+
+    public void setDisplay(Display display) {
+        mCustomDisplay = display;
+    }
+
+    @Override
+    public Display getDisplay() {
+        if (mCustomDisplay != null) {
+            return mCustomDisplay;
+        }
+        return super.getDisplay();
     }
 
     public SysuiTestableContext createDefaultDisplayContext() {

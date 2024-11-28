@@ -30,10 +30,8 @@ import javax.inject.Inject
 /** Maps [ScreenRecordModel] to [QSTileState]. */
 class ScreenRecordTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<ScreenRecordModel> {
+constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
+    QSTileDataToStateMapper<ScreenRecordModel> {
     override fun map(config: QSTileConfig, data: ScreenRecordModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_screen_record_label)
@@ -43,24 +41,12 @@ constructor(
                 is ScreenRecordModel.Recording -> {
                     activationState = QSTileState.ActivationState.ACTIVE
                     iconRes = R.drawable.qs_screen_record_icon_on
-                    val loadedIcon =
-                        Icon.Loaded(
-                            resources.getDrawable(iconRes!!, theme),
-                            contentDescription = null
-                        )
-                    icon = { loadedIcon }
                     sideViewIcon = QSTileState.SideViewIcon.None
                     secondaryLabel = resources.getString(R.string.quick_settings_screen_record_stop)
                 }
                 is ScreenRecordModel.Starting -> {
                     activationState = QSTileState.ActivationState.ACTIVE
                     iconRes = R.drawable.qs_screen_record_icon_on
-                    val loadedIcon =
-                        Icon.Loaded(
-                            resources.getDrawable(iconRes!!, theme),
-                            contentDescription = null
-                        )
-                    icon = { loadedIcon }
                     val countDown = data.countdownSeconds
                     sideViewIcon = QSTileState.SideViewIcon.None
                     secondaryLabel = String.format("%d...", countDown)
@@ -68,17 +54,13 @@ constructor(
                 is ScreenRecordModel.DoingNothing -> {
                     activationState = QSTileState.ActivationState.INACTIVE
                     iconRes = R.drawable.qs_screen_record_icon_off
-                    val loadedIcon =
-                        Icon.Loaded(
-                            resources.getDrawable(iconRes!!, theme),
-                            contentDescription = null
-                        )
-                    icon = { loadedIcon }
                     sideViewIcon = QSTileState.SideViewIcon.Chevron // tapping will open dialog
                     secondaryLabel =
                         resources.getString(R.string.quick_settings_screen_record_start)
                 }
             }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+
             contentDescription =
                 if (TextUtils.isEmpty(secondaryLabel)) label
                 else TextUtils.concat(label, ", ", secondaryLabel)

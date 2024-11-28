@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
@@ -40,7 +41,6 @@ import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.BACK_GESTUR
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import java.util.Optional
 import javax.inject.Inject
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Activity for out of the box experience for keyboard and touchpad. Note that it's possible that
@@ -56,10 +56,13 @@ constructor(
 ) : ComponentActivity() {
 
     companion object {
-        const val INTENT_TUTORIAL_TYPE_KEY = "tutorial_type"
-        const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
-        const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
-        const val INTENT_TUTORIAL_TYPE_BOTH = "both"
+        const val INTENT_TUTORIAL_SCOPE_KEY = "tutorial_scope"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD = "touchpad"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK = "touchpad_back"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME = "touchpad_home"
+        const val INTENT_TUTORIAL_SCOPE_KEYBOARD = "keyboard"
+        const val INTENT_TUTORIAL_SCOPE_ALL = "all"
+
         const val INTENT_TUTORIAL_ENTRY_POINT_KEY = "entry_point"
         const val INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER = "scheduler"
         const val INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU = "contextual_edu"
@@ -90,10 +93,11 @@ constructor(
         setContent {
             PlatformTheme { KeyboardTouchpadTutorialContainer(vm, touchpadTutorialScreensProvider) }
         }
+        // TODO(b/376692701): Update launchTime when the activity is launched by Companion App
         if (savedInstanceState == null) {
             metricsLogger.logPeripheralTutorialLaunched(
                 intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY),
-                intent.getStringExtra(INTENT_TUTORIAL_TYPE_KEY),
+                intent.getStringExtra(INTENT_TUTORIAL_SCOPE_KEY),
             )
             logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
         }

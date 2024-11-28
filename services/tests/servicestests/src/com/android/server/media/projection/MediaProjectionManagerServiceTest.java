@@ -67,10 +67,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Rect;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.ReviewGrantedConsentResult;
+import android.media.projection.StopReason;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
@@ -85,6 +87,7 @@ import android.provider.Settings;
 import android.testing.TestableContext;
 import android.view.ContentRecordingSession;
 import android.view.ContentRecordingSession.RecordContent;
+import android.view.Display;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
@@ -348,30 +351,42 @@ public class MediaProjectionManagerServiceTest {
             .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
     @Test
     public void testCreateProjection_keyguardLocked_RoleHeld() {
-        runWithRole(AssociationRequest.DEVICE_PROFILE_APP_STREAMING, () -> {
-            try {
-                mAppInfo.privateFlags |= PRIVATE_FLAG_PRIVILEGED;
-                doReturn(mAppInfo).when(mPackageManager).getApplicationInfoAsUser(anyString(),
-                        any(ApplicationInfoFlags.class), any(UserHandle.class));
-                MediaProjectionManagerService.MediaProjection projection =
-                        mService.createProjectionInternal(Process.myUid(),
-                                mContext.getPackageName(),
-                                TYPE_MIRRORING, /* isPermanentGrant= */ false, UserHandle.CURRENT);
-                doReturn(true).when(mKeyguardManager).isKeyguardLocked();
-                doReturn(PackageManager.PERMISSION_DENIED).when(
-                        mPackageManager).checkPermission(
-                        RECORD_SENSITIVE_CONTENT, projection.packageName);
+        runWithRole(
+                AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
+                () -> {
+                    try {
+                        mAppInfo.privateFlags |= PRIVATE_FLAG_PRIVILEGED;
+                        doReturn(mAppInfo)
+                                .when(mPackageManager)
+                                .getApplicationInfoAsUser(
+                                        anyString(),
+                                        any(ApplicationInfoFlags.class),
+                                        any(UserHandle.class));
+                        MediaProjectionManagerService.MediaProjection projection =
+                                mService.createProjectionInternal(
+                                        Process.myUid(),
+                                        mContext.getPackageName(),
+                                        TYPE_MIRRORING,
+                                        /* isPermanentGrant= */ false,
+                                        UserHandle.CURRENT,
+                                        DEFAULT_DISPLAY);
+                        doReturn(true).when(mKeyguardManager).isKeyguardLocked();
+                        doReturn(PackageManager.PERMISSION_DENIED)
+                                .when(mPackageManager)
+                                .checkPermission(RECORD_SENSITIVE_CONTENT, projection.packageName);
 
-                projection.start(mIMediaProjectionCallback);
-                projection.notifyVirtualDisplayCreated(10);
+                        projection.start(mIMediaProjectionCallback);
+                        projection.notifyVirtualDisplayCreated(10);
 
-                // The projection was started because it was allowed to capture the keyguard.
-                assertWithMessage("Failed to run projection")
-                        .that(mService.getActiveProjectionInfo()).isNotNull();
-            } catch (NameNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
+                        // The projection was started because it was allowed to capture the
+                        // keyguard.
+                        assertWithMessage("Failed to run projection")
+                                .that(mService.getActiveProjectionInfo())
+                                .isNotNull();
+                    } catch (NameNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     @EnableFlags(android.companion.virtualdevice.flags
@@ -480,8 +495,13 @@ public class MediaProjectionManagerServiceTest {
 
         // We are allowed to create another projection.
         MediaProjectionManagerService.MediaProjection secondProjection =
-                mService.createProjectionInternal(UID + 10, PACKAGE_NAME + "foo",
-                        TYPE_MIRRORING, /* isPermanentGrant= */ true, UserHandle.CURRENT);
+                mService.createProjectionInternal(
+                        UID + 10,
+                        PACKAGE_NAME + "foo",
+                        TYPE_MIRRORING,
+                        /* isPermanentGrant= */ true,
+                        UserHandle.CURRENT,
+                        Display.DEFAULT_DISPLAY);
 
         assertThat(secondProjection).isNotNull();
 
@@ -514,56 +534,14 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
         projection.start(mIMediaProjectionCallback);
 
+        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
+                RECORD_SENSITIVE_CONTENT, projection.packageName);
         doReturn(true).when(mKeyguardManager).isKeyguardLocked();
         MediaProjectionManagerService.BinderService mediaProjectionBinderService =
                 mService.new BinderService(mContext);
         mediaProjectionBinderService.requestConsentForInvalidProjection(projection);
 
         verify(mContext, never()).startActivityAsUser(any(), any());
-    }
-
-    @EnableFlags(android.companion.virtualdevice.flags
-            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
-    @Test
-    public void testKeyguardLocked_stopsActiveProjection() throws Exception {
-        MediaProjectionManagerService service =
-                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
-        MediaProjectionManagerService.MediaProjection projection =
-                startProjectionPreconditions(service);
-        projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreated(10);
-
-        assertThat(service.getActiveProjectionInfo()).isNotNull();
-
-        doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager)
-                .checkPermission(RECORD_SENSITIVE_CONTENT, projection.packageName);
-        service.onKeyguardLockedStateChanged(true);
-
-        verify(mMediaProjectionMetricsLogger).logStopped(UID, TARGET_UID_UNKNOWN);
-        assertThat(service.getActiveProjectionInfo()).isNull();
-        assertThat(mIMediaProjectionCallback.mLatch.await(5, TimeUnit.SECONDS)).isTrue();
-    }
-
-    @EnableFlags(android.companion.virtualdevice.flags
-            .Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
-    @Test
-    public void testKeyguardLocked_packageAllowlisted_doesNotStopActiveProjection()
-            throws NameNotFoundException {
-        MediaProjectionManagerService service =
-                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
-        MediaProjectionManagerService.MediaProjection projection =
-                startProjectionPreconditions(service);
-        projection.start(mIMediaProjectionCallback);
-        projection.notifyVirtualDisplayCreated(10);
-
-        assertThat(service.getActiveProjectionInfo()).isNotNull();
-
-        doReturn(PackageManager.PERMISSION_GRANTED).when(mPackageManager).checkPermission(
-                RECORD_SENSITIVE_CONTENT, projection.packageName);
-        service.onKeyguardLockedStateChanged(true);
-
-        verifyZeroInteractions(mMediaProjectionMetricsLogger);
-        assertThat(service.getActiveProjectionInfo()).isNotNull();
     }
 
     @Test
@@ -573,7 +551,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection =
                 startProjectionPreconditions(service);
 
-        projection.stop();
+        projection.stop(StopReason.STOP_UNKNOWN);
 
         verifyZeroInteractions(mMediaProjectionMetricsLogger);
     }
@@ -586,10 +564,10 @@ public class MediaProjectionManagerServiceTest {
                 startProjectionPreconditions(service);
         projection.start(mIMediaProjectionCallback);
 
-        projection.stop();
+        final @StopReason int stopReason = StopReason.STOP_UNKNOWN;
+        projection.stop(stopReason);
 
-        verify(mMediaProjectionMetricsLogger)
-                .logStopped(UID, TARGET_UID_UNKNOWN);
+        verify(mMediaProjectionMetricsLogger).logStopped(UID, TARGET_UID_UNKNOWN, stopReason);
     }
 
     @Test
@@ -604,15 +582,16 @@ public class MediaProjectionManagerServiceTest {
                 .setContentRecordingSession(any(ContentRecordingSession.class));
         service.setContentRecordingSession(DISPLAY_SESSION);
 
-        projection.stop();
+        final @StopReason int stopReason = StopReason.STOP_UNKNOWN;
+        projection.stop(stopReason);
 
-        verify(mMediaProjectionMetricsLogger)
-                .logStopped(UID, TARGET_UID_FULL_SCREEN);
+        verify(mMediaProjectionMetricsLogger).logStopped(UID, TARGET_UID_FULL_SCREEN, stopReason);
     }
 
     @Test
     public void stop_taskSession_logsHostUidAndTargetUid() throws Exception {
         int targetUid = 1234;
+        int stopReason = StopReason.STOP_UNKNOWN;
         MediaProjectionManagerService service =
                 new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
         MediaProjectionManagerService.MediaProjection projection =
@@ -625,9 +604,9 @@ public class MediaProjectionManagerServiceTest {
         taskSession.setTargetUid(targetUid);
         service.setContentRecordingSession(taskSession);
 
-        projection.stop();
+        projection.stop(stopReason);
 
-        verify(mMediaProjectionMetricsLogger).logStopped(UID, targetUid);
+        verify(mMediaProjectionMetricsLogger).logStopped(UID, targetUid, stopReason);
     }
 
     @Test
@@ -662,7 +641,7 @@ public class MediaProjectionManagerServiceTest {
         projection.start(mIMediaProjectionCallback);
         assertThat(projection.isValid()).isTrue();
 
-        projection.stop();
+        projection.stop(StopReason.STOP_UNKNOWN);
 
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
@@ -688,7 +667,7 @@ public class MediaProjectionManagerServiceTest {
                 mClockInjector);
         MediaProjectionManagerService.MediaProjection projection = createProjectionPreconditions(
                 service);
-        mClock.fastForward(projection.mDefaultTimeoutMs + 10);
+        mClock.fastForward(projection.mDefaultTimeoutMillis + 10);
 
         // Immediate timeout - so no longer valid.
         assertThat(projection.isValid()).isFalse();
@@ -716,7 +695,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions(
                 service);
         projection.start(mIMediaProjectionCallback);
-        projection.stop();
+        projection.stop(StopReason.STOP_UNKNOWN);
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
 
@@ -732,7 +711,7 @@ public class MediaProjectionManagerServiceTest {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions(
                 service);
         projection.start(mIMediaProjectionCallback);
-        projection.stop();
+        projection.stop(StopReason.STOP_UNKNOWN);
 
         // Second start - so not valid.
         projection.start(mIMediaProjectionCallback);
@@ -969,6 +948,26 @@ public class MediaProjectionManagerServiceTest {
 
         verify(mMediaProjectionMetricsLogger).logChangedWindowingMode(RECORD_CONTENT_TASK,
                 projection.uid, targetUid, WINDOWING_MODE_MULTI_WINDOW);
+    }
+
+    @Test
+    public void notifyCaptureBoundsChanged_forwardsToLoggerAndResizeCallbacks() throws Exception {
+        int targetUid = 123;
+        mService =
+                new MediaProjectionManagerService(mContext, mMediaProjectionMetricsLoggerInjector);
+
+        ContentRecordingSession taskSession = createTaskSession(mock(IBinder.class));
+        taskSession.setTargetUid(targetUid);
+        mService.setContentRecordingSession(taskSession);
+
+        MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
+        projection.start(mIMediaProjectionCallback);
+
+        Rect newBounds = new Rect(0, 0, 1000, 2000);
+        mService.notifyCaptureBoundsChanged(RECORD_CONTENT_TASK, targetUid, newBounds);
+
+        verify(mMediaProjectionMetricsLogger)
+                .logChangedCaptureBounds(RECORD_CONTENT_TASK, projection.uid, targetUid, newBounds);
     }
 
     /**
@@ -1246,6 +1245,13 @@ public class MediaProjectionManagerServiceTest {
         verify(mWatcherCallback, never()).onRecordingSessionSet(any(), any());
     }
 
+    @Test
+    public void createProjectionForSecondaryDisplay() throws NameNotFoundException {
+        MediaProjectionManagerService.MediaProjection projection =
+                createProjectionPreconditions(mService, 200);
+        assertThat(projection.getDisplayId()).isEqualTo(200);
+    }
+
     private void verifySetSessionWithContent(@RecordContent int content) {
         verify(mWindowManagerInternal, atLeastOnce()).setContentRecordingSession(
                 mSessionCaptor.capture());
@@ -1255,12 +1261,21 @@ public class MediaProjectionManagerServiceTest {
 
     // Set up preconditions for creating a projection.
     private MediaProjectionManagerService.MediaProjection createProjectionPreconditions(
-            MediaProjectionManagerService service)
-            throws NameNotFoundException {
+            MediaProjectionManagerService service) throws NameNotFoundException {
+        return createProjectionPreconditions(service, Display.DEFAULT_DISPLAY);
+    }
+
+    private MediaProjectionManagerService.MediaProjection createProjectionPreconditions(
+            MediaProjectionManagerService service, int displayId) throws NameNotFoundException {
         doReturn(mAppInfo).when(mPackageManager).getApplicationInfoAsUser(anyString(),
                 any(ApplicationInfoFlags.class), any(UserHandle.class));
-        return service.createProjectionInternal(UID, PACKAGE_NAME,
-                TYPE_MIRRORING, /* isPermanentGrant= */ false, UserHandle.CURRENT);
+        return service.createProjectionInternal(
+                UID,
+                PACKAGE_NAME,
+                TYPE_MIRRORING,
+                /* isPermanentGrant= */ false,
+                UserHandle.CURRENT,
+                displayId);
     }
 
     // Set up preconditions for starting a projection, with no foreground service requirements.

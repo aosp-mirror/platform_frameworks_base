@@ -190,7 +190,7 @@ public class SplitLayoutTests extends ShellTestCase {
     }
 
     private void waitDividerFlingFinished() {
-        verify(mSplitLayout).flingDividerPosition(anyInt(), anyInt(), anyInt(),
+        verify(mSplitLayout).flingDividerPosition(anyInt(), anyInt(), anyInt(), any(),
                 mRunnableCaptor.capture());
         mRunnableCaptor.getValue().run();
     }

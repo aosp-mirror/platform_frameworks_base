@@ -27,6 +27,7 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationCompat
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -34,10 +35,11 @@ import com.android.systemui.education.ui.viewmodel.ContextualEduNotificationView
 import com.android.systemui.education.ui.viewmodel.ContextualEduToastViewModel
 import com.android.systemui.education.ui.viewmodel.ContextualEduViewModel
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_KEY
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A class to show contextual education on UI based on the edu produced from
@@ -99,12 +101,13 @@ constructor(
                 CHANNEL_ID,
                 context.getString(com.android.internal.R.string.android_system_label),
                 // Make it as silent notification
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             )
         notificationManager.createNotificationChannel(channel)
     }
 
     private fun showDialog(model: ContextualEduToastViewModel) {
+        dialog?.dismiss()
         dialog = createDialog(model)
         dialog?.show()
     }
@@ -114,7 +117,7 @@ constructor(
         val extras = Bundle()
         extras.putString(
             Notification.EXTRA_SUBSTITUTE_APP_NAME,
-            context.getString(com.android.internal.R.string.android_system_label)
+            context.getString(com.android.internal.R.string.android_system_label),
         )
 
         val notification =
@@ -131,7 +134,7 @@ constructor(
             TAG,
             NOTIFICATION_ID,
             notification,
-            UserHandle.of(model.userId)
+            UserHandle.of(model.userId),
         )
     }
 
@@ -140,12 +143,16 @@ constructor(
             Intent(context, KeyboardTouchpadTutorialActivity::class.java).apply {
                 addCategory(Intent.CATEGORY_DEFAULT)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                putExtra(
+                    INTENT_TUTORIAL_ENTRY_POINT_KEY,
+                    INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU,
+                )
             }
         return PendingIntent.getActivity(
             context,
             /* requestCode= */ 0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE,
         )
     }
 }

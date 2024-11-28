@@ -15,12 +15,15 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.BYTE;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.SHORT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.UTF8;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.BYTE;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -28,31 +31,32 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * Operation to deal with bitmap data
- * On getting an Image during a draw call the bitmap is compressed and saved
- * in playback the image is decompressed
+ * Operation to deal with bitmap data On getting an Image during a draw call the bitmap is
+ * compressed and saved in playback the image is decompressed
  */
-public class ShaderData implements Operation, VariableSupport {
+public class ShaderData extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.DATA_SHADER;
     private static final String CLASS_NAME = "ShaderData";
     int mShaderTextId; // the actual text of a shader
     int mShaderID; // allows shaders to be referenced by number
-    HashMap<String, float[]> mUniformRawFloatMap = null;
-    HashMap<String, float[]> mUniformFloatMap = null;
-    HashMap<String, int[]> mUniformIntMap = null;
-    HashMap<String, Integer> mUniformBitmapMap = null;
+    @Nullable HashMap<String, float[]> mUniformRawFloatMap = null;
+    @Nullable HashMap<String, float[]> mUniformFloatMap = null;
+    @Nullable HashMap<String, int[]> mUniformIntMap;
+    @Nullable HashMap<String, Integer> mUniformBitmapMap = null;
 
-    public ShaderData(int shaderID,
-                      int shaderTextId,
-                      HashMap<String, float[]> floatMap,
-                      HashMap<String, int[]> intMap,
-                      HashMap<String, Integer> bitmapMap) {
+    public ShaderData(
+            int shaderID,
+            int shaderTextId,
+            @Nullable HashMap<String, float[]> floatMap,
+            @Nullable HashMap<String, int[]> intMap,
+            @Nullable HashMap<String, Integer> bitmapMap) {
         mShaderID = shaderID;
         mShaderTextId = shaderTextId;
         if (floatMap != null) {
@@ -77,7 +81,6 @@ public class ShaderData implements Operation, VariableSupport {
                 mUniformBitmapMap.put(name, bitmapMap.get(name));
             }
         }
-
     }
 
     public int getShaderTextId() {
@@ -89,6 +92,7 @@ public class ShaderData implements Operation, VariableSupport {
      *
      * @return Names of all uniform floats or empty array
      */
+    @NonNull
     public String[] getUniformFloatNames() {
         if (mUniformFloatMap == null) return new String[0];
         return mUniformFloatMap.keySet().toArray(new String[0]);
@@ -100,15 +104,16 @@ public class ShaderData implements Operation, VariableSupport {
      * @param name name of uniform
      * @return value of uniform
      */
-    public float[] getUniformFloats(String name) {
-        return mUniformFloatMap.get(name);
+    public @NonNull float[] getUniformFloats(@NonNull String name) {
+        return mUniformFloatMap != null ? mUniformFloatMap.get(name) : new float[0];
     }
 
     /**
      * get the name of all know uniform integers
      *
-     * @return  Name of all integer uniforms
+     * @return Name of all integer uniforms
      */
+    @NonNull
     public String[] getUniformIntegerNames() {
         if (mUniformIntMap == null) return new String[0];
         return mUniformIntMap.keySet().toArray(new String[0]);
@@ -120,8 +125,8 @@ public class ShaderData implements Operation, VariableSupport {
      * @param name Name of uniform
      * @return value of uniform
      */
-    public int[] getUniformInts(String name) {
-        return mUniformIntMap.get(name);
+    public @NonNull int[] getUniformInts(@NonNull String name) {
+        return mUniformIntMap != null ? mUniformIntMap.get(name) : new int[0];
     }
 
     /**
@@ -129,6 +134,7 @@ public class ShaderData implements Operation, VariableSupport {
      *
      * @return Name of all bitmap uniforms
      */
+    @NonNull
     public String[] getUniformBitmapNames() {
         if (mUniformBitmapMap == null) return new String[0];
         return mUniformBitmapMap.keySet().toArray(new String[0]);
@@ -140,24 +146,32 @@ public class ShaderData implements Operation, VariableSupport {
      * @param name Name of bitmap uniform
      * @return Bitmap ID
      */
-    public int getUniformBitmapId(String name) {
-        return mUniformBitmapMap.get(name);
+    public int getUniformBitmapId(@NonNull String name) {
+        return mUniformBitmapMap != null
+                ? mUniformBitmapMap.get(name)
+                : -1; // TODO: what is the proper return value here? -- bbade@
     }
 
     @Override
-    public void write(WireBuffer buffer) {
-        apply(buffer, mShaderID, mShaderTextId,
-                mUniformFloatMap, mUniformIntMap, mUniformBitmapMap);
+    public void write(@NonNull WireBuffer buffer) {
+        apply(
+                buffer,
+                mShaderID,
+                mShaderTextId,
+                mUniformFloatMap,
+                mUniformIntMap,
+                mUniformBitmapMap);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "SHADER DATA " + mShaderID;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
-        for (String name : mUniformRawFloatMap.keySet()) {
+    public void updateVariables(@NonNull RemoteContext context) {
+        for (String name : mUniformRawFloatMap.keySet()) { // TODO: potential npe
             float[] value = mUniformRawFloatMap.get(name);
             float[] out = null;
             for (int i = 0; i < value.length; i++) {
@@ -173,8 +187,8 @@ public class ShaderData implements Operation, VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
-        for (String name : mUniformRawFloatMap.keySet()) {
+    public void registerListening(@NonNull RemoteContext context) {
+        for (String name : mUniformRawFloatMap.keySet()) { // TODO: potential npe
             float[] value = mUniformRawFloatMap.get(name);
             for (float v : value) {
                 if (Float.isNaN(v)) {
@@ -184,10 +198,16 @@ public class ShaderData implements Operation, VariableSupport {
         }
     }
 
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -202,10 +222,13 @@ public class ShaderData implements Operation, VariableSupport {
      * @param intMap the map of int uniforms
      * @param bitmapMap the map of bitmap uniforms
      */
-    public static void apply(WireBuffer buffer, int shaderID, int shaderTextId,
-                             HashMap<String, float[]> floatMap,
-                             HashMap<String, int[]> intMap,
-                             HashMap<String, Integer> bitmapMap) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int shaderID,
+            int shaderTextId,
+            @Nullable HashMap<String, float[]> floatMap,
+            @Nullable HashMap<String, int[]> intMap,
+            @Nullable HashMap<String, Integer> bitmapMap) {
         buffer.start(OP_CODE);
         buffer.writeInt(shaderID);
 
@@ -248,8 +271,13 @@ public class ShaderData implements Operation, VariableSupport {
         }
     }
 
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int shaderID = buffer.readInt();
         int shaderTextId = buffer.readInt();
         HashMap<String, float[]> floatMap = null;
@@ -298,16 +326,18 @@ public class ShaderData implements Operation, VariableSupport {
                 bitmapMap.put(name, val);
             }
         }
-        operations.add(new ShaderData(shaderID, shaderTextId,
-                floatMap, intMap, bitmapMap));
+        operations.add(new ShaderData(shaderID, shaderTextId, floatMap, intMap, bitmapMap));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
+        doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Shader")
-                .field(INT, "shaderID", "id of shader")
+                .field(DocumentedOperation.INT, "shaderID", "id of shader")
                 .field(BYTE, " floatSize", "number of float uniforms")
                 .field(BYTE, " intSize", "number of int uniform")
                 .field(SHORT, " intSize", "number of int uniform")
@@ -319,16 +349,16 @@ public class ShaderData implements Operation, VariableSupport {
                 .field(INT_ARRAY, "VALUE", "int uniform (max 4)")
                 .field(UTF8, "bitmapName", "name of bitmap")
                 .field(INT, "VALUE", "id of bitmap");
-
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadShader(mShaderID, this);
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

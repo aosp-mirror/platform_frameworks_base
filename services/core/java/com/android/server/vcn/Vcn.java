@@ -38,6 +38,7 @@ import android.net.Uri;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
+import android.net.vcn.util.LogUtils;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Message;
@@ -54,7 +55,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.VcnManagementService.VcnCallback;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
-import com.android.server.vcn.util.LogUtils;
 
 import java.util.Arrays;
 import java.util.Collections;

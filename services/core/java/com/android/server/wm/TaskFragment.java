@@ -1090,8 +1090,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
-        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this,
-                true /* ignoringKeyguard */) == null;
+        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this) == null;
     }
 
     /**
@@ -1732,6 +1731,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean startPausing(boolean userLeaving, boolean uiSleeping, ActivityRecord resuming,
             String reason) {
         if (!hasDirectChildActivities()) {
+            return false;
+        }
+        if (mResumedActivity != null && mTransitionController.isTransientLaunch(mResumedActivity)) {
+            // Even if the transient activity is occluded, defer pausing (addToStopping will still
+            // be called) it until the transient transition is done. So the current resuming
+            // activity won't need to wait for additional pause complete.
             return false;
         }
 
@@ -3157,12 +3162,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     /** Bounds to be used for dimming, as well as touch related tests. */
     void getDimBounds(@NonNull Rect out) {
-        if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
-            // Return the task bounds if the dimmer is showing and should cover on the Task (not
-            // just on this embedded TaskFragment).
-            out.set(getTask().getBounds());
+        if (Flags.useTasksDimOnly() && mDimmer.hasDimState()) {
+            out.set(mDimmer.getDimBounds());
         } else {
-            out.set(getBounds());
+            if (mIsEmbedded && isDimmingOnParentTask() && getDimmer().getDimBounds() != null) {
+                // Return the task bounds if the dimmer is showing and should cover on the Task (not
+                // just on this embedded TaskFragment).
+                out.set(getTask().getBounds());
+            } else {
+                out.set(getBounds());
+            }
         }
     }
 
@@ -3193,10 +3202,16 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
 
-        final Rect dimBounds = mDimmer.getDimBounds();
-        if (dimBounds != null) {
-            // Bounds need to be relative, as the dim layer is a child.
-            dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+        if (!Flags.useTasksDimOnly()) {
+            final Rect dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                // Bounds need to be relative, as the dim layer is a child.
+                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+                if (mDimmer.updateDims(getSyncTransaction())) {
+                    scheduleAnimation();
+                }
+            }
+        } else {
             if (mDimmer.updateDims(getSyncTransaction())) {
                 scheduleAnimation();
             }

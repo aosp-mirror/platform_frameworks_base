@@ -16,15 +16,12 @@
 
 package com.android.systemui.shared.clocks
 
-import android.content.Context
-import android.content.res.Resources
 import android.graphics.Rect
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import com.android.systemui.customization.R
-import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockAnimations
 import com.android.systemui.plugins.clocks.ClockEvents
@@ -32,7 +29,7 @@ import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockFaceLayout
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
@@ -45,25 +42,19 @@ import kotlin.math.max
 
 // TODO(b/364680879): Merge w/ ComposedDigitalLayerController
 class FlexClockFaceController(
-    ctx: Context,
-    private val resources: Resources,
-    val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
+    clockCtx: ClockContext,
     face: ClockFace,
     private val isLargeClock: Boolean,
-    messageBuffer: MessageBuffer,
 ) : ClockFaceController {
     override val view: View
         get() = layerController.view
 
-    override val config =
-        ClockFaceConfig(
-            hasCustomPositionUpdatedAnimation = false // TODO(b/364673982)
-        )
+    override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
 
-    override var theme = ThemeConfig(true, assets.seedColor)
+    override var theme = ThemeConfig(true, clockCtx.settings.seedColor)
 
     private val keyguardLargeClockTopMargin =
-        resources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin)
+        clockCtx.resources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin)
     val layerController: SimpleClockLayerController
     val timespecHandler = DigitalTimespecHandler(DigitalTimespec.TIME_FULL_FORMAT, "hh:mm")
 
@@ -75,25 +66,25 @@ class FlexClockFaceController(
 
         layerController =
             if (isLargeClock) {
-                ComposedDigitalLayerController(
-                    ctx,
-                    resources,
-                    assets,
-                    layer as ComposedDigitalHandLayer,
-                    messageBuffer,
-                )
+                ComposedDigitalLayerController(clockCtx, layer as ComposedDigitalHandLayer)
             } else {
-                val childView = SimpleDigitalClockTextView(ctx, messageBuffer)
-                SimpleDigitalHandLayerController(
-                    ctx,
-                    resources,
-                    assets,
-                    layer as DigitalHandLayer,
-                    childView,
-                    messageBuffer,
-                )
+                val childView = SimpleDigitalClockTextView(clockCtx)
+                SimpleDigitalHandLayerController(clockCtx, layer as DigitalHandLayer, childView)
             }
         layerController.view.layoutParams = lp
+    }
+
+    /** See documentation at [FlexClockView.offsetGlyphsForStepClockAnimation]. */
+    private fun offsetGlyphsForStepClockAnimation(
+        clockStartLeft: Int,
+        direction: Int,
+        fraction: Float,
+    ) {
+        (view as? FlexClockView)?.offsetGlyphsForStepClockAnimation(
+            clockStartLeft,
+            direction,
+            fraction,
+        )
     }
 
     override val layout: ClockFaceLayout =
@@ -136,13 +127,16 @@ class FlexClockFaceController(
 
         override fun onFontSettingChanged(fontSizePx: Float) {
             layerController.faceEvents.onFontSettingChanged(fontSizePx)
+            view.requestLayout()
         }
 
         override fun onThemeChanged(theme: ThemeConfig) {
             layerController.faceEvents.onThemeChanged(theme)
         }
 
-        override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
+        override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
+            layerController.events.onFontAxesChanged(axes)
+        }
 
         /**
          * targetRegion passed to all customized clock applies counter translationY of
@@ -245,10 +239,12 @@ class FlexClockFaceController(
 
             override fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {
                 layerController.animations.onPositionUpdated(fromLeft, direction, fraction)
+                if (isLargeClock) offsetGlyphsForStepClockAnimation(fromLeft, direction, fraction)
             }
 
             override fun onPositionUpdated(distance: Float, fraction: Float) {
                 layerController.animations.onPositionUpdated(distance, fraction)
+                // TODO(b/378128811) port stepping animation
             }
         }
 }

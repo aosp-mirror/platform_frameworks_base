@@ -21,11 +21,13 @@ import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -48,7 +50,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -176,6 +177,9 @@ constructor(
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Communal,
                             loggingReason = "FromDreamingTransitionInteractor",
+                            transitionKey =
+                                if (communalHubOnMobile()) CommunalTransitionKeys.SimpleFade
+                                else null,
                         )
                     } else {
                         startTransitionTo(

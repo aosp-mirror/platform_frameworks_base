@@ -161,6 +161,7 @@ public class BubbleBarAnimationHelper {
 
         updateExpandedView();
         bbev.setAnimating(true);
+        bbev.setSurfaceZOrderedOnTop(true);
         bbev.setContentVisibility(false);
         bbev.setAlpha(0f);
         bbev.setTaskViewAlpha(0f);
@@ -171,28 +172,29 @@ public class BubbleBarAnimationHelper {
 
         bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
 
-        mExpandedViewAlphaAnimator.start();
+        bbev.animateExpansionWhenTaskViewVisible(() -> {
+            mExpandedViewAlphaAnimator.start();
 
-        PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
-        PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
-                .spring(AnimatableScaleMatrix.SCALE_X,
-                        AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
-                        mScaleInSpringConfig)
-                .spring(AnimatableScaleMatrix.SCALE_Y,
-                        AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
-                        mScaleInSpringConfig)
-                .addUpdateListener((target, values) -> {
-                    bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
-                })
-                .withEndActions(() -> {
-                    bbev.setAnimationMatrix(null);
-                    updateExpandedView();
-                    bbev.setSurfaceZOrderedOnTop(false);
-                    if (afterAnimation != null) {
-                        afterAnimation.run();
-                    }
-                })
-                .start();
+            PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
+            PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
+                    .spring(AnimatableScaleMatrix.SCALE_X,
+                            AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
+                            mScaleInSpringConfig)
+                    .spring(AnimatableScaleMatrix.SCALE_Y,
+                            AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
+                            mScaleInSpringConfig)
+                    .addUpdateListener((target, values) -> {
+                        bbev.setAnimationMatrix(mExpandedViewContainerMatrix);
+                    })
+                    .withEndActions(() -> {
+                        bbev.setAnimationMatrix(null);
+                        updateExpandedView();
+                        if (afterAnimation != null) {
+                            afterAnimation.run();
+                        }
+                    })
+                    .start();
+        });
     }
 
     /**

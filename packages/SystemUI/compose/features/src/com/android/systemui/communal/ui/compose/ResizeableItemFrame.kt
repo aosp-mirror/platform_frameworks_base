@@ -56,7 +56,6 @@ import com.android.compose.modifiers.thenIf
 import com.android.systemui.communal.ui.viewmodel.DragHandle
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
-import com.android.systemui.lifecycle.rememberViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 
@@ -192,16 +191,12 @@ fun ResizableItemFrame(
     maxHeightPx: Int = Int.MAX_VALUE,
     resizeMultiple: Int = 1,
     alpha: () -> Float = { 1f },
+    viewModel: ResizeableItemFrameViewModel,
     onResize: (info: ResizeInfo) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val brush = SolidColor(outlineColor)
     val onResizeUpdated by rememberUpdatedState(onResize)
-    val viewModel =
-        rememberViewModel(key = currentSpan, traceName = "ResizeableItemFrame.viewModel") {
-            ResizeableItemFrameViewModel()
-        }
-
     val dragHandleHeight = verticalArrangement.spacing - outlinePadding * 2
     val isDragging by
         remember(viewModel) {

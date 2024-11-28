@@ -724,8 +724,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             }
 
             // Compute system bar insets frame if needed.
-            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()
-                    && windowState != null && instance.isUntouchableNavigationBar()) {
+            if (windowState != null && instance.isUntouchableNavigationBar()) {
                 final InsetsSourceProvider provider =
                         windowState.getControllableInsetProvider();
                 if (provider != null) {

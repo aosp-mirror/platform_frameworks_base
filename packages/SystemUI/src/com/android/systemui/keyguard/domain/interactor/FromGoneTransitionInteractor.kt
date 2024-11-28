@@ -24,8 +24,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
-import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
@@ -54,9 +52,7 @@ constructor(
     powerInteractor: PowerInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
-    private val biometricSettingsRepository: BiometricSettingsRepository,
-    private val keyguardRepository: KeyguardRepository,
-    private val keyguardEnabledInteractor: KeyguardEnabledInteractor,
+    private val keyguardLockWhileAwakeInteractor: KeyguardLockWhileAwakeInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.GONE,
@@ -78,7 +74,9 @@ constructor(
     }
 
     fun showKeyguard() {
-        scope.launch("$TAG#showKeyguard") { startTransitionTo(KeyguardState.LOCKSCREEN) }
+        scope.launch("$TAG#showKeyguard") {
+            startTransitionTo(KeyguardState.LOCKSCREEN, ownerReason = "showKeyguard()")
+        }
     }
 
     /**
@@ -102,34 +100,18 @@ constructor(
     // Primarily for when the user chooses to lock down the device
     private fun listenForGoneToLockscreenOrHubOrOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
-            scope.launch("$TAG#listenForGoneToLockscreenOrHub") {
-                biometricSettingsRepository.isCurrentUserInLockdown
-                    .distinctUntilChanged()
-                    .filterRelevantKeyguardStateAnd { inLockdown -> inLockdown }
+            scope.launch {
+                keyguardLockWhileAwakeInteractor.lockWhileAwakeEvents
+                    .filterRelevantKeyguardState()
                     .sample(communalSceneInteractor.isIdleOnCommunalNotEditMode, ::Pair)
-                    .collect { (_, isIdleOnCommunal) ->
+                    .collect { (lockReason, idleOnCommunal) ->
                         val to =
-                            if (isIdleOnCommunal) {
+                            if (idleOnCommunal) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
-                        startTransitionTo(to, ownerReason = "User initiated lockdown")
-                    }
-            }
-
-            scope.launch {
-                keyguardRepository.isKeyguardEnabled
-                    .filterRelevantKeyguardStateAnd { enabled -> enabled }
-                    .sample(keyguardEnabledInteractor.showKeyguardWhenReenabled)
-                    .filter { reshow -> reshow }
-                    .collect {
-                        startTransitionTo(
-                            KeyguardState.LOCKSCREEN,
-                            ownerReason =
-                                "Keyguard was re-enabled, and we weren't GONE when it " +
-                                    "was originally disabled",
-                        )
+                        startTransitionTo(to, ownerReason = "lockWhileAwake: $lockReason")
                     }
             }
         } else {
@@ -146,7 +128,10 @@ constructor(
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
-                        startTransitionTo(to)
+                        startTransitionTo(
+                            to,
+                            ownerReason = "keyguard interactor says keyguard is showing",
+                        )
                     }
             }
         }

@@ -15,8 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -26,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-public class ComponentStart implements ComponentStartOperation {
+public class ComponentStart extends Operation implements ComponentStartOperation {
 
     int mType = DEFAULT;
     float mX;
@@ -69,23 +71,36 @@ public class ComponentStart implements ComponentStartOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mType, mComponentId, mWidth, mHeight);
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return "COMPONENT_START (type " + mType + " " + typeDescription(mType)
-                + ") - (" + mX + ", " + mY + " - " + mWidth + " x " + mHeight + ")";
+        return "COMPONENT_START (type "
+                + mType
+                + " "
+                + typeDescription(mType)
+                + ") - ("
+                + mX
+                + ", "
+                + mY
+                + " - "
+                + mWidth
+                + " x "
+                + mHeight
+                + ")";
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         // nothing
     }
 
@@ -108,6 +123,7 @@ public class ComponentStart implements ComponentStartOperation {
     public static final int LAYOUT_ROW = 15;
     public static final int LAYOUT_COLUMN = 16;
 
+    @NonNull
     public static String typeDescription(int type) {
         switch (type) {
             case DEFAULT:
@@ -141,16 +157,22 @@ public class ComponentStart implements ComponentStartOperation {
         }
     }
 
+    @NonNull
     public static String name() {
         return "ComponentStart";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.COMPONENT_START;
     }
 
-    public static void apply(WireBuffer buffer, int type, int componentId,
-                             float width, float height) {
+    public static void apply(
+            @NonNull WireBuffer buffer, int type, int componentId, float width, float height) {
         buffer.start(Operations.COMPONENT_START);
         buffer.writeInt(type);
         buffer.writeInt(componentId);
@@ -162,7 +184,13 @@ public class ComponentStart implements ComponentStartOperation {
         return 1 + 4 + 4 + 4;
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int type = buffer.readInt();
         int componentId = buffer.readInt();
         float width = buffer.readFloat();
@@ -170,10 +198,10 @@ public class ComponentStart implements ComponentStartOperation {
         operations.add(new ComponentStart(type, componentId, width, height));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
-                .description("Basic component encapsulating draw commands."
-                        + "This is not resizable.")
+                .description(
+                        "Basic component encapsulating draw commands." + "This is not resizable.")
                 .field(INT, "TYPE", "Type of components")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .field(FLOAT, "WIDTH", "width of the component")

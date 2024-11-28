@@ -242,7 +242,7 @@ class HandleMenuTest : ShellTestCase() {
 
     private fun createAndShowHandleMenu(
         splitPosition: Int? = null,
-        forceShowSystemBars: Boolean = false,
+        forceShowSystemBars: Boolean = false
     ): HandleMenu {
         val layoutId = if (mockDesktopWindowDecoration.mTaskInfo.isFreeform) {
             R.layout.desktop_mode_app_header
@@ -266,7 +266,9 @@ class HandleMenuTest : ShellTestCase() {
             WindowManagerWrapper(mockWindowManager),
             layoutId, appIcon, appName, splitScreenController, shouldShowWindowingPill = true,
             shouldShowNewWindowButton = true, shouldShowManageWindowsButton = false,
-            null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
+            shouldShowChangeAspectRatioButton = false, shouldShowDesktopModeButton = true,
+            isBrowserApp = false, null /* openInAppOrBrowserIntent */, captionWidth = HANDLE_WIDTH,
+            captionHeight = 50,
             captionX = captionX,
             captionY = 0,
         )
@@ -276,7 +278,8 @@ class HandleMenuTest : ShellTestCase() {
             onToSplitScreenClickListener = mock(),
             onNewWindowClickListener = mock(),
             onManageWindowsClickListener = mock(),
-            openInBrowserClickListener = mock(),
+            onChangeAspectRatioClickListener = mock(),
+            openInAppOrBrowserClickListener = mock(),
             onOpenByDefaultClickListener = mock(),
             onCloseMenuClickListener = mock(),
             onOutsideTouchListener = mock(),

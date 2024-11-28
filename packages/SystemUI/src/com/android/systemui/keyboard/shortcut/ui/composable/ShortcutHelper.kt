@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -52,8 +53,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -68,6 +72,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,15 +91,20 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -106,6 +116,7 @@ import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
@@ -113,6 +124,7 @@ import com.android.systemui.keyboard.shortcut.ui.model.IconSource
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun ShortcutHelper(
@@ -121,6 +133,7 @@ fun ShortcutHelper(
     modifier: Modifier = Modifier,
     shortcutsUiState: ShortcutsUiState,
     useSinglePane: @Composable () -> Boolean = { shouldUseSinglePane() },
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     when (shortcutsUiState) {
         is ShortcutsUiState.Active -> {
@@ -130,8 +143,10 @@ fun ShortcutHelper(
                 onSearchQueryChanged,
                 modifier,
                 onKeyboardSettingsClicked,
+                onCustomizationRequested,
             )
         }
+
         else -> {
             // No-op for now.
         }
@@ -145,6 +160,7 @@ private fun ActiveShortcutHelper(
     onSearchQueryChanged: (String) -> Unit,
     modifier: Modifier,
     onKeyboardSettingsClicked: () -> Unit,
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     var selectedCategoryType by
         remember(shortcutsUiState.defaultSelectedCategory) {
@@ -169,6 +185,8 @@ private fun ActiveShortcutHelper(
             selectedCategoryType,
             onCategorySelected = { selectedCategoryType = it },
             onKeyboardSettingsClicked,
+            shortcutsUiState.isShortcutCustomizerFlagEnabled,
+            onCustomizationRequested,
         )
     }
 }
@@ -357,28 +375,83 @@ private fun ShortcutHelperTwoPane(
     selectedCategoryType: ShortcutCategoryType?,
     onCategorySelected: (ShortcutCategoryType?) -> Unit,
     onKeyboardSettingsClicked: () -> Unit,
+    isShortcutCustomizerFlagEnabled: Boolean,
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
 ) {
     val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
+    var isCustomizing by remember { mutableStateOf(false) }
+
     Column(modifier = modifier.fillMaxSize().padding(horizontal = 24.dp)) {
-        TitleBar()
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // Keep title centered whether customize button is visible or not.
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    TitleBar(isCustomizing)
+                }
+                if (isShortcutCustomizerFlagEnabled) {
+                    if (isCustomizing) {
+                        DoneButton(onClick = { isCustomizing = false })
+                    } else {
+                        CustomizeButton(onClick = { isCustomizing = true })
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(if (isCustomizing) 69.dp else 133.dp))
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth()) {
             StartSidePanel(
                 onSearchQueryChanged = onSearchQueryChanged,
-                modifier = Modifier.width(240.dp),
+                modifier = Modifier.width(240.dp).semantics { isTraversalGroup = true },
                 categories = categories,
                 onKeyboardSettingsClicked = onKeyboardSettingsClicked,
                 selectedCategory = selectedCategoryType,
                 onCategoryClicked = { onCategorySelected(it.type) },
             )
             Spacer(modifier = Modifier.width(24.dp))
-            EndSidePanel(searchQuery, Modifier.fillMaxSize().padding(top = 8.dp), selectedCategory)
+            EndSidePanel(
+                searchQuery,
+                Modifier.fillMaxSize().padding(top = 8.dp).semantics { isTraversalGroup = true },
+                selectedCategory,
+                isCustomizing = isCustomizing,
+                onCustomizationRequested = onCustomizationRequested,
+            )
         }
     }
 }
 
 @Composable
-private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: ShortcutCategoryUi?) {
+private fun CustomizeButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        width = 133.dp,
+        iconSource = IconSource(imageVector = Icons.Default.Tune),
+        text = stringResource(id = R.string.shortcut_helper_customize_button_text),
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
+}
+
+@Composable
+private fun DoneButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.primary,
+        width = 69.dp,
+        text = stringResource(R.string.shortcut_helper_done_button_text),
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    )
+}
+
+@Composable
+private fun EndSidePanel(
+    searchQuery: String,
+    modifier: Modifier,
+    category: ShortcutCategoryUi?,
+    isCustomizing: Boolean,
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
+) {
     val listState = rememberLazyListState()
     LaunchedEffect(key1 = category) { if (category != null) listState.animateScrollToItem(0) }
     if (category == null) {
@@ -387,7 +460,20 @@ private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: Shor
     }
     LazyColumn(modifier = modifier, state = listState) {
         items(category.subCategories) { subcategory ->
-            SubCategoryContainerDualPane(searchQuery = searchQuery, subCategory = subcategory)
+            SubCategoryContainerDualPane(
+                searchQuery = searchQuery,
+                subCategory = subcategory,
+                isCustomizing = isCustomizing and category.type.includeInCustomization,
+                onCustomizationRequested = { requestInfo ->
+                    when (requestInfo) {
+                        is ShortcutCustomizationRequestInfo.Add ->
+                            onCustomizationRequested(requestInfo.copy(categoryType = category.type))
+
+                        is ShortcutCustomizationRequestInfo.Delete ->
+                            onCustomizationRequested(requestInfo.copy(categoryType = category.type))
+                    }
+                },
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -412,7 +498,12 @@ private fun NoSearchResultsText(horizontalPadding: Dp, fillHeight: Boolean) {
 }
 
 @Composable
-private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: ShortcutSubCategory) {
+private fun SubCategoryContainerDualPane(
+    searchQuery: String,
+    subCategory: ShortcutSubCategory,
+    isCustomizing: Boolean,
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit,
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
@@ -432,6 +523,20 @@ private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: Short
                     modifier = Modifier.padding(vertical = 8.dp),
                     searchQuery = searchQuery,
                     shortcut = shortcut,
+                    isCustomizing = isCustomizing,
+                    onCustomizationRequested = { requestInfo ->
+                        when (requestInfo) {
+                            is ShortcutCustomizationRequestInfo.Add ->
+                                onCustomizationRequested(
+                                    requestInfo.copy(subCategoryLabel = subCategory.label)
+                                )
+
+                            is ShortcutCustomizationRequestInfo.Delete ->
+                                onCustomizationRequested(
+                                    requestInfo.copy(subCategoryLabel = subCategory.label)
+                                )
+                        }
+                    },
                 )
             }
         }
@@ -448,7 +553,13 @@ private fun SubCategoryTitle(title: String) {
 }
 
 @Composable
-private fun Shortcut(modifier: Modifier, searchQuery: String, shortcut: ShortcutModel) {
+private fun Shortcut(
+    modifier: Modifier,
+    searchQuery: String,
+    shortcut: ShortcutModel,
+    isCustomizing: Boolean = false,
+    onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val focusColor = MaterialTheme.colorScheme.secondary
@@ -459,19 +570,44 @@ private fun Shortcut(modifier: Modifier, searchQuery: String, shortcut: Shortcut
             }
             .focusable(interactionSource = interactionSource)
             .padding(8.dp)
+            .semantics { contentDescription = shortcut.contentDescription }
     ) {
         Row(
-            modifier = Modifier.width(128.dp).align(Alignment.CenterVertically),
+            modifier =
+                Modifier.width(128.dp).align(Alignment.CenterVertically).weight(0.333f).semantics {
+                    hideFromAccessibility()
+                },
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (shortcut.icon != null) {
-                ShortcutIcon(shortcut.icon, modifier = Modifier.size(24.dp))
+                ShortcutIcon(
+                    shortcut.icon,
+                    modifier = Modifier.size(24.dp).semantics { hideFromAccessibility() },
+                )
             }
-            ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
+            ShortcutDescriptionText(
+                searchQuery = searchQuery,
+                shortcut = shortcut,
+                modifier = Modifier.semantics { hideFromAccessibility() },
+            )
         }
-        Spacer(modifier = Modifier.width(24.dp))
-        ShortcutKeyCombinations(modifier = Modifier.weight(1f), shortcut = shortcut)
+        Spacer(modifier = Modifier.width(24.dp).semantics { hideFromAccessibility() })
+        ShortcutKeyCombinations(
+            modifier = Modifier.weight(.666f).semantics { hideFromAccessibility() },
+            shortcut = shortcut,
+            isCustomizing = isCustomizing,
+            onAddShortcutRequested = {
+                onCustomizationRequested(
+                    ShortcutCustomizationRequestInfo.Add(label = shortcut.label)
+                )
+            },
+            onDeleteShortcutRequested = {
+                onCustomizationRequested(
+                    ShortcutCustomizationRequestInfo.Delete(label = shortcut.label)
+                )
+            },
+        )
     }
 }
 
@@ -495,18 +631,92 @@ fun ShortcutIcon(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ShortcutKeyCombinations(modifier: Modifier = Modifier, shortcut: ShortcutModel) {
+private fun ShortcutKeyCombinations(
+    modifier: Modifier = Modifier,
+    shortcut: ShortcutModel,
+    isCustomizing: Boolean = false,
+    onAddShortcutRequested: () -> Unit = {},
+    onDeleteShortcutRequested: () -> Unit = {},
+) {
     FlowRow(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End,
     ) {
         shortcut.commands.forEachIndexed { index, command ->
             if (index > 0) {
                 ShortcutOrSeparator(spacing = 16.dp)
             }
-            ShortcutCommand(command)
+            ShortcutCommandContainer(showBackground = command.isCustom) { ShortcutCommand(command) }
         }
+        if (isCustomizing) {
+            Spacer(modifier = Modifier.width(16.dp))
+            if (shortcut.containsCustomShortcutCommands) {
+                DeleteShortcutButton(onDeleteShortcutRequested)
+            } else {
+                AddShortcutButton(onAddShortcutRequested)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AddShortcutButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        modifier =
+            Modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = CircleShape,
+            ),
+        onClick = onClick,
+        color = Color.Transparent,
+        width = 32.dp,
+        height = 32.dp,
+        iconSource = IconSource(imageVector = Icons.Default.Add),
+        contentColor = MaterialTheme.colorScheme.primary,
+        contentPaddingVertical = 0.dp,
+        contentPaddingHorizontal = 0.dp,
+    )
+}
+
+@Composable
+private fun DeleteShortcutButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        modifier =
+            Modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = CircleShape,
+            ),
+        onClick = onClick,
+        color = Color.Transparent,
+        width = 32.dp,
+        height = 32.dp,
+        iconSource = IconSource(imageVector = Icons.Default.DeleteOutline),
+        contentColor = MaterialTheme.colorScheme.primary,
+        contentPaddingVertical = 0.dp,
+        contentPaddingHorizontal = 0.dp,
+    )
+}
+
+@Composable
+private fun ShortcutCommandContainer(showBackground: Boolean, content: @Composable () -> Unit) {
+    if (showBackground) {
+        Box(
+            modifier =
+                Modifier.wrapContentSize()
+                    .background(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = RoundedCornerShape(16.dp),
+                    )
+                    .padding(4.dp)
+        ) {
+            content()
+        }
+    } else {
+        content()
     }
 }
 
@@ -554,7 +764,11 @@ private fun BoxScope.ShortcutTextKey(key: ShortcutKey.Text) {
 @Composable
 private fun BoxScope.ShortcutIconKey(key: ShortcutKey.Icon) {
     Icon(
-        painter = painterResource(key.drawableResId),
+        painter =
+            when (key) {
+                is ShortcutKey.Icon.ResIdIcon -> painterResource(key.drawableResId)
+                is ShortcutKey.Icon.DrawableIcon -> rememberDrawablePainter(drawable = key.drawable)
+            },
         contentDescription = null,
         modifier = Modifier.align(Alignment.Center).padding(6.dp),
     )
@@ -581,7 +795,7 @@ private fun ShortcutDescriptionText(
     Text(
         modifier = modifier,
         text = textWithHighlightedSearchQuery(shortcut.label, searchQuery),
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.onSurface,
     )
 }
@@ -619,16 +833,25 @@ private fun StartSidePanel(
     selectedCategory: ShortcutCategoryType?,
     onCategoryClicked: (ShortcutCategoryUi) -> Unit,
 ) {
-    Column(modifier) {
-        ShortcutsSearchBar(onSearchQueryChanged)
-        Spacer(modifier = Modifier.heightIn(8.dp))
-        CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
-        Spacer(modifier = Modifier.weight(1f))
-        KeyboardSettings(
-            horizontalPadding = 24.dp,
-            verticalPadding = 24.dp,
-            onKeyboardSettingsClicked,
-        )
+    CompositionLocalProvider(
+        // Restrict system font scale increases up to a max so categories display correctly.
+        LocalDensity provides
+            Density(
+                density = LocalDensity.current.density,
+                fontScale = LocalDensity.current.fontScale.coerceIn(1f, 1.5f),
+            )
+    ) {
+        Column(modifier) {
+            ShortcutsSearchBar(onSearchQueryChanged)
+            Spacer(modifier = Modifier.heightIn(8.dp))
+            CategoriesPanelTwoPane(categories, selectedCategory, onCategoryClicked)
+            Spacer(modifier = Modifier.weight(1f))
+            KeyboardSettings(
+                horizontalPadding = 24.dp,
+                verticalPadding = 24.dp,
+                onKeyboardSettingsClicked,
+            )
+        }
     }
 }
 
@@ -690,7 +913,7 @@ private fun CategoryItemTwoPane(
                 Text(
                     fontSize = 18.sp,
                     color = colors.textColor(selected).value,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleSmall,
                     text = label,
                 )
             }
@@ -700,12 +923,18 @@ private fun CategoryItemTwoPane(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun TitleBar() {
+private fun TitleBar(isCustomizing: Boolean = false) {
+    val text =
+        if (isCustomizing) {
+            stringResource(R.string.shortcut_helper_customize_mode_title)
+        } else {
+            stringResource(R.string.shortcut_helper_title)
+        }
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
         title = {
             Text(
-                text = stringResource(R.string.shortcut_helper_title),
+                text = text,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.headlineSmall,
             )
@@ -724,7 +953,12 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
     var queryInternal by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    LaunchedEffect(Unit) {
+        // TODO(b/272065229): Added minor delay so TalkBack can take focus of search box by default,
+        //  remove when default a11y focus is fixed.
+        delay(50)
+        focusRequester.requestFocus()
+    }
     SearchBar(
         modifier =
             Modifier.fillMaxWidth().focusRequester(focusRequester).onKeyEvent {
@@ -753,14 +987,12 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
 
 @Composable
 private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
     ClickableShortcutSurface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
         modifier =
             Modifier.semantics { role = Role.Button }.fillMaxWidth().padding(horizontal = 12.dp),
-        interactionSource = interactionSource,
         interactionsConfig =
             InteractionsConfig(
                 hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
@@ -777,9 +1009,11 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                stringResource(id = R.string.shortcut_helper_keyboard_settings_buttons_label),
+                text =
+                    stringResource(id = R.string.shortcut_helper_keyboard_settings_buttons_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 16.sp,
+                style = MaterialTheme.typography.titleSmall,
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(

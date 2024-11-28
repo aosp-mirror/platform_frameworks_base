@@ -49,27 +49,26 @@ static jlongArray getUidCpuFreqTimeMs(JNIEnv *env, jclass, jint uid) {
  * to the supplied multi-state counter in accordance with the counter's state.
  */
 static jboolean addCpuTimeInFreqDelta(
-        jint uid, jlong counterNativePtr, jlong timestampMs,
+        JNIEnv *env, jint uid, jlong counterNativePtr, jlong timestampMs,
         std::optional<std::vector<std::vector<uint64_t>>> timeInFreqDataNanos,
-        jlong deltaOutContainerNativePtr) {
+        jlongArray deltaOut) {
     if (!timeInFreqDataNanos) {
         return false;
     }
 
-    battery::LongArrayMultiStateCounter *counter =
-            reinterpret_cast<battery::LongArrayMultiStateCounter *>(counterNativePtr);
+    auto counter = reinterpret_cast<battery::LongArrayMultiStateCounter *>(counterNativePtr);
     size_t s = 0;
     for (const auto &cluster : *timeInFreqDataNanos) s += cluster.size();
 
-    std::vector<uint64_t> flattened;
-    flattened.reserve(s);
-    auto offset = flattened.begin();
+    battery::Uint64ArrayRW flattened(s);
+    uint64_t *out = flattened.dataRW();
+    auto offset = out;
     for (const auto &cluster : *timeInFreqDataNanos) {
-        flattened.insert(offset, cluster.begin(), cluster.end());
+        memcpy(offset, cluster.data(), cluster.size() * sizeof(uint64_t));
         offset += cluster.size();
     }
     for (size_t i = 0; i < s; ++i) {
-        flattened[i] /= NSEC_PER_MSEC;
+        out[i] /= NSEC_PER_MSEC;
     }
     if (s != counter->getCount(0).size()) { // Counter has at least one state
         ALOGE("Mismatch between eBPF data size (%d) and the counter size (%d)", (int)s,
@@ -77,29 +76,32 @@ static jboolean addCpuTimeInFreqDelta(
         return false;
     }
 
-    const std::vector<uint64_t> &delta = counter->updateValue(flattened, timestampMs);
-    if (deltaOutContainerNativePtr) {
-        std::vector<uint64_t> *vector =
-                reinterpret_cast<std::vector<uint64_t> *>(deltaOutContainerNativePtr);
-        *vector = delta;
+    const battery::Uint64Array &delta = counter->updateValue(flattened, timestampMs);
+    if (deltaOut) {
+        ScopedLongArrayRW scopedArray(env, deltaOut);
+        uint64_t *array = reinterpret_cast<uint64_t *>(scopedArray.get());
+        if (delta.data() != nullptr) {
+            memcpy(array, delta.data(), s * sizeof(uint64_t));
+        } else {
+            memset(array, 0, s * sizeof(uint64_t));
+        }
     }
 
     return true;
 }
 
-static jboolean addDeltaFromBpf(jint uid, jlong counterNativePtr, jlong timestampMs,
-                                jlong deltaOutContainerNativePtr) {
-    return addCpuTimeInFreqDelta(uid, counterNativePtr, timestampMs,
-                                 android::bpf::getUidCpuFreqTimes(uid), deltaOutContainerNativePtr);
+static jboolean addDeltaFromBpf(JNIEnv *env, jlong self, jint uid, jlong counterNativePtr,
+                                jlong timestampMs, jlongArray deltaOut) {
+    return addCpuTimeInFreqDelta(env, uid, counterNativePtr, timestampMs,
+                                 android::bpf::getUidCpuFreqTimes(uid), deltaOut);
 }
 
 static jboolean addDeltaForTest(JNIEnv *env, jclass, jint uid, jlong counterNativePtr,
                                 jlong timestampMs, jobjectArray timeInFreqDataNanos,
-                                jlong deltaOutContainerNativePtr) {
+                                jlongArray deltaOut) {
     if (!timeInFreqDataNanos) {
-        return addCpuTimeInFreqDelta(uid, counterNativePtr, timestampMs,
-                                     std::optional<std::vector<std::vector<uint64_t>>>(),
-                                     deltaOutContainerNativePtr);
+        return addCpuTimeInFreqDelta(env, uid, counterNativePtr, timestampMs,
+                                     std::optional<std::vector<std::vector<uint64_t>>>(), deltaOut);
     }
 
     std::vector<std::vector<uint64_t>> timeInFreqData;
@@ -113,18 +115,16 @@ static jboolean addDeltaForTest(JNIEnv *env, jclass, jint uid, jlong counterNati
         }
         timeInFreqData.push_back(cluster);
     }
-    return addCpuTimeInFreqDelta(uid, counterNativePtr, timestampMs, std::optional(timeInFreqData),
-                                 deltaOutContainerNativePtr);
+    return addCpuTimeInFreqDelta(env, uid, counterNativePtr, timestampMs,
+                                 std::optional(timeInFreqData), deltaOut);
 }
 
 static const JNINativeMethod g_single_methods[] = {
         {"readBpfData", "(I)[J", (void *)getUidCpuFreqTimeMs},
-
-        // @CriticalNative
-        {"addDeltaFromBpf", "(IJJJ)Z", (void *)addDeltaFromBpf},
+        {"addDeltaFromBpf", "(IJJ[J)Z", (void *)addDeltaFromBpf},
 
         // Used for testing
-        {"addDeltaForTest", "(IJJ[[JJ)Z", (void *)addDeltaForTest},
+        {"addDeltaForTest", "(IJJ[[J[J)Z", (void *)addDeltaForTest},
 };
 
 int register_com_android_internal_os_KernelSingleUidTimeReader(JNIEnv *env) {

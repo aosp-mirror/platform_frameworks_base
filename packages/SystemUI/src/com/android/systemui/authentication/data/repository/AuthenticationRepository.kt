@@ -22,6 +22,7 @@ import android.annotation.UserIdInt
 import android.app.admin.DevicePolicyManager
 import android.content.IntentFilter
 import android.os.UserHandle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel
@@ -57,7 +58,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** Defines interface for classes that can access authentication-related application state. */
@@ -178,6 +178,16 @@ interface AuthenticationRepository {
      * profile of an organization-owned device.
      */
     @UserIdInt suspend fun getProfileWithMinFailedUnlockAttemptsForWipe(): Int
+
+    /**
+     * Returns the device policy enforced maximum time to lock the device, in milliseconds. When the
+     * device goes to sleep, this is the maximum time the device policy allows to wait before
+     * locking the device, despite what the user setting might be set to.
+     */
+    suspend fun getMaximumTimeToLock(): Long
+
+    /** Returns `true` if the power button should instantly lock the device, `false` otherwise. */
+    suspend fun getPowerButtonInstantlyLocks(): Boolean
 }
 
 @SysUISingleton
@@ -321,6 +331,19 @@ constructor(
     override suspend fun getProfileWithMinFailedUnlockAttemptsForWipe(): Int {
         return withContext(backgroundDispatcher) {
             devicePolicyManager.getProfileWithMinimumFailedPasswordsForWipe(selectedUserId)
+        }
+    }
+
+    override suspend fun getMaximumTimeToLock(): Long {
+        return withContext(backgroundDispatcher) {
+            devicePolicyManager.getMaximumTimeToLock(/* admin= */ null, selectedUserId)
+        }
+    }
+
+    /** Returns `true` if the power button should instantly lock the device, `false` otherwise. */
+    override suspend fun getPowerButtonInstantlyLocks(): Boolean {
+        return withContext(backgroundDispatcher) {
+            lockPatternUtils.getPowerButtonInstantlyLocks(selectedUserId)
         }
     }
 

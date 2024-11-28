@@ -16,15 +16,14 @@
 
 package com.android.systemui.shared.clocks
 
-import android.content.Context
-import android.content.res.Resources
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.clocks.AlarmData
+import com.android.systemui.plugins.clocks.AxisType
 import com.android.systemui.plugins.clocks.ClockConfig
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
-import com.android.systemui.plugins.clocks.ClockMessageBuffers
-import com.android.systemui.plugins.clocks.ClockReactiveSetting
+import com.android.systemui.plugins.clocks.ClockFontAxis
+import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
@@ -35,41 +34,28 @@ import java.util.TimeZone
 
 /** Controller for the default flex clock */
 class FlexClockController(
-    private val ctx: Context,
-    private val resources: Resources,
-    private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
+    private val clockCtx: ClockContext,
     val design: ClockDesign, // TODO(b/364680879): Remove when done inlining
-    val messageBuffers: ClockMessageBuffers?,
 ) : ClockController {
-    override val smallClock = run {
-        val buffer = messageBuffers?.smallClockMessageBuffer ?: LogUtil.DEFAULT_MESSAGE_BUFFER
+    override val smallClock =
         FlexClockFaceController(
-            ctx,
-            resources,
-            assets.copy(messageBuffer = buffer),
+            clockCtx.copy(messageBuffer = clockCtx.messageBuffers.smallClockMessageBuffer),
             design.small ?: design.large!!,
-            false,
-            buffer,
+            isLargeClock = false,
         )
-    }
 
-    override val largeClock = run {
-        val buffer = messageBuffers?.largeClockMessageBuffer ?: LogUtil.DEFAULT_MESSAGE_BUFFER
+    override val largeClock =
         FlexClockFaceController(
-            ctx,
-            resources,
-            assets.copy(messageBuffer = buffer),
+            clockCtx.copy(messageBuffer = clockCtx.messageBuffers.largeClockMessageBuffer),
             design.large ?: design.small!!,
-            true,
-            buffer,
+            isLargeClock = true,
         )
-    }
 
     override val config: ClockConfig by lazy {
         ClockConfig(
             DEFAULT_CLOCK_ID,
-            resources.getString(R.string.clock_default_name),
-            resources.getString(R.string.clock_default_description),
+            clockCtx.resources.getString(R.string.clock_default_name),
+            clockCtx.resources.getString(R.string.clock_default_description),
             isReactiveToTone = true,
         )
     }
@@ -113,14 +99,17 @@ class FlexClockController(
                 largeClock.events.onZenDataChanged(data)
             }
 
-            override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {
-                smallClock.events.onReactiveAxesChanged(axes)
-                largeClock.events.onReactiveAxesChanged(axes)
+            override fun onFontAxesChanged(axes: List<ClockFontAxisSetting>) {
+                val fontAxes = ClockFontAxis.merge(FONT_AXES, axes).map { it.toSetting() }
+                smallClock.events.onFontAxesChanged(fontAxes)
+                largeClock.events.onFontAxesChanged(fontAxes)
             }
         }
 
     override fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float) {
-        val theme = ThemeConfig(isDarkTheme, assets.seedColor)
+        val theme = ThemeConfig(isDarkTheme, clockCtx.settings.seedColor)
+        events.onFontAxesChanged(clockCtx.settings.axes)
+
         smallClock.run {
             events.onThemeChanged(theme)
             animations.doze(dozeFraction)
@@ -137,4 +126,46 @@ class FlexClockController(
     }
 
     override fun dump(pw: PrintWriter) {}
+
+    companion object {
+        val FONT_AXES =
+            listOf(
+                ClockFontAxis(
+                    key = "wght",
+                    type = AxisType.Float,
+                    minValue = 1f,
+                    currentValue = 400f,
+                    maxValue = 1000f,
+                    name = "Weight",
+                    description = "Glyph Weight",
+                ),
+                ClockFontAxis(
+                    key = "wdth",
+                    type = AxisType.Float,
+                    minValue = 25f,
+                    currentValue = 100f,
+                    maxValue = 151f,
+                    name = "Width",
+                    description = "Glyph Width",
+                ),
+                ClockFontAxis(
+                    key = "ROND",
+                    type = AxisType.Boolean,
+                    minValue = 0f,
+                    currentValue = 0f,
+                    maxValue = 100f,
+                    name = "Round",
+                    description = "Glyph Roundness",
+                ),
+                ClockFontAxis(
+                    key = "slnt",
+                    type = AxisType.Boolean,
+                    minValue = 0f,
+                    currentValue = 0f,
+                    maxValue = -10f,
+                    name = "Slant",
+                    description = "Glyph Slant",
+                ),
+            )
+    }
 }

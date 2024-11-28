@@ -67,6 +67,7 @@ static struct {
         jfieldID preferredFrameTimelineIndex;
         jfieldID frameTimelinesLength;
         jfieldID frameTimelines;
+        jfieldID numberQueuedBuffers;
     } vsyncEventDataClassInfo;
 
 } gDisplayEventReceiverClassInfo;
@@ -165,7 +166,8 @@ static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventDa
     return env->NewObject(gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                           gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.init,
                           frameTimelineObjs.get(), vsyncEventData.preferredFrameTimelineIndex,
-                          vsyncEventData.frameTimelinesLength, vsyncEventData.frameInterval);
+                          vsyncEventData.frameTimelinesLength, vsyncEventData.frameInterval,
+                          vsyncEventData.numberQueuedBuffers);
 }
 
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId,
@@ -188,6 +190,9 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
         env->SetLongField(vsyncEventDataObj.get(),
                           gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.frameInterval,
                           vsyncEventData.frameInterval);
+        env->SetIntField(vsyncEventDataObj.get(),
+                         gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.numberQueuedBuffers,
+                         vsyncEventData.numberQueuedBuffers);
 
         ScopedLocalRef<jobjectArray>
                 frameTimelinesObj(env,
@@ -441,7 +446,7 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                              "<init>",
                              "([Landroid/view/"
-                             "DisplayEventReceiver$VsyncEventData$FrameTimeline;IIJ)V");
+                             "DisplayEventReceiver$VsyncEventData$FrameTimeline;IIJI)V");
 
     gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.preferredFrameTimelineIndex =
             GetFieldIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
@@ -456,6 +461,9 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
             GetFieldIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                             "frameTimelines",
                             "[Landroid/view/DisplayEventReceiver$VsyncEventData$FrameTimeline;");
+    gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.numberQueuedBuffers =
+            GetFieldIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
+                            "numberQueuedBuffers", "I");
 
     return res;
 }

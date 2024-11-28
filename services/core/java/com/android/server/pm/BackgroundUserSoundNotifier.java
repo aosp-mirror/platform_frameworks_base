@@ -179,13 +179,17 @@ public class BackgroundUserSoundNotifier {
                     final String action = intent.getAction().substring(actionIndex);
                     Log.d(LOG_TAG, "Action requested: " + action + ", by userId "
                             + ActivityManager.getCurrentUser() + " for alarm on user "
-                            + UserHandle.getUserHandleForUid(clientUid));
+                            + UserHandle.getUserHandleForUid(clientUid).getIdentifier());
                 }
 
                 if (ACTION_MUTE_SOUND.equals(intent.getAction())) {
                     muteAlarmSounds(clientUid);
                 } else if (ACTION_SWITCH_USER.equals(intent.getAction())) {
-                    activityManager.switchUser(UserHandle.getUserId(clientUid));
+                    int userId = UserHandle.getUserId(clientUid);
+                    if (mUserManager.isProfile(userId)) {
+                        userId = mUserManager.getProfileParent(userId).id;
+                    }
+                    activityManager.switchUser(userId);
                 }
                 if (Flags.multipleAlarmNotificationsSupport()) {
                     mNotificationClientUids.remove(clientUid);
@@ -237,11 +241,12 @@ public class BackgroundUserSoundNotifier {
                 UserHandle.of(ActivityManager.getCurrentUser()), 0);
         final int userId = UserHandle.getUserId(afi.getClientUid());
         final int usage = afi.getAttributes().getUsage();
-        UserInfo userInfo = mUserManager.getUserInfo(userId);
-
+        UserInfo userInfo = mUserManager.isProfile(userId) ? mUserManager.getProfileParent(userId) :
+                mUserManager.getUserInfo(userId);
+        ActivityManager activityManager = foregroundContext.getSystemService(ActivityManager.class);
         // Only show notification if the sound is coming from background user and the notification
         // for this UID is not already shown.
-        if (userInfo != null && userId != foregroundContext.getUserId()
+        if (userInfo != null && !activityManager.isProfileForeground(userInfo.getUserHandle())
                 && !isNotificationShown(afi.getClientUid())) {
             //TODO: b/349138482 - Add handling of cases when usage == USAGE_NOTIFICATION_RINGTONE
             if (usage == USAGE_ALARM) {

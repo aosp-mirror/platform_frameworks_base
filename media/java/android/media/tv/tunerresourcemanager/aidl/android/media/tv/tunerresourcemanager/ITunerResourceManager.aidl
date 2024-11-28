@@ -151,6 +151,19 @@ interface ITunerResourceManager {
      */
     void setLnbInfoList(in long[] lnbIds);
 
+    /**
+     * Determines whether the Resource Holder retains ownership of the resource during a challenge
+     * scenario, when both Resource Holder and Resource Challenger have same processId and same
+     * priority.
+     *
+     * @param clientId The client id used to set ownership of resource in case of resource
+     *     challenger situation.
+     * @param enabled Set to {@code true} to allow the Resource Holder to retain ownership,
+     *     or false to allow the Resource Challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     */
+    void setResourceOwnershipRetention(int clientId, boolean enabled);
+
     /*
      * This API is used by the Tuner framework to request a frontend from the TunerHAL.
      *

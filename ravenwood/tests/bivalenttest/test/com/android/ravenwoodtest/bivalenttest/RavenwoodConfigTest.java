@@ -20,8 +20,6 @@ import static android.platform.test.ravenwood.RavenwoodConfig.isOnRavenwood;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
-import android.platform.test.ravenwood.RavenwoodConfig;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -33,13 +31,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class RavenwoodConfigTest {
-    private static final String PACKAGE_NAME = "com.test";
-
-    @RavenwoodConfig.Config
-    public static RavenwoodConfig sConfig =
-            new RavenwoodConfig.Builder()
-                    .setPackageName(PACKAGE_NAME)
-                    .build();
+    private static final String PACKAGE_NAME = "com.android.ravenwoodtest.bivalenttest";
 
     @Test
     public void testConfig() {

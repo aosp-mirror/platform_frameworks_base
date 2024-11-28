@@ -47,7 +47,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    private val config = SliderHapticFeedbackConfig()
+    private var config = SliderHapticFeedbackConfig()
 
     private val dragVelocityProvider = SliderDragVelocityProvider { config.maxVelocityToScale }
 
@@ -224,6 +224,72 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
 
             // THEN the correct composition only plays once
             assertEquals(/* expected= */ 1, vibratorHelper.timesVibratedWithEffect(ticks.compose()))
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playHapticAtProgress_forDiscreteSlider_playsTick() =
+        with(kosmos) {
+            config = SliderHapticFeedbackConfig(sliderStepSize = 0.2f)
+            sliderHapticFeedbackProvider =
+                SliderHapticFeedbackProvider(
+                    vibratorHelper,
+                    msdlPlayer,
+                    dragVelocityProvider,
+                    config,
+                    kosmos.fakeSystemClock,
+                )
+
+            // GIVEN max velocity and slider progress
+            val progress = 1f
+            val expectedScale =
+                sliderHapticFeedbackProvider.scaleOnDragTexture(config.maxVelocityToScale, progress)
+            val tick =
+                VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, expectedScale)
+                    .compose()
+
+            // GIVEN system running for 1s
+            fakeSystemClock.advanceTime(1000)
+
+            // WHEN called to play haptics
+            sliderHapticFeedbackProvider.onProgress(progress)
+
+            // THEN the correct composition only plays once
+            assertEquals(expected = 1, vibratorHelper.timesVibratedWithEffect(tick))
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun playHapticAtProgress_forDiscreteSlider_playsDiscreteSliderToken() =
+        with(kosmos) {
+            config = SliderHapticFeedbackConfig(sliderStepSize = 0.2f)
+            sliderHapticFeedbackProvider =
+                SliderHapticFeedbackProvider(
+                    vibratorHelper,
+                    msdlPlayer,
+                    dragVelocityProvider,
+                    config,
+                    kosmos.fakeSystemClock,
+                )
+
+            // GIVEN max velocity and slider progress
+            val progress = 1f
+            val expectedScale =
+                sliderHapticFeedbackProvider.scaleOnDragTexture(config.maxVelocityToScale, progress)
+            val expectedProperties =
+                InteractionProperties.DynamicVibrationScale(expectedScale, pipeliningAttributes)
+
+            // GIVEN system running for 1s
+            fakeSystemClock.advanceTime(1000)
+
+            // WHEN called to play haptics
+            sliderHapticFeedbackProvider.onProgress(progress)
+
+            // THEN the correct token plays once
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.DRAG_INDICATOR_DISCRETE)
+            assertThat(msdlPlayer.latestPropertiesPlayed).isEqualTo(expectedProperties)
+            assertThat(msdlPlayer.getHistory().size).isEqualTo(1)
         }
 
     @Test

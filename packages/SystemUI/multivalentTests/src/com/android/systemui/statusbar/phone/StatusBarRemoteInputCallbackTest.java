@@ -261,6 +261,7 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         when(enr.getPrivateLayout()).thenReturn(privateLayout);
         when(enr.getEntry()).thenReturn(enrEntry);
         when(enr.isChildInGroup()).thenReturn(false);
+        when(enr.isPinned()).thenReturn(false);
         when(enr.isExpanded()).thenReturn(false);
 
         // WHEN
@@ -287,7 +288,62 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
         when(enr.getPrivateLayout()).thenReturn(privateLayout);
         when(enr.getEntry()).thenReturn(enrEntry);
         when(enr.isChildInGroup()).thenReturn(false);
+        when(enr.isPinned()).thenReturn(false);
         when(enr.isExpanded()).thenReturn(true);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(enr, never()).toggleExpansionState();
+        verify(privateLayout, never()).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+        verify(enr, never()).setUserExpanded(anyBoolean());
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void onMakeExpandedVisibleForRemoteInput_notExpandedPinnedHUN_toggleExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(false);
+        when(enr.isPinned()).thenReturn(true);
+        when(enr.isPinnedAndExpanded()).thenReturn(false);
+
+        // WHEN
+        mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(
+                enr, mock(View.class), false, onExpandedVisibleRunner);
+
+        // THEN
+        verify(enr).toggleExpansionState();
+        verify(privateLayout).setOnExpandedVisibleListener(onExpandedVisibleRunner);
+        verify(enr, never()).setUserExpanded(anyBoolean());
+        verify(mGroupExpansionManager, never()).toggleGroupExpansion(any());
+    }
+
+    @Test
+    @EnableFlags(ExpandHeadsUpOnInlineReply.FLAG_NAME)
+    public void onMakeExpandedVisibleForRemoteInput_expandedPinnedHUN_notToggleExpansion() {
+        // GIVEN
+        final Runnable onExpandedVisibleRunner = mock(Runnable.class);
+
+        final ExpandableNotificationRow enr = mock(ExpandableNotificationRow.class);
+        final NotificationContentView privateLayout = mock(NotificationContentView.class);
+        final NotificationEntry enrEntry = mock(NotificationEntry.class);
+
+        when(enr.getPrivateLayout()).thenReturn(privateLayout);
+        when(enr.getEntry()).thenReturn(enrEntry);
+        when(enr.isChildInGroup()).thenReturn(false);
+        when(enr.isPinned()).thenReturn(true);
+        when(enr.isPinnedAndExpanded()).thenReturn(true);
 
         // WHEN
         mRemoteInputCallback.onMakeExpandedVisibleForRemoteInput(

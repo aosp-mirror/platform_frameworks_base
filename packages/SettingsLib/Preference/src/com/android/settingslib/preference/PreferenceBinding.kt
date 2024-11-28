@@ -80,7 +80,6 @@ interface PreferenceBinding {
             preference.isVisible =
                 (this as? PreferenceAvailabilityProvider)?.isAvailable(context) != false
             preference.isPersistent = isPersistent(context)
-            metadata.order(context)?.let { preference.order = it }
             // PreferenceRegistry will notify dependency change, so we do not need to set
             // dependency here. This simplifies dependency management and avoid the
             // IllegalStateException when call Preference.setDependency
@@ -109,6 +108,9 @@ interface PreferenceBinding {
     }
 }
 
+/** Interface indicates that a virtual [Preference] should be created for binding. */
+interface PreferenceBindingPlaceholder
+
 /** Abstract preference screen to provide preference hierarchy and binding factory. */
 interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenProvider {
 
@@ -116,7 +118,7 @@ interface PreferenceScreenCreator : PreferenceScreenMetadata, PreferenceScreenPr
     fun isFlagEnabled(context: Context): Boolean = true
 
     val preferenceBindingFactory: PreferenceBindingFactory
-        get() = DefaultPreferenceBindingFactory
+        get() = PreferenceBindingFactory.defaultFactory
 
     override fun createPreferenceScreen(factory: PreferenceScreenFactory) =
         factory.getOrCreatePreferenceScreen().apply {

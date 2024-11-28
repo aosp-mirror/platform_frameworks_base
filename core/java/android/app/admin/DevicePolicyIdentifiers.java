@@ -191,6 +191,12 @@ public final class DevicePolicyIdentifiers {
     public static final String PASSWORD_COMPLEXITY_POLICY = "passwordComplexity";
 
     /**
+     * String identifier for {@link DevicePolicyManager#setMtePolicy(int)}.
+     */
+    @FlaggedApi(android.app.admin.flags.Flags.FLAG_SET_MTE_POLICY_COEXISTENCE)
+    public static final String MEMORY_TAGGING_POLICY = "memoryTagging";
+
+    /**
      * @hide
      */
     public static final String USER_RESTRICTION_PREFIX = "userRestriction_";

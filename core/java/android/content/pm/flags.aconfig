@@ -297,14 +297,6 @@ flag {
 }
 
 flag {
-    name: "get_packages_from_launcher_apps"
-    namespace: "package_manager_service"
-    description: "Feature flag to provide the new methods within launcher apps class to get packages."
-    bug: "363324203"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "remove_cross_user_permission_hack"
     namespace: "package_manager_service"
     description: "Feature flag to remove hack code of using PackageManager.MATCH_ANY_USER flag without cross user permission."
@@ -320,11 +312,11 @@ flag {
 }
 
 flag {
-    name: "verification_service"
+    name: "sdk_dependency_installer"
+    is_exported: true
     namespace: "package_manager_service"
-    description: "Feature flag to enable the new verification service."
-    bug: "360129103"
-    is_fixed_read_only: true
+    description: "Feature flag to enable installation of missing sdk dependency of app"
+    bug: "370822870"
 }
 
 flag {
@@ -350,3 +342,29 @@ flag {
     bug: "364760703"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "cloud_compilation_pm"
+    is_exported: true
+    namespace: "art_mainline"
+    description: "Feature flag to enable the Cloud Compilation support on the package manager side."
+    bug: "377474232"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "support_minor_versions_in_minsdkversion"
+    namespace: "package_manager_service"
+    description: "Block app installations that specify an incompatible minor SDK version"
+    bug: "377302905"
+}
+
+flag {
+    name: "app_compat_option_16kb"
+    is_exported: true
+    namespace: "devoptions_settings"
+    description: "Feature flag to enable page size app compat mode from manifest, package manager and settings level."
+    bug: "371049373"
+    is_fixed_read_only: true
+}
+

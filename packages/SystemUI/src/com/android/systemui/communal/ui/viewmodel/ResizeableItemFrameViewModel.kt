@@ -17,6 +17,7 @@ package com.android.systemui.communal.ui.viewmodel
 
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.snapTo
 import androidx.compose.runtime.snapshotFlow
 import com.android.app.tracing.coroutines.coroutineScopeTraced as coroutineScope
 import com.android.systemui.lifecycle.ExclusiveActivatable
@@ -75,10 +76,76 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
             floor(spans.toDouble() / resizeMultiple).toInt() * resizeMultiple
 
         val maxSpans: Int
-            get() = roundDownToMultiple(getSpansForPx(maxHeightPx))
+            get() = roundDownToMultiple(getSpansForPx(maxHeightPx)).coerceAtLeast(currentSpan)
 
         val minSpans: Int
-            get() = roundDownToMultiple(getSpansForPx(minHeightPx))
+            get() = roundDownToMultiple(getSpansForPx(minHeightPx)).coerceAtMost(currentSpan)
+    }
+
+    /** Check if widget can expanded based on current drag states */
+    fun canExpand(): Boolean {
+        return getNextAnchor(bottomDragState, moveUp = false) != null ||
+            getNextAnchor(topDragState, moveUp = true) != null
+    }
+
+    /** Check if widget can shrink based on current drag states */
+    fun canShrink(): Boolean {
+        return getNextAnchor(bottomDragState, moveUp = true) != null ||
+            getNextAnchor(topDragState, moveUp = false) != null
+    }
+
+    /** Get the next anchor value in the specified direction */
+    private fun getNextAnchor(state: AnchoredDraggableState<Int>, moveUp: Boolean): Int? {
+        var nextAnchor: Int? = null
+        var nextAnchorDiff = Int.MAX_VALUE
+        val currentValue = state.currentValue
+
+        for (i in 0 until state.anchors.size) {
+            val anchor = state.anchors.anchorAt(i) ?: continue
+            if (anchor == currentValue) continue
+
+            val diff =
+                if (moveUp) {
+                    currentValue - anchor
+                } else {
+                    anchor - currentValue
+                }
+
+            if (diff in 1..<nextAnchorDiff) {
+                nextAnchor = anchor
+                nextAnchorDiff = diff
+            }
+        }
+
+        return nextAnchor
+    }
+
+    /** Handle expansion to the next anchor */
+    suspend fun expandToNextAnchor() {
+        if (!canExpand()) return
+        val bottomAnchor = getNextAnchor(state = bottomDragState, moveUp = false)
+        if (bottomAnchor != null) {
+            bottomDragState.snapTo(bottomAnchor)
+            return
+        }
+        val topAnchor =
+            getNextAnchor(
+                state = topDragState,
+                moveUp = true, // Moving up to expand
+            )
+        topAnchor?.let { topDragState.snapTo(it) }
+    }
+
+    /** Handle shrinking to the next anchor */
+    suspend fun shrinkToNextAnchor() {
+        if (!canShrink()) return
+        val topAnchor = getNextAnchor(state = topDragState, moveUp = false)
+        if (topAnchor != null) {
+            topDragState.snapTo(topAnchor)
+            return
+        }
+        val bottomAnchor = getNextAnchor(state = bottomDragState, moveUp = true)
+        bottomAnchor?.let { bottomDragState.snapTo(it) }
     }
 
     /**

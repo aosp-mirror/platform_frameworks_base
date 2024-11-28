@@ -21,6 +21,7 @@ import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -37,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.hardware.usb.flags.Flags;
 import android.hardware.usb.gadget.GadgetFunction;
 import android.hardware.usb.gadget.UsbSpeed;
 import android.os.Binder;
@@ -52,6 +54,11 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -509,7 +516,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1;
 
     /**
@@ -517,7 +525,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2;
 
     /**
@@ -525,7 +534,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12;
 
     /**
@@ -533,7 +543,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480;
 
     /**
@@ -541,7 +552,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_5G = 5 * 1024;
 
     /**
@@ -549,7 +561,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_10G = 10 * 1024;
 
     /**
@@ -557,7 +570,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_20G = 20 * 1024;
 
     /**
@@ -565,7 +579,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     public static final int USB_DATA_TRANSFER_RATE_40G = 40 * 1024;
 
     /**
@@ -813,6 +828,216 @@ public class UsbManager {
         }
     }
 
+    /**
+     * Opens the handle for accessory, marks it as input or output, and adds it to the map
+     * if it is the first time the accessory has had an I/O stream associated with it.
+     */
+    private AccessoryHandle openHandleForAccessory(UsbAccessory accessory,
+            boolean openingInputStream)
+            throws RemoteException {
+        synchronized (mAccessoryHandleMapLock) {
+            if (mAccessoryHandleMap == null) {
+                mAccessoryHandleMap = new ArrayMap<>();
+            }
+
+            // If accessory isn't available in map
+            if (!mAccessoryHandleMap.containsKey(accessory)) {
+                // open accessory and store associated AccessoryHandle in map
+                ParcelFileDescriptor pfd = mService.openAccessory(accessory);
+                AccessoryHandle newHandle = new AccessoryHandle(pfd, openingInputStream,
+                        !openingInputStream);
+                mAccessoryHandleMap.put(accessory, newHandle);
+
+                return newHandle;
+            }
+
+            // if accessory is already in map, get modified handle
+            AccessoryHandle currentHandle = mAccessoryHandleMap.get(accessory);
+            if (currentHandle == null) {
+                throw new IllegalStateException("Accessory doesn't have an associated handle yet!");
+            }
+
+            AccessoryHandle modifiedHandle = getModifiedHandleForOpeningStream(
+                    openingInputStream, currentHandle);
+
+            mAccessoryHandleMap.put(accessory, modifiedHandle);
+
+            return modifiedHandle;
+        }
+    }
+
+    private AccessoryHandle getModifiedHandleForOpeningStream(boolean openingInputStream,
+            @NonNull AccessoryHandle currentHandle) {
+        if (currentHandle.isInputStreamOpened() && openingInputStream) {
+            throw new IllegalStateException("Input stream already open for this accessory! "
+                    + "Please close the existing input stream before opening a new one.");
+        }
+
+        if (currentHandle.isOutputStreamOpened() && !openingInputStream) {
+            throw new IllegalStateException("Output stream already open for this accessory! "
+                    + "Please close the existing output stream before opening a new one.");
+        }
+
+        boolean isInputStreamOpened = openingInputStream || currentHandle.isInputStreamOpened();
+        boolean isOutputStreamOpened = !openingInputStream || currentHandle.isOutputStreamOpened();
+
+        return new AccessoryHandle(
+                currentHandle.getPfd(), isInputStreamOpened, isOutputStreamOpened);
+    }
+
+    /**
+     * Marks the handle for the given accessory closed for input or output, and closes the handle
+     * and removes it from the map if there are no more I/O streams associated with the handle.
+     */
+    private void closeHandleForAccessory(UsbAccessory accessory, boolean closingInputStream)
+            throws IOException {
+        synchronized (mAccessoryHandleMapLock) {
+            AccessoryHandle currentHandle = mAccessoryHandleMap.get(accessory);
+
+            if (currentHandle == null) {
+                throw new IllegalStateException(
+                        "No handle has been initialised for this accessory!");
+            }
+
+            AccessoryHandle modifiedHandle = getModifiedHandleForClosingStream(
+                    closingInputStream, currentHandle);
+            if (!modifiedHandle.isOpen()) {
+                //close handle and remove accessory handle pair from map
+                modifiedHandle.getPfd().close();
+                mAccessoryHandleMap.remove(accessory);
+            } else {
+                mAccessoryHandleMap.put(accessory, modifiedHandle);
+            }
+        }
+    }
+
+    private AccessoryHandle getModifiedHandleForClosingStream(boolean closingInputStream,
+            @NonNull AccessoryHandle currentHandle) {
+        if (!currentHandle.isInputStreamOpened() && closingInputStream) {
+            throw new IllegalStateException(
+                    "Attempting to close an input stream that has not been opened "
+                            + "for this accessory!");
+        }
+
+        if (!currentHandle.isOutputStreamOpened() && !closingInputStream) {
+            throw new IllegalStateException(
+                    "Attempting to close an output stream that has not been opened "
+                            + "for this accessory!");
+        }
+
+        boolean isInputStreamOpened = !closingInputStream && currentHandle.isInputStreamOpened();
+        boolean isOutputStreamOpened = closingInputStream && currentHandle.isOutputStreamOpened();
+
+        return new AccessoryHandle(
+                currentHandle.getPfd(), isInputStreamOpened, isOutputStreamOpened);
+    }
+
+    /**
+     * An InputStream you can create on a UsbAccessory, which will
+     * take care of calling {@link ParcelFileDescriptor#close
+     * ParcelFileDescriptor.close()} for you when the stream is closed.
+     */
+    private class AccessoryAutoCloseInputStream extends FileInputStream {
+
+        private final ParcelFileDescriptor mPfd;
+        private final UsbAccessory mAccessory;
+
+        AccessoryAutoCloseInputStream(UsbAccessory accessory, ParcelFileDescriptor pfd) {
+            super(pfd.getFileDescriptor());
+            this.mAccessory = accessory;
+            this.mPfd = pfd;
+        }
+
+        @Override
+        public void close() throws IOException {
+            /* TODO(b/377850642) : Ensure the stream is closed even if client does not
+                explicitly close the stream to avoid corrupt FDs*/
+            super.close();
+            closeHandleForAccessory(mAccessory, true);
+        }
+
+
+        @Override
+        public int read() throws IOException {
+            final int result = super.read();
+            checkError(result);
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            final int result = super.read(b);
+            checkError(result);
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            final int result = super.read(b, off, len);
+            checkError(result);
+            return result;
+        }
+
+        private void checkError(int result) throws IOException {
+            if (result == -1 && mPfd.canDetectErrors()) {
+                mPfd.checkError();
+            }
+        }
+    }
+
+    /**
+     * An OutputStream you can create on a UsbAccessory, which will
+     * take care of calling {@link ParcelFileDescriptor#close
+     * ParcelFileDescriptor.close()} for you when the stream is closed.
+     */
+    private class AccessoryAutoCloseOutputStream extends FileOutputStream {
+        private final UsbAccessory mAccessory;
+
+        AccessoryAutoCloseOutputStream(UsbAccessory accessory, ParcelFileDescriptor pfd) {
+            super(pfd.getFileDescriptor());
+            mAccessory = accessory;
+        }
+
+        @Override
+        public void close() throws IOException {
+            /* TODO(b/377850642) : Ensure the stream is closed even if client does not
+                explicitly close the stream to avoid corrupt FDs*/
+            super.close();
+            closeHandleForAccessory(mAccessory, false);
+        }
+    }
+
+    /**
+     * Holds file descriptor and marks whether input and output streams have been opened for it.
+     */
+    private static class AccessoryHandle {
+        private final ParcelFileDescriptor mPfd;
+        private final boolean mInputStreamOpened;
+        private final boolean mOutputStreamOpened;
+        AccessoryHandle(ParcelFileDescriptor parcelFileDescriptor,
+                boolean inputStreamOpened, boolean outputStreamOpened) {
+            mPfd = parcelFileDescriptor;
+            mInputStreamOpened = inputStreamOpened;
+            mOutputStreamOpened = outputStreamOpened;
+        }
+
+        public ParcelFileDescriptor getPfd() {
+            return mPfd;
+        }
+
+        public boolean isInputStreamOpened() {
+            return mInputStreamOpened;
+        }
+
+        public boolean isOutputStreamOpened() {
+            return mOutputStreamOpened;
+        }
+
+        public boolean isOpen() {
+            return (mInputStreamOpened || mOutputStreamOpened);
+        }
+    }
+
     private final Context mContext;
     private final IUsbManager mService;
     private final Object mDisplayPortListenersLock = new Object();
@@ -820,6 +1045,11 @@ public class UsbManager {
     private ArrayMap<DisplayPortAltModeInfoListener, Executor> mDisplayPortListeners;
     @GuardedBy("mDisplayPortListenersLock")
     private DisplayPortAltModeInfoDispatchingListener mDisplayPortServiceListener;
+
+    private final Object mAccessoryHandleMapLock = new Object();
+    @GuardedBy("mAccessoryHandleMapLock")
+    private ArrayMap<UsbAccessory, AccessoryHandle> mAccessoryHandleMap;
+
 
     /**
      * @hide
@@ -912,6 +1142,10 @@ public class UsbManager {
      * data of a USB transfer should be read at once. If only a partial request is read the rest of
      * the transfer is dropped.
      *
+     * <p>It is strongly recommended to use newer methods instead of this method,
+     * since this method may provide sub-optimal performance on some devices.
+     * This method could potentially face interim performance degradation as well.
+     *
      * @param accessory the USB accessory to open
      * @return file descriptor, or null if the accessory could not be opened.
      */
@@ -922,6 +1156,49 @@ public class UsbManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Opens an input stream for reading from the USB accessory.
+     * If accessory is not open at this point, accessory will first be opened.
+     * <p>If data is read from the created {@link java.io.InputStream} all
+     * data of a USB transfer should be read at once. If only a partial request is read, the rest of
+     * the transfer is dropped.
+     * <p>The caller is responsible for ensuring that the returned stream is closed.
+     *
+     * @param accessory the USB accessory to open an input stream for
+     * @return input stream to read from given USB accessory
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_ACCESSORY_STREAM_API)
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
+    public @NonNull InputStream openAccessoryInputStream(@NonNull UsbAccessory accessory) {
+        try {
+            return new AccessoryAutoCloseInputStream(accessory,
+                    openHandleForAccessory(accessory, true).getPfd());
+
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Opens an output stream for writing to the USB accessory.
+     * If accessory is not open at this point, accessory will first be opened.
+     * <p>The caller is responsible for ensuring that the returned stream is closed.
+     *
+     * @param accessory the USB accessory to open an output stream for
+     * @return output stream to write to given USB accessory
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_ACCESSORY_STREAM_API)
+    @RequiresFeature(PackageManager.FEATURE_USB_ACCESSORY)
+    public @NonNull OutputStream openAccessoryOutputStream(@NonNull UsbAccessory accessory) {
+        try {
+            return new AccessoryAutoCloseOutputStream(accessory,
+                    openHandleForAccessory(accessory, false).getPfd());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
     }
 
     /**
@@ -1283,7 +1560,7 @@ public class UsbManager {
      * <p>
      * This function returns the current USB bandwidth through USB Gadget HAL.
      * It should be used when Android device is in USB peripheral mode and
-     * connects to a USB host. If USB state is not configued, API will return
+     * connects to a USB host. If USB state is not configured, API will return
      * {@value #USB_DATA_TRANSFER_RATE_UNKNOWN}. In addition, the unit of the
      * return value is Mbps.
      * </p>
@@ -1292,7 +1569,8 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_EXPOSE_USB_SPEED_SYSTEM_API)
+    @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public int getUsbBandwidthMbps() {
         int usbSpeed;

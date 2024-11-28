@@ -18,9 +18,12 @@ package android.view;
 
 import static android.graphics.FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -175,6 +178,16 @@ public final class FrameMetrics {
      * </p>
      **/
     public static final int DEADLINE = 13;
+
+    /**
+     * Metric identifier for the frame's VSync identifier.
+     * <p>
+     * The id that corresponds to the chosen frame timeline, used to correlate a frame produced
+     * by HWUI with the timeline data from the compositor.
+     * </p>
+     */
+    @FlaggedApi(Flags.FLAG_JANK_API)
+    public static final int FRAME_TIMELINE_VSYNC_ID = 14;
 
     /**
      * Identifiers for metrics available for each frame.
@@ -337,7 +350,8 @@ public final class FrameMetrics {
      * @return the value of the metric or -1 if it is not available.
      */
     public long getMetric(@Metric int id) {
-        if (id < UNKNOWN_DELAY_DURATION || id > DEADLINE) {
+        if (id < UNKNOWN_DELAY_DURATION
+                || id > (Flags.jankApi() ? FRAME_TIMELINE_VSYNC_ID : DEADLINE)) {
             return -1;
         }
 
@@ -351,6 +365,8 @@ public final class FrameMetrics {
             return mTimingData[Index.INTENDED_VSYNC];
         } else if (id == VSYNC_TIMESTAMP) {
             return mTimingData[Index.VSYNC];
+        } else if (id == FRAME_TIMELINE_VSYNC_ID) {
+            return mTimingData[Index.FRAME_TIMELINE_VSYNC_ID];
         }
 
         int durationsIdx = 2 * id;
@@ -358,4 +374,3 @@ public final class FrameMetrics {
                 - mTimingData[DURATIONS[durationsIdx]];
     }
 }
-

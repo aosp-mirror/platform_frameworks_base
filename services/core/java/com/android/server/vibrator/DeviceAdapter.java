@@ -47,11 +47,17 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
      * instance is created with the final segment list.
      */
     private final List<VibrationSegmentsAdapter> mSegmentAdapters;
+    /**
+     * The vibration segment validators that can validate VibrationEffectSegments entries based on
+     * the VibratorInfo.
+     */
+    private final List<VibrationSegmentsValidator> mSegmentsValidators;
 
     DeviceAdapter(VibrationSettings settings, SparseArray<VibratorController> vibrators) {
         mSegmentAdapters = Arrays.asList(
-                // TODO(b/167947076): add filter that removes unsupported primitives
                 // TODO(b/167947076): add filter that replaces unsupported prebaked with fallback
+                // Updates primitive delays to hardware supported pauses
+                new PrimitiveDelayAdapter(),
                 // Convert segments based on device capabilities
                 new RampToStepAdapter(settings.getRampStepDuration()),
                 new StepToRampAdapter(),
@@ -60,7 +66,17 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
                 // Split segments based on their duration and device supported limits
                 new SplitSegmentsAdapter(),
                 // Clip amplitudes and frequencies of final segments based on device bandwidth curve
-                new ClippingAmplitudeAndFrequencyAdapter()
+                new ClippingAmplitudeAndFrequencyAdapter(),
+                // Convert BasicPwleSegments to PwleSegments based on device capabilities
+                new BasicToPwleSegmentAdapter(),
+                // Split Pwle segments based on their duration and device supported limits
+                new SplitPwleSegmentsAdapter()
+        );
+        mSegmentsValidators = List.of(
+                // Validate Pwle segments base on the vibrators frequency range
+                new PwleSegmentsValidator(),
+                // Validate primitive segments based on device support
+                new PrimitiveSegmentsValidator()
         );
         mAvailableVibrators = vibrators;
         mAvailableVibratorIds = new int[vibrators.size()];
@@ -78,7 +94,6 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
         return mAvailableVibratorIds;
     }
 
-    @NonNull
     @Override
     public VibrationEffect adaptToVibrator(int vibratorId, @NonNull VibrationEffect effect) {
         if (!(effect instanceof VibrationEffect.Composed composed)) {
@@ -100,6 +115,14 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
         for (int i = 0; i < adapterCount; i++) {
             newRepeatIndex =
                     mSegmentAdapters.get(i).adaptToVibrator(info, newSegments, newRepeatIndex);
+        }
+
+        // Validate the vibration segments. If a segment is not supported, ignore the entire
+        // vibration effect.
+        for (int i = 0; i < mSegmentsValidators.size(); i++) {
+            if (!mSegmentsValidators.get(i).hasValidSegments(info, newSegments)) {
+                return null;
+            }
         }
 
         return new VibrationEffect.Composed(newSegments, newRepeatIndex);

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
+import android.os.Binder;
 import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
 import android.view.RemoteAnimationAdapter;
@@ -61,7 +62,8 @@ public class SafeActivityOptionsTest {
         opts1.setLaunchDisplayId(5);
         final ActivityOptions opts2 = ActivityOptions.makeBasic();
         opts2.setLaunchDisplayId(6);
-        final SafeActivityOptions options = new SafeActivityOptions(opts1);
+        final SafeActivityOptions options = new SafeActivityOptions(opts1,
+                Binder.getCallingPid(), Binder.getCallingUid());
         final ActivityOptions result = options.mergeActivityOptions(opts1, opts2);
         assertEquals(6, result.getLaunchDisplayId());
     }
@@ -75,7 +77,8 @@ public class SafeActivityOptionsTest {
         final SafeActivityOptions clone = new SafeActivityOptions(ActivityOptions.makeBasic()
                 .setLaunchTaskDisplayArea(token)
                 .setLaunchDisplayId(launchDisplayId)
-                .setCallerDisplayId(callerDisplayId))
+                .setCallerDisplayId(callerDisplayId),
+                Binder.getCallingPid(), Binder.getCallingUid())
                 .selectiveCloneLaunchOptions();
 
         assertSame(clone.getOriginalOptions().getLaunchTaskDisplayArea(), token);
@@ -86,8 +89,9 @@ public class SafeActivityOptionsTest {
     @Test
     public void test_selectiveCloneLunchRootTask() {
         final WindowContainerToken token = mock(WindowContainerToken.class);
-        final SafeActivityOptions clone = new SafeActivityOptions(ActivityOptions.makeBasic()
-                .setLaunchRootTask(token))
+        final SafeActivityOptions clone = new SafeActivityOptions(
+                ActivityOptions.makeBasic().setLaunchRootTask(token),
+                Binder.getCallingPid(), Binder.getCallingUid())
                 .selectiveCloneLaunchOptions();
 
         assertSame(clone.getOriginalOptions().getLaunchRootTask(), token);
@@ -97,7 +101,8 @@ public class SafeActivityOptionsTest {
     public void test_selectiveCloneLunchRemoteTransition() {
         final RemoteTransition transition = mock(RemoteTransition.class);
         final SafeActivityOptions clone = new SafeActivityOptions(
-                ActivityOptions.makeRemoteTransition(transition))
+                ActivityOptions.makeRemoteTransition(transition),
+                Binder.getCallingPid(), Binder.getCallingUid())
                 .selectiveCloneLaunchOptions();
 
         assertSame(clone.getOriginalOptions().getRemoteTransition(), transition);
@@ -157,6 +162,10 @@ public class SafeActivityOptionsTest {
             verifySecureExceptionThrown(activityOptions, taskSupervisor);
 
             activityOptions = ActivityOptions.makeBasic();
+            activityOptions.setTaskAlwaysOnTop(true);
+            verifySecureExceptionThrown(activityOptions, taskSupervisor);
+
+            activityOptions = ActivityOptions.makeBasic();
             activityOptions.setLaunchDisplayId(DEFAULT_DISPLAY);
             verifySecureExceptionThrown(activityOptions, taskSupervisor);
 
@@ -202,7 +211,8 @@ public class SafeActivityOptionsTest {
 
     private void verifySecureExceptionThrown(ActivityOptions activityOptions,
             ActivityTaskSupervisor taskSupervisor, TaskDisplayArea mockTda) {
-        SafeActivityOptions safeActivityOptions = new SafeActivityOptions(activityOptions);
+        SafeActivityOptions safeActivityOptions = new SafeActivityOptions(activityOptions,
+                Binder.getCallingPid(), Binder.getCallingUid());
         if (mockTda != null) {
             spyOn(safeActivityOptions);
             doReturn(mockTda).when(safeActivityOptions).getLaunchTaskDisplayArea(any(), any());

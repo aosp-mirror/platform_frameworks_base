@@ -198,7 +198,7 @@ public final class ServerSocketPerfTest {
         executor.awaitTermination(5, TimeUnit.SECONDS);
     }
 
-    // @Test Temporarily disabled
+    @Test
     @Parameters(method = "getParams")
     public void throughput(Config config) throws Exception {
         setup(config);

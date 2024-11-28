@@ -65,7 +65,6 @@ import javax.inject.Provider;
         DependencyProvider.class,
         NotificationInsetsModule.class,
         QsFrameTranslateModule.class,
-        SystemUIBinder.class,
         SystemUIModule.class,
         SystemUICoreStartableModule.class,
         ReferenceSystemUIModule.class})

@@ -19,6 +19,7 @@ package com.android.wm.shell.desktopmode;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR;
@@ -119,6 +120,7 @@ public class DesktopModeVisualIndicator {
     private View mView;
     private IndicatorType mCurrentType;
     private DragStartState mDragStartState;
+    private boolean mIsReleased;
 
     public DesktopModeVisualIndicator(SyncTransactionQueue syncQueue,
             ActivityManager.RunningTaskInfo taskInfo, DisplayController displayController,
@@ -239,6 +241,7 @@ public class DesktopModeVisualIndicator {
      * Create a fullscreen indicator with no animation
      */
     private void createView() {
+        if (mIsReleased) return;
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         final Resources resources = mContext.getResources();
         final DisplayMetrics metrics = resources.getDisplayMetrics();
@@ -259,6 +262,7 @@ public class DesktopModeVisualIndicator {
                         FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Desktop Mode Visual Indicator");
         lp.setTrustedOverlay();
+        lp.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         final WindowlessWindowManager windowManager = new WindowlessWindowManager(
                 mTaskInfo.configuration, mLeash,
                 null /* hostInputToken */);
@@ -293,6 +297,12 @@ public class DesktopModeVisualIndicator {
      * @param finishCallback called when animation ends or gets cancelled
      */
     void fadeOutIndicator(@Nullable Runnable finishCallback) {
+        if (mCurrentType == NO_INDICATOR) {
+            // In rare cases, fade out can be requested before the indicator has determined its
+            // initial type and started animating in. In this case, no animator is needed.
+            finishCallback.run();
+            return;
+        }
         final VisualIndicatorAnimator animator = VisualIndicatorAnimator
                 .fadeBoundsOut(mView, mCurrentType,
                         mDisplayController.getDisplayLayout(mTaskInfo.displayId));
@@ -333,6 +343,7 @@ public class DesktopModeVisualIndicator {
      * Release the indicator and its components when it is no longer needed.
      */
     public void releaseVisualIndicator(SurfaceControl.Transaction t) {
+        mIsReleased = true;
         if (mViewHost == null) return;
         if (mViewHost != null) {
             mViewHost.release();

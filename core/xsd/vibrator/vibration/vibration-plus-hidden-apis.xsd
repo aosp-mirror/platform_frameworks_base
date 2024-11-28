@@ -147,6 +147,7 @@
         <xs:attribute name="name" type="PrimitiveEffectName" use="required"/>
         <xs:attribute name="scale" type="PrimitiveScale"/>
         <xs:attribute name="delayMs" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="delayType" type="PrimitiveDelayType"/>
     </xs:complexType>
 
     <!-- Primitive names as defined by VibrationEffect.Composition.PRIMITIVE_* -->
@@ -168,6 +169,14 @@
         <xs:restriction base="xs:float">
             <xs:minInclusive value="0"/>
             <xs:maxInclusive value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Primitive delay types VibrationEffect.Composition.DELAY_TYPE_* -->
+    <xs:simpleType  name="PrimitiveDelayType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="pause"/>
+            <xs:enumeration value="relative_start_offset"/>
         </xs:restriction>
     </xs:simpleType>
 

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.casttootherdevice.domian.interactor
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -30,8 +31,10 @@ import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class MediaRouterChipInteractorTest : SysuiTestCase() {
     val kosmos = Kosmos()

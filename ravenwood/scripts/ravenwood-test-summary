@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+#
+# Copyright (C) 2024 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+'''
+Print the latest Ravenwood test execution summary
+
+Usage: /ravenwood-test-summary
+
+Example output:
+Module                                                         Passed   Failed  Skipped
+android.test.mock.ravenwood.tests                                   2        0        0
+CarLibHostUnitTest                                                565        0        7
+CarServiceHostUnitTest                                            364        0        0
+CtsAccountManagerTestCasesRavenwood                                 4        0        0
+CtsAppTestCasesRavenwood                                           21        0        0
+
+Description:
+This script finds all the test execution result from /tmp/Ravenwood-stats*,
+and shows per-module summary.
+'''
+
+import csv
+import glob
+import sys
+
+# Find the latest stats files.
+stats_files = glob.glob('/tmp/Ravenwood-stats_*_latest.csv')
+
+if len(stats_files) == 0:
+    print("No log files found.", file=sys.stderr)
+    exit(1)
+
+
+def parse_stats(file, result):
+    module = '(unknwon)'
+    passed = 0
+    failed = 0
+    skipped = 0
+    with open(file) as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+
+
+        for i, row in enumerate(reader):
+            if i == 0: continue # Skip header line
+            module = row[0]
+            passed += int(row[3])
+            failed += int(row[4])
+            skipped += int(row[5])
+
+    result[module] = (passed, failed, skipped)
+
+
+result = {}
+
+for file in stats_files:
+    parse_stats(file, result)
+
+print('%-60s %8s %8s %8s' % ("Module", "Passed", "Failed", "Skipped"))
+
+for module in sorted(result.keys(), key=str.casefold):
+    r = result[module]
+    print('%-60s %8d %8d %8d' % (module, r[0], r[1], r[2]))

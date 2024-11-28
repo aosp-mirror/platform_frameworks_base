@@ -15,7 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
+
+import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -29,10 +31,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 
 import java.util.List;
 
-/**
- * Apply a value change on a string variable.
- */
-public class ValueStringChangeActionOperation implements ActionOperation {
+/** Apply a value change on a string variable. */
+public class ValueStringChangeActionOperation extends Operation implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_STRING_CHANGE_ACTION;
 
     int mTargetValueId = -1;
@@ -43,6 +43,7 @@ public class ValueStringChangeActionOperation implements ActionOperation {
         mValueId = value;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ValueChangeActionOperation(" + mTargetValueId + ")";
@@ -52,56 +53,66 @@ public class ValueStringChangeActionOperation implements ActionOperation {
         return mTargetValueId;
     }
 
+    @NonNull
     public String serializedName() {
         return "VALUE_CHANGE";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, serializedName() + " = " + mTargetValueId + " -> " + mValueId);
     }
 
     @Override
-    public void apply(RemoteContext context) {
-    }
+    public void apply(@NonNull RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void write(WireBuffer buffer) {
-
-    }
+    public void write(@NonNull WireBuffer buffer) {}
 
     @Override
-    public void runAction(RemoteContext context, CoreDocument document,
-                          Component component, float x, float y) {
+    public void runAction(
+            @NonNull RemoteContext context,
+            @NonNull CoreDocument document,
+            @NonNull Component component,
+            float x,
+            float y) {
         context.overrideText(mTargetValueId, mValueId);
     }
 
-    public static void apply(WireBuffer buffer, int valueId, int value) {
+    public static void apply(@NonNull WireBuffer buffer, int valueId, int value) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
         buffer.writeInt(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int valueId = buffer.readInt();
         int value = buffer.readInt();
         operations.add(new ValueStringChangeActionOperation(valueId, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueStringChangeActionOperation")
-                .description("ValueStrin gChange action. "
-                        + " This operation represents a String change (referenced by id) "
-                        + "for the given string id")
+                .description(
+                        "ValueStrin gChange action. "
+                                + " This operation represents a String change (referenced by id) "
+                                + "for the given string id")
                 .field(INT, "TARGET_ID", "Target Value ID")
-                .field(INT, "VALUE_ID", "Value ID to be assigned to the target "
-                        + "value as a string")
-        ;
+                .field(
+                        INT,
+                        "VALUE_ID",
+                        "Value ID to be assigned to the target " + "value as a string");
     }
-
 }

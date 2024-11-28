@@ -2400,10 +2400,14 @@ public final class InputMethodManager {
             if (Flags.refactorInsetsController()) {
                 final var viewRootImpl = view.getViewRootImpl();
                 // In case of a running show IME animation, it should not be requested visible,
-                // otherwise the animation would jump and not be controlled by the user anymore
-                if (viewRootImpl != null
-                        && (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
-                                & WindowInsets.Type.ime()) == 0) {
+                // otherwise the animation would jump and not be controlled by the user anymore.
+                // If predictive back is in progress, and a editText is focussed, we should
+                // show the IME.
+                if (viewRootImpl != null && (
+                        (viewRootImpl.getInsetsController().computeUserAnimatingTypes()
+                                & WindowInsets.Type.ime()) == 0
+                        || viewRootImpl.getInsetsController()
+                                .isPredictiveBackImeHideAnimInProgress())) {
                     ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_CLIENT_NO_ONGOING_USER_ANIMATION);
                     if (resultReceiver != null) {
@@ -2464,6 +2468,11 @@ public final class InputMethodManager {
             if (rootView == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
+                return;
+            }
+
+            if (Flags.refactorInsetsController()) {
+                showSoftInput(rootView, statsToken, flags, resultReceiver, reason);
                 return;
             }
 
@@ -2617,10 +2626,12 @@ public final class InputMethodManager {
                         // The view is running on a different thread than our own, so
                         // we need to reschedule our work for over there.
                         if (DEBUG) Log.v(TAG, "Hiding soft input: reschedule to view thread");
+                        final var finalStatsToken = statsToken;
                         vh.post(() -> viewRootImpl.getInsetsController().hide(
-                                WindowInsets.Type.ime()));
+                                WindowInsets.Type.ime(), false /* fromIme */, finalStatsToken));
                     } else {
-                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime(),
+                                false /* fromIme */, statsToken);
                     }
                 }
                 return true;
@@ -3660,6 +3671,14 @@ public final class InputMethodManager {
         startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
                 null /* focusedView */,
                 0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
+    }
+
+    /**
+     * Returns the ImeOnBackInvokedDispatcher.
+     * @hide
+     */
+    public ImeOnBackInvokedDispatcher getImeOnBackInvokedDispatcher() {
+        return mImeDispatcher;
     }
 
     /**
@@ -5162,7 +5181,7 @@ public final class InputMethodManager {
         // system can verify the consistency between the uid of this process and package name passed
         // from here. See comment of Context#getOpPackageName() for details.
         editorInfo.packageName = servedView.getContext().getOpPackageName();
-        editorInfo.autofillId = servedView.getAutofillId();
+        editorInfo.setAutofillId(servedView.getAutofillId());
         editorInfo.fieldId = servedView.getId();
         final InputConnection ic = servedView.onCreateInputConnection(editorInfo);
         if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
@@ -5171,7 +5190,7 @@ public final class InputMethodManager {
         // This ensures that even disconnected EditorInfos have well-defined attributes,
         // making them consistently and straightforwardly comparable.
         if (ic == null) {
-            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
+            editorInfo.setAutofillId(AutofillId.NO_AUTOFILL_ID);
             editorInfo.fieldId = 0;
         }
         return new Pair<>(ic, editorInfo);

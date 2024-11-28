@@ -16,11 +16,9 @@
 
 package android.service.wearable;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.app.wearable.Flags;
 import android.app.wearable.WearableSensingDataRequest;
 
 import java.lang.annotation.Retention;
@@ -32,7 +30,6 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
 @SystemApi
 public interface WearableSensingDataRequester {
 

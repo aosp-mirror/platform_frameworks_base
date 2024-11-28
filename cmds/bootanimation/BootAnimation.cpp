@@ -451,7 +451,7 @@ public:
                     auto token = SurfaceComposerClient::getPhysicalDisplayToken(
                         event.header.displayId);
 
-                    auto firstDisplay = mBootAnimation->mDisplays.front();
+                    auto& firstDisplay = mBootAnimation->mDisplays.front();
                     if (token != firstDisplay.displayToken) {
                         // ignore hotplug of a secondary display
                         continue;

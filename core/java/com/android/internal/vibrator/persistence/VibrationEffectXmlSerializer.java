@@ -27,6 +27,7 @@ import android.os.vibrator.VibrationEffectSegment;
 
 import com.android.internal.vibrator.persistence.SerializedComposedEffect.SerializedSegment;
 import com.android.internal.vibrator.persistence.XmlConstants.PredefinedEffectName;
+import com.android.internal.vibrator.persistence.XmlConstants.PrimitiveDelayType;
 import com.android.internal.vibrator.persistence.XmlConstants.PrimitiveEffectName;
 
 import java.util.List;
@@ -170,8 +171,20 @@ public final class VibrationEffectXmlSerializer {
         XmlValidator.checkSerializerCondition(primitiveName != null,
                 "Unsupported primitive effect id %s", primitive.getPrimitiveId());
 
+        PrimitiveDelayType delayType = null;
+
+        if (Flags.primitiveCompositionAbsoluteDelay()) {
+            delayType = PrimitiveDelayType.findByType(primitive.getDelayType());
+            XmlValidator.checkSerializerCondition(delayType != null,
+                    "Unsupported primitive delay type %s", primitive.getDelayType());
+        } else {
+            XmlValidator.checkSerializerCondition(
+                    primitive.getDelayType() == PrimitiveSegment.DEFAULT_DELAY_TYPE,
+                    "Unsupported primitive delay type %s", primitive.getDelayType());
+        }
+
         return new SerializedCompositionPrimitive(
-                primitiveName, primitive.getScale(), primitive.getDelay());
+                primitiveName, primitive.getScale(), primitive.getDelay(), delayType);
     }
 
     private static int toAmplitudeInt(float amplitude) {

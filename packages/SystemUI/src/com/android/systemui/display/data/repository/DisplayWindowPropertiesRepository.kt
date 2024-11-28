@@ -19,20 +19,21 @@ package com.android.systemui.display.data.repository
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Display
+import android.view.LayoutInflater
 import android.view.WindowManager
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.res.R
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.google.common.collect.HashBasedTable
 import com.google.common.collect.Table
 import java.io.PrintWriter
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Provides per display instances of [DisplayWindowProperties]. */
 interface DisplayWindowPropertiesRepository {
@@ -55,11 +56,15 @@ constructor(
     @Background private val backgroundApplicationScope: CoroutineScope,
     private val globalContext: Context,
     private val globalWindowManager: WindowManager,
+    private val globalLayoutInflater: LayoutInflater,
     private val displayRepository: DisplayRepository,
 ) : DisplayWindowPropertiesRepository, CoreStartable {
 
     init {
-        StatusBarConnectedDisplays.assertInNewMode()
+        check(StatusBarConnectedDisplays.isEnabled || ShadeWindowGoesAround.isEnabled) {
+            "This should be instantiated only when wither StatusBarConnectedDisplays or " +
+                "ShadeWindowGoesAround are enabled."
+        }
     }
 
     private val properties: Table<Int, Int, DisplayWindowProperties> = HashBasedTable.create()
@@ -93,12 +98,14 @@ constructor(
                 windowType = windowType,
                 context = globalContext,
                 windowManager = globalWindowManager,
+                layoutInflater = globalLayoutInflater,
             )
         } else {
             val context = createWindowContext(display, windowType)
             @SuppressLint("NonInjectedService") // Need to manually get the service
             val windowManager = context.getSystemService(WindowManager::class.java) as WindowManager
-            DisplayWindowProperties(displayId, windowType, context, windowManager)
+            val layoutInflater = LayoutInflater.from(context)
+            DisplayWindowProperties(displayId, windowType, context, windowManager, layoutInflater)
         }
     }
 

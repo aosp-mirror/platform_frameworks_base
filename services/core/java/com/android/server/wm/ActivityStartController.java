@@ -34,7 +34,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -191,7 +190,8 @@ public class ActivityStartController {
                 .setOutActivity(tmpOutRecord)
                 .setCallingUid(0)
                 .setActivityInfo(aInfo)
-                .setActivityOptions(options.toBundle())
+                .setActivityOptions(options.toBundle(),
+                        Binder.getCallingPid(), Binder.getCallingUid())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
         if (rootHomeTask.mInResumeTopActivity) {
@@ -280,8 +280,8 @@ public class ActivityStartController {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param forcedBalByPiSender If set to allow, the
-     *        PendingIntent's sender will try to force allow background activity starts.
+     * @param allowBalExemptionForSystemProcess If set to {@code true}, the
+     *        PendingIntent's sender will allow additional exemptions.
      *        This is only possible if the sender of the PendingIntent is a system process.
      */
     final int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
@@ -289,7 +289,7 @@ public class ActivityStartController {
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender) {
+            boolean allowBalExemptionForSystemProcess) {
 
         userId = checkTargetUser(userId, validateIncomingUser, realCallingPid, realCallingUid,
                 reason);
@@ -310,7 +310,7 @@ public class ActivityStartController {
                 .setUserId(userId)
                 .setInTask(inTask)
                 .setOriginatingPendingIntent(originatingPendingIntent)
-                .setBackgroundStartPrivileges(forcedBalByPiSender)
+                .setAllowBalExemptionForSystemProcess(allowBalExemptionForSystemProcess)
                 .execute();
     }
 
@@ -325,18 +325,18 @@ public class ActivityStartController {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param forcedBalByPiSender If set to allow, the
-     *        PendingIntent's sender will try to force allow background activity starts.
+     * @param allowBalExemptionForSystemProcess If set to {@code true}, the
+     *        PendingIntent's sender will allow additional exemptions.
      *        This is only possible if the sender of the PendingIntent is a system process.
      */
     final int startActivitiesInPackage(int uid, String callingPackage,
             @Nullable String callingFeatureId, Intent[] intents, String[] resolvedTypes,
             IBinder resultTo, SafeActivityOptions options, int userId, boolean validateIncomingUser,
             PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender) {
+            boolean allowBalExemptionForSystemProcess) {
         return startActivitiesInPackage(uid, 0 /* realCallingPid */, -1 /* realCallingUid */,
                 callingPackage, callingFeatureId, intents, resolvedTypes, resultTo, options, userId,
-                validateIncomingUser, originatingPendingIntent, forcedBalByPiSender);
+                validateIncomingUser, originatingPendingIntent, allowBalExemptionForSystemProcess);
     }
 
     /**
@@ -351,15 +351,15 @@ public class ActivityStartController {
      * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
      * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
      *        null if not originated by PendingIntent
-     * @param forcedBalByPiSender If set to allow, the
-     *        PendingIntent's sender will try to force allow background activity starts.
+     * @param allowBalExemptionForSystemProcess If set to {@code true}, the
+     *        PendingIntent's sender will allow additional exemptions.
      *        This is only possible if the sender of the PendingIntent is a system process.
      */
     final int startActivitiesInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender) {
+            boolean allowBalExemptionForSystemProcess) {
 
         final String reason = "startActivityInPackage";
 
@@ -369,14 +369,14 @@ public class ActivityStartController {
         // TODO: Switch to user app stacks here.
         return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage,
                 callingFeatureId, intents, resolvedTypes, resultTo, options, userId, reason,
-                originatingPendingIntent, forcedBalByPiSender);
+                originatingPendingIntent, allowBalExemptionForSystemProcess);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, int incomingRealCallingPid,
             int incomingRealCallingUid, String callingPackage, @Nullable String callingFeatureId,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
             int userId, String reason, PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender) {
+            boolean allowBalExemptionForSystemProcess) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -478,7 +478,7 @@ public class ActivityStartController {
                                 intentGrants.merge(creatorIntentGrants);
                             }
                         } catch (SecurityException securityException) {
-                            ActivityStarter.logAndThrowExceptionForIntentRedirect(
+                            ActivityStarter.logAndThrowExceptionForIntentRedirect(mService.mContext,
                                     "Creator URI Grant Caused Exception.", intent, creatorUid,
                                     creatorPackage, filterCallingUid, callingPackage,
                                     securityException);
@@ -518,7 +518,7 @@ public class ActivityStartController {
                         // top one as otherwise an activity below might consume it.
                         .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                         .setOriginatingPendingIntent(originatingPendingIntent)
-                        .setBackgroundStartPrivileges(forcedBalByPiSender);
+                        .setAllowBalExemptionForSystemProcess(allowBalExemptionForSystemProcess);
             }
             // Log if the activities to be started have different uids.
             if (startingUidPkgs.size() > 1) {

@@ -249,6 +249,10 @@ public class ZygoteInit {
         return isExperimentEnabled("profilesystemserver");
     }
 
+    private static boolean shouldProfileBootClasspath() {
+        return isExperimentEnabled("profilebootclasspath");
+    }
+
     /**
      * Performs Zygote process initialization. Loads and initializes commonly used classes.
      *
@@ -352,7 +356,7 @@ public class ZygoteInit {
             // If we are profiling the boot image, reset the Jit counters after preloading the
             // classes. We want to preload for performance, and we can use method counters to
             // infer what clases are used after calling resetJitCounters, for profile purposes.
-            if (isExperimentEnabled("profilebootclasspath")) {
+            if (shouldProfileBootClasspath()) {
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
                 VMRuntime.resetJitCounters();
                 Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
@@ -460,9 +464,25 @@ public class ZygoteInit {
                             ? String.join(":", systemServerClasspath, standaloneSystemServerJars)
                             : systemServerClasspath;
                     prepareSystemServerProfile(systemServerPaths);
+                    try {
+                        SystemProperties.set("debug.tracing.profile_system_server", "1");
+                    } catch (RuntimeException e) {
+                        Slog.e(TAG, "Failed to set debug.tracing.profile_system_server", e);
+                    }
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
                 }
+            }
+        }
+
+        // Zygote can't set system properties due to permission denied. We need to be in System
+        // Server to set system properties, so we do it here instead of the more natural place in
+        // preloadClasses.
+        if (shouldProfileBootClasspath()) {
+            try {
+                SystemProperties.set("debug.tracing.profile_boot_classpath", "1");
+            } catch (RuntimeException e) {
+                Slog.e(TAG, "Failed to set debug.tracing.profile_boot_classpath", e);
             }
         }
 

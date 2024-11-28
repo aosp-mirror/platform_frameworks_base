@@ -134,12 +134,12 @@ class AppHandleEducationFilterTest : ShellTestCase() {
   }
 
   @Test
-  fun shouldShowAppHandleEducation_educationViewedBefore_returnsFalse() = runTest {
-    // Education has been viewed before, hence #shouldShowAppHandleEducation should return false
+  fun shouldShowAppHandleEducation_appHandleHintViewedBefore_returnsFalse() = runTest {
+    // App handle hint has been viewed before, hence #shouldShowAppHandleEducation should return false
     val windowingEducationProto =
         createWindowingEducationProto(
             appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
-            educationViewedTimestampMillis = 123L,
+            appHandleHintViewedTimestampMillis = 123L,
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
@@ -149,12 +149,12 @@ class AppHandleEducationFilterTest : ShellTestCase() {
   }
 
   @Test
-  fun shouldShowAppHandleEducation_featureUsedBefore_returnsFalse() = runTest {
-    // Feature has been used before, hence #shouldShowAppHandleEducation should return false
+  fun shouldShowAppHandleEducation_appHandleHintUsedBefore_returnsFalse() = runTest {
+    // App handle hint has been used before, hence #shouldShowAppHandleEducation should return false
     val windowingEducationProto =
         createWindowingEducationProto(
             appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
-            featureUsedTimestampMillis = 123L,
+            appHandleHintUsedTimestampMillis = 123L,
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 

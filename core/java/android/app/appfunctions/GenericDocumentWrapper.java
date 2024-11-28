@@ -34,9 +34,9 @@ import java.util.Objects;
  * <p>{#link {@link Parcel#writeBlob(byte[])}} could take care of whether to pass data via binder
  * directly or Android shared memory if the data is large.
  *
- * <p>This class performs lazy unparcelling. The `GenericDocument` is only unparcelled
- * from the underlying `Parcel` when {@link #getValue()} is called. This optimization
- * allows the system server to pass through the generic document, without unparcel and parcel it.
+ * <p>This class performs lazy unparcelling. The `GenericDocument` is only unparcelled from the
+ * underlying `Parcel` when {@link #getValue()} is called. This optimization allows the system
+ * server to pass through the generic document, without unparcel and parcel it.
  *
  * @hide
  * @see Parcel#writeBlob(byte[])
@@ -45,8 +45,11 @@ public final class GenericDocumentWrapper implements Parcelable {
     @Nullable
     @GuardedBy("mLock")
     private GenericDocument mGenericDocument;
+
     @GuardedBy("mLock")
-    @Nullable private Parcel mParcel;
+    @Nullable
+    private Parcel mParcel;
+
     private final Object mLock = new Object();
 
     public static final Creator<GenericDocumentWrapper> CREATOR =

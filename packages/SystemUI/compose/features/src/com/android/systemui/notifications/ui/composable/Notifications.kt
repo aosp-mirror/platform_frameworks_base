@@ -25,6 +25,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollBy
@@ -375,9 +376,13 @@ fun SceneScope.NotificationScrollingStack(
     LaunchedEffect(shadeScrollState) { viewModel.setScrollState(shadeScrollState) }
 
     // if contentHeight drops below minimum visible scrim height while scrim is
-    // expanded, reset scrim offset.
-    LaunchedEffect(stackHeight, scrimOffset) {
-        snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
+    // expanded and IME is not showing, reset scrim offset.
+    LaunchedEffect(stackHeight, scrimOffset, imeTop) {
+        snapshotFlow {
+                stackHeight.intValue < minVisibleScrimHeight() &&
+                    scrimOffset.value < 0f &&
+                    imeTop.floatValue <= 0f
+            }
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.animateTo(0f, tween()) }
     }
 
@@ -447,12 +452,14 @@ fun SceneScope.NotificationScrollingStack(
         }
     }
 
+    val flingBehavior = ScrollableDefaults.flingBehavior()
     val scrimNestedScrollConnection =
         shadeSession.rememberSession(
             scrimOffset,
             maxScrimTop,
             minScrimTop,
             isCurrentGestureOverscroll,
+            flingBehavior,
         ) {
             NotificationScrimNestedScrollConnection(
                 scrimOffset = { scrimOffset.value },
@@ -465,6 +472,7 @@ fun SceneScope.NotificationScrollingStack(
                 contentHeight = { stackHeight.intValue.toFloat() },
                 minVisibleScrimHeight = minVisibleScrimHeight,
                 isCurrentGestureOverscroll = { isCurrentGestureOverscroll.value },
+                flingBehavior = flingBehavior,
             )
         }
 

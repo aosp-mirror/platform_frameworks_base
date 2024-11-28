@@ -216,10 +216,19 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 if (row.isChildInGroup() && !row.areChildrenExpanded()) {
                     // The group isn't expanded, let's make sure it's visible!
                     mGroupExpansionManager.toggleGroupExpansion(row.getEntry());
-                } else if (!row.isChildInGroup() && !row.isExpanded()) {
-                    // notification isn't expanded, let's make sure it's visible!
-                    row.toggleExpansionState();
-                    row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
+                } else if (!row.isChildInGroup()) {
+                    final boolean expandNotification;
+                    if (row.isPinned()) {
+                        expandNotification = !row.isPinnedAndExpanded();
+                    } else {
+                        expandNotification = !row.isExpanded();
+                    }
+
+                    if (expandNotification) {
+                        // notification isn't expanded, let's make sure it's expanded!
+                        row.toggleExpansionState();
+                        row.getPrivateLayout().setOnExpandedVisibleListener(runnable);
+                    }
                 }
             } else {
                 if (row.isChildInGroup() && !row.areChildrenExpanded()) {

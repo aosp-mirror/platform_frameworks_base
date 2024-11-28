@@ -30,10 +30,8 @@ import javax.inject.Inject
 /** Maps [ReduceBrightColorsTileModel] to [QSTileState]. */
 class ReduceBrightColorsTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Resources.Theme,
-) : QSTileDataToStateMapper<ReduceBrightColorsTileModel> {
+constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
+    QSTileDataToStateMapper<ReduceBrightColorsTileModel> {
 
     override fun map(config: QSTileConfig, data: ReduceBrightColorsTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -50,12 +48,7 @@ constructor(
                     resources
                         .getStringArray(R.array.tile_states_reduce_brightness)[Tile.STATE_INACTIVE]
             }
-            icon = {
-                Icon.Loaded(
-                    drawable = resources.getDrawable(iconRes!!, theme),
-                    contentDescription = null
-                )
-            }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             label =
                 resources.getString(com.android.internal.R.string.reduce_bright_colors_feature_name)
             contentDescription = label

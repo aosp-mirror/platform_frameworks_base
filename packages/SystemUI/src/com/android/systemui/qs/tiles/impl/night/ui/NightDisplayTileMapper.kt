@@ -57,9 +57,8 @@ constructor(
                 activationState = QSTileState.ActivationState.INACTIVE
                 iconRes = R.drawable.qs_nightlight_icon_off
             }
-            val loadedIcon =
-                Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
-            icon = { loadedIcon }
+
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
 
             secondaryLabel = getSecondaryLabel(data, resources)
 
@@ -70,7 +69,7 @@ constructor(
 
     private fun getSecondaryLabel(
         data: NightDisplayTileModel,
-        resources: Resources
+        resources: Resources,
     ): CharSequence? {
         when (data) {
             is NightDisplayTileModel.AutoModeTwilight -> {

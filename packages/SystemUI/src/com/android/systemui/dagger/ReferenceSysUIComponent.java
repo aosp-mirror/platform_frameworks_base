@@ -32,7 +32,6 @@ import dagger.Subcomponent;
         DependencyProvider.class,
         NotificationInsetsModule.class,
         QsFrameTranslateModule.class,
-        SystemUIBinder.class,
         SystemUIModule.class,
         SystemUICoreStartableModule.class,
         SysUIUnfoldModule.class,

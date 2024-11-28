@@ -21,7 +21,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.DemoNotifChipViewModel
+import com.android.systemui.statusbar.chips.notification.domain.interactor.StatusBarNotificationChipsInteractor
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
@@ -40,6 +43,20 @@ abstract class StatusBarChipsModule {
         @StatusBarChipsLog
         fun provideChipsLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("StatusBarChips", 200)
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(StatusBarNotificationChipsInteractor::class)
+        fun statusBarNotificationChipsInteractorAsCoreStartable(
+            interactorLazy: Lazy<StatusBarNotificationChipsInteractor>
+        ): CoreStartable {
+            return if (StatusBarNotifChips.isEnabled) {
+                interactorLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
         }
     }
 }

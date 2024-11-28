@@ -17,13 +17,14 @@
 package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
+import android.media.projection.StopReason;
 import android.os.IBinder;
 import android.app.ActivityOptions.LaunchCookie;
 
 /** {@hide} */
 interface IMediaProjection {
     void start(IMediaProjectionCallback callback);
-    void stop();
+    void stop(StopReason stopReason);
 
     boolean canProjectAudio();
     boolean canProjectVideo();
@@ -55,6 +56,13 @@ interface IMediaProjection {
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     int getTaskId();
+
+
+    /**
+     * Returns the displayId identifying the display to record. This only applies to full screen
+     * recording.
+     */
+    int getDisplayId();
 
     /**
      * Updates the {@link LaunchCookie} identifying the task to record.

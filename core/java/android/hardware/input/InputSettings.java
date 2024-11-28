@@ -20,16 +20,21 @@ import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FL
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
+import static com.android.hardware.input.Flags.enableCustomizableInputGestures;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
-import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
+import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
-import static com.android.input.flags.Flags.enableInputFilterRustImpl;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiKeyGestures;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
+import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
 
 import android.Manifest;
@@ -70,6 +75,20 @@ public class InputSettings {
      */
     @SuppressLint("UnflaggedApi") // TestApi without associated feature.
     public static final int DEFAULT_POINTER_SPEED = 0;
+
+    /**
+     * Bounce Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS = 500;
+
+    /**
+     * Slow Keys Threshold: The default value of the threshold (500 ms).
+     *
+     * @hide
+     */
+    public static final int DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS = 500;
 
     /**
      * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
@@ -356,12 +375,30 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for disabling system gestures on touchpads is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadSystemGestureDisableFeatureFlagEnabled() {
+        return touchpadSystemGestureDisable();
+    }
+
+    /**
      * Returns true if the feature flag for touchpad visualizer is enabled.
      *
      * @hide
      */
     public static boolean isTouchpadVisualizerFeatureFlagEnabled() {
         return touchpadVisualizer();
+    }
+
+    /**
+     * Returns true if the feature flag for the touchpad three-finger tap shortcut is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadThreeFingerTapShortcutFeatureFlagEnabled() {
+        return isCustomizableInputGesturesFeatureFlagEnabled() && touchpadThreeFingerTapShortcut();
     }
 
     /**
@@ -481,6 +518,59 @@ public class InputSettings {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns true if three-finger taps on the touchpad should trigger a customizable shortcut
+     * rather than a middle click.
+     *
+     * The returned value only applies to gesture-compatible touchpads.
+     *
+     * @param context The application context.
+     * @return Whether three-finger taps should trigger the shortcut.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
+        int customizedShortcut = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
+                KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED, UserHandle.USER_CURRENT);
+        return customizedShortcut != KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED
+                && isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+    }
+
+    /**
+     * Returns true if system gestures (three- and four-finger swipes) should be enabled for
+     * touchpads.
+     *
+     * @param context The application context.
+     * @return Whether system gestures on touchpads are enabled
+     *
+     * @hide
+     */
+    public static boolean useTouchpadSystemGestures(@NonNull Context context) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return true;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, 1, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets whether system gestures are enabled for touchpads.
+     *
+     * @param context The application context.
+     * @param enabled True to enable system gestures.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadSystemGesturesEnabled(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, enabled ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -1090,5 +1180,28 @@ public class InputSettings {
         Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, delayTimeMillis,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether "Customizable key gestures" feature flag is enabled.
+     *
+     * <p>
+     * ‘Customizable key gestures’ is a feature which allows users to customize key based
+     * shortcuts on the physical keyboard.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isCustomizableInputGesturesFeatureFlagEnabled() {
+        return enableCustomizableInputGestures() && useKeyGestureEventHandler();
+    }
+
+    /**
+     * Whether multi-key gestures are supported using {@code KeyGestureEventHandler}
+     *
+     * @hide
+     */
+    public static boolean doesKeyGestureEventHandlerSupportMultiKeyGestures() {
+        return useKeyGestureEventHandler() && useKeyGestureEventHandlerMultiKeyGestures();
     }
 }

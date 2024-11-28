@@ -79,7 +79,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     @Mock
     private lateinit var mockDesktopWindowDecoration: DesktopModeWindowDecoration
     @Mock
-    private lateinit var mockDragStartListener: DragPositioningCallbackUtility.DragStartListener
+    private lateinit var mockDragEventListener: DragPositioningCallbackUtility.DragEventListener
 
     @Mock
     private lateinit var taskToken: WindowContainerToken
@@ -156,7 +156,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         mockShellTaskOrganizer,
                         mockDesktopWindowDecoration,
                         mockDisplayController,
-                        mockDragStartListener,
+                        mockDragEventListener,
                         mockTransactionFactory,
                         mockTransitions,
                         mockInteractionJankMonitor,
@@ -433,6 +433,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
         // isResizingOrAnimating should be set to true after move during a resize
         Assert.assertTrue(taskPositioner.isResizingOrAnimating)
+        verify(mockDragEventListener, times(1)).onDragMove(eq(TASK_ID))
 
         taskPositioner.onDragPositioningEnd(
                 STARTING_BOUNDS.left.toFloat(),

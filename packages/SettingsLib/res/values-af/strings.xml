@@ -358,7 +358,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Plaaslike terminaal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktiveer terminaalprogram wat plaaslike skermtoegang bied"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-ontwikkelingomgewing"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Laat loop Linux-terminaal op Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimenteel) Laat Linux-terminale op Android loop"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"As jy deaktiveer, sal Linux se terminale data uitgevee word"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontrolering"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Stel HDCP-kontrolering se gedrag"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ontfouting"</string>
@@ -585,12 +586,15 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Hierdie foon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Hierdie tablet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Hierdie rekenaar (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
+    <!-- no translation found for media_transfer_this_device_name_tv (8508713779441163887) -->
     <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokluidspreker"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Eksterne toestel"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Gekoppelde toestel"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Hierdie foon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analoog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AANVULLENDE"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan nie op hierdie toestel speel nie"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Gradeer rekening op om oor te skakel"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan nie aflaaie hier speel nie"</string>
@@ -603,9 +607,10 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Gekoppel deur ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Gekoppel deur eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV-verstek"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-uitset"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne luidsprekers"</string>
+    <!-- no translation found for tv_media_transfer_internal_speakers (4662765121700213785) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_hdmi_title (6715658310934507444) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kan nie koppel nie. Skakel toestel af en weer aan"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedrade oudiotoestel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en terugvoer"</string>

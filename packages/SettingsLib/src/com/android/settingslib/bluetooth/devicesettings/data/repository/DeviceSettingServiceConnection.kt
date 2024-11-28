@@ -21,6 +21,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.IInterface
 import android.os.RemoteException
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterIsInstance
@@ -296,12 +298,21 @@ class DeviceSettingServiceConnection(
                 val listener =
                     object : IDeviceSettingsListener.Stub() {
                         override fun onDeviceSettingsChanged(settings: List<DeviceSetting>) {
+                            Log.i(TAG, "Receive setting ids ${settings.map { it.settingId }}")
                             launch { send(settings) }
                         }
                     }
                 val deviceInfo = deviceInfo { setBluetoothAddress(cachedDevice.address) }
                 service.registerDeviceSettingsListener(deviceInfo, listener)
                 awaitClose { service.unregisterDeviceSettingsListener(deviceInfo, listener) }
+            }
+            .catch { e ->
+                if (e is DeadObjectException) {
+                    Log.e(TAG, "DeadObjectException happens when registering listener.", e)
+                    emit(listOf())
+                } else {
+                    throw e
+                }
             }
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyList())
     }

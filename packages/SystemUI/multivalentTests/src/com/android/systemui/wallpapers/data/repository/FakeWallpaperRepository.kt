@@ -25,9 +25,4 @@ class FakeWallpaperRepository : WallpaperRepository {
     override val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
     override val wallpaperSupportsAmbientMode = MutableStateFlow(false)
     override var rootView: View? = null
-    private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
-
-    override fun setNotificationStackAbsoluteBottom(bottom: Float) {
-        _notificationStackAbsoluteBottom.value = bottom
-    }
 }

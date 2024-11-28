@@ -17,10 +17,12 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.util.Log
+import com.android.app.tracing.traceSection
 import com.android.internal.widget.MessagingGroup
 import com.android.internal.widget.MessagingMessage
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener
 import com.android.systemui.statusbar.notification.ColorUpdateLogger
@@ -29,17 +31,18 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Compile
-import com.android.app.tracing.traceSection
 import javax.inject.Inject
 
 /**
- * A coordinator which ensures that notifications within the new pipeline are correctly inflated
- * for the current uiMode and screen properties; additionally deferring those changes when a user
- * change is in progress until that process has completed.
+ * A coordinator which ensures that notifications within the new pipeline are correctly inflated for
+ * the current uiMode and screen properties; additionally deferring those changes when a user change
+ * is in progress until that process has completed.
  */
 @CoordinatorScope
-class ViewConfigCoordinator @Inject internal constructor(
-    private val mConfigurationController: ConfigurationController,
+class ViewConfigCoordinator
+@Inject
+internal constructor(
+    @ShadeDisplayAware private val mConfigurationController: ConfigurationController,
     private val mLockscreenUserManager: NotificationLockscreenUserManager,
     private val mGutsManager: NotificationGutsManager,
     private val mKeyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -51,28 +54,32 @@ class ViewConfigCoordinator @Inject internal constructor(
     private var mDispatchUiModeChangeOnUserSwitched = false
     private var mPipeline: NotifPipeline? = null
 
-    private val mKeyguardUpdateCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onUserSwitching(userId: Int) {
-            colorUpdateLogger.logTriggerEvent("VCC.mKeyguardUpdateCallback.onUserSwitching()")
-            log { "ViewConfigCoordinator.onUserSwitching(userId=$userId)" }
-            mIsSwitchingUser = true
+    private val mKeyguardUpdateCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onUserSwitching(userId: Int) {
+                colorUpdateLogger.logTriggerEvent("VCC.mKeyguardUpdateCallback.onUserSwitching()")
+                log { "ViewConfigCoordinator.onUserSwitching(userId=$userId)" }
+                mIsSwitchingUser = true
+            }
+
+            override fun onUserSwitchComplete(userId: Int) {
+                colorUpdateLogger.logTriggerEvent(
+                    "VCC.mKeyguardUpdateCallback.onUserSwitchComplete()"
+                )
+                log { "ViewConfigCoordinator.onUserSwitchComplete(userId=$userId)" }
+                mIsSwitchingUser = false
+                applyChangesOnUserSwitched()
+            }
         }
 
-        override fun onUserSwitchComplete(userId: Int) {
-            colorUpdateLogger.logTriggerEvent("VCC.mKeyguardUpdateCallback.onUserSwitchComplete()")
-            log { "ViewConfigCoordinator.onUserSwitchComplete(userId=$userId)" }
-            mIsSwitchingUser = false
-            applyChangesOnUserSwitched()
+    private val mUserChangedListener =
+        object : UserChangedListener {
+            override fun onUserChanged(userId: Int) {
+                colorUpdateLogger.logTriggerEvent("VCC.mUserChangedListener.onUserChanged()")
+                log { "ViewConfigCoordinator.onUserChanged(userId=$userId)" }
+                applyChangesOnUserSwitched()
+            }
         }
-    }
-
-    private val mUserChangedListener = object : UserChangedListener {
-        override fun onUserChanged(userId: Int) {
-            colorUpdateLogger.logTriggerEvent("VCC.mUserChangedListener.onUserChanged()")
-            log { "ViewConfigCoordinator.onUserChanged(userId=$userId)" }
-            applyChangesOnUserSwitched()
-        }
-    }
 
     override fun attach(pipeline: NotifPipeline) {
         mPipeline = pipeline
@@ -86,8 +93,8 @@ class ViewConfigCoordinator @Inject internal constructor(
         log {
             val keyguardIsSwitchingUser = mKeyguardUpdateMonitor.isSwitchingUser
             "ViewConfigCoordinator.onDensityOrFontScaleChanged()" +
-                    " isSwitchingUser=$mIsSwitchingUser" +
-                    " keyguardUpdateMonitor.isSwitchingUser=$keyguardIsSwitchingUser"
+                " isSwitchingUser=$mIsSwitchingUser" +
+                " keyguardUpdateMonitor.isSwitchingUser=$keyguardIsSwitchingUser"
         }
         MessagingMessage.dropCache()
         MessagingGroup.dropCache()
@@ -103,8 +110,8 @@ class ViewConfigCoordinator @Inject internal constructor(
         log {
             val keyguardIsSwitchingUser = mKeyguardUpdateMonitor.isSwitchingUser
             "ViewConfigCoordinator.onUiModeChanged()" +
-                    " isSwitchingUser=$mIsSwitchingUser" +
-                    " keyguardUpdateMonitor.isSwitchingUser=$keyguardIsSwitchingUser"
+                " isSwitchingUser=$mIsSwitchingUser" +
+                " keyguardUpdateMonitor.isSwitchingUser=$keyguardIsSwitchingUser"
         }
         if (!mIsSwitchingUser) {
             updateNotificationsOnUiModeChanged()
@@ -131,13 +138,13 @@ class ViewConfigCoordinator @Inject internal constructor(
     }
 
     private fun updateNotificationsOnUiModeChanged() {
-        colorUpdateLogger.logEvent("VCC.updateNotificationsOnUiModeChanged()",
-                "mode=" + mConfigurationController.nightModeName)
+        colorUpdateLogger.logEvent(
+            "VCC.updateNotificationsOnUiModeChanged()",
+            "mode=" + mConfigurationController.nightModeName,
+        )
         log { "ViewConfigCoordinator.updateNotificationsOnUiModeChanged()" }
         traceSection("updateNotifOnUiModeChanged") {
-            mPipeline?.allNotifs?.forEach { entry ->
-                entry.row?.onUiModeChanged()
-            }
+            mPipeline?.allNotifs?.forEach { entry -> entry.row?.onUiModeChanged() }
         }
     }
 

@@ -36,7 +36,7 @@ enum class CommunalContentSize(val span: Int) {
         /** Converts from span to communal content size. */
         fun toSize(span: Int): CommunalContentSize {
             return entries.find { it.span == span }
-                ?: throw Exception("Invalid span for communal content size")
+                ?: throw IllegalArgumentException("$span is not a valid span size")
         }
     }
 }

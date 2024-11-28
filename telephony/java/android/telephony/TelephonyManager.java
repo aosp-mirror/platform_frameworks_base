@@ -133,6 +133,7 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.flags.Flags;
+import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
@@ -6282,14 +6283,17 @@ public class TelephonyManager {
      * The contents of the file is a <b>Ip Multimedia Service Private User Identity</b> of the user
      * as defined in the section 4.2.2 of 3GPP TS 131 103.
      *
-     * @return IMPI (IMS private user identity) of type string.
+     * @return IMPI (IMS private user identity) of type string or null if the IMPI isn't present
+     *         on the ISIM.
      * @throws IllegalStateException in case the ISIM has’t been loaded
      * @throws SecurityException if the caller does not have the required permission/privileges
      * @hide
      */
-    @NonNull
+    @FlaggedApi(Flags.FLAG_SUPPORT_ISIM_RECORD)
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @Nullable
     public String getImsPrivateUserIdentity() {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
@@ -6370,6 +6374,9 @@ public class TelephonyManager {
      * The contents of the file are <b>Ip Multimedia Service Public User Identities</b> of the user
      * as defined in the section 4.2.4 of 3GPP TS 131 103. It contains one or more records.
      *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission or carrier
+     * privileges.
+     *
      * @return List of public user identities of type android.net.Uri or empty list  if
      *         EF_IMPU is not available.
      * @throws IllegalStateException in case the ISIM hasn’t been loaded
@@ -6378,18 +6385,18 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
-    @NonNull
-    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PHONE_NUMBERS,
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
+    @FlaggedApi(Flags.FLAG_SUPPORT_ISIM_RECORD)
+    @SystemApi
+    @RequiresPermission(value = Manifest.permission.READ_PRIVILEGED_PHONE_STATE, conditional = true)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @NonNull
     public List<Uri> getImsPublicUserIdentities() {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null) {
                 throw new RuntimeException("IMPU error: Subscriber Info is null");
             }
-            return info.getImsPublicUserIdentities(getSubId(), getOpPackageName(),
-                    getAttributionTag());
+            return info.getImsPublicUserIdentities(getSubId(), getOpPackageName());
         } catch (IllegalArgumentException | NullPointerException ex) {
             Rlog.e(TAG, "getImsPublicUserIdentities Exception = " + ex);
         } catch (RemoteException ex) {
@@ -8684,7 +8691,10 @@ public class TelephonyManager {
      * @return an array of PCSCF strings with one PCSCF per string, or null if
      *         not present or not loaded
      * @hide
+     * @deprecated use {@link #getImsPcscfAddresses()} instead.
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_SUPPORT_ISIM_RECORD)
     @UnsupportedAppUsage
     public String[] getIsimPcscf() {
         try {
@@ -8699,6 +8709,40 @@ public class TelephonyManager {
             // This could happen before phone restarts due to crashing
             return null;
         }
+    }
+
+    /**
+     * Returns the IMS Proxy Call Session Control Function(P-CSCF) that were loaded from the ISIM.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission or carrier
+     * privileges.
+     *
+     * @return List of P-CSCF address strings or empty list if not available.
+     * @throws IllegalStateException in case the ISIM hasn’t been loaded
+     * @throws SecurityException if the caller does not have the required permission/privilege
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_ISIM_RECORD)
+    @SystemApi
+    @RequiresPermission(value = Manifest.permission.READ_PRIVILEGED_PHONE_STATE, conditional = true)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @NonNull
+    public List<String> getImsPcscfAddresses() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                throw new RuntimeException("P-CSCF error: Subscriber Info is null");
+            }
+            return info.getImsPcscfAddresses(getSubId(), getOpPackageName());
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            Rlog.e(TAG, "getImsPcscfAddresses Exception = " + ex);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getImsPcscfAddresses Exception = " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return Collections.EMPTY_LIST;
     }
 
     /** UICC application type is unknown or not specified */
@@ -8781,9 +8825,6 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
      *          authType.
      */
-    // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
-    // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
-    // it's not public API.
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public String getIccAuthentication(int appType, @AuthType int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
@@ -8934,8 +8975,10 @@ public class TelephonyManager {
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
+     * @deprecated Use {@link #getSimServiceTable(int, Executor, OutcomeReceiver)} instead.
      */
-
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_SUPPORT_ISIM_RECORD)
     @Nullable
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -8960,6 +9003,55 @@ public class TelephonyManager {
             Rlog.e(TAG, "getSimServiceTable(): NullPointerException=" + ex.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Fetches the sim service table from the EFUST/EFIST based on the application type
+     * {@link #APPTYPE_USIM} or {@link #APPTYPE_ISIM}.
+     * The USIM service table EF is described in as per Section 4.2.8 of 3GPP TS 31.102.
+     * The ISIM service table EF is described in as per Section 4.2.7 of 3GPP TS 31.103.
+     *
+     * @param appType of type int of either {@link #APPTYPE_USIM} or {@link #APPTYPE_ISIM}.
+     * @param executor executor to run the callback on.
+     * @param callback callback object to which the result will be delivered.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SUPPORT_ISIM_RECORD)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public void getSimServiceTable(@UiccAppType int appType,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<byte[], Exception> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        IPhoneSubInfo info = getSubscriberInfoService();
+        if (info == null) {
+            executor.execute(() -> callback.onError(
+                    new RuntimeException("getSimServiceTable: Subscriber Info is null")));
+            return;
+        }
+
+        try {
+            String serviceTable;
+            if (appType == APPTYPE_ISIM) {
+                serviceTable  = info.getIsimIst(getSubId());
+            } else if ((appType == APPTYPE_USIM)) {
+                serviceTable = info.getSimServiceTable(getSubId(), APPTYPE_USIM);
+            } else {
+                serviceTable = null;
+            }
+
+            if (serviceTable == null) {
+                executor.execute(() -> callback.onResult(new byte[0]));
+            } else {
+                byte[] simServiceTable = IccUtils.hexStringToBytes(serviceTable);
+                executor.execute(() -> callback.onResult(simServiceTable));
+            }
+        } catch (Exception ex) {
+            executor.execute(() -> callback.onError(ex));
+        }
     }
 
     /**
@@ -12144,9 +12236,10 @@ public class TelephonyManager {
      * @param subId Subscription ID
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
-     * Use {@link ImsMmTelManager.RegistrationCallback} instead.
      * @hide
+     * @deprecated Use {@link ImsMmTelManager#getRegistrationState(Executor, Consumer)} instead.
      */
+    @Deprecated
     public boolean isImsRegistered(int subId) {
         try {
             return getITelephony().isImsRegistered(subId);
@@ -12164,8 +12257,10 @@ public class TelephonyManager {
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
      * @see SubscriptionManager#getDefaultSubscriptionId()
+     * @deprecated Use {@link ImsMmTelManager#getRegistrationState(Executor, Consumer)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean isImsRegistered() {
        try {
@@ -12182,9 +12277,10 @@ public class TelephonyManager {
      * @return true if Voice over LTE is available or false if it is unavailable or unknown.
      * @see SubscriptionManager#getDefaultSubscriptionId()
      * <p>
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isVolteAvailable() {
         try {
@@ -12202,9 +12298,10 @@ public class TelephonyManager {
      * used during creation, the default subscription ID will be used. To query the
      * underlying technology that VT is available on, use {@link #getImsRegTechnologyForMmTel}.
      * @return true if VT is available, or false if it is unavailable or unknown.
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isVideoTelephonyAvailable() {
         try {
@@ -12218,9 +12315,10 @@ public class TelephonyManager {
      * Returns the Status of Wi-Fi calling (Voice over WiFi) for the subscription ID specified.
      * @param subId the subscription ID.
      * @return true if VoWiFi is available, or false if it is unavailable or unknown.
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isWifiCallingAvailable() {
        try {
@@ -12241,9 +12339,11 @@ public class TelephonyManager {
      *  other sim's internet, or
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_NONE} if we are not registered or the
      *  result is unavailable.
-     *  Use {@link ImsMmTelManager.RegistrationCallback} instead.
+     *  @Deprecated Use {@link ImsMmTelManager#registerImsRegistrationCallback(Executor, RegistrationCallback)}
+     *      or {@link ImsMmTelManager#getRegistrationTransportType(Executor, Consumer)} instead.
      *  @hide
      */
+    @Deprecated
     public @ImsRegistrationImplBase.ImsRegistrationTech int getImsRegTechnologyForMmTel() {
         try {
             return getITelephony().getImsRegTechnologyForMmTel(getSubId());
@@ -17278,6 +17378,18 @@ public class TelephonyManager {
     }
 
     /**
+     * Setup sISms for testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void setupISmsForTest(ISms iSms) {
+        synchronized (sCacheLock) {
+            sISms = iSms;
+        }
+    }
+
+    /**
      * Whether device can connect to 5G network when two SIMs are active.
      *
      * @hide TODO b/153669716: remove or make system API.
@@ -19486,5 +19598,38 @@ public class TelephonyManager {
             Rlog.e(TAG, "getTestEuiccUiComponent() RemoteException : " + ex);
             throw ex.rethrowAsRuntimeException();
         }
+    }
+
+    /**
+     * Returns carrier id maps to the passing CarrierIdentifier.
+     * To recognize a carrier (including MVNO) as a first-class identity,
+     * Android assigns each carrier with a canonical integer a.k.a. carrier id.
+     * The carrier ID is an Android platform-wide identifier for a carrier.
+     * AOSP maintains carrier ID assignments in
+     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/latest_carrier_id/carrier_list.textpb">here</a>
+     *
+     * @param carrierIdentifier {@link CarrierIdentifier}
+     *
+     * @return Carrier id. Return {@link #UNKNOWN_CARRIER_ID} if the carrier cannot be identified.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ID_FROM_CARRIER_IDENTIFIER)
+    @SystemApi
+    @WorkerThread
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getCarrierIdFromCarrierIdentifier(@NonNull CarrierIdentifier carrierIdentifier) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromIdentifier(carrierIdentifier);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
     }
 }

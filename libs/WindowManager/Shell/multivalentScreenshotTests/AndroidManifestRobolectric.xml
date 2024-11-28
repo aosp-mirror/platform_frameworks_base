@@ -18,6 +18,7 @@
     <application android:debuggable="true" android:supportsRtl="true">
         <activity
             android:name="platform.test.screenshot.ScreenshotActivity"
+            android:theme="@style/Theme.PlatformUi.Screenshot"
             android:exported="true">
         </activity>
     </application>

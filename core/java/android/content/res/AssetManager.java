@@ -75,7 +75,10 @@ public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
 
-    private static final String FRAMEWORK_APK_PATH = getFrameworkApkPath();
+    /**
+     * @hide
+     */
+    public static final String FRAMEWORK_APK_PATH = getFrameworkApkPath();
     private static final String FRAMEWORK_APK_PATH_DEVICE = "/system/framework/framework-res.apk";
     private static final String FRAMEWORK_APK_PATH_RAVENWOOD = "ravenwood-data/framework-res.apk";
 
@@ -973,9 +976,9 @@ public final class AssetManager implements AutoCloseable {
      * Open an asset using ACCESS_STREAMING mode.  This provides access to
      * files that have been bundled with an application as assets -- that is,
      * files placed in to the "assets" directory.
-     * 
+     *
      * @param fileName The name of the asset to open.  This name can be hierarchical.
-     * 
+     *
      * @see #open(String, int)
      * @see #list
      */
@@ -988,10 +991,10 @@ public final class AssetManager implements AutoCloseable {
      * read its contents.  This provides access to files that have been bundled
      * with an application as assets -- that is, files placed in to the
      * "assets" directory.
-     * 
+     *
      * @param fileName The name of the asset to open.  This name can be hierarchical.
      * @param accessMode Desired access mode for retrieving the data.
-     * 
+     *
      * @see #ACCESS_UNKNOWN
      * @see #ACCESS_STREAMING
      * @see #ACCESS_RANDOM
@@ -1037,14 +1040,14 @@ public final class AssetManager implements AutoCloseable {
 
     /**
      * Return a String array of all the assets at the given path.
-     * 
+     *
      * @param path A relative path within the assets, i.e., "docs/home.html".
-     * 
+     *
      * @return String[] Array of strings, one for each asset.  These file
      *         names are relative to 'path'.  You can open the file by
      *         concatenating 'path' and a name in the returned string (via
      *         File) and passing that to open().
-     * 
+     *
      * @see #open
      */
     public @Nullable String[] list(@NonNull String path) throws IOException {
@@ -1167,20 +1170,20 @@ public final class AssetManager implements AutoCloseable {
             return new AssetFileDescriptor(pfd, mOffsets[0], mOffsets[1]);
         }
     }
-    
+
     /**
      * Retrieve a parser for a compiled XML file.
-     * 
+     *
      * @param fileName The name of the file to retrieve.
      */
     public @NonNull XmlResourceParser openXmlResourceParser(@NonNull String fileName)
             throws IOException {
         return openXmlResourceParser(0, fileName);
     }
-    
+
     /**
      * Retrieve a parser for a compiled XML file.
-     * 
+     *
      * @param cookie Identifier of the package to be opened.
      * @param fileName The name of the file to retrieve.
      */
@@ -1200,7 +1203,7 @@ public final class AssetManager implements AutoCloseable {
 
     /**
      * Retrieve a non-asset as a compiled XML file.  Not for use by applications.
-     * 
+     *
      * @param fileName The name of the file to retrieve.
      * @hide
      */
@@ -1211,7 +1214,7 @@ public final class AssetManager implements AutoCloseable {
     /**
      * Retrieve a non-asset as a compiled XML file.  Not for use by
      * applications.
-     * 
+     *
      * @param cookie Identifier of the package to be opened.
      * @param fileName Name of the asset to retrieve.
      * @hide
@@ -1675,7 +1678,6 @@ public final class AssetManager implements AutoCloseable {
                 mRefStacks = new HashMap<>();
             }
             RuntimeException ex = new RuntimeException();
-            ex.fillInStackTrace();
             mRefStacks.put(id, ex);
         }
         mNumRefs++;

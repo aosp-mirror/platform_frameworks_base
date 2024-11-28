@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
 import android.os.UserManager
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
@@ -51,11 +52,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Encapsulates the state of widgets for communal mode. */
 interface CommunalWidgetRepository {
-    /** A flow of information about active communal widgets stored in database. */
+    /** A flow of the list of Glanceable Hub widgets ordered by rank. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
     /**
@@ -106,8 +106,12 @@ interface CommunalWidgetRepository {
     fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>)
 }
 
+/**
+ * The local implementation of the [CommunalWidgetRepository] that should be injected in a
+ * foreground user process.
+ */
 @SysUISingleton
-class CommunalWidgetRepositoryImpl
+class CommunalWidgetRepositoryLocalImpl
 @Inject
 constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
@@ -123,7 +127,7 @@ constructor(
     private val defaultWidgetPopulation: DefaultWidgetPopulation,
 ) : CommunalWidgetRepository {
     companion object {
-        const val TAG = "CommunalWidgetRepository"
+        const val TAG = "CommunalWidgetRepositoryLocalImpl"
     }
 
     private val logger = Logger(logBuffer, TAG)

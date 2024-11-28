@@ -16,6 +16,8 @@
 
 package android.media.tv.tuner;
 
+import static android.media.tv.flags.Flags.FLAG_SET_RESOURCE_HOLDER_RETAIN;
+
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -748,6 +750,21 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public void updateResourcePriority(int priority, int niceValue) {
         mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+    }
+
+    /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     */
+    @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public void setResourceOwnershipRetention(boolean enabled) {
+        mTunerResourceManager.setResourceOwnershipRetention(mClientId, enabled);
     }
 
     /**

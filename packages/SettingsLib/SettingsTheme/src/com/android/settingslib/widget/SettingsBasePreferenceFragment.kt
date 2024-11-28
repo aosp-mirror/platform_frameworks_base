@@ -21,7 +21,7 @@ import androidx.preference.PreferenceScreen
 import androidx.recyclerview.widget.RecyclerView
 
 /** Base class for Settings to use PreferenceFragmentCompat */
-open abstract class SettingsBasePreferenceFragment : PreferenceFragmentCompat() {
+abstract class SettingsBasePreferenceFragment : PreferenceFragmentCompat() {
 
     override fun onCreateAdapter(preferenceScreen: PreferenceScreen): RecyclerView.Adapter<*> {
         if (SettingsThemeHelper.isExpressiveTheme(requireContext()))

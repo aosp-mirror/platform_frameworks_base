@@ -49,7 +49,7 @@ import java.util.List;
  */
 @FlaggedApi(android.security.Flags.FLAG_KEYSTORE_GRANT_API)
 @SystemService(Context.KEYSTORE_SERVICE)
-public class KeyStoreManager {
+public final class KeyStoreManager {
     private static final String TAG = "KeyStoreManager";
 
     private static final Object sInstanceLock = new Object();

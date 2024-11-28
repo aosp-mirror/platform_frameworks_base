@@ -25,12 +25,14 @@ import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
+import static android.service.autofill.Flags.FLAG_FILL_DIALOG_IMPROVEMENTS;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1607,7 +1609,12 @@ public final class AutofillManager {
      *             the virtual view in the host view.
      *
      * @throws IllegalArgumentException if the {@code infos} was empty
+     *
+     * @deprecated This function will not do anything. Showing fill dialog is now fully controlled
+     * by the framework and the autofill provider.
      */
+    @FlaggedApi(FLAG_FILL_DIALOG_IMPROVEMENTS)
+    @Deprecated
     public void notifyVirtualViewsReady(
             @NonNull View view, @NonNull SparseArray<VirtualViewFillInfo> infos) {
         Objects.requireNonNull(infos);
@@ -4034,8 +4041,13 @@ public final class AutofillManager {
      *             receiving a focus event. The autofill suggestions shown will include content for
      *             related views as well.
      * @return {@code true} if the autofill dialog is being shown
+     *
+     * @deprecated This function will not do anything. Showing fill dialog is now fully controlled
+     * by the framework and the autofill provider.
      */
     // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
+    @FlaggedApi(FLAG_FILL_DIALOG_IMPROVEMENTS)
+    @Deprecated
     public boolean showAutofillDialog(@NonNull View view) {
         Objects.requireNonNull(view);
         if (shouldShowAutofillDialog(view, view.getAutofillId())) {
@@ -4073,7 +4085,12 @@ public final class AutofillManager {
      *            suggestions.
      * @param virtualId id identifying the virtual view inside the host view.
      * @return {@code true} if the autofill dialog is being shown
+     *
+     * @deprecated This function will not do anything. Showing fill dialog is now fully controlled
+     * by the framework and the autofill provider.
      */
+    @FlaggedApi(FLAG_FILL_DIALOG_IMPROVEMENTS)
+    @Deprecated
     public boolean showAutofillDialog(@NonNull View view, int virtualId) {
         Objects.requireNonNull(view);
         if (shouldShowAutofillDialog(view, getAutofillId(view, virtualId))) {

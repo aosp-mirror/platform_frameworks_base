@@ -18,12 +18,12 @@ package com.android.server.compat;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
 
 import android.app.compat.ChangeIdStateCache;
 import android.app.compat.PackageOverride;

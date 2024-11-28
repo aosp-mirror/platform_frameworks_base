@@ -36,10 +36,14 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.UidObserver;
+import android.app.compat.CompatChanges;
 import android.app.job.JobInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -121,6 +125,9 @@ public final class QuotaController extends StateController {
     private static final String ALARM_TAG_CLEANUP = "*job.cleanup*";
     private static final String ALARM_TAG_QUOTA_CHECK = "*job.quota_check*";
 
+    private static final String TRACE_QUOTA_STATE_CHANGED_TAG = "QuotaStateChanged:";
+    private static final String TRACE_QUOTA_STATE_CHANGED_DELIMITER = "#";
+
     private static final int SYSTEM_APP_CHECK_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.GET_PERMISSIONS | PackageManager.MATCH_KNOWN_PACKAGES;
@@ -128,6 +135,27 @@ public final class QuotaController extends StateController {
     private static int hashLong(long val) {
         return (int) (val ^ (val >>> 32));
     }
+
+    /**
+     * When enabled this change id overrides the default quota policy enforcement to the jobs
+     * running in the foreground process state.
+     */
+    // TODO: b/379681266 - Might need some refactoring for a better app-compat strategy.
+    @VisibleForTesting
+    @ChangeId
+    @Disabled // Disabled by default
+    @Overridable // The change can be overridden in user build
+    static final long OVERRIDE_QUOTA_ENFORCEMENT_TO_FGS_JOBS = 341201311L;
+
+    /**
+     * When enabled this change id overrides the default quota policy enforcement policy
+     * the jobs started when app was in the TOP state.
+     */
+    @VisibleForTesting
+    @ChangeId
+    @Disabled // Disabled by default
+    @Overridable // The change can be overridden in user build.
+    static final long OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS = 374323858L;
 
     @VisibleForTesting
     static class ExecutionStats {
@@ -619,7 +647,9 @@ public final class QuotaController extends StateController {
         }
 
         final int uid = jobStatus.getSourceUid();
-        if (!Flags.enforceQuotaPolicyToTopStartedJobs() && mTopAppCache.get(uid)) {
+        if ((!Flags.enforceQuotaPolicyToTopStartedJobs()
+                || CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS,
+                        uid)) && mTopAppCache.get(uid)) {
             if (DEBUG) {
                 Slog.d(TAG, jobStatus.toShortString() + " is top started job");
             }
@@ -656,7 +686,9 @@ public final class QuotaController extends StateController {
                 timer.stopTrackingJob(jobStatus);
             }
         }
-        if (!Flags.enforceQuotaPolicyToTopStartedJobs()) {
+        if (!Flags.enforceQuotaPolicyToTopStartedJobs()
+                || CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS,
+                        jobStatus.getSourceUid())) {
             mTopStartedJobs.remove(jobStatus);
         }
     }
@@ -769,7 +801,13 @@ public final class QuotaController extends StateController {
 
     /** @return true if the job was started while the app was in the TOP state. */
     private boolean isTopStartedJobLocked(@NonNull final JobStatus jobStatus) {
-        return !Flags.enforceQuotaPolicyToTopStartedJobs() && mTopStartedJobs.contains(jobStatus);
+        if (!Flags.enforceQuotaPolicyToTopStartedJobs()
+                || CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_TOP_STARTED_JOBS,
+                        jobStatus.getSourceUid())) {
+            return mTopStartedJobs.contains(jobStatus);
+        }
+
+        return false;
     }
 
     /** Returns the maximum amount of time this job could run for. */
@@ -793,7 +831,9 @@ public final class QuotaController extends StateController {
                     || isTopStartedJobLocked(jobStatus)
                     || isUidInForeground(jobStatus.getSourceUid());
             final boolean isJobImportant = jobStatus.getEffectivePriority() >= JobInfo.PRIORITY_HIGH
-                    || (jobStatus.getFlags() & JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0;
+                    || (!android.app.job.Flags.ignoreImportantWhileForeground()
+                            && (jobStatus.getFlags()
+                                    & JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0);
             if (isInPrivilegedState && isJobImportant) {
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
             }
@@ -2629,9 +2669,13 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
-    int getProcessStateQuotaFreeThreshold() {
-        return Flags.enforceQuotaPolicyToFgsJobs() ? ActivityManager.PROCESS_STATE_BOUND_TOP :
-                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+    int getProcessStateQuotaFreeThreshold(int uid) {
+        if (Flags.enforceQuotaPolicyToFgsJobs()
+                && !CompatChanges.isChangeEnabled(OVERRIDE_QUOTA_ENFORCEMENT_TO_FGS_JOBS, uid)) {
+            return ActivityManager.PROCESS_STATE_BOUND_TOP;
+        }
+
+        return ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
     private class QcHandler extends Handler {
@@ -2655,11 +2699,12 @@ public final class QuotaController extends StateController {
                         if (timeRemainingMs <= 50) {
                             // Less than 50 milliseconds left. Start process of shutting down jobs.
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its quota.");
-                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
-                                        JobSchedulerService.TRACE_TRACK_NAME,
-                                        pkg + "#" + MSG_REACHED_TIME_QUOTA);
-                            }
+                            final StringBuilder traceMsg = new StringBuilder();
+                            traceMsg.append(TRACE_QUOTA_STATE_CHANGED_TAG)
+                                    .append(pkg)
+                                    .append(TRACE_QUOTA_STATE_CHANGED_DELIMITER)
+                                    .append(MSG_REACHED_TIME_QUOTA);
+                            Trace.instant(Trace.TRACE_TAG_POWER, traceMsg.toString());
                             mStateChangedListener.onControllerStateChanged(
                                     maybeUpdateConstraintForPkgLocked(
                                             sElapsedRealtimeClock.millis(),
@@ -2688,11 +2733,12 @@ public final class QuotaController extends StateController {
                                 pkg.userId, pkg.packageName);
                         if (timeRemainingMs <= 0) {
                             if (DEBUG) Slog.d(TAG, pkg + " has reached its EJ quota.");
-                            if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                                Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
-                                        JobSchedulerService.TRACE_TRACK_NAME,
-                                        pkg + "#" + MSG_REACHED_EJ_TIME_QUOTA);
-                            }
+                            final StringBuilder traceMsg = new StringBuilder();
+                            traceMsg.append(TRACE_QUOTA_STATE_CHANGED_TAG)
+                                    .append(pkg)
+                                    .append(TRACE_QUOTA_STATE_CHANGED_DELIMITER)
+                                    .append(MSG_REACHED_EJ_TIME_QUOTA);
+                            Trace.instant(Trace.TRACE_TAG_POWER, traceMsg.toString());
                             mStateChangedListener.onControllerStateChanged(
                                     maybeUpdateConstraintForPkgLocked(
                                             sElapsedRealtimeClock.millis(),
@@ -2717,11 +2763,12 @@ public final class QuotaController extends StateController {
                             Slog.d(TAG, pkg + " has reached its count quota.");
                         }
 
-                        if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
-                            Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
-                                    JobSchedulerService.TRACE_TRACK_NAME,
-                                    pkg + "#" + MSG_REACHED_COUNT_QUOTA);
-                        }
+                        final StringBuilder traceMsg = new StringBuilder();
+                        traceMsg.append(TRACE_QUOTA_STATE_CHANGED_TAG)
+                                .append(pkg)
+                                .append(TRACE_QUOTA_STATE_CHANGED_DELIMITER)
+                                .append(MSG_REACHED_COUNT_QUOTA);
+                        Trace.instant(Trace.TRACE_TAG_POWER, traceMsg.toString());
 
                         mStateChangedListener.onControllerStateChanged(
                                 maybeUpdateConstraintForPkgLocked(
@@ -2768,7 +2815,7 @@ public final class QuotaController extends StateController {
                                 isQuotaFree = true;
                             } else {
                                 final boolean reprocess;
-                                if (procState <= getProcessStateQuotaFreeThreshold()) {
+                                if (procState <= getProcessStateQuotaFreeThreshold(uid)) {
                                     reprocess = !mForegroundUids.get(uid);
                                     mForegroundUids.put(uid, true);
                                     isQuotaFree = true;

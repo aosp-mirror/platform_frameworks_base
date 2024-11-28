@@ -138,4 +138,22 @@ class HeadsUpCoordinatorLogger(private val buffer: LogBuffer, private val verbos
             { "marked group summary as interrupted: $str1 for alert transfer to child: $str2" },
         )
     }
+
+    fun logShowPromotedNotificationHeadsUp(key: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = key },
+            { "requesting promoted entry to show heads up: $str1" },
+        )
+    }
+
+    fun logPromotedNotificationForHeadsUpNotFound(key: String) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = key },
+            { "could not find promoted entry, so not showing heads up: $str1" },
+        )
+    }
 }

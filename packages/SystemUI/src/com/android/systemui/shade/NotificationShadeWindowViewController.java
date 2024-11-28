@@ -54,9 +54,12 @@ import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -69,6 +72,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 import com.android.systemui.statusbar.phone.DozeScrimController;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
@@ -84,6 +88,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -188,7 +193,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
             QuickSettingsController quickSettingsController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            BouncerViewBinder bouncerViewBinder) {
+            BouncerViewBinder bouncerViewBinder,
+            @ShadeDisplayAware Provider<ConfigurationForwarder> configurationForwarder,
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -229,6 +236,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mView,
                 notificationLaunchAnimationInteractor.isLaunchAnimationRunning(),
                 this::setExpandAnimationRunning);
+        if (QSComposeFragment.isEnabled()) {
+            collectFlow(mView,
+                    brightnessMirrorShowingInteractor.isShowing(),
+                    this::setBrightnessMirrorShowingForDepth);
+        }
 
         var keyguardUnfoldTransition = unfoldComponent.map(
                 SysUIUnfoldComponent::getKeyguardUnfoldTransition);
@@ -245,6 +257,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             mDisableSubpixelTextTransitionListener));
         }
 
+        if (ShadeWindowGoesAround.isEnabled()) {
+            mView.setConfigurationForwarder(configurationForwarder.get());
+        }
         dumpManager.registerDumpable(this);
     }
 
@@ -695,6 +710,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (MigrateClocksToBlueprint.isEnabled()) {
             mDragDownHelper.stopDragging();
         }
+    }
+
+    private void setBrightnessMirrorShowingForDepth(boolean showing) {
+        mDepthController.setBrightnessMirrorVisible(showing);
     }
 
     @Override

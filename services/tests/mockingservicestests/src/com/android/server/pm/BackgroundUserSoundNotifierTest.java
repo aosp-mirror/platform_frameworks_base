@@ -103,6 +103,7 @@ public class BackgroundUserSoundNotifierTest {
         assumeTrue(UserManager.supportsMultipleUsers());
         AudioAttributes aa = new AudioAttributes.Builder().setUsage(USAGE_ALARM).build();
         UserInfo user = createUser("User", UserManager.USER_TYPE_FULL_SECONDARY, 0);
+
         final int fgUserId = mSpiedContext.getUserId();
         final int bgUserUid = user.id * 100000;
         doReturn(UserHandle.of(fgUserId)).when(mSpiedContext).getUser();
@@ -204,6 +205,28 @@ public class BackgroundUserSoundNotifierTest {
                 .onAudioFocusGrant(afi, AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
 
         verify(mNotificationManager)
+                .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
+                        eq(afi.getClientUid()), any(Notification.class),
+                        eq(UserHandle.of(fgUserId)));
+    }
+
+    @Test
+    public void testOnAudioFocusGrant_alarmOnProfileOfForegroundUser_foregroundUserNotNotified() {
+        assumeTrue(UserManager.supportsMultipleUsers());
+        final int fgUserId = mSpiedContext.getUserId();
+        UserInfo fgUserProfile = createProfileForUser("Background profile",
+                UserManager.USER_TYPE_PROFILE_MANAGED, fgUserId, null);
+        assumeTrue("Cannot add a profile", fgUserProfile != null);
+        int fgUserProfileUid = fgUserProfile.id * 100_000;
+
+        AudioAttributes aa = new AudioAttributes.Builder().setUsage(USAGE_ALARM).build();
+        AudioFocusInfo afi = new AudioFocusInfo(aa, fgUserProfileUid, "", "",
+                AudioManager.AUDIOFOCUS_GAIN, 0, 0, Build.VERSION.SDK_INT);
+
+        mBackgroundUserSoundNotifier.getAudioPolicyFocusListener()
+                .onAudioFocusGrant(afi, AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+
+        verify(mNotificationManager, never())
                 .notifyAsUser(eq(BackgroundUserSoundNotifier.class.getSimpleName()),
                         eq(afi.getClientUid()), any(Notification.class),
                         eq(UserHandle.of(fgUserId)));
@@ -327,6 +350,17 @@ public class BackgroundUserSoundNotifierTest {
         }
         return user;
     }
+
+    private UserInfo createProfileForUser(String name, String userType, int userHandle,
+            String[] disallowedPackages) {
+        UserInfo profile = mUserManager.createProfileForUser(
+                name, userType, 0, userHandle, disallowedPackages);
+        if (profile != null) {
+            mUsersToRemove.add(profile.id);
+        }
+        return profile;
+    }
+
     private void removeUser(int userId) {
         mUserManager.removeUser(userId);
     }

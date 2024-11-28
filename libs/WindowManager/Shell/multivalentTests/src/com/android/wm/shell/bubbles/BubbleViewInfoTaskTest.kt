@@ -25,6 +25,7 @@ import android.os.Handler
 import android.os.UserManager
 import android.view.IWindowManager
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -56,7 +57,9 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 /** Test inflating bubbles with [BubbleViewInfoTask]. */
 @SmallTest
@@ -158,18 +161,23 @@ class BubbleViewInfoTaskTest {
                 mock<BubbleProperties>()
             )
 
-        val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)
-        bubbleStackView =
-            BubbleStackView(
-                context,
-                bubbleStackViewManager,
-                bubblePositioner,
-                bubbleData,
-                surfaceSynchronizer,
-                FloatingContentCoordinator(),
-                bubbleController,
-                mainExecutor
-            )
+        // TODO: (b/371829099) - when optional overflow is no longer flagged we can enable this
+        //  again, something about the overflow being added uncovers an issue with Robolectric and
+        //  bitmaps; this is switched to a mock to work around that (b/375513387).
+//        val bubbleStackViewManager = BubbleStackViewManager.fromBubbleController(bubbleController)
+//        bubbleStackView = BubbleStackView(
+//                context,
+//                bubbleStackViewManager,
+//                bubblePositioner,
+//                bubbleData,
+//                surfaceSynchronizer,
+//                FloatingContentCoordinator(),
+//                bubbleController,
+//                mainExecutor
+//            )
+        bubbleStackView = mock<BubbleStackView>()
+        whenever(bubbleStackView.generateLayoutParams(any()))
+            .thenReturn(FrameLayout.LayoutParams(1000, 1000))
         expandedViewManager = BubbleExpandedViewManager.fromBubbleController(bubbleController)
     }
 

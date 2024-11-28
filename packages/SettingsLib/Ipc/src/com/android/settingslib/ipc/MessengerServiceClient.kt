@@ -320,6 +320,11 @@ constructor(
             }
         }
 
+        override fun onNullBinding(name: ComponentName) {
+            Log.i(TAG, "onNullBinding $name")
+            close(ClientBindServiceException(null))
+        }
+
         internal open fun drainPendingRequests() {
             disposableHandle = null
             if (pendingRequests.isEmpty()) {

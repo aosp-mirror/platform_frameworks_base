@@ -27,6 +27,7 @@
 #include <camera/StringUtils.h>
 #include <com_android_internal_camera_flags.h>
 #include <cutils/properties.h>
+#include <gui/Flags.h>
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 #include <nativehelper/JNIHelp.h>
@@ -537,7 +538,7 @@ static bool attributionSourceStateForJavaParcel(JNIEnv *env, jobject jClientAttr
         return false;
     }
 
-    if (!(useContextAttributionSource && flags::use_context_attribution_source())) {
+    if (!(useContextAttributionSource && flags::data_delivery_permission_checks())) {
         clientAttribution.uid = Camera::USE_CALLING_UID;
         clientAttribution.pid = Camera::USE_CALLING_PID;
     }
@@ -715,16 +716,20 @@ static void android_hardware_Camera_setPreviewSurface(JNIEnv *env, jobject thiz,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<IGraphicBufferProducer> gbp;
     sp<Surface> surface;
     if (jSurface) {
         surface = android_view_Surface_getSurface(env, jSurface);
-        if (surface != NULL) {
-            gbp = surface->getIGraphicBufferProducer();
-        }
     }
 
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    if (camera->setPreviewTarget(surface) != NO_ERROR) {
+#else
+    sp<IGraphicBufferProducer> gbp;
+    if (surface != NULL) {
+        gbp = surface->getIGraphicBufferProducer();
+    }
     if (camera->setPreviewTarget(gbp) != NO_ERROR) {
+#endif
         jniThrowException(env, "java/io/IOException", "setPreviewTexture failed");
     }
 }
@@ -736,6 +741,9 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    sp<Surface> surface;
+#endif
     sp<IGraphicBufferProducer> producer = NULL;
     if (jSurfaceTexture != NULL) {
         producer = SurfaceTexture_getProducer(env, jSurfaceTexture);
@@ -744,10 +752,16 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
                     "SurfaceTexture already released in setPreviewTexture");
             return;
         }
-
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+        surface = new Surface(producer);
+#endif
     }
 
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    if (camera->setPreviewTarget(surface) != NO_ERROR) {
+#else
     if (camera->setPreviewTarget(producer) != NO_ERROR) {
+#endif
         jniThrowException(env, "java/io/IOException",
                 "setPreviewTexture failed");
     }
@@ -761,18 +775,32 @@ static void android_hardware_Camera_setPreviewCallbackSurface(JNIEnv *env,
     sp<Camera> camera = get_native_camera(env, thiz, &context);
     if (camera == 0) return;
 
+#if !WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
     sp<IGraphicBufferProducer> gbp;
+#endif
     sp<Surface> surface;
     if (jSurface) {
         surface = android_view_Surface_getSurface(env, jSurface);
+        if (surface == NULL) {
+            jniThrowException(env, "java/lang/IllegalArgumentException",
+                              "android_view_Surface_getSurface failed");
+            return;
+        }
+
+#if !WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
         if (surface != NULL) {
             gbp = surface->getIGraphicBufferProducer();
         }
+#endif
     }
     // Clear out normal preview callbacks
     context->setCallbackMode(env, false, false);
     // Then set up callback surface
+#if WB_LIBCAMERASERVICE_WITH_DEPENDENCIES
+    if (camera->setPreviewCallbackTarget(surface) != NO_ERROR) {
+#else
     if (camera->setPreviewCallbackTarget(gbp) != NO_ERROR) {
+#endif
         jniThrowException(env, "java/io/IOException", "setPreviewCallbackTarget failed");
     }
 }

@@ -17,23 +17,25 @@
 package com.android.compose.animation.scene.transformation
 
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
-import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Fade an element in or out. */
-internal class Fade(override val matcher: ElementMatcher) : PropertyTransformation<Float> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+internal object Fade : InterpolatedPropertyTransformation<Float> {
+    override val property = PropertyTransformation.Property.Alpha
+
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: Float,
+        idleValue: Float,
     ): Float {
         // Return the alpha value of [element] either when it starts fading in or when it finished
         // fading out, which is `0` in both cases.
         return 0f
+    }
+
+    object Factory : Transformation.Factory {
+        override fun create(): Transformation = Fade
     }
 }

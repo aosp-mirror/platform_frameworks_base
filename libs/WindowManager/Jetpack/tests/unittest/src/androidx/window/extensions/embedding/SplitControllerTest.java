@@ -166,6 +166,8 @@ public class SplitControllerTest {
     private List<SplitInfo> mSplitInfos;
     private TransactionManager mTransactionManager;
     private ActivityThread mCurrentActivityThread;
+    private final ArgumentCaptor<Bundle> mBundleArgumentCaptor =
+            ArgumentCaptor.forClass(Bundle.class);
 
     @Before
     public void setUp() {
@@ -685,9 +687,13 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertTrue(result);
-        verify(mSplitPresenter).startActivityToSide(mTransaction, mActivity, PLACEHOLDER_INTENT,
-                mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
-                placeholderRule, SPLIT_ATTRIBUTES, true /* isPlaceholder */);
+        verify(mSplitPresenter).startActivityToSide(eq(mTransaction), eq(mActivity),
+                eq(PLACEHOLDER_INTENT), mBundleArgumentCaptor.capture(),
+                eq(placeholderRule), eq(SPLIT_ATTRIBUTES), eq(true) /* isPlaceholder */);
+
+        final ActivityOptions activityOptions =
+                new ActivityOptions(mBundleArgumentCaptor.getValue());
+        assertTrue(activityOptions.getAvoidMoveToFront());
     }
 
     @Test
@@ -720,9 +726,13 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertTrue(result);
-        verify(mSplitPresenter).startActivityToSide(mTransaction, mActivity, PLACEHOLDER_INTENT,
-                mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
-                placeholderRule, SPLIT_ATTRIBUTES, true /* isPlaceholder */);
+        verify(mSplitPresenter).startActivityToSide(eq(mTransaction), eq(mActivity),
+                eq(PLACEHOLDER_INTENT), mBundleArgumentCaptor.capture(),
+                eq(placeholderRule), eq(SPLIT_ATTRIBUTES), eq(true) /* isPlaceholder */);
+
+        final ActivityOptions activityOptions =
+                new ActivityOptions(mBundleArgumentCaptor.getValue());
+        assertTrue(activityOptions.getAvoidMoveToFront());
     }
 
     @Test
@@ -755,9 +765,13 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertTrue(result);
-        verify(mSplitPresenter).startActivityToSide(mTransaction, mActivity, PLACEHOLDER_INTENT,
-                mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */),
-                placeholderRule, SPLIT_ATTRIBUTES, true /* isPlaceholder */);
+        verify(mSplitPresenter).startActivityToSide(eq(mTransaction), eq(mActivity),
+                eq(PLACEHOLDER_INTENT), mBundleArgumentCaptor.capture(),
+                eq(placeholderRule), eq(SPLIT_ATTRIBUTES), eq(true) /* isPlaceholder */);
+
+        final ActivityOptions activityOptions =
+                new ActivityOptions(mBundleArgumentCaptor.getValue());
+        assertTrue(activityOptions.getAvoidMoveToFront());
     }
 
     @Test
@@ -1065,16 +1079,8 @@ public class SplitControllerTest {
     public void testGetPlaceholderOptions() {
         // Setup to make sure a transaction record is started.
         mTransactionManager.startNewTransaction();
-        doReturn(true).when(mActivity).isResumed();
 
-        assertNull(mSplitController.getPlaceholderOptions(mActivity, false /* isOnCreated */));
-
-        doReturn(false).when(mActivity).isResumed();
-
-        assertNull(mSplitController.getPlaceholderOptions(mActivity, true /* isOnCreated */));
-
-        // Launch placeholder without moving the Task to front if the Task is now in background (not
-        // resumed or onCreated).
+        // Launch placeholder without moving the Task to front
         final Bundle options = mSplitController.getPlaceholderOptions(mActivity,
                 false /* isOnCreated */);
 

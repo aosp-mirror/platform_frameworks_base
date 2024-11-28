@@ -40,6 +40,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.Trace;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import dalvik.system.VMRuntime;
 
 import java.io.IOException;
@@ -1208,6 +1210,11 @@ public class ImageReader implements AutoCloseable {
                 default:
                     width = nativeGetWidth();
             }
+            if (Flags.cameraHeifGainmap()) {
+                if (getFormat() == ImageFormat.HEIC_ULTRAHDR){
+                    width = ImageReader.this.getWidth();
+                }
+            }
             return width;
         }
 
@@ -1226,6 +1233,11 @@ public class ImageReader implements AutoCloseable {
                     break;
                 default:
                     height = nativeGetHeight();
+            }
+            if (Flags.cameraHeifGainmap()) {
+                if (getFormat() == ImageFormat.HEIC_ULTRAHDR){
+                    height = ImageReader.this.getHeight();
+                }
             }
             return height;
         }

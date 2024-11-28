@@ -485,6 +485,9 @@ public class DisplayRotation {
             if (isDefaultDisplay) {
                 updateOrientationListenerLw();
             }
+        } else if (mCompatPolicyForImmersiveApps != null
+                && mCompatPolicyForImmersiveApps.deferOrientationUpdate()) {
+            return false;
         }
         return updateRotationUnchecked(forceUpdate);
     }

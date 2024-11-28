@@ -53,8 +53,8 @@ public class SplitTestUtils {
         doReturn(dividerBounds).when(out).getDividerBounds();
         doReturn(dividerBounds).when(out).getRefDividerBounds();
         doReturn(leash).when(out).getDividerLeash();
-        doReturn(bounds1).when(out).getBounds1();
-        doReturn(bounds2).when(out).getBounds2();
+        doReturn(bounds1).when(out).getTopLeftBounds();
+        doReturn(bounds2).when(out).getBottomRightBounds();
         return out;
     }
 

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
@@ -32,9 +34,9 @@ import static org.mockito.Mockito.when;
 import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.compose.animation.scene.ObservableTransitionState;
@@ -42,6 +44,7 @@ import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.BrokenWithSceneContainer;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -64,7 +67,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -78,13 +81,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
+import java.util.List;
+
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.test.TestScope;
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper
 public class VisualStabilityCoordinatorTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return parameterizeSceneContainerFlag();
+    }
 
     private VisualStabilityCoordinator mCoordinator;
 
@@ -116,6 +128,11 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     private NotifStabilityManager mNotifStabilityManager;
     private NotificationEntry mEntry;
     private GroupEntry mGroupEntry;
+
+    public VisualStabilityCoordinatorTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() {
@@ -251,6 +268,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 377868472) // mReorderingAllowed is broken with SceneContainer
     public void testLockscreenPartlyShowing_groupAndSectionChangesNotAllowed() {
         // GIVEN the panel true expanded and device isn't pulsing
         setFullyDozed(false);
@@ -267,6 +285,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 377868472) // mReorderingAllowed is broken with SceneContainer
     public void testLockscreenFullyShowing_groupAndSectionChangesNotAllowed() {
         // GIVEN the panel true expanded and device isn't pulsing
         setFullyDozed(false);
@@ -520,6 +539,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_CHECK_LOCKSCREEN_GONE_TRANSITION)
+    @BrokenWithSceneContainer(bugId = 377868472) // mReorderingAllowed is broken with SceneContainer
     public void testNotLockscreenInGoneTransition_invalidationCalled() {
         // GIVEN visual stability is being maintained b/c animation is playing
         mKosmos.getKeyguardTransitionRepository().sendTransitionStepJava(
@@ -589,6 +609,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    @BrokenWithSceneContainer(bugId = 377868472) // mReorderingAllowed is broken with SceneContainer
     public void testCommunalShowingWillNotSuppressReordering() {
         // GIVEN panel is expanded, communal is showing, and QS is collapsed
         setPulsing(false);

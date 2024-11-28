@@ -24,7 +24,10 @@ import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+import static android.window.BackEvent.EDGE_NONE;
 
+import static com.android.window.flags.Flags.predictiveBackSwipeEdgeNoneApi;
+import static com.android.window.flags.Flags.predictiveBackThreeButtonNav;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
@@ -41,6 +44,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_V
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION;
 
 import android.annotation.FloatRange;
+import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -114,6 +118,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -174,6 +179,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private Region mActiveNavBarRegion;
 
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final BackAnimation mBackAnimation;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
@@ -287,11 +293,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
-        public void onBackPressed() {
-            verifyCallerAndClearCallingIdentityPostMain("onBackPressed", () -> {
-                sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-                sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-            });
+        public void onBackEvent(@Nullable KeyEvent keyEvent) throws RemoteException {
+            if (predictiveBackThreeButtonNav() && predictiveBackSwipeEdgeNoneApi()
+                    && mBackAnimation != null && keyEvent != null) {
+                mBackAnimation.setTriggerBack(!keyEvent.isCanceled());
+                mBackAnimation.onBackMotion(/* touchX */ 0, /* touchY */ 0, keyEvent.getAction(),
+                        EDGE_NONE);
+            } else {
+                verifyCallerAndClearCallingIdentityPostMain("onBackPressed", () -> {
+                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                    sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+                });
+            }
         }
 
         @Override
@@ -657,7 +670,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             AssistUtils assistUtils,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
-            BroadcastDispatcher broadcastDispatcher
+            BroadcastDispatcher broadcastDispatcher,
+            Optional<BackAnimation> backAnimation
     ) {
         // b/241601880: This component should only be running for primary users or
         // secondaryUsers when visibleBackgroundUsers are supported.
@@ -695,6 +709,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
         mBroadcastDispatcher = broadcastDispatcher;
+        mBackAnimation = backAnimation.orElse(null);
 
         if (!KeyguardWmStateRefactor.isEnabled()) {
             mSysuiUnlockAnimationController = sysuiUnlockAnimationController;

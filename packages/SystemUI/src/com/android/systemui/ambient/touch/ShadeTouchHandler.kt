@@ -22,6 +22,7 @@ import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags
 import com.android.systemui.ambient.touch.TouchHandler.TouchSession
 import com.android.systemui.ambient.touch.dagger.ShadeModule
@@ -38,7 +39,6 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * [ShadeTouchHandler] is responsible for handling swipe down gestures over dream to bring down the

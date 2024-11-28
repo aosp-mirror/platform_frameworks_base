@@ -104,6 +104,7 @@ cc_library_shared {
         "libgrallocusage",
         "libmedia_midiiowrapper",
         "android.companion.virtualdevice.flags-aconfig-cc",
+        "android.media.codec-aconfig-cc",
         "android.media.playback.flags-aconfig-cc",
     ],
 

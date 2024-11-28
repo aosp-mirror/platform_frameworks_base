@@ -139,3 +139,28 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "bitmap_ashmem_long_name"
+  namespace: "core_graphics"
+  description: "Whether to have more information in ashmem filenames for bitmaps"
+  bug: "369619160"
+}
+
+flag {
+  name: "animated_image_drawable_filter_bitmap"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "API's that enable animated image drawables to use nearest sampling when scaling."
+  bug: "370523334"
+}
+
+flag {
+  name: "remove_vri_sketchy_destroy"
+  namespace: "core_graphics"
+  description: "Remove the eager yet thread-violating destroyHardwareResources in VRI#die"
+  bug: "377057106"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -208,7 +208,17 @@ public class DragPositioningCallbackUtility {
         return result;
     }
 
-    private static boolean isExceedingWidthConstraint(int repositionedWidth, int startingWidth,
+    /**
+     * Checks whether the new task bounds exceed the allowed width.
+     *
+     * @param repositionedWidth task width after repositioning.
+     * @param startingWidth task width before repositioning.
+     * @param maxResizeBounds stable bounds for display.
+     * @param displayController display controller for the task being checked.
+     * @param windowDecoration contains decor info and helpers for the task.
+     * @return whether the task is exceeding any of the width constrains, minimum or maximum.
+     */
+    public static boolean isExceedingWidthConstraint(int repositionedWidth, int startingWidth,
             Rect maxResizeBounds, DisplayController displayController,
             WindowDecoration windowDecoration) {
         boolean isSizeIncreasing = (repositionedWidth - startingWidth) > 0;
@@ -223,7 +233,17 @@ public class DragPositioningCallbackUtility {
                 && repositionedWidth > maxResizeBounds.width() && isSizeIncreasing;
     }
 
-    private static boolean isExceedingHeightConstraint(int repositionedHeight, int startingHeight,
+    /**
+     * Checks whether the new task bounds exceed the allowed height.
+     *
+     * @param repositionedHeight task's height after repositioning.
+     * @param startingHeight task's height before repositioning.
+     * @param maxResizeBounds stable bounds for display.
+     * @param displayController display controller for the task being checked.
+     * @param windowDecoration contains decor info and helpers for the task.
+     * @return whether the task is exceeding any of the height constrains, minimum or maximum.
+     */
+    public static boolean isExceedingHeightConstraint(int repositionedHeight, int startingHeight,
             Rect maxResizeBounds, DisplayController displayController,
             WindowDecoration windowDecoration) {
         boolean isSizeIncreasing = (repositionedHeight - startingHeight) > 0;
@@ -284,12 +304,19 @@ public class DragPositioningCallbackUtility {
                 && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS.isTrue();
     }
 
-    interface DragStartListener {
+    public interface DragEventListener {
         /**
          * Inform the implementing class that a drag resize has started
          *
          * @param taskId id of this positioner's {@link WindowDecoration}
          */
         void onDragStart(int taskId);
+
+        /**
+         * Inform the implementing class that a drag move has started.
+         *
+         * @param taskId id of this positioner's {@link WindowDecoration}
+         */
+        void onDragMove(int taskId);
     }
 }

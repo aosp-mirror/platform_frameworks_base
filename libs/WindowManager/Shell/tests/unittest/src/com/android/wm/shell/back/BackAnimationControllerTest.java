@@ -51,11 +51,14 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContentResolver;
@@ -90,6 +93,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -139,6 +143,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     @Mock
     private Handler mHandler;
+    @Mock
+    private Transitions.TransitionHandler mTakeoverHandler;
 
     private BackAnimationController mController;
     private TestableContentResolver mContentResolver;
@@ -150,6 +156,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private Rect mTouchableRegion;
 
     private BackAnimationController.BackTransitionHandler mBackTransitionHandler;
+
+    @Rule
+    public SetFlagsRule mSetflagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -604,6 +613,51 @@ public class BackAnimationControllerTest extends ShellTestCase {
         verify(mAnimatorCallback, never()).onBackInvoked();
     }
 
+    @EnableFlags({com.android.systemui.shared.Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+            com.android.systemui.shared.Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+            com.android.window.flags.Flags.FLAG_UNIFY_BACK_NAVIGATION_TRANSITION})
+    @Test
+    public void appCallback_receivesTakeoverHandler_whenAvailable() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_CROSS_TASK);
+        mBackTransitionHandler.mTakeoverHandler = mTakeoverHandler;
+
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result))
+                .setTouchableRegion(mTouchableRegion)
+                .setAppProgressAllowed(true));
+
+        triggerBackGesture();
+        mShellExecutor.flushAll();
+        releaseBackGesture();
+        mShellExecutor.flushAll();
+
+        verify(mAppCallback).setHandoffHandler(any());
+    }
+
+    @Test
+    public void appCallback_doesNotReceiveTakeoverHandler_whenUnavailable() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_CROSS_TASK);
+
+        final int type = BackNavigationInfo.TYPE_CALLBACK;
+        final ResultListener result = new ResultListener();
+        createNavigationInfo(new BackNavigationInfo.Builder()
+                .setType(type)
+                .setOnBackInvokedCallback(mAppCallback)
+                .setOnBackNavigationDone(new RemoteCallback(result))
+                .setTouchableRegion(mTouchableRegion)
+                .setAppProgressAllowed(true));
+        triggerBackGesture();
+        mShellExecutor.flushAll();
+        releaseBackGesture();
+        mShellExecutor.flushAll();
+
+        verify(mAppCallback, never()).setHandoffHandler(any());
+    }
+
     @Test
     public void skipsCancelWithoutStart() throws RemoteException {
         final int type = BackNavigationInfo.TYPE_CALLBACK;
@@ -699,7 +753,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 eq(tInfo), eq(st), eq(ft), eq(callback));
 
         mBackTransitionHandler.onAnimationFinished();
-        final TransitionInfo.Change openToClose = createAppChange(openTaskId, TRANSIT_CLOSE,
+        final TransitionInfo.Change openToClose = createAppChangeFromChange(open, TRANSIT_CLOSE,
                 FLAG_BACK_GESTURE_ANIMATED);
         tInfo2 = createTransitionInfo(TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION, openToClose);
         mBackTransitionHandler.mClosePrepareTransition = mock(IBinder.class);
@@ -812,7 +866,10 @@ public class BackAnimationControllerTest extends ShellTestCase {
         if (taskId != INVALID_TASK_ID) {
             final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
             taskInfo.taskId = taskId;
-            taskInfo.token = new WindowContainerToken(mock(IWindowContainerToken.class));
+            final IWindowContainerToken mockT = mock(IWindowContainerToken.class);
+            Binder binder = new Binder();
+            doReturn(binder).when(mockT).asBinder();
+            taskInfo.token = new WindowContainerToken(mockT);
             change = new TransitionInfo.Change(
                     taskInfo.token, b.build());
             change.setTaskInfo(taskInfo);
@@ -821,6 +878,16 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 null, b.build());
 
         }
+        change.setMode(mode);
+        change.setFlags(flags);
+        return change;
+    }
+
+    private TransitionInfo.Change createAppChangeFromChange(
+            TransitionInfo.Change originalChange, @TransitionInfo.TransitionMode int mode,
+            @TransitionInfo.ChangeFlags int flags) {
+        final TransitionInfo.Change change = new TransitionInfo.Change(
+                originalChange.getTaskInfo().token, originalChange.getLeash());
         change.setMode(mode);
         change.setFlags(flags);
         return change;

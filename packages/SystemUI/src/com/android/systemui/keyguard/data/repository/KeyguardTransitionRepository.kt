@@ -25,6 +25,7 @@ import android.os.Trace
 import android.util.Log
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.withContextTraced as withContext
+import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -77,6 +78,8 @@ interface KeyguardTransitionRepository {
 
     /** The [TransitionInfo] of the most recent call to [startTransition]. */
     val currentTransitionInfoInternal: StateFlow<TransitionInfo>
+    /** The [TransitionInfo] of the most recent call to [startTransition]. */
+    val currentTransitionInfo: TransitionInfo
 
     /**
      * Interactors that require information about changes between [KeyguardState]s will call this to
@@ -111,6 +114,18 @@ interface KeyguardTransitionRepository {
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState,
     )
+
+    /**
+     * Forces the current transition to emit FINISHED, foregoing any additional RUNNING steps that
+     * otherwise would have been emitted.
+     *
+     * When the screen is off, upcoming performance changes cause all Animators to cease emitting
+     * frames, which means the Animator passed to [startTransition] will never finish if it was
+     * running when the screen turned off. Also, there's simply no reason to emit RUNNING steps when
+     * the screen isn't even on. As long as we emit FINISHED, everything should end up in the
+     * correct state.
+     */
+    suspend fun forceFinishCurrentTransition()
 }
 
 @SysUISingleton
@@ -131,8 +146,9 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
     override val transitions = _transitions.asSharedFlow().distinctUntilChanged()
     private var lastStep: TransitionStep = TransitionStep()
     private var lastAnimator: ValueAnimator? = null
+    private var animatorListener: AnimatorListenerAdapter? = null
 
-    private val _currentTransitionMutex = Mutex()
+    private val withContextMutex = Mutex()
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
         MutableStateFlow(
             TransitionInfo(
@@ -143,6 +159,16 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
             )
         )
     override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
+
+    @Volatile
+    override var currentTransitionInfo: TransitionInfo =
+        TransitionInfo(
+            ownerName = "",
+            from = KeyguardState.OFF,
+            to = KeyguardState.OFF,
+            animator = null,
+        )
+        private set
 
     /*
      * When manual control of the transition is requested, a unique [UUID] is used as the handle
@@ -163,13 +189,17 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
     }
 
     override suspend fun startTransition(info: TransitionInfo): UUID? {
-        _currentTransitionInfo.value = info
+        if (transitionRaceCondition()) {
+            currentTransitionInfo = info
+        } else {
+            _currentTransitionInfo.value = info
+        }
         Log.d(TAG, "(Internal) Setting current transition info: $info")
 
         // There is no fairness guarantee with 'withContext', which means that transitions could
         // be processed out of order. Use a Mutex to guarantee ordering. [updateTransition]
         // requires the same lock
-        _currentTransitionMutex.lock()
+        withContextMutex.lock()
         // Only used in a test environment
         if (forceDelayForRaceConditionTest) {
             delay(50L)
@@ -177,7 +207,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
 
         // Animators must be started on the main thread.
         return withContext("$TAG#startTransition", mainDispatcher) {
-            _currentTransitionMutex.unlock()
+            withContextMutex.unlock()
             if (lastStep.from == info.from && lastStep.to == info.to) {
                 Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
                 return@withContext null
@@ -216,7 +246,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                     )
                 }
 
-                val adapter =
+                animatorListener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(animation: Animator) {
                             emitTransition(
@@ -237,9 +267,10 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                             animator.removeListener(this)
                             animator.removeUpdateListener(updateListener)
                             lastAnimator = null
+                            animatorListener = null
                         }
                     }
-                animator.addListener(adapter)
+                animator.addListener(animatorListener)
                 animator.addUpdateListener(updateListener)
                 animator.start()
                 return@withContext null
@@ -265,11 +296,38 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
         // There is no fairness guarantee with 'withContext', which means that transitions could
         // be processed out of order. Use a Mutex to guarantee ordering. [startTransition]
         // requires the same lock
-        _currentTransitionMutex.lock()
+        withContextMutex.lock()
         withContext("$TAG#updateTransition", mainDispatcher) {
-            _currentTransitionMutex.unlock()
+            withContextMutex.unlock()
 
             updateTransitionInternal(transitionId, value, state)
+        }
+    }
+
+    override suspend fun forceFinishCurrentTransition() {
+        if (lastAnimator?.isRunning != true) {
+            return
+        }
+
+        withContextMutex.lock()
+
+        return withContext("$TAG#forceFinishCurrentTransition", mainDispatcher) {
+            withContextMutex.unlock()
+
+            Log.d(TAG, "forceFinishCurrentTransition() - emitting FINISHED early.")
+
+            lastAnimator?.apply {
+                // Cancel the animator, but remove listeners first so we don't emit CANCELED.
+                removeAllListeners()
+                cancel()
+
+                // Emit a final 1f RUNNING step to ensure that any transitions not listening for a
+                // FINISHED step end up in the right end state.
+                emitTransition(TransitionStep(currentTransitionInfo, 1f, TransitionState.RUNNING))
+
+                // Ask the listener to emit FINISHED and clean up its state.
+                animatorListener?.onAnimationEnd(this)
+            }
         }
     }
 
@@ -302,13 +360,23 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
         // Tests runs on testDispatcher, which is not the main thread, causing the animator thread
         // check to fail
         if (testSetup) {
-            _currentTransitionInfo.value =
-                TransitionInfo(
-                    ownerName = ownerName,
-                    from = KeyguardState.OFF,
-                    to = to,
-                    animator = null,
-                )
+            if (transitionRaceCondition()) {
+                currentTransitionInfo =
+                    TransitionInfo(
+                        ownerName = ownerName,
+                        from = KeyguardState.OFF,
+                        to = to,
+                        animator = null,
+                    )
+            } else {
+                _currentTransitionInfo.value =
+                    TransitionInfo(
+                        ownerName = ownerName,
+                        from = KeyguardState.OFF,
+                        to = to,
+                        animator = null,
+                    )
+            }
             emitTransition(
                 TransitionStep(
                     KeyguardState.OFF,

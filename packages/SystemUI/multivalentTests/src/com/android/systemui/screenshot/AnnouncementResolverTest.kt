@@ -16,7 +16,7 @@
 
 package com.android.systemui.screenshot
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.screenshot.data.repository.profileTypeRepository
 import com.android.systemui.screenshot.policy.TestUserIds
@@ -30,7 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class AnnouncementResolverTest {
     private val kosmos = Kosmos()
 

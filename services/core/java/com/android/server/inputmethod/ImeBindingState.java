@@ -20,6 +20,7 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCU
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.IBinder;
@@ -86,10 +87,10 @@ final class ImeBindingState {
                 InputMethodDebug.softInputModeToString(mFocusedWindowSoftInputMode));
     }
 
-    void dump(String prefix, Printer p) {
-        p.println(prefix + "mFocusedWindow()=" + mFocusedWindow);
-        p.println(prefix + "softInputMode=" + InputMethodDebug.softInputModeToString(
-                mFocusedWindowSoftInputMode));
+    void dump(@NonNull Printer p, @NonNull String prefix) {
+        p.println(prefix + "mFocusedWindow=" + mFocusedWindow);
+        p.println(prefix + "mFocusedWindowSoftInputMode="
+                + InputMethodDebug.softInputModeToString(mFocusedWindowSoftInputMode));
         p.println(prefix + "mFocusedWindowClient=" + mFocusedWindowClient);
     }
 

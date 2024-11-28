@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -40,8 +41,11 @@ import java.util.concurrent.Executor;
  * <p>Resources include:
  * <ul>
  * <li>TunerFrontend {@link android.media.tv.tuner.frontend}.
+ * <li>Demux {@link com.android.server.tv.tunerresourcemanager.DemuxResource}.
+ * <li>Descrambler {@link android.media.tv.tuner.Descrambler}.
  * <li>TunerLnb {@link android.media.tv.tuner.Lnb}.
  * <li>MediaCas {@link android.media.MediaCas}.
+ * <li>CiCam {@link com.android.server.tv.tunerresourcemanager.CiCamResource}.
  * <ul>
  *
  * <p>Expected workflow is:
@@ -78,7 +82,7 @@ public class TunerResourceManager {
         TUNER_RESOURCE_TYPE_LNB,
         TUNER_RESOURCE_TYPE_CAS_SESSION,
         TUNER_RESOURCE_TYPE_FRONTEND_CICAM,
-        TUNER_RESOURCE_TYPE_MAX,
+        TUNER_RESOURCE_TYPE_MAX, // upper bound of constants
      })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TunerResourceType {}
@@ -217,6 +221,26 @@ public class TunerResourceManager {
             throw e.rethrowFromSystemServer();
         }
         return result;
+    }
+
+    /**
+     * Determines whether the resource holder retains ownership of the resource during a challenge
+     * scenario, when both resource holder and resource challenger have same processId and same
+     * priority.
+     *
+     * @param clientId The client id used to set ownership of resource in case of resource
+     *     challenger situation.
+     * @param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
+     */
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public void setResourceOwnershipRetention(int clientId, boolean enabled) {
+        try {
+            mService.setResourceOwnershipRetention(clientId, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

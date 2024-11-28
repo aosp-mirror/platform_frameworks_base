@@ -15,23 +15,30 @@
  */
 package com.android.internal.widget.remotecompose.player;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.HapticFeedbackConstants;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.player.platform.RemoteComposeCanvas;
 
-/**
- * A view to to display and play RemoteCompose documents
- */
+/** A view to to display and play RemoteCompose documents */
 public class RemoteComposePlayer extends FrameLayout {
     private RemoteComposeCanvas mInner;
 
@@ -59,11 +66,7 @@ public class RemoteComposePlayer extends FrameLayout {
      * @param debugFlags 1 to set debug on
      */
     public void setDebug(int debugFlags) {
-        if (debugFlags == 1) {
-            mInner.setDebug(true);
-        } else {
-            mInner.setDebug(false);
-        }
+        mInner.setDebug(debugFlags);
     }
 
     public RemoteComposeDocument getDocument() {
@@ -73,10 +76,7 @@ public class RemoteComposePlayer extends FrameLayout {
     public void setDocument(RemoteComposeDocument value) {
         if (value != null) {
             if (value.canBeDisplayed(
-                    MAX_SUPPORTED_MAJOR_VERSION,
-                    MAX_SUPPORTED_MINOR_VERSION, 0L
-            )
-            ) {
+                    MAX_SUPPORTED_MAJOR_VERSION, MAX_SUPPORTED_MINOR_VERSION, 0L)) {
                 mInner.setDocument(value);
                 int contentBehavior = value.getDocument().getContentScroll();
                 applyContentBehavior(contentBehavior);
@@ -87,68 +87,70 @@ public class RemoteComposePlayer extends FrameLayout {
             mInner.setDocument(null);
         }
         mapColors();
+        setupSensors();
+        mInner.setHapticEngine(
+                new CoreDocument.HapticEngine() {
+
+                    @Override
+                    public void haptic(int type) {
+                        provideHapticFeedback(type);
+                    }
+                });
     }
 
     /**
-     * Apply the content behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL) to the player,
-     * adding or removing scrollviews as needed.
+     * Apply the content behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL) to the player, adding or
+     * removing scrollviews as needed.
      *
      * @param contentBehavior document content behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      */
     private void applyContentBehavior(int contentBehavior) {
         switch (contentBehavior) {
-            case RootContentBehavior.SCROLL_HORIZONTAL: {
+            case RootContentBehavior.SCROLL_HORIZONTAL:
                 if (!(mInner.getParent() instanceof HorizontalScrollView)) {
                     ((ViewGroup) mInner.getParent()).removeView(mInner);
                     removeAllViews();
-                    LayoutParams layoutParamsInner = new LayoutParams(
-                            LayoutParams.WRAP_CONTENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParamsInner =
+                            new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
                     HorizontalScrollView horizontalScrollView =
                             new HorizontalScrollView(getContext());
                     horizontalScrollView.setBackgroundColor(Color.TRANSPARENT);
                     horizontalScrollView.setFillViewport(true);
                     horizontalScrollView.addView(mInner, layoutParamsInner);
-                    LayoutParams layoutParams = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParams =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                     addView(horizontalScrollView, layoutParams);
                 }
-            }
-            break;
-            case RootContentBehavior.SCROLL_VERTICAL: {
+                break;
+            case RootContentBehavior.SCROLL_VERTICAL:
                 if (!(mInner.getParent() instanceof ScrollView)) {
                     ((ViewGroup) mInner.getParent()).removeView(mInner);
                     removeAllViews();
-                    LayoutParams layoutParamsInner = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.WRAP_CONTENT);
+                    LayoutParams layoutParamsInner =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                     ScrollView scrollView = new ScrollView(getContext());
                     scrollView.setBackgroundColor(Color.TRANSPARENT);
                     scrollView.setFillViewport(true);
                     scrollView.addView(mInner, layoutParamsInner);
-                    LayoutParams layoutParams = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParams =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                     addView(scrollView, layoutParams);
                 }
-            }
-            break;
+                break;
             default:
                 if (mInner.getParent() != this) {
                     ((ViewGroup) mInner.getParent()).removeView(mInner);
                     removeAllViews();
-                    LayoutParams layoutParams = new LayoutParams(
-                            LayoutParams.MATCH_PARENT,
-                            LayoutParams.MATCH_PARENT);
+                    LayoutParams layoutParams =
+                            new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                     addView(mInner, layoutParams);
                 }
         }
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT);
+        LayoutParams layoutParams =
+                new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         setBackgroundColor(Color.TRANSPARENT);
         mInner = new RemoteComposeCanvas(context, attrs, defStyleAttr);
         mInner.setBackgroundColor(Color.TRANSPARENT);
@@ -241,24 +243,25 @@ public class RemoteComposePlayer extends FrameLayout {
      * Add a callback for handling click events on the document
      *
      * @param callback the callback lambda that will be used when a click is detected
-     *                 <p>
-     *                 The parameter of the callback are:
-     *                 id : the id of the clicked area
-     *                 metadata: a client provided unstructured string associated with that area
+     *     <p>The parameter of the callback are:
+     *     <ul>
+     *       <li>id : the id of the clicked area
+     *       <li>metadata: a client provided unstructured string associated with that area
+     *     </ul>
      */
     public void addClickListener(ClickCallbacks callback) {
         mInner.addClickListener((id, metadata) -> callback.click(id, metadata));
     }
 
     /**
-     * Set the playback theme for the document. This allows to filter operations in order
-     * to have the document adapt to the given theme. This method is intended to be used
-     * to support night/light themes (system or app level), not custom themes.
+     * Set the playback theme for the document. This allows to filter operations in order to have
+     * the document adapt to the given theme. This method is intended to be used to support
+     * night/light themes (system or app level), not custom themes.
      *
-     * @param theme the theme used for playing the document. Possible values for theme are:
-     *              - Theme.UNSPECIFIED -- all instructions in the document will be executed
-     *              - Theme.DARK -- only executed NON Light theme instructions
-     *              - Theme.LIGHT -- only executed NON Dark theme instructions
+     * @param theme the theme used for playing the document. Possible values for theme are: -
+     *     Theme.UNSPECIFIED -- all instructions in the document will be executed - Theme.DARK --
+     *     only executed NON Light theme instructions - Theme.LIGHT -- only executed NON Dark theme
+     *     instructions
      */
     public void setTheme(int theme) {
         if (mInner.getTheme() != theme) {
@@ -270,15 +273,41 @@ public class RemoteComposePlayer extends FrameLayout {
     /**
      * This returns a list of colors that have names in the Document.
      *
-     * @return
+     * @return the names of named Strings or null
      */
     public String[] getNamedColors() {
         return mInner.getNamedColors();
     }
 
     /**
-     * This sets a color based on its name. Overriding the color set in
-     * the document.
+     * This returns a list of floats that have names in the Document.
+     *
+     * @return return the names of named floats in the document
+     */
+    public String[] getNamedFloats() {
+        return mInner.getNamedVariables(NamedVariable.FLOAT_TYPE);
+    }
+
+    /**
+     * This returns a list of string name that have names in the Document.
+     *
+     * @return the name of named string (not the string itself)
+     */
+    public String[] getNamedStrings() {
+        return mInner.getNamedVariables(NamedVariable.STRING_TYPE);
+    }
+
+    /**
+     * This returns a list of images that have names in the Document.
+     *
+     * @return
+     */
+    public String[] getNamedImages() {
+        return mInner.getNamedVariables(NamedVariable.IMAGE_TYPE);
+    }
+
+    /**
+     * This sets a color based on its name. Overriding the color set in the document.
      *
      * @param colorName Name of the color
      * @param colorValue The new color value
@@ -364,7 +393,7 @@ public class RemoteComposePlayer extends FrameLayout {
                 case "colorFocusedHighlight":
                     setRColor(s, android.R.attr.colorFocusedHighlight);
                     break;
-                case "colorForeground":   // General foreground color for views.
+                case "colorForeground": // General foreground color for views.
                     setRColor(s, android.R.attr.colorForeground);
                     break;
                 // Foreground color for inverse backgrounds.
@@ -483,15 +512,161 @@ public class RemoteComposePlayer extends FrameLayout {
     }
 
     private int getColorFromResource(int id) {
+
         TypedValue typedValue = new TypedValue();
-        try (TypedArray arr = getContext()
-                .getApplicationContext()
-                .obtainStyledAttributes(typedValue.data, new int[]{id})) {
+        try (TypedArray arr =
+                getContext()
+                        .getApplicationContext()
+                        .obtainStyledAttributes(typedValue.data, new int[] {id})) {
             int color = arr.getColor(0, -1);
             return color;
         }
     }
 
+    private static int[] sHapticTable = {
+        HapticFeedbackConstants.NO_HAPTICS,
+        HapticFeedbackConstants.LONG_PRESS,
+        HapticFeedbackConstants.VIRTUAL_KEY,
+        HapticFeedbackConstants.KEYBOARD_TAP,
+        HapticFeedbackConstants.CLOCK_TICK,
+        HapticFeedbackConstants.CONTEXT_CLICK,
+        HapticFeedbackConstants.KEYBOARD_PRESS,
+        HapticFeedbackConstants.KEYBOARD_RELEASE,
+        HapticFeedbackConstants.VIRTUAL_KEY_RELEASE,
+        HapticFeedbackConstants.TEXT_HANDLE_MOVE,
+        HapticFeedbackConstants.GESTURE_START,
+        HapticFeedbackConstants.GESTURE_END,
+        HapticFeedbackConstants.CONFIRM,
+        HapticFeedbackConstants.REJECT,
+        HapticFeedbackConstants.TOGGLE_ON,
+        HapticFeedbackConstants.TOGGLE_OFF,
+        HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE,
+        HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE,
+        HapticFeedbackConstants.DRAG_START,
+        HapticFeedbackConstants.SEGMENT_TICK,
+        HapticFeedbackConstants.SEGMENT_FREQUENT_TICK,
+    };
 
+    private void provideHapticFeedback(int type) {
+        performHapticFeedback(sHapticTable[type % sHapticTable.length]);
+    }
+
+    SensorManager mSensorManager;
+    Sensor mAcc = null, mGyro = null, mMag = null, mLight = null;
+    SensorEventListener mListener;
+
+    private void setupSensors() {
+
+        int minId = RemoteContext.ID_ACCELERATION_X;
+        int maxId = RemoteContext.ID_LIGHT;
+        int[] ids = new int[1 + maxId - minId];
+
+        int count = mInner.hasSensorListeners(ids);
+        mAcc = null;
+        mGyro = null;
+        mMag = null;
+        mLight = null;
+        if (count > 0) {
+            Application app = (Application) getContext().getApplicationContext();
+
+            mSensorManager = (SensorManager) app.getSystemService(Context.SENSOR_SERVICE);
+            for (int i = 0; i < count; i++) {
+                switch (ids[i]) {
+                    case RemoteContext.ID_ACCELERATION_X:
+                    case RemoteContext.ID_ACCELERATION_Y:
+                    case RemoteContext.ID_ACCELERATION_Z:
+                        if (mAcc == null) {
+                            mAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                        }
+                        break;
+                    case RemoteContext.ID_GYRO_ROT_X:
+                    case RemoteContext.ID_GYRO_ROT_Y:
+                    case RemoteContext.ID_GYRO_ROT_Z:
+                        if (mGyro == null) {
+                            mGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+                        }
+                        break;
+                    case RemoteContext.ID_MAGNETIC_X:
+                    case RemoteContext.ID_MAGNETIC_Y:
+                    case RemoteContext.ID_MAGNETIC_Z:
+                        if (mMag == null) {
+                            mMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+                        }
+                        break;
+                    case RemoteContext.ID_LIGHT:
+                        if (mLight == null) {
+                            mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+                        }
+                }
+            }
+        }
+        registerListener();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        unregisterListener();
+    }
+
+    public void registerListener() {
+        Sensor[] s = {mAcc, mGyro, mMag, mLight};
+        if (mListener != null) {
+            unregisterListener();
+        }
+        SensorEventListener listener =
+                new SensorEventListener() {
+                    @Override
+                    public void onSensorChanged(SensorEvent event) {
+                        if (event.sensor == mAcc) {
+                            mInner.setExternalFloat(
+                                    RemoteContext.ID_ACCELERATION_X, event.values[0]);
+                            mInner.setExternalFloat(
+                                    RemoteContext.ID_ACCELERATION_Y, event.values[1]);
+                            mInner.setExternalFloat(
+                                    RemoteContext.ID_ACCELERATION_Z, event.values[2]);
+                        } else if (event.sensor == mGyro) {
+                            mInner.setExternalFloat(RemoteContext.ID_GYRO_ROT_X, event.values[0]);
+                            mInner.setExternalFloat(RemoteContext.ID_GYRO_ROT_Y, event.values[1]);
+                            mInner.setExternalFloat(RemoteContext.ID_GYRO_ROT_Z, event.values[2]);
+                        } else if (event.sensor == mMag) {
+                            mInner.setExternalFloat(RemoteContext.ID_MAGNETIC_X, event.values[0]);
+                            mInner.setExternalFloat(RemoteContext.ID_MAGNETIC_Y, event.values[1]);
+                            mInner.setExternalFloat(RemoteContext.ID_MAGNETIC_Z, event.values[2]);
+                        } else if (event.sensor == mLight) {
+                            mInner.setExternalFloat(RemoteContext.ID_LIGHT, event.values[0]);
+                        }
+                    }
+
+                    @Override
+                    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+                };
+
+        Sensor[] sensors = {mAcc, mGyro, mMag, mLight};
+        for (int i = 0; i < sensors.length; i++) {
+            Sensor sensor = sensors[i];
+            if (sensor != null) {
+                mListener = listener;
+                mSensorManager.registerListener(
+                        mListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+        }
+    }
+
+    public void unregisterListener() {
+        if (mListener != null && mSensorManager != null) {
+            mSensorManager.unregisterListener(mListener);
+        }
+        mListener = null;
+    }
+
+    /**
+     * This returns the amount of time in ms the player used to evalueate a pass it is averaged over
+     * a number of evaluations.
+     *
+     * @return time in ms
+     */
+    public float getEvalTime() {
+        return mInner.getEvalTime();
+    }
 }
-

@@ -557,6 +557,30 @@
         <item name="android:showWhenLocked">true</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.Volume">
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:showWhenLocked">true</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="SystemUI.Material3.Slider.Volume">
+        <item name="trackHeight">40dp</item>
+        <item name="thumbHeight">52dp</item>
+    </style>
+
+    <style name="SystemUI.Material3.Slider" parent="@style/Widget.Material3.Slider">
+        <item name="labelStyle">@style/Widget.Material3.Slider.Label</item>
+        <item name="thumbColor">@color/slider_thumb_color</item>
+        <item name="tickColorActive">@color/slider_inactive_track_color</item>
+        <item name="tickColorInactive">@color/slider_active_track_color</item>
+        <item name="trackColorActive">@color/slider_active_track_color</item>
+        <item name="trackColorInactive">@color/slider_inactive_track_color</item>
+    </style>
+
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
 
     <style name="Theme.SystemUI.Dialog" parent="@style/Theme.SystemUI.DayNightDialog">
@@ -785,6 +809,16 @@
         <item name="android:minWidth">0dp</item>
     </style>
 
+    <style
+        name="TextAppearance.NotificationFooterButtonRedesign"
+        parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:drawableTint">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
     <style name="TextAppearance.HeadsUpStatusBarText"
         parent="@*android:style/TextAppearance.DeviceDefault.Notification.Info">
     </style>
@@ -794,6 +828,11 @@
         <item name="android:letterSpacing">0.01</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">?attr/onSurfaceVariant</item>
+    </style>
+
+    <style name="TextAppearance.QSEditTitle" >
+        <item name="android:fontFamily">"gsf-title-medium-emphasized"</item>
         <item name="android:textColor">?attr/onSurfaceVariant</item>
     </style>
 
@@ -1045,11 +1084,6 @@
         <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
-
-        <!--
-            TODO(b/309578419): Make the activity handle insets properly and then remove this.
-        -->
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="Widget.SliceView.VolumePanel">
@@ -1447,28 +1481,14 @@
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
-    <style name="BluetoothTileDialog.Device.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceName">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textAppearance">@style/TextAppearance.Dialog.Title</item>
+    <style name="TextAppearance.BluetoothTileDialog">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:textAlignment">gravity</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
-    <style name="BluetoothTileDialog.DeviceSummary">
-        <item name="android:ellipsize">end</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:textAppearance">@style/TextAppearance.Dialog.Body.Message</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceName.Active">
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
-    </style>
-
-    <style name="BluetoothTileDialog.DeviceSummary.Active">
+    <style name="TextAppearance.BluetoothTileDialog.Active">
         <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryContainer</item>
     </style>
 

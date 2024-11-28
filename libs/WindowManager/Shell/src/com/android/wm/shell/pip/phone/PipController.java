@@ -104,6 +104,7 @@ import com.android.wm.shell.sysui.UserChangeListener;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -215,7 +216,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private boolean mIsKeyguardShowingOrAnimating;
 
-    private Consumer<Boolean> mOnIsInPipStateChangedListener;
+    private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
 
     @VisibleForTesting
     interface PipAnimationListener {
@@ -501,11 +502,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* saveRestoreSnapFraction */);
         });
         mPipTransitionState.addOnPipTransitionStateChangedListener((oldState, newState) -> {
-            if (mOnIsInPipStateChangedListener != null) {
-                final boolean wasInPip = PipTransitionState.isInPip(oldState);
-                final boolean nowInPip = PipTransitionState.isInPip(newState);
-                if (nowInPip != wasInPip) {
-                    mOnIsInPipStateChangedListener.accept(nowInPip);
+            final boolean wasInPip = PipTransitionState.isInPip(oldState);
+            final boolean nowInPip = PipTransitionState.isInPip(newState);
+            if (nowInPip != wasInPip) {
+                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
+                    listener.accept(nowInPip);
                 }
             }
         });
@@ -960,10 +961,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState.getLauncherState().setAppIconSizePx(iconSizePx);
     }
 
-    private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
-        mOnIsInPipStateChangedListener = callback;
-        if (mOnIsInPipStateChangedListener != null) {
+    private void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.add(callback);
             callback.accept(mPipTransitionState.isInPip());
+        }
+    }
+
+    private void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.remove(callback);
         }
     }
 
@@ -1222,9 +1229,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+        public void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
             mMainExecutor.execute(() -> {
-                PipController.this.setOnIsInPipStateChangedListener(callback);
+                PipController.this.addOnIsInPipStateChangedListener(callback);
+            });
+        }
+
+        @Override
+        public void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+            mMainExecutor.execute(() -> {
+                PipController.this.removeOnIsInPipStateChangedListener(callback);
             });
         }
 

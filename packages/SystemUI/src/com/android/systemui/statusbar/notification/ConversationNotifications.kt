@@ -29,16 +29,17 @@ import com.android.internal.widget.MessagingLayout
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationContentView
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinderLogger
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.children
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -48,12 +49,12 @@ class ConversationNotificationProcessor
 @Inject
 constructor(
     private val launcherApps: LauncherApps,
-    private val conversationNotificationManager: ConversationNotificationManager
+    private val conversationNotificationManager: ConversationNotificationManager,
 ) {
     fun processNotification(
         entry: NotificationEntry,
         recoveredBuilder: Notification.Builder,
-        logger: NotificationRowContentBinderLogger
+        logger: NotificationRowContentBinderLogger,
     ): Notification.MessagingStyle? {
         val messagingStyle = recoveredBuilder.style as? Notification.MessagingStyle ?: return null
         messagingStyle.conversationType =
@@ -82,7 +83,7 @@ constructor(
     private val notifCollection: CommonNotifCollection,
     private val bindEventManager: BindEventManager,
     private val headsUpManager: HeadsUpManager,
-    private val statusBarStateController: StatusBarStateController
+    private val statusBarStateController: StatusBarStateController,
 ) {
 
     private var isStatusBarExpanded = false
@@ -117,7 +118,8 @@ constructor(
             .flatMap { layout -> layout.allViews.asSequence() }
             .flatMap { view ->
                 (view as? ConversationLayout)?.messagingGroups?.asSequence()
-                    ?: (view as? MessagingLayout)?.messagingGroups?.asSequence() ?: emptySequence()
+                    ?: (view as? MessagingLayout)?.messagingGroups?.asSequence()
+                    ?: emptySequence()
             }
             .flatMap { messagingGroup -> messagingGroup.messageContainer.children }
             .mapNotNull { view ->
@@ -141,9 +143,9 @@ class ConversationNotificationManager
 @Inject
 constructor(
     bindEventManager: BindEventManager,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notifCollection: CommonNotifCollection,
-    @Main private val mainHandler: Handler
+    @Main private val mainHandler: Handler,
 ) {
     // Need this state to be thread safe, since it's accessed from the ui thread
     // (NotificationEntryListener) and a bg thread (NotificationRowContentBinder)
@@ -174,7 +176,7 @@ constructor(
                             // the notif has been moved in the shade
                             mainHandler.postDelayed(
                                 { layout.setIsImportantConversation(important, true) },
-                                IMPORTANCE_ANIMATION_DELAY.toLong()
+                                IMPORTANCE_ANIMATION_DELAY.toLong(),
                             )
                         } else {
                             layout.setIsImportantConversation(important, false)
@@ -232,8 +234,7 @@ constructor(
                     state?.run {
                         if (shouldIncrementUnread(recoveredBuilder)) unreadCount + 1
                         else unreadCount
-                    }
-                        ?: 1
+                    } ?: 1
                 ConversationState(newCount, entry.sbn.notification)
             }!!
             .unreadCount

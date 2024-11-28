@@ -238,7 +238,12 @@ public class CompanionDeviceDiscoveryService extends Service {
             // Cancel discovery.
             mBtAdapter.cancelDiscovery();
             // Unregister receiver.
-            unregisterReceiver(mBtReceiver);
+            try {
+                unregisterReceiver(mBtReceiver);
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Unable to unregister BT receiver. The receiver is already"
+                        + " unregistered or was not previously registered.");
+            }
             mBtReceiver = null;
         }
 

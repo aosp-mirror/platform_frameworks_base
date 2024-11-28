@@ -417,6 +417,14 @@ public class Environment {
      */
     @SystemApi
     @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
+    public static @NonNull File getDataSystemDeviceProtectedDirectory() {
+        return buildPath(getDataDirectory(), "system_de");
+    }
+
+    /** Use {@link #getDataSystemDeviceProtectedDirectory()} instead.
+     * {@hide}
+     */
+    @Deprecated
     public static @NonNull File getDataSystemDeDirectory() {
         return buildPath(getDataDirectory(), "system_de");
     }

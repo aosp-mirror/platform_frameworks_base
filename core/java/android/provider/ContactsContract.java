@@ -3151,7 +3151,7 @@ public final class ContactsContract {
                  *                {@link #DEFAULT_ACCOUNT_STATE_CLOUD} or
                  *                {@link #DEFAULT_ACCOUNT_STATE_SIM}, or null otherwise.
                  */
-                public DefaultAccountAndState(@DefaultAccountState int state,
+                private DefaultAccountAndState(@DefaultAccountState int state,
                         @Nullable Account account) {
                     if (!isValidDefaultAccountState(state)) {
                         throw new IllegalArgumentException("Invalid default account state.");
@@ -9383,7 +9383,14 @@ public final class ContactsContract {
          * @param resolver the ContentResolver to query.
          * @return the default account for new contacts, or null if it's not set or set to NULL
          * account.
+         *
+         * @deprecated This API is only supported up to Android version
+         *      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions,
+         * {@link ContactsContract.RawContacts.DefaultAccount#getDefaultAccountForNewContacts}
+         * should be used.
          */
+        @Deprecated
+        @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         @Nullable
         public static Account getDefaultAccount(@NonNull ContentResolver resolver) {
             Bundle response = resolver.call(ContactsContract.AUTHORITY_URI,
@@ -9404,7 +9411,14 @@ public final class ContactsContract {
          * @param resolver the ContentResolver to query.
          * @param account the account to be set to default.
          * @hide
+         *
+         * @deprecated This API is only supported up to Android version
+         *      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. On later versions,
+         * {@link ContactsContract.RawContacts.DefaultAccount#setDefaultAccountForNewContacts}
+         * should be used.
          */
+        @Deprecated
+        @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         @SystemApi
         @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS)
         public static void setDefaultAccount(@NonNull ContentResolver resolver,
@@ -10843,6 +10857,28 @@ public final class ContactsContract {
          */
         public static final String CONTENT_ITEM_TYPE =
                 "vnd.android.cursor.item/contact_metadata_sync_state";
+    }
+
+    /**
+     * This exception is thrown when an attempt is made to perform a write operation
+     * on a contact or contact group targeting a local account or a SIM account,
+     * and the operation is not permitted under the current conditions.
+     * The local account can be retrieved using {@link RawContacts#getLocalAccountName(Context)}
+     * and {@link RawContacts#getLocalAccountType(Context)}.
+     * SIM accounts can be retrieved using {@link SimContacts#getSimAccounts(ContentResolver)}.
+     *
+     * <p>Local and SIM accounts have limitations that may prevent write operations
+     * due to their nature, underlying implementation, or the current system state.
+     * For example, the SIM card may be full, read-only, or not present.
+     *
+     * <p>The specific conditions under which write operations are permitted on
+     * local or SIM accounts can vary.
+     */
+    @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+    public static class LocalSimContactsWriteException extends IllegalArgumentException {
+        public LocalSimContactsWriteException(@NonNull String s) {
+            super(s);
+        }
     }
 
     private static Bundle nullSafeCall(@NonNull ContentResolver resolver, @NonNull Uri uri,

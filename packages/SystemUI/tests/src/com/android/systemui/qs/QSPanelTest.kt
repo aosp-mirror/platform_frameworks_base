@@ -13,6 +13,7 @@
  */
 package com.android.systemui.qs
 
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableContext
@@ -91,7 +92,9 @@ class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @After
     fun tearDown() {
-        ViewUtils.detachView(qsPanel)
+        if (qsPanel.isAttachedToWindow) {
+            ViewUtils.detachView(qsPanel)
+        }
     }
 
     @Test
@@ -119,7 +122,7 @@ class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
             QSPanelControllerBase.TileRecord(
                 mock(QSTile::class.java),
-                QSTileViewImpl(themedContext)
+                QSTileViewImpl(themedContext),
             )
         )
 
@@ -129,7 +132,7 @@ class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
         qsPanel.setUsingHorizontalLayout(/* horizontal */ true, mediaView, /* force */ true)
         qsPanel.measure(
             /* width */ View.MeasureSpec.makeMeasureSpec(3000, View.MeasureSpec.EXACTLY),
-            /* height */ View.MeasureSpec.makeMeasureSpec(1000, View.MeasureSpec.EXACTLY)
+            /* height */ View.MeasureSpec.makeMeasureSpec(1000, View.MeasureSpec.EXACTLY),
         )
         qsPanel.layout(0, 0, qsPanel.measuredWidth, qsPanel.measuredHeight)
 
@@ -147,7 +150,7 @@ class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
         val padding = 10
         themedContext.orCreateTestableResources.addOverride(
             R.dimen.qs_panel_padding_bottom,
-            padding
+            padding,
         )
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingBottom).isEqualTo(padding)
@@ -160,7 +163,7 @@ class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
         themedContext.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
         themedContext.orCreateTestableResources.addOverride(
             R.dimen.qs_panel_padding_top,
-            paddingCombined
+            paddingCombined,
         )
 
         qsPanel.updatePadding()
@@ -265,6 +268,62 @@ class QSPanelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
         assertThat(qsPanel.tileLayout!!.minRows).isEqualTo(2)
         assertThat(qsPanel.tileLayout!!.maxColumns).isEqualTo(2)
+    }
+
+    @Test
+    fun noPendingConfigChangesAtBeginning() {
+        assertThat(qsPanel.hadConfigurationChangeWhileDetached()).isFalse()
+    }
+
+    @Test
+    fun configChangesWhileDetached_pendingConfigChanges() {
+        ViewUtils.detachView(qsPanel)
+
+        qsPanel.onConfigurationChanged(Configuration())
+
+        assertThat(qsPanel.hadConfigurationChangeWhileDetached()).isTrue()
+    }
+
+    @Test
+    fun configChangesWhileDetached_reattach_pendingConfigChanges() {
+        ViewUtils.detachView(qsPanel)
+
+        qsPanel.onConfigurationChanged(Configuration())
+        testableLooper.runWithLooper { ViewUtils.attachView(qsPanel) }
+
+        assertThat(qsPanel.hadConfigurationChangeWhileDetached()).isTrue()
+    }
+
+    @Test
+    fun configChangesWhileDetached_reattach_detach_pendingConfigChanges_reset() {
+        ViewUtils.detachView(qsPanel)
+
+        qsPanel.onConfigurationChanged(Configuration())
+
+        testableLooper.runWithLooper { ViewUtils.attachView(qsPanel) }
+        ViewUtils.detachView(qsPanel)
+
+        assertThat(qsPanel.hadConfigurationChangeWhileDetached()).isFalse()
+    }
+
+    @Test
+    fun configChangeWhileAttached_noPendingConfigChanges() {
+        qsPanel.onConfigurationChanged(Configuration())
+
+        assertThat(qsPanel.hadConfigurationChangeWhileDetached()).isFalse()
+    }
+
+    @Test
+    fun configChangeWhileAttachedWithPending_doesntResetPending() {
+        ViewUtils.detachView(qsPanel)
+
+        qsPanel.onConfigurationChanged(Configuration())
+
+        testableLooper.runWithLooper { ViewUtils.attachView(qsPanel) }
+
+        qsPanel.onConfigurationChanged(Configuration())
+
+        assertThat(qsPanel.hadConfigurationChangeWhileDetached()).isTrue()
     }
 
     companion object {

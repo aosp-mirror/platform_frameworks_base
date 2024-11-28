@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
 import androidx.annotation.DrawableRes
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Icon
@@ -34,8 +35,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChipTransitionHelperTest : SysuiTestCase() {
     private val kosmos = Kosmos()

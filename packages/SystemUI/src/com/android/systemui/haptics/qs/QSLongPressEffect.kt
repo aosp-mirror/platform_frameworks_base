@@ -215,6 +215,21 @@ constructor(
         return true
     }
 
+    fun onTileLongClick(): Boolean {
+        if (state == State.IDLE) {
+            // This case represents a long-click detected outside of the QSLongPressEffect. This can
+            // be due to accessibility services
+            qsTile?.longClick(expandable)
+            logEvent(
+                qsTile?.tileSpec,
+                state,
+                "long click action triggered from OnLongClickListener",
+            )
+            return true
+        }
+        return false
+    }
+
     /**
      * Get the appropriate state for a click action.
      *

@@ -34,14 +34,13 @@ import javax.inject.Inject
 /** Maps [UiModeNightTileModel] to [QSTileState]. */
 class UiModeNightTileMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    private val theme: Theme,
-) : QSTileDataToStateMapper<UiModeNightTileModel> {
+constructor(@Main private val resources: Resources, private val theme: Theme) :
+    QSTileDataToStateMapper<UiModeNightTileModel> {
     companion object {
         val formatter12Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
         val formatter24Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
     }
+
     override fun map(config: QSTileConfig, data: UiModeNightTileModel): QSTileState =
         with(data) {
             QSTileState.build(resources, theme, config.uiConfig) {
@@ -76,7 +75,7 @@ constructor(
                                 if (isNightMode)
                                     R.string.quick_settings_dark_mode_secondary_label_until
                                 else R.string.quick_settings_dark_mode_secondary_label_on_at,
-                                formatter.format(time)
+                                formatter.format(time),
                             )
                     } else if (
                         nightModeCustomType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME
@@ -121,9 +120,7 @@ constructor(
                     if (activationState == QSTileState.ActivationState.ACTIVE)
                         R.drawable.qs_light_dark_theme_icon_on
                     else R.drawable.qs_light_dark_theme_icon_off
-                val loadedIcon =
-                    Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
-                icon = { loadedIcon }
+                icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
 
                 supportedActions =
                     if (activationState == QSTileState.ActivationState.UNAVAILABLE)

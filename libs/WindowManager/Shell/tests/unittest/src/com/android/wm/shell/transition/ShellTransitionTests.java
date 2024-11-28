@@ -19,6 +19,7 @@ package com.android.wm.shell.transition;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -360,6 +361,25 @@ public class ShellTransitionTests extends ShellTestCase {
                 .addChange(TRANSIT_OPEN, createTaskInfo(
                         1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD)).build();
         assertFalse(filter.matches(infoNoTaskFragmentToken));
+    }
+
+    @Test
+    public void testTransitionFilterWindowingMode() {
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mWindowingMode = WINDOWING_MODE_FREEFORM;
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        final TransitionInfo fullscreenStd = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, createTaskInfo(
+                        1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD)).build();
+        assertFalse(filter.matches(fullscreenStd));
+
+        final TransitionInfo freeformStd = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, createTaskInfo(
+                        1, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD)).build();
+        assertTrue(filter.matches(freeformStd));
     }
 
     @Test
