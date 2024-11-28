@@ -78,9 +78,16 @@ fun Expandable.withStateAwareness(
             cookie: ActivityTransitionAnimator.TransitionCookie?,
             component: ComponentName?,
             returnCujType: Int?,
+            isEphemeral: Boolean,
         ): ActivityTransitionAnimator.Controller? =
             delegate
-                .activityTransitionController(launchCujType, cookie, component, returnCujType)
+                .activityTransitionController(
+                    launchCujType,
+                    cookie,
+                    component,
+                    returnCujType,
+                    isEphemeral,
+                )
                 ?.withStateAwareness(onActivityLaunchTransitionStart, onActivityLaunchTransitionEnd)
 
         override fun dialogTransitionController(

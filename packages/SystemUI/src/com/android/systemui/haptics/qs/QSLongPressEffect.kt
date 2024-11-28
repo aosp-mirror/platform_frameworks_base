@@ -284,6 +284,7 @@ constructor(
                     cookie: ActivityTransitionAnimator.TransitionCookie?,
                     component: ComponentName?,
                     returnCujType: Int?,
+                    isEphemeral: Boolean,
                 ): ActivityTransitionAnimator.Controller? {
                     val delegatedController =
                         ActivityTransitionAnimator.Controller.fromView(
@@ -292,6 +293,7 @@ constructor(
                             cookie,
                             component,
                             returnCujType,
+                            isEphemeral,
                         )
                     return delegatedController?.let { createTransitionControllerDelegate(it) }
                 }
