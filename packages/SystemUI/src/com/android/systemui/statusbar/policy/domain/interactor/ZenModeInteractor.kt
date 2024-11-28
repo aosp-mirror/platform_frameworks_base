@@ -209,6 +209,14 @@ constructor(
         zenModeRepository.deactivateMode(zenMode)
     }
 
+    fun deactivateAllModes() {
+        for (mode in zenModeRepository.getModes()) {
+            if (mode.isActive) {
+                deactivateMode(mode)
+            }
+        }
+    }
+
     private val zenDuration
         get() = notificationSettingsRepository.zenDuration.value
 

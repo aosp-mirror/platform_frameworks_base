@@ -62,7 +62,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
         ModesTileUserActionInteractor(inputHandler, mockDialogDelegate, zenModeInteractor)
 
     @Test
-    fun handleClick_active() = runTest {
+    fun handleClick_active_showsDialog() = runTest {
         val expandable = mock<Expandable>()
         underTest.handleInput(
             QSTileInputTestKtx.click(data = modelOf(true, listOf("DND")), expandable = expandable)
@@ -72,7 +72,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleClick_inactive() = runTest {
+    fun handleClick_inactive_showsDialog() = runTest {
         val expandable = mock<Expandable>()
         underTest.handleInput(
             QSTileInputTestKtx.click(data = modelOf(false, emptyList()), expandable = expandable)
@@ -83,7 +83,31 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT)
-    fun handleToggleClick_dndActive() =
+    fun handleToggleClick_multipleModesActive_deactivatesAll() =
+        testScope.runTest {
+            val activeModes by collectLastValue(zenModeInteractor.activeModes)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder().setName("Mode 1").setActive(true).build(),
+                    TestModeBuilder().setName("Mode 2").setActive(true).build(),
+                )
+            )
+            assertThat(activeModes?.modeNames?.count()).isEqualTo(3)
+
+            underTest.handleInput(
+                QSTileInputTestKtx.toggleClick(
+                    data = modelOf(true, listOf("DND", "Mode 1", "Mode 2"))
+                )
+            )
+
+            assertThat(activeModes?.isAnyActive()).isFalse()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT)
+    fun handleToggleClick_dndActive_deactivatesDnd() =
         testScope.runTest {
             val dndMode by collectLastValue(zenModeInteractor.dndMode)
 
@@ -99,7 +123,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT)
-    fun handleToggleClick_dndInactive() =
+    fun handleToggleClick_dndInactive_activatesDnd() =
         testScope.runTest {
             val dndMode by collectLastValue(zenModeInteractor.dndMode)
 
@@ -107,14 +131,14 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
             assertThat(dndMode?.isActive).isFalse()
 
             underTest.handleInput(
-                QSTileInputTestKtx.toggleClick(data = modelOf(true, listOf("DND")))
+                QSTileInputTestKtx.toggleClick(data = modelOf(false, emptyList()))
             )
 
             assertThat(dndMode?.isActive).isTrue()
         }
 
     @Test
-    fun handleLongClick_active() = runTest {
+    fun handleLongClick_active_opensSettings() = runTest {
         underTest.handleInput(QSTileInputTestKtx.longClick(modelOf(true, listOf("DND"))))
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
@@ -123,7 +147,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun handleLongClick_inactive() = runTest {
+    fun handleLongClick_inactive_opensSettings() = runTest {
         underTest.handleInput(QSTileInputTestKtx.longClick(modelOf(false, emptyList())))
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {

@@ -49,7 +49,7 @@ constructor(
                     handleClick(action.expandable)
                 }
                 is QSTileUserAction.ToggleClick -> {
-                    handleToggleClick()
+                    handleToggleClick(input.data)
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserInputHandler.handle(action.expandable, longClickIntent)
@@ -63,20 +63,24 @@ constructor(
         dialogDelegate.showDialog(expandable)
     }
 
-    fun handleToggleClick() {
+    fun handleToggleClick(modesTileModel: ModesTileModel) {
         if (QSComposeFragment.isUnexpectedlyInLegacyMode()) {
             return
         }
 
-        val dnd = zenModeInteractor.dndMode.value
-        if (dnd == null) {
-            Log.wtf(TAG, "Triggered DND but it's null!?")
-            return
-        }
-        if (dnd.isActive) {
-            zenModeInteractor.deactivateMode(dnd)
-        } else {
+        // If no modes are on, turn on DND since it's the highest-priority mode. Otherwise, turn
+        // them all off.
+        // We want this toggle to work as a shortcut to DND in most cases, but it should still
+        // correctly toggle the tile state to "off" as the user would expect when more modes are on.
+        if (modesTileModel.activeModes.isEmpty()) {
+            val dnd = zenModeInteractor.dndMode.value
+            if (dnd == null) {
+                Log.wtf(TAG, "Triggered DND but it's null!?")
+                return
+            }
             zenModeInteractor.activateMode(dnd)
+        } else {
+            zenModeInteractor.deactivateAllModes()
         }
     }
 

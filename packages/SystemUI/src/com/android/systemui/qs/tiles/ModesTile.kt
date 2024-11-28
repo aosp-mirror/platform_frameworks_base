@@ -110,7 +110,8 @@ constructor(
     }
 
     override fun handleSecondaryClick(expandable: Expandable?) = runBlocking {
-        userActionInteractor.handleToggleClick()
+        val model = dataInteractor.getCurrentTileModel()
+        userActionInteractor.handleToggleClick(model)
     }
 
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
