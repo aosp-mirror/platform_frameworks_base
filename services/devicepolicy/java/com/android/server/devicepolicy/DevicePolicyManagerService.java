@@ -9082,7 +9082,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         CallerIdentity caller = getCallerIdentity(who);
 
-        Objects.requireNonNull(who, "ComponentName is null");
+        if (!Flags.setAutoTimeEnabledCoexistence()) {
+            Objects.requireNonNull(who, "ComponentName is null");
+        }
         Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
 
@@ -9162,7 +9164,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         CallerIdentity caller = getCallerIdentity(who);
 
-        Objects.requireNonNull(who, "ComponentName is null");
+        if (!Flags.setAutoTimeZoneEnabledCoexistence()) {
+            Objects.requireNonNull(who, "ComponentName is null");
+        }
         Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
                 caller));
