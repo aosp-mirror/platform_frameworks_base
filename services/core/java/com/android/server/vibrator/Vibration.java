@@ -25,6 +25,7 @@ import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -211,6 +212,11 @@ abstract class Vibration {
         public void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
             statsLogger.logVibrationAdaptiveHapticScale(mCallerInfo.uid, mAdaptiveScale);
             statsLogger.writeVibrationReportedAsync(mStatsInfo);
+            if (Flags.vendorVibrationEffects()) {
+                // Log effect as it was originally requested.
+                statsLogger.logVibrationCountAndSizeIfVendorEffect(mCallerInfo.uid,
+                        mOriginalEffect != null ? mOriginalEffect : mPlayedEffect);
+            }
         }
 
         @Override
