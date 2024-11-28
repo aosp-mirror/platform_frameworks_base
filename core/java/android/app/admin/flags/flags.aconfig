@@ -367,6 +367,7 @@ flag {
     namespace: "enterprise"
     description: "API that removes a given managed profile."
     bug: "372652841"
+    is_exported: true
 }
 
 flag {
@@ -390,6 +391,7 @@ flag {
   namespace: "enterprise"
   description: "Split up existing create and provision managed profile API."
   bug: "375382324"
+  is_exported: true
 }
 
 flag {
