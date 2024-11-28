@@ -49,7 +49,6 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.res.R
 
 object TestShortcuts {
@@ -626,9 +625,6 @@ object TestShortcuts {
             }
         }
 
-    val expectedStandardDeleteShortcutUiState =
-        ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)
-
     val keyDownEventWithoutActionKeyPressed =
         androidx.compose.ui.input.key.KeyEvent(
             android.view.KeyEvent(
@@ -670,13 +666,5 @@ object TestShortcuts {
             label = "Standard shortcut",
             categoryType = ShortcutCategoryType.System,
             subCategoryLabel = "Standard subcategory",
-        )
-
-    val expectedStandardAddShortcutUiState =
-        ShortcutCustomizationUiState.AddShortcutDialog(
-            shortcutLabel = "Standard shortcut",
-            defaultCustomShortcutModifierKey =
-                ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
-            isDialogShowing = false,
         )
 }

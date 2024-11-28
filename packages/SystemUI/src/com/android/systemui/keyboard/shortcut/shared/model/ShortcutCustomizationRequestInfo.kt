@@ -28,4 +28,6 @@ sealed interface ShortcutCustomizationRequestInfo {
         val categoryType: ShortcutCategoryType = ShortcutCategoryType.System,
         val subCategoryLabel: String = "",
     ) : ShortcutCustomizationRequestInfo
+
+    data object Reset : ShortcutCustomizationRequestInfo
 }
