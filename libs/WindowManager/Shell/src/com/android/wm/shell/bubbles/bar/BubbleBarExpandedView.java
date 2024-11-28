@@ -606,6 +606,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mTaskView.setZOrderedOnTop(onTop, true /* allowDynamicChange */);
     }
 
+    @VisibleForTesting
+    boolean isSurfaceZOrderedOnTop() {
+        return mTaskView != null && mTaskView.isZOrderedOnTop();
+    }
+
     /**
      * Sets whether the view is animating, in this case we won't change the content visibility
      * until the animation is done.
