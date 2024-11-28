@@ -35,7 +35,7 @@ import android.view.animation.DecelerateInterpolator;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
-import static com.android.systemui.Flags.notificationShadeBlur;
+import com.android.systemui.window.flag.WindowBlurFlag;
 
 /**
  * Drawable used on SysUI scrims.
@@ -214,8 +214,9 @@ public class ScrimDrawable extends Drawable {
     public void draw(@NonNull Canvas canvas) {
         mPaint.setColor(mMainColor);
         mPaint.setAlpha(mAlpha);
-        if (notificationShadeBlur()) {
+        if (WindowBlurFlag.isEnabled()) {
             // TODO(b/370555223): Match the alpha to the visual spec when it is finalized.
+            // TODO (b/381263600), wire this at ScrimController, move it to PrimaryBouncerTransition
             mPaint.setAlpha((int) (0.5f * mAlpha));
         }
         if (mConcaveInfo != null) {
