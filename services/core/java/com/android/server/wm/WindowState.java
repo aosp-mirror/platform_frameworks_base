@@ -2728,7 +2728,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Expands the given rectangle by the region of window resize handle for freeform window.
      * @param inOutRect The rectangle to update.
      */
-    private void adjustRegionInFreefromWindowMode(Rect inOutRect) {
+    private void adjustRegionInFreeformWindowMode(Rect inOutRect) {
         if (!inFreeformWindowingMode()) {
             return;
         }
@@ -2772,7 +2772,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
         }
-        adjustRegionInFreefromWindowMode(mTmpRect);
+        adjustRegionInFreeformWindowMode(mTmpRect);
         outRegion.set(mTmpRect);
         cropRegionToRootTaskBoundsIfNeeded(outRegion);
     }
@@ -3546,7 +3546,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         rootTask.getDimBounds(mTmpRect);
-        adjustRegionInFreefromWindowMode(mTmpRect);
+        adjustRegionInFreeformWindowMode(mTmpRect);
         region.op(mTmpRect, Region.Op.INTERSECT);
     }
 
