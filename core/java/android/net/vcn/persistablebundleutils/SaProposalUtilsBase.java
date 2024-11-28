@@ -18,10 +18,9 @@ package android.net.vcn.persistablebundleutils;
 
 import android.annotation.NonNull;
 import android.net.ipsec.ike.SaProposal;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 import android.util.Pair;
-
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.util.ArrayList;
 import java.util.List;

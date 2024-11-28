@@ -34,7 +34,7 @@ class SingleSurfaceLetterboxController @Inject constructor(
 
     companion object {
         @JvmStatic
-        private val TAG = "LetterboxController"
+        private val TAG = "SingleSurfaceLetterboxController"
     }
 
     private val letterboxMap = mutableMapOf<LetterboxKey, SurfaceControl>()
@@ -93,7 +93,8 @@ class SingleSurfaceLetterboxController @Inject constructor(
     override fun updateLetterboxSurfaceBounds(
         key: LetterboxKey,
         transaction: Transaction,
-        taskBounds: Rect
+        taskBounds: Rect,
+        activityBounds: Rect
     ) {
         letterboxMap.runOnItem(key, onFound = { item ->
             item.run {

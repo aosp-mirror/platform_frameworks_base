@@ -34,9 +34,9 @@ import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeIn
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyDownEventWithActionKeyPressed
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyDownEventWithoutActionKeyPressed
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.keyUpEventWithActionKeyPressed
-import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardAddCustomShortcutRequestInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutAddRequest
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardAddShortcutRequest
-import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardDeleteCustomShortcutRequestInfo
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutDeleteRequest
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutCustomizationViewModelFactory
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
@@ -99,7 +99,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     @Test
     fun uiState_correctlyUpdatedWhenDeleteShortcutCustomizationIsRequested() {
         testScope.runTest {
-            viewModel.onShortcutCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
+            viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
 
             assertThat(uiState).isEqualTo(expectedStandardDeleteShortcutUiState)
@@ -122,7 +122,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_consumedOnDeleteDialogShown() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
+            viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
             viewModel.onDialogShown()
 
             assertThat(
@@ -170,7 +170,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     fun uiState_errorMessage_isEmptyByDefault() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(standardAddCustomShortcutRequestInfo)
+            viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
             viewModel.onDialogShown()
 
             assertThat((uiState as ShortcutCustomizationUiState.AddShortcutDialog).errorMessage)
@@ -298,7 +298,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     private suspend fun openAddShortcutDialogAndSetShortcut() {
-        viewModel.onShortcutCustomizationRequested(standardAddCustomShortcutRequestInfo)
+        viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
         viewModel.onDialogShown()
 
         viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
@@ -308,7 +308,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     private suspend fun openDeleteShortcutDialogAndDeleteShortcut() {
-        viewModel.onShortcutCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
+        viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
         viewModel.onDialogShown()
 
         viewModel.deleteShortcutCurrentlyBeingCustomized()

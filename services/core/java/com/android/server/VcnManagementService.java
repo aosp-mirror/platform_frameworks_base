@@ -55,6 +55,8 @@ import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.net.vcn.VcnManager.VcnStatusCode;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
+import android.net.vcn.util.PersistableBundleUtils;
+import android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import android.net.wifi.WifiInfo;
 import android.os.Binder;
 import android.os.Build;
@@ -90,8 +92,6 @@ import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
-import com.android.server.vcn.util.PersistableBundleUtils;
-import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import java.io.File;
 import java.io.FileDescriptor;

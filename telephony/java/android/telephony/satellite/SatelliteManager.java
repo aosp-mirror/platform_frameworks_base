@@ -221,6 +221,14 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestSessionStats(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+
+    public static final String KEY_SESSION_STATS_V2 = "session_stats_v2";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestIsProvisioned(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -747,6 +755,8 @@ public final class SatelliteManager {
      * config_satellite_gateway_service_package
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED =
             "android.telephony.satellite.action.SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
 
@@ -758,6 +768,8 @@ public final class SatelliteManager {
      * config_satellite_gateway_service_package
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String ACTION_SATELLITE_START_NON_EMERGENCY_SESSION =
             "android.telephony.satellite.action.SATELLITE_START_NON_EMERGENCY_SESSION";
     /**
@@ -773,6 +785,8 @@ public final class SatelliteManager {
      * }
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT =
             "android.telephony.METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT";
 
@@ -3274,13 +3288,14 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle the satellite supoprted state changed event.
      *
-     * @return The {@link SatelliteResult} result of the operation.
+     * @return The result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteResult public int registerForSupportedStateChanged(
             @NonNull @CallbackExecutor Executor executor,
@@ -3322,11 +3337,11 @@ public final class SatelliteManager {
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
-     *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void unregisterForSupportedStateChanged(
             @NonNull SatelliteSupportedStateCallback callback) {
         Objects.requireNonNull(callback);
@@ -3355,11 +3370,13 @@ public final class SatelliteManager {
      *
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle satellite communication allowed state changed event.
-     * @return The {@link SatelliteResult} result of the operation.
+     * @return The result of the operation.
      * @throws SecurityException     if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteResult
     public int registerForCommunicationAllowedStateChanged(
@@ -3414,8 +3431,9 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void unregisterForCommunicationAllowedStateChanged(
             @NonNull SatelliteCommunicationAllowedStateCallback callback) {
         Objects.requireNonNull(callback);
@@ -3455,7 +3473,6 @@ public final class SatelliteManager {
      */
     @RequiresPermission(allOf = {Manifest.permission.PACKAGE_USAGE_STATS,
             Manifest.permission.MODIFY_PHONE_STATE})
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void requestSessionStats(@NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<SatelliteSessionStats, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -3468,21 +3485,33 @@ public final class SatelliteManager {
                     @Override
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            SatelliteSessionStats stats;
                             if (resultData.containsKey(KEY_SESSION_STATS)) {
-                                SatelliteSessionStats stats =
-                                        resultData.getParcelable(KEY_SESSION_STATS,
-                                                SatelliteSessionStats.class);
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onResult(stats)));
+                                stats = resultData.getParcelable(KEY_SESSION_STATS,
+                                        SatelliteSessionStats.class);
+                                if (resultData.containsKey(KEY_SESSION_STATS_V2)) {
+                                    SatelliteSessionStats stats1 = resultData.getParcelable(
+                                            KEY_SESSION_STATS_V2, SatelliteSessionStats.class);
+                                    if (stats != null && stats1 != null) {
+                                        stats.setSatelliteSessionStats(
+                                                stats1.getSatelliteSessionStats());
+                                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                                () -> callback.onResult(stats)));
+                                        return;
+                                    }
+                                } else {
+                                    loge("KEY_SESSION_STATS_V2 does not exist.");
+                                }
                             } else {
                                 loge("KEY_SESSION_STATS does not exist.");
-                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                        callback.onError(new SatelliteException(
-                                                SATELLITE_RESULT_REQUEST_FAILED))));
                             }
+                            executor.execute(() -> Binder.withCleanCallingIdentity(
+                                    () -> callback.onError(new SatelliteException(
+                                            SATELLITE_RESULT_REQUEST_FAILED))));
+
                         } else {
-                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
-                                    callback.onError(new SatelliteException(resultCode))));
+                            executor.execute(() -> Binder.withCleanCallingIdentity(
+                                    () -> callback.onError(new SatelliteException(resultCode))));
                         }
                     }
                 };
@@ -3515,8 +3544,9 @@ public final class SatelliteManager {
      * @throws SecurityException if the caller doesn't have required permission.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void requestSatelliteSubscriberProvisionStatus(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<List<SatelliteSubscriberProvisionStatus>,
@@ -3573,8 +3603,9 @@ public final class SatelliteManager {
      * @throws SecurityException if the caller doesn't have required permission.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void provisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
@@ -3628,8 +3659,9 @@ public final class SatelliteManager {
      * @throws SecurityException if the caller doesn't have required permission.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void deprovisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {

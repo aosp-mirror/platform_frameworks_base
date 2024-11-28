@@ -44,6 +44,7 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.UserManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -234,9 +235,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock private lateinit var resources: Resources
   @Mock
   lateinit var desktopModeEnterExitTransitionListener: DesktopModeEntryExitTransitionListener
+  @Mock private lateinit var userManager: UserManager
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
   private lateinit var taskRepository: DesktopRepository
+  private lateinit var userRepositories: DesktopUserRepositories
   private lateinit var desktopTasksLimiter: DesktopTasksLimiter
   private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
   private lateinit var testScope: CoroutineScope
@@ -268,12 +271,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
     shellInit = spy(ShellInit(testExecutor))
-    taskRepository =
-      DesktopRepository(context, shellInit, persistentRepository, repositoryInitializer, testScope)
+    userRepositories =
+      DesktopUserRepositories(
+        context,
+        shellInit,
+        persistentRepository,
+        repositoryInitializer,
+        testScope,
+        userManager)
     desktopTasksLimiter =
         DesktopTasksLimiter(
             transitions,
-            taskRepository,
+            userRepositories,
             shellTaskOrganizer,
             MAX_TASK_LIMIT,
             mockInteractionJankMonitor,
@@ -316,6 +325,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     controller.taskbarDesktopTaskListener = taskbarDesktopTaskListener
 
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
+
+    taskRepository = userRepositories.current
   }
 
   private fun createController(): DesktopTasksController {
@@ -339,7 +350,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         toggleResizeDesktopTaskTransitionHandler,
         dragToDesktopTransitionHandler,
         mMockDesktopImmersiveController,
-        taskRepository,
+        userRepositories,
         recentsTransitionHandler,
         multiInstanceHelper,
         shellExecutor,

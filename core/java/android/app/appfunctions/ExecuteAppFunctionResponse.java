@@ -27,7 +27,16 @@ import android.os.Parcelable;
 
 import java.util.Objects;
 
-/** The response to an app function execution. */
+/**
+ * The response to an app function execution.
+ *
+ * <p>The {@link ExecuteAppFunctionResponse#getResultDocument()} contains the function's return
+ * value as a GenericDocument. This can be converted back into a structured class using the
+ * AppFunction SDK.
+ *
+ * <p>The {@link ExecuteAppFunctionResponse#getExtras()} provides any extra metadata returned by the
+ * function. The AppFunction SDK can expose structured APIs by packing and unpacking this Bundle.
+ */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public final class ExecuteAppFunctionResponse implements Parcelable {
     @NonNull

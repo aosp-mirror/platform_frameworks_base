@@ -1851,14 +1851,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyKeyguardState(@NonNull WindowContainerTransaction.HierarchyOp hop) {
-        int effects = TRANSACT_EFFECTS_NONE;
+        int effects = TRANSACT_EFFECTS_LIFECYCLE;
 
         final KeyguardState keyguardState = hop.getKeyguardState();
         if (keyguardState != null) {
-            int displayId = keyguardState.getDisplayId();
             boolean keyguardShowing = keyguardState.getKeyguardShowing();
             boolean aodShowing = keyguardState.getAodShowing();
-            mService.mKeyguardController.setKeyguardShown(displayId, keyguardShowing, aodShowing);
+            mService.setLockScreenShown(keyguardShowing, aodShowing);
         }
         return effects;
     }

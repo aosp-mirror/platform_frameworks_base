@@ -622,6 +622,15 @@ class BackNavigationController {
         }
     }
 
+    boolean hasFixedRotationAnimation(@NonNull DisplayContent displayContent) {
+        if (!mAnimationHandler.mComposed) {
+            return false;
+        }
+        final ActivityRecord openActivity = mAnimationHandler.mOpenActivities[0];
+        return displayContent == openActivity.mDisplayContent
+                && displayContent.isFixedRotationLaunchingApp(openActivity);
+    }
+
     private boolean isWaitBackTransition() {
         // Ignore mWaitTransition while flag is enabled.
         return mAnimationHandler.mComposed && (Flags.migratePredictiveBackTransition()

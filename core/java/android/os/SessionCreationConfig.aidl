@@ -36,4 +36,12 @@ parcelable SessionCreationConfig {
      * List of the modes to be enabled upon session creation.
      */
     SessionMode[] modesToEnable;
+
+    /**
+     * List of layers to attach this session to.
+     *
+     * Note: DO NOT STORE THESE IN HintSessionManager, as
+     * it will break the layer lifecycle.
+     */
+    IBinder[] layerTokens;
 }

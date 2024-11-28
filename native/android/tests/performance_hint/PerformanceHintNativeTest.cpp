@@ -83,6 +83,7 @@ public:
                 (override));
     MOCK_METHOD(ScopedAStatus, getGpuHeadroomMinIntervalMillis, (int64_t* _aidl_return),
                 (override));
+    MOCK_METHOD(ScopedAStatus, passSessionManagerBinder, (const SpAIBinder& sessionManager));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -99,6 +100,8 @@ public:
     MOCK_METHOD(ScopedAStatus, close, (), (override));
     MOCK_METHOD(ScopedAStatus, reportActualWorkDuration2,
                 (const ::std::vector<hal::WorkDuration>& workDurations), (override));
+    MOCK_METHOD(ScopedAStatus, associateToLayers,
+                (const std::vector<::ndk::SpAIBinder>& in_layerTokens), (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };

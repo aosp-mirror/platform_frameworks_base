@@ -117,6 +117,7 @@ import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction;
@@ -169,7 +170,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellTaskOrganizer mTaskOrganizer;
-    private final DesktopRepository mDesktopRepository;
+    private final DesktopUserRepositories mDesktopUserRepositories;
     private final ShellController mShellController;
     private final Context mContext;
     private final @ShellMainThread Handler mMainHandler;
@@ -247,7 +248,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
-            DesktopRepository desktopRepository,
+            DesktopUserRepositories desktopUserRepositories,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,
@@ -278,7 +279,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 shellCommandHandler,
                 windowManager,
                 taskOrganizer,
-                desktopRepository,
+                desktopUserRepositories,
                 displayController,
                 shellController,
                 displayInsetsController,
@@ -318,7 +319,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
-            DesktopRepository desktopRepository,
+            DesktopUserRepositories desktopUserRepositories,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,
@@ -352,7 +353,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mBgExecutor = bgExecutor;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
-        mDesktopRepository = desktopRepository;
+        mDesktopUserRepositories = desktopUserRepositories;
         mShellController = shellController;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
@@ -628,12 +629,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         );
     }
 
-    private void onEnterOrExitImmersive(int taskId) {
-        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+    private void onEnterOrExitImmersive(RunningTaskInfo taskInfo) {
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) {
             return;
         }
-        if (mDesktopRepository.isTaskInFullImmersiveState(taskId)) {
+        final DesktopRepository desktopRepository = mDesktopUserRepositories.getProfile(
+                taskInfo.userId);
+        if (desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
             mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
                     DesktopUiEventEnum.DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_RESTORE);
             mDesktopImmersiveController.moveTaskToNonImmersive(
@@ -828,7 +831,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         private boolean mIsResizeGesture;
         private boolean mIsDragging;
         private boolean mTouchscreenInUse;
-        private boolean mHasLongClicked;
         private int mDragPointerId = -1;
         private MotionEvent mMotionEvent;
 
@@ -894,7 +896,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         && TaskInfoKt.getRequestingImmersive(decoration.mTaskInfo)) {
                     // Task is requesting immersive, so it should either enter or exit immersive,
                     // depending on immersive state.
-                    onEnterOrExitImmersive(decoration.mTaskInfo.taskId);
+                    onEnterOrExitImmersive(decoration.mTaskInfo);
                 } else {
                     // Full immersive is disabled or task doesn't request/support it, so just
                     // toggle between maximize/restore states.
@@ -987,7 +989,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 if (decoration.isMaximizeMenuActive()) {
                     decoration.closeMaximizeMenu();
                 } else {
-                    mHasLongClicked = true;
                     mDesktopModeUiEventLogger.log(decoration.mTaskInfo,
                             DesktopUiEventEnum.DESKTOP_WINDOW_MAXIMIZE_BUTTON_REVEAL_MENU);
                     decoration.createMaximizeMenu();
@@ -1084,8 +1085,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             }
             final boolean touchingButton = (id == R.id.close_window || id == R.id.maximize_window
                     || id == R.id.open_menu_button || id == R.id.minimize_window);
+            final DesktopRepository desktopRepository = mDesktopUserRepositories.getProfile(
+                    taskInfo.userId);
             final boolean dragAllowed =
-                    !mDesktopRepository.isTaskInFullImmersiveState(taskInfo.taskId);
+                    !desktopRepository.isTaskInFullImmersiveState(taskInfo.taskId);
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     if (dragAllowed) {
@@ -1096,7 +1099,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         updateDragStatus(e.getActionMasked());
                         mOnDragStartInitialBounds.set(initialBounds);
                     }
-                    mHasLongClicked = false;
                     // Do not consume input event if a button is touched, otherwise it would
                     // prevent the button's ripple effect from showing.
                     return !touchingButton;
@@ -1153,7 +1155,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             newTaskBounds, decoration.calculateValidDragArea(),
                             new Rect(mOnDragStartInitialBounds), e,
                             mWindowDecorByTaskId.get(taskInfo.taskId));
-                    if (touchingButton && !mHasLongClicked) {
+                    if (touchingButton) {
                         // We need the input event to not be consumed here to end the ripple
                         // effect on the touched button. We will reset drag state in the ensuing
                         // onClick call that results.
@@ -1195,7 +1197,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     && action != MotionEvent.ACTION_CANCEL)) {
                 return false;
             }
-            if (mDesktopRepository.isTaskInFullImmersiveState(mTaskId)) {
+            final DesktopRepository desktopRepository = mDesktopUserRepositories.getCurrent();
+            if (desktopRepository.isTaskInFullImmersiveState(mTaskId)) {
                 // Disallow double-tap to resize when in full immersive.
                 return false;
             }
@@ -1608,7 +1611,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mSplitScreenController,
-                        mDesktopRepository,
+                        mDesktopUserRepositories,
                         mTaskOrganizer,
                         taskInfo,
                         taskSurface,
@@ -1645,7 +1648,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return Unit.INSTANCE;
         });
         windowDecoration.setOnImmersiveOrRestoreClickListener(() -> {
-            onEnterOrExitImmersive(taskInfo.taskId);
+            onEnterOrExitImmersive(taskInfo);
             return Unit.INSTANCE;
         });
         windowDecoration.setOnLeftSnapClickListener(() -> {

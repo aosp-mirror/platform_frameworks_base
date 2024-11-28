@@ -3,7 +3,6 @@ package com.android.systemui.statusbar.notification.stack
 import android.annotation.DimenRes
 import android.content.pm.PackageManager
 import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -30,7 +29,6 @@ import com.android.systemui.statusbar.notification.footer.ui.view.FooterView.Foo
 import com.android.systemui.statusbar.notification.headsup.AvalancheController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
@@ -154,22 +152,6 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    fun resetViewStates_defaultHun_yTranslationIsInset() {
-        whenever(notificationRow.isPinned).thenReturn(true)
-        whenever(notificationRow.isHeadsUp).thenReturn(true)
-        resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
-    }
-
-    @Test
-    @DisableSceneContainer
-    fun resetViewStates_defaultHunWithStackMargin_changesHunYTranslation() {
-        whenever(notificationRow.isPinned).thenReturn(true)
-        whenever(notificationRow.isHeadsUp).thenReturn(true)
-        resetViewStates_stackMargin_changesHunYTranslation()
-    }
-
-    @Test
-    @DisableSceneContainer
     fun resetViewStates_defaultHunWhenShadeIsOpening_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
@@ -183,24 +165,7 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_yTranslationIsInset() {
-        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
-        resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
-    }
-
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_StackMarginChangesHunYTranslation() {
-        whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
-        resetViewStates_stackMargin_changesHunYTranslation()
-    }
-
-    @Test
-    @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_defaultHun_newHeadsUpAnim_yTranslationIsInset() {
+    fun resetViewStates_defaultHun_yTranslationIsInset() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         resetViewStates_hunYTranslationIs(stackScrollAlgorithm.mHeadsUpInset)
@@ -208,8 +173,7 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_defaultHunWithStackMargin_newHeadsUpAnim_changesHunYTranslation() {
+    fun resetViewStates_defaultHunWithStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isPinned).thenReturn(true)
         whenever(notificationRow.isHeadsUp).thenReturn(true)
         resetViewStates_stackMargin_changesHunYTranslation()
@@ -399,8 +363,7 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_defaultHun_showingQS_newHeadsUpAnim_hunTranslatedToMax() {
+    fun resetViewStates_defaultHun_showingQS_hunTranslatedToMax() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
         val maxHunTranslation = 2000f
         ambientState.maxHeadsUpTranslation = maxHunTranslation
@@ -416,8 +379,7 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_showingQS_newHeadsUpAnim_hunTranslatedToBottomOfScreen() {
+    fun resetViewStates_hunAnimatingAway_showingQS_hunTranslatedToBottomOfScreen() {
         // Given: the shade is open and scrolled to the bottom to show the QuickSettings
         val bottomOfScreen = 2600f
         val maxHunTranslation = 2000f
@@ -437,8 +399,7 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunAnimatingAway_newHeadsUpAnim_hunTranslatedToTopOfScreen() {
+    fun resetViewStates_hunAnimatingAway_hunTranslatedToTopOfScreen() {
         val topMargin = 100f
         ambientState.maxHeadsUpTranslation = 2000f
         ambientState.stackTopMargin = topMargin.toInt()
@@ -461,7 +422,6 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAwayWhileDozing_yTranslationIsInset() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
 
@@ -472,7 +432,6 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     @DisableSceneContainer
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun resetViewStates_hunAnimatingAwayWhileDozing_hasStackMargin_changesHunYTranslation() {
         whenever(notificationRow.isHeadsUpAnimatingAway).thenReturn(true)
 
@@ -489,18 +448,6 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
         whenever(topHun.isPinned).thenReturn(true)
         whenever(bottomHun.isHeadsUp).thenReturn(true)
         whenever(bottomHun.isPinned).thenReturn(true)
-
-        resetViewStates_hunsOverlapping_bottomHunClipped(topHun, bottomHun)
-    }
-
-    @Test
-    @DisableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
-    fun resetViewStates_hunsOverlappingAndBottomHunAnimatingAway_bottomHunClipped() {
-        val topHun = mockExpandableNotificationRow()
-        val bottomHun = mockExpandableNotificationRow()
-        whenever(topHun.isHeadsUp).thenReturn(true)
-        whenever(topHun.isPinned).thenReturn(true)
-        whenever(bottomHun.isHeadsUpAnimatingAway).thenReturn(true)
 
         resetViewStates_hunsOverlapping_bottomHunClipped(topHun, bottomHun)
     }

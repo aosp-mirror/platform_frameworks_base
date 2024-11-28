@@ -16,3 +16,11 @@ flag {
   description: "Flag to enable the SupervisionService on Wear devices"
   bug: "373358935"
 }
+
+flag {
+  name: "enable_sync_with_dpm"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag that enables supervision when the supervision app is the profile owner"
+  bug: "377261590"
+}
