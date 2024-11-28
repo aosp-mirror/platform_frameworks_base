@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 public class RavenwoodCommonUtils {
-    private static final String TAG = "RavenwoodCommonUtils";
+    public static final String TAG = "Ravenwood";
 
     private RavenwoodCommonUtils() {
     }

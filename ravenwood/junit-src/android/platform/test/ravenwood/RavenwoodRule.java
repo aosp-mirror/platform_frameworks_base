@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  */
 @Deprecated
 public final class RavenwoodRule implements TestRule {
-    private static final String TAG = "RavenwoodRule";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
@@ -193,6 +193,12 @@ public final class RavenwoodRule implements TestRule {
         return IS_ON_RAVENWOOD;
     }
 
+    private static void ensureOnRavenwood(String featureName) {
+        if (!IS_ON_RAVENWOOD) {
+            throw new RuntimeException(featureName + " is only supported on Ravenwood.");
+        }
+    }
+
     /**
      * @deprecated Use
      * {@code androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getContext()}
@@ -240,6 +246,40 @@ public final class RavenwoodRule implements TestRule {
      */
     public long realCurrentTimeMillis() {
         return System.currentTimeMillis();
+    }
+
+    /**
+     * Equivalent to setting the ANDROID_LOG_TAGS environmental variable.
+     *
+     * See https://developer.android.com/tools/logcat#filteringOutput for the string format.
+     *
+     * NOTE: this works only on Ravenwood.
+     */
+    public static void setAndroidLogTags(@Nullable String androidLogTags) {
+        ensureOnRavenwood("RavenwoodRule.setAndroidLogTags()");
+        try {
+            Class<?> logRavenwoodClazz = Class.forName("android.util.Log_ravenwood");
+            var setter = logRavenwoodClazz.getMethod("setLogLevels", String.class);
+            setter.invoke(null, androidLogTags);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Set a log level for a given tag. Pass NULL to {@code tag} to change the default level.
+     *
+     * NOTE: this works only on Ravenwood.
+     */
+    public static void setLogLevel(@Nullable String tag, int level) {
+        ensureOnRavenwood("RavenwoodRule.setLogLevel()");
+        try {
+            Class<?> logRavenwoodClazz = Class.forName("android.util.Log_ravenwood");
+            var setter = logRavenwoodClazz.getMethod("setLogLevel", String.class, int.class);
+            setter.invoke(null, tag, level);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Below are internal to ravenwood. Don't use them from normal tests...
