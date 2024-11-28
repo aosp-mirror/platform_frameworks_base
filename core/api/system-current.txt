@@ -7192,8 +7192,8 @@ package android.hardware.soundtrigger {
     method public int getAudioCapabilities();
     method @NonNull public byte[] getData();
     method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphrases();
-    method public boolean isAllowMultipleTriggers();
     method public boolean isCaptureRequested();
+    method public boolean isMultipleTriggersAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
   }
@@ -7201,11 +7201,11 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.RecognitionConfig.Builder {
     ctor public SoundTrigger.RecognitionConfig.Builder();
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig build();
-    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAllowMultipleTriggers(boolean);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAudioCapabilities(int);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setCaptureRequested(boolean);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@NonNull byte[]);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setKeyphrases(@NonNull java.util.Collection<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setMultipleTriggersAllowed(boolean);
   }
 
   public static class SoundTrigger.RecognitionEvent {

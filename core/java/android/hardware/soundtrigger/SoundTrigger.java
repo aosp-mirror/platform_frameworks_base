@@ -1518,7 +1518,7 @@ public class SoundTrigger {
     @FlaggedApi(android.media.soundtrigger.Flags.FLAG_MANAGER_API)
     public static final class RecognitionConfig implements Parcelable {
         private final boolean mCaptureRequested;
-        private final boolean mAllowMultipleTriggers;
+        private final boolean mMultipleTriggersAllowed;
         private final KeyphraseRecognitionExtra mKeyphrases[];
         private final byte[] mData;
         private final @ModuleProperties.AudioCapabilities int mAudioCapabilities;
@@ -1529,7 +1529,7 @@ public class SoundTrigger {
          * {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)}
          *
          * @param captureRequested Whether the DSP should capture the trigger sound.
-         * @param allowMultipleTriggers Whether the service should restart listening after the DSP
+         * @param multipleTriggersAllowed Whether the service should restart listening after the DSP
          *                              triggers.
          * @param keyphrases List of keyphrases in the sound model.
          * @param data Opaque data for use by system applications who know about voice engine
@@ -1537,11 +1537,11 @@ public class SoundTrigger {
          * @param audioCapabilities Bit field encoding of the AudioCapabilities. See
          *                          {@link ModuleProperties.AudioCapabilities} for details.
          */
-        private RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
+        private RecognitionConfig(boolean captureRequested, boolean multipleTriggersAllowed,
                 @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data,
                 @ModuleProperties.AudioCapabilities int audioCapabilities) {
             this.mCaptureRequested = captureRequested;
-            this.mAllowMultipleTriggers = allowMultipleTriggers;
+            this.mMultipleTriggersAllowed = multipleTriggersAllowed;
             this.mKeyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
             this.mData = data != null ? data : new byte[0];
             this.mAudioCapabilities = audioCapabilities;
@@ -1553,7 +1553,7 @@ public class SoundTrigger {
          *
          * @deprecated Use {@link Builder} instead.
          * @param captureRequested Whether the DSP should capture the trigger sound.
-         * @param allowMultipleTriggers Whether the service should restart listening after the DSP
+         * @param multipleTriggersAllowed Whether the service should restart listening after the DSP
          *                              triggers.
          * @param keyphrases List of keyphrases in the sound model.
          * @param data Opaque data for use by system applications.
@@ -1563,9 +1563,9 @@ public class SoundTrigger {
         @UnsupportedAppUsage
         @Deprecated
         @TestApi
-        public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
+        public RecognitionConfig(boolean captureRequested, boolean multipleTriggersAllowed,
                 @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data) {
-            this(captureRequested, allowMultipleTriggers, keyphrases, data, 0);
+            this(captureRequested, multipleTriggersAllowed, keyphrases, data, 0);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<RecognitionConfig> CREATOR
@@ -1593,8 +1593,8 @@ public class SoundTrigger {
          * <p><b>Note:</b> This config flag is currently used at the service layer rather than by
          * the DSP.
          */
-        public boolean isAllowMultipleTriggers() {
-            return mAllowMultipleTriggers;
+        public boolean isMultipleTriggersAllowed() {
+            return mMultipleTriggersAllowed;
         }
 
         /**
@@ -1627,19 +1627,19 @@ public class SoundTrigger {
 
         private static RecognitionConfig fromParcel(Parcel in) {
             boolean captureRequested = in.readBoolean();
-            boolean allowMultipleTriggers = in.readBoolean();
+            boolean multipleTriggersAllowed = in.readBoolean();
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             byte[] data = in.createByteArray();
             int audioCapabilities = in.readInt();
-            return new RecognitionConfig(captureRequested, allowMultipleTriggers, keyphrases, data,
-                    audioCapabilities);
+            return new RecognitionConfig(captureRequested, multipleTriggersAllowed, keyphrases,
+                    data, audioCapabilities);
         }
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeBoolean(mCaptureRequested);
-            dest.writeBoolean(mAllowMultipleTriggers);
+            dest.writeBoolean(mMultipleTriggersAllowed);
             dest.writeTypedArray(mKeyphrases, flags);
             dest.writeByteArray(mData);
             dest.writeInt(mAudioCapabilities);
@@ -1653,7 +1653,7 @@ public class SoundTrigger {
         @Override
         public String toString() {
             return "RecognitionConfig [captureRequested=" + mCaptureRequested
-                    + ", allowMultipleTriggers=" + mAllowMultipleTriggers + ", keyphrases="
+                    + ", multipleTriggersAllowed=" + mMultipleTriggersAllowed + ", keyphrases="
                     + Arrays.toString(mKeyphrases) + ", data=" + Arrays.toString(mData)
                     + ", audioCapabilities=" + Integer.toHexString(mAudioCapabilities) + "]";
         }
@@ -1670,7 +1670,7 @@ public class SoundTrigger {
             if (mCaptureRequested != other.mCaptureRequested) {
                 return false;
             }
-            if (mAllowMultipleTriggers != other.mAllowMultipleTriggers) {
+            if (mMultipleTriggersAllowed != other.mMultipleTriggersAllowed) {
                 return false;
             }
             if (!Arrays.equals(mKeyphrases, other.mKeyphrases)) {
@@ -1690,7 +1690,7 @@ public class SoundTrigger {
             final int prime = 31;
             int result = 1;
             result = prime * result + (mCaptureRequested ? 1 : 0);
-            result = prime * result + (mAllowMultipleTriggers ? 1 : 0);
+            result = prime * result + (mMultipleTriggersAllowed ? 1 : 0);
             result = prime * result + Arrays.hashCode(mKeyphrases);
             result = prime * result + Arrays.hashCode(mData);
             result = prime * result + mAudioCapabilities;
@@ -1702,7 +1702,7 @@ public class SoundTrigger {
          */
         public static final class Builder {
             private boolean mCaptureRequested;
-            private boolean mAllowMultipleTriggers;
+            private boolean mMultipleTriggersAllowed;
             @Nullable private KeyphraseRecognitionExtra[] mKeyphrases;
             @Nullable private byte[] mData;
             private @ModuleProperties.AudioCapabilities int mAudioCapabilities;
@@ -1725,12 +1725,12 @@ public class SoundTrigger {
 
             /**
              * Sets allow multiple triggers state.
-             * @param allowMultipleTriggers Whether the service should restart listening after the
+             * @param multipleTriggersAllowed Whether the service should restart listening after the
              *                              DSP triggers.
              * @return the same Builder instance.
              */
-            public @NonNull Builder setAllowMultipleTriggers(boolean allowMultipleTriggers) {
-                mAllowMultipleTriggers = allowMultipleTriggers;
+            public @NonNull Builder setMultipleTriggersAllowed(boolean multipleTriggersAllowed) {
+                mMultipleTriggersAllowed = multipleTriggersAllowed;
                 return this;
             }
 
@@ -1779,7 +1779,7 @@ public class SoundTrigger {
             public @NonNull RecognitionConfig build() {
                 RecognitionConfig config = new RecognitionConfig(
                         /* captureRequested= */ mCaptureRequested,
-                        /* allowMultipleTriggers= */ mAllowMultipleTriggers,
+                        /* multipleTriggersAllowed= */ mMultipleTriggersAllowed,
                         /* keyphrases= */ mKeyphrases,
                         /* data= */ mData,
                         /* audioCapabilities= */ mAudioCapabilities);
