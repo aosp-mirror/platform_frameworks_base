@@ -34,8 +34,10 @@ import android.view.KeyEvent.KEYCODE_RECENT_APPS
 import android.view.KeyEvent.KEYCODE_S
 import android.view.KeyEvent.KEYCODE_SLASH
 import android.view.KeyEvent.KEYCODE_TAB
+import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
+import android.view.KeyEvent.META_SHIFT_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import com.android.systemui.Flags.shortcutHelperKeyGlyph
@@ -138,6 +140,16 @@ constructor(@Main private val resources: Resources, private val inputManager: In
             //  - Meta + Tab
             shortcutInfo(resources.getString(R.string.group_system_overview_open_apps)) {
                 command(META_META_ON, KEYCODE_TAB)
+            },
+            // Cycle through recent apps (forward):
+            //  - Alt + Tab
+            shortcutInfo(resources.getString(R.string.group_system_cycle_forward)) {
+                command(META_ALT_ON, KEYCODE_TAB)
+            },
+            // Cycle through recent apps (back):
+            //  - Shift + Alt + Tab
+            shortcutInfo(resources.getString(R.string.group_system_cycle_back)) {
+                command(META_SHIFT_ON or META_ALT_ON, KEYCODE_TAB)
             },
             // Back: go back to previous state (back button)
             //  - Meta + Escape OR

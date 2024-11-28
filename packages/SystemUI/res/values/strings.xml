@@ -3736,10 +3736,6 @@
          that shows the user which keyboard shortcuts they can use. The "Multitasking" shortcuts are
          for example "Enter split screen". [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_category_multitasking">Multitasking</string>
-    <!-- Title of the keyboard shortcut helper category "Recent apps". The helper is a component
-         that shows the user which keyboard shortcuts they can use. The "Recent apps" shortcuts are
-         for example "Cycle through recent apps". [CHAR LIMIT=NONE] -->
-    <string name="shortcutHelper_category_recent_apps">Recent apps</string>
     <!-- Title of the keyboard shortcut helper category "Split screen". The helper is a component
          that shows the user which keyboard shortcuts they can use. The "Split screen" shortcuts are
          for example "Move current app to left split". [CHAR LIMIT=NONE] -->

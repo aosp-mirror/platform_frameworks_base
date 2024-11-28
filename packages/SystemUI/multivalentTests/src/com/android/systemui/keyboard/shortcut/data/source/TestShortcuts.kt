@@ -490,17 +490,15 @@ object TestShortcuts {
             simpleShortcutCategory(AppCategories, "Applications", "Email"),
             simpleShortcutCategory(AppCategories, "Applications", "Maps"),
             simpleShortcutCategory(AppCategories, "Applications", "SMS"),
-            simpleShortcutCategory(MultiTasking, "Recent apps", "Cycle forward through recent apps"),
         )
-    val customInputGestureTypeHome =
-        simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+    val customInputGestureTypeHome = simpleInputGestureData(keyGestureType = KEY_GESTURE_TYPE_HOME)
 
     val allCustomizableInputGesturesWithSimpleShortcutCombinations =
         listOf(
             simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT
             ),
-            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_HOME),
+            simpleInputGestureData(keyGestureType = KEY_GESTURE_TYPE_HOME),
             simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS
             ),
