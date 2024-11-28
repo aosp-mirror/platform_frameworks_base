@@ -207,7 +207,8 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         final ComponentInfo info = new ComponentInfo();
         info.applicationInfo = new ApplicationInfo();
         info.applicationInfo.uid = uid;
-        return new RegisteredServicesCache.ServiceInfo<>(type, info, null);
+        return new RegisteredServicesCache.ServiceInfo<>(type, info, null /* componentName */,
+                0 /* lastUpdateTime */);
     }
 
     private void assertNotEmptyFileCreated(TestServicesCache cache, int userId) {
@@ -301,7 +302,7 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
 
         @Override
         protected ServiceInfo<TestServiceType> parseServiceInfo(
-                ResolveInfo resolveInfo) throws XmlPullParserException, IOException {
+                ResolveInfo resolveInfo, int userId) throws XmlPullParserException, IOException {
             int size = mServices.size();
             for (int i = 0; i < size; i++) {
                 Map<ResolveInfo, ServiceInfo<TestServiceType>> map = mServices.valueAt(i);
