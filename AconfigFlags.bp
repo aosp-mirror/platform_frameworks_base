@@ -23,6 +23,7 @@ aconfig_declarations_group {
         "aconfig_mediacodec_flags_java_lib",
         "aconfig_settingslib_flags_java_lib",
         "aconfig_trade_in_mode_flags_java_lib",
+        "adpf_flags_java_lib",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
         "android.app.assist.flags-aconfig-java",
@@ -871,6 +872,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.hardware.biometrics.flags-aconfig-java",
     aconfig_declarations: "android.hardware.biometrics.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Adaptive Performance
+java_aconfig_library {
+    name: "adpf_flags_java_lib",
+    aconfig_declarations: "adpf_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
