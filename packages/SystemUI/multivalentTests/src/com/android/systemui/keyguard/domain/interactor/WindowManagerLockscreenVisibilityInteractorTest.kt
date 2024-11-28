@@ -52,7 +52,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -884,7 +883,6 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    @Ignore("b/378766637")
     fun lockscreenVisibilityWithScenes() =
         testScope.runTest {
             val isDeviceUnlocked by
@@ -893,6 +891,7 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 )
             assertThat(isDeviceUnlocked).isFalse()
 
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
             val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
