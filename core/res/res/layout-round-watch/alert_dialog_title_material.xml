@@ -14,30 +14,34 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="top|center_horizontal">
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:orientation="vertical"
-        android:gravity="top|center_horizontal">
-    <FrameLayout
-            android:adjustViewBounds="true"
-            android:layout_width="match_parent"
+        android:adjustViewBounds="true">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minHeight="@dimen/screen_percentage_15">
-        <ImageView android:id="@+id/icon"
-                android:adjustViewBounds="true"
-                android:maxHeight="24dp"
-                android:maxWidth="24dp"
-                android:layout_marginTop="@dimen/screen_percentage_10"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@null" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp"
+            android:maxHeight="32dp"
+            android:maxWidth="32dp"
+            android:src="@null" />
     </FrameLayout>
-    <TextView android:id="@+id/alertTitle"
-            style="?android:attr/windowTitleStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/alertTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/alertDialog_material_side_margin_title"
+        android:layout_marginEnd="@dimen/alertDialog_material_side_margin_title"
+        android:textAppearance="@style/TextAppearance.AlertDialog.Title"
+        android:gravity="center" />
 </LinearLayout>

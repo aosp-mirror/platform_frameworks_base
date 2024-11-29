@@ -31,6 +31,7 @@ import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutCustomizatio
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.AddShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.DeleteShortcutDialog
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.ResetShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -54,7 +55,8 @@ constructor(
         viewModel.shortcutCustomizationUiState.collect { uiState ->
             val shouldShowAddDialog = uiState is AddShortcutDialog && !uiState.isDialogShowing
             val shouldShowDeleteDialog = uiState is DeleteShortcutDialog && !uiState.isDialogShowing
-            if (shouldShowDeleteDialog || shouldShowAddDialog) {
+            val shouldShowResetDialog = uiState is ResetShortcutDialog && !uiState.isDialogShowing
+            if (shouldShowDeleteDialog || shouldShowAddDialog || shouldShowResetDialog) {
                 dialog = createDialog().also { it.show() }
                 viewModel.onDialogShown()
             } else if (uiState is ShortcutCustomizationUiState.Inactive) {
@@ -83,7 +85,12 @@ constructor(
                 onKeyPress = { viewModel.onKeyPressed(it) },
                 onCancel = { dialog.dismiss() },
                 onConfirmSetShortcut = { coroutineScope.launch { viewModel.onSetShortcut() } },
-                onConfirmDeleteShortcut = { coroutineScope.launch { viewModel.deleteShortcutCurrentlyBeingCustomized() } },
+                onConfirmDeleteShortcut = {
+                    coroutineScope.launch { viewModel.deleteShortcutCurrentlyBeingCustomized() }
+                },
+                onConfirmResetShortcut = {
+                    coroutineScope.launch { viewModel.resetAllCustomShortcuts() }
+                },
             )
             dialog.setOnDismissListener { viewModel.onDialogDismissed() }
 

@@ -543,7 +543,7 @@ public class InteractionJankMonitor {
 
             mRunningTrackers.put(cuj, tracker);
             if (mDebugOverlay != null) {
-                mDebugOverlay.onTrackerAdded(cuj);
+                mDebugOverlay.onTrackerAdded(cuj, tracker.mTracker.hashCode());
             }
 
             return tracker;
@@ -578,7 +578,7 @@ public class InteractionJankMonitor {
             running.mConfig.getHandler().removeCallbacks(running.mTimeoutAction);
             mRunningTrackers.remove(cuj);
             if (mDebugOverlay != null) {
-                mDebugOverlay.onTrackerRemoved(cuj, reason);
+                mDebugOverlay.onTrackerRemoved(cuj, reason, tracker.hashCode());
             }
             return false;
         }

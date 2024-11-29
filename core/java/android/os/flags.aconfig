@@ -96,6 +96,7 @@ flag {
     namespace: "crumpet"
     description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
     bug: "324046728"
+    is_exported: true
 }
 
 # This flag guards the private space feature, its APIs, and some of the feature implementations. The flag android.multiuser.Flags.enable_private_space_features exclusively guards all the implementations.
@@ -178,6 +179,7 @@ flag {
     namespace: "game"
     description: "Feature flag for adding CPU/GPU headroom API"
     bug: "346604998"
+    is_exported: true
 }
 
 flag {
@@ -220,6 +222,14 @@ flag {
     metadata {
         purpose: PURPOSE_FEATURE
     }
+}
+
+flag {
+    name: "material_motion_tokens"
+    namespace: "systemui"
+    description: "Adding new Material Tokens for M3 Motion Spec"
+    bug: "324922198"
+    is_exported: true
 }
 
 flag {

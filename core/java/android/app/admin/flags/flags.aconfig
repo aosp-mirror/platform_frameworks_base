@@ -286,6 +286,16 @@ flag {
 }
 
 flag {
+    name: "unsuspend_not_suspended"
+    namespace: "enterprise"
+    description: "When admin unsuspends packages, pass previously not suspended packages to PM too"
+    bug: "378766314"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "backup_connected_apps_settings"
     namespace: "enterprise"
     description: "backup and restore connected work and personal apps user settings across devices"
@@ -367,6 +377,7 @@ flag {
     namespace: "enterprise"
     description: "API that removes a given managed profile."
     bug: "372652841"
+    is_exported: true
 }
 
 flag {
@@ -390,6 +401,7 @@ flag {
   namespace: "enterprise"
   description: "Split up existing create and provision managed profile API."
   bug: "375382324"
+  is_exported: true
 }
 
 flag {

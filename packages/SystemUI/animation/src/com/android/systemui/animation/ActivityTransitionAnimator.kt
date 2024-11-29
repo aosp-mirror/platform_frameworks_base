@@ -424,15 +424,16 @@ constructor(
                         newKeyguardOccludedState: Boolean?
                     ) {
                         super.onTransitionAnimationCancelled(newKeyguardOccludedState)
-                        cleanUp()
+                        onDispose()
                     }
 
                     override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                         super.onTransitionAnimationEnd(isExpandingFullyAbove)
-                        cleanUp()
+                        onDispose()
                     }
 
-                    private fun cleanUp() {
+                    override fun onDispose() {
+                        super.onDispose()
                         cleanUpRunnable?.run()
                     }
                 }
@@ -560,6 +561,7 @@ constructor(
                 cookie: TransitionCookie? = null,
                 component: ComponentName? = null,
                 returnCujType: Int? = null,
+                isEphemeral: Boolean = true,
             ): Controller? {
                 // Make sure the View we launch from implements LaunchableView to avoid visibility
                 // issues.
@@ -587,6 +589,7 @@ constructor(
                     cookie,
                     component,
                     returnCujType,
+                    isEphemeral,
                 )
             }
         }
@@ -647,6 +650,9 @@ constructor(
          * appropriately.
          */
         fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
+
+        /** The controller will not be used again. Clean up the relevant internal state. */
+        fun onDispose() {}
     }
 
     /**

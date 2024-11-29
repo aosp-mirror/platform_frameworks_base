@@ -143,7 +143,7 @@ class DisplayWindowSettings {
         }
         // No record is present so use default windowing mode policy.
         final boolean forceFreeForm = mService.mAtmService.mSupportsFreeformWindowManagement
-                && (mService.mIsPc || dc.forceDesktopMode());
+                && (mService.mIsPc || dc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
         if (forceFreeForm) {
             return WindowConfiguration.WINDOWING_MODE_FREEFORM;
         }

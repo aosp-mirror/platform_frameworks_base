@@ -266,5 +266,26 @@ test_module_config {
     test_suites: ["device-tests"],
 }
 
+test_module_config {
+    name: "WMShellFlickerTestsPip-nonMatchParent",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.*"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfExitPipToAppViaExpandButtonTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaExpandButtonTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfExitPipToAppViaIntentTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaIntentTest"],
+    test_suites: ["device-tests"],
+}
+
 // End breakdowns for WMShellFlickerTestsPip module
 ////////////////////////////////////////////////////////////////////////////////

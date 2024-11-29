@@ -328,7 +328,7 @@ public final class SoundTriggerDetector {
                 mRecognitionCallback,
                 new RecognitionConfig.Builder()
                     .setCaptureRequested(captureTriggerAudio)
-                    .setAllowMultipleTriggers(allowMultipleTriggers)
+                    .setMultipleTriggersAllowed(allowMultipleTriggers)
                     .setAudioCapabilities(audioCapabilities)
                     .build(),
                 runInBatterySaver);

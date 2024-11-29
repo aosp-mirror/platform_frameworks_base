@@ -471,6 +471,9 @@ private fun EndSidePanel(
 
                         is ShortcutCustomizationRequestInfo.Delete ->
                             onCustomizationRequested(requestInfo.copy(categoryType = category.type))
+
+                        ShortcutCustomizationRequestInfo.Reset ->
+                            onCustomizationRequested(requestInfo)
                     }
                 },
             )
@@ -535,6 +538,9 @@ private fun SubCategoryContainerDualPane(
                                 onCustomizationRequested(
                                     requestInfo.copy(subCategoryLabel = subCategory.label)
                                 )
+
+                            ShortcutCustomizationRequestInfo.Reset ->
+                                onCustomizationRequested(requestInfo)
                         }
                     },
                 )
