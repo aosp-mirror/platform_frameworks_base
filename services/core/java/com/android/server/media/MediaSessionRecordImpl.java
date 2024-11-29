@@ -16,10 +16,8 @@
 
 package com.android.server.media;
 
-import android.app.ForegroundServiceDelegationOptions;
 import android.app.Notification;
 import android.media.AudioManager;
-import android.media.session.PlaybackState;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
 
@@ -63,13 +61,14 @@ public abstract class MediaSessionRecordImpl {
     public abstract int getUserId();
 
     /**
-     * Get the {@link ForegroundServiceDelegationOptions} needed for notifying activity manager
-     * service with changes in the {@link PlaybackState} for this session.
+     * Returns whether this session supports linked notifications.
      *
-     * @return the {@link ForegroundServiceDelegationOptions} needed for notifying the activity
-     *     manager service with changes in the {@link PlaybackState} for this session.
+     * <p>A notification is linked to a media session if it contains
+     * {@link android.app.Notification#EXTRA_MEDIA_SESSION}.
+     *
+     * @return {@code true} if this session supports linked notifications, {@code false} otherwise.
      */
-    public abstract ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions();
+    public abstract boolean hasLinkedNotificationSupport();
 
     /**
      * Check if this session has system priority and should receive media buttons before any other
