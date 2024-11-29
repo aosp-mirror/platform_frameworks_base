@@ -121,6 +121,14 @@ class DeviceSettingServiceConnection(
                         null
                     }
                 }
+                .catch { e ->
+                    if (e is DeadObjectException) {
+                        Log.e(TAG, "DeadObjectException happens when try to get service status.", e)
+                        emit(false)
+                    } else {
+                        throw e
+                    }
+                }
                 .firstOrNull() ?: false
         }
 
