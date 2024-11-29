@@ -610,6 +610,11 @@ public class CachedBluetoothDeviceManager {
         return mOngoingSetMemberPair != null && mOngoingSetMemberPair.equals(device);
     }
 
+    @NonNull
+    public HearingAidDeviceManager getHearingAidDeviceManager() {
+        return mHearingAidDeviceManager;
+    }
+
     private void log(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);

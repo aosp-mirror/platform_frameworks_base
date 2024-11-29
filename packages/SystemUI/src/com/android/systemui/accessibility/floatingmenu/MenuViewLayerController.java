@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -39,11 +40,12 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
     MenuViewLayerController(Context context, WindowManager windowManager,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             AccessibilityManager accessibilityManager, SecureSettings secureSettings,
-            NavigationModeController navigationModeController) {
+            NavigationModeController navigationModeController,
+            HearingAidDeviceManager hearingAidDeviceManager) {
         mWindowManager = viewCaptureAwareWindowManager;
 
         MenuViewModel menuViewModel = new MenuViewModel(
-                context, accessibilityManager, secureSettings);
+                context, accessibilityManager, secureSettings, hearingAidDeviceManager);
         MenuViewAppearance menuViewAppearance = new MenuViewAppearance(context, windowManager);
 
         mMenuViewLayer = new MenuViewLayer(context, windowManager, accessibilityManager,

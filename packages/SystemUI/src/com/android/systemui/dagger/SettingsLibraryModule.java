@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.UserHandle;
 
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.dagger.qualifiers.Background;
 
@@ -40,5 +41,17 @@ public class SettingsLibraryModule {
     static LocalBluetoothManager provideLocalBluetoothController(Context context,
             @Background Handler bgHandler) {
         return LocalBluetoothManager.create(context, bgHandler, UserHandle.ALL);
+    }
+
+    @SuppressLint("MissingPermission")
+    @SysUISingleton
+    @Provides
+    @Nullable
+    static HearingAidDeviceManager provideHearingAidDeviceManager(
+            @Nullable LocalBluetoothManager localBluetoothManager) {
+        if (localBluetoothManager == null) {
+            return null;
+        }
+        return localBluetoothManager.getCachedDeviceManager().getHearingAidDeviceManager();
     }
 }

@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
@@ -35,6 +36,7 @@ import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver.AccessibilityButtonMode;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
@@ -61,6 +63,7 @@ public class AccessibilityFloatingMenuController implements
     private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final DisplayManager mDisplayManager;
     private final AccessibilityManager mAccessibilityManager;
+    private final HearingAidDeviceManager mHearingAidDeviceManager;
 
     private final SecureSettings mSecureSettings;
     private final DisplayTracker mDisplayTracker;
@@ -107,6 +110,7 @@ public class AccessibilityFloatingMenuController implements
             AccessibilityManager accessibilityManager,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
+            @Nullable HearingAidDeviceManager hearingAidDeviceManager,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecureSettings secureSettings,
             DisplayTracker displayTracker,
@@ -119,6 +123,7 @@ public class AccessibilityFloatingMenuController implements
         mAccessibilityManager = accessibilityManager;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
+        mHearingAidDeviceManager = hearingAidDeviceManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
@@ -201,7 +206,7 @@ public class AccessibilityFloatingMenuController implements
                     TYPE_NAVIGATION_BAR_PANEL, /* options= */ null);
             mFloatingMenu = new MenuViewLayerController(windowContext, mWindowManager,
                     mViewCaptureAwareWindowManager, mAccessibilityManager, mSecureSettings,
-                    mNavigationModeController);
+                    mNavigationModeController, mHearingAidDeviceManager);
         }
 
         mFloatingMenu.show();

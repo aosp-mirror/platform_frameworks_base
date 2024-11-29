@@ -77,6 +77,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
@@ -140,6 +141,8 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Mock
     private AccessibilityManager mStubAccessibilityManager;
     @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
+    @Mock
     private PackageManager mMockPackageManager;
     private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings();
 
@@ -160,7 +163,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         doReturn(mWindowMetrics).when(mStubWindowManager).getCurrentWindowMetrics();
 
         mMenuViewModel = new MenuViewModel(
-                mSpyContext, mStubAccessibilityManager, mSecureSettings);
+                mSpyContext, mStubAccessibilityManager, mSecureSettings, mHearingAidDeviceManager);
         MenuViewAppearance menuViewAppearance = new MenuViewAppearance(
                 mSpyContext, mStubWindowManager);
         mMenuView = spy(
@@ -419,9 +422,10 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void onDismissAction_incrementsTexMetricDismiss() {
-        mMenuViewModel.onTargetFeaturesChanged(
-                List.of(new TestAccessibilityTarget(mSpyContext, 1234),
-                        new TestAccessibilityTarget(mSpyContext, 5678)));
+        List<AccessibilityTarget> testTargets = new ArrayList<>();
+        testTargets.add(new TestAccessibilityTarget(mSpyContext, 1234));
+        testTargets.add(new TestAccessibilityTarget(mSpyContext, 5678));
+        mMenuViewModel.onTargetFeaturesChanged(testTargets);
 
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_remove_menu);
 
@@ -431,9 +435,10 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void onEditAction_incrementsTexMetricEdit() {
-        mMenuViewModel.onTargetFeaturesChanged(
-                List.of(new TestAccessibilityTarget(mSpyContext, 1234),
-                        new TestAccessibilityTarget(mSpyContext, 5678)));
+        List<AccessibilityTarget> testTargets = new ArrayList<>();
+        testTargets.add(new TestAccessibilityTarget(mSpyContext, 1234));
+        testTargets.add(new TestAccessibilityTarget(mSpyContext, 5678));
+        mMenuViewModel.onTargetFeaturesChanged(testTargets);
 
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
 
