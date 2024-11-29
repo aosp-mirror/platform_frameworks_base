@@ -17,8 +17,9 @@
 package com.android.systemui.statusbar.notification.collection.provider
 
 import android.content.Context
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /**
@@ -31,9 +32,7 @@ import javax.inject.Inject
  * visibility when it invalidates, and we just store that state here.)
  */
 @SysUISingleton
-class SectionHeaderVisibilityProvider @Inject constructor(
-    context: Context
-) {
+class SectionHeaderVisibilityProvider @Inject constructor(@ShadeDisplayAware context: Context) {
     val neverShowSectionHeaders =
         context.resources.getBoolean(R.bool.config_notification_never_show_section_headers)
     var sectionHeadersVisible = true

@@ -59,6 +59,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
@@ -134,7 +135,8 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
     private final ActivityStarter mActivityStarter;
 
     @Inject
-    public NotificationGutsManager(Context context,
+    public NotificationGutsManager(
+            @ShadeDisplayAware Context context,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             JavaAdapter javaAdapter,
