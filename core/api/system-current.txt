@@ -7989,10 +7989,10 @@ package android.media.quality {
   @FlaggedApi("android.media.tv.flags.media_quality_fw") public final class MediaQualityManager {
     method @NonNull public java.util.List<java.lang.String> getPictureProfileAllowList();
     method @NonNull public java.util.List<java.lang.String> getPictureProfilePackageNames();
-    method @NonNull public java.util.List<android.media.quality.PictureProfile> getPictureProfilesByPackage(@NonNull String);
+    method @NonNull public java.util.List<android.media.quality.PictureProfile> getPictureProfilesByPackage(@NonNull String, boolean);
     method @NonNull public java.util.List<java.lang.String> getSoundProfileAllowList();
     method @NonNull public java.util.List<java.lang.String> getSoundProfilePackageNames();
-    method @NonNull public java.util.List<android.media.quality.SoundProfile> getSoundProfilesByPackage(@NonNull String);
+    method @NonNull public java.util.List<android.media.quality.SoundProfile> getSoundProfilesByPackage(@NonNull String, boolean);
     method public void setAutoPictureQualityEnabled(boolean);
     method public void setAutoSoundQualityEnabled(boolean);
     method public boolean setDefaultPictureProfile(@Nullable String);
