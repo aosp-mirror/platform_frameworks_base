@@ -20,6 +20,7 @@ import android.hardware.display.DisplayTopology
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.DisplayInfo
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyFloat
@@ -86,5 +87,22 @@ class DisplayTopologyCoordinatorTest {
 
         verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
         verify(mockTopologyChangedCallback, never()).invoke(any())
+    }
+
+    @Test
+    fun getTopology_copy() {
+        assertThat(coordinator.topology).isEqualTo(mockTopologyCopy)
+    }
+
+    @Test
+    fun setTopology_normalize() {
+        val topology = mock<DisplayTopology>()
+        val topologyCopy = mock<DisplayTopology>()
+        whenever(topology.copy()).thenReturn(topologyCopy)
+
+        coordinator.topology = topology
+
+        verify(topology).normalize()
+        verify(mockTopologyChangedCallback).invoke(topologyCopy)
     }
 }

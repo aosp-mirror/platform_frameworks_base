@@ -100,13 +100,14 @@ class DisplayTopologyCoordinator {
      */
     DisplayTopology getTopology() {
         synchronized (mSyncRoot) {
-            return mTopology;
+            return mTopology.copy();
         }
     }
 
     void setTopology(DisplayTopology topology) {
         synchronized (mSyncRoot) {
             mTopology = topology;
+            mTopology.normalize();
             sendTopologyUpdateLocked();
         }
     }
