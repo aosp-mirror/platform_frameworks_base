@@ -22,6 +22,8 @@ import static com.android.server.display.brightness.clamper.BrightnessClamperCon
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.display.BrightnessInfo;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
@@ -37,6 +39,7 @@ import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig.PowerThrottlingConfigData;
 import com.android.server.display.DisplayDeviceConfig.PowerThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel;
+import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
@@ -48,16 +51,16 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
-class BrightnessPowerClamper extends
-        BrightnessClamper<BrightnessPowerClamper.PowerData> {
+class BrightnessPowerModifier implements BrightnessStateModifier,
+        BrightnessClamperController.DisplayDeviceDataListener,
+        BrightnessClamperController.StatefulModifier,
+        BrightnessClamperController.DeviceConfigListener {
 
     private static final String TAG = "BrightnessPowerClamper";
     @NonNull
-    private final Injector mInjector;
-    @NonNull
     private final DeviceConfigParameterProvider mConfigParameterProvider;
-    @Nullable
-    private PmicMonitor mPmicMonitor;
+    @NonNull
+    private final PmicMonitor mPmicMonitor;
     // data from DeviceConfig, for all displays, for all dataSets
     // mapOf(uniqueDisplayId to mapOf(dataSetId to PowerThrottlingData))
     @NonNull
@@ -71,11 +74,9 @@ class BrightnessPowerClamper extends
     @Nullable
     private PowerThrottlingData mPowerThrottlingDataActive = null;
     @Nullable
-    private PowerThrottlingConfigData mPowerThrottlingConfigData = null;
+    private PowerThrottlingConfigData mPowerThrottlingConfigData;
     @NonNull
     private final ThermalLevelListener mThermalLevelListener;
-    @NonNull
-    private final PowerChangeListener mPowerChangeListener;
     private @Temperature.ThrottlingStatus int mCurrentThermalLevel = Temperature.THROTTLING_NONE;
     private boolean mCurrentThermalLevelChanged = false;
     private float mCurrentAvgPowerConsumed = 0;
@@ -100,28 +101,32 @@ class BrightnessPowerClamper extends
     private final Function<List<ThrottlingLevel>, PowerThrottlingData>
             mDataSetMapper = PowerThrottlingData::create;
 
+    protected final Handler mHandler;
+    protected final BrightnessClamperController.ClamperChangeListener mChangeListener;
 
-    BrightnessPowerClamper(Handler handler, ClamperChangeListener listener,
+    private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;;
+    private boolean mApplied = false;
+
+
+    BrightnessPowerModifier(Handler handler, ClamperChangeListener listener,
             PowerData powerData, float currentBrightness) {
         this(new Injector(), handler, listener, powerData, currentBrightness);
     }
 
     @VisibleForTesting
-    BrightnessPowerClamper(Injector injector, Handler handler, ClamperChangeListener listener,
-                           PowerData powerData, float currentBrightness) {
-        super(handler, listener);
-        mInjector = injector;
+    BrightnessPowerModifier(@NonNull Injector injector, Handler handler,
+            ClamperChangeListener listener, PowerData powerData, float currentBrightness) {
+        mHandler = handler;
+        mChangeListener = listener;
         mCurrentBrightness = currentBrightness;
-        mPowerChangeListener = (powerConsumed, thermalStatus) -> {
-            recalculatePowerQuotaChange(powerConsumed, thermalStatus);
-        };
+
         mPowerThrottlingConfigData = powerData.getPowerThrottlingConfigData();
         if (mPowerThrottlingConfigData != null) {
             mCustomAnimationRateDeviceConfig = mPowerThrottlingConfigData.customAnimationRate;
         }
         mThermalLevelListener = new ThermalLevelListener(handler);
         mPmicMonitor =
-            mInjector.getPmicMonitor(mPowerChangeListener,
+            injector.getPmicMonitor(this::recalculatePowerQuotaChange,
                     mThermalLevelListener.getThermalService(),
                     mPowerThrottlingConfigData.pollingWindowMaxMillis,
                     mPowerThrottlingConfigData.pollingWindowMinMillis);
@@ -134,46 +139,32 @@ class BrightnessPowerClamper extends
         });
     }
 
-    @VisibleForTesting
-    PowerChangeListener getPowerChangeListener() {
-        return mPowerChangeListener;
-    }
-
+    //region BrightnessStateModifier
     @Override
-    @NonNull
-    BrightnessClamper.Type getType() {
-        return Type.POWER;
-    }
-
-    @Override
-    float getCustomAnimationRate() {
-        return mCustomAnimationRateSec;
-    }
-
-    @Override
-    void onDeviceConfigChanged() {
-        mHandler.post(() -> {
-            loadOverrideData();
-            recalculateActiveData();
-        });
-    }
-
-    @Override
-    void onDisplayChanged(PowerData data) {
-        mHandler.post(() -> {
-            setDisplayData(data);
-            recalculateActiveData();
-        });
-    }
-
-    @Override
-    void stop() {
-        if (mPmicMonitor != null) {
-            mPmicMonitor.shutdown();
+    public void apply(DisplayManagerInternal.DisplayPowerRequest request,
+            DisplayBrightnessState.Builder stateBuilder) {
+        if (stateBuilder.getMaxBrightness() > mBrightnessCap) {
+            stateBuilder.setMaxBrightness(mBrightnessCap);
+            stateBuilder.setBrightness(Math.min(stateBuilder.getBrightness(), mBrightnessCap));
+            stateBuilder.setBrightnessMaxReason(BrightnessInfo.BRIGHTNESS_MAX_REASON_POWER_IC);
+            stateBuilder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_THROTTLED);
+            // set custom animation rate only when modifier is activated.
+            // this will allow auto brightness to apply slow change even when modifier is active
+            if (!mApplied) {
+                stateBuilder.setCustomAnimationRate(mCustomAnimationRateSec);
+                mCustomAnimationRateSec = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
+            }
+            mApplied = true;
+        } else {
+            mApplied = false;
         }
-        if (mThermalLevelListener != null) {
-            mThermalLevelListener.stop();
-        }
+        mCurrentBrightness = stateBuilder.getBrightness();
+    }
+
+    @Override
+    public void stop() {
+        mPmicMonitor.shutdown();
+        mThermalLevelListener.stop();
     }
 
     /**
@@ -187,16 +178,52 @@ class BrightnessPowerClamper extends
         pw.println("  mCurrentThermalLevelChanged=" + mCurrentThermalLevelChanged);
         pw.println("  mPowerThrottlingDataFromDDC=" + (mPowerThrottlingDataFromDDC == null ? "null"
                 : mPowerThrottlingDataFromDDC.toString()));
+        pw.println("  mBrightnessCap: " + mBrightnessCap);
+        pw.println("  mApplied: " + mApplied);
         mThermalLevelListener.dump(pw);
-        super.dump(pw);
     }
 
-    /**
-     * Updates current brightness, for power calculations.
-     */
-    public void updateCurrentBrightness(float currentBrightness) {
-        mCurrentBrightness = currentBrightness;
+    @Override
+    public boolean shouldListenToLightSensor() {
+        return false;
     }
+
+    @Override
+    public void setAmbientLux(float lux) {
+        // noop
+    }
+    //endregion
+
+    //region DisplayDeviceDataListener
+    @Override
+    public void onDisplayChanged(BrightnessClamperController.DisplayDeviceData data) {
+        mHandler.post(() -> {
+            setDisplayData(data);
+            recalculateActiveData();
+        });
+    }
+    //endregion
+
+    //region StatefulModifier
+    @Override
+    public void applyStateChange(
+            BrightnessClamperController.ModifiersAggregatedState aggregatedState) {
+        if (aggregatedState.mMaxBrightness > mBrightnessCap) {
+            aggregatedState.mMaxBrightness = mBrightnessCap;
+            aggregatedState.mMaxBrightnessReason = BrightnessInfo.BRIGHTNESS_MAX_REASON_POWER_IC;
+        }
+    }
+    //endregion
+
+    //region DeviceConfigListener
+    @Override
+    public void onDeviceConfigChanged() {
+        mHandler.post(() -> {
+            loadOverrideData();
+            recalculateActiveData();
+        });
+    }
+    //endregion
 
     private void recalculateActiveData() {
         if (mUniqueDisplayId == null || mDataId == null) {
@@ -206,9 +233,7 @@ class BrightnessPowerClamper extends
                 .getOrDefault(mUniqueDisplayId, Map.of()).getOrDefault(mDataId,
                         mPowerThrottlingDataFromDDC);
         if (mPowerThrottlingDataActive == null) {
-            if (mPmicMonitor != null) {
-                mPmicMonitor.stop();
-            }
+            mPmicMonitor.stop();
         }
     }
 
@@ -231,7 +256,6 @@ class BrightnessPowerClamper extends
     }
 
     private void recalculateBrightnessCap() {
-        boolean isActive = false;
         float targetBrightnessCap = PowerManager.BRIGHTNESS_MAX;
         float powerQuota = getPowerQuotaForThermalStatus(mCurrentThermalLevel);
         if (mPowerThrottlingDataActive == null) {
@@ -240,7 +264,6 @@ class BrightnessPowerClamper extends
         if (powerQuota > 0) {
             if (BrightnessUtils.isValidBrightnessValue(mCurrentBrightness)
                     && (mCurrentAvgPowerConsumed > powerQuota)) {
-                isActive = true;
                 // calculate new brightness Cap.
                 // Brightness has a linear relation to power-consumed.
                 targetBrightnessCap =
@@ -248,11 +271,9 @@ class BrightnessPowerClamper extends
             } else if (mCurrentThermalLevelChanged) {
                 if (mCurrentThermalLevel == Temperature.THROTTLING_NONE) {
                     // reset pmic and remove the power-throttling cap.
-                    isActive = true;
                     targetBrightnessCap = PowerManager.BRIGHTNESS_MAX;
                     mPmicMonitor.stop();
                 } else {
-                    isActive = true;
                     // Since the thermal status has changed, we need to remove power-throttling cap.
                     // Instead of recalculating and changing brightness again, adding flicker,
                     // we will wait for the next pmic cycle to re-evaluate this value
@@ -263,7 +284,6 @@ class BrightnessPowerClamper extends
                     }
                 }
             } else { // Current power consumed is under the quota.
-                isActive = true;
                 targetBrightnessCap = PowerManager.BRIGHTNESS_MAX;
             }
         }
@@ -274,8 +294,7 @@ class BrightnessPowerClamper extends
                                 mPowerThrottlingConfigData.brightnessLowestCapAllowed);
         }
 
-        if (mBrightnessCap != targetBrightnessCap || mIsActive != isActive) {
-            mIsActive = isActive;
+        if (mBrightnessCap != targetBrightnessCap) {
             Slog.i(TAG, "Power clamper changing current brightness cap mBrightnessCap: "
                     + mBrightnessCap + " to target brightness cap:" + targetBrightnessCap
                     + " for current screen brightness: " + mCurrentBrightness + "\n"
@@ -309,11 +328,7 @@ class BrightnessPowerClamper extends
 
     private void recalculatePowerQuotaChange(float avgPowerConsumed, int thermalStatus) {
         mHandler.post(() -> {
-            if (mCurrentThermalLevel != thermalStatus) {
-                mCurrentThermalLevelChanged = true;
-            } else {
-                mCurrentThermalLevelChanged = false;
-            }
+            mCurrentThermalLevelChanged = mCurrentThermalLevel != thermalStatus;
             mCurrentThermalLevel = thermalStatus;
             mCurrentAvgPowerConsumed = avgPowerConsumed;
             recalculateBrightnessCap();
@@ -398,7 +413,7 @@ class BrightnessPowerClamper extends
             @Temperature.ThrottlingStatus int status = temp.getStatus();
             if (status >= Temperature.THROTTLING_LIGHT) {
                 Slog.d(TAG, "Activating pmic monitor due to thermal state:" + status);
-                mHandler.post(() -> activatePmicMonitor());
+                mHandler.post(BrightnessPowerModifier.this::activatePmicMonitor);
             } else {
                 if (!mPmicMonitor.isStopped()) {
                     mHandler.post(() -> deactivatePmicMonitor(status));
@@ -452,6 +467,7 @@ class BrightnessPowerClamper extends
 
     @VisibleForTesting
     static class Injector {
+        @NonNull
         PmicMonitor getPmicMonitor(PowerChangeListener powerChangeListener,
                                    IThermalService thermalService,
                                    int pollingMaxTimeMillis,
