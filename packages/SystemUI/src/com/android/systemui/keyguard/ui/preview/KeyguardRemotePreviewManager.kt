@@ -25,18 +25,24 @@ import android.os.Messenger
 import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.coroutines.runBlockingTraced as runBlocking
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.CLOCK_SIZE_DYNAMIC
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.CLOCK_SIZE_SMALL
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_CLOCK_SIZE
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_QUICK_AFFORDANCE_ID
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.KEY_SLOT_ID
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_DEFAULT_PREVIEW
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_HIDE_SMART_SPACE
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_PREVIEW_CLOCK_SIZE
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_PREVIEW_QUICK_AFFORDANCE_SELECTED
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants.MESSAGE_ID_START_CUSTOMIZING_QUICK_AFFORDANCES
@@ -44,7 +50,6 @@ import com.android.systemui.util.kotlin.logD
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class KeyguardRemotePreviewManager
@@ -86,17 +91,8 @@ constructor(
             renderer.render()
             renderer.hostToken?.linkToDeath(observer, 0)
             val result = Bundle()
-            result.putParcelable(
-                KEY_PREVIEW_SURFACE_PACKAGE,
-                renderer.surfacePackage,
-            )
-            val messenger =
-                Messenger(
-                    Handler(
-                        backgroundHandler.looper,
-                        observer,
-                    )
-                )
+            result.putParcelable(KEY_PREVIEW_SURFACE_PACKAGE, renderer.surfacePackage)
+            val messenger = Messenger(Handler(backgroundHandler.looper, observer))
             // NOTE: The process on the other side can retain messenger indefinitely.
             // (e.g. GC might not trigger and cleanup the reference)
             val msg = Message.obtain()
@@ -190,6 +186,18 @@ class PreviewLifecycleObserver(
             }
             MESSAGE_ID_HIDE_SMART_SPACE -> {
                 checkNotNull(renderer).hideSmartspace(message.data.getBoolean(KEY_HIDE_SMART_SPACE))
+            }
+            MESSAGE_ID_PREVIEW_CLOCK_SIZE -> {
+                message.data
+                    .getString(KEY_CLOCK_SIZE)
+                    ?.let {
+                        when (it) {
+                            CLOCK_SIZE_DYNAMIC -> ClockSizeSetting.DYNAMIC
+                            CLOCK_SIZE_SMALL -> ClockSizeSetting.SMALL
+                            else -> null
+                        }
+                    }
+                    ?.let { checkNotNull(renderer).onClockSizeSelected(it) }
             }
             else -> checkNotNull(onDestroy).invoke(this)
         }
