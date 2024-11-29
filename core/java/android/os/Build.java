@@ -431,13 +431,8 @@ public class Build {
          * android.os.Build.VERSION_CODES_FULL}.
          */
         @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
-        public static final int SDK_INT_FULL;
-
-        static {
-            SDK_INT_FULL = VERSION_CODES_FULL.SDK_INT_MULTIPLIER
-                * SystemProperties.getInt("ro.build.version.sdk", 0)
-                + SystemProperties.getInt("ro.build.version.sdk_minor", 0);
-        }
+        public static final int SDK_INT_FULL = parseFullVersion(SystemProperties.get(
+                    "ro.build.version.sdk_full", ""));
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
