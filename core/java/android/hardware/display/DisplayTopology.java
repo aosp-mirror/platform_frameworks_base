@@ -283,6 +283,14 @@ public final class DisplayTopology implements Parcelable {
         normalize();
     }
 
+    /**
+     * @return A deep copy of the topology that will not be modified by the system.
+     */
+    public DisplayTopology copy() {
+        TreeNode rootCopy = mRoot == null ? null : mRoot.copy();
+        return new DisplayTopology(rootCopy, mPrimaryDisplayId);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -692,6 +700,17 @@ public final class DisplayTopology implements Parcelable {
 
         public List<TreeNode> getChildren() {
             return Collections.unmodifiableList(mChildren);
+        }
+
+        /**
+         * @return A deep copy of the node that will not be modified by the system.
+         */
+        public TreeNode copy() {
+            TreeNode copy = new TreeNode(mDisplayId, mWidth, mHeight, mPosition, mOffset);
+            for (TreeNode child : mChildren) {
+                copy.mChildren.add(child.copy());
+            }
+            return copy;
         }
 
         @Override
