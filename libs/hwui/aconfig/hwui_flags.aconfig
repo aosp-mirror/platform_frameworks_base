@@ -6,6 +6,7 @@ flag {
   namespace: "core_graphics"
   description: "API for AGSL authored runtime color filters and blenders"
   bug: "358126864"
+  is_exported: true
 }
 
 flag {
@@ -44,6 +45,7 @@ flag {
   namespace: "accessibility"
   description: "Draw a solid rectangle background behind text instead of a stroke outline"
   bug: "186567103"
+  is_exported: true
 }
 
 flag {
@@ -96,6 +98,7 @@ flag {
   namespace: "core_graphics"
   description: "Add canvas#drawRegion API"
   bug: "318612129"
+  is_exported: true
 }
 
 flag {

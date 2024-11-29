@@ -2796,6 +2796,12 @@ public class VibratorManagerServiceTest {
         stopAutoDispatcherAndDispatchAll();
 
         verify(mNativeWrapperMock, never()).startSession(anyLong(), any(int[].class));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionStarted(anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionVibrations(anyInt(), anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
         verify(callback, never()).onStarted(any(IVibrationSession.class));
         verify(callback, never()).onFinishing();
         verify(callback, never()).onFinished(anyInt());
@@ -2817,6 +2823,12 @@ public class VibratorManagerServiceTest {
 
         assertThat(session.getStatus()).isEqualTo(Status.IGNORED_UNSUPPORTED);
         verify(mNativeWrapperMock, never()).startSession(anyLong(), any(int[].class));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionStarted(anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionVibrations(anyInt(), anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
         verify(callback, never()).onFinishing();
         verify(callback)
                 .onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_UNSUPPORTED));
@@ -2838,6 +2850,12 @@ public class VibratorManagerServiceTest {
 
         assertThat(session).isNull();
         verify(mNativeWrapperMock, never()).startSession(anyLong(), any(int[].class));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionStarted(anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionVibrations(anyInt(), anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
     }
 
     @Test
@@ -2860,6 +2878,12 @@ public class VibratorManagerServiceTest {
 
         assertThat(session.getStatus()).isEqualTo(Status.IGNORED_UNSUPPORTED);
         verify(mNativeWrapperMock, never()).startSession(anyLong(), any(int[].class));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionStarted(anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionVibrations(anyInt(), anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
         verify(callback, never()).onFinishing();
         verify(callback, times(2))
                 .onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_UNSUPPORTED));
@@ -2886,6 +2910,12 @@ public class VibratorManagerServiceTest {
 
         assertThat(session.getStatus()).isEqualTo(Status.IGNORED_UNSUPPORTED);
         verify(mNativeWrapperMock, never()).startSession(anyLong(), any(int[].class));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionStarted(anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionVibrations(anyInt(), anyInt());
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
         verify(callback, never()).onStarted(any(IVibrationSession.class));
         verify(callback, never()).onFinishing();
         verify(callback)
@@ -2923,6 +2953,12 @@ public class VibratorManagerServiceTest {
         assertThat(session.getStatus()).isEqualTo(Status.FINISHED);
         verify(callback).onFinishing();
         verify(callback).onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_SUCCESS));
+
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationVendorSessionStarted(eq(UID));
+        verify(mVibratorFrameworkStatsLoggerMock)
+                .logVibrationVendorSessionVibrations(eq(UID), eq(0));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
     }
 
     @Test
@@ -2949,6 +2985,12 @@ public class VibratorManagerServiceTest {
         assertThat(session.getStatus()).isEqualTo(Status.CANCELLED_BY_USER);
         verify(callback).onFinishing();
         verify(callback).onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_CANCELED));
+
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationVendorSessionStarted(eq(UID));
+        verify(mVibratorFrameworkStatsLoggerMock)
+                .logVibrationVendorSessionVibrations(eq(UID), eq(0));
+        verify(mVibratorFrameworkStatsLoggerMock, never())
+                .logVibrationVendorSessionInterrupted(anyInt());
     }
 
     @Test
@@ -3038,6 +3080,11 @@ public class VibratorManagerServiceTest {
         assertThat(session.getStatus()).isEqualTo(Status.CANCELLED_BY_UNKNOWN_REASON);
         verify(callback).onFinishing();
         verify(callback).onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_CANCELED));
+
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationVendorSessionStarted(eq(UID));
+        verify(mVibratorFrameworkStatsLoggerMock)
+                .logVibrationVendorSessionVibrations(eq(UID), eq(0));
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationVendorSessionInterrupted(anyInt());
     }
 
     @Test
@@ -3340,6 +3387,10 @@ public class VibratorManagerServiceTest {
         assertThat(service.isVibrating(2)).isFalse();
         verify(callback).onFinishing();
         verify(callback).onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_SUCCESS));
+
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationVendorSessionStarted(eq(UID));
+        verify(mVibratorFrameworkStatsLoggerMock)
+                .logVibrationVendorSessionVibrations(eq(UID), eq(1));
     }
 
     @Test
@@ -3391,6 +3442,10 @@ public class VibratorManagerServiceTest {
         assertThat(service.isVibrating(2)).isFalse();
         verify(callback).onFinishing();
         verify(callback).onFinished(eq(android.os.vibrator.VendorVibrationSession.STATUS_SUCCESS));
+
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationVendorSessionStarted(eq(UID));
+        verify(mVibratorFrameworkStatsLoggerMock)
+                .logVibrationVendorSessionVibrations(eq(UID), eq(2));
     }
 
     @Test

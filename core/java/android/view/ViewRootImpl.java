@@ -16,7 +16,9 @@
 
 package android.view;
 
+import static android.adpf.Flags.adpfViewrootimplActionDownBoost;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.content.pm.ActivityInfo.OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS;
 import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
 import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
@@ -1208,6 +1210,8 @@ public final class ViewRootImpl implements ViewParent,
     private long mRenderThreadDrawStartTimeNs = -1;
     private long mFirstFramePresentedTimeNs = -1;
 
+    private final boolean mSendPerfHintOnTouch;
+
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitFrameRateFunctionEnablingReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
@@ -1337,6 +1341,8 @@ public final class ViewRootImpl implements ViewParent,
                 CompatChanges.isChangeEnabled(DISABLE_DRAW_WAKE_LOCK) && disableDrawWakeLock();
         mIsSubscribeGranularDisplayEventsEnabled =
                 com.android.server.display.feature.flags.Flags.subscribeGranularDisplayEvents();
+
+        mSendPerfHintOnTouch = adpfViewrootimplActionDownBoost();
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -2647,7 +2653,8 @@ public final class ViewRootImpl implements ViewParent,
             mStopped = stopped;
             final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
             if (renderer != null) {
-                if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
+                if (DEBUG_DRAW)
+                    Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
@@ -7110,6 +7117,10 @@ public final class ViewRootImpl implements ViewParent,
                 + "touch mode is " + mAttachInfo.mInTouchMode);
         if (mAttachInfo.mInTouchMode == inTouchMode) return false;
 
+        if (inTouchMode && mAttachInfo.mThreadedRenderer != null && mSendPerfHintOnTouch) {
+            mAttachInfo.mThreadedRenderer.notifyExpensiveFrame();
+        }
+
         // tell the window manager
         try {
             IWindowManager windowManager = WindowManagerGlobal.getWindowManagerService();
@@ -7968,8 +7979,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private boolean moveFocusToAdjacentWindow(@FocusDirection int direction) {
-            if (getConfiguration().windowConfiguration.getWindowingMode()
-                    != WINDOWING_MODE_MULTI_WINDOW) {
+            final int windowingMode = getConfiguration().windowConfiguration.getWindowingMode();
+            if (!(windowingMode == WINDOWING_MODE_MULTI_WINDOW
+                    || windowingMode == WINDOWING_MODE_FREEFORM)) {
                 return false;
             }
             try {

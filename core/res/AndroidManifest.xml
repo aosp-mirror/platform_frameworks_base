@@ -8696,7 +8696,7 @@
         android:featureFlag="android.security.secure_lockdown" />
 
     <!-- Allows app to enter trade-in-mode.
-        <p>Protection level: signature|privileged
+        <p>Protection level: signature
         @hide
     -->
     <permission android:name="android.permission.ENTER_TRADE_IN_MODE"
