@@ -21,12 +21,12 @@ import android.content.res.Resources
 import android.content.res.Resources.Theme
 import android.text.TextUtils
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.model.UiModeNightTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -34,7 +34,7 @@ import javax.inject.Inject
 /** Maps [UiModeNightTileModel] to [QSTileState]. */
 class UiModeNightTileMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Theme) :
+constructor(@ShadeDisplayAware private val resources: Resources, private val theme: Theme) :
     QSTileDataToStateMapper<UiModeNightTileModel> {
     companion object {
         val formatter12Hour: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
