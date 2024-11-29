@@ -160,7 +160,7 @@ public class RescueParty {
     /** Register the Rescue Party observer as a Package Watchdog health observer */
     public static void registerHealthObserver(Context context) {
         PackageWatchdog.getInstance(context).registerHealthObserver(
-                RescuePartyObserver.getInstance(context));
+                RescuePartyObserver.getInstance(context), context.getMainExecutor());
     }
 
     private static boolean isDisabled() {

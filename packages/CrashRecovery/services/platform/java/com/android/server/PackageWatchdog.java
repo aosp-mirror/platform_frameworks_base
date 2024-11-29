@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -362,7 +363,7 @@ public class PackageWatchdog {
      * it will resume observing any packages requested from a previous boot.
      * @hide
      */
-    public void registerHealthObserver(PackageHealthObserver observer) {
+    public void registerHealthObserver(PackageHealthObserver observer, Executor ignoredExecutor) {
         synchronized (mLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -445,7 +446,7 @@ public class PackageWatchdog {
             }
 
             // Register observer in case not already registered
-            registerHealthObserver(observer);
+            registerHealthObserver(observer, null);
 
             // Sync after we add the new packages to the observers. We may have received packges
             // requiring an earlier schedule than we are currently scheduled for.
