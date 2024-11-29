@@ -106,6 +106,7 @@ aconfig_declarations_group {
         "com.android.server.flags.services-aconfig-java",
         "com.android.text.flags-aconfig-java",
         "com.android.window.flags.window-aconfig-java",
+        "conscrypt_exported_aconfig_flags_lib",
         "device_policy_aconfig_flags_lib",
         "display_flags_lib",
         "dropbox_flags_lib",
@@ -192,6 +193,14 @@ java_aconfig_library {
     name: "libcore_readonly_aconfig_flags_lib",
     aconfig_declarations: "libcore-readonly-aconfig-flags",
     mode: "force-read-only",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Conscrypt
+java_aconfig_library {
+    name: "conscrypt_exported_aconfig_flags_lib",
+    aconfig_declarations: "conscrypt-aconfig-flags",
+    mode: "exported",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
