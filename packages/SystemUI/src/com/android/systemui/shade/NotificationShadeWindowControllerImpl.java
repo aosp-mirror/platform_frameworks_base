@@ -38,10 +38,10 @@ import android.view.IWindowSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
-import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Flags;
@@ -102,7 +102,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private final Context mContext;
     private final WindowRootViewComponent.Factory mWindowRootViewComponentFactory;
-    private final ViewCaptureAwareWindowManager mWindowManager;
+    private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
@@ -149,7 +149,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     public NotificationShadeWindowControllerImpl(
             @ShadeDisplayAware Context context,
             WindowRootViewComponent.Factory windowRootViewComponentFactory,
-            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            @ShadeDisplayAware WindowManager windowManager,
             IActivityManager activityManager,
             DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
@@ -172,7 +172,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             @ShadeDisplayAware LayoutParams shadeWindowLayoutParams) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
-        mWindowManager = viewCaptureAwareWindowManager;
+        mWindowManager = windowManager;
         mActivityManager = activityManager;
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
