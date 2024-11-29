@@ -57,7 +57,6 @@ constructor(
     }
 
     private suspend fun VolumeDialogStreamModel.bindToSlider(slider: Slider) {
-        slider.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY -> }
         with(slider) {
             valueFrom = levelMin.toFloat()
             valueTo = levelMax.toFloat()

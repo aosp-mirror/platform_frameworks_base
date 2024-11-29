@@ -29,6 +29,7 @@ flag {
    namespace: "backstage_power"
    description: "Detect, report and take action on jobs that maybe abandoned by the app without calling jobFinished."
    bug: "372529068"
+   is_exported: true
 }
 
 flag {
@@ -36,6 +37,7 @@ flag {
     namespace: "backstage_power"
     description: "Ignore the important_while_foreground flag and change the related APIs to be not effective"
     bug: "374175032"
+    is_exported: true
 }
 
 flag {

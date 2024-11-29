@@ -165,6 +165,7 @@ flag {
     description: "Writing tools API"
     bug: "373788889"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -191,4 +192,5 @@ flag {
   description: "Verify KeyEvents in IME"
   bug: "331730488"
   is_fixed_read_only: true
+  is_exported: true
 }

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.sliders.ui.viewmodel
+package android.location.provider;
 
-import android.view.MotionEvent
-import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
-import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInputEventsInteractor
-import javax.inject.Inject
+import android.location.Location;
 
-@VolumeDialogSliderScope
-class VolumeDialogSliderTouchesViewModel
-@Inject
-constructor(private val interactor: VolumeDialogSliderInputEventsInteractor) {
+/**
+ * Binder interface for S2 level callback.
+ * @hide
+ */
+oneway interface IS2LevelCallback {
+    /**
+     * Called with the resulting default S2 level for coarsening a location, in case a better
+     * answer cannot be obtained for a latitude/longitude.
+     */
+    void onResult(int s2Level);
 
-    fun onTouchEvent(event: MotionEvent) {
-        interactor.onTouchEvent(event)
-    }
+    /** Called if any error occurs while processing the query. */
+    void onError();
 }
