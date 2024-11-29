@@ -44,7 +44,7 @@ public final class FakeIMediaProjection extends IMediaProjection.Stub {
     }
 
     @Override
-    public void stop() throws RemoteException {
+    public void stop(@StopReason int stopReason) throws RemoteException {
         // Pass along to the client's callback wrapper.
         mIMediaProjectionCallback.onStop();
     }

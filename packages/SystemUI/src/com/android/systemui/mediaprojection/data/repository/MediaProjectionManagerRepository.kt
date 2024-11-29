@@ -20,6 +20,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.hardware.display.DisplayManager
 import android.media.projection.MediaProjectionInfo
 import android.media.projection.MediaProjectionManager
+import android.media.projection.StopReason
 import android.os.Handler
 import android.view.ContentRecordingSession
 import android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY
@@ -71,7 +72,7 @@ constructor(
         }
     }
 
-    override suspend fun stopProjecting() {
+    override suspend fun stopProjecting(@StopReason stopReason: Int) {
         withContext(backgroundDispatcher) {
             logger.log(
                 TAG,
@@ -79,7 +80,7 @@ constructor(
                 {},
                 { "Requesting MediaProjectionManager#stopActiveProjection" },
             )
-            mediaProjectionManager.stopActiveProjection()
+            mediaProjectionManager.stopActiveProjection(stopReason)
         }
     }
 

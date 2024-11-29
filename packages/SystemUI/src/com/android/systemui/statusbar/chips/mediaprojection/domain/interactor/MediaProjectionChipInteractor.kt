@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.mediaprojection.domain.interactor
 
 import android.content.pm.PackageManager
+import android.media.projection.StopReason
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
@@ -83,7 +84,7 @@ constructor(
 
     /** Stops the currently active projection. */
     fun stopProjecting() {
-        scope.launch { mediaProjectionRepository.stopProjecting() }
+        scope.launch { mediaProjectionRepository.stopProjecting(StopReason.STOP_PRIVACY_CHIP) }
     }
 
     companion object {
