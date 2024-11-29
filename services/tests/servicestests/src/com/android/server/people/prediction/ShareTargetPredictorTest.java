@@ -286,6 +286,25 @@ public final class ShareTargetPredictorTest {
     }
 
     @Test
+    public void testPredictTargets_emptyIntentFilter() {
+        Bundle bundle = new Bundle();
+        IntentFilter filter = new IntentFilter();
+        bundle.putObject(ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY, filter);
+        AppPredictionContext predictionContext = new AppPredictionContext.Builder(mContext)
+                .setUiSurface(UI_SURFACE_SHARE)
+                .setPredictedTargetCount(NUM_PREDICTED_TARGETS)
+                .setExtras(bundle)
+                .build();
+        mPredictor = new ShareTargetPredictor(
+                predictionContext, mUpdatePredictionsMethod, mDataManager, USER_ID, mContext);
+
+        mPredictor.predictTargets();
+
+        verify(mUpdatePredictionsMethod).accept(mAppTargetCaptor.capture());
+        assertThat(mAppTargetCaptor.getValue()).isEmpty();
+    }
+
+    @Test
     public void testPredictTargets_noSharingHistoryRankedByShortcutRank() {
         mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc1", 3));
         mShareShortcuts.add(buildShareShortcut(PACKAGE_1, CLASS_1, "sc2", 2));
