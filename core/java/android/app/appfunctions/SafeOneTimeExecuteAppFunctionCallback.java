@@ -17,6 +17,7 @@
 package android.app.appfunctions;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -37,8 +38,16 @@ public class SafeOneTimeExecuteAppFunctionCallback {
 
     @NonNull private final IExecuteAppFunctionCallback mCallback;
 
+    @Nullable CompletionCallback mCompletionCallback;
+
     public SafeOneTimeExecuteAppFunctionCallback(@NonNull IExecuteAppFunctionCallback callback) {
+        this(callback, /* completionCallback= */ null);
+    }
+
+    public SafeOneTimeExecuteAppFunctionCallback(@NonNull IExecuteAppFunctionCallback callback,
+            @Nullable CompletionCallback completionCallback) {
         mCallback = Objects.requireNonNull(callback);
+        mCompletionCallback = completionCallback;
     }
 
     /** Invoke wrapped callback with the result. */
@@ -49,6 +58,9 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         }
         try {
             mCallback.onSuccess(result);
+            if (mCompletionCallback != null) {
+                mCompletionCallback.finalizeOnSuccess(result);
+            }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
             Log.w(TAG, "Failed to invoke the callback", ex);
@@ -63,6 +75,9 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         }
         try {
             mCallback.onError(error);
+            if (mCompletionCallback != null) {
+                mCompletionCallback.finalizeOnError(error);
+            }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
             Log.w(TAG, "Failed to invoke the callback", ex);
@@ -75,5 +90,17 @@ public class SafeOneTimeExecuteAppFunctionCallback {
      */
     public void disable() {
         mOnResultCalled.set(true);
+    }
+
+    /**
+     * Provides a hook to execute additional actions after the {@link IExecuteAppFunctionCallback}
+     * has been invoked.
+     */
+    public interface CompletionCallback {
+        /** Called after {@link IExecuteAppFunctionCallback#onSuccess}. */
+        void finalizeOnSuccess(@NonNull ExecuteAppFunctionResponse result);
+
+        /** Called after {@link IExecuteAppFunctionCallback#onError}. */
+        void finalizeOnError(@NonNull AppFunctionException error);
     }
 }
