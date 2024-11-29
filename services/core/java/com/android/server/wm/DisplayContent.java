@@ -791,6 +791,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private WindowState mLastWakeLockHoldingWindow;
 
     /**
+     * Whether display is allowed to ignore all activity size restrictions.
+     * @see #isDisplayIgnoreActivitySizeRestrictions
+     */
+    private final boolean mIgnoreActivitySizeRestrictions;
+
+    /**
      * The helper of policy controller.
      *
      * @see DisplayWindowPolicyControllerHelper
@@ -1220,6 +1226,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this);
+        mIgnoreActivitySizeRestrictions =
+                mWmService.mDisplayWindowSettings.isIgnoreActivitySizeRestrictionsLocked(this);
 
         // Sets the initial touch mode state.
         mInTouchMode = mWmService.mContext.getResources().getBoolean(
@@ -5810,7 +5818,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * {@link VirtualDisplayConfig.Builder#setIgnoreActivitySizeRestrictions}.</p>
      */
     boolean isDisplayIgnoreActivitySizeRestrictions() {
-        return mWmService.mDisplayWindowSettings.isIgnoreActivitySizeRestrictionsLocked(this);
+        return mIgnoreActivitySizeRestrictions;
     }
 
     /**
