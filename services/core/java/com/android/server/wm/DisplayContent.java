@@ -4267,16 +4267,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
         }
         final int imePolicy = mWmService.mDisplayWindowSettings.getImePolicyLocked(this);
-        if (imePolicy == DISPLAY_IME_POLICY_FALLBACK_DISPLAY && forceDesktopMode()) {
+        if (imePolicy == DISPLAY_IME_POLICY_FALLBACK_DISPLAY
+                && isPublicSecondaryDisplayWithDesktopModeForceEnabled()) {
             // If the display has not explicitly requested for the IME to be hidden then it shall
             // show the IME locally.
             return DISPLAY_IME_POLICY_LOCAL;
         }
         return imePolicy;
-    }
-
-    boolean forceDesktopMode() {
-        return mWmService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay && !isPrivate();
     }
 
     /** @see WindowManagerInternal#onToggleImeRequested */
@@ -4871,7 +4868,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** @return {@code true} if there is window to wait before enabling the screen. */
     boolean shouldWaitForSystemDecorWindowsOnBoot() {
-        if (!isDefaultDisplay && !supportsSystemDecorations()) {
+        if (!isDefaultDisplay && !isSystemDecorationsSupported()) {
             // Nothing to wait because the secondary display doesn't support system decorations,
             // there is no wallpaper, keyguard (status bar) or application (home) window to show
             // during booting.
@@ -5750,22 +5747,48 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /**
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
-    boolean supportsSystemDecorations() {
-        boolean forceDesktopModeOnDisplay = forceDesktopMode();
-
-        if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
-            // System decorations should not be forced on a rear display due to security policies.
-            forceDesktopModeOnDisplay =
-                    forceDesktopModeOnDisplay && ((mDisplay.getFlags() & Display.FLAG_REAR) == 0);
+    boolean isSystemDecorationsSupported() {
+        if (mDisplayId == mWmService.mVr2dDisplayId) {
+            // VR virtual display will be used to run and render 2D app within a VR experience.
+            return false;
         }
+        if (!isTrusted()) {
+            // Do not show system decorations on untrusted virtual display.
+            return false;
+        }
+        if (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
+                || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+            // This display is configured to show system decorations.
+            return true;
+        }
+        if (isPublicSecondaryDisplayWithDesktopModeForceEnabled()) {
+            if (com.android.window.flags.Flags.rearDisplayDisableForceDesktopSystemDecorations()) {
+                // System decorations should not be forced on a rear display due to security
+                // policies.
+                return (mDisplay.getFlags() & Display.FLAG_REAR) == 0;
+            }
+            // If the display is forced to desktop mode, treat it the same as it is configured to
+            // show system decorations.
+            return true;
+        }
+        return false;
+    }
 
-        return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
-                || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || forceDesktopModeOnDisplay)
-                // VR virtual display will be used to run and render 2D app within a VR experience.
-                && mDisplayId != mWmService.mVr2dDisplayId
-                // Do not show system decorations on untrusted virtual display.
-                && isTrusted();
+    /**
+     * This is the development option to force enable desktop mode on all secondary public displays
+     * that are not owned by a virtual device.
+     * When this is enabled, it also force enable system decorations on those displays.
+     *
+     * If we need a per-display config to enable desktop mode for production, that config should
+     * also check {@link #isSystemDecorationsSupported()} to avoid breaking any security policy.
+     */
+    boolean isPublicSecondaryDisplayWithDesktopModeForceEnabled() {
+        if (!mWmService.mForceDesktopModeOnExternalDisplays || isDefaultDisplay || isPrivate()) {
+            return false;
+        }
+        // Desktop mode is not supported on virtual devices.
+        int deviceId = mRootWindowContainer.mTaskSupervisor.getDeviceIdForDisplayId(mDisplayId);
+        return deviceId == Context.DEVICE_ID_DEFAULT;
     }
 
     /**
@@ -5776,7 +5799,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     boolean isHomeSupported() {
         return (mWmService.mDisplayWindowSettings.isHomeSupportedLocked(this) && isTrusted())
-                || supportsSystemDecorations();
+                || isSystemDecorationsSupported();
     }
 
     /**

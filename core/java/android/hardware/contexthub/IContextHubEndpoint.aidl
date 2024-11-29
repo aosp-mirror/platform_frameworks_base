@@ -38,7 +38,6 @@ interface IContextHubEndpoint {
      * @throws IllegalArgumentException If the HubEndpointInfo is not valid.
      * @throws IllegalStateException If there are too many opened sessions.
      */
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
     int openSession(in HubEndpointInfo destination, in @nullable HubServiceInfo serviceInfo);
 
     /**
@@ -49,7 +48,6 @@ interface IContextHubEndpoint {
      *
      * @throws IllegalStateException If the session wasn't opened.
      */
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
     void closeSession(int sessionId, int reason);
 
     /**
@@ -61,13 +59,11 @@ interface IContextHubEndpoint {
      *
      * @throws IllegalStateException If the session wasn't opened.
      */
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
     void openSessionRequestComplete(int sessionId);
 
     /**
      * Unregister this endpoint from the HAL, invalidate the EndpointInfo previously assigned.
      */
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
     void unregister();
 
     /**
@@ -79,7 +75,6 @@ interface IContextHubEndpoint {
      * @param transactionCallback Nullable. If the hub message requires a reply, the transactionCallback
      *                            will be set to non-null.
      */
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
     void sendMessage(int sessionId, in HubMessage message,
                      in @nullable IContextHubTransactionCallback transactionCallback);
 
@@ -91,6 +86,5 @@ interface IContextHubEndpoint {
      * @param messageSeqNumber The message sequence number, this should match a previously received HubMessage.
      * @param errorCode The message delivery status detail.
      */
-    @EnforcePermission("ACCESS_CONTEXT_HUB")
     void sendMessageDeliveryStatus(int sessionId, int messageSeqNumber, byte errorCode);
 }

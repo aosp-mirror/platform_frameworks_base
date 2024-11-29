@@ -1197,7 +1197,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 new VendorVibrationSession.DebugInfoImpl(status, callerInfo,
                         SystemClock.uptimeMillis(), System.currentTimeMillis(),
                         /* startTime= */ 0, /* endUptime= */ 0, /* endTime= */ 0,
-                        /* vibrations= */ null));
+                        /* endedByVendor= */ false, /* vibrations= */ null));
     }
 
     private void logAndRecordVibration(DebugInfo info) {

@@ -23,11 +23,17 @@ sealed interface ShortcutCustomizationUiState {
         val shortcutLabel: String,
         val errorMessage: String = "",
         val defaultCustomShortcutModifierKey: ShortcutKey.Icon.ResIdIcon,
-        val isDialogShowing: Boolean,
+        val isDialogShowing: Boolean = false,
         val pressedKeys: List<ShortcutKey> = emptyList(),
     ) : ShortcutCustomizationUiState
 
-    data class DeleteShortcutDialog(val isDialogShowing: Boolean) : ShortcutCustomizationUiState
+    data class DeleteShortcutDialog(
+        val isDialogShowing: Boolean = false
+    ) : ShortcutCustomizationUiState
+
+    data class ResetShortcutDialog(
+        val isDialogShowing: Boolean = false
+    ) : ShortcutCustomizationUiState
 
     data object Inactive : ShortcutCustomizationUiState
 }

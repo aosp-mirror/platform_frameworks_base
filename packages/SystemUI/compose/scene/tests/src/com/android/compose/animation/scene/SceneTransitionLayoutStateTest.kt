@@ -18,12 +18,9 @@ package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
@@ -167,130 +164,6 @@ class SceneTransitionLayoutStateTest {
             )
             .isNotNull()
         assertThat(state.currentTransition?.transformationSpec?.transformationMatchers).hasSize(2)
-    }
-
-    @Test
-    fun snapToIdleIfClose_snapToStart() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-        state.startTransitionImmediately(
-            animationScope = backgroundScope,
-            transition(from = SceneA, to = SceneB, current = { SceneA }, progress = { 0.2f }),
-        )
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Go to the initial scene if it is close to 0.
-        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
-        assertThat(state.isTransitioning()).isFalse()
-        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA))
-    }
-
-    @Test
-    fun snapToIdleIfClose_snapToStart_overlays() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-        state.startTransitionImmediately(
-            animationScope = backgroundScope,
-            transition(SceneA, OverlayA, isEffectivelyShown = { false }, progress = { 0.2f }),
-        )
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Go to the initial scene if it is close to 0.
-        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
-        assertThat(state.isTransitioning()).isFalse()
-        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA))
-    }
-
-    @Test
-    fun snapToIdleIfClose_snapToEnd() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-        state.startTransitionImmediately(
-            animationScope = backgroundScope,
-            transition(from = SceneA, to = SceneB, progress = { 0.8f }),
-        )
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Go to the final scene if it is close to 1.
-        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
-        assertThat(state.isTransitioning()).isFalse()
-        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneB))
-    }
-
-    @Test
-    fun snapToIdleIfClose_snapToEnd_overlays() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-        state.startTransitionImmediately(
-            animationScope = backgroundScope,
-            transition(SceneA, OverlayA, isEffectivelyShown = { true }, progress = { 0.8f }),
-        )
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Go to the final scene if it is close to 1.
-        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
-        assertThat(state.isTransitioning()).isFalse()
-        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneA, setOf(OverlayA)))
-    }
-
-    @Test
-    fun snapToIdleIfClose_multipleTransitions() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-
-        val aToB = transition(from = SceneA, to = SceneB, progress = { 0.5f })
-        state.startTransitionImmediately(animationScope = backgroundScope, aToB)
-        assertThat(state.currentTransitions).containsExactly(aToB).inOrder()
-
-        val bToC = transition(from = SceneB, to = SceneC, progress = { 0.8f })
-        state.startTransitionImmediately(animationScope = backgroundScope, bToC)
-        assertThat(state.currentTransitions).containsExactly(aToB, bToC).inOrder()
-
-        // Ignore the request if the progress is not close to 0 or 1, using the threshold.
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.currentTransitions).containsExactly(aToB, bToC).inOrder()
-
-        // Go to the final scene if it is close to 1.
-        assertThat(state.snapToIdleIfClose(threshold = 0.2f)).isTrue()
-        assertThat(state.transitionState).isEqualTo(TransitionState.Idle(SceneC))
-        assertThat(state.currentTransitions).isEmpty()
-    }
-
-    @Test
-    fun snapToIdleIfClose_closeButNotCurrentScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
-        var progress by mutableStateOf(0f)
-        var currentScene by mutableStateOf(SceneB)
-        state.startTransitionImmediately(
-            animationScope = backgroundScope,
-            transition(
-                from = SceneA,
-                to = SceneB,
-                current = { currentScene },
-                progress = { progress },
-            ),
-        )
-        assertThat(state.isTransitioning()).isTrue()
-
-        // Ignore the request if we are close to a scene that is not the current scene
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.isTransitioning()).isTrue()
-
-        progress = 1f
-        currentScene = SceneA
-        assertThat(state.snapToIdleIfClose(threshold = 0.1f)).isFalse()
-        assertThat(state.isTransitioning()).isTrue()
     }
 
     private fun MonotonicClockTestScope.startOverscrollableTransistionFromAtoB(

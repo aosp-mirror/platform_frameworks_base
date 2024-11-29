@@ -68,7 +68,8 @@ public enum DesktopModeFlags {
             Flags::enableDesktopWindowingTaskbarRunningApps, true),
     // TODO: b/369763947 - remove this once ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS is ramped up
     ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
-    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
+    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS(
+            Flags::enableDesktopWindowingEnterTransitions, false),
     ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
     ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
             Flags::enableWindowingTransitionHandlersObservers, false),
@@ -77,7 +78,15 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS(
             Flags::enableDesktopAppLaunchTransitions, false),
     ENABLE_DESKTOP_WINDOWING_PERSISTENCE(Flags::enableDesktopWindowingPersistence, false),
-    ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true);
+    ENABLE_HANDLE_INPUT_FIX(Flags::enableHandleInputFix, true),
+    ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopWindowingEnterTransitionBugfix, false),
+    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopWindowingExitTransitionsBugfix, false),
+    ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, false),
+    ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(
+            Flags::enableDesktopAppLaunchTransitionsBugfix, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.

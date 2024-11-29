@@ -22,7 +22,7 @@
     android:minWidth="@dimen/settingslib_expressive_space_medium3"
     android:minHeight="@dimen/settingslib_expressive_space_medium3"
     android:gravity="center"
-    android:layout_marginEnd="-4dp"
+    android:layout_marginEnd="@dimen/settingslib_expressive_space_extrasmall6"
     android:filterTouchesWhenObscured="false">
 
     <androidx.preference.internal.PreferenceImageView

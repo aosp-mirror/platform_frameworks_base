@@ -169,7 +169,8 @@ constructor(
             .firstOrNull { it.action.keyGestureType() == keyGestureType }
     }
 
-    suspend fun confirmAndSetShortcutCurrentlyBeingCustomized(): ShortcutCustomizationRequestResult {
+    suspend fun confirmAndSetShortcutCurrentlyBeingCustomized():
+        ShortcutCustomizationRequestResult {
         val inputGestureData =
             buildInputGestureDataForShortcutBeingCustomized()
                 ?: return ShortcutCustomizationRequestResult.ERROR_OTHER
@@ -182,6 +183,10 @@ constructor(
             retrieveInputGestureDataForShortcutBeingDeleted()
                 ?: return ShortcutCustomizationRequestResult.ERROR_OTHER
         return customInputGesturesRepository.deleteCustomInputGesture(inputGestureData)
+    }
+
+    suspend fun resetAllCustomShortcuts(): ShortcutCustomizationRequestResult {
+        return customInputGesturesRepository.resetAllCustomInputGestures()
     }
 
     private fun Builder.addKeyGestureTypeFromShortcutLabel(): Builder {
@@ -297,17 +302,13 @@ constructor(
         return null
     }
 
-    private fun fetchGroupLabelByGestureType(
-        @KeyGestureType keyGestureType: Int
-    ): String? {
+    private fun fetchGroupLabelByGestureType(@KeyGestureType keyGestureType: Int): String? {
         inputGestureMaps.gestureToInternalKeyboardShortcutGroupLabelResIdMap[keyGestureType]?.let {
             return context.getString(it)
         } ?: return null
     }
 
-    private fun fetchShortcutInfoLabelByGestureType(
-        @KeyGestureType keyGestureType: Int
-    ): String? {
+    private fun fetchShortcutInfoLabelByGestureType(@KeyGestureType keyGestureType: Int): String? {
         inputGestureMaps.gestureToInternalKeyboardShortcutInfoLabelResIdMap[keyGestureType]?.let {
             return context.getString(it)
         } ?: return null

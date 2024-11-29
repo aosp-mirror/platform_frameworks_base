@@ -27,4 +27,5 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+  is_exported: true
 }

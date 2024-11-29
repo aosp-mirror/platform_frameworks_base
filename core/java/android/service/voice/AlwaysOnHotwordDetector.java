@@ -1541,7 +1541,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 mInternalCallback,
                 new RecognitionConfig.Builder()
                     .setCaptureRequested(captureTriggerAudio)
-                    .setAllowMultipleTriggers(allowMultipleTriggers)
+                    .setMultipleTriggersAllowed(allowMultipleTriggers)
                     .setKeyphrases(recognitionExtra)
                     .setData(data)
                     .setAudioCapabilities(audioCapabilities)

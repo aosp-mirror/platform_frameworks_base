@@ -41,12 +41,13 @@ import android.os.Handler;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.android.internal.jank.FrameTracker.Reasons;
+
+import java.util.ArrayList;
 
 /**
  * An overlay that uses WindowCallbacks to draw the names of all running CUJs to the window
@@ -68,13 +69,14 @@ import com.android.internal.jank.FrameTracker.Reasons;
 class InteractionMonitorDebugOverlay {
     private static final String TAG = "InteractionMonitorDebug";
     private static final int REASON_STILL_RUNNING = -1000;
+    private static final long HIDE_OVERLAY_DELAY = 2000L;
     // Sparse array where the key in the CUJ and the value is the session status, or null if
     // it's currently running
     private final Application mCurrentApplication;
     private final Handler mUiThread;
     private final DebugOverlayView mDebugOverlayView;
     private final WindowManager mWindowManager;
-    private final SparseIntArray mRunningCujs = new SparseIntArray();
+    private final ArrayList<TrackerState> mRunningCujs = new ArrayList<>();
 
     InteractionMonitorDebugOverlay(@NonNull Application currentApplication,
             @NonNull @UiThread Handler uiThread, @ColorInt int bgColor, double yOffset) {
@@ -94,8 +96,7 @@ class InteractionMonitorDebugOverlay {
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT);
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
                 | WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 
@@ -116,30 +117,53 @@ class InteractionMonitorDebugOverlay {
         mWindowManager.addView(mDebugOverlayView, lp);
     }
 
+    private final Runnable mHideOverlayRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mRunningCujs.clear();
+            mDebugOverlayView.setVisibility(INVISIBLE);
+        }
+    };
+
     @AnyThread
-    void onTrackerAdded(@Cuj.CujType int addedCuj) {
+    void onTrackerAdded(@Cuj.CujType int addedCuj, int cookie) {
+        mUiThread.removeCallbacks(mHideOverlayRunnable);
         mUiThread.post(() -> {
             String cujName = Cuj.getNameOfCuj(addedCuj);
-            Log.i(TAG, cujName + " started");
-            // Use REASON_STILL_RUNNING (not technically one of the '@Reasons') to indicate the CUJ
-            // is still running
-            mRunningCujs.put(addedCuj, REASON_STILL_RUNNING);
+            Log.i(TAG, cujName + " started (cookie=" + cookie + ")");
+            mRunningCujs.add(new TrackerState(addedCuj, cookie));
             mDebugOverlayView.setVisibility(VISIBLE);
             mDebugOverlayView.invalidate();
         });
     }
 
     @AnyThread
-    void onTrackerRemoved(@Cuj.CujType int removedCuj, @Reasons int reason) {
+    void onTrackerRemoved(@Cuj.CujType int removedCuj, @Reasons int reason, int cookie) {
         mUiThread.post(() -> {
-            mRunningCujs.put(removedCuj, reason);
+            TrackerState foundTracker = null;
+            boolean allTrackersEnded = true;
+            for (int i = 0; i < mRunningCujs.size(); i++) {
+                TrackerState tracker = mRunningCujs.get(i);
+                if (tracker.mCuj == removedCuj && tracker.mCookie == cookie) {
+                    foundTracker = tracker;
+                } else {
+                    // If none of the trackers have REASON_STILL_RUNNING status, then
+                    // all CUJs have ended
+                    allTrackersEnded = allTrackersEnded && tracker.mState != REASON_STILL_RUNNING;
+                }
+            }
+
+            if (foundTracker != null) {
+                foundTracker.mState = reason;
+            }
+
             String cujName = Cuj.getNameOfCuj(removedCuj);
-            Log.i(TAG, cujName + (reason == REASON_END_NORMAL ? " ended" : " cancelled"));
-            // If REASON_STILL_RUNNING is not in mRunningCujs, then all CUJs have ended
-            if (mRunningCujs.indexOfValue(REASON_STILL_RUNNING) < 0) {
+            Log.i(TAG, cujName + (reason == REASON_END_NORMAL ? " ended" : " cancelled")
+                    + " (cookie=" + cookie + ")");
+
+            if (allTrackersEnded) {
                 Log.i(TAG, "All CUJs ended");
-                mRunningCujs.clear();
-                mDebugOverlayView.setVisibility(INVISIBLE);
+                mUiThread.postDelayed(mHideOverlayRunnable, HIDE_OVERLAY_DELAY);
             }
             mDebugOverlayView.invalidate();
         });
@@ -150,6 +174,21 @@ class InteractionMonitorDebugOverlay {
         mUiThread.post(() -> {
             mWindowManager.removeView(mDebugOverlayView);
         });
+    }
+
+    @AnyThread
+    private static class TrackerState {
+        final int mCookie;
+        final int mCuj;
+        int mState;
+
+        private TrackerState(int cuj, int cookie) {
+            mCuj = cuj;
+            mCookie = cookie;
+            // Use REASON_STILL_RUNNING (not technically one of the '@Reasons') to indicate the CUJ
+            // is still running
+            mState = REASON_STILL_RUNNING;
+        }
     }
 
     @UiThread
@@ -164,7 +203,15 @@ class InteractionMonitorDebugOverlay {
         private final float mDensity;
         private final Paint mDebugPaint;
         private final Paint.FontMetrics mDebugFontMetrics;
-        private final String mPackageName;
+        private final String mPackageNameText;
+
+        final int mPadding;
+        final int mPackageNameFontSize;
+        final int mCujFontSize;
+        final float mCujNameTextHeight;
+        final float mCujStatusWidth;
+        final float mPackageNameTextHeight;
+        final float mPackageNameWidth;
 
         private DebugOverlayView(Context context, @ColorInt int bgColor, double yOffset) {
             super(context);
@@ -176,7 +223,14 @@ class InteractionMonitorDebugOverlay {
             mDebugPaint = new Paint();
             mDebugPaint.setAntiAlias(false);
             mDebugFontMetrics = new Paint.FontMetrics();
-            mPackageName = mCurrentApplication.getPackageName();
+            mPackageNameText = "package:" + mCurrentApplication.getPackageName();
+            mPadding = dipToPx(5);
+            mPackageNameFontSize = dipToPx(12);
+            mCujFontSize = dipToPx(18);
+            mCujNameTextHeight = getTextHeight(mCujFontSize);
+            mCujStatusWidth = mCujNameTextHeight * 1.2f;
+            mPackageNameTextHeight = getTextHeight(mPackageNameFontSize);
+            mPackageNameWidth = getWidthOfText(mPackageNameText, mPackageNameFontSize);
         }
 
         private int dipToPx(int dip) {
@@ -189,11 +243,16 @@ class InteractionMonitorDebugOverlay {
             return mDebugFontMetrics.descent - mDebugFontMetrics.ascent;
         }
 
+        private float getWidthOfText(String text, int fontSize) {
+            mDebugPaint.setTextSize(fontSize);
+            return mDebugPaint.measureText(text);
+        }
+
         private float getWidthOfLongestCujName(int cujFontSize) {
             mDebugPaint.setTextSize(cujFontSize);
             float maxLength = 0;
             for (int i = 0; i < mRunningCujs.size(); i++) {
-                String cujName = Cuj.getNameOfCuj(mRunningCujs.keyAt(i));
+                String cujName = Cuj.getNameOfCuj(mRunningCujs.get(i).mCuj);
                 float textLength = mDebugPaint.measureText(cujName);
                 if (textLength > maxLength) {
                     maxLength = textLength;
@@ -211,47 +270,52 @@ class InteractionMonitorDebugOverlay {
             // performance analysis.
             Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME, "DEBUG_OVERLAY_DRAW", 0);
 
-            final int padding = dipToPx(5);
             final int h = getHeight();
             final int w = getWidth();
             final int dy = (int) (h * mYOffset);
-            int packageNameFontSize = dipToPx(12);
-            int cujFontSize = dipToPx(18);
-            final float cujNameTextHeight = getTextHeight(cujFontSize);
-            final float packageNameTextHeight = getTextHeight(packageNameFontSize);
-            float maxLength = getWidthOfLongestCujName(cujFontSize);
+
+            float maxLength = Math.max(mPackageNameWidth, getWidthOfLongestCujName(mCujFontSize))
+                    + mCujStatusWidth;
 
             final int dx = (int) ((w - maxLength) / 2f);
             canvas.translate(dx, dy);
             // Draw background rectangle for displaying the text showing the CUJ name
             mDebugPaint.setColor(mBgColor);
-            canvas.drawRect(-padding * 2, // more padding on top so we can draw the package name
-                    -padding, padding * 2 + maxLength,
-                    padding * 2 + packageNameTextHeight + cujNameTextHeight * mRunningCujs.size(),
-                    mDebugPaint);
-            mDebugPaint.setTextSize(packageNameFontSize);
+            canvas.drawRect(-mPadding * 2, // more padding on top so we can draw the package name
+                    -mPadding, mPadding * 2 + maxLength, mPadding * 2 + mPackageNameTextHeight
+                            + mCujNameTextHeight * mRunningCujs.size(), mDebugPaint);
+            mDebugPaint.setTextSize(mPackageNameFontSize);
             mDebugPaint.setColor(Color.BLACK);
             mDebugPaint.setStrikeThruText(false);
-            canvas.translate(0, packageNameTextHeight);
-            canvas.drawText("package:" + mPackageName, 0, 0, mDebugPaint);
-            mDebugPaint.setTextSize(cujFontSize);
+            canvas.translate(0, mPackageNameTextHeight);
+            canvas.drawText(mPackageNameText, 0, 0, mDebugPaint);
+            mDebugPaint.setTextSize(mCujFontSize);
             // Draw text for CUJ names
             for (int i = 0; i < mRunningCujs.size(); i++) {
-                int status = mRunningCujs.valueAt(i);
-                if (status == REASON_STILL_RUNNING) {
-                    mDebugPaint.setColor(Color.BLACK);
-                    mDebugPaint.setStrikeThruText(false);
-                } else if (status == REASON_END_NORMAL) {
-                    mDebugPaint.setColor(Color.GRAY);
-                    mDebugPaint.setStrikeThruText(false);
-                } else {
-                    // Cancelled, or otherwise ended for a bad reason
-                    mDebugPaint.setColor(Color.RED);
-                    mDebugPaint.setStrikeThruText(true);
-                }
-                String cujName = Cuj.getNameOfCuj(mRunningCujs.keyAt(i));
-                canvas.translate(0, cujNameTextHeight);
-                canvas.drawText(cujName, 0, 0, mDebugPaint);
+                TrackerState tracker = mRunningCujs.get(i);
+                int status = tracker.mState;
+                String statusText = switch (status) {
+                    case REASON_STILL_RUNNING -> {
+                        mDebugPaint.setColor(Color.BLACK);
+                        mDebugPaint.setStrikeThruText(false);
+                        yield "☐"; // BALLOT BOX
+                    }
+                    case REASON_END_NORMAL -> {
+                        mDebugPaint.setColor(Color.GRAY);
+                        mDebugPaint.setStrikeThruText(false);
+                        yield "✅"; // WHITE HEAVY CHECK MARK
+                    }
+                    default -> {
+                        // Cancelled, or otherwise ended for a bad reason
+                        mDebugPaint.setColor(Color.RED);
+                        mDebugPaint.setStrikeThruText(true);
+                        yield "❌"; // CROSS MARK
+                    }
+                };
+                String cujName = Cuj.getNameOfCuj(tracker.mCuj);
+                canvas.translate(0, mCujNameTextHeight);
+                canvas.drawText(statusText, 0, 0, mDebugPaint);
+                canvas.drawText(cujName, mCujStatusWidth, 0, mDebugPaint);
             }
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, 0);
         }
