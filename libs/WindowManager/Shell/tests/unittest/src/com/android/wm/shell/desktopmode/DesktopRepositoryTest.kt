@@ -149,6 +149,14 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun addTask_multipleDisplays_moveToAnotherDisplay() {
+        repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+        repo.addTask(SECOND_DISPLAY, taskId = 1, isVisible = true)
+        assertThat(repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)).isEmpty()
+        assertThat(repo.getFreeformTasksInZOrder(SECOND_DISPLAY)).containsExactly(1)
+    }
+
+    @Test
     fun removeActiveTask_notifiesActiveTaskListener() {
         val listener = TestListener()
         repo.addActiveTaskListener(listener)
