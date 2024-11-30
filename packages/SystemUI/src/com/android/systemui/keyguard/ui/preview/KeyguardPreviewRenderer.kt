@@ -66,6 +66,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -310,6 +311,10 @@ constructor(
             initiallySelectedSlotId = null,
             shouldHighlightSelectedAffordance = false,
         )
+    }
+
+    fun onClockSizeSelected(clockSize: ClockSizeSetting) {
+        smartspaceViewModel.setOverrideClockSize(clockSize)
     }
 
     fun destroy() {

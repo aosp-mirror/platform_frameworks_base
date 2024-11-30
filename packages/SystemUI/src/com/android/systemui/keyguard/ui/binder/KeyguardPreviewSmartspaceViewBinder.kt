@@ -39,7 +39,7 @@ object KeyguardPreviewSmartspaceViewBinder {
         smartspace.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch("$TAG#viewModel.selectedClockSize") {
-                    viewModel.selectedClockSize.collect {
+                    viewModel.previewingClockSize.collect {
                         val topPadding =
                             when (it) {
                                 ClockSizeSetting.DYNAMIC ->

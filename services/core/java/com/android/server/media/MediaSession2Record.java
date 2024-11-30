@@ -16,7 +16,6 @@
 
 package com.android.server.media;
 
-import android.app.ForegroundServiceDelegationOptions;
 import android.app.Notification;
 import android.media.MediaController2;
 import android.media.Session2CommandGroup;
@@ -98,11 +97,8 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
     }
 
     @Override
-    public ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions() {
-        // For an app to be eligible for FGS delegation, it needs a media session liked to a media
-        // notification. Currently, notifications cannot be linked to MediaSession2 so it is not
-        // supported.
-        return null;
+    public boolean hasLinkedNotificationSupport() {
+        return false;
     }
 
     @Override
