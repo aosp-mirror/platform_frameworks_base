@@ -28277,7 +28277,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags |= PFLAG_FORCE_LAYOUT;
         mPrivateFlags |= PFLAG_INVALIDATED;
 
-        if (mParent != null && !mParent.isLayoutRequested()) {
+        if (mParent != null) {
             mParent.requestLayout();
         }
         if (mAttachInfo != null && mAttachInfo.mViewRequestingLayout == this) {

@@ -55,9 +55,9 @@ import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.metadata.ReadWritePermit
 import com.android.settingslib.preference.PreferenceScreenFactory
 import com.android.settingslib.preference.PreferenceScreenProvider
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 private const val TAG = "PreferenceGraphBuilder"
 
@@ -387,6 +387,7 @@ fun PreferenceMetadata.toProto(
     }
     persistent = metadata.isPersistent(context)
     if (persistent) {
+        if (metadata is PersistentPreference<*>) sensitivityLevel = metadata.sensitivityLevel
         if (
             flags.includeValue() &&
                 enabled &&

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
+import android.view.Display
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
@@ -29,6 +30,7 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.launch
 
 /** Binds a [NotificationIconContainer] to a [NotificationIconContainerStatusBarViewModel]. */
 class NotificationIconContainerStatusBarViewBinder
@@ -38,11 +40,22 @@ constructor(
     @ShadeDisplayAware private val configuration: ConfigurationState,
     private val systemBarUtilsState: SystemBarUtilsState,
     private val failureTracker: StatusBarIconViewBindingFailureTracker,
-    private val viewStore: StatusBarNotificationIconViewStore,
+    private val defaultDisplayViewStore: StatusBarNotificationIconViewStore,
+    private val connectedDisplaysViewStoreFactory:
+        ConnectedDisplaysStatusBarNotificationIconViewStore.Factory,
 ) {
+
     fun bindWhileAttached(view: NotificationIconContainer, displayId: Int): DisposableHandle {
         return traceSection("NICStatusBar#bindWhileAttached") {
             view.repeatWhenAttached {
+                val viewStore =
+                    if (displayId == Display.DEFAULT_DISPLAY) {
+                        defaultDisplayViewStore
+                    } else {
+                        connectedDisplaysViewStoreFactory.create(displayId = displayId).also {
+                            lifecycleScope.launch { it.activate() }
+                        }
+                    }
                 lifecycleScope.launch {
                     NotificationIconContainerViewBinder.bind(
                         displayId = displayId,
