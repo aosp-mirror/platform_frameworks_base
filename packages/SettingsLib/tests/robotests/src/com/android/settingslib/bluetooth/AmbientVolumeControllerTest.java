@@ -171,6 +171,37 @@ public class AmbientVolumeControllerTest {
     }
 
     @Test
+    public void getMute_verifyGetOnFirstControl() {
+        List<AudioInputControl> controls = prepareValidAmbientControls();
+
+        mVolumeController.getMute(mDevice);
+
+        verify(controls.getFirst()).getMute();
+    }
+
+    @Test
+    public void setMuted_true_verifySetOnAllControls() {
+        List<AudioInputControl> controls = prepareValidAmbientControls();
+
+        mVolumeController.setMuted(mDevice, true);
+
+        for (AudioInputControl control : controls) {
+            verify(control).setMute(AudioInputControl.MUTE_MUTED);
+        }
+    }
+
+    @Test
+    public void setMuted_false_verifySetOnAllControls() {
+        List<AudioInputControl> controls = prepareValidAmbientControls();
+
+        mVolumeController.setMuted(mDevice, false);
+
+        for (AudioInputControl control : controls) {
+            verify(control).setMute(AudioInputControl.MUTE_NOT_MUTED);
+        }
+    }
+
+    @Test
     public void ambientCallback_onGainSettingChanged_verifyCallbackIsCalledWhenStateChange() {
         AmbientVolumeController.AmbientCallback ambientCallback =
                 mVolumeController.new AmbientCallback(mDevice, mCallback);
@@ -194,6 +225,33 @@ public class AmbientVolumeControllerTest {
                 mVolumeController.new AmbientCallback(mDevice, mCallback);
 
         ambientCallback.onSetGainSettingFailed();
+
+        verify(mCallback).onCommandFailed(mDevice);
+    }
+
+    @Test
+    public void ambientCallback_onMuteChanged_verifyCallbackIsCalledWhenStateChange() {
+        AmbientVolumeController.AmbientCallback ambientCallback =
+                mVolumeController.new AmbientCallback(mDevice, mCallback);
+        final int testMute = 0;
+        List<AudioInputControl> controls = prepareValidAmbientControls();
+        when(controls.getFirst().getMute()).thenReturn(testMute);
+
+        mVolumeController.refreshAmbientState(mDevice);
+        ambientCallback.onMuteChanged(testMute);
+        verify(mCallback, never()).onMuteChanged(mDevice, testMute);
+
+        final int updatedTestMute = 1;
+        ambientCallback.onMuteChanged(updatedTestMute);
+        verify(mCallback).onMuteChanged(mDevice, updatedTestMute);
+    }
+
+    @Test
+    public void ambientCallback_onSetMuteFailed_verifyCallbackIsCalled() {
+        AmbientVolumeController.AmbientCallback ambientCallback =
+                mVolumeController.new AmbientCallback(mDevice, mCallback);
+
+        ambientCallback.onSetMuteFailed();
 
         verify(mCallback).onCommandFailed(mDevice);
     }

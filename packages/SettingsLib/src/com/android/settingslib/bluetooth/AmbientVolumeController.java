@@ -16,6 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.AudioInputControl.MUTE_DISABLED;
+import static android.bluetooth.AudioInputControl.MUTE_MUTED;
+import static android.bluetooth.AudioInputControl.MUTE_NOT_MUTED;
+
 import static com.android.settingslib.bluetooth.HearingDeviceLocalDataManager.Data.INVALID_VOLUME;
 
 import android.bluetooth.AudioInputControl;
@@ -171,7 +175,8 @@ public class AmbientVolumeController implements LocalBluetoothProfileManager.Ser
             return null;
         }
         int gainSetting = getAmbient(device);
-        return new RemoteAmbientState(gainSetting);
+        int mute = getMute(device);
+        return new RemoteAmbientState(gainSetting, mute);
     }
 
     /**
@@ -190,7 +195,9 @@ public class AmbientVolumeController implements LocalBluetoothProfileManager.Ser
         if (!ambientControls.isEmpty()) {
             synchronized (mDeviceAmbientStateMap) {
                 value = ambientControls.getFirst().getGainSetting();
-                RemoteAmbientState updatedState = new RemoteAmbientState(value);
+                RemoteAmbientState state = mDeviceAmbientStateMap.getOrDefault(device,
+                        new RemoteAmbientState(INVALID_VOLUME, MUTE_DISABLED));
+                RemoteAmbientState updatedState = new RemoteAmbientState(value, state.mute);
                 mDeviceAmbientStateMap.put(device, updatedState);
             }
         }
@@ -208,9 +215,55 @@ public class AmbientVolumeController implements LocalBluetoothProfileManager.Ser
             Log.d(TAG, "setAmbient, value:" + value + ", device:" + device);
         }
         List<AudioInputControl> ambientControls = getAmbientControls(device);
+        ambientControls.forEach(control -> control.setGainSetting(value));
+    }
+
+    /**
+     * Gets the mute state from first ambient control point of the remote device and
+     * stores it in cached {@link RemoteAmbientState}. The value will be one of
+     * {@link AudioInputControl.Mute}.
+     *
+     * When any audio input point receives {@link AmbientCallback#onMuteChanged(int)} callback,
+     * only the changed value which is different from the value stored in the cached state will
+     * be notified to the {@link AmbientVolumeControlCallback} of this controller.
+     *
+     * @param device the remote device
+     */
+    public int getMute(@NonNull BluetoothDevice device) {
+        List<AudioInputControl> ambientControls = getAmbientControls(device);
+        int value = MUTE_DISABLED;
         if (!ambientControls.isEmpty()) {
-            ambientControls.forEach(control -> control.setGainSetting(value));
+            synchronized (mDeviceAmbientStateMap) {
+                value = ambientControls.getFirst().getMute();
+                RemoteAmbientState state = mDeviceAmbientStateMap.getOrDefault(device,
+                        new RemoteAmbientState(INVALID_VOLUME, MUTE_DISABLED));
+                RemoteAmbientState updatedState = new RemoteAmbientState(state.gainSetting, value);
+                mDeviceAmbientStateMap.put(device, updatedState);
+            }
         }
+        return value;
+    }
+
+    /**
+     * Sets the mute state to all ambient control points of the remote device.
+     *
+     * @param device the remote device
+     * @param muted the mute state to be updated
+     */
+    public void setMuted(@NonNull BluetoothDevice device, boolean muted) {
+        if (DEBUG) {
+            Log.d(TAG, "setMuted, muted:" + muted + ", device:" + device);
+        }
+        List<AudioInputControl> ambientControls = getAmbientControls(device);
+        ambientControls.forEach(control -> {
+            try {
+                control.setMute(muted ? MUTE_MUTED : MUTE_NOT_MUTED);
+            } catch (IllegalStateException e) {
+                // Sometimes remote will throw this exception due to initialization not done
+                // yet. Catch it to prevent crashes on UI.
+                Log.w(TAG, "Remote mute state is currently disabled.");
+            }
+        });
     }
 
     /**
@@ -276,6 +329,16 @@ public class AmbientVolumeController implements LocalBluetoothProfileManager.Ser
         }
 
         /**
+         * This method is called when one of the remote device's ambient control point's mute
+         * state is changed.
+         *
+         * @param device the remote device
+         * @param mute the new mute state
+         */
+        default void onMuteChanged(@NonNull BluetoothDevice device, int mute) {
+        }
+
+        /**
          * This method is called when any command to the remote device's ambient control point
          * is failed.
          *
@@ -319,9 +382,34 @@ public class AmbientVolumeController implements LocalBluetoothProfileManager.Ser
                 mCallback.onCommandFailed(mDevice);
             }
         }
+
+        @Override
+        public void onMuteChanged(int mute) {
+            if (mCallback != null) {
+                synchronized (mDeviceAmbientStateMap) {
+                    RemoteAmbientState previousState = mDeviceAmbientStateMap.get(mDevice);
+                    if (previousState.mute != mute) {
+                        mCallback.onMuteChanged(mDevice, mute);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onSetMuteFailed() {
+            Log.w(TAG, "onSetMuteFailed, device=" + mDevice);
+            if (mCallback != null) {
+                mCallback.onCommandFailed(mDevice);
+            }
+        }
     }
 
-    public record RemoteAmbientState(int gainSetting) {
-
+    public record RemoteAmbientState(int gainSetting, int mute) {
+        public boolean isMutable() {
+            return mute != MUTE_DISABLED;
+        }
+        public boolean isMuted() {
+            return mute == MUTE_MUTED;
+        }
     }
 }
