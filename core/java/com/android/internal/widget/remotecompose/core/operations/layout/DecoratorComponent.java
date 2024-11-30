@@ -24,5 +24,13 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
  * measured. Eg borders, background, clips, etc.
  */
 public interface DecoratorComponent {
-    void layout(@NonNull RemoteContext context, float width, float height);
+    /**
+     * Layout the decorator
+     *
+     * @param context
+     * @param component the associated component
+     * @param width horizontal dimension in pixels
+     * @param height vertical dimension in pixels
+     */
+    void layout(@NonNull RemoteContext context, Component component, float width, float height);
 }

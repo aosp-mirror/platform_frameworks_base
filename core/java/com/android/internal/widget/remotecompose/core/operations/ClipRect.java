@@ -28,8 +28,8 @@ import java.util.List;
 
 /** Support clip with a rectangle */
 public class ClipRect extends DrawBase4 {
-    public static final int OP_CODE = Operations.CLIP_RECT;
-    public static final String CLASS_NAME = "ClipRect";
+    private static final int OP_CODE = Operations.CLIP_RECT;
+    private static final String CLASS_NAME = "ClipRect";
 
     /**
      * Read this operation and add it to the list of operations
@@ -51,6 +51,11 @@ public class ClipRect extends DrawBase4 {
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

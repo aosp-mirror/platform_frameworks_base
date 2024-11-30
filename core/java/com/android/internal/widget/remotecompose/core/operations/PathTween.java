@@ -80,6 +80,11 @@ public class PathTween extends PaintOperation implements VariableSupport {
                 + floatToString(mTween, mTweenOut);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

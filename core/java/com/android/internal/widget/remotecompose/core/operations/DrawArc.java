@@ -26,8 +26,9 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 
 import java.util.List;
 
+/** Draw an Arc command the specified arc, will be scaled to fit inside the specified oval. */
 public class DrawArc extends DrawBase6 {
-    public static final int OP_CODE = Operations.DRAW_ARC;
+    private static final int OP_CODE = Operations.DRAW_ARC;
     private static final String CLASS_NAME = "DrawArc";
 
     /**
@@ -114,8 +115,20 @@ public class DrawArc extends DrawBase6 {
                         "Sweep angle (in degrees) measured clockwise");
     }
 
-    public DrawArc(float v1, float v2, float v3, float v4, float v5, float v6) {
-        super(v1, v2, v3, v4, v5, v6);
+    /**
+     * Create Draw Arc command Draw the specified arc, which will be scaled to fit inside the
+     * specified oval.
+     *
+     * @param left the left side of the oval
+     * @param top the top of the oval
+     * @param right the right side of the oval
+     * @param bottom the bottom of the oval
+     * @param startAngle Starting angle (in degrees) where the arc begins
+     * @param sweepAngle Sweep angle (in degrees) measured clockwise
+     */
+    public DrawArc(
+            float left, float top, float right, float bottom, float startAngle, float sweepAngle) {
+        super(left, top, right, bottom, startAngle, sweepAngle);
         mName = "DrawArc";
     }
 

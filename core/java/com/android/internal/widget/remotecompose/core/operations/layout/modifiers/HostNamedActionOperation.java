@@ -125,6 +125,11 @@ public class HostNamedActionOperation extends Operation implements ActionOperati
         operations.add(new HostNamedActionOperation(textId, type, valueId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "HostNamedAction")
                 .description("Host Named action. This operation represents a host action")

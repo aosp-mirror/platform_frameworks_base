@@ -26,6 +26,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
+/** The restore previous matrix command */
 public class MatrixRestore extends PaintOperation {
     private static final int OP_CODE = Operations.MATRIX_RESTORE;
     private static final String CLASS_NAME = "MatrixRestore";
@@ -54,6 +55,11 @@ public class MatrixRestore extends PaintOperation {
         return "MatrixRestore";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

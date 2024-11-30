@@ -27,9 +27,10 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
+/** Skew the matrix command */
 public class MatrixSkew extends DrawBase2 {
-    public static final int OP_CODE = Operations.MATRIX_SKEW;
-    public static final String CLASS_NAME = "MatrixSkew";
+    private static final int OP_CODE = Operations.MATRIX_SKEW;
+    private static final String CLASS_NAME = "MatrixSkew";
 
     /**
      * Read this operation and add it to the list of operations
@@ -51,6 +52,11 @@ public class MatrixSkew extends DrawBase2 {
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

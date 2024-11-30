@@ -41,9 +41,17 @@ public interface TouchHandler {
      * @param component the component on which the touch has been received
      * @param x the x position of the click in document coordinates
      * @param y the y position of the click in document coordinates
+     * @param dx
+     * @param dy
      */
     void onTouchUp(
-            RemoteContext context, CoreDocument document, Component component, float x, float y);
+            RemoteContext context,
+            CoreDocument document,
+            Component component,
+            float x,
+            float y,
+            float dx,
+            float dy);
 
     /**
      * callback for a touch move event
