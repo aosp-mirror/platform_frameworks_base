@@ -460,8 +460,8 @@ public final class AssociationInfo implements Parcelable {
         } else {
             mDeviceIcon = null;
         }
-
-        if (Flags.associationTag() && in.readInt() == 1) {
+        int deviceId = in.readInt();
+        if (Flags.associationTag() && deviceId == 1) {
             mDeviceId = in.readTypedObject(DeviceId.CREATOR);
         } else {
             mDeviceId = null;
