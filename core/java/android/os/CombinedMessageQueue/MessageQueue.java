@@ -24,8 +24,6 @@ import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.Instrumentation;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Process;
-import android.os.UserHandle;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
@@ -95,6 +93,13 @@ public final class MessageQueue {
     private int mAsyncMessageCount;
 
     /**
+     * @hide
+     */
+    private final AtomicLong mMessageCount = new AtomicLong();
+    private final Thread mThread;
+    private final long mTid;
+
+    /**
      * Select between two implementations of message queue. The legacy implementation is used
      * by default as it provides maximum compatibility with applications and tests that
      * reach into MessageQueue via the mMessages field. The concurrent implemmentation is used for
@@ -128,6 +133,8 @@ public final class MessageQueue {
         mUseConcurrent = sIsProcessAllowedToUseConcurrent && !isInstrumenting();
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
+        mThread = Thread.currentThread();
+        mTid = Process.myTid();
     }
 
     private static void initIsProcessAllowedToUseConcurrent() {
@@ -216,6 +223,32 @@ public final class MessageQueue {
         } finally {
             super.finalize();
         }
+    }
+
+    private void decAndTraceMessageCount() {
+        mMessageCount.decrementAndGet();
+        traceMessageCount();
+    }
+
+    private void incAndTraceMessageCount(Message msg, long when) {
+        mMessageCount.incrementAndGet();
+        msg.mSendingThreadName = Thread.currentThread().getName();
+        msg.mEventId.set(PerfettoTrace.getFlowId());
+
+        traceMessageCount();
+        PerfettoTrace.instant(PerfettoTrace.MQ_CATEGORY, "message_queue_send")
+                .addFlow(msg.mEventId.get())
+                .addArg("receiving_thread", mThread.getName())
+                .addArg("delay", when - SystemClock.uptimeMillis())
+                .addArg("what", msg.what)
+                .emit();
+    }
+
+    /** @hide */
+    private void traceMessageCount() {
+        PerfettoTrace.counter(PerfettoTrace.MQ_CATEGORY, mMessageCount.get())
+                .usingThreadCounterTrack(mTid, mThread.getName())
+                .emit();
     }
 
     // Disposes of the underlying message queue.
@@ -800,6 +833,7 @@ public final class MessageQueue {
             Message msg = nextMessage(false, false);
             if (msg != null) {
                 msg.markInUse();
+                decAndTraceMessageCount();
                 return msg;
             }
 
@@ -909,6 +943,7 @@ public final class MessageQueue {
                         if (msg.isAsynchronous()) {
                             mAsyncMessageCount--;
                         }
+                        decAndTraceMessageCount();
                         if (TRACE) {
                             Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
                         }
@@ -1075,6 +1110,7 @@ public final class MessageQueue {
 
             msg.markInUse();
             msg.arg1 = token;
+            incAndTraceMessageCount(msg, when);
 
             if (!enqueueMessageUnchecked(msg, when)) {
                 Log.wtf(TAG_C, "Unexpected error while adding sync barrier!");
@@ -1090,6 +1126,7 @@ public final class MessageQueue {
             msg.markInUse();
             msg.when = when;
             msg.arg1 = token;
+            incAndTraceMessageCount(msg, when);
 
             if (Flags.messageQueueTailTracking() && mLast != null && mLast.when <= when) {
                 /* Message goes to tail of list */
@@ -1196,6 +1233,7 @@ public final class MessageQueue {
                 needWake = mMessages == null || mMessages.target != null;
             }
             p.recycleUnchecked();
+            decAndTraceMessageCount();
 
             // If the loop is quitting then it is already awake.
             // We can assume mPtr != 0 when mQuitting is false.
@@ -1252,6 +1290,8 @@ public final class MessageQueue {
 
             msg.markInUse();
             msg.when = when;
+            incAndTraceMessageCount(msg, when);
+
             Message p = mMessages;
             boolean needWake;
             if (p == null || when == 0 || when < p.when) {
@@ -1391,6 +1431,7 @@ public final class MessageQueue {
                 if (msg.isAsynchronous()) {
                     mAsyncMessageCount--;
                 }
+                decAndTraceMessageCount();
                 if (TRACE) {
                     Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
                 }
@@ -1642,6 +1683,7 @@ public final class MessageQueue {
                     mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
+                decAndTraceMessageCount();
                 p = n;
             }
 
@@ -1660,6 +1702,7 @@ public final class MessageQueue {
                             mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
+                        decAndTraceMessageCount();
                         p.next = nn;
                         if (p.next == null) {
                             mLast = p;
@@ -1718,6 +1761,7 @@ public final class MessageQueue {
                             mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
+                        decAndTraceMessageCount();
                         p.next = nn;
                         if (p.next == null) {
                             mLast = p;
@@ -1759,6 +1803,7 @@ public final class MessageQueue {
                     mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
+                decAndTraceMessageCount();
                 p = n;
             }
 
@@ -1777,6 +1822,7 @@ public final class MessageQueue {
                             mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
+                        decAndTraceMessageCount();
                         p.next = nn;
                         if (p.next == null) {
                             mLast = p;
@@ -1832,6 +1878,7 @@ public final class MessageQueue {
                     mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
+                decAndTraceMessageCount();
                 p = n;
             }
 
@@ -1850,6 +1897,7 @@ public final class MessageQueue {
                             mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
+                        decAndTraceMessageCount();
                         p.next = nn;
                         if (p.next == null) {
                             mLast = p;
@@ -1904,6 +1952,7 @@ public final class MessageQueue {
                     mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
+                decAndTraceMessageCount();
                 p = n;
             }
 
@@ -1921,6 +1970,7 @@ public final class MessageQueue {
                             mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
+                        decAndTraceMessageCount();
                         p.next = nn;
                         if (p.next == null) {
                             mLast = p;
@@ -1976,6 +2026,7 @@ public final class MessageQueue {
                     mAsyncMessageCount--;
                 }
                 p.recycleUnchecked();
+                decAndTraceMessageCount();
                 p = n;
             }
 
@@ -1993,6 +2044,7 @@ public final class MessageQueue {
                             mAsyncMessageCount--;
                         }
                         n.recycleUnchecked();
+                        decAndTraceMessageCount();
                         p.next = nn;
                         if (p.next == null) {
                             mLast = p;
@@ -2027,6 +2079,8 @@ public final class MessageQueue {
         mMessages = null;
         mLast = null;
         mAsyncMessageCount = 0;
+        mMessageCount.set(0);
+        traceMessageCount();
     }
 
     private void removeAllFutureMessagesLocked() {
@@ -2057,6 +2111,7 @@ public final class MessageQueue {
                         mAsyncMessageCount--;
                     }
                     p.recycleUnchecked();
+                    decAndTraceMessageCount();
                 } while (n != null);
             }
         }
@@ -2701,6 +2756,7 @@ public final class MessageQueue {
         MessageNode node = new MessageNode(msg, seq);
         msg.when = when;
         msg.markInUse();
+        incAndTraceMessageCount(msg, when);
 
         if (DEBUG) {
             Log.d(TAG_C, "Insert message what: " + msg.what + " when: " + msg.when + " seq: "
@@ -2828,6 +2884,7 @@ public final class MessageQueue {
                 if (removeMatches) {
                     if (p.removeFromStack()) {
                         p.mMessage.recycleUnchecked();
+                        decAndTraceMessageCount();
                         if (mMessageCounts.incrementCancelled()) {
                             nativeWake(mPtr);
                         }
@@ -2870,6 +2927,7 @@ public final class MessageQueue {
                     found = true;
                     if (queue.remove(msg)) {
                         msg.mMessage.recycleUnchecked();
+                        decAndTraceMessageCount();
                     }
                 } else {
                     return true;

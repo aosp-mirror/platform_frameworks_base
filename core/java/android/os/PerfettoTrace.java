@@ -51,6 +51,8 @@ public final class PerfettoTrace {
      */
     private static final AtomicInteger sFlowEventId = new AtomicInteger();
 
+    public static final PerfettoTrace.Category MQ_CATEGORY = new PerfettoTrace.Category("mq");
+
     /**
      * Perfetto category a trace event belongs to.
      * Registering a category is not sufficient to capture events within the category, it must
@@ -369,5 +371,12 @@ public final class PerfettoTrace {
      */
     public static void register(boolean isBackendInProcess) {
         native_register(isBackendInProcess);
+    }
+
+    /**
+     * Registers categories with Perfetto.
+     */
+    public static void registerCategories() {
+        MQ_CATEGORY.register();
     }
 }
