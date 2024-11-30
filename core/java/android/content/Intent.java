@@ -55,6 +55,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.BundleMerger;
@@ -12397,8 +12398,19 @@ public class Intent implements Parcelable, Cloneable {
         addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
         if (mExtras != null && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
-                Object value = mExtras.get(key);
-
+                Object value;
+                try {
+                    value = mExtras.get(key);
+                } catch (BadParcelableException e) {
+                    // This could happen when the key points to a LazyValue whose class cannot be
+                    // found by the classLoader - A nested object more than 1 level deeper who is
+                    // of type of a custom class could trigger this situation. In such case, we
+                    // ignore it since it is not an intent. However, it could be a custom type that
+                    // extends from Intent. If such an object is retrieved later in another
+                    // component, then trying to launch such a custom class object will fail unless
+                    // removeLaunchSecurityProtection() is called before it is launched.
+                    value = null;
+                }
                 if (value instanceof Intent intent && !visited.contains(intent)) {
                     handleNestedIntent(intent, visited, new NestedIntentKey(
                             NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0));
