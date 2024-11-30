@@ -286,7 +286,12 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 if (isImeInputTarget(caller)) {
                     reportImeInputTargetStateToControlTarget(caller, controlTarget, statsToken);
                 } else {
-                    // TODO(b/353463205) add ImeTracker?
+                    ProtoLog.w(WM_DEBUG_IME,
+                            "Tried to update client visibility for non-IME input target %s "
+                                    + "(current target: %s)",
+                            caller, mDisplayContent.getImeInputTarget());
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY);
                 }
             }
             return false;

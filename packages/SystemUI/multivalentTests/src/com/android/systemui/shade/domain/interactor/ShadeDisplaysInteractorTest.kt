@@ -53,7 +53,7 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
     private val shadeRootview = mock<WindowRootView>()
     private val positionRepository = FakeShadeDisplayRepository()
     private val shadeContext = mock<Context>()
-    private val contextStore = FakeDisplayWindowPropertiesRepository()
+    private val contextStore = FakeDisplayWindowPropertiesRepository(context)
     private val testScope = TestScope(UnconfinedTestDispatcher())
     private val shadeWm = mock<WindowManager>()
     private val resources = mock<Resources>()

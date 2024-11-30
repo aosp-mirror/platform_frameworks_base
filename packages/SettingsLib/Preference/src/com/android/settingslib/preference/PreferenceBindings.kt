@@ -55,13 +55,13 @@ interface PreferenceScreenBinding : PreferenceBinding {
     }
 }
 
-/** Binding of preference group associated with [PreferenceCategory]. */
-interface PreferenceGroupBinding : PreferenceBinding {
+/** Binding of preference category associated with [PreferenceCategory]. */
+interface PreferenceCategoryBinding : PreferenceBinding {
 
     override fun createWidget(context: Context) = PreferenceCategory(context)
 
     companion object {
-        @JvmStatic val INSTANCE = object : PreferenceGroupBinding {}
+        @JvmStatic val INSTANCE = object : PreferenceCategoryBinding {}
     }
 }
 

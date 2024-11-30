@@ -28,6 +28,7 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.IndentingPrintWriter;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -283,6 +284,154 @@ public final class DisplayTopology implements Parcelable {
         normalize();
     }
 
+    /**
+     * Clamp offsets and remove any overlaps between displays.
+     */
+    public void normalize() {
+        if (mRoot == null) {
+            return;
+        }
+        clampOffsets(mRoot);
+
+        Map<TreeNode, RectF> bounds = new HashMap<>();
+        Map<TreeNode, Integer> depths = new HashMap<>();
+        Map<TreeNode, TreeNode> parents = new HashMap<>();
+        getInfo(bounds, depths, parents, mRoot, /* x= */ 0, /* y= */ 0, /* depth= */ 0);
+
+        // Sort the displays first by their depth in the tree, then by the distance of their top
+        // left point from the root display's origin (0, 0). This way we process the displays
+        // starting at the root and we push out a display if necessary.
+        Comparator<TreeNode> comparator = (d1, d2) -> {
+            if (d1 == d2) {
+                return 0;
+            }
+
+            int compareDepths = Integer.compare(depths.get(d1), depths.get(d2));
+            if (compareDepths != 0) {
+                return compareDepths;
+            }
+
+            RectF bounds1 = bounds.get(d1);
+            RectF bounds2 = bounds.get(d2);
+            return Double.compare(Math.hypot(bounds1.left, bounds1.top),
+                    Math.hypot(bounds2.left, bounds2.top));
+        };
+        List<TreeNode> displays = new ArrayList<>(bounds.keySet());
+        displays.sort(comparator);
+
+        for (int i = 1; i < displays.size(); i++) {
+            TreeNode targetDisplay = displays.get(i);
+            TreeNode lastIntersectingSourceDisplay = null;
+            float lastOffsetX = 0;
+            float lastOffsetY = 0;
+
+            for (int j = 0; j < i; j++) {
+                TreeNode sourceDisplay = displays.get(j);
+                RectF sourceBounds = bounds.get(sourceDisplay);
+                RectF targetBounds = bounds.get(targetDisplay);
+
+                if (!RectF.intersects(sourceBounds, targetBounds)) {
+                    continue;
+                }
+
+                // Find the offset by which to move the display. Pick the smaller one among the x
+                // and y axes.
+                float offsetX = targetBounds.left >= 0
+                        ? sourceBounds.right - targetBounds.left
+                        : sourceBounds.left - targetBounds.right;
+                float offsetY = targetBounds.top >= 0
+                        ? sourceBounds.bottom - targetBounds.top
+                        : sourceBounds.top - targetBounds.bottom;
+                if (Math.abs(offsetX) <= Math.abs(offsetY)) {
+                    targetBounds.left += offsetX;
+                    targetBounds.right += offsetX;
+                    // We need to also update the offset in the tree
+                    if (targetDisplay.mPosition == POSITION_TOP
+                            || targetDisplay.mPosition == POSITION_BOTTOM) {
+                        targetDisplay.mOffset += offsetX;
+                    }
+                    offsetY = 0;
+                } else {
+                    targetBounds.top += offsetY;
+                    targetBounds.bottom += offsetY;
+                    // We need to also update the offset in the tree
+                    if (targetDisplay.mPosition == POSITION_LEFT
+                            || targetDisplay.mPosition == POSITION_RIGHT) {
+                        targetDisplay.mOffset += offsetY;
+                    }
+                    offsetX = 0;
+                }
+
+                lastIntersectingSourceDisplay = sourceDisplay;
+                lastOffsetX = offsetX;
+                lastOffsetY = offsetY;
+            }
+
+            // Now re-parent the target display to the last intersecting source display if it no
+            // longer touches its parent.
+            if (lastIntersectingSourceDisplay == null) {
+                // There was no overlap.
+                continue;
+            }
+            TreeNode parent = parents.get(targetDisplay);
+            if (parent == lastIntersectingSourceDisplay) {
+                // The displays are moved in such a way that they're adjacent to the intersecting
+                // display. If the last intersecting display happens to be the parent then we
+                // already know that the display is adjacent to its parent.
+                continue;
+            }
+
+            RectF childBounds = bounds.get(targetDisplay);
+            RectF parentBounds = bounds.get(parent);
+            // Check that the edges are on the same line
+            boolean areTouching = switch (targetDisplay.mPosition) {
+                case POSITION_LEFT -> floatEquals(parentBounds.left, childBounds.right);
+                case POSITION_RIGHT -> floatEquals(parentBounds.right, childBounds.left);
+                case POSITION_TOP -> floatEquals(parentBounds.top, childBounds.bottom);
+                case POSITION_BOTTOM -> floatEquals(parentBounds.bottom, childBounds.top);
+                default -> throw new IllegalStateException(
+                        "Unexpected value: " + targetDisplay.mPosition);
+            };
+            // Check that the offset is within bounds
+            areTouching &= switch (targetDisplay.mPosition) {
+                case POSITION_LEFT, POSITION_RIGHT ->
+                        childBounds.bottom + EPSILON >= parentBounds.top
+                                && childBounds.top <= parentBounds.bottom + EPSILON;
+                case POSITION_TOP, POSITION_BOTTOM ->
+                        childBounds.right + EPSILON >= parentBounds.left
+                                && childBounds.left <= parentBounds.right + EPSILON;
+                default -> throw new IllegalStateException(
+                        "Unexpected value: " + targetDisplay.mPosition);
+            };
+
+            if (!areTouching) {
+                // Re-parent the display.
+                parent.mChildren.remove(targetDisplay);
+                RectF lastIntersectingSourceDisplayBounds =
+                        bounds.get(lastIntersectingSourceDisplay);
+                lastIntersectingSourceDisplay.mChildren.add(targetDisplay);
+
+                if (lastOffsetX != 0) {
+                    targetDisplay.mPosition = lastOffsetX > 0 ? POSITION_RIGHT : POSITION_LEFT;
+                    targetDisplay.mOffset =
+                            childBounds.top - lastIntersectingSourceDisplayBounds.top;
+                } else if (lastOffsetY != 0) {
+                    targetDisplay.mPosition = lastOffsetY > 0 ? POSITION_BOTTOM : POSITION_TOP;
+                    targetDisplay.mOffset =
+                            childBounds.left - lastIntersectingSourceDisplayBounds.left;
+                }
+            }
+        }
+    }
+
+    /**
+     * @return A deep copy of the topology that will not be modified by the system.
+     */
+    public DisplayTopology copy() {
+        TreeNode rootCopy = mRoot == null ? null : mRoot.copy();
+        return new DisplayTopology(rootCopy, mPrimaryDisplayId);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -434,145 +583,6 @@ public final class DisplayTopology implements Parcelable {
     }
 
     /**
-     * Update the topology to remove any overlaps between displays.
-     */
-    @VisibleForTesting
-    public void normalize() {
-        if (mRoot == null) {
-            return;
-        }
-        Map<TreeNode, RectF> bounds = new HashMap<>();
-        Map<TreeNode, Integer> depths = new HashMap<>();
-        Map<TreeNode, TreeNode> parents = new HashMap<>();
-        getInfo(bounds, depths, parents, mRoot, /* x= */ 0, /* y= */ 0, /* depth= */ 0);
-
-        // Sort the displays first by their depth in the tree, then by the distance of their top
-        // left point from the root display's origin (0, 0). This way we process the displays
-        // starting at the root and we push out a display if necessary.
-        Comparator<TreeNode> comparator = (d1, d2) -> {
-            if (d1 == d2) {
-                return 0;
-            }
-
-            int compareDepths = Integer.compare(depths.get(d1), depths.get(d2));
-            if (compareDepths != 0) {
-                return compareDepths;
-            }
-
-            RectF bounds1 = bounds.get(d1);
-            RectF bounds2 = bounds.get(d2);
-            return Double.compare(Math.hypot(bounds1.left, bounds1.top),
-                    Math.hypot(bounds2.left, bounds2.top));
-        };
-        List<TreeNode> displays = new ArrayList<>(bounds.keySet());
-        displays.sort(comparator);
-
-        for (int i = 1; i < displays.size(); i++) {
-            TreeNode targetDisplay = displays.get(i);
-            TreeNode lastIntersectingSourceDisplay = null;
-            float lastOffsetX = 0;
-            float lastOffsetY = 0;
-
-            for (int j = 0; j < i; j++) {
-                TreeNode sourceDisplay = displays.get(j);
-                RectF sourceBounds = bounds.get(sourceDisplay);
-                RectF targetBounds = bounds.get(targetDisplay);
-
-                if (!RectF.intersects(sourceBounds, targetBounds)) {
-                    continue;
-                }
-
-                // Find the offset by which to move the display. Pick the smaller one among the x
-                // and y axes.
-                float offsetX = targetBounds.left >= 0
-                        ? sourceBounds.right - targetBounds.left
-                        : sourceBounds.left - targetBounds.right;
-                float offsetY = targetBounds.top >= 0
-                        ? sourceBounds.bottom - targetBounds.top
-                        : sourceBounds.top - targetBounds.bottom;
-                if (Math.abs(offsetX) <= Math.abs(offsetY)) {
-                    targetBounds.left += offsetX;
-                    targetBounds.right += offsetX;
-                    // We need to also update the offset in the tree
-                    if (targetDisplay.mPosition == POSITION_TOP
-                            || targetDisplay.mPosition == POSITION_BOTTOM) {
-                        targetDisplay.mOffset += offsetX;
-                    }
-                    offsetY = 0;
-                } else {
-                    targetBounds.top += offsetY;
-                    targetBounds.bottom += offsetY;
-                    // We need to also update the offset in the tree
-                    if (targetDisplay.mPosition == POSITION_LEFT
-                            || targetDisplay.mPosition == POSITION_RIGHT) {
-                        targetDisplay.mOffset += offsetY;
-                    }
-                    offsetX = 0;
-                }
-
-                lastIntersectingSourceDisplay = sourceDisplay;
-                lastOffsetX = offsetX;
-                lastOffsetY = offsetY;
-            }
-
-            // Now re-parent the target display to the last intersecting source display if it no
-            // longer touches its parent.
-            if (lastIntersectingSourceDisplay == null) {
-                // There was no overlap.
-                continue;
-            }
-            TreeNode parent = parents.get(targetDisplay);
-            if (parent == lastIntersectingSourceDisplay) {
-                // The displays are moved in such a way that they're adjacent to the intersecting
-                // display. If the last intersecting display happens to be the parent then we
-                // already know that the display is adjacent to its parent.
-                continue;
-            }
-
-            RectF childBounds = bounds.get(targetDisplay);
-            RectF parentBounds = bounds.get(parent);
-            // Check that the edges are on the same line
-            boolean areTouching = switch (targetDisplay.mPosition) {
-                case POSITION_LEFT -> floatEquals(parentBounds.left, childBounds.right);
-                case POSITION_RIGHT -> floatEquals(parentBounds.right, childBounds.left);
-                case POSITION_TOP -> floatEquals(parentBounds.top, childBounds.bottom);
-                case POSITION_BOTTOM -> floatEquals(parentBounds.bottom, childBounds.top);
-                default -> throw new IllegalStateException(
-                        "Unexpected value: " + targetDisplay.mPosition);
-            };
-            // Check that the offset is within bounds
-            areTouching &= switch (targetDisplay.mPosition) {
-                case POSITION_LEFT, POSITION_RIGHT ->
-                        childBounds.bottom + EPSILON >= parentBounds.top
-                                && childBounds.top <= parentBounds.bottom + EPSILON;
-                case POSITION_TOP, POSITION_BOTTOM ->
-                        childBounds.right + EPSILON >= parentBounds.left
-                                && childBounds.left <= parentBounds.right + EPSILON;
-                default -> throw new IllegalStateException(
-                        "Unexpected value: " + targetDisplay.mPosition);
-            };
-
-            if (!areTouching) {
-                // Re-parent the display.
-                parent.mChildren.remove(targetDisplay);
-                RectF lastIntersectingSourceDisplayBounds =
-                        bounds.get(lastIntersectingSourceDisplay);
-                lastIntersectingSourceDisplay.mChildren.add(targetDisplay);
-
-                if (lastOffsetX != 0) {
-                    targetDisplay.mPosition = lastOffsetX > 0 ? POSITION_RIGHT : POSITION_LEFT;
-                    targetDisplay.mOffset =
-                            childBounds.top - lastIntersectingSourceDisplayBounds.top;
-                } else if (lastOffsetY != 0) {
-                    targetDisplay.mPosition = lastOffsetY > 0 ? POSITION_BOTTOM : POSITION_TOP;
-                    targetDisplay.mOffset =
-                            childBounds.left - lastIntersectingSourceDisplayBounds.left;
-                }
-            }
-        }
-    }
-
-    /**
      * Tests whether two brightness float values are within a small enough tolerance
      * of each other.
      * @param a first float to compare
@@ -595,6 +605,24 @@ public final class DisplayTopology implements Parcelable {
         } while (!pend.isEmpty());
 
         return found;
+    }
+
+    /**
+     * Ensure that the offsets of all displays within the given tree are within bounds.
+     * @param display The starting node
+     */
+    private void clampOffsets(TreeNode display) {
+        if (display == null) {
+            return;
+        }
+        for (TreeNode child : display.mChildren) {
+            if (child.mPosition == POSITION_LEFT || child.mPosition == POSITION_RIGHT) {
+                child.mOffset = MathUtils.constrain(child.mOffset, -child.mHeight, display.mHeight);
+            } else if (child.mPosition == POSITION_TOP || child.mPosition == POSITION_BOTTOM) {
+                child.mOffset = MathUtils.constrain(child.mOffset, -child.mWidth, display.mWidth);
+            }
+            clampOffsets(child);
+        }
     }
 
     public static final class TreeNode implements Parcelable {
@@ -692,6 +720,17 @@ public final class DisplayTopology implements Parcelable {
 
         public List<TreeNode> getChildren() {
             return Collections.unmodifiableList(mChildren);
+        }
+
+        /**
+         * @return A deep copy of the node that will not be modified by the system.
+         */
+        public TreeNode copy() {
+            TreeNode copy = new TreeNode(mDisplayId, mWidth, mHeight, mPosition, mOffset);
+            for (TreeNode child : mChildren) {
+                copy.mChildren.add(child.copy());
+            }
+            return copy;
         }
 
         @Override

@@ -476,7 +476,7 @@ class DesktopTasksController(
                 .setTimeout(APP_HANDLE_DRAG_HOLD_CUJ_TIMEOUT_MS)
         interactionJankMonitor.begin(jankConfigBuilder)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
-            taskInfo.taskId,
+            taskInfo,
             dragToDesktopValueAnimator,
         )
     }

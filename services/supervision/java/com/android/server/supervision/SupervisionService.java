@@ -72,13 +72,6 @@ public class SupervisionService extends ISupervisionManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
     }
 
-    private void syncStateWithDevicePolicyManager(@UserIdInt int userId) {
-        // Ensure that supervision is enabled when supervision app is the profile owner.
-        if (Flags.enableSyncWithDpm() && isProfileOwner(userId)) {
-            setSupervisionEnabledForUser(userId, true);
-        }
-    }
-
     @Override
     public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
         synchronized (getLockObject()) {
@@ -140,6 +133,18 @@ public class SupervisionService extends ISupervisionManager.Stub {
         }
     }
 
+    /** Ensures that supervision is enabled when supervision app is the profile owner. */
+    private void syncStateWithDevicePolicyManager(@UserIdInt int userId) {
+        if (isProfileOwner(userId)) {
+            setSupervisionEnabledForUser(userId, true);
+        } else {
+            // TODO(b/381428475): Avoid disabling supervision when the app is not the profile owner.
+            // This might only be possible after introducing specific and public APIs to enable
+            // supervision.
+            setSupervisionEnabledForUser(userId, false);
+        }
+    }
+
     /** Returns whether the supervision app has profile owner status. */
     private boolean isProfileOwner(@UserIdInt int userId) {
         ComponentName profileOwner = mDpmInternal.getProfileOwnerAsUser(userId);
@@ -189,7 +194,7 @@ public class SupervisionService extends ISupervisionManager.Stub {
 
         @Override
         public void onUserStarting(@NonNull TargetUser user) {
-            if (!user.isPreCreated()) {
+            if (Flags.enableSyncWithDpm() && !user.isPreCreated()) {
                 mSupervisionService.syncStateWithDevicePolicyManager(user.getUserIdentifier());
             }
         }

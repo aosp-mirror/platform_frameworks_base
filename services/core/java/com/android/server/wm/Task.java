@@ -6292,12 +6292,6 @@ class Task extends TaskFragment {
         return mAnimatingActivityRegistry;
     }
 
-    @Override
-    void executeAppTransition(ActivityOptions options) {
-        mDisplayContent.executeAppTransition();
-        ActivityOptions.abort(options);
-    }
-
     private Rect getRawBounds() {
         return super.getBounds();
     }
