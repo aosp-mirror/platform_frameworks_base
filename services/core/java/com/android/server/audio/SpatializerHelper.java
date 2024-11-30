@@ -129,6 +129,8 @@ public class SpatializerHelper {
     /** current level as reported by native Spatializer in callback */
     private int mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private int mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+    /** cached version of Spatializer.getSpatializedChannelMasks */
+    private List<Integer> mSpatializedChannelMasks = Collections.emptyList();
 
     private boolean mTransauralSupported = false;
     private boolean mBinauralSupported = false;
@@ -1030,6 +1032,17 @@ public class SpatializerHelper {
                 return;
             }
             try {
+                final int[] nativeMasks = mSpat.getSpatializedChannelMasks();
+                for (int i = 0; i < nativeMasks.length; i++) {
+                    nativeMasks[i] = AudioFormat.convertNativeChannelMaskToOutMask(nativeMasks[i]);
+                }
+                mSpatializedChannelMasks = Arrays.stream(nativeMasks).boxed().toList();
+
+            } catch (Exception e) { // just catch Exception in case nativeMasks is null
+                Log.e(TAG, "Error calling getSpatializedChannelMasks", e);
+                mSpatializedChannelMasks = Collections.emptyList();
+            }
+            try {
                 //TODO: register heatracking callback only when sensors are registered
                 if (mIsHeadTrackingSupported) {
                     mActualHeadTrackingMode =
@@ -1103,20 +1116,7 @@ public class SpatializerHelper {
     }
 
     synchronized @NonNull List<Integer> getSpatializedChannelMasks() {
-        if (!checkSpatializer("getSpatializedChannelMasks")) {
-            return Collections.emptyList();
-        }
-        try {
-            final int[] nativeMasks = new int[0]; // FIXME mSpat query goes here
-            for (int i = 0; i < nativeMasks.length; i++) {
-                nativeMasks[i] = AudioFormat.convertNativeChannelMaskToOutMask(nativeMasks[i]);
-            }
-            final List<Integer> masks = Arrays.stream(nativeMasks).boxed().toList();
-            return masks;
-        } catch (Exception e) { // just catch Exception in case nativeMasks is null
-            Log.e(TAG, "Error calling getSpatializedChannelMasks", e);
-            return Collections.emptyList();
-        }
+        return mSpatializedChannelMasks;
     }
 
     //------------------------------------------------------
@@ -1622,6 +1622,14 @@ public class SpatializerHelper {
         pw.println("\tmState:" + mState);
         pw.println("\tmSpatLevel:" + mSpatLevel);
         pw.println("\tmCapableSpatLevel:" + mCapableSpatLevel);
+        List<Integer> speakerMasks = getSpatializedChannelMasks();
+        StringBuilder masks = speakerMasks.isEmpty()
+                ? new StringBuilder("none") : new StringBuilder("");
+        for (Integer mask : speakerMasks) {
+            masks.append(AudioFormat.javaChannelOutMaskToString(mask)).append(" ");
+        }
+        pw.println("\tspatialized speaker masks: " + masks);
+
         pw.println("\tmIsHeadTrackingSupported:" + mIsHeadTrackingSupported);
         StringBuilder modesString = new StringBuilder();
         for (int mode : mSupportedHeadTrackingModes) {

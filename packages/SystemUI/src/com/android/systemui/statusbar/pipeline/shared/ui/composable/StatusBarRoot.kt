@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.composable
 
-import android.view.Display
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -167,17 +166,11 @@ fun StatusBarRoot(
                             R.id.notificationIcons
                         )
 
-                    // TODO(b/369337701): implement notification icons for all displays.
-                    //  Currently if we try to bind for all displays, there is a crash, because the
-                    //  same notification icon view can't have multiple parents.
-                    val displayId = context.displayId
-                    if (displayId == Display.DEFAULT_DISPLAY) {
-                        scope.launch {
-                            notificationIconsBinder.bindWhileAttached(
-                                notificationIconContainer,
-                                displayId,
-                            )
-                        }
+                    scope.launch {
+                        notificationIconsBinder.bindWhileAttached(
+                            notificationIconContainer,
+                            context.displayId,
+                        )
                     }
 
                     // This binder handles everything else

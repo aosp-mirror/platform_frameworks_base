@@ -378,8 +378,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
 
             assertThat(dndMode!!.isActive).isFalse()
 
-            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
             runCurrent()
 
             assertThat(dndMode!!.isActive).isTrue()

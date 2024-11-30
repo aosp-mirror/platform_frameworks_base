@@ -24,7 +24,6 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_ACTIVE
 import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_INACTIVE
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
@@ -107,6 +106,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardRepository
     private val clockBuffers = ClockMessageBuffers(LogcatOnlyMessageBuffer(LogLevel.DEBUG))
     private lateinit var underTest: ClockEventController
+    private lateinit var dndModeId: String
 
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var batteryController: BatteryController
@@ -156,6 +156,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(largeClockController.theme).thenReturn(ThemeConfig(true, null))
         whenever(userTracker.userId).thenReturn(1)
 
+        dndModeId = MANUAL_DND_INACTIVE.id
         zenModeRepository.addMode(MANUAL_DND_INACTIVE)
 
         repository = FakeKeyguardRepository()
@@ -528,7 +529,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         testScope.runTest {
             underTest.listenForDnd(testScope.backgroundScope)
 
-            zenModeRepository.replaceMode(MANUAL_DND_INACTIVE.id, MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(dndModeId)
             runCurrent()
 
             verify(events)
@@ -536,7 +537,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                     eq(ZenData(ZenMode.IMPORTANT_INTERRUPTIONS, R.string::dnd_is_on.name))
                 )
 
-            zenModeRepository.replaceMode(MANUAL_DND_ACTIVE.id, MANUAL_DND_INACTIVE)
+            zenModeRepository.deactivateMode(dndModeId)
             runCurrent()
 
             verify(events).onZenDataChanged(eq(ZenData(ZenMode.OFF, R.string::dnd_is_off.name)))
