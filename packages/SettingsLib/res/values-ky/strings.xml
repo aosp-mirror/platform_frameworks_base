@@ -237,7 +237,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Профиль тандоо"</string>
     <string name="category_personal" msgid="6236798763159385225">"Жеке"</string>
     <string name="category_work" msgid="4014193632325996115">"Жумуш"</string>
-    <string name="category_private" msgid="4244892185452788977">"Купуя"</string>
+    <string name="category_private" msgid="4244892185452788977">"Жеке профиль"</string>
     <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Иштеп чыгуучунун параметрлери"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Иштеп чыгуучунун параметрлерин иштетүү"</string>
@@ -258,7 +258,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR кодунун сканерин колдонуп, жаңы түзмөктөрдү жупташтырыңыз"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Түзмөктү атайын код аркылуу жупташтыруу"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Жаңы түзмөктөрдү алты сандан турган код аркылуу жупташтырасыз"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Жупташтырылган түзмөктөр"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Байланышкан түзмөктөр"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Учурда туташып турган түзмөктөр"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Түзмөктүн чоо-жайы"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Унутулсун"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жакшыртылган туташуу функциясын иштетет."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергиликтүү терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux иштеп чыгуу чөйрөсү"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Cынамык) Linux терминалын Android\'де иштетүү"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Эгер өчүрүп койсоңуз, Linux терминалынын маалыматы тазаланат"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP текшерүү"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP текшерүү тартиби"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Мүчүлүштүктөрдү аныктоо"</string>

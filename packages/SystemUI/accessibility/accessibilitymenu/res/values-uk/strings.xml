@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Перейти на попередній екран"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Перейти на наступний екран"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"За допомогою великого екранного меню функцій доступності можна блокувати пристрій, змінювати гучність і яскравість, робити знімки екрана й багато іншого."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Керування пристроєм за допомогою великого меню"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Керувати пристроєм за допомогою великого меню"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Налаштування меню функцій доступності"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Великі кнопки"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Збільшити розмір кнопок у меню функцій доступності"</string>

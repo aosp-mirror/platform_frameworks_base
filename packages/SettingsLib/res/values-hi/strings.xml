@@ -288,7 +288,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM अनलॉक करने की अनुमति दें?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"चेतावनी: इस सेटिंग के चालू रहने पर डिवाइस सुरक्षा सुविधाएं इस डिवाइस पर काम नहीं करेंगी."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"मॉक लोकेशन के लिए ऐप्लिकेशन चुनें"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"मॉक लोकेशन के लिए ऐप्लिकेशन सेट नहीं है"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"मॉक लोकेशन के लिए कोई ऐप्लिकेशन सेट नहीं है"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"मॉक लोकेशन के लिए ऐप्लिकेशन: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"वायरलेस डिसप्ले सर्टिफ़िकेशन"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"कनेक्टिविटी बेहतर बनाने की सुविधा को चालू करें"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"लोकल शेल तक पहुंचने की सुविधा देने वाले टर्मिनल ऐप को चालू करें"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux डेवलपमेंट एनवायरमेंट"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(एक्सपेरिमेंट के तौर पर) Android पर Linux का टर्मिनल ऐप्लिकेशन चलाएं"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Linux टर्मिनल ऐप्लिकेशन को बंद करने पर, उसका डेटा मिट जाएगा"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP जांच"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP जाँच व्‍यवहार सेट करें"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"डीबग करना"</string>

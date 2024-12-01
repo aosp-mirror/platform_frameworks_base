@@ -19,6 +19,19 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+filegroup {
+    name: "vcn-location-sources",
+    srcs: select(release_flag("RELEASE_MOVE_VCN_TO_MAINLINE"), {
+        true: [
+            "vcn-location-flag/module/com/android/server/vcn/VcnLocation.java",
+        ],
+        default: [
+            "vcn-location-flag/platform/com/android/server/vcn/VcnLocation.java",
+        ],
+    }),
+    visibility: ["//frameworks/base/services/core"],
+}
+
 java_library {
     name: "service-connectivity-b-pre-jarjar",
     sdk_version: "system_server_current",

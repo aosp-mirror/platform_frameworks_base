@@ -108,7 +108,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды жаздыруу сеансы боюнча учурдагы билдирме"</string>
     <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Жаздырып баштайсызбы?"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Жаздырып жатканыңызда Android экраныңызда көрүнүп жана түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Колдонмону жаздырып жатканда Android анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Колдонмону жаздырып жатканда Android андагы нерселерди көрө алат. Андыктан сырсөздөр, төлөмдүн чоо-жайы, билдирүүлөр, сүрөттөр, аудио жана видеолор менен этият болуңуз."</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Жаздырып баштоо"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жаздыруу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Түзмөктөгү аудиолор"</string>
@@ -236,7 +236,7 @@
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Түзмөктүн чоо-жайын конфигурациялоо үчүн чыкылдатыңыз"</string>
     <string name="accessibility_bluetooth_device_settings_see_all" msgid="9111952496905423543">"Бардык түзмөктөрдү көрүү үчүн чыкылдатыңыз"</string>
     <string name="accessibility_bluetooth_device_settings_pair_new_device" msgid="2435184865793496966">"Жаңы түзмөк кошуу үчүн чыкылдатыңыз"</string>
-    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батарея кубатынын деңгээли белгисиз."</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Батареянын деңгээли белгисиз."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> менен туташкан."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> менен туташты."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Интернет жок."</string>
@@ -513,7 +513,7 @@
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> бул параметрди өчүрүп койду"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Тышкы экранга чыгарып баштайсызбы?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Тышкы экранга чыгарганда Android экраныңызда көрүнүп жана түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Колдонмону тышкы экранга чыгарганда Android анда көрүнүп же ойноп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Колдонмону тышкы экранга чыгарганда, андагы нерселердин баары көрүнөт. Андыктан сырсөздөр, төлөмдүн чоо-жайы, билдирүүлөр, сүрөттөр, аудио жана видео сыяктуу нерселер менен этият болуңуз."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Тышкы экранга чыгарып баштоо"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Бөлүшүү башталсынбы?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Бөлүшүп, жаздырып же тышкы экранга чыгарып жатканда Android экраныңыздагы бардык маалыматты же түзмөктө ойнотулуп жаткан нерселерди көрө алат. Андыктан сырсөздөрдү, төлөмдүн чоо-жайын, билдирүүлөрдү, сүрөттөрдү, аудио жана видеону көрсөтүп албаңыз."</string>
@@ -749,7 +749,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Боштук"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Артка өчүрүү"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Ойнотуу/Тындыруу"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Токтотуу"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Кийинки"</string>
@@ -803,7 +803,7 @@
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Учурдагы колдонмону оңго жылдырып, экранды бөлүү"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Учурдагы колдонмону солго жылдырып, экранды бөлүү"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Экранды бөлүү режиминен толук экранга которулуу"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Бөлүнгөн экранды колдонуп жатканда сол же төмөн жактагы колдонмого которулуңуз"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Бөлүнгөн экранда сол же төмөн жактагы колдонмого которулуу"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Бөлүнгөн экранды колдонуп жатканда сол же жогору жактагы колдонмого которулуңуз"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Экранды бөлүү режиминде бир колдонмону экинчисине алмаштыруу"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Киргизүү"</string>
@@ -1336,7 +1336,7 @@
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Система"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Бир нече тапшырма аткаруу"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Киргизүү"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Колдонмодогу кыска жолдор"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Колдонмонун ыкчам баскычтары"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Атайын мүмкүнчүлүктөр"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Ыкчам баскычтар"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Ыкчам баскычтарды издөө"</string>

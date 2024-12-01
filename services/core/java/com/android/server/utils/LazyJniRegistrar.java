@@ -42,6 +42,9 @@ public final class LazyJniRegistrar {
     /** Registers native methods for ConsumerIrService. */
     public static native void registerConsumerIrService();
 
+    /** Registers native methods for GameManagerService. */
+    public static native void registerGameManagerService();
+
     /** Registers native methods for VrManagerService. */
     public static native void registerVrManagerService();
 }

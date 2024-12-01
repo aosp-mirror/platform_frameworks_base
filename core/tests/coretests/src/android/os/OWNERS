@@ -15,3 +15,6 @@ per-file IpcDataCache* = file:/PERFORMANCE_OWNERS
 
 # RemoteCallbackList
 per-file RemoteCallbackListTest.java = shayba@google.com
+
+# MessageQueue
+per-file MessageQueueTest.java = mfasheh@google.com, shayba@google.com

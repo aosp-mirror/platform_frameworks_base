@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Activa a función de conectividade mellorada"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activa a aplicación terminal que ofrece acceso ao shell local"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Contorno de programación Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Executa o terminal de Linux en Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Se desactivas a opción, borraranse os datos do terminal de Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Comprobación HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Definir comprobación HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuración"</string>
@@ -503,7 +506,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Cargando sen fíos"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Cargando"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Non se está cargando"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Conectado, pero non cargando"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Conectado, pero sen cargar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Carga en pausa"</string>

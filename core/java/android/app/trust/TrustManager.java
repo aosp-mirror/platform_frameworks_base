@@ -31,6 +31,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 
+import com.android.internal.policy.IDeviceLockedStateListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -255,6 +257,35 @@ public class TrustManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Registers a listener for device lock state events.
+     *
+     * Requires the {@link android.Manifest.permission#SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE}
+     * permission.
+     */
+    public void registerDeviceLockedStateListener(final IDeviceLockedStateListener listener,
+            int deviceId) {
+        try {
+            mService.registerDeviceLockedStateListener(listener, deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a listener for device lock state events.
+     *
+     * Requires the {@link android.Manifest.permission#SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE}
+     * permission.
+     */
+    public void unregisterDeviceLockedStateListener(final IDeviceLockedStateListener listener) {
+        try {
+            mService.unregisterDeviceLockedStateListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

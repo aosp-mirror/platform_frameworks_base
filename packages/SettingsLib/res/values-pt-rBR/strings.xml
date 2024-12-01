@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ativa o recurso \"Conectividade melhorada\"."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Ativar o app terminal que oferece acesso ao shell local"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Ambiente de desenvolvimento do Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Executar terminal Linux no Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Se desativar o app, os dados do terminal Linux serão removidos"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Verificação HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Config. a verificação HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuração"</string>
@@ -409,8 +412,8 @@
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Ativar registro detalhado de fornecedor"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluir mais registros de fornecedores específicos do dispositivo em relatórios de bugs. Isso pode aumentar o uso da bateria e/ou do armazenamento, e os relatórios podem conter informações particulares."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animação da janela"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala de animação de transição"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de duração do Animator"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala anim. de transição"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala duração Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular telas secundárias"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Não manter atividades"</string>

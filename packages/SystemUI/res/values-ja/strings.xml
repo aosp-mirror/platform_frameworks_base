@@ -297,7 +297,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存済み"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"明日自動的に ON にする"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"日付が変わったら自動的に ON にする"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share や「デバイスを探す」などの機能は Bluetooth を使用します"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"明日の朝に Bluetooth が ON になります"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"音声を共有"</string>
@@ -809,7 +809,7 @@
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"入力"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"次の言語に切り替える"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"前の言語に切り替える"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"絵文字にアクセス"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"絵文字にアクセスする"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"音声入力にアクセス"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"アプリ"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"アシスタント"</string>

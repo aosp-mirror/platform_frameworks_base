@@ -748,7 +748,7 @@
     <string name="keyboard_key_back" msgid="4185420465469481999">"Հետ"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Բացատ"</string>
-    <string name="keyboard_key_enter" msgid="8633362970109751646">"Մուտք"</string>
+    <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Նվագարկում/դադար"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Կանգնեցնել"</string>
@@ -792,16 +792,16 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Հետ գնալ"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Անցնել հիմնական էկրան"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Դիտել վերջին հավելվածները"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Առաջ անցնել վերջին հավելվածների միջով"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Հետ անցնել վերջին հավելվածների միջով"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Առաջ անցնել վերջին հավելվածներով"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Հետ անցնել վերջին հավելվածներով"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Բացել հավելվածների ցանկը"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Բացել կարգավորումները"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Բացել Օգնականը"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Կողպէկրան"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Ստեղծել նշում"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Բազմախնդրություն"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Աջ մասում օգտագործեք տրոհված էկրանն այս հավելվածի հետ"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Ձախ մասում օգտագործեք տրոհված էկրանն այս հավելվածի հետ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Բազմախնդրու­թյուն"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Տրոհել էկրանը և տեղավորել այս հավելվածը աջում"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Տրոհել էկրանը և տեղավորել այս հավելվածը ձախում"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Տրոհված էկրանից անցնել լիաէկրան ռեժիմ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Անցեք աջ կողմի կամ ներքևի հավելվածին տրոհված էկրանի միջոցով"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Անցեք աջ կողմի կամ վերևի հավելվածին տրոհված էկրանի միջոցով"</string>
@@ -1334,7 +1334,7 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Օգտագործվում է <xliff:g id="APP_NAME">%1$s</xliff:g>ի կողմից (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Վերջերս օգտագործվել է <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի կողմից (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Համակարգ"</string>
-    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Բազմախնդրություն"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Բազմախնդրու­թյուն"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ներածում"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Հավելվածի դյուրանցումներ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Հատուկ գործառույթներ"</string>

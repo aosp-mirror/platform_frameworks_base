@@ -613,6 +613,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Atļaut lietotnei noteikt relatīvo atrašanās vietu starp tuvumā esošām ultraplatjoslas ierīcēm"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Mijiedarbība ar tuvumā esošām Wi‑Fi ierīcēm"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Atļauj lietotnei nodot datus tuvumā esošām Wi‑Fi ierīcē, izveidot savienojumu ar tām un noteikt to relatīvo pozīciju."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"atrašanās vietas noteikšana relatīvi ierīcēm"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Atļaut lietotnei noteikt relatīvo atrašanās vietu starp tuvumā esošām ierīcēm"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informācija par vēlamo NFC maksājumu pakalpojumu"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ļauj lietotnei iegūt informāciju par vēlamo NFC maksājumu pakalpojumu, piemēram, par reģistrētajiem lietojumprogrammu ID un maršruta galamērķi."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolē tuvlauka saziņu"</string>

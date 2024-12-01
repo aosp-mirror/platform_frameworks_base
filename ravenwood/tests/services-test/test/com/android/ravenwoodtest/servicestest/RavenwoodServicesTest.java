@@ -24,8 +24,6 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.hardware.SerialManager;
 import android.hardware.SerialManagerInternal;
-import android.platform.test.ravenwood.RavenwoodConfig;
-import android.platform.test.ravenwood.RavenwoodConfig.Config;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -41,12 +39,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RavenwoodServicesTest {
     private static final String TEST_VIRTUAL_PORT = "virtual:example";
-
-    @Config
-    public static final RavenwoodConfig sRavenwood = new RavenwoodConfig.Builder()
-            .setProcessSystem()
-            .setServicesRequired(SerialManager.class)
-            .build();
 
     private Context mContext;
 

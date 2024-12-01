@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"సిస్టమ్ UI"</string>
     <string name="battery_low_title" msgid="5319680173344341779">"బ్యాటరీ సేవర్‌ను ఆన్ చేయాలా?"</string>
-    <string name="battery_low_description" msgid="3282977755476423966">"మీకు <xliff:g id="PERCENTAGE">%s</xliff:g> బ్యాటరీ మిగిలి ఉంది. బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది, బ్యాక్‌గ్రౌండ్ యాక్టివిటీని పరిమితం చేస్తుంది, అలాగే నోటిఫికేషన్‌లను ఆలస్యంగా పంపిస్తుంది."</string>
+    <string name="battery_low_description" msgid="3282977755476423966">"బ్యాటరీ <xliff:g id="PERCENTAGE">%s</xliff:g> మిగిలి ఉంది. \"బ్యాటరీ సేవర్\" వల్ల డార్క్ థీమ్ ఆన్ అవుతుంది, బ్యాక్‌గ్రౌండ్ యాక్టివిటీ పరిమితం అవుతుంది, అలాగే నోటిఫికేషన్‌లు ఆలస్యంగా వస్తాయి."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"బ్యాటరీ సేవర్ ముదురు రంగు రూపాన్ని ఆన్ చేస్తుంది, బ్యాక్‌గ్రౌండ్ యాక్టివిటీని పరిమితం చేస్తుంది, అలాగే నోటిఫికేషన్‌లను ఆలస్యంగా పంపిస్తుంది."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> మిగిలి ఉంది"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"USB ద్వారా ఛార్జ్ చేయలేరు"</string>
@@ -359,7 +359,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>కి"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ముదురు రంగు రూపం"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"డార్క్ థీమ్‌"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"బ్యాటరీ సేవర్"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
@@ -529,7 +529,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"మేనేజ్ చేయండి"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"హిస్టరీ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"కొత్తవి"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"నిశ్శబ్దం"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"సైలెంట్ మోడ్"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
@@ -798,12 +798,12 @@
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"సెట్టింగ్‌లను తెరవండి"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"అసిస్టెంట్‌ను తెరవండి"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"లాక్ స్క్రీన్"</string>
-    <string name="group_system_quick_memo" msgid="3764560265935722903">"గమనికను రాయండి"</string>
+    <string name="group_system_quick_memo" msgid="3764560265935722903">"నోట్‌ను రాయండి"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"మల్టీ-టాస్కింగ్"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"కుడివైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"ఎడమవైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"స్ప్లిట్ స్క్రీన్‌ను ఫుల్ స్క్రీన్‌కు మార్చండి"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు కుడి లేదా పైన యాప్‌నకు మారండి"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు కుడి లేదా కింద యాప్‌నకు మారండి"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు ఎడమ లేదా పైన యాప్‌నకు మారండి"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"స్ప్లిట్ స్క్రీన్ సమయంలో: ఒక దాన్నుండి మరో దానికి యాప్ రీప్లేస్ చేయండి"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ఇన్‌పుట్"</string>
@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"యాప్ షార్ట్‌కట్‌లు"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"యాక్సెసిబిలిటీ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"సెర్చ్ షార్ట్‌కట్‌లు"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"షార్ట్‌కట్‌లను వెతకండి"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"కుదించండి చిహ్నం"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"విస్తరించండి చిహ్నం"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"లేదా"</string>

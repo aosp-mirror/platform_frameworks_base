@@ -1335,7 +1335,7 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Χρησιμοποιήθηκε πρόσφατα από την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Σύστημα"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Πολυδιεργασία"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Είσοδος"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Εισαγωγή"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Συντομεύσεις εφαρμογών"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Προσβασιμότητα"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Συντομεύσεις πληκτρολογίου"</string>

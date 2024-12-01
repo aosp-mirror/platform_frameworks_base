@@ -69,6 +69,7 @@ import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.util.MtuUtils;
 import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
@@ -79,7 +80,6 @@ import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
-import com.android.server.vcn.util.MtuUtils;
 
 import org.junit.Before;
 import org.junit.Test;
