@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -60,7 +62,13 @@ public class TouchUpModifierOperation extends ListActionsOperation implements To
 
     @Override
     public void onTouchUp(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            RemoteContext context,
+            CoreDocument document,
+            Component component,
+            float x,
+            float y,
+            float dx,
+            float dy) {
         applyActions(context, document, component, x, y, true);
     }
 
@@ -76,6 +84,12 @@ public class TouchUpModifierOperation extends ListActionsOperation implements To
         // nothing
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "TouchUpModifier";
     }

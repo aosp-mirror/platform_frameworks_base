@@ -26,6 +26,7 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
@@ -45,7 +46,7 @@ public class ZIndexModifierOperation extends DecoratorModifierOperation {
         return mCurrentValue;
     }
 
-    public void setmValue(float value) {
+    public void setValue(float value) {
         this.mValue = value;
     }
 
@@ -79,6 +80,12 @@ public class ZIndexModifierOperation extends DecoratorModifierOperation {
         return "ZIndexModifierOperation(" + mValue + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -109,5 +116,5 @@ public class ZIndexModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {}
+    public void layout(RemoteContext context, Component component, float width, float height) {}
 }

@@ -72,6 +72,11 @@ public class TextLookupInt extends Operation implements VariableSupport {
         context.listensTo(mIndex, this);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

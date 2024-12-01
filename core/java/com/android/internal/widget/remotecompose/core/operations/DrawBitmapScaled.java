@@ -27,11 +27,13 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ImageScaling;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Operation to draw a given cached bitmap */
-public class DrawBitmapScaled extends PaintOperation implements VariableSupport {
+public class DrawBitmapScaled extends PaintOperation
+        implements VariableSupport, AccessibleComponent {
     private static final int OP_CODE = Operations.DRAW_BITMAP_SCALED;
     private static final String CLASS_NAME = "DrawBitmapScaled";
     int mImageId;
@@ -191,6 +193,16 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
                 + Utils.floatToString(mScaleFactor, mOutScaleFactor);
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescId;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

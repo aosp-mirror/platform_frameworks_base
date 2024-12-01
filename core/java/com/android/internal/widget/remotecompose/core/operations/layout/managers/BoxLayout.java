@@ -119,8 +119,9 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
             size.setHeight(Math.max(size.getHeight(), m.getH()));
         }
         // add padding
-        size.setWidth(Math.max(size.getWidth(), computeModifierDefinedWidth()));
-        size.setHeight(Math.max(size.getHeight(), computeModifierDefinedHeight()));
+        size.setWidth(Math.max(size.getWidth(), computeModifierDefinedWidth(context.getContext())));
+        size.setHeight(
+                Math.max(size.getHeight(), computeModifierDefinedHeight(context.getContext())));
     }
 
     @Override
@@ -172,6 +173,11 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "BoxLayout";
@@ -219,6 +225,11 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
                         verticalPositioning));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(

@@ -133,8 +133,7 @@
     <string name="collapse_menu_text" msgid="7515008122450342029">"ಮೆನು ಮುಚ್ಚಿ"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"ಮೆನು ತೆರೆಯಿರಿ"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"ಸ್ಕ್ರೀನ್ ಅನ್ನು ಮ್ಯಾಕ್ಸಿಮೈಸ್ ಮಾಡಿ"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_snap_text (5673738963174074006) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"ಆ್ಯಪ್ ಅನ್ನು ಇಲ್ಲಿಗೆ ಸರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"ಇಮ್ಮರ್ಸಿವ್"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"ಮರುಸ್ಥಾಪಿಸಿ"</string>

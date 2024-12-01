@@ -122,6 +122,11 @@ public class TextFromFloat extends Operation implements VariableSupport {
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

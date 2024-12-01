@@ -61,6 +61,11 @@ public class PaintData extends PaintOperation implements VariableSupport {
         return "PaintData " + "\"" + mPaintData + "\"";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -92,6 +97,11 @@ public class PaintData extends PaintOperation implements VariableSupport {
         operations.add(data);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a Paint ")

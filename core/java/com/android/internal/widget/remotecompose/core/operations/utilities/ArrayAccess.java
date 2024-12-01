@@ -23,17 +23,45 @@ import android.annotation.Nullable;
  * FloatArrayAccess, ListAccess, MapAccess
  */
 public interface ArrayAccess {
+    /**
+     * Get a value as a float for an index
+     *
+     * @param index position in the collection
+     * @return
+     */
     float getFloatValue(int index);
 
+    /**
+     * If the objects have id's return the id
+     *
+     * @param index index of the object
+     * @return id or -1 if no id is available
+     */
     default int getId(int index) {
         return 0;
     }
 
+    /**
+     * Get the backing array of float if available for float arrays
+     *
+     * @return
+     */
     @Nullable
     float[] getFloats();
 
+    /**
+     * Get the length of the collection
+     *
+     * @return length of the collection
+     */
     int getLength();
 
+    /**
+     * Get the value as an integer if available
+     *
+     * @param index the position in the collection
+     * @return it value as and integer
+     */
     default int getIntValue(int index) {
         return (int) getFloatValue(index);
     }

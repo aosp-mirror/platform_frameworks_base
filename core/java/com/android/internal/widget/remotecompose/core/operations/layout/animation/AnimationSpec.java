@@ -137,6 +137,11 @@ public class AnimationSpec extends Operation {
         return (indent != null ? indent : "") + toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "AnimationSpec";
@@ -224,6 +229,11 @@ public class AnimationSpec extends Operation {
         operations.add(op);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("define the animation")

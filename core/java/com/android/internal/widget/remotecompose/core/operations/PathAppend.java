@@ -109,6 +109,11 @@ public class PathAppend extends PaintOperation implements VariableSupport {
     public static final float CLOSE_NAN = Utils.asNan(CLOSE);
     public static final float DONE_NAN = Utils.asNan(DONE);
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -162,11 +167,12 @@ public class PathAppend extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void paint(PaintContext context) {}
+    public void paint(PaintContext context) {
+        apply(context.getContext());
+    }
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        updateVariables(context);
         float[] data = context.getPathData(mInstanceId);
         float[] out = mOutputPath;
         if (data != null) {

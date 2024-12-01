@@ -192,6 +192,11 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "RootLayout";
@@ -222,6 +227,11 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         operations.add(new RootLayoutComponent(componentId, 0, 0, 0, 0, null, -1));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")
