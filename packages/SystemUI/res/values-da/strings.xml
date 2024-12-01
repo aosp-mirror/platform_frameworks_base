@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Brug Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Der er oprettet forbindelse"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Lyddeling"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Tryk for at skifte eller dele lyd"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Understøtter lyddeling"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gemt"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"afbryd forbindelse"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivér"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Widgets på låseskærmen"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Hvis du vil åbne en app ved hjælp af en widget, skal du verificere din identitet. Husk også, at alle kan se dem, også når din tablet er låst. Nogle widgets er muligvis ikke beregnet til låseskærmen, og det kan være usikkert at tilføje dem her."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Hvis du vil tilføje widgets på låseskærmen som en genvej, skal du sørge for, at funktionen er aktiveret i indstillingerne."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skift bruger"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullemenu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps og data i denne session slettes."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Vises øverst i samtalenotifikationer og som et profilbillede på låseskærmen. Vises som en boble, der afbryder Forstyr ikke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke samtalefunktioner"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Giv feedback om pakker"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse notifikationer kan ikke redigeres."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Opkaldsnotifikationer kan ikke redigeres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Du kan ikke konfigurere denne gruppe notifikationer her"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Skift til en app til venstre eller ovenfor, når du bruger opdelt skærm"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Ved opdelt skærm: Udskift én app med en anden"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Flyt det aktive vindue fra skærm til skærm"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Skift til næste sprog"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Skift til forrige sprog"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Angiv færre end <xliff:g id="LENGTH">%1$d</xliff:g> tegn"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummeret blev kopieret til udklipsholderen."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"kopiér til udklipsholderen."</string>
     <string name="basic_status" msgid="2315371112182658176">"Åben samtale"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Samtalewidgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tryk på en samtale for at føje den til din startskærm"</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Vend telefonen for at få højere opløsning"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldbar enhed foldes ud"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldbar enhed vendes om"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Frontskærmen er aktiveret"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"foldet"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"foldet ud"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hjælpefunktioner"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tastaturgenveje"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tilpas tastaturgenveje"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Tryk på en tast for at tildele genvejen"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Skal genvejen fjernes?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Tryk på en tast for at tildele genvej"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Denne handling sletter din tilpassede genvej permanent."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Genveje til søgning"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Der er ingen søgeresultater"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikon for Skjul"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Udfør"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikon for Udvid"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eller"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Håndtag"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Tastaturindstillinger"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Konfigurer genvej"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Fjern"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Annuller"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Tryk på en tast"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Tastekombinationen er allerede i brug. Prøv en anden tast."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tastekombinationen er allerede i brug. Prøv en anden tast."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Genvejen kan ikke konfigureres."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Naviger ved hjælp af dit tastatur"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Se tastaturgenveje"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Naviger ved hjælp af din touchplade"</string>

@@ -794,28 +794,6 @@ void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSu
     transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
 
-void ASurfaceTransaction_setFrameRateParams(
-        ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
-        float desiredMinRate, float desiredMaxRate, float fixedSourceRate,
-        ANativeWindow_ChangeFrameRateStrategy changeFrameRateStrategy) {
-    CHECK_NOT_NULL(aSurfaceTransaction);
-    CHECK_NOT_NULL(aSurfaceControl);
-    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
-    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-
-    if (desiredMaxRate < desiredMinRate) {
-        ALOGW("desiredMaxRate must be greater than or equal to desiredMinRate");
-        return;
-    }
-    // TODO(b/362798998): Fix plumbing to send modern params
-    int compatibility = fixedSourceRate == 0 ? ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_DEFAULT
-                                             : ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-    double frameRate = compatibility == ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
-            ? fixedSourceRate
-            : desiredMinRate;
-    transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
-}
-
 void ASurfaceTransaction_clearFrameRate(ASurfaceTransaction* aSurfaceTransaction,
                                         ASurfaceControl* aSurfaceControl) {
     CHECK_NOT_NULL(aSurfaceTransaction);

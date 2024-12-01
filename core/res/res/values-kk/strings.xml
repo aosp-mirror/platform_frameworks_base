@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелмеген"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Қызмет ұсынылмаған."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Қоңырау шалушы идентификаторы параметрін өзгерту мүмкін емес."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Деректер <xliff:g id="CARRIERDISPLAY">%s</xliff:g> операторына ауыстырылды"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g> <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Кез келген күнтізбе"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> кейбір дыбыстарды өшіруде"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
@@ -2442,9 +2449,9 @@
     <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Satellite SOS функциясы қолжетімді емес"</string>
     <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Satellite SOS функциясы бұл елде немесе аймақта қолжетімді емес."</string>
     <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satellite SOS функциясы реттелмеген"</string>
-    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Жерсерік арқылы хабар алмасу үшін, Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Жерсерік арқылы хабар алмасу үшін Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
     <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satellite SOS функциясы қолжетімді емес"</string>
-    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Satellite SOS функциясының бұл елде немесе аймақта қолжетімді екенін тексеру үшін, локация параметрлерін қосыңыз."</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Satellite SOS функциясының бұл елде немесе аймақта қолжетімді екенін тексеру үшін локация параметрлерін қосыңыз."</string>
     <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Жерсерік арқылы хабар алмасу функциясы қолжетімді"</string>
     <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Мобильдік немесе Wi-Fi желісі жоқ болған жағдайда, жерсерік арқылы хабар алмаса аласыз. Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
     <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Жерсерік арқылы хабар алмасу функциясына қолдау көрсетілмейді"</string>
@@ -2454,9 +2461,9 @@
     <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Жерсерік арқылы хабар алмасу функциясы қолжетімді емес"</string>
     <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Жерсерік арқылы хабар алмасу функциясы бұл елде немесе аймақта қолжетімді емес."</string>
     <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Жерсерік арқылы хабар алмасу функциясы реттелмеген"</string>
-    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Жерсерік арқылы хабар алмасу үшін, Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Жерсерік арқылы хабар алмасу үшін Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
     <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Жерсерік арқылы хабар алмасу функциясы қолжетімді емес"</string>
-    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Жерсерік арқылы хабар алмасу функциясының бұл елде немесе аймақта қолжетімді екенін тексеру үшін, локация параметрлерін қосыңыз."</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Жерсерік арқылы хабар алмасу функциясының бұл елде немесе аймақта қолжетімді екенін тексеру үшін локация параметрлерін қосыңыз."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Саусақ ізімен ашу функциясын қайта реттеу"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> бұдан былай танылмайды."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> және <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> бұдан былай танылмайды."</string>

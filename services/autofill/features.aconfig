@@ -6,6 +6,7 @@ flag {
   namespace: "autofill"
   description: "Guards against new metrics definitions introduced in W"
   bug: "342676602"
+  is_exported: true
 }
 
 flag {
@@ -31,9 +32,24 @@ flag {
 }
 
 flag {
+    name: "fill_dialog_improvements_impl"
+    is_exported: true
+    namespace: "autofill"
+    description: "Improvements for Fill Dialog for non-api changes"
+    bug: "336223371"
+}
+
+flag {
     name: "fill_dialog_improvements"
     is_exported: true
     namespace: "autofill"
     description: "Improvements for Fill Dialog, including deprecation of pre-trigger API's"
     bug: "336223371"
+}
+
+flag {
+  name: "add_last_focused_id_to_fill_event_history"
+  namespace: "autofill"
+  description: "Adds focused id to each event that's part of the fill event history"
+  bug: "334141398"
 }

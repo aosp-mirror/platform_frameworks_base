@@ -629,11 +629,7 @@ constructor(
                                         id = R.string.accessibility_quick_settings_expand
                                     )
                                 )
-                                .padding(
-                                    horizontal = {
-                                        QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                    }
-                                )
+                                .padding(horizontal = qsHorizontalMargin())
                     ) {
                         QuickQuickSettingsLayout(
                             tiles = Tiles,
@@ -737,8 +733,8 @@ constructor(
                                     .sysuiResTag(ResIdTags.quickSettingsPanel)
                                     .padding(
                                         top = QuickSettingsShade.Dimensions.Padding,
-                                        start = QuickSettingsShade.Dimensions.Padding,
-                                        end = QuickSettingsShade.Dimensions.Padding,
+                                        start = qsHorizontalMargin(),
+                                        end = qsHorizontalMargin(),
                                     )
                         ) {
                             QuickSettingsLayout(
@@ -1126,6 +1122,8 @@ private object ResIdTags {
     const val qsScroll = "expanded_qs_scroll_view"
     const val qsFooterActions = "qs_footer_actions"
 }
+
+@Composable private fun qsHorizontalMargin() = dimensionResource(id = R.dimen.qs_horizontal_margin)
 
 @Composable
 private fun interactionsConfig() =

@@ -98,6 +98,7 @@ flag {
     namespace: "android_settings"
     description: "Settings catalyst project migration"
     bug: "323791114"
+    is_exported: true
 }
 
 flag {
@@ -106,6 +107,7 @@ flag {
     namespace: "android_settings"
     description: "Enable WRITE_SYSTEM_PREFERENCE permission and appop"
     bug: "375193223"
+    is_exported: true
 }
 
 flag {
@@ -177,4 +179,11 @@ flag {
     namespace: "accessibility"
     description: "Enable the input routing control in device details and hearing devices dialog."
     bug: "349255906"
+}
+
+flag {
+    name: "hearing_device_set_connection_status_report"
+    namespace: "accessibility"
+    description: "Enable the connection status report for a set of hearing device."
+    bug: "357878944"
 }

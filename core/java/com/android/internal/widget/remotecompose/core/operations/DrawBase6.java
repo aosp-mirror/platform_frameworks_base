@@ -145,6 +145,11 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
         return null;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "DrawBase6";

@@ -21,15 +21,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.TextView;
 import android.window.OnBackInvokedCallback;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
@@ -94,6 +97,18 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
             super.onViewCreated(view, savedInstanceState);
             view.setLayoutDirection(
                     view.getResources().getConfiguration().getLayoutDirection());
+            view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                @NonNull
+                @Override
+                public WindowInsets onApplyWindowInsets(@NonNull View v,
+                        @NonNull WindowInsets windowInsets) {
+                    Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars()
+                            | WindowInsets.Type.navigationBars()
+                            | WindowInsets.Type.displayCutout());
+                    v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                    return WindowInsets.CONSUMED;
+                }
+            });
         }
 
         /**

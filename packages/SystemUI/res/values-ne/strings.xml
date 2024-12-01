@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्लुटुथ प्रयोग गर्नुहोस्"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"अडियो सेयरिङ"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"अडियो बदल्न वा सेयर गर्न ट्याप गर्नुहोस्"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"अडियो सेयर गर्न मिल्छ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेभ गरिएको छ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"एक्टिभेट गर्नुहोस्"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"लक स्क्रिन विजेटहरू"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"विजेट प्रयोग गरी एप खोल्न तपाईंले आफ्नो पहिचान पुष्टि गर्नु पर्ने हुन्छ। साथै, तपाईंको ट्याब्लेट लक भएका बेला पनि सबै जनाले तिनलाई देख्न सक्छन् भन्ने कुरा ख्याल गर्नुहोस्। केही विजेटहरू लक स्क्रिनमा प्रयोग गर्ने उद्देश्यले नबनाइएका हुन सक्छन् र तिनलाई यहाँ हाल्नु सुरक्षित नहुन सक्छ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"बुझेँ"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"विजेटहरू"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"विजेटहरू लक स्क्रिनमा सर्टकटका रूपमा हाल्न सेटिङमा गई यो सुविधा अन गरिएको छ भन्ने सुनिश्चित गर्नुहोस्।"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनु"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यो वार्तालापका सूचनाहरूको सिरानमा, बबलका रूपमा र लक स्क्रिनमा प्रोफाइल फोटोका रूपमा देखिन्छ। साथै, यसले गर्दा \'बाधा नपुऱ्याउनुहोस्\' नामक सुविधामा अवरोध आउँछ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा वार्तालापसम्बन्धी सुविधा प्रयोग गर्न मिल्दैन"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"बन्डलका बारेमा प्रतिक्रिया दिनुहोस्"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कलसम्बन्धी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"यहाँबाट सूचनाहरूको यो समूह कन्फिगर गर्न सकिँदैन"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रिन प्रयोग गर्दै गर्दा बायाँ वा माथिको एप चलाउनुहोस्"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रिन प्रयोग गरिएका बेला: एउटा स्क्रिनमा भएको एप अर्कोमा लैजानुहोस्"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"सक्रिय विन्डोलाई एउटा डिस्प्लेबाट सारेर अर्को डिस्प्लेमा लैजानुहोस्"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"इनपुट"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"अर्को भाषा प्रयोग गर्नुहोस्"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"अघिल्लो भाषा प्रयोग गर्नुहोस्"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> वटा भन्दा कम वर्ण प्रयोग गर्नुहोस्"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नम्बर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नम्बर कपी गरी क्लिपबोर्डमा सारियो।"</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"कपी गरेर क्लिपबोर्डमा पेस्ट गर्नुहोस्।"</string>
     <string name="basic_status" msgid="2315371112182658176">"वार्तालाप खोल्नुहोस्"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"वार्तालापसम्बन्धी विजेटहरू"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"कुनै वार्तालाप होम स्क्रिनमा हाल्न उक्त वार्तालापमा ट्याप गर्नुहोस्"</string>
@@ -1355,10 +1365,9 @@
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"स्क्रिनहरू बदल्ने हो?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"उच्च रिजोल्युसनको सेल्फी खिच्न पछाडिको क्यामेरा प्रयोग गर्नुहोस्"</string>
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रिजोल्युसनको सेल्फी खिच्न फोन फ्लिप गर्नुहोस्"</string>
-    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड गर्न मिल्ने डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
-    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड गर्न मिल्ने डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्डेबल डिभाइस अनफोल्ड गरेको देखाइएको एनिमेसन"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्डेबल डिभाइस यताउता पल्टाएर देखाइएको एनिमेसन"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"अगाडिको स्क्रिन अन गरिएको छ"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"फोल्ड गरिएको"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"अनफोल्ड गरिएको"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"सर्वसुलभता"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"किबोर्डका सर्टकटहरू"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"किबोर्डका सर्टकटहरू कस्टमाइज गर्नुहोस्"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"सर्टकट असाइन गर्न की थिच्नुहोस्"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"सर्टकट हटाउने हो?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"सर्टकट असाइन गर्न की थिच्नुहोस्"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"यसो गर्नुभयो भने तपाईंको कस्टम सर्टकट सदाका लागि मेटिने छ।"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"खोजका सर्टकटहरू"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"कुनै पनि खोज परिणाम भेटिएन"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"\"कोल्याप्स गर्नुहोस्\" आइकन"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"पूरा भयो"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"\"एक्स्पान्ड गर्नुहोस्\" आइकन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"वा"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ड्र्याग ह्यान्डल"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"किबोर्डसम्बन्धी सेटिङ"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"सर्टकट सेट गर्नुहोस्"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"हटाउनुहोस्"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"रद्द गर्नुहोस्"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"की थिच्नुहोस्"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"यो की कम्बिनेसन प्रयोग गरिसकिएको छ। अर्कै की प्रयोग गरी हेर्नुहोस्।"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"यो की कम्बिनेसन प्रयोग गरिसकिएको छ। अर्कै की प्रयोग गरी हेर्नुहोस्।"</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"सर्टकट सेट गर्न सकिएन।"</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"किबोर्ड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"किबोर्डका सर्टकटहरू प्रयोग गर्न सिक्नुहोस्"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"टचप्याड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>

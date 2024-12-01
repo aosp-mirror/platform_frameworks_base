@@ -68,73 +68,133 @@ fun ShortcutCustomizationDialog(
     onCancel: () -> Unit,
     onConfirmSetShortcut: () -> Unit,
     onConfirmDeleteShortcut: () -> Unit,
+    onConfirmResetShortcut: () -> Unit,
 ) {
     when (uiState) {
         is ShortcutCustomizationUiState.AddShortcutDialog -> {
-            Column(modifier = modifier) {
-                Title(uiState.shortcutLabel)
-                Description(
-                    text =
-                        stringResource(
-                            id = R.string.shortcut_customize_mode_add_shortcut_description
-                        )
-                )
-                PromptShortcutModifier(
-                    modifier =
-                        Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
-                            .width(131.dp)
-                            .height(48.dp),
-                    defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
-                )
-                SelectedKeyCombinationContainer(
-                    shouldShowError = uiState.errorMessage.isNotEmpty(),
-                    onKeyPress = onKeyPress,
-                    pressedKeys = uiState.pressedKeys,
-                )
-                ErrorMessageContainer(uiState.errorMessage)
-                DialogButtons(
-                    onCancel,
-                    isConfirmButtonEnabled = uiState.pressedKeys.isNotEmpty(),
-                    onConfirm = onConfirmSetShortcut,
-                    confirmButtonText =
-                        stringResource(
-                            R.string.shortcut_helper_customize_dialog_set_shortcut_button_label
-                        ),
-                )
-            }
+            AddShortcutDialog(modifier, uiState, onKeyPress, onCancel, onConfirmSetShortcut)
         }
         is ShortcutCustomizationUiState.DeleteShortcutDialog -> {
-            Column(modifier) {
-                Title(
-                    title =
-                        stringResource(
-                            id = R.string.shortcut_customize_mode_remove_shortcut_dialog_title
-                        )
-                )
-                Description(
-                    text =
-                        stringResource(
-                            id = R.string.shortcut_customize_mode_remove_shortcut_description
-                        )
-                )
-                DialogButtons(
-                    onCancel = onCancel,
-                    onConfirm = onConfirmDeleteShortcut,
-                    confirmButtonText =
-                        stringResource(
-                            R.string.shortcut_helper_customize_dialog_remove_button_label
-                        ),
-                )
-            }
+            DeleteShortcutDialog(modifier, onCancel, onConfirmDeleteShortcut)
+        }
+        is ShortcutCustomizationUiState.ResetShortcutDialog -> {
+            ResetShortcutDialog(modifier, onCancel, onConfirmResetShortcut)
         }
         else -> {
-            /* No-Op */
+            /* No-op */
         }
     }
 }
 
 @Composable
-fun DialogButtons(
+private fun AddShortcutDialog(
+    modifier: Modifier,
+    uiState: ShortcutCustomizationUiState.AddShortcutDialog,
+    onKeyPress: (KeyEvent) -> Boolean,
+    onCancel: () -> Unit,
+    onConfirmSetShortcut: () -> Unit
+){
+    Column(modifier = modifier) {
+        Title(uiState.shortcutLabel)
+        Description(
+            text =
+            stringResource(
+                id = R.string.shortcut_customize_mode_add_shortcut_description
+            )
+        )
+        PromptShortcutModifier(
+            modifier =
+            Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
+                .width(131.dp)
+                .height(48.dp),
+            defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
+        )
+        SelectedKeyCombinationContainer(
+            shouldShowError = uiState.errorMessage.isNotEmpty(),
+            onKeyPress = onKeyPress,
+            pressedKeys = uiState.pressedKeys,
+        )
+        ErrorMessageContainer(uiState.errorMessage)
+        DialogButtons(
+            onCancel,
+            isConfirmButtonEnabled = uiState.pressedKeys.isNotEmpty(),
+            onConfirm = onConfirmSetShortcut,
+            confirmButtonText =
+            stringResource(
+                R.string.shortcut_helper_customize_dialog_set_shortcut_button_label
+            ),
+        )
+    }
+}
+
+@Composable
+private fun DeleteShortcutDialog(
+    modifier: Modifier,
+    onCancel: () -> Unit,
+    onConfirmDeleteShortcut: () -> Unit
+){
+    ConfirmationDialog(
+        modifier = modifier,
+        title =
+        stringResource(
+            id = R.string.shortcut_customize_mode_remove_shortcut_dialog_title
+        ),
+        description =
+        stringResource(
+            id = R.string.shortcut_customize_mode_remove_shortcut_description
+        ),
+        confirmButtonText =
+        stringResource(R.string.shortcut_helper_customize_dialog_remove_button_label),
+        onCancel = onCancel,
+        onConfirm = onConfirmDeleteShortcut,
+    )
+}
+
+@Composable
+private fun ResetShortcutDialog(
+    modifier: Modifier,
+    onCancel: () -> Unit,
+    onConfirmResetShortcut: () -> Unit
+){
+    ConfirmationDialog(
+        modifier = modifier,
+        title =
+        stringResource(
+            id = R.string.shortcut_customize_mode_reset_shortcut_dialog_title
+        ),
+        description =
+        stringResource(
+            id = R.string.shortcut_customize_mode_reset_shortcut_description
+        ),
+        confirmButtonText =
+        stringResource(R.string.shortcut_helper_customize_dialog_reset_button_label),
+        onCancel = onCancel,
+        onConfirm = onConfirmResetShortcut,
+    )
+}
+
+@Composable
+private fun ConfirmationDialog(
+    modifier: Modifier,
+    title: String,
+    description: String,
+    confirmButtonText: String,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    Column(modifier) {
+        Title(title = title)
+        Description(text = description)
+        DialogButtons(
+            onCancel = onCancel,
+            onConfirm = onConfirm,
+            confirmButtonText = confirmButtonText,
+        )
+    }
+}
+
+@Composable
+private fun DialogButtons(
     onCancel: () -> Unit,
     isConfirmButtonEnabled: Boolean = true,
     onConfirm: () -> Unit,
@@ -168,7 +228,7 @@ fun DialogButtons(
 }
 
 @Composable
-fun ErrorMessageContainer(errorMessage: String) {
+private fun ErrorMessageContainer(errorMessage: String) {
     if (errorMessage.isNotEmpty()) {
         Box(modifier = Modifier.padding(horizontal = 16.dp).width(332.dp).height(40.dp)) {
             Text(
@@ -185,7 +245,7 @@ fun ErrorMessageContainer(errorMessage: String) {
 }
 
 @Composable
-fun SelectedKeyCombinationContainer(
+private fun SelectedKeyCombinationContainer(
     shouldShowError: Boolean,
     onKeyPress: (KeyEvent) -> Boolean,
     pressedKeys: List<ShortcutKey>,
@@ -352,7 +412,7 @@ private fun ActionKeyContainer(defaultModifierKey: ShortcutKey.Icon.ResIdIcon) {
 }
 
 @Composable
-fun ActionKeyText() {
+private fun ActionKeyText() {
     Text(
         text = "Action",
         style = MaterialTheme.typography.titleMedium,

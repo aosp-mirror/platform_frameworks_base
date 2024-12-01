@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ବ୍ଲୁଟୁଥ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ଅଡିଓ ସେୟାରିଂ"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ଅଡିଓ ସୁଇଚ କିମ୍ବା ସେୟାର କରିବାକୁ ଟାପ କରନ୍ତୁ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"ଅଡିଓ ସେୟାରିଂକୁ ସପୋର୍ଟ କରେ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ସେଭ କରାଯାଇଛି"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ଡିସକନେକ୍ଟ କରନ୍ତୁ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ଚାଲୁ କରନ୍ତୁ"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ଲକ ସ୍କ୍ରିନ ୱିଜେଟ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ଏକ ୱିଜେଟ ବ୍ୟବହାର କରି ଗୋଟିଏ ଆପ ଖୋଲିବା ପାଇଁ ଏହା ଆପଣ ଅଟନ୍ତି ବୋଲି ଆପଣଙ୍କୁ ଯାଞ୍ଚ କରିବାକୁ ହେବ। ଆହୁରି ମଧ୍ୟ, ଆପଣଙ୍କ ଟାବଲେଟ ଲକ ଥିଲେ ମଧ୍ୟ ଯେ କୌଣସି ବ୍ୟକ୍ତି ଏହାକୁ ଭ୍ୟୁ କରିପାରିବେ ବୋଲି ମନେ ରଖନ୍ତୁ। କିଛି ୱିଜେଟ ଆପଣଙ୍କ ଲକ ସ୍କ୍ରିନ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ହୋଇନଥାଇପାରେ ଏବଂ ଏଠାରେ ଯୋଗ କରିବା ଅସୁରକ୍ଷିତ ହୋଇପାରେ।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ବୁଝିଗଲି"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ୱିଜେଟ"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"ଏକ ସର୍ଟକଟ ଭାବେ ଲକ ସ୍କ୍ରିନରେ ୱିଜାଟ ଯୋଗ କରିବାକୁ, ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ଏହା ସେଟିଂସରେ ସକ୍ଷମ ହୋଇଛି।"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ୟୁଜର୍‍ ବଦଳାନ୍ତୁ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ପୁଲଡାଉନ ମେନୁ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ଏହି ସେସନର ସମସ୍ତ ଆପ୍‌ ଓ ଡାଟା ଡିଲିଟ୍‌ ହୋଇଯିବ।"</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ବାର୍ତ୍ତାଳାପ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଶୀର୍ଷରେ ଏବଂ ଲକ୍ ସ୍କ୍ରିନରେ ଏକ ପ୍ରୋଫାଇଲ୍ ଛବି ଭାବେ ଦେଖାଏ, ଏକ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, \'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\'କୁ ବାଧା ଦିଏ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ଫିଚରଗୁଡ଼ିକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"ବଣ୍ଡଲ ମତାମତ ପ୍ରଦାନ କରନ୍ତୁ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"କଲ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପରିବର୍ତ୍ତନ କରାଯାଇପାରିବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ବ୍ୟବହାର କରିବା ସମୟରେ ବାମପଟର ବା ଉପରର ଆପକୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନ ସମୟରେ: କୌଣସି ଆପକୁ ଗୋଟିଏରୁ ଅନ୍ୟ ଏକ ଆପରେ ବଦଳାନ୍ତୁ"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"ସକ୍ରିୟ ୱିଣ୍ଡୋକୁ ଡିସପ୍ଲେଗୁଡ଼ିକ ମଧ୍ୟରେ ମୁଭ କରନ୍ତୁ"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ଇନପୁଟ"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ପରବର୍ତ୍ତୀ ଭାଷାକୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"ପୂର୍ବବର୍ତ୍ତୀ ଭାଷାକୁ ସୁଇଚ କରନ୍ତୁ"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g>ଟିରୁ କମ କେରେକ୍ଟର ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ବିଲ୍ଡ ନମ୍ୱର"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"କ୍ଲିପବୋର୍ଡକୁ କପି କରାଯାଇଥିବା ବିଲ୍ଡ ନମ୍ୱର।"</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"କ୍ଲିପବୋର୍ଡକୁ କପି କରନ୍ତୁ।"</string>
     <string name="basic_status" msgid="2315371112182658176">"ବାର୍ତ୍ତାଳାପ ଖୋଲନ୍ତୁ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ବାର୍ତ୍ତାଳାପ ୱିଜେଟଗୁଡ଼ିକ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ଏକ ବାର୍ତ୍ତାଳାପକୁ ଆପଣଙ୍କ ହୋମ ସ୍କ୍ରିନରେ ଯୋଗ କରିବା ପାଇଁ ସେଥିରେ ଟାପ କରନ୍ତୁ"</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ଉଚ୍ଚ ରିଜୋଲ୍ୟୁସନ ପାଇଁ ଫୋନକୁ ଫ୍ଲିପ କରନ୍ତୁ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଅନଫୋଲ୍ଡ କରାଯାଉଛି"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ଫୋଲ୍ଡ କରାଯାଇପାରୁଥିବା ଡିଭାଇସକୁ ଫ୍ଲିପ କରାଯାଉଛି"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"ସାମ୍ନା ସ୍କ୍ରିନ ଚାଲୁ ଅଛି"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ଫୋଲ୍ଡେଡ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ଅନଫୋଲ୍ଡେଡ"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ଆକ୍ସେସିବିଲିଟୀ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"କୀବୋର୍ଡ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"କୀବୋର୍ଡ ସର୍ଟକଟଗୁଡ଼ିକୁ କଷ୍ଟମାଇଜ କରନ୍ତୁ"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"ସର୍ଟକଟ ଆସାଇନ କରିବା ପାଇଁ କୀ\'କୁ ଦବାନ୍ତୁ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ସର୍ଟକଟକୁ କାଢ଼ି ଦେବେ?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ସର୍ଟକଟ ଆସାଇନ କରିବା ପାଇଁ କୀ\'କୁ ଦବାନ୍ତୁ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ଏହା ଆପଣଙ୍କ କଷ୍ଟମ ସର୍ଟକଟକୁ ସ୍ଥାୟୀ ଭାବେ ଡିଲିଟ କରିଦେବ।"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ସର୍ଚ୍ଚ ସର୍ଟକଟ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"କୌଣସି ସର୍ଚ୍ଚ ଫଳାଫଳ ନାହିଁ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ଆଇକନକୁ ସଙ୍କୁଚିତ କରନ୍ତୁ"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"ହୋଇଗଲା"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ଆଇକନକୁ ବିସ୍ତାର କରନ୍ତୁ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"କିମ୍ବା"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ଡ୍ରାଗ ହେଣ୍ଡେଲ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"କୀବୋର୍ଡ ସେଟିଂ"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ସର୍ଟକଟ ସେଟ କରନ୍ତୁ"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ବାତିଲ କରନ୍ତୁ"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"କୀ ଦବାନ୍ତୁ"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"କୀ କମ୍ବିନେସନ ପୂର୍ବରୁ ବ୍ୟବହାର କରାଯାଉଛି। ଅନ୍ୟ ଏକ କୀ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ।"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"କୀ କମ୍ବିନେସନ ପୂର୍ବରୁ ବ୍ୟବହାର କରାଯାଉଛି। ଅନ୍ୟ ଏକ କୀ ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ।"</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"ସର୍ଟକଟ ସେଟ କରାଯାଇପାରିବ ନାହିଁ।"</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ଆପଣଙ୍କ କୀବୋର୍ଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"କୀବୋର୍ଡ ସର୍ଟକଟଗୁଡ଼ିକ ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ଆପଣଙ୍କ ଟଚପେଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>

@@ -42,6 +42,19 @@ annotation class ReadWritePermit {
     }
 }
 
+/** Indicates how sensitive of the data. */
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.TYPE)
+annotation class SensitivityLevel {
+    companion object {
+        const val UNKNOWN_SENSITIVITY = 0
+        const val NO_SENSITIVITY = 1
+        const val LOW_SENSITIVITY = 2
+        const val MEDIUM_SENSITIVITY = 3
+        const val HIGH_SENSITIVITY = 4
+    }
+}
+
 /** Preference interface that has a value persisted in datastore. */
 interface PersistentPreference<T> {
 
@@ -86,6 +99,10 @@ interface PersistentPreference<T> {
             callingUid,
             this as PreferenceMetadata,
         )
+
+    /** The sensitivity level of the preference. */
+    val sensitivityLevel: @SensitivityLevel Int
+        get() = SensitivityLevel.UNKNOWN_SENSITIVITY
 }
 
 /** Descriptor of values. */

@@ -75,7 +75,7 @@ class DesktopModeUiEventLogger(
         instanceId: InstanceId,
         uid: Int,
         packageName: String,
-        event: DesktopUiEventEnum
+        event: DesktopUiEventEnum,
     ) {
         if (packageName.isEmpty() || uid < 0) {
             logD("Skip logging since package name is empty or bad uid")
@@ -84,11 +84,12 @@ class DesktopModeUiEventLogger(
         uiEventLogger.logWithInstanceId(event, uid, packageName, instanceId)
     }
 
-    private fun getUid(packageName: String, userId: Int): Int = try {
-        packageManager.getApplicationInfoAsUser(packageName, /* flags= */ 0, userId).uid
-    } catch (e: PackageManager.NameNotFoundException) {
-        INVALID_PACKAGE_UID
-    }
+    private fun getUid(packageName: String, userId: Int): Int =
+        try {
+            packageManager.getApplicationInfoAsUser(packageName, /* flags= */ 0, userId).uid
+        } catch (e: PackageManager.NameNotFoundException) {
+            INVALID_PACKAGE_UID
+        }
 
     private fun logD(msg: String, vararg arguments: Any?) {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
@@ -103,8 +104,12 @@ class DesktopModeUiEventLogger(
         DESKTOP_WINDOW_CORNER_DRAG_RESIZE(1722),
         @UiEvent(doc = "Tap on the window header maximize button in desktop windowing mode")
         DESKTOP_WINDOW_MAXIMIZE_BUTTON_TAP(1723),
+        @UiEvent(doc = "Tap on the window header restore button in desktop windowing mode")
+        DESKTOP_WINDOW_RESTORE_BUTTON_TAP(2017),
         @UiEvent(doc = "Double tap on window header to maximize it in desktop windowing mode")
         DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_MAXIMIZE(1724),
+        @UiEvent(doc = "Double tap on window header to restore from maximize in desktop windowing")
+        DESKTOP_WINDOW_HEADER_DOUBLE_TAP_TO_RESTORE(2018),
         @UiEvent(doc = "Tap on the window Handle to open the Handle Menu")
         DESKTOP_WINDOW_APP_HANDLE_TAP(1998),
         @UiEvent(doc = "Tap on the desktop mode option under app handle menu")
@@ -136,7 +141,11 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Tap on the tile to left option in the maximize button menu")
         DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_LEFT(2012),
         @UiEvent(doc = "Tap on the tile to right option in the maximize button menu")
-        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_RIGHT(2013);
+        DESKTOP_WINDOW_MAXIMIZE_BUTTON_MENU_TAP_TO_TILE_TO_RIGHT(2013),
+        @UiEvent(doc = "Moving the desktop window by dragging the header")
+        DESKTOP_WINDOW_MOVE_BY_HEADER_DRAG(2021),
+        @UiEvent(doc = "Double tap on the window header to refocus a desktop window")
+        DESKTOP_WINDOW_HEADER_TAP_TO_REFOCUS(2022);
 
         override fun getId(): Int = mId
     }

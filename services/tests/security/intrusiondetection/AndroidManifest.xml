@@ -33,6 +33,10 @@
         </receiver>
     </application>
 
+    <queries>
+        <package android:name="com.android.coretests.apps.testapp" />
+    </queries>
+
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
          android:targetPackage="com.android.server.security.intrusiondetection.tests"
          android:label="Frameworks IntrusionDetection Services Tests"/>

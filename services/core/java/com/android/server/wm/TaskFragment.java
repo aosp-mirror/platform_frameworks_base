@@ -2129,7 +2129,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     void executeAppTransition(ActivityOptions options) {
-        // No app transition applied to the task fragment.
+        mDisplayContent.executeAppTransition();
+        ActivityOptions.abort(options);
     }
 
     @Override

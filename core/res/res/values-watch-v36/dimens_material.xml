@@ -22,13 +22,33 @@
     <dimen name="btn_lineHeight">18sp</dimen>
     <dimen name="btn_textSize">15sp</dimen>
 
+    <!-- values for material3 AlertDialog Title -->
+    <dimen name="alertDialog_material_line_height_title">18sp</dimen>
+    <dimen name="alertDialog_material_text_size_title">16sp</dimen>
+    <item name="alertDialog_material_letter_spacing_title" format="float" type="dimen">0.0125</item>
+    <dimen name="alertDialog_material_side_margin_title">@dimen/screen_percentage_12</dimen>
+
+    <!-- values for material3 AlertDialog Body -->
+    <dimen name="alertDialog_material_line_height_body_1">16sp</dimen>
+    <dimen name="alertDialog_material_text_size_body_1">14sp</dimen>
+    <item name="alertDialog_material_letter_spacing_body_1" format="float" type="dimen">0.0286</item>
+    <dimen name="alertDialog_material_side_margin_body">@dimen/screen_percentage_0416</dimen>
+
     <!-- values for material3 AlertDialog -->
     <dimen name="dialog_btn_negative_width">60dp</dimen>
     <dimen name="dialog_btn_negative_height">60dp</dimen>
     <dimen name="dialog_btn_confirm_width">62dp</dimen>
     <dimen name="dialog_btn_confirm_height">60dp</dimen>
+    <dimen name="alertDialog_material_side_margin">@dimen/screen_percentage_052</dimen>
+    <dimen name="alertDialog_material_top_margin">@dimen/screen_percentage_10</dimen>
+    <dimen name="alertDialog_material_bottom_margin">@dimen/screen_percentage_3646</dimen>
 
     <!-- Opacity factor for disabled material3 widget -->
     <dimen name="disabled_alpha_device_default">0.12</dimen>
     <dimen name="primary_content_alpha_device_default">0.38</dimen>
+
+    <!--  values for material3 progress bar(progress indicator)  -->
+    <item name="progressbar_inner_radius_ratio" format="float" type="dimen">2.12</item>
+    <dimen name="progressbar_thickness">8dp</dimen>
+    <dimen name="progressbar_elevation">0.1dp</dimen>
 </resources>

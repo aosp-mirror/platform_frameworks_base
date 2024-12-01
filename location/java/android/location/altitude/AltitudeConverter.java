@@ -26,8 +26,8 @@ import android.location.Location;
 import android.location.flags.Flags;
 
 import com.android.internal.location.altitude.GeoidMap;
-import com.android.internal.location.altitude.S2CellIdUtils;
 import com.android.internal.location.altitude.nano.MapParamsProto;
+import com.android.internal.location.geometry.S2CellIdUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;

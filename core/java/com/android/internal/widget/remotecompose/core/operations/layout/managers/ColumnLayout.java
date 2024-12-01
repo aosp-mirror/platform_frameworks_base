@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -125,17 +126,21 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         DebugLog.s(() -> "COMPUTE WRAP SIZE in " + this + " (" + mComponentId + ")");
         int visibleChildrens = 0;
+        float currentMaxHeight = maxHeight;
         for (Component c : mChildrenComponents) {
-            c.measure(context, 0f, maxWidth, 0f, maxHeight, measure);
+            c.measure(context, 0f, maxWidth, 0f, currentMaxHeight, measure);
             ComponentMeasure m = measure.get(c);
             if (m.getVisibility() != Visibility.GONE) {
                 size.setWidth(Math.max(size.getWidth(), m.getW()));
                 size.setHeight(size.getHeight() + m.getH());
                 visibleChildrens++;
+                currentMaxHeight -= m.getH();
             }
         }
         if (!mChildrenComponents.isEmpty()) {
@@ -165,11 +170,11 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     @Override
-    public float intrinsicHeight() {
-        float height = computeModifierDefinedHeight();
+    public float intrinsicHeight(@NonNull RemoteContext context) {
+        float height = computeModifierDefinedHeight(context);
         float componentHeights = 0f;
         for (Component c : mChildrenComponents) {
-            componentHeights += c.intrinsicHeight();
+            componentHeights += c.intrinsicHeight(context);
         }
         return Math.max(height, componentHeights);
     }
@@ -337,11 +342,21 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         DebugLog.e();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "ColumnLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_COLUMN;
     }
@@ -361,6 +376,12 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         buffer.writeFloat(spacedBy);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
@@ -377,6 +398,11 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                         spacedBy));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(

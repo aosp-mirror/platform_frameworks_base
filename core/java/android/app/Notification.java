@@ -817,18 +817,18 @@ public class Notification implements Parcelable
                      R.layout.notification_2025_template_expanded_base,
                      R.layout.notification_2025_template_heads_up_base,
                      R.layout.notification_2025_template_header,
+                     R.layout.notification_2025_template_conversation,
+                     R.layout.notification_2025_template_collapsed_call,
+                     R.layout.notification_2025_template_expanded_call,
                      R.layout.notification_2025_template_collapsed_messaging,
+                     R.layout.notification_2025_template_expanded_messaging,
                      R.layout.notification_2025_template_collapsed_media,
-                     R.layout.notification_template_material_big_picture,
-                     R.layout.notification_template_material_big_text,
-                     R.layout.notification_template_material_inbox,
-                     R.layout.notification_template_material_big_messaging,
-                     R.layout.notification_template_material_conversation,
-                     R.layout.notification_template_material_big_media,
-                     R.layout.notification_template_material_call,
-                     R.layout.notification_template_material_big_call,
-                     R.layout.notification_template_header -> true;
-                case R.layout.notification_template_material_progress -> Flags.apiRichOngoing();
+                     R.layout.notification_2025_template_expanded_media,
+                     R.layout.notification_2025_template_expanded_big_picture,
+                     R.layout.notification_2025_template_expanded_big_text,
+                     R.layout.notification_2025_template_expanded_inbox -> true;
+                case R.layout.notification_2025_template_expanded_progress
+                        -> Flags.apiRichOngoing();
                 default -> false;
             };
         }
@@ -5964,7 +5964,7 @@ public class Notification implements Parcelable
 
         private static void setHeaderlessVerticalMargins(RemoteViews contentView,
                 StandardTemplateParams p, boolean hasSecondLine) {
-            if (!p.mHeaderless) {
+            if (Flags.notificationsRedesignTemplates() || !p.mHeaderless) {
                 return;
             }
             int marginDimen = hasSecondLine
@@ -6445,10 +6445,13 @@ public class Notification implements Parcelable
                 // Clear view padding to allow buttons to start on the left edge.
                 // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
                 big.setViewPadding(R.id.actions, 0, 0, 0, 0);
-                // Add an optional indent that will make buttons start at the correct column when
-                // there is enough space to do so (and fall back to the left edge if not).
-                big.setInt(R.id.actions, "setCollapsibleIndentDimen",
-                        R.dimen.call_notification_collapsible_indent);
+                if (!Flags.notificationsRedesignTemplates()) {
+                    // Add an optional indent that will make buttons start at the correct column
+                    // when there is enough space to do so (and fall back to the left edge if not).
+                    // This is handled directly in NotificationActionListLayout in the new design.
+                    big.setInt(R.id.actions, "setCollapsibleIndentDimen",
+                            R.dimen.call_notification_collapsible_indent);
+                }
                 if (evenlyDividedCallStyleActionLayout()) {
                     if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                         Log.d(TAG, "setting evenly divided mode on action list");
@@ -6761,19 +6764,6 @@ public class Notification implements Parcelable
             resetNotificationHeader(header);
             bindNotificationHeader(header, p);
             return header;
-        }
-
-        /**
-         * Construct a RemoteViews for the ambient version of the notification.
-         *
-         * @hide
-         */
-        public RemoteViews makeAmbientNotification() {
-            RemoteViews headsUpContentView = createHeadsUpContentView(false /* increasedHeight */);
-            if (headsUpContentView != null) {
-                return headsUpContentView;
-            }
-            return createContentView();
         }
 
         /**
@@ -7561,15 +7551,27 @@ public class Notification implements Parcelable
         }
 
         private int getBigPictureLayoutResource() {
-            return R.layout.notification_template_material_big_picture;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_big_picture;
+            } else {
+                return R.layout.notification_template_material_big_picture;
+            }
         }
 
         private int getBigTextLayoutResource() {
-            return R.layout.notification_template_material_big_text;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_big_text;
+            } else {
+                return R.layout.notification_template_material_big_text;
+            }
         }
 
         private int getInboxLayoutResource() {
-            return R.layout.notification_template_material_inbox;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_inbox;
+            } else {
+                return R.layout.notification_template_material_inbox;
+            }
         }
 
         private int getCollapsedMessagingLayoutResource() {
@@ -7581,7 +7583,11 @@ public class Notification implements Parcelable
         }
 
         private int getExpandedMessagingLayoutResource() {
-            return R.layout.notification_template_material_big_messaging;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_messaging;
+            } else {
+                return R.layout.notification_template_material_big_messaging;
+            }
         }
 
         private int getCollapsedMediaLayoutResource() {
@@ -7592,12 +7598,44 @@ public class Notification implements Parcelable
             }
         }
 
+        private int getExpandedMediaLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_media;
+            } else {
+                return R.layout.notification_template_material_big_media;
+            }
+        }
+
         private int getConversationLayoutResource() {
-            return R.layout.notification_template_material_conversation;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_conversation;
+            } else {
+                return R.layout.notification_template_material_conversation;
+            }
+        }
+
+        private int getCollapsedCallLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_collapsed_call;
+            } else {
+                return R.layout.notification_template_material_call;
+            }
+        }
+
+        private int getExpandedCallLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_call;
+            } else {
+                return R.layout.notification_template_material_big_call;
+            }
         }
 
         private int getProgressLayoutResource() {
-            return R.layout.notification_template_material_progress;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_progress;
+            } else {
+                return R.layout.notification_template_material_progress;
+            }
         }
 
         private int getActionLayoutResource() {
@@ -10521,7 +10559,7 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews template = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_big_media, p , result);
+                    mBuilder.getExpandedMediaLayoutResource(), p , result);
 
             for (int i = 0; i < MAX_MEDIA_BUTTONS; i++) {
                 if (i < actionCount) {
@@ -10944,10 +10982,10 @@ public class Notification implements Parcelable
             final RemoteViews contentView;
             if (isCollapsed) {
                 contentView = mBuilder.applyStandardTemplate(
-                        R.layout.notification_template_material_call, p, null /* result */);
+                        mBuilder.getCollapsedCallLayoutResource(), p, null /* result */);
             } else {
                 contentView = mBuilder.applyStandardTemplateWithActions(
-                        R.layout.notification_template_material_big_call, p, null /* result */);
+                    mBuilder.getExpandedCallLayoutResource(), p, null /* result */);
             }
 
             // Bind some extra conversation-specific header fields.
@@ -14798,12 +14836,23 @@ public class Notification implements Parcelable
                 } else {
                     mBackgroundColor = rawColor;
                 }
-                mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                        ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
-                        mBackgroundColor, 4.5);
-                mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
-                        ContrastColorUtil.resolveSecondaryColor(ctx, mBackgroundColor, nightMode),
-                        mBackgroundColor, 4.5);
+                if (Flags.uiRichOngoing()) {
+                    boolean isBgDark = Notification.Builder.isColorDark(mBackgroundColor);
+                    int onSurfaceColorExtreme = isBgDark ? Color.WHITE : Color.BLACK;
+                    mPrimaryTextColor = ContrastColorUtil.ensureContrast(
+                            ColorUtils.blendARGB(mBackgroundColor, onSurfaceColorExtreme, 0.9f),
+                            mBackgroundColor, isBgDark, 4.5);
+                    mSecondaryTextColor = ContrastColorUtil.ensureContrast(
+                            ColorUtils.blendARGB(mBackgroundColor, onSurfaceColorExtreme, 0.8f),
+                            mBackgroundColor, isBgDark, 4.5);
+                } else {
+                    mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                            ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
+                            mBackgroundColor, 4.5);
+                    mSecondaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
+                            ContrastColorUtil.resolveSecondaryColor(ctx,
+                                    mBackgroundColor, nightMode), mBackgroundColor, 4.5);
+                }
                 mContrastColor = mPrimaryTextColor;
                 mPrimaryAccentColor = mPrimaryTextColor;
                 mSecondaryAccentColor = mSecondaryTextColor;

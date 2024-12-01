@@ -24,13 +24,39 @@ import android.annotation.Nullable;
 public interface CollectionsAccess {
     float getFloatValue(int id, int index);
 
+    /**
+     * Get the array of float if it is a float array
+     *
+     * @param id the id of the float array
+     * @return
+     */
     @Nullable
     float[] getFloats(int id);
 
+    /**
+     * Get the number of entries in the list
+     *
+     * @param id the id of the list
+     * @return
+     */
     int getListLength(int id);
 
+    /**
+     * get the id of an entry if the list is a list of id's
+     *
+     * @param listId the list id
+     * @param index the index into the list
+     * @return
+     */
     int getId(int listId, int index);
 
+    /**
+     * Get the value as an integer
+     *
+     * @param listId the list id to access
+     * @param index the index into the list
+     * @return
+     */
     default int getIntValue(int listId, int index) {
         return (int) getFloatValue(listId, index);
     }

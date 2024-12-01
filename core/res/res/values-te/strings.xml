@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి ఉంటుంది. తర్వాత కాల్: పరిమితి లేదు"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి ఉంటుంది"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి లేదు"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"డేటాను <xliff:g id="CARRIERDISPLAY">%s</xliff:g>కు స్విచ్ చేశారు"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> నుండి <xliff:g id="END">%2$s</xliff:g> వరకు"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ఏదైనా క్యాలెండర్"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
@@ -2442,7 +2449,7 @@
     <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
     <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ఈ దేశంలో లేదా ప్రాంతంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
     <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సెటప్ చేయలేదు"</string>
-    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ సెట్టింగ్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
     <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
     <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ఈ దేశంలో లేదా ప్రాంతంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో ఉందో లేదో చెక్ చేయడానికి, లొకేషన్ సెట్టింగ్‌లను ఆన్ చేయండి"</string>
     <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"శాటిలైట్ మెసేజింగ్ అందుబాటులో ఉంది"</string>
@@ -2454,7 +2461,7 @@
     <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
     <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ఈ దేశంలో లేదా ప్రాంతంలో శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
     <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"శాటిలైట్ మెసేజింగ్‌ను సెటప్ చేయలేదు"</string>
-    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ సెట్టింగ్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
     <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
     <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ఈ దేశంలో లేదా ప్రాంతంలో శాటిలైట్ మెసేజింగ్ అందుబాటులో ఉందో లేదో చెక్ చేయడానికి, లొకేషన్ సెట్టింగ్‌లను ఆన్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>

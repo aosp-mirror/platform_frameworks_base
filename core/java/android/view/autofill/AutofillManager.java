@@ -26,6 +26,7 @@ import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.service.autofill.Flags.FLAG_FILL_DIALOG_IMPROVEMENTS;
+import static android.service.autofill.Flags.relayoutFix;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
@@ -1013,7 +1014,7 @@ public final class AutofillManager {
                 AutofillFeatureFlags.shouldIncludeInvisibleViewInAssistStructure();
 
         mRelayoutFixDeprecated = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
-        mRelayoutFix = AutofillFeatureFlags.enableRelayoutFixes();
+        mRelayoutFix = relayoutFix() && AutofillFeatureFlags.enableRelayoutFixes();
         mRelativePositionForRelayout = AutofillFeatureFlags.enableRelativeLocationForRelayout();
         mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
     }

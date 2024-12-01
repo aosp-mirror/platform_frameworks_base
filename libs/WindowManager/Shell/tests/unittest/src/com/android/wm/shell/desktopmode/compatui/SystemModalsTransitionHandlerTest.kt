@@ -25,10 +25,11 @@ import android.view.WindowManager.TRANSIT_OPEN
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFullscreenTaskBuilder
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createSystemModalTask
+import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
@@ -49,6 +50,7 @@ class SystemModalsTransitionHandlerTest : ShellTestCase() {
     private val animExecutor = mock<ShellExecutor>()
     private val shellInit = mock<ShellInit>()
     private val transitions = mock<Transitions>()
+    private val desktopUserRepositories = mock<DesktopUserRepositories>()
     private val desktopRepository = mock<DesktopRepository>()
     private val startT = mock<SurfaceControl.Transaction>()
     private val finishT = mock<SurfaceControl.Transaction>()
@@ -58,6 +60,7 @@ class SystemModalsTransitionHandlerTest : ShellTestCase() {
     @Before
     fun setUp() {
         // Simulate having one Desktop task so that we see Desktop Mode as active
+        whenever(desktopUserRepositories.current).thenReturn(desktopRepository)
         whenever(desktopRepository.getVisibleTaskCount(anyInt())).thenReturn(1)
         transitionHandler = createTransitionHandler()
     }
@@ -69,7 +72,7 @@ class SystemModalsTransitionHandlerTest : ShellTestCase() {
             animExecutor,
             shellInit,
             transitions,
-            desktopRepository,
+            desktopUserRepositories,
         )
 
     @Test
@@ -79,7 +82,7 @@ class SystemModalsTransitionHandlerTest : ShellTestCase() {
 
     @Test
     fun startAnimation_desktopNotActive_doesNotAnimate() {
-        whenever(desktopRepository.getVisibleTaskCount(anyInt())).thenReturn(1)
+        whenever(desktopUserRepositories.current.getVisibleTaskCount(anyInt())).thenReturn(1)
         val info =
             TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN, createSystemModalTask())

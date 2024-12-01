@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nade-default sa pinaghihigpitan ang Caller ID. Susunod na tawag: hindi pinaghihigpitan"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Naka-default sa hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Pinaghihigpitan"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Naka-default na hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Hindi pinaghihigpitan"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Hindi naprobisyon ang serbisyo."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Hindi mo mababago ang setting ng caller ID."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Nailipat sa <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ang data"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> patungong <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Anumang kalendaryo"</string>
     <string name="muted_by" msgid="91464083490094950">"Minu-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g> ang ilang tunog"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"May internal na problema sa iyong device, at maaaring hindi ito maging stable hanggang sa i-reset mo ang factory data."</string>

@@ -48,8 +48,6 @@ import kotlinx.coroutines.flow.map
 
 object KeyguardClockViewBinder {
     private val TAG = KeyguardClockViewBinder::class.simpleName!!
-    // When changing to new clock, we need to remove old clock views from burnInLayer
-    private var lastClock: ClockController? = null
 
     @JvmStatic
     fun bind(
@@ -72,19 +70,33 @@ object KeyguardClockViewBinder {
         disposables +=
             keyguardRootView.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    // When changing to new clock, we need to remove old views from burnInLayer
+                    var lastClock: ClockController? = null
                     launch {
-                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                        viewModel.currentClock.collect { currentClock ->
-                            cleanupClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
-                            addClockViews(currentClock, keyguardRootView)
-                            updateBurnInLayer(
-                                keyguardRootView,
-                                viewModel,
-                                viewModel.clockSize.value,
-                            )
-                            applyConstraints(clockSection, keyguardRootView, true)
+                            if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                            viewModel.currentClock.collect { currentClock ->
+                                if (lastClock != currentClock) {
+                                    cleanupClockViews(
+                                        lastClock,
+                                        keyguardRootView,
+                                        viewModel.burnInLayer,
+                                    )
+                                    lastClock = currentClock
+                                }
+
+                                addClockViews(currentClock, keyguardRootView)
+                                updateBurnInLayer(
+                                    keyguardRootView,
+                                    viewModel,
+                                    viewModel.clockSize.value,
+                                )
+                                applyConstraints(clockSection, keyguardRootView, true)
+                            }
                         }
-                    }
+                        .invokeOnCompletion {
+                            cleanupClockViews(lastClock, keyguardRootView, viewModel.burnInLayer)
+                            lastClock = null
+                        }
 
                     launch {
                         if (!MigrateClocksToBlueprint.isEnabled) return@launch
@@ -185,23 +197,18 @@ object KeyguardClockViewBinder {
         viewModel.burnInLayer?.updatePostLayout(keyguardRootView)
     }
 
-    private fun cleanupClockViews(
-        currentClock: ClockController?,
+    fun cleanupClockViews(
+        lastClock: ClockController?,
         rootView: ConstraintLayout,
         burnInLayer: Layer?,
     ) {
-        if (lastClock == currentClock) {
-            return
-        }
-
-        lastClock?.let { clock ->
-            clock.smallClock.layout.views.forEach {
+        lastClock?.run {
+            smallClock.layout.views.forEach {
                 burnInLayer?.removeView(it)
                 rootView.removeView(it)
             }
-            clock.largeClock.layout.views.forEach { rootView.removeView(it) }
+            largeClock.layout.views.forEach { rootView.removeView(it) }
         }
-        lastClock = currentClock
     }
 
     @VisibleForTesting

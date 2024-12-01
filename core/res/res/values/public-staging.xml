@@ -135,6 +135,8 @@
     <public name="pageSizeCompat" />
     <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
     <public name="shareRolePriority"/>
+    <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
+    <public name="minSdkVersionFull"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
@@ -149,9 +151,36 @@
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
          @hide @SystemApi -->
     <public name="config_systemDependencyInstaller" />
+    <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_CROSS_USER_ROLE_PLATFORM_API_ENABLED)
+         @hide @SystemApi -->
+    <public name="config_defaultReservedForTestingProfileGroupExclusivity" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowEffectDamping"/>
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b20000">
@@ -203,6 +232,30 @@
   </staging-public-group>
 
   <staging-public-group type="integer" first-id="0x01aa0000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowEffectStiffness"/>
   </staging-public-group>
 
   <staging-public-group type="transition" first-id="0x01a90000">

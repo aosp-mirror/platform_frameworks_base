@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Erabili Bluetootha"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Konektatuta"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audioa partekatzea"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Audioa aldatu edo partekatzeko, sakatu hau"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Audioa partekatzeko eginbidea onartzen du"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gordeta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"deskonektatu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktibatu"</string>
@@ -384,8 +384,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Egunsentira arte"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Desaktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Aktibatuta lo egiteko garaian"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Lo egiteko garaia amaitzen den arte"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Aktibatuta lotara joateko garaian"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Lotara joateko garaia amaitzen den arte"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFCa"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Desgaituta dago NFC"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Gaituta dago NFC"</string>
@@ -455,7 +455,7 @@
     <string name="zen_mode_set_up" msgid="8231201163894922821">"Ezarri gabe"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Kudeatu ezarpenetan"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ez dago modurik aktibo}=1{\"{mode}\" aktibo dago}other{# modu aktibo daude}}"</string>
-    <string name="zen_priority_introduction" msgid="3159291973383796646">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta abisuen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_priority_introduction" msgid="3159291973383796646">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta gogorarazpenen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Pertsonalizatu"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Pantaila blokeatuko widgetak"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Aplikazio bat widget baten bidez irekitzeko, zeu zarela egiaztatu beharko duzu. Gainera, kontuan izan edonork ikusi ahalko dituela halako widgetak, tableta blokeatuta badago ere. Baliteke widget batzuk pantaila blokeaturako egokiak ez izatea, eta agian ez da segurua haiek bertan gehitzea."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Ados"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgetak"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Pantaila blokeatuan lasterbide gisa widgetak gehitzeko, ziurtatu aukera hori gaituta dagoela ezarpenetan."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"zabaldu menua"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Elkarrizketen jakinarazpenen goialdean eta profileko argazki gisa agertzen da pantaila blokeatuan, burbuila batean, eta ez molestatzeko modua eteten du"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Lehentasuna"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak ez ditu onartzen elkarrizketetarako eginbideak"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Bidali sortari buruzko oharrak"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Jakinarazpen horiek ezin dira aldatu."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Deien jakinarazpenak ezin dira aldatu."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Jakinarazpen talde hau ezin da konfiguratu hemen"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Aldatu ezkerreko edo goiko aplikaziora pantaila zatitua erabiltzean"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Pantaila zatituan zaudela, ordeztu aplikazio bat beste batekin"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Eraman leiho aktiboa pantaila batetik bestera"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Sarrera"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Aldatu hurrengo hizkuntzara"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Aldatu aurreko hizkuntzara"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Erabili <xliff:g id="LENGTH">%1$d</xliff:g> karaktere baino gutxiago"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Konpilazio-zenbakia"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Kopiatu da konpilazio-zenbakia arbelean."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"kopiatu arbelean."</string>
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Elkarrizketa-widgetak"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Irauli telefonoa bereizmen handiago a lortzeko"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Gailu tolesgarria zabaltzen"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Gailu tolesgarria biratzen"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Aurreko pantaila piztuta dago"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"tolestuta"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"tolestu gabe"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Erabilerraztasuna"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Lasterbideak"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Pertsonalizatu lasterbideak"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Sakatu tekla lasterbidea esleitzeko"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Lasterbidea kendu nahi duzu?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Sakatu tekla lasterbidea esleitzeko"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Betiko ezabatuko da lasterbide pertsonalizatua."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Bilatu lasterbideak"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ez dago bilaketa-emaitzarik"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tolesteko ikonoa"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Eginda"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Zabaltzeko ikonoa"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"edo"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Arrastatzeko kontrol-puntua"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Teklatuaren ezarpenak"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Ezarri lasterbidea"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Kendu"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Utzi"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Sakatu tekla"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Tekla-konbinazio hori erabili da dagoeneko. Probatu beste tekla bat."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tekla-konbinazio hori erabili da dagoeneko. Probatu beste tekla bat."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Ezin da ezarri lasterbidea."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Nabigatu teklatua erabilita"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Ikasi lasterbideak"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Nabigatu ukipen-panela erabilita"</string>

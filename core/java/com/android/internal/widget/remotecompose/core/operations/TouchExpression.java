@@ -21,6 +21,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -30,6 +31,7 @@ import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.AnimatedFloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.utilities.NanMap;
 import com.android.internal.widget.remotecompose.core.operations.utilities.touch.VelocityEasing;
@@ -42,12 +44,12 @@ import java.util.List;
  * touch behaviours. Including animating to Notched, positions. and tweaking the dynamics of the
  * animation.
  */
-public class TouchExpression implements Operation, VariableSupport, TouchListener {
+public class TouchExpression extends Operation implements VariableSupport, TouchListener {
     private static final int OP_CODE = Operations.TOUCH_EXPRESSION;
     private static final String CLASS_NAME = "TouchExpression";
     private float mDefValue;
     private float mOutDefValue;
-    public int mId;
+    private int mId;
     public float[] mSrcExp;
     int mMode = 1; // 0 = delta, 1 = absolute
     float mMax = 1;
@@ -56,11 +58,14 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
     float mOutMin = 1;
     float mValue = 0;
     boolean mUnmodified = true;
-    public float[] mPreCalcValue;
+    private float[] mPreCalcValue;
     private float mLastChange = Float.NaN;
     private float mLastCalculatedValue = Float.NaN;
     AnimatedFloatExpression mExp = new AnimatedFloatExpression();
+
+    /** The maximum number of floats in the expression */
     public static final int MAX_EXPRESSION_SIZE = 32;
+
     private VelocityEasing mEasyTouch = new VelocityEasing();
     private boolean mEasingToStop = false;
     private float mTouchUpTime = 0;
@@ -77,14 +82,41 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
     int mTouchEffects;
     float mVelocityId;
 
+    /** Stop with some deceleration */
     public static final int STOP_GENTLY = 0;
+
+    /** Stop only at the start or end */
     public static final int STOP_ENDS = 2;
+
+    /** Stop on touch up */
     public static final int STOP_INSTANTLY = 1;
+
+    /** Stop at evenly spaced notches */
     public static final int STOP_NOTCHES_EVEN = 3;
+
+    /** Stop at a collection points described in percents of the range */
     public static final int STOP_NOTCHES_PERCENTS = 4;
+
+    /** Stop at a collectiond of point described in abslute cordnates */
     public static final int STOP_NOTCHES_ABSOLUTE = 5;
+
+    /** Jump to the absloute poition of the point */
     public static final int STOP_ABSOLUTE_POS = 6;
 
+    /**
+     * create a touch expression
+     *
+     * @param id The float id the value is output to
+     * @param exp the expression (containing TOUCH_* )
+     * @param defValue the default value
+     * @param min the minimum value
+     * @param max the maximum value
+     * @param touchEffects the type of touch mode
+     * @param velocityId the valocity (not used)
+     * @param stopMode the behavour on touch oup
+     * @param stopSpec the paraameters that affect the touch up behavour
+     * @param easingSpec the easing parameters for coming to a stop
+     */
     public TouchExpression(
             int id,
             float[] exp,
@@ -126,7 +158,6 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
     @Override
     public void updateVariables(RemoteContext context) {
-
         if (mPreCalcValue == null || mPreCalcValue.length != mSrcExp.length) {
             mPreCalcValue = new float[mSrcExp.length];
         }
@@ -189,7 +220,9 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         if (Float.isNaN(mDefValue)) {
             context.listensTo(Utils.idFromNan(mDefValue), this);
         }
-        context.addTouchListener(this);
+        if (mComponent == null) {
+            context.addTouchListener(this);
+        }
         for (float v : mSrcExp) {
             if (Float.isNaN(v)
                     && !AnimatedFloatExpression.isMathOperator(v)
@@ -329,9 +362,25 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
     float mScrLeft, mScrRight, mScrTop, mScrBottom;
 
-    @Override
-    public void apply(RemoteContext context) {
-        Component comp = context.mLastComponent;
+    @Nullable Component mComponent;
+
+    /**
+     * Set the component the touch expression is in (if any)
+     * @param component the component, or null if outside
+     */
+    public void setComponent(@Nullable Component component) {
+        mComponent = component;
+        if (mComponent != null) {
+            try {
+                RootLayoutComponent root = mComponent.getRoot();
+                root.setHasTouchListeners(true);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void updateBounds() {
+        Component comp = mComponent;
         if (comp != null) {
             float x = comp.getX();
             float y = comp.getY();
@@ -348,7 +397,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
             mScrRight = w + x;
             mScrBottom = h + y;
         }
-        updateVariables(context);
+    }
+
+    @Override
+    public void apply(RemoteContext context) {
+        updateBounds();
         if (mUnmodified) {
             mCurrentValue = mOutDefValue;
             context.loadFloat(mId, wrap(mCurrentValue));
@@ -368,6 +421,7 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
                 mEasingToStop = false;
             }
             crossNotchCheck(context);
+            context.needsRepaint();
             return;
         }
         if (mTouchDown) {
@@ -392,11 +446,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
     @Override
     public void touchDown(RemoteContext context, float x, float y) {
-
         if (!(x >= mScrLeft && x <= mScrRight && y >= mScrTop && y <= mScrBottom)) {
             Utils.log("NOT IN WINDOW " + x + ", " + y + " " + mScrLeft + ", " + mScrTop);
             return;
         }
+        mEasingToStop = false;
         mTouchDown = true;
         mUnmodified = false;
         if (mMode == 0) {
@@ -404,6 +458,7 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
             mDownTouchValue =
                     mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length);
         }
+        context.needsRepaint();
     }
 
     @Override
@@ -438,6 +493,7 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         float time = mMaxTime * Math.abs(dest - value) / (2 * mMaxVelocity);
         mEasyTouch.config(value, dest, slope, time, mMaxAcceleration, mMaxVelocity, null);
         mEasingToStop = true;
+        context.needsRepaint();
     }
 
     @Override
@@ -446,7 +502,7 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
             return;
         }
         apply(context);
-        context.getDocument().getRootLayoutComponent().needsRepaint();
+        context.needsRepaint();
     }
 
     @Override
@@ -491,10 +547,21 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
 
     // ===================== static ======================
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -505,6 +572,14 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
      * @param buffer The buffer to write to
      * @param id the id of the resulting float
      * @param value the float expression array
+     * @param min the minimum allowed value
+     * @param max the maximum allowed value
+     * @param velocityId the velocity id
+     * @param touchEffects the type touch effect
+     * @param exp the expression the maps touch drags to movement
+     * @param touchMode the touch mode e.g. notch modes
+     * @param touchSpec the spec of the touch modes
+     * @param easingSpec the spec of when the object comes to an easing
      */
     public static void apply(
             WireBuffer buffer,
@@ -549,7 +624,13 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         float startValue = buffer.readFloat();
         float min = buffer.readFloat();
@@ -594,6 +675,11 @@ public class TouchExpression implements Operation, VariableSupport, TouchListene
                         easingData));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Float expression")

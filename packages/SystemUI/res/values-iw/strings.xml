@@ -306,11 +306,11 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"‏שימוש ב-Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"מחובר"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"שיתוף אודיו"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"צריך להקיש כדי להחליף מצב או לשתף אודיו"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"תמיכה בשיתוף אודיו"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"נשמר"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"הפעלה אוטומטית מחר"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"הפעלה אוטומטית ביום הבא"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"‏תכונות כמו \'שיתוף מהיר\' ו\'איפה המכשיר שלי\' משתמשות ב-Bluetooth"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"‏חיבור ה-Bluetooth יופעל מחר בבוקר"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"שיתוף האודיו"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ווידג\'טים במסך הנעילה"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"כדי לפתוח אפליקציה באמצעות ווידג\'ט, עליך לאמת את זהותך. בנוסף, כדאי לזכור שכל אחד יכול לראות את הווידג\'טים גם כשהטאבלט שלך נעול. יכול להיות שחלק מהווידג\'טים לא נועדו למסך הנעילה ושלא בטוח להוסיף אותם לכאן."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"הבנתי"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ווידג\'טים"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"כדי להוסיף את קיצור דרך \"ווידג\'טים במסך הנעילה\", צריך לוודא שהתכונה הזו מופעלת בהגדרות."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
@@ -699,7 +701,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"אודיו מרחבי"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"השבתה"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"מצב סטטי"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"מעקב אחר תנועות הראש"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"מעקב ראש"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"יש להקיש כדי לשנות את מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"השתקה"</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה צפה ומפריעה במצב \'נא לא להפריע\'"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"שליחת משוב על החבילה"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"לא ניתן לשנות את ההתראות האלה."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"לא ניתן לשנות את התראות השיחה."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"לא ניתן להגדיר כאן את קבוצת ההתראות הזו"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"מעבר לאפליקציה מימין או למעלה בזמן שימוש במסך מפוצל"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"כשהמסך מפוצל: החלפה בין אפליקציה אחת לאחרת"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"העברת החלון הפעיל בין מסכים"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"קלט"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"מעבר לשפה הבאה"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"מעבר לשפה הקודמת"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"אפשר להזין עד <xliff:g id="LENGTH">%1$d</xliff:g> תווים"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"‏מספר Build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"‏מספר ה-Build הועתק ללוח."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"העתקה ללוח."</string>
     <string name="basic_status" msgid="2315371112182658176">"פתיחת שיחה"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ווידג\'טים של שיחות"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"יש להקיש על שיחה כדי להוסיף אותה למסך הבית"</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"כדי לצלם תמונה ברזולוציה גבוהה יותר, כדאי להפוך את הטלפון"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"מכשיר מתקפל עובר למצב לא מקופל"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"מכשיר מתקפל עובר למצב מהופך"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"המסך הקדמי מופעל"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"מצב מקופל"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"מצב לא מקופל"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‏%1$s‏ / %2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"נגישות"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"מקשי קיצור"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"התאמה אישית של מקשי הקיצור"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"יש ללחוץ על מקש כדי להקצות מקש קיצור"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"להסיר את קיצור הדרך?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"צריך להקיש על מקש כדי להקצות מקש קיצור"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"קיצור הדרך יימחק באופן סופי."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"קיצורי דרך לחיפוש"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"אין תוצאות חיפוש"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"סמל הכיווץ"</string>
@@ -1428,18 +1439,25 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"סיום"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"או"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"נקודת האחיזה לגרירה"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"הגדרות המקלדת"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"הגדרה של מקש קיצור"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"הסרה"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ביטול"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"יש ללחוץ על מקש"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"שילוב המקשים הזה כבר בשימוש. אפשר לנסות מקש אחר."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"שילוב המקשים הזה כבר בשימוש. אפשר לנסות מקש אחר."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"לא ניתן להגדיר את קיצור הדרך."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ניווט באמצעות המקלדת"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"מידע על מקשי קיצור"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ניווט באמצעות לוח המגע"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"מידע על התנועות בלוח המגע"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ניווט באמצעות המקלדת ולוח המגע"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"מידע על התנועות בלוח המגע, מקשי קיצור ועוד"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ניווט עם המקלדת ולוח המגע"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"כאן אפשר לקרוא איך מפעילים תנועות בלוח המגע, מקשי קיצור ועוד"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"חזרה"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"חזרה לדף הבית"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"הצגת האפליקציות האחרונות"</string>

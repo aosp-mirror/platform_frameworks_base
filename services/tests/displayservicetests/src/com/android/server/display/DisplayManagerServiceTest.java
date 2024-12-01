@@ -123,7 +123,6 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.os.test.FakePermissionEnforcer;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -234,6 +233,7 @@ public class DisplayManagerServiceTest {
     private static final String DISPLAY_GROUP_EVENT_ADDED = "DISPLAY_GROUP_EVENT_ADDED";
     private static final String DISPLAY_GROUP_EVENT_REMOVED = "DISPLAY_GROUP_EVENT_REMOVED";
     private static final String DISPLAY_GROUP_EVENT_CHANGED = "DISPLAY_GROUP_EVENT_CHANGED";
+    private static final String TOPOLOGY_CHANGED_EVENT = "TOPOLOGY_CHANGED_EVENT";
 
     @Rule(order = 0)
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
@@ -1387,21 +1387,23 @@ public class DisplayManagerServiceTest {
     }
 
     /**
-     * Tests that it's not allowed to create an auto-mirror virtual display without
-     * CAPTURE_VIDEO_OUTPUT permission or a virtual device that can mirror displays
+     * Tests that it is not allowed to create an auto-mirror virtual display for a virtual device
+     * without ADD_MIRROR_DISPLAY permission / without the mirror display capability.
      */
-    @EnableFlags(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
     @Test
-    public void createAutoMirrorDisplay_withoutPermissionOrAllowedVirtualDevice_throwsException()
-            throws Exception {
+    public void createAutoMirrorDisplay_withoutPermission_throwsException() throws Exception {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         registerDefaultDisplays(displayManager);
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
-        when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
+                    .thenReturn(PackageManager.PERMISSION_DENIED);
+        } else {
+            when(virtualDevice.canCreateMirrorDisplays()).thenReturn(false);
+        }
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
         when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT)).thenReturn(
                 PackageManager.PERMISSION_DENIED);
@@ -1432,8 +1434,12 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
-        when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
+                    .thenReturn(PackageManager.PERMISSION_GRANTED);
+        } else {
+            when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
+        }
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create an auto-mirror virtual display using a virtual device.
@@ -1466,8 +1472,12 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
-        when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
+                    .thenReturn(PackageManager.PERMISSION_GRANTED);
+        } else {
+            when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
+        }
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create an auto-mirror virtual display using a virtual device.
@@ -1534,8 +1544,12 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
-        when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
+                    .thenReturn(PackageManager.PERMISSION_GRANTED);
+        } else {
+            when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
+        }
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
         when(mContext.checkCallingPermission(ADD_ALWAYS_UNLOCKED_DISPLAY))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
@@ -1571,8 +1585,12 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
-        when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
+            when(mContext.checkCallingPermission(ADD_MIRROR_DISPLAY))
+                    .thenReturn(PackageManager.PERMISSION_GRANTED);
+        } else {
+            when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
+        }
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create an auto-mirror virtual display using a virtual device.
@@ -3699,8 +3717,7 @@ public class DisplayManagerServiceTest {
                 DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 1);
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3718,8 +3735,7 @@ public class DisplayManagerServiceTest {
     public void testGetDisplayTopology_NullIfFlagDisabled() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(false);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3733,8 +3749,7 @@ public class DisplayManagerServiceTest {
     @Test
     public void testGetDisplayTopology_withoutPermission_shouldThrowException() {
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3748,8 +3763,7 @@ public class DisplayManagerServiceTest {
     public void testSetDisplayTopology() {
         manageDisplaysPermission(/* granted= */ true);
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3762,8 +3776,7 @@ public class DisplayManagerServiceTest {
     @Test
     public void testSetDisplayTopology_withoutPermission_shouldThrowException() {
         when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService displayManagerBinderService =
                 displayManager.new BinderService();
@@ -3772,6 +3785,49 @@ public class DisplayManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> displayManagerBinderService.setDisplayTopology(new DisplayTopology()));
+    }
+
+    @Test
+    public void testShouldNotifyTopologyChanged() {
+        manageDisplaysPermission(/* granted= */ true);
+        when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(callback,
+                DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED);
+        waitForIdleHandler(handler);
+
+        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
+        waitForIdleHandler(handler);
+
+        assertThat(callback.receivedEvents()).containsExactly(TOPOLOGY_CHANGED_EVENT);
+    }
+
+    @Test
+    public void testShouldNotNotifyTopologyChanged_WhenClientIsNotSubscribed() {
+        manageDisplaysPermission(/* granted= */ true);
+        when(mMockFlags.isDisplayTopologyEnabled()).thenReturn(true);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        // Only subscribe to display events, not topology events
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(callback,
+                STANDARD_DISPLAY_EVENTS);
+        waitForIdleHandler(handler);
+
+        displayManagerBinderService.setDisplayTopology(new DisplayTopology());
+        waitForIdleHandler(handler);
+
+        assertThat(callback.receivedEvents()).isEmpty();
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {
@@ -4223,6 +4279,12 @@ public class DisplayManagerServiceTest {
         public void onDisplayGroupChanged(int groupId) {
             mReceivedEvents.add(DISPLAY_GROUP_EVENT_CHANGED);
             eventSeen(DISPLAY_GROUP_EVENT_CHANGED);
+        }
+
+        @Override
+        public void onTopologyChanged(DisplayTopology topology) {
+            mReceivedEvents.add(TOPOLOGY_CHANGED_EVENT);
+            eventSeen(TOPOLOGY_CHANGED_EVENT);
         }
 
         public void clear() {

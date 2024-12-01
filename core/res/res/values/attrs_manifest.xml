@@ -2572,6 +2572,8 @@
              against a development branch, in which case it will only work against
              the development builds. -->
         <attr name="minSdkVersion" format="integer|string" />
+        <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
+        <attr name="minSdkVersionFull" format="string" />
         <!-- This is the SDK version number that the application is targeting.
              It is able to run on older versions (down to minSdkVersion), but
              was explicitly tested to work with the version specified here.

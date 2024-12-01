@@ -12486,6 +12486,36 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the {@link EnforcingAdmin} who have set this policy.
+     *
+     * <p>Important: this API is a temporary solution, hence should be kept hidden. That is because
+     * the string argument can't define policies with arguments.
+     *
+     * <p>Note that for {@link #POLICY_SUSPEND_PACKAGES} it returns the PO or DO to keep the
+     * behavior the same as before the bug fix for b/192245204.
+     *
+     * <p>This API is only callable by the system UID
+     *
+     * @param userId     The user for whom to retrieve the information.
+     * @param identifier The policy enforced by admins. It could be any user restriction or
+     *                   policy like {@link DevicePolicyManager#POLICY_DISABLE_CAMERA} and
+     *                   {@link DevicePolicyManager#POLICY_DISABLE_SCREEN_CAPTURE}. This also works
+     *                   for {@link DevicePolicyIdentifiers#MEMORY_TAGGING_POLICY}.
+     *
+     * @hide
+     */
+    public @Nullable EnforcingAdmin getEnforcingAdmin(int userId, String identifier) {
+        if (mService != null) {
+            try {
+                return mService.getEnforcingAdmin(userId, identifier);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the list of {@link EnforcingAdmin}s who have set this restriction.
      *
      * <p>Note that for {@link #POLICY_SUSPEND_PACKAGES} it returns the PO or DO to keep the

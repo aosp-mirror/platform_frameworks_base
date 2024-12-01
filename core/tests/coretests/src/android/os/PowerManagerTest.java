@@ -30,11 +30,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
@@ -54,7 +53,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = PowerManager.class)
+@DisabledOnRavenwood(blockedBy = PowerManager.class)
 public class PowerManagerTest {
 
     private static final String TAG = "PowerManagerTest";
@@ -83,19 +82,14 @@ public class PowerManagerTest {
             String[] keys, String[] values);
 
     static {
-        if (!RavenwoodRule.isUnderRavenwood()) {
+        if (!RavenwoodRule.isOnRavenwood()) {
             System.loadLibrary("powermanagertest_jni");
         }
     }
 
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     // Required for RequiresFlagsEnabled and RequiresFlagsDisabled annotations to take effect.
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood()
-            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
-            : DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     /**
      * Setup any common data for the upcoming tests.

@@ -76,6 +76,7 @@ Typeface* Typeface::createRelative(Typeface* src, Typeface::Style style) {
         result->fBaseWeight = resolvedFace->fBaseWeight;
         result->fAPIStyle = style;
         result->fStyle = computeRelativeStyle(result->fBaseWeight, style);
+        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
     }
     return result;
 }
@@ -88,6 +89,7 @@ Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
         result->fBaseWeight = resolvedFace->fBaseWeight;
         result->fAPIStyle = computeAPIStyle(weight, italic);
         result->fStyle = computeMinikinStyle(weight, italic);
+        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
     }
     return result;
 }
@@ -109,6 +111,7 @@ Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
         result->fBaseWeight = resolvedFace->fBaseWeight;
         result->fAPIStyle = resolvedFace->fAPIStyle;
         result->fStyle = resolvedFace->fStyle;
+        result->fIsVariationInstance = true;
     }
     return result;
 }
@@ -121,6 +124,7 @@ Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
         result->fBaseWeight = weight;
         result->fAPIStyle = resolvedFace->fAPIStyle;
         result->fStyle = computeRelativeStyle(weight, result->fAPIStyle);
+        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
     }
     return result;
 }
@@ -170,6 +174,7 @@ Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::Font
     result->fBaseWeight = weight;
     result->fAPIStyle = computeAPIStyle(weight, italic);
     result->fStyle = computeMinikinStyle(weight, italic);
+    result->fIsVariationInstance = false;
     return result;
 }
 

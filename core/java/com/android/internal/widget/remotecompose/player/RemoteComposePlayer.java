@@ -85,6 +85,7 @@ public class RemoteComposePlayer extends FrameLayout {
             }
         } else {
             mInner.setDocument(null);
+            this.setAccessibilityDelegate(null);
         }
         mapColors();
         setupSensors();
@@ -658,5 +659,15 @@ public class RemoteComposePlayer extends FrameLayout {
             mSensorManager.unregisterListener(mListener);
         }
         mListener = null;
+    }
+
+    /**
+     * This returns the amount of time in ms the player used to evalueate a pass it is averaged over
+     * a number of evaluations.
+     *
+     * @return time in ms
+     */
+    public float getEvalTime() {
+        return mInner.getEvalTime();
     }
 }

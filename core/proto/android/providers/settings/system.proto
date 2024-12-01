@@ -218,6 +218,7 @@ message SystemSettingsProto {
         optional SettingProto tap_to_click = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto tap_dragging = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto three_finger_tap_customization = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto system_gestures = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];;
     }
     optional Touchpad touchpad = 36;
 

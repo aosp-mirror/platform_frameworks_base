@@ -196,6 +196,7 @@ object SceneWindowRootViewBinder {
                             sceneByKey = sceneByKey,
                             overlayByKey = overlayByKey,
                             initialSceneKey = containerConfig.initialSceneKey,
+                            sceneTransitions = containerConfig.transitions,
                             dataSourceDelegator = dataSourceDelegator,
                             qsSceneAdapter = qsSceneAdapter,
                         )

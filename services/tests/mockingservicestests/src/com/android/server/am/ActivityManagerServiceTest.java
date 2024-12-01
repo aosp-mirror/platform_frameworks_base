@@ -47,8 +47,10 @@ import static com.android.server.am.Flags.FLAG_AVOID_RESOLVING_TYPE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -87,6 +89,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.SyncNotedAppOp;
 import android.app.backup.BackupAnnotations;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -98,6 +101,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -105,6 +109,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IProgressListener;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -201,6 +206,16 @@ public class ActivityManagerServiceTest {
 
     private static final String TEST_AUTHORITY = "test_authority";
     private static final String TEST_MIME_TYPE = "application/test_type";
+    private static final Uri TEST_URI = Uri.parse("content://com.example/people");
+    private static final int TEST_CREATOR_UID = 12345;
+    private static final String TEST_CREATOR_PACKAGE = "android.content.testCreatorPackage";
+    private static final String TEST_TYPE = "testType";
+    private static final String TEST_IDENTIFIER = "testIdentifier";
+    private static final String TEST_CATEGORY = "testCategory";
+    private static final String TEST_LAUNCH_TOKEN = "testLaunchToken";
+    private static final ComponentName TEST_COMPONENT = new ComponentName(TEST_PACKAGE,
+            "TestClass");
+    private static final int ALL_SET_FLAG = 0xFFFFFFFF;
 
     private static final int[] UID_RECORD_CHANGES = {
         UidRecord.CHANGE_PROCSTATE,
@@ -959,28 +974,37 @@ public class ActivityManagerServiceTest {
     @Test
     @SuppressWarnings("GuardedBy")
     public void testBroadcastStickyIntent_verifyTypeNotResolved() throws Exception {
-        final Intent intent = new Intent(TEST_ACTION1);
-        final Uri uri = new Uri.Builder()
-                .scheme(SCHEME_CONTENT)
-                .authority(TEST_AUTHORITY)
-                .path("green")
-                .build();
-        intent.setData(uri);
-        broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
-        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
-                StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
-                        TEST_MIME_TYPE));
-        when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().mockStatic(IpcDataCache.class).startMocking();
 
-        addUidRecord(TEST_UID, TEST_PACKAGE);
-        final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
-        final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
-        intentFilter.addDataType(TEST_MIME_TYPE);
-        final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
-                TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
-                Context.RECEIVER_EXPORTED);
-        assertNotNull(resultIntent);
-        verify(mContentResolver, never()).getType(any());
+        try {
+            final Intent intent = new Intent(TEST_ACTION1);
+            final Uri uri = new Uri.Builder()
+                    .scheme(SCHEME_CONTENT)
+                    .authority(TEST_AUTHORITY)
+                    .path("green")
+                    .build();
+            intent.setData(uri);
+            broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
+            assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
+                    StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                            TEST_MIME_TYPE));
+            when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+            ExtendedMockito.doNothing().when(
+                    () -> IpcDataCache.invalidateCache(anyString(), anyString()));
+
+            addUidRecord(TEST_UID, TEST_PACKAGE);
+            final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
+            final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
+            intentFilter.addDataType(TEST_MIME_TYPE);
+            final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
+                    TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
+                    Context.RECEIVER_EXPORTED);
+            assertNotNull(resultIntent);
+            verify(mContentResolver, never()).getType(any());
+        } finally {
+            mockitoSession.finishMocking();
+        }
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1400,6 +1424,34 @@ public class ActivityManagerServiceTest {
         // local created intent should not have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
         assertThat(extraIntent3.getExtendedFlags()
                 & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+    }
+
+    @Test
+    public void testUseCloneForCreatorTokenAndOriginalIntent_createSameIntentCreatorToken() {
+        Intent testIntent = new Intent(TEST_ACTION1)
+                .setComponent(TEST_COMPONENT)
+                .setDataAndType(TEST_URI, TEST_TYPE)
+                .setIdentifier(TEST_IDENTIFIER)
+                .addCategory(TEST_CATEGORY);
+        testIntent.setOriginalIntent(new Intent(TEST_ACTION2));
+        testIntent.setSelector(new Intent(TEST_ACTION3));
+        testIntent.setSourceBounds(new Rect(0, 0, 100, 100));
+        testIntent.setLaunchToken(TEST_LAUNCH_TOKEN);
+        testIntent.addFlags(ALL_SET_FLAG)
+                .addExtendedFlags(ALL_SET_FLAG);
+        ClipData testClipData = ClipData.newHtmlText("label", "text", "<html/>");
+        testClipData.addItem(new ClipData.Item(new Intent(TEST_ACTION1)));
+        testClipData.addItem(new ClipData.Item(TEST_URI));
+        testIntent.putExtra(TEST_EXTRA_KEY1, TEST_EXTRA_VALUE1);
+
+        ActivityManagerService.IntentCreatorToken tokenForFullIntent =
+                new ActivityManagerService.IntentCreatorToken(TEST_CREATOR_UID,
+                        TEST_CREATOR_PACKAGE, testIntent);
+        ActivityManagerService.IntentCreatorToken tokenForCloneIntent =
+                new ActivityManagerService.IntentCreatorToken(TEST_CREATOR_UID,
+                        TEST_CREATOR_PACKAGE, testIntent.cloneForCreatorToken());
+
+        assertThat(tokenForFullIntent.getKeyFields()).isEqualTo(tokenForCloneIntent.getKeyFields());
     }
 
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,

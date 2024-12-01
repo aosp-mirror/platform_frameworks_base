@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Caller ID ໂດຍເລີ່ມຕົ້ນຖືກປັບໃຫ້ບໍ່ມີການປິດກັ້ນ. ການໂທຕໍ່ໄປ:ປິດກັ້ນ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ບໍ່ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ແອັບນີ້ເຂົ້າກັນບໍ່ໄດ້ກັບ 16 KB. ກວດສອບການຈັດຕຳແໜ່ງ APK ບໍ່ສຳເລັດ. ແອັບນີ້ຈະເຮັດວຽກໂດຍໃຊ້ໂໝດທີ່ເຂົ້າກັນໄດ້ກັບຂະໜາດໜ້າ. ເພື່ອຄວາມເຂົ້າກັນໄດ້ດີທີ່ສຸດ, ກະລຸນາຮວມແອັບພລິເຄຊັນຄືນດ້ວຍການຮອງຮັບ 16 KB. ສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ເບິ່ງ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ແອັບນີ້ເຂົ້າກັນບໍ່ໄດ້ກັບ 16 KB. ກວດສອບການຈັດຕຳແໜ່ງ ELF ບໍ່ສຳເລັດ. ແອັບນີ້ຈະເຮັດວຽກໂດຍໃຊ້ໂໝດທີ່ເຂົ້າກັນໄດ້ກັບຂະໜາດໜ້າ. ເພື່ອຄວາມເຂົ້າກັນໄດ້ດີທີ່ສຸດ, ກະລຸນາຮວມແອັບພລິເຄຊັນຄືນດ້ວຍການຮອງຮັບ 16 KB. ສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ເບິ່ງ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ແອັບນີ້ເຂົ້າກັນບໍ່ໄດ້ກັບ 16 KB. ກວດສອບການຈັດຕຳແໜ່ງ APK ແລະ ELF ບໍ່ສຳເລັດ. ແອັບນີ້ຈະເຮັດວຽກໂດຍໃຊ້ໂໝດທີ່ເຂົ້າກັນໄດ້ກັບຂະໜາດໜ້າ. ເພື່ອຄວາມເຂົ້າກັນໄດ້ດີທີ່ສຸດ, ກະລຸນາຮວມແອັບພລິເຄຊັນຄືນດ້ວຍການຮອງຮັບ 16 KB. ສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ເບິ່ງ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ບໍ່ໄດ້ເປີດໃຊ້ບໍລິການ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ທ່ານບໍ່ສາມາດປ່ຽນແປງການຕັ້ງຄ່າ Caller ID"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ປ່ຽນໄປໃຊ້ອິນເຕີເນັດມືຖືຂອງ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ແລ້ວ"</string>
@@ -1947,6 +1950,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ຫາ <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ປະ​ຕິ​ທິນ​ໃດ​ກໍໄດ້"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ປິດສຽງບາງຢ່າງໄວ້"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>

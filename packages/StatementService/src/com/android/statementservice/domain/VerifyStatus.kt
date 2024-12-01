@@ -49,7 +49,7 @@ enum class VerifyStatus(val value: Int) {
                 return false
             }
 
-            val status = values().find { it.value == state } ?: return true
+            val status = entries.find { it.value == state } ?: return true
             return when (status) {
                 SUCCESS,
                 FAILURE_LEGACY_UNSUPPORTED_WILDCARD,
@@ -60,6 +60,21 @@ enum class VerifyStatus(val value: Int) {
                 FAILURE_TIMEOUT,
                 FAILURE_UNKNOWN,
                 FAILURE_REDIRECT -> true
+            }
+        }
+
+        fun canUpdate(state: Int): Boolean {
+            if (state == DomainVerificationInfo.STATE_UNMODIFIABLE) {
+                return false
+            }
+
+            val status = entries.find { it.value == state }
+            return when (status) {
+                SUCCESS,
+                FAILURE_LEGACY_UNSUPPORTED_WILDCARD,
+                FAILURE_REJECTED_BY_SERVER,
+                UNKNOWN -> true
+                else -> false
             }
         }
     }

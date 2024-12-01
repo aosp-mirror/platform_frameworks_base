@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ڈیٹا <xliff:g id="CARRIERDISPLAY">%s</xliff:g> پر سوئچ کیا گیا"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> تا <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>، <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"کوئی بھی کیلنڈر"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> کچھ آوازوں کو خاموش کر رہا ہے"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"آپ کے آلہ میں ایک داخلی مسئلہ ہے اور جب تک آپ فیکٹری ڈیٹا کو دوبارہ ترتیب نہیں دے دیتے ہیں، ہوسکتا ہے کہ یہ غیر مستحکم رہے۔"</string>

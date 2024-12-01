@@ -38,6 +38,7 @@ import com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_B
 import com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_C
 import com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString
 import com.android.wm.shell.windowdecor.WindowDecorViewModel
+import java.util.Collections
 import java.util.Optional
 
 /**
@@ -145,6 +146,24 @@ class StageOrderOperator (
         } else {
             throw IllegalArgumentException("No stage for invalid position")
         }
+    }
+
+    /**
+     * This will swap the stages for the two stages on either side of the given divider.
+     * Note: This will keep [activeStages] and [allStages] in sync by swapping both of them
+     * If there are no [activeStages] then this will be a no-op.
+     *
+     * TODO(b/379984874): Take in a divider identifier to determine which array indices to swap
+     */
+    fun onDoubleTappedDivider() {
+        if (activeStages.isEmpty()) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                "Stages not active, ignoring swap request")
+            return
+        }
+
+        Collections.swap(activeStages, 0, 1)
+        Collections.swap(allStages, 0, 1)
     }
 
     /**

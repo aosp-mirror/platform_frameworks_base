@@ -96,6 +96,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -111,6 +113,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
@@ -121,7 +124,6 @@ import com.android.systemui.keyboard.shortcut.ui.model.IconSource
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
-import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -465,14 +467,13 @@ private fun EndSidePanel(
                 onCustomizationRequested = { requestInfo ->
                     when (requestInfo) {
                         is ShortcutCustomizationRequestInfo.Add ->
-                            onCustomizationRequested(
-                                requestInfo.copy(categoryType = category.type)
-                            )
+                            onCustomizationRequested(requestInfo.copy(categoryType = category.type))
 
                         is ShortcutCustomizationRequestInfo.Delete ->
-                            onCustomizationRequested(
-                                requestInfo.copy(categoryType = category.type)
-                            )
+                            onCustomizationRequested(requestInfo.copy(categoryType = category.type))
+
+                        ShortcutCustomizationRequestInfo.Reset ->
+                            onCustomizationRequested(requestInfo)
                     }
                 },
             )
@@ -537,6 +538,9 @@ private fun SubCategoryContainerDualPane(
                                 onCustomizationRequested(
                                     requestInfo.copy(subCategoryLabel = subCategory.label)
                                 )
+
+                            ShortcutCustomizationRequestInfo.Reset ->
+                                onCustomizationRequested(requestInfo)
                         }
                     },
                 )
@@ -572,20 +576,31 @@ private fun Shortcut(
             }
             .focusable(interactionSource = interactionSource)
             .padding(8.dp)
+            .semantics { contentDescription = shortcut.contentDescription }
     ) {
         Row(
-            modifier = Modifier.width(128.dp).align(Alignment.CenterVertically).weight(0.333f),
+            modifier =
+                Modifier.width(128.dp).align(Alignment.CenterVertically).weight(0.333f).semantics {
+                    hideFromAccessibility()
+                },
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (shortcut.icon != null) {
-                ShortcutIcon(shortcut.icon, modifier = Modifier.size(24.dp))
+                ShortcutIcon(
+                    shortcut.icon,
+                    modifier = Modifier.size(24.dp).semantics { hideFromAccessibility() },
+                )
             }
-            ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
+            ShortcutDescriptionText(
+                searchQuery = searchQuery,
+                shortcut = shortcut,
+                modifier = Modifier.semantics { hideFromAccessibility() },
+            )
         }
-        Spacer(modifier = Modifier.width(24.dp))
+        Spacer(modifier = Modifier.width(24.dp).semantics { hideFromAccessibility() })
         ShortcutKeyCombinations(
-            modifier = Modifier.weight(.666f),
+            modifier = Modifier.weight(.666f).semantics { hideFromAccessibility() },
             shortcut = shortcut,
             isCustomizing = isCustomizing,
             onAddShortcutRequested = {

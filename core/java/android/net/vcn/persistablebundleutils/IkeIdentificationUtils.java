@@ -27,10 +27,10 @@ import android.net.ipsec.ike.IkeIpv4AddrIdentification;
 import android.net.ipsec.ike.IkeIpv6AddrIdentification;
 import android.net.ipsec.ike.IkeKeyIdIdentification;
 import android.net.ipsec.ike.IkeRfc822AddrIdentification;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;

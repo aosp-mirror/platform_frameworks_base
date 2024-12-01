@@ -26,6 +26,7 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.ExceptionUtils;
 import android.hardware.camera2.utils.SubmitInfo;
+import android.hardware.common.fmq.MQDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -313,4 +314,15 @@ public class ICameraDeviceUserWrapper {
             throw ExceptionUtils.throwAsPublicException(e);
         }
     }
+
+    public MQDescriptor<Byte, Byte> getCaptureResultMetadataQueue() throws CameraAccessException {
+        try {
+            return mRemoteDevice.getCaptureResultMetadataQueue();
+        } catch (ServiceSpecificException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        } catch (RemoteException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        }
+    }
+
 }

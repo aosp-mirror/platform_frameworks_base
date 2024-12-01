@@ -25,9 +25,12 @@ import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CLOSE
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.window.flags.Flags
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.common.transition.TransitionStateHolder
+import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.TransitionObserverInputBuilder
@@ -37,12 +40,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.verification.VerificationMode
 
 /**
  * Tests for [LetterboxTransitionObserver].
@@ -154,7 +156,26 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
     }
 
     @Test
-    fun `When closing change letterbox surface destroy is triggered`() {
+    fun `When closing change with no recents running letterbox surfaces are destroyed`() {
+        runTestScenario { r ->
+            executeTransitionObserverTest(observerFactory = r.observerFactory) {
+                r.invokeShellInit()
+
+                inputBuilder {
+                    buildTransitionInfo()
+                    r.configureRecentsState(running = false)
+                    r.createClosingChange(inputBuilder = this)
+                }
+
+                validateOutput {
+                    r.destroyEventDetected(expected = true)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `When closing change and recents are running letterbox surfaces are not destroyed`() {
         runTestScenario { r ->
             executeTransitionObserverTest(observerFactory = r.observerFactory) {
                 r.invokeShellInit()
@@ -162,13 +183,11 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                 inputBuilder {
                     buildTransitionInfo()
                     r.createClosingChange(inputBuilder = this)
+                    r.configureRecentsState(running = true)
                 }
 
                 validateOutput {
-                    r.destroyEventDetected(expected = true)
-                    r.creationEventDetected(expected = false)
-                    r.visibilityEventDetected(expected = false, visible = false)
-                    r.updateSurfaceBoundsEventDetected(expected = false)
+                    r.destroyEventDetected(expected = false)
                 }
             }
         }
@@ -197,6 +216,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
         private val transitions: Transitions
         private val letterboxController: LetterboxController
         private val letterboxObserver: LetterboxTransitionObserver
+        private val transitionStateHolder: TransitionStateHolder
 
         val observerFactory: () -> LetterboxTransitionObserver
 
@@ -205,8 +225,16 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
             shellInit = ShellInit(executor)
             transitions = mock<Transitions>()
             letterboxController = mock<LetterboxController>()
+            transitionStateHolder =
+                TransitionStateHolder(shellInit, mock<RecentsTransitionHandler>())
+            spyOn(transitionStateHolder)
             letterboxObserver =
-                LetterboxTransitionObserver(shellInit, transitions, letterboxController)
+                LetterboxTransitionObserver(
+                    shellInit,
+                    transitions,
+                    letterboxController,
+                    transitionStateHolder
+                )
             observerFactory = { letterboxObserver }
         }
 
@@ -216,6 +244,10 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
 
         fun checkObservableIsRegistered(expected: Boolean) {
             verify(transitions, expected.asMode()).registerObserver(observer())
+        }
+
+        fun configureRecentsState(running: Boolean) {
+            doReturn(running).`when`(transitionStateHolder).isRecentsTransitionRunning()
         }
 
         fun creationEventDetected(
@@ -258,14 +290,16 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
             expected: Boolean,
             displayId: Int = DISPLAY_ID,
             taskId: Int = TASK_ID,
-            taskBounds: Rect = Rect()
+            taskBounds: Rect = Rect(),
+            activityBounds: Rect = Rect()
         ) = verify(
             letterboxController,
             expected.asMode()
         ).updateLetterboxSurfaceBounds(
             eq(LetterboxKey(displayId, taskId)),
             any<SurfaceControl.Transaction>(),
-            eq(taskBounds)
+            eq(taskBounds),
+            eq(activityBounds)
         )
 
         fun createTopActivityChange(
@@ -300,7 +334,5 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                 this.displayId = displayId
             }, changeMode = TRANSIT_CLOSE)
         }
-
-        private fun Boolean.asMode(): VerificationMode = if (this) times(1) else never()
     }
 }

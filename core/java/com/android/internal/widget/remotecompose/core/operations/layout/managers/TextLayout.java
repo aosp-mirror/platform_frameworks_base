@@ -34,11 +34,13 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Text component, referencing a text id */
-public class TextLayout extends LayoutManager implements ComponentStartOperation, VariableSupport {
+public class TextLayout extends LayoutManager
+        implements ComponentStartOperation, VariableSupport, AccessibleComponent {
 
     private static final boolean DEBUG = false;
     private int mTextId = -1;
@@ -52,10 +54,16 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     private int mType = -1;
     private float mTextX;
     private float mTextY;
-    private float mTextW;
-    private float mTextH;
+    private float mTextW = -1;
+    private float mTextH = -1;
 
     @Nullable private String mCachedString = "";
+
+    @Nullable
+    @Override
+    public Integer getTextId() {
+        return mTextId;
+    }
 
     @Override
     public void registerListening(@NonNull RemoteContext context) {
@@ -66,7 +74,11 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
 
     @Override
     public void updateVariables(@NonNull RemoteContext context) {
-        mCachedString = context.getText(mTextId);
+        String cachedString = context.getText(mTextId);
+        if (cachedString != null && cachedString.equalsIgnoreCase(mCachedString)) {
+            return;
+        }
+        mCachedString = cachedString;
         if (mType == -1) {
             if (mFontFamilyId != -1) {
                 String fontFamily = context.getText(mFontFamilyId);
@@ -86,8 +98,16 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                 mType = 0;
             }
         }
-        mNeedsMeasure = true;
-        needsRepaint();
+        mTextW = -1;
+        mTextH = -1;
+
+        if (mHorizontalScrollDelegate != null) {
+            mHorizontalScrollDelegate.reset();
+        }
+        if (mVerticalScrollDelegate != null) {
+            mVerticalScrollDelegate.reset();
+        }
+        invalidateMeasure();
     }
 
     public TextLayout(
@@ -168,7 +188,19 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
             return;
         }
         int length = mCachedString.length();
-        context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+        if (mTextW > mWidth) {
+            context.save();
+            context.clipRect(
+                    mPaddingLeft,
+                    mPaddingTop,
+                    mWidth - mPaddingLeft - mPaddingRight,
+                    mHeight - mPaddingTop - mPaddingBottom);
+            context.translate(getScrollX(), getScrollY());
+            context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+            context.restore();
+        } else {
+            context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+        }
         if (DEBUG) {
             mPaint.setStyle(PaintBundle.STYLE_FILL_AND_STROKE);
             mPaint.setColor(1f, 1F, 1F, 1F);
@@ -246,6 +278,8 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         context.savePaint();
@@ -262,29 +296,39 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         context.restorePaint();
         float w = bounds[2] - bounds[0];
         float h = bounds[3] - bounds[1];
-        size.setWidth(w);
+        size.setWidth(Math.min(maxWidth, w));
         mTextX = -bounds[0];
-        size.setHeight(h);
+        size.setHeight(Math.min(maxHeight, h));
         mTextY = -bounds[1];
         mTextW = w;
         mTextH = h;
     }
 
     @Override
-    public float intrinsicHeight() {
+    public float intrinsicHeight(@Nullable RemoteContext context) {
         return mTextH;
     }
 
     @Override
-    public float intrinsicWidth() {
+    public float intrinsicWidth(@Nullable RemoteContext context) {
         return mTextW;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "TextLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_TEXT;
     }
@@ -312,6 +356,12 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         buffer.writeInt(textAlign);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
@@ -336,6 +386,11 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                         textAlign));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Text layout implementation.\n\n")

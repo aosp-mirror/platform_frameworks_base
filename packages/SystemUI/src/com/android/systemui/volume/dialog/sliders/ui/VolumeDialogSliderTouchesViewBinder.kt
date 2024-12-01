@@ -18,34 +18,23 @@ package com.android.systemui.volume.dialog.sliders.ui
 
 import android.annotation.SuppressLint
 import android.view.View
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
-import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderTouchesViewModel
+import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderInputEventsViewModel
 import com.google.android.material.slider.Slider
 import javax.inject.Inject
 
 @VolumeDialogSliderScope
 class VolumeDialogSliderTouchesViewBinder
 @Inject
-constructor(private val viewModelFactory: VolumeDialogSliderTouchesViewModel.Factory) {
+constructor(private val viewModel: VolumeDialogSliderInputEventsViewModel) {
 
     @SuppressLint("ClickableViewAccessibility")
     fun bind(view: View) {
         with(view.requireViewById<Slider>(R.id.volume_dialog_slider)) {
-            repeatWhenAttached {
-                viewModel(
-                    traceName = "VolumeDialogSliderTouchesViewBinder",
-                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelFactory.create() },
-                ) { viewModel ->
-                    setOnTouchListener { _, event ->
-                        viewModel.onTouchEvent(event)
-                        false
-                    }
-                }
+            setOnTouchListener { _, event ->
+                viewModel.onTouchEvent(event)
+                false
             }
         }
     }

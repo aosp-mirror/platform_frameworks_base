@@ -113,7 +113,7 @@
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"تسجيل شاشة تطبيق واحد"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"تسجيل الشاشة بكاملها"</string>
     <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="3754611651558838691">"‏تسجيل محتوى الشاشة بالكامل: %s"</string>
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"أثناء تسجيل محتوى الشاشة بالكامل، يتم تسجيل كل المحتوى المعروض على شاشتك. لذا يُرجى توخي الحذر بشأن المعلومات، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور وملفات الصوت والفيديو."</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"أثناء تسجيل محتوى الشاشة بالكامل، يتم تسجيل كل المحتوى المعروض على شاشتك، لذا يُرجى توخي الحذر بشأن المعلومات الظاهرة، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور والمقاطع الصوتية والفيديوهات."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"سيتم تسجيل كل المحتوى المعروض أو المشغَّل على شاشة التطبيق، لذا يُرجى توخي الحذر بشأن المعلومات الظاهرة، مثل كلمات المرور وتفاصيل الدفع والرسائل والصور والمقاطع الصوتية والفيديوهات."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"تسجيل الشاشة"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"يُرجى اختيار تطبيق لتسجيل شاشته"</string>
@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"استخدام البلوتوث"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"متّصل"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"مشاركة الصوت"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"انقر لتبديل مصدر الصوت أو مشاركته"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"تتوفّر ميزة \"مشاركة الصوت\""</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"إلغاء الربط"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"تفعيل"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"التطبيقات المصغّرة المصمَّمة لشاشة القفل"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"لفتح تطبيق باستخدام تطبيق مصغَّر، عليك إثبات هويتك. يُرجى ملاحظة أنّ أي شخص يمكنه الاطّلاع محتوى التطبيقات المصغَّرة، حتى وإن كان جهازك اللوحي مُقفلاً. بعض التطبيقات المصغّرة قد لا تكون مُصمَّمة لإضافتها إلى شاشة القفل، وقد يكون هذا الإجراء غير آمن."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"حسنًا"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"التطبيقات المصغَّرة"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"لإضافة التطبيقات المصغّرة على شاشة القفل كاختصار، تأكَّد من تفعيلها في الإعدادات."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"القائمة المنسدلة"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
@@ -695,10 +697,10 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. انقر للتعيين على الاهتزاز."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. انقر لكتم الصوت."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"التحكُّم في مستوى الضوضاء"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"التحكّم بالضوضاء"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"الصوت المكاني"</string>
-    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"غير مفعّل"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"تفعيل"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"عدم التفعيل"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"التفعيل بدون تتبّع"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"تتبُّع حركة الرأس"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"انقر لتغيير وضع الرنين."</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"وضع الرنين"</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"تظهر في أعلى إشعارات المحادثات وكصورة ملف شخصي على شاشة القفل وتظهر على شكل فقاعة لمقاطعة ميزة \"عدم الإزعاج\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"تقديم ملاحظات مُجمّعة"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"لا يمكن تعديل إشعارات المكالمات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
@@ -872,6 +875,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"التبديل إلى التطبيق على اليمين أو الأعلى أثناء استخدام \"تقسيم الشاشة\""</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"استبدال تطبيق بآخر في وضع \"تقسيم الشاشة\""</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"نقل نافذة نشطة بين شاشات العرض"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"نقل النافذة إلى اليمين"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"نقل النافذة إلى اليسار"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"تكبير النافذة"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"تصغير النافذة"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"الإدخال"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"التبديل إلى اللغة التالية"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"التبديل إلى اللغة السابقة"</string>
@@ -1220,8 +1227,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"يجب استخدام أقل من <xliff:g id="LENGTH">%1$d</xliff:g> حرف."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"نسخ المحتوى إلى الحافظة"</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"التطبيقات المصغّرة للمحادثات"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\""</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"للحصول على درجة دقة أعلى، اقلِب الهاتف."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"جهاز قابل للطي يجري فتحه"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"جهاز قابل للطي يجري قلبه"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"تم تفعيل الشاشة الأمامية"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"مطوي"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"غير مطوي"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‫%1$s / %2$s"</string>
@@ -1418,7 +1423,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"تسهيل الاستخدام"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"اختصارات لوحة المفاتيح"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"تخصيص اختصارات لوحة المفاتيح"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"اضغط على مفتاح لتخصيص الاختصار"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"هل تريد إزالة هذا الاختصار؟"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"اضغط على مفتاح لتخصيص الاختصار"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"سيؤدي هذا الإجراء إلى حذف الاختصار المخصّص نهائيًا."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"البحث في الاختصارات"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ما مِن نتائج بحث"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"رمز التصغير"</string>
@@ -1428,12 +1435,17 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"تم"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"رمز التوسيع"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"أو"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"زائد"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"شرطة مائلة للأمام"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"مقبض السحب"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"إعدادات لوحة المفاتيح"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ضبط الاختصار"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"إزالة"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"إلغاء"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"اضغط على مفتاح"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"يتم حاليًا استخدام مجموعة المفاتيح هذه. يُرجى تجربة مفتاح آخر."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"يتم حاليًا استخدام مجموعة المفاتيح هذه. يُرجى تجربة مفتاح آخر."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"تعذَّر ضبط الاختصار."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"التنقّل باستخدام لوحة المفاتيح"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"تعرَّف على اختصارات لوحة المفاتيح"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"التنقّل باستخدام لوحة اللمس"</string>

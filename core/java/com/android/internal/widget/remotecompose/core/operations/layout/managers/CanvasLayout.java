@@ -72,11 +72,21 @@ public class CanvasLayout extends BoxLayout {
         return "CANVAS";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "CanvasLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_CANVAS;
     }
@@ -87,12 +97,23 @@ public class CanvasLayout extends BoxLayout {
         buffer.writeInt(animationId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         operations.add(new CanvasLayout(null, componentId, animationId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Canvas implementation. Encapsulate draw operations.\n\n")

@@ -309,23 +309,31 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     /**
      * Record task snapshots before shutdown.
      */
-    void snapshotForShutdown(int displayId) {
+    void prepareShutdown() {
         if (!com.android.window.flags.Flags.recordTaskSnapshotsBeforeShutdown()) {
             return;
         }
-        final DisplayContent displayContent = mService.mRoot.getDisplayContent(displayId);
-        if (displayContent == null) {
+        // Make write items run in a batch.
+        mPersister.mSnapshotPersistQueue.setPaused(true);
+        mPersister.mSnapshotPersistQueue.prepareShutdown();
+        for (int i = 0; i < mService.mRoot.getChildCount(); i++) {
+            mService.mRoot.getChildAt(i).forAllLeafTasks(task -> {
+                if (task.isVisible() && !task.isActivityTypeHome()) {
+                    final TaskSnapshot snapshot = captureSnapshot(task);
+                    if (snapshot != null) {
+                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                    }
+                }
+            }, true /* traverseTopToBottom */);
+        }
+        mPersister.mSnapshotPersistQueue.setPaused(false);
+    }
+
+    void waitFlush(long timeout) {
+        if (!com.android.window.flags.Flags.recordTaskSnapshotsBeforeShutdown()) {
             return;
         }
-        displayContent.forAllLeafTasks(task -> {
-            if (task.isVisible() && !task.isActivityTypeHome()) {
-                final TaskSnapshot snapshot = captureSnapshot(task);
-                if (snapshot != null) {
-                    mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                }
-            }
-        }, true /* traverseTopToBottom */);
-        mPersister.mSnapshotPersistQueue.shutdown();
+        mPersister.mSnapshotPersistQueue.waitFlush(timeout);
     }
 
     /**

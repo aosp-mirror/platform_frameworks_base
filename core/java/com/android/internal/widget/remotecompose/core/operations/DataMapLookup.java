@@ -31,7 +31,7 @@ import com.android.internal.widget.remotecompose.core.types.LongConstant;
 import java.util.List;
 
 /** This can lookup in a map given a string writing the results to an id. */
-public class DataMapLookup implements Operation {
+public class DataMapLookup extends Operation {
     private static final int OP_CODE = Operations.DATA_MAP_LOOKUP;
     private static final String CLASS_NAME = "DataMapLookup";
     public int mId;
@@ -109,12 +109,17 @@ public class DataMapLookup implements Operation {
         operations.add(new DataMapLookup(id, mapId, stringId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
-                .description("A float and its associated id")
+                .description("Look up a value in a data map")
                 .field(INT, "id", "id of float")
                 .field(INT, "dataMapId", "32-bit float value")
-                .field(INT, "value", "32-bit float value");
+                .field(INT, "stringId", "32-bit float value");
     }
 
     @Override

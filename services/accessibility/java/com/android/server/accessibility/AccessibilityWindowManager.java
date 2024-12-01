@@ -433,10 +433,24 @@ public class AccessibilityWindowManager {
             return Collections.emptyList();
         }
 
-        private void onWindowsForAccessibilityChanged(boolean forceSend, int topFocusedDisplayId,
-                IBinder topFocusedWindowToken, @NonNull List<WindowInfo> windows) {
-            // TODO(b/322444245): no longer need to get a lock.
+        /**
+         * Called when the windows for accessibility changed.
+         *
+         * @param forceSend             Send the windows for accessibility even if they haven't
+         *                              changed.
+         * @param topFocusedDisplayId   The display Id which has the top focused window.
+         * @param topFocusedWindowToken The window token of top focused window.
+         * @param screenSize            The size of the display that the change happened.
+         * @param accessibilityWindows  The windows for accessibility.
+         */
+        @Override
+        public void onAccessibilityWindowsChanged(boolean forceSend, int topFocusedDisplayId,
+                @NonNull IBinder topFocusedWindowToken, @NonNull Point screenSize,
+                @NonNull List<AccessibilityWindow> accessibilityWindows) {
             synchronized (mLock) {
+                final List<WindowInfo> windows =
+                        createWindowInfoListLocked(screenSize, accessibilityWindows);
+
                 if (DEBUG) {
                     Slogf.i(LOG_TAG, "mDisplayId=%d, topFocusedDisplayId=%d, currentUserId=%d, "
                                     + "visibleBgUsers=%s", mDisplayId, topFocusedDisplayId,
@@ -451,14 +465,15 @@ public class AccessibilityWindowManager {
                         Slogf.i(LOG_TAG, "%d windows changed: %s", windows.size(), windowsInfo);
                     }
                 }
-                if (shouldUpdateWindowsLocked(forceSend, windows)) {
+
+                if (forceSend || shouldUpdateWindowsLocked(windows)) {
                     mTopFocusedDisplayId = topFocusedDisplayId;
                     if (!isProxyed(topFocusedDisplayId)) {
                         mLastNonProxyTopFocusedDisplayId = topFocusedDisplayId;
                     }
                     mTopFocusedWindowToken = topFocusedWindowToken;
                     if (DEBUG) {
-                        Slogf.d(LOG_TAG, "onWindowsForAccessibilityChanged(): updating windows for "
+                        Slogf.d(LOG_TAG, "onAccessibilityWindowsChanged(): updating windows for "
                                         + "display %d and token %s",
                                 topFocusedDisplayId, topFocusedWindowToken);
                     }
@@ -468,34 +483,11 @@ public class AccessibilityWindowManager {
                             windows);
                     // Someone may be waiting for the windows - advertise it.
                     mLock.notifyAll();
-                }
-                else if (DEBUG) {
-                    Slogf.d(LOG_TAG, "onWindowsForAccessibilityChanged(): NOT updating windows for "
+                } else if (DEBUG) {
+                    Slogf.d(LOG_TAG, "onAccessibilityWindowsChanged(): NOT updating windows for "
                                     + "display %d and token %s",
                             topFocusedDisplayId, topFocusedWindowToken);
                 }
-            }
-        }
-
-        /**
-         * Called when the windows for accessibility changed.
-         *
-         * @param forceSend             Send the windows for accessibility even if they haven't
-         *                              changed.
-         * @param topFocusedDisplayId   The display Id which has the top focused window.
-         * @param topFocusedWindowToken The window token of top focused window.
-         * @param screenSize            The size of the display that the change happened.
-         * @param windows               The windows for accessibility.
-         */
-        @Override
-        public void onAccessibilityWindowsChanged(boolean forceSend, int topFocusedDisplayId,
-                @NonNull IBinder topFocusedWindowToken, @NonNull Point screenSize,
-                @NonNull List<AccessibilityWindow> windows) {
-            synchronized (mLock) {
-                final List<WindowInfo> windowInfoList =
-                        createWindowInfoListLocked(screenSize, windows);
-                onWindowsForAccessibilityChanged(forceSend, topFocusedDisplayId,
-                        topFocusedWindowToken, windowInfoList);
             }
         }
 
@@ -650,12 +642,7 @@ public class AccessibilityWindowManager {
             windowInfo.locales = attributes.getLocales();
         }
 
-        private boolean shouldUpdateWindowsLocked(boolean forceSend,
-                @NonNull List<WindowInfo> windows) {
-            if (forceSend) {
-                return true;
-            }
-
+        private boolean shouldUpdateWindowsLocked(@NonNull List<WindowInfo> windows) {
             final int windowCount = windows.size();
             if (VERBOSE) {
                 Slogf.v(LOG_TAG,

@@ -6884,10 +6884,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testReadPolicyXml_backupRestoreLogging() throws Exception {
         BackupRestoreEventLogger logger = mock(BackupRestoreEventLogger.class);
 
+        if (ActivityManager.getCurrentUser() != UserHandle.USER_SYSTEM) {
+            // By default, the ZenModeHelper only has a configuration for the system user.
+            // If the current user is not the system user, the user must be updated.
+            mService.mZenModeHelper.onUserSwitched(ActivityManager.getCurrentUser());
+        }
         UserInfo ui = new UserInfo(ActivityManager.getCurrentUser(), "Clone", UserInfo.FLAG_FULL);
         ui.userType = USER_TYPE_FULL_SYSTEM;
         when(mUmInternal.getUserInfo(ActivityManager.getCurrentUser())).thenReturn(ui);
-        when(mPermissionHelper.getNotificationPermissionValues(0)).thenReturn(new ArrayMap<>());
+        when(mPermissionHelper.getNotificationPermissionValues(ActivityManager.getCurrentUser()))
+                .thenReturn(new ArrayMap<>());
         TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
@@ -8931,8 +8937,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testAreBubblesEnabled_false() throws Exception {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_BUBBLES, 0);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_BUBBLES, 0, UserHandle.getUserId(mUid));
         mService.mPreferencesHelper.updateBubblesEnabled();
         assertFalse(mBinderService.areBubblesEnabled(UserHandle.getUserHandleForUid(mUid)));
     }
@@ -13310,6 +13316,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPermissionHelper.hasPermission(UID_N_MR1)).thenReturn(false);
         when(mPermissionHelper.hasPermission(UID_P)).thenReturn(true);
 
+        enableInteractAcrossUsers();
         assertThat(mBinderService.getPackagesBypassingDnd(UserHandle.getUserId(UID_P)).getList())
                 .containsExactly(new ZenBypassingApp(PKG_P, false));
     }

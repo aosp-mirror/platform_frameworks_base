@@ -17,7 +17,6 @@
 package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
@@ -110,6 +109,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * Invalid corner radius that signifies that corner radius should not be set.
      */
     static final int INVALID_CORNER_RADIUS = -1;
+    /**
+     * Invalid corner radius that signifies that shadow radius should not be set.
+     */
+    static final int INVALID_SHADOW_RADIUS = -1;
 
     /**
      * System-wide context. Only used to create context with overridden configurations.
@@ -439,16 +442,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     .setPosition(mTaskSurface, taskPosition.x, taskPosition.y);
         }
 
-        float shadowRadius;
-        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-            // Shadow is not needed for fullscreen tasks
-            shadowRadius = 0;
-        } else {
-            shadowRadius =
-                    loadDimension(mDecorWindowContext.getResources(), params.mShadowRadiusId);
+        if (params.mShadowRadius != INVALID_SHADOW_RADIUS) {
+            startT.setShadowRadius(mTaskSurface, params.mShadowRadius);
+            finishT.setShadowRadius(mTaskSurface, params.mShadowRadius);
         }
-        startT.setShadowRadius(mTaskSurface, shadowRadius);
-        finishT.setShadowRadius(mTaskSurface, shadowRadius);
 
         if (params.mSetTaskVisibilityPositionAndCrop) {
             startT.show(mTaskSurface);
@@ -851,8 +848,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         @InsetsSource.Flags int mInsetSourceFlags;
         final Region mDisplayExclusionRegion = Region.obtain();
 
-        int mShadowRadiusId;
-        int mCornerRadius;
+        int mShadowRadius = INVALID_SHADOW_RADIUS;
+        int mCornerRadius = INVALID_CORNER_RADIUS;
 
         int mCaptionTopPadding;
         boolean mIsCaptionVisible;
@@ -874,8 +871,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mInsetSourceFlags = 0;
             mDisplayExclusionRegion.setEmpty();
 
-            mShadowRadiusId = Resources.ID_NULL;
-            mCornerRadius = 0;
+            mShadowRadius = INVALID_SHADOW_RADIUS;
+            mCornerRadius = INVALID_SHADOW_RADIUS;
 
             mCaptionTopPadding = 0;
             mIsCaptionVisible = false;

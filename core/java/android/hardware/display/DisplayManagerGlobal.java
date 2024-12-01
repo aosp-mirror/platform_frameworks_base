@@ -23,6 +23,7 @@ import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -73,6 +74,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -126,7 +128,7 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_REFRESH_RATE_CHANGED = 8;
     public static final int EVENT_DISPLAY_STATE_CHANGED = 9;
 
-    @LongDef(prefix = {"INTERNAL_EVENT_DISPLAY"}, flag = true, value = {
+    @LongDef(prefix = {"INTERNAL_EVENT_FLAG_"}, flag = true, value = {
             INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
             INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
@@ -134,7 +136,8 @@ public final class DisplayManagerGlobal {
             INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE,
-            INTERNAL_EVENT_FLAG_DISPLAY_STATE
+            INTERNAL_EVENT_FLAG_DISPLAY_STATE,
+            INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InternalEventFlag {}
@@ -147,6 +150,7 @@ public final class DisplayManagerGlobal {
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 5;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE = 1L << 6;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_STATE = 1L << 7;
+    public static final long INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED = 1L << 8;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -162,6 +166,9 @@ public final class DisplayManagerGlobal {
     private DisplayManagerCallback mCallback;
     private @InternalEventFlag long mRegisteredInternalEventFlag = 0;
     private final CopyOnWriteArrayList<DisplayListenerDelegate> mDisplayListeners =
+            new CopyOnWriteArrayList<>();
+
+    private final CopyOnWriteArrayList<DisplayTopologyListenerDelegate> mTopologyListeners =
             new CopyOnWriteArrayList<>();
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<>();
@@ -457,6 +464,18 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    private void maybeLogAllTopologyListeners() {
+        if (!extraLogging()) {
+            return;
+        }
+        Slog.i(TAG, "Currently registered display topology listeners:");
+        int i = 0;
+        for (DisplayTopologyListenerDelegate d : mTopologyListeners) {
+            Slog.i(TAG, i + ": " + d);
+            i++;
+        }
+    }
+
     /**
      * Called when there is a display-related window configuration change. Reroutes the event from
      * WindowManager to make sure the {@link Display} fields are up-to-date in the last callback.
@@ -502,7 +521,20 @@ public final class DisplayManagerGlobal {
                     | INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
                     | INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         }
+        if (!mTopologyListeners.isEmpty()) {
+            mask |= INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED;
+        }
         return mask;
+    }
+
+    private DisplayTopologyListenerDelegate findTopologyListenerLocked(
+            @NonNull Consumer<DisplayTopology> listener) {
+        for (DisplayTopologyListenerDelegate delegate : mTopologyListeners) {
+            if (delegate.mListener == listener) {
+                return delegate;
+            }
+        }
+        return null;
     }
 
     private void registerCallbackIfNeededLocked() {
@@ -1316,11 +1348,65 @@ public final class DisplayManagerGlobal {
      */
     @RequiresPermission(MANAGE_DISPLAYS)
     public void setDisplayTopology(DisplayTopology topology) {
+        if (topology == null) {
+            throw new IllegalArgumentException("Topology must not be null");
+        }
         try {
             mDm.setDisplayTopology(topology);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @see DisplayManager#registerTopologyListener
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void registerTopologyListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<DisplayTopology> listener, String packageName) {
+        if (!Flags.displayTopology()) {
+            return;
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        if (extraLogging()) {
+            Slog.i(TAG, "Registering display topology listener: packageName=" + packageName);
+        }
+        synchronized (mLock) {
+            DisplayTopologyListenerDelegate delegate = findTopologyListenerLocked(listener);
+            if (delegate == null) {
+                mTopologyListeners.add(new DisplayTopologyListenerDelegate(listener, executor,
+                        packageName));
+                registerCallbackIfNeededLocked();
+                updateCallbackIfNeededLocked();
+            }
+            maybeLogAllTopologyListeners();
+        }
+    }
+
+    /**
+     * @see DisplayManager#unregisterTopologyListener
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void unregisterTopologyListener(@NonNull Consumer<DisplayTopology> listener) {
+        if (!Flags.displayTopology()) {
+            return;
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        if (extraLogging()) {
+            Slog.i(TAG, "Unregistering display topology listener: " + listener);
+        }
+        synchronized (mLock) {
+            DisplayTopologyListenerDelegate delegate = findTopologyListenerLocked(listener);
+            if (delegate != null) {
+                mTopologyListeners.remove(delegate);
+                updateCallbackIfNeededLocked();
+            }
+        }
+        maybeLogAllTopologyListeners();
     }
 
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
@@ -1331,6 +1417,16 @@ public final class DisplayManagerGlobal {
                         + eventToString(event));
             }
             handleDisplayEvent(displayId, event, false /* forceUpdate */);
+        }
+
+        @Override
+        public void onTopologyChanged(DisplayTopology topology) {
+            if (DEBUG) {
+                Log.d(TAG, "onTopologyChanged: " + topology);
+            }
+            for (DisplayTopologyListenerDelegate listener : mTopologyListeners) {
+                listener.onTopologyChanged(topology);
+            }
         }
     }
 
@@ -1507,12 +1603,30 @@ public final class DisplayManagerGlobal {
                 mExecutor.execute(mCallback::onStopped);
             }
         }
+    }
 
-        @Override // Binder call
-        public void onRequestedBrightnessChanged(float brightness) {
-            if (mCallback != null) {
-                mExecutor.execute(() -> mCallback.onRequestedBrightnessChanged(brightness));
+    private static final class DisplayTopologyListenerDelegate {
+        private final Consumer<DisplayTopology> mListener;
+        private final Executor mExecutor;
+        private final String mPackageName;
+
+        DisplayTopologyListenerDelegate(@NonNull Consumer<DisplayTopology> listener,
+                @NonNull @CallbackExecutor Executor executor, String packageName) {
+            mExecutor = executor;
+            mListener = listener;
+            mPackageName = packageName;
+        }
+
+        @Override
+        public String toString() {
+            return "DisplayTopologyListener {packageName=" + mPackageName + "}";
+        }
+
+        void onTopologyChanged(DisplayTopology topology) {
+            if (extraLogging()) {
+                Slog.i(TAG, "Sending topology update: " + topology);
             }
+            mExecutor.execute(() -> mListener.accept(topology));
         }
     }
 

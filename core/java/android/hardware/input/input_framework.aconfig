@@ -149,6 +149,13 @@ flag {
 }
 
 flag {
+    name: "touchpad_system_gesture_disable"
+    namespace: "input"
+    description: "Adds an accessibility setting to disable system navigation gestures (3- and 4-finger swipes) on touchpads"
+    bug: "353947750"
+}
+
+flag {
     name: "enable_customizable_input_gestures"
     namespace: "input"
     description: "Enables keyboard shortcut customization support"
@@ -160,6 +167,7 @@ flag {
     namespace: "input"
     description: "Enables new 25Q2 keycodes"
     bug: "365920375"
+    is_exported: true
 }
 
 flag {

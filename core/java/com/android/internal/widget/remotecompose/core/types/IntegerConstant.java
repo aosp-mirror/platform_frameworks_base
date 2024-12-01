@@ -29,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Represents a single integer typically used for states or named for input into the system */
-public class IntegerConstant implements Operation {
+public class IntegerConstant extends Operation {
     private int mValue = 0;
     private int mId;
 
@@ -60,11 +60,21 @@ public class IntegerConstant implements Operation {
         return "IntegerConstant[" + mId + "] = " + mValue + "";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "IntegerConstant";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.DATA_INT;
     }
@@ -82,6 +92,12 @@ public class IntegerConstant implements Operation {
         buffer.writeInt(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 
@@ -89,6 +105,11 @@ public class IntegerConstant implements Operation {
         operations.add(new IntegerConstant(id, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", id(), "IntegerConstant")
                 .description("A integer and its associated id")

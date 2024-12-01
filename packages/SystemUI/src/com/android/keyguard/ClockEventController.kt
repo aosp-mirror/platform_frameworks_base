@@ -95,9 +95,10 @@ constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    // TODO b/362719719 - We should use the configuration controller associated with the display.
     private val configurationController: ConfigurationController,
     @DisplaySpecific private val resources: Resources,
-    private val context: Context,
+    @DisplaySpecific val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
     private val clockBuffers: ClockMessageBuffers,

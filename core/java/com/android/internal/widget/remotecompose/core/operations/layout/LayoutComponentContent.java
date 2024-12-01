@@ -41,11 +41,21 @@ public class LayoutComponentContent extends Component implements ComponentStartO
         super(parent, componentId, animationId, x, y, width, height);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "LayoutContent";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_CONTENT;
     }
@@ -61,11 +71,22 @@ public class LayoutComponentContent extends Component implements ComponentStartO
         buffer.writeInt(componentId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         operations.add(new LayoutComponentContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")

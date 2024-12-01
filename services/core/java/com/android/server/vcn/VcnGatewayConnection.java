@@ -30,10 +30,10 @@ import static android.net.vcn.VcnGatewayConnectionConfig.VCN_GATEWAY_OPTION_ENAB
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.VcnManagementService.VDBG;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -78,6 +78,9 @@ import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.util.LogUtils;
+import android.net.vcn.util.MtuUtils;
+import android.net.vcn.util.OneWayBoolean;
 import android.net.wifi.WifiInfo;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -103,9 +106,6 @@ import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController;
 import com.android.server.vcn.routeselection.UnderlyingNetworkController.UnderlyingNetworkControllerCallback;
 import com.android.server.vcn.routeselection.UnderlyingNetworkRecord;
-import com.android.server.vcn.util.LogUtils;
-import com.android.server.vcn.util.MtuUtils;
-import com.android.server.vcn.util.OneWayBoolean;
 
 import java.io.IOException;
 import java.net.Inet4Address;

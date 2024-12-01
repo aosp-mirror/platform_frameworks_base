@@ -24,11 +24,12 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Add a click area to the document */
-public class ClickArea implements RemoteComposeOperation {
+public class ClickArea extends Operation implements RemoteComposeOperation, AccessibleComponent {
     private static final int OP_CODE = Operations.CLICK_AREA;
     private static final String CLASS_NAME = "ClickArea";
     int mId;
@@ -113,15 +114,40 @@ public class ClickArea implements RemoteComposeOperation {
         return indent + toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescription;
+    }
+
+    /**
+     * @param buffer
+     * @param id
+     * @param contentDescription
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param metadata
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int id,
@@ -141,6 +167,12 @@ public class ClickArea implements RemoteComposeOperation {
         buffer.writeInt(metadata);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int contentDescription = buffer.readInt();
@@ -154,6 +186,11 @@ public class ClickArea implements RemoteComposeOperation {
         operations.add(clickArea);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Define a region you can click on")

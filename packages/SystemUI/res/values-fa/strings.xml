@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"استفاده از بلوتوث"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"متصل"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"اشتراک صدا"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"برای فعال کردن و هم‌رسانی صدا، تک‌ضرب بزنید"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"از اشتراک صدا پشتیبانی می‌کند"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ذخیره‌شده"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"قطع اتصال"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"فعال کردن"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ابزاره‌های صفحه قفل"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"برای باز کردن برنامه بااستفاده از ابزاره، باید هویت خودتان را به‌تأیید برسانید. همچنین، به‌خاطر داشته باشید که همه می‌توانند آن‌ها را مشاهده کنند، حتی وقتی رایانه لوحی‌تان قفل است. برخی‌از ابزاره‌ها ممکن است برای صفحه قفل درنظر گرفته نشده باشند و ممکن است اضافه کردن آن‌ها در اینجا ناامن باشد."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"متوجه‌ام"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ابزاره‌ها"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"برای افزودن «ابزاره‌ها» در صفحه قفل به‌عنوان میان‌بر، مطمئن شوید این گزینه در تنظیمات فعال باشد."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تغییر کاربر"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"منوی پایین‌پر"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"همه برنامه‌ها و داده‌های این جلسه حذف خواهد شد."</string>
@@ -695,7 +697,7 @@
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. برای صامت کردن تک‌ضرب بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. برای تنظیم روی لرزش، تک‌ضرب بزنید."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. برای صامت کردن تک‌ضرب بزنید."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"کنترل صدای محیط"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"کنترل نوفه زمینه"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"صدای فضایی"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"خاموش"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ثابت"</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"در بالای اعلان‌های مکالمه و به‌صورت عکس نمایه در صفحه قفل نشان داده می‌شود، به‌صورت حبابک ظاهر می‌شود، در حالت «مزاحم نشوید» وقفه ایجاد می‌کند"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ویژگی‌های مکالمه پشتیبانی نمی‌کند"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"ارائه بازخورد دسته‌ای"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"این اعلان‌ها قابل‌اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"رفتن به برنامه سمت چپ یا بالا درحین استفاده از صفحهٔ دونیمه"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"درحین صفحهٔ دونیمه: برنامه‌ای را با دیگری جابه‌جا می‌کند"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"جابه‌جا کردن پنجره فعال بین نمایشگرها"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ورودی"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"رفتن به زبان بعدی"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"رفتن به زبان قبلی"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"از کمتر از <xliff:g id="LENGTH">%1$d</xliff:g> نویسه استفاده کنید"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"شماره ساخت"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"کپی کردن در بریده‌دان."</string>
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ابزارک‌های مکالمه"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"روی مکالمه‌ای تک‌ضرب بزنید تا به «صفحه اصلی» اضافه شود"</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"برای وضوح بیشتر، تلفن را بچرخانید"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"دستگاه تاشو درحال باز شدن"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"دستگاه تاشو درحال چرخش به اطراف"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"صفحه‌نمایش جلو روشن شد"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"تاشده"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"تانشده"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"دسترس‌پذیری"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"میان‌برهای صفحه‌کلید"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"سفارشی‌سازی کردن میان‌برهای صفحه‌کلید"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"برای اختصاص دادن میان‌بر، کلید را فشار دهید"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"میان‌بر حذف شود؟"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"برای اختصاص دادن میان‌بر، کلید را فشار دهید"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"با این کار، میان‌بر سفارشی شما برای همیشه حذف می‌شود."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"جستجوی میان‌برها"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"نتیجه‌ای برای جستجو پیدا نشد"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"نماد جمع کردن"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"تمام"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"نماد ازهم بازکردن"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"یا"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"دستگیره کشاندن"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"تنظیمات صفحه‌کلید"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"تنظیم میان‌بر"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"حذف"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"لغو"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"کلید را فشار دهید"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"ترکیب کلید ازقبل درحال استفاده است. کلید دیگری را امتحان کنید."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"ترکیب کلید ازقبل درحال استفاده است. کلید دیگری را امتحان کنید."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"میان‌بر تنظیم نشد."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"پیمایش کردن بااستفاده از صفحه‌کلید"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"آشنایی با میان‌برهای صفحه‌کلید"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"پیمایش کردن بااستفاده از صفحه لمسی"</string>
