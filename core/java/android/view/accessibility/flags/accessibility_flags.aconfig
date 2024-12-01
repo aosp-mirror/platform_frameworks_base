@@ -8,6 +8,7 @@ flag {
     namespace: "accessibility"
     description: "Enables new APIs for an app to convey if a node is expanded or collapsed."
     bug: "362782536"
+    is_exported: true
 }
 
 flag {
@@ -15,6 +16,7 @@ flag {
     namespace: "accessibility"
     description: "Adds an API to indicate whether a form field (or similar element) is required."
     bug: "362784403"
+    is_exported: true
 }
 
 flag {
@@ -44,6 +46,7 @@ flag {
     namespace: "accessibility"
     description: "Enables new extra data key for an AccessibilityService to request character bounds in unmagnified window coordinates."
     bug: "375429616"
+    is_exported: true
 }
 
 flag {
@@ -88,6 +91,7 @@ flag {
     name: "deprecate_accessibility_announcement_apis"
     description: "Controls the deprecation of platform APIs related to disruptive accessibility announcements"
     bug: "376727542"
+    is_exported: true
 }
 
 flag {
@@ -95,6 +99,7 @@ flag {
     name: "deprecate_ani_label_for_apis"
     description: "Controls the deprecation of AccessibilityNodeInfo labelFor apis"
     bug: "333783827"
+    is_exported: true
 }
 
 flag {
@@ -145,6 +150,7 @@ flag {
     name: "global_action_menu"
     description: "Allow AccessibilityService to perform GLOBAL_ACTION_MENU"
     bug: "334954140"
+    is_exported: true
 }
 
 flag {
@@ -152,6 +158,7 @@ flag {
     name: "global_action_media_play_pause"
     description: "Allow AccessibilityService to perform GLOBAL_ACTION_MEDIA_PLAY_PAUSE"
     bug: "334954140"
+    is_exported: true
 }
 
 flag {
@@ -230,6 +237,7 @@ flag {
     namespace: "accessibility"
     description: "Feature flag for supplemental description api"
     bug: "375266174"
+    is_exported: true
 }
 
 flag {
@@ -237,6 +245,7 @@ flag {
     namespace: "accessibility"
     description: "Feature flag for supporting multiple labels in AccessibilityNodeInfo labeledby api"
     bug: "333780959"
+    is_exported: true
 }
 
 flag {
@@ -251,6 +260,7 @@ flag {
     namespace: "accessibility"
     description: "Feature flag for adding tri-state checked api"
     bug: "333784774"
+    is_exported: true
 }
 
 flag {
@@ -261,11 +271,12 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
- }
+}
 
- flag {
+flag {
     name: "indeterminate_range_info"
     namespace: "accessibility"
     description: "Creates a way to create an INDETERMINATE RangeInfo"
     bug: "376108874"
- }
+    is_exported: true
+}

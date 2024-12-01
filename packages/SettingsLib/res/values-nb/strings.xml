@@ -499,7 +499,7 @@
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Fulladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er satt på vent for å beskytte batteriet"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – lader"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%3$s</xliff:g>"</string>
@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Denne telefonen"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Dette nettbrettet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Denne datamaskinen (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Denne TV-en"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokkhøyttaler"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ekstern enhet"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Tilkoblet enhet"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Tilkoblet via ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Tilkoblet via eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV-ens standardinnstilling"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-utgang"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne høyttalere"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Innebygd høyttaler"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV-lyd"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjelp og tilbakemelding"</string>

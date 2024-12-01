@@ -1922,10 +1922,23 @@ class ContextImpl extends Context {
             }
         }
         try {
-            final Intent intent = ActivityManager.getService().registerReceiverWithFeature(
-                    mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
-                    AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission, userId,
-                    flags);
+            final Intent intent;
+            if (receiver == null && BroadcastStickyCache.useCache(filter)) {
+                intent = BroadcastStickyCache.getIntent(
+                        mMainThread.getApplicationThread(),
+                        mBasePackageName,
+                        getAttributionTag(),
+                        filter,
+                        broadcastPermission,
+                        userId,
+                        flags);
+            } else {
+                intent = ActivityManager.getService().registerReceiverWithFeature(
+                        mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
+                        AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission,
+                        userId, flags);
+            }
+
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
                 // TODO: determine at registration time if caller is

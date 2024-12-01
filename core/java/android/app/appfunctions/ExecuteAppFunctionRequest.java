@@ -27,7 +27,16 @@ import android.os.Parcelable;
 
 import java.util.Objects;
 
-/** A request to execute an app function. */
+/**
+ * A request to execute an app function.
+ *
+ * <p>The {@link ExecuteAppFunctionRequest#getParameters()} contains the parameters for the function
+ * to be executed in a GenericDocument. Structured classes defined in the AppFunction SDK can be
+ * converted into GenericDocuments.
+ *
+ * <p>The {@link ExecuteAppFunctionRequest#getExtras()} provides any extra metadata for the request.
+ * Structured APIs can be exposed in the SDK by packing and unpacking this Bundle.
+ */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public final class ExecuteAppFunctionRequest implements Parcelable {
     @NonNull

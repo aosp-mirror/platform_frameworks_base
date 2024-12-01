@@ -23,6 +23,7 @@ import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.PipTransition
 import org.junit.FixMethodOrder
@@ -37,6 +38,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class PipAspectRatioChangeTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { pipApp.changeAspectRatio(wmHelper) }
     }

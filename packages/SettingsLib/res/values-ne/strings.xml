@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"यो ट्याब्लेट"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"यो कम्प्युटर (आन्तरिक)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"यो टिभी"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"डक स्पिकर"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिभाइस"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"कनेक्ट गरिएको डिभाइस"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC मार्फत कनेक्ट गरिएका"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC मार्फत कनेक्ट गरिएका"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"टिभीको डिफल्ट अडियो आउटपुट"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI आउटपुट"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"आन्तरिक स्पिकरहरू"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"अन्तर्निर्मित स्पिकर"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"टिभीको अडियो"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि अन गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
     <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>

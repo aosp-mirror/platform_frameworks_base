@@ -108,6 +108,8 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         for (Component c : mChildrenComponents) {
@@ -117,8 +119,9 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
             size.setHeight(Math.max(size.getHeight(), m.getH()));
         }
         // add padding
-        size.setWidth(Math.max(size.getWidth(), computeModifierDefinedWidth()));
-        size.setHeight(Math.max(size.getHeight(), computeModifierDefinedHeight()));
+        size.setWidth(Math.max(size.getWidth(), computeModifierDefinedWidth(context.getContext())));
+        size.setHeight(
+                Math.max(size.getHeight(), computeModifierDefinedHeight(context.getContext())));
     }
 
     @Override
@@ -170,11 +173,21 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "BoxLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_BOX;
     }
@@ -192,6 +205,12 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
         buffer.writeInt(verticalPositioning);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
@@ -206,6 +225,11 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
                         verticalPositioning));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(

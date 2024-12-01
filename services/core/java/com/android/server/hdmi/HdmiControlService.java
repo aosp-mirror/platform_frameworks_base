@@ -50,6 +50,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
@@ -106,6 +107,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -725,6 +727,13 @@ public class HdmiControlService extends SystemService {
         }
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         setProhibitMode(false);
+        if (isTvDevice() && getWasCecDisabledOnStandbyByLowEnergyMode()) {
+            Slog.w(TAG, "Re-enable CEC on boot-up since it was disabled due to low energy "
+                    + " mode.");
+            mHdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                    HDMI_CEC_CONTROL_ENABLED);
+            setWasCecDisabledOnStandbyByLowEnergyMode(false);
+        }
         mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
 
@@ -771,14 +780,6 @@ public class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support eARC.");
         }
         mHdmiCecNetwork = new HdmiCecNetwork(this, mCecController, mMhlController);
-        if (isTvDevice() && getWasCecDisabledOnStandbyByLowEnergyMode()) {
-            Slog.w(TAG, "Re-enable CEC on boot-up since it was disabled due to low energy "
-                    + " mode.");
-            getHdmiCecConfig().setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
-                    HDMI_CEC_CONTROL_ENABLED);
-            setWasCecDisabledOnStandbyByLowEnergyMode(false);
-            setCecEnabled(HDMI_CEC_CONTROL_ENABLED);
-        }
         if (isCecControlEnabled()) {
             initializeCec(INITIATED_BY_BOOT_UP);
         } else {
@@ -1007,6 +1008,21 @@ public class HdmiControlService extends SystemService {
                                 ? SOUNDBAR_MODE_ENABLED : SOUNDBAR_MODE_DISABLED);
                     }
                 }, mServiceThreadExecutor);
+
+        if (isPlaybackDevice()) {
+            mHdmiCecConfig.registerChangeListener(
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                    new HdmiCecConfig.SettingChangeListener() {
+                        @Override
+                        public void onChange(String setting) {
+                            boolean goToStandbyOnActiveSourceLost =
+                                    mHdmiCecConfig.getStringValue(
+                                            HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST)
+                                            .equals(HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+                            writePowerStateChangeOnActiveSourceLostAtom(goToStandbyOnActiveSourceLost);
+                        }
+                    }, mServiceThreadExecutor);
+        }
 
         mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
                 new DeviceConfig.OnPropertiesChangedListener() {
@@ -3190,6 +3206,7 @@ public class HdmiControlService extends SystemService {
             // Cancel an existing timer to send the device to sleep since OTP was triggered.
             playback().mDelayedStandbyOnActiveSourceLostHandler
                     .removeCallbacksAndMessages(null);
+            playback().setIsActiveSourceLostPopupLaunched(false);
         }
 
         if (source == null) {
@@ -5225,6 +5242,34 @@ public class HdmiControlService extends SystemService {
         writeStringSystemProperty(
                 Constants.PROPERTY_WAS_CEC_DISABLED_ON_STANDBY_BY_LOW_ENERGY_MODE,
                 String.valueOf(value));
+    }
+
+    /**
+     * Writes a HdmiPowerStateChangeOnActiveSourceLostToggled atom representing a
+     * HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST setting change.
+     */
+    protected void writePowerStateChangeOnActiveSourceLostAtom(boolean isSettingEnabled) {
+        String manufacturerPnpId = "undefined";
+        int manufactureYear = -1;
+        int manufactureWeek = -1;
+        Display display = getContext().getDisplay();
+        if (display != null) {
+            DeviceProductInfo deviceProductInfo = display.getDeviceProductInfo();
+            manufacturerPnpId = deviceProductInfo.getManufacturerPnpId();
+            manufactureYear = deviceProductInfo.getManufactureYear();
+        }
+        int enumLogReason =
+                HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_UNKNOWN;
+        if (playback() != null) {
+            if (playback().isActiveSourceLostPopupLaunched()) {
+                enumLogReason = HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_POP_UP;
+            } else {
+                enumLogReason = HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_SETTING;
+            }
+        }
+
+        getAtomWriter().powerStateChangeOnActiveSourceLostChanged(isSettingEnabled, enumLogReason,
+                manufacturerPnpId, manufactureYear, manufactureWeek);
     }
 
     /**

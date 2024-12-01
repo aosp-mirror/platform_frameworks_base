@@ -4668,21 +4668,25 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
-    public void updateDisplayWindowRequestedVisibleTypes(
-            int displayId, @InsetsType int requestedVisibleTypes) {
+    public void updateDisplayWindowRequestedVisibleTypes(int displayId,
+            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token statsToken) {
         updateDisplayWindowRequestedVisibleTypes_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null || dc.mRemoteInsetsControlTarget == null) {
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES);
                     return;
                 }
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES);
                 dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
                 // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
-                //  IME provider. Check if we have to create a new request here
+                //  IME provider. Check if we have to create a new request here, if null.
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
-                        dc.mRemoteInsetsControlTarget, null /* statsToken */);
+                        dc.mRemoteInsetsControlTarget, statsToken);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -7696,7 +7700,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: %d", displayId);
                 return false;
             }
-            return displayContent.supportsSystemDecorations();
+            return displayContent.isSystemDecorationsSupported();
         }
     }
 

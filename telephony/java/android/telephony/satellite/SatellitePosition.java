@@ -16,6 +16,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,8 +35,9 @@ import java.util.Objects;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-public class SatellitePosition implements Parcelable {
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+public final class SatellitePosition implements Parcelable {
 
     /**
      * The longitude of the satellite in degrees, ranging from -180 to 180 degrees
@@ -51,6 +53,7 @@ public class SatellitePosition implements Parcelable {
      * Constructor for {@link SatellitePosition} used to create an instance from a {@link Parcel}.
      *
      * @param in The {@link Parcel} to read the satellite position data from.
+     * @hide
      */
     public SatellitePosition(Parcel in) {
         mLongitudeDegree = in.readDouble();
@@ -62,12 +65,14 @@ public class SatellitePosition implements Parcelable {
      *
      * @param longitudeDegree The longitude of the satellite in degrees.
      * @param altitudeKm  The altitude of the satellite in kilometers.
+     * @hide
      */
     public SatellitePosition(double longitudeDegree, double altitudeKm) {
         mLongitudeDegree = longitudeDegree;
         mAltitudeKm = altitudeKm;
     }
 
+    @NonNull
     public static final Creator<SatellitePosition> CREATOR = new Creator<SatellitePosition>() {
         @Override
         public SatellitePosition createFromParcel(Parcel in) {

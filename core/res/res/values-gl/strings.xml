@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O valor predeterminado do identificador de chamada é non restrinxido. Próxima chamada: restrinxido"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O valor predeterminado do identificador de chamada é restrinxido. Próxima chamada: non restrinxido"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizo non ofrecido."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non podes cambiar a configuración do identificador de chamada."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Cambiouse a conexión de datos a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"De <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Calquera calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando algúns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Produciuse un erro interno no teu dispositivo e quizais funcione de maneira inestable ata o restablecemento dos datos de fábrica."</string>

@@ -2174,6 +2174,16 @@
         <item>com.android.location.fused</item>
     </string-array>
 
+    <!-- Package name providing population density location support. -->
+    <string name="config_populationDensityProviderPackageName" translatable="false">com.android.location.populationdensity</string>
+
+    <!-- Whether to enable population density provider overlay, which allows the population density provider to
+         be replaced by an app at run-time. When disabled, only the
+         config_populationDensityProviderPackageName package will be searched for a population density
+         provider, otherwise any system package is eligible. Anyone who wants to disable the overlay
+         mechanism can set it to false. -->
+    <bool name="config_enablePopulationDensityProviderOverlay" translatable="false">true</bool>
+
    <!-- Package name of the extension software fallback. -->
     <string name="config_extensionFallbackPackageName" translatable="false"></string>
 
@@ -2451,6 +2461,9 @@
     <string name="config_systemCallStreaming" translatable="false"></string>
     <!-- The name of the package that will hold the default retail demo role. -->
     <string name="config_defaultRetailDemo" translatable="false"></string>
+    <!-- The name of the package that will hold the default reserved for testing profile group
+         exclusivity role. -->
+    <string name="config_defaultReservedForTestingProfileGroupExclusivity" translatable="false">android.app.rolemultiuser.cts.app</string>
 
     <!-- The component name of the wear service class that will be started by the system server. -->
     <string name="config_wearServiceComponent" translatable="false"></string>
@@ -2778,6 +2791,9 @@
          Matched against ComponentName#flattenToString() for dream components.
          If empty, logs "other" for all. -->
     <string-array name="config_loggable_dream_prefixes"></string-array>
+
+    <!-- Whether to enable glanceable hub features on this device. -->
+    <bool name="config_glanceableHubEnabled">false</bool>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead

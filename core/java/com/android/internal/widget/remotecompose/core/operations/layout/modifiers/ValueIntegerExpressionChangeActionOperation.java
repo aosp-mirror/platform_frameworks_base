@@ -32,7 +32,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Apply a value change on an integer variable. */
-public class ValueIntegerExpressionChangeActionOperation implements ActionOperation {
+public class ValueIntegerExpressionChangeActionOperation extends Operation
+        implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_INTEGER_EXPRESSION_CHANGE_ACTION;
 
     long mTargetValueId = -1;
@@ -88,12 +89,23 @@ public class ValueIntegerExpressionChangeActionOperation implements ActionOperat
         buffer.writeLong(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         long valueId = buffer.readLong();
         long value = buffer.readLong();
         operations.add(new ValueIntegerExpressionChangeActionOperation(valueId, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueIntegerExpressionChangeActionOperation")
                 .description(

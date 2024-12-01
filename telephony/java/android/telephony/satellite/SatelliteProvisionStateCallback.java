@@ -48,9 +48,8 @@ public interface SatelliteProvisionStateCallback {
      *
      * @param satelliteSubscriberProvisionStatus The List contains the latest provisioning states
      *                                           of the SatelliteSubscriberInfos.
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     default void onSatelliteSubscriptionProvisionStateChanged(
             @NonNull List<SatelliteSubscriberProvisionStatus>
                     satelliteSubscriberProvisionStatus) {};

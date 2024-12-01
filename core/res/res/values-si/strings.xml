@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී ඇත. මීළඟ ඇමතුම: සීමා කර නැත"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"සේවාවන් සපයා නැත."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"අමතන්නාගේ ID සැකසීම ඔබට වෙනස්කල නොහැක."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"දත්ත <xliff:g id="CARRIERDISPLAY">%s</xliff:g> වෙත මාරු කරන ලදි"</string>
@@ -1059,7 +1065,7 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> කොටුව එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"රටාව සම්පූර්ණයි"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"රටා ප්‍රදේශය."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%%1$s. %%3$d න් %%2$d විජටය."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. %3$d න් %2$d විජටය."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"විජටය එක් කරන්න."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"හිස්"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"අගුළු අරින ප්‍රදේශය විදහා ඇත."</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="END">%2$s</xliff:g> සිට <xliff:g id="START">%1$s</xliff:g> දක්වා"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ඕනෑම දින දර්ශනයක්"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> සමහර ශබ්ද නිහඬ කරමින්"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>

@@ -3846,7 +3846,7 @@ public class UserManager {
     }
 
     /**
-     * Return the time when the context user was unlocked elapsed milliseconds since boot,
+     * Return the time when the calling user was unlocked elapsed milliseconds since boot,
      * or 0 if not unlocked.
      *
      * @hide

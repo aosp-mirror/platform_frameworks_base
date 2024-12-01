@@ -141,6 +141,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.interruption.AvalancheProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
@@ -154,7 +155,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -162,6 +162,7 @@ import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvision
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.Flags;
@@ -442,6 +443,7 @@ public class BubblesTest extends SysuiTestCase {
                 () -> mSelectedUserInteractor,
                 mUserTracker,
                 mNotificationShadeWindowModel,
+                new FakeSettings(),
                 mKosmos::getCommunalInteractor
         );
         mNotificationShadeWindowController.fetchWindowRootView();

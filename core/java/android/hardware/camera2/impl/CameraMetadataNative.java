@@ -391,6 +391,18 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     /**
+     * Take ownership of native metadata
+     */
+    public CameraMetadataNative(long metadataPtr) {
+        super();
+        mMetadataPtr = metadataPtr;
+        if (mMetadataPtr == 0) {
+            throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
+        }
+        updateNativeAllocation();
+    }
+
+    /**
      * Move the contents from {@code other} into a new camera metadata instance.</p>
      *
      * <p>After this call, {@code other} will become empty.</p>

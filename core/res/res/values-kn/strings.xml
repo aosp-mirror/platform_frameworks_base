@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ಈ ಆ್ಯಪ್‌ 16 KB ಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. APK ಮತ್ತು ELF ಅಲೈನ್‌ಮೆಂಟ್ ಪರಿಶೀಲನೆಗಳು ವಿಫಲವಾಗಿವೆ ಪುಟದ ಗಾತ್ರಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುವ ಮೋಡ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆ್ಯಪ್ ಅನ್ನು ರನ್ ಮಾಡಲಾಗುತ್ತದೆ. ಉತ್ತಮ ಹೊಂದಾಣಿಕೆಗಾಗಿ, 16 KB ಗೆ ಬೆಂಬಲದೊಂದಿಗೆ ಆ್ಯಪ್ ಅನ್ನು ಮರುಕಂಪೈಲ್ ಮಾಡಿ. ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ಅನ್ನು ನೋಡಿ"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ಈ ಆ್ಯಪ್‌ 16 KB ಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ELF ಅಲೈನ್‌ಮೆಂಟ್ ಪರಿಶೀಲನೆಗಳು ವಿಫಲವಾಗಿದೆ. ಪುಟದ ಗಾತ್ರಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುವ ಮೋಡ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆ್ಯಪ್ ಅನ್ನು ರನ್ ಮಾಡಲಾಗುತ್ತದೆ. ಉತ್ತಮ ಹೊಂದಾಣಿಕೆಗಾಗಿ, 16 KB ಗೆ ಬೆಂಬಲದೊಂದಿಗೆ ಆ್ಯಪ್ ಅನ್ನು ಮರುಕಂಪೈಲ್ ಮಾಡಿ. ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ಅನ್ನು ನೋಡಿ"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ಈ ಆ್ಯಪ್‌ 16 KB ಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. APK ಮತ್ತು ELF ಅಲೈನ್‌ಮೆಂಟ್ ಪರಿಶೀಲನೆಗಳು ವಿಫಲವಾಗಿವೆ ಪುಟದ ಗಾತ್ರಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುವ ಮೋಡ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ಆ್ಯಪ್ ಅನ್ನು ರನ್ ಮಾಡಲಾಗುತ್ತದೆ. ಉತ್ತಮ ಹೊಂದಾಣಿಕೆಗಾಗಿ, 16 KB ಗೆ ಬೆಂಬಲದೊಂದಿಗೆ ಆ್ಯಪ್ ಅನ್ನು ಮರುಕಂಪೈಲ್ ಮಾಡಿ. ಹೆಚ್ಚಿನ ಮಾಹಿತಿಗಾಗಿ, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ಅನ್ನು ನೋಡಿ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ಸೇವೆಯನ್ನು ಪೂರೈಸಲಾಗಿಲ್ಲ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ನೀವು ಕಾಲರ್‌ ID ಸೆಟ್ಟಿಂಗ್‌ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> ಗೆ ಡೇಟಾವನ್ನು ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
@@ -1387,7 +1390,7 @@
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ಹೊಸ ಸಿಮ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ಇದನ್ನು ಸ್ಥಾಪಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ಸಮಯವನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="date_picker_dialog_title" msgid="5030520449243071926">"ದಿನಾಂಕವನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="date_picker_dialog_title" msgid="5030520449243071926">"ದಿನಾಂಕವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ಹೊಂದಿಸು"</string>
     <string name="date_time_done" msgid="8363155889402873463">"ಆಯಿತು"</string>
     <string name="perms_new_perm_prefix" msgid="6984556020395757087"><font size="12" fgcolor="#ff33b5e5">"ಹೊಸ: "</font></string>
@@ -1947,6 +1950,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ನಿಂದ <xliff:g id="END">%2$s</xliff:g> ವರೆಗೆ"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ಯಾವುದೇ ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ರೀಸೆಟ್ ಮಾಡುವವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>

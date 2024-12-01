@@ -29,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Used to represent a long */
-public class LongConstant implements Operation {
+public class LongConstant extends Operation {
     private static final int OP_CODE = Operations.DATA_LONG;
     private long mValue;
     private int mId;
@@ -83,6 +83,12 @@ public class LongConstant implements Operation {
         buffer.writeLong(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
 
@@ -90,6 +96,11 @@ public class LongConstant implements Operation {
         operations.add(new LongConstant(id, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, "LongConstant")
                 .description("A boolean and its associated id")

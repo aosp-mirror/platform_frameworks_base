@@ -16,6 +16,7 @@
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
@@ -33,13 +34,15 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Color
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.Easing;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
+import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Represents a click modifier + actions */
 public class ClickModifierOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent, ClickHandler {
+        implements ModifierOperation, DecoratorComponent, ClickHandler, AccessibleComponent {
     private static final int OP_CODE = Operations.MODIFIER_CLICK;
 
     long mAnimateRippleStart = 0;
@@ -53,6 +56,22 @@ public class ClickModifierOperation extends PaintOperation
     @NonNull public float[] locationInWindow = new float[2];
 
     @NonNull PaintBundle mPaint = new PaintBundle();
+
+    @Override
+    public boolean isClickable() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public Role getRole() {
+        return Role.BUTTON;
+    }
+
+    @Override
+    public CoreSemantics.Mode getMode() {
+        return CoreSemantics.Mode.MERGE;
+    }
 
     public void animateRipple(float x, float y) {
         mAnimateRippleStart = System.currentTimeMillis();
@@ -80,6 +99,10 @@ public class ClickModifierOperation extends PaintOperation
 
     @Override
     public void apply(@NonNull RemoteContext context) {
+        RootLayoutComponent root = context.getDocument().getRootLayoutComponent();
+        if (root != null) {
+            root.setHasTouchListeners(true);
+        }
         for (Operation op : mList) {
             if (op instanceof TextData) {
                 op.apply(context);
@@ -136,7 +159,8 @@ public class ClickModifierOperation extends PaintOperation
     }
 
     @Override
-    public void layout(@NonNull RemoteContext context, float width, float height) {
+    public void layout(
+            @NonNull RemoteContext context, Component component, float width, float height) {
         mWidth = width;
         mHeight = height;
     }
@@ -173,6 +197,11 @@ public class ClickModifierOperation extends PaintOperation
         context.hapticEffect(3);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "ClickModifier";
@@ -182,10 +211,21 @@ public class ClickModifierOperation extends PaintOperation
         buffer.start(OP_CODE);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         operations.add(new ClickModifierOperation());
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, name())
                 .description(

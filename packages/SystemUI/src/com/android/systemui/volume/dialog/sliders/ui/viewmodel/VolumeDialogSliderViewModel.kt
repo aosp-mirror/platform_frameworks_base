@@ -21,9 +21,9 @@ import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -49,8 +49,9 @@ import kotlinx.coroutines.flow.stateIn
 private const val VOLUME_UPDATE_GRACE_PERIOD = 1000
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@VolumeDialogSliderScope
 class VolumeDialogSliderViewModel
-@AssistedInject
+@Inject
 constructor(
     private val interactor: VolumeDialogSliderInteractor,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
@@ -90,10 +91,4 @@ constructor(
     private fun getTimestampMillis(): Long = systemClock.uptimeMillis()
 
     private data class VolumeUpdate(val newVolumeLevel: Int, val timestampMillis: Long)
-
-    @AssistedFactory
-    interface Factory {
-
-        fun create(): VolumeDialogSliderViewModel
-    }
 }

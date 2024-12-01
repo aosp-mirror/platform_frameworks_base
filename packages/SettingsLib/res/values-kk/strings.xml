@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Осы телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Осы планшет"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Осы компьютер (ішкі)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Осы теледидар"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Динамигі бар қондыру станциясы"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Сыртқы құрылғы"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Жалғанған құрылғы"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC арқылы жалғанған."</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC арқылы жалғанған."</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Теледидардың әдепкі шығысы"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI шығыс интерфейсі"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Ішкі динамиктер"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Ендірілген динамик"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Теледидардың аудио шығысы"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Байланыс орнату қатесі шығуып жатыр. Құрылғыны өшіріп, қайта қосыңыз."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Сымды аудио құрылғысы"</string>
     <string name="help_label" msgid="3528360748637781274">"Анықтама және пікір"</string>

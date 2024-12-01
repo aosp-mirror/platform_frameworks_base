@@ -156,13 +156,6 @@ flag {
 }
 
 flag {
-    name: "notifications_improved_hun_animation"
-    namespace: "systemui"
-    description: "Adds a translateY animation, and other improvements to match the motion specs of the HUN Intro + Outro animations."
-    bug: "243302608"
-}
-
-flag {
     name: "notification_content_alpha_optimization"
     namespace: "systemui"
     description: "Only reset alpha values of needed content views"
@@ -1201,6 +1194,16 @@ flag {
 }
 
 flag {
+  name: "communal_hub_use_thread_pool_for_widgets"
+  namespace: "systemui"
+  description: "Use a dedicated thread pool executor for loading widgets on glanceable hub"
+  bug: "369412569"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "communal_standalone_support"
   namespace: "systemui"
   description: "Support communal features without a dock"
@@ -1304,6 +1307,13 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "media_controls_ui_update"
+  namespace: "systemui"
+  description: "Enables media visuals update"
+  bug: "380053768"
 }
 
 flag {

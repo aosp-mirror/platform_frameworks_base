@@ -28,6 +28,7 @@ import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallbac
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.CameraMetadataInfo;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.TotalCaptureResult;
@@ -291,10 +292,10 @@ public class CameraOfflineSessionImpl extends CameraOfflineSession
         }
 
         @Override
-        public void onResultReceived(CameraMetadataNative result,
+        public void onResultReceived(CameraMetadataInfo resultInfo,
                 CaptureResultExtras resultExtras, PhysicalCaptureResultInfo physicalResults[])
                 throws RemoteException {
-
+            CameraMetadataNative result = resultInfo.getMetadata();
             int requestId = resultExtras.getRequestId();
             long frameNumber = resultExtras.getFrameNumber();
 

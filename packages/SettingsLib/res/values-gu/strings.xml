@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"આ ટૅબ્લેટ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"આ કમ્પ્યૂટર (આંતરિક)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"આ ટીવી"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ડૉક સ્પીકર"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"બહારનું ડિવાઇસ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"કનેક્ટ કરેલું ડિવાઇસ"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC મારફતે કનેક્ટેડ"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC મારફતે કનેક્ટેડ"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ડિવાઇસનું ડિફૉલ્ટ ઑડિયો આઉટપુટ, ટીવી"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI આઉટપુટ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"આંતરિક સ્પીકર"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"બિલ્ટ-ઇન સ્પીકર"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ટીવીનો ઑડિયો"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
     <string name="help_label" msgid="3528360748637781274">"સહાય અને પ્રતિસાદ"</string>

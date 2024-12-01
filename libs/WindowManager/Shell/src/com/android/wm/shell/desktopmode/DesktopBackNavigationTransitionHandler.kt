@@ -71,8 +71,7 @@ class DesktopBackNavigationTransitionHandler(
         animations +=
             info.changes
                 .filter {
-                    it.mode == info.type &&
-                            it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM
+                    it.mode == info.type && it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM
                 }
                 .mapNotNull { createMinimizeAnimation(it, finishTransaction, onAnimFinish) }
         if (animations.isEmpty()) return false
@@ -83,7 +82,7 @@ class DesktopBackNavigationTransitionHandler(
     private fun createMinimizeAnimation(
         change: TransitionInfo.Change,
         finishTransaction: Transaction,
-        onAnimFinish: (Animator) -> Unit
+        onAnimFinish: (Animator) -> Unit,
     ): Animator? {
         val t = Transaction()
         val sc = change.leash

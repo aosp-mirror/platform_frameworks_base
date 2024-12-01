@@ -27,9 +27,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Build;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.IWindow;
@@ -73,6 +74,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
 
@@ -130,6 +132,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private final SysuiColorExtractor mColorExtractor;
     private final NotificationShadeWindowModel mNotificationShadeWindowModel;
+    private final SecureSettings mSecureSettings;
     /**
      * Layout params would be aggregated and dispatched all at once if this is > 0.
      *
@@ -163,6 +166,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             Lazy<SelectedUserInteractor> userInteractor,
             UserTracker userTracker,
             NotificationShadeWindowModel notificationShadeWindowModel,
+            SecureSettings secureSettings,
             Lazy<CommunalInteractor> communalInteractor) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
@@ -178,6 +182,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mBackgroundExecutor = backgroundExecutor;
         mColorExtractor = colorExtractor;
         mNotificationShadeWindowModel = notificationShadeWindowModel;
+        mSecureSettings = secureSettings;
         // prefix with {slow} to make sure this dumps at the END of the critical section.
         dumpManager.registerCriticalDumpable("{slow}NotificationShadeWindowControllerImpl", this);
         mAuthController = authController;
@@ -400,7 +405,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                     (long) mLpChanged.preferredMaxDisplayRefreshRate);
         }
 
-        if (state.bouncerShowing && !isDebuggable()) {
+        if (state.bouncerShowing && !isSecureWindowsDisabled()) {
             mLpChanged.flags |= LayoutParams.FLAG_SECURE;
         } else {
             mLpChanged.flags &= ~LayoutParams.FLAG_SECURE;
@@ -413,8 +418,11 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         }
     }
 
-    protected boolean isDebuggable() {
-        return Build.IS_DEBUGGABLE;
+    private boolean isSecureWindowsDisabled() {
+        return mSecureSettings.getIntForUser(
+            Settings.Secure.DISABLE_SECURE_WINDOWS,
+            0,
+            UserHandle.USER_CURRENT) == 1;
     }
 
     private void adjustScreenOrientation(NotificationShadeWindowState state) {

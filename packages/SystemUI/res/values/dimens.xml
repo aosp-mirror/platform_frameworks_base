@@ -236,6 +236,9 @@
     <!-- The size of a bluetooth indicator icon that displays next to the RSSI status icon. -->
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
+    <!-- Height of a small notification in the status bar (2025 redesign version) -->
+    <dimen name="notification_2025_min_height">@*android:dimen/notification_2025_min_height</dimen>
+
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">@*android:dimen/notification_min_height</dimen>
 
@@ -1995,12 +1998,16 @@
     <dimen name="backlight_indicator_step_large_radius">28dp</dimen>
 
     <!-- Touchpad gestures tutorial-->
-    <!-- This value is in unit of dp/ms
+    <!-- This value is in dp/ms.
         TriggerSwipeUpTouchTracker (which is base for gesture tutorial implementation) uses value
         of 0.5dp but from manual testing it's too high and doesn't really feel like it's forcing
         slowing down. Also for tutorial it should be fine to lean to the side of being more strict
         rather than not strict enough and not teaching user the proper gesture as a result.-->
     <dimen name="touchpad_recent_apps_gesture_velocity_threshold">0.05dp</dimen>
+    <!-- This value is in dp/ms.
+        As above, it's not tied to system-wide value (defined in launcher's
+        quickstep_fling_threshold_speed) because for tutorial it's fine to be more strict. -->
+    <dimen name="touchpad_home_gesture_velocity_threshold">0.5dp</dimen>
     <!-- Normal gesture threshold is system_gestures_distance_threshold but for tutorial we can
          exaggerate gesture, which also works much better with live tracking -->
     <dimen name="touchpad_tutorial_gestures_distance_threshold">48dp</dimen>
@@ -2086,7 +2093,7 @@
     <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
     <dimen name="volume_dialog_floating_sliders_vertical_padding_negative">-10dp</dimen>
     <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
-    <dimen name="volume_dialog_button_size">48dp</dimen>
+    <dimen name="volume_dialog_button_size">40dp</dimen>
     <dimen name="volume_dialog_slider_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">254dp</dimen>
 
@@ -2094,7 +2101,7 @@
 
     <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
 
-    <dimen name="volume_dialog_ringer_drawer_button_size">40dp</dimen>
+    <dimen name="volume_dialog_ringer_drawer_button_size">@dimen/volume_dialog_button_size</dimen>
     <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
     <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
 

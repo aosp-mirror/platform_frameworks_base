@@ -300,7 +300,8 @@ public class KeyValueAdbBackupEngine {
     }
 
     private void cleanup() {
-        mBackupManagerService.tearDownAgentAndKill(mCurrentPackage.applicationInfo);
+        mBackupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                mCurrentPackage.applicationInfo, /* allowKill= */ true);
         mBlankStateName.delete();
         mNewStateName.delete();
         mBackupDataName.delete();

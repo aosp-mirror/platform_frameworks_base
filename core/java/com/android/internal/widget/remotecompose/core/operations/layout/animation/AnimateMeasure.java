@@ -120,7 +120,7 @@ public class AnimateMeasure {
                 h -= pop.getTop() + pop.getBottom();
             }
             if (op instanceof DecoratorComponent) {
-                ((DecoratorComponent) op).layout(context.getContext(), w, h);
+                ((DecoratorComponent) op).layout(context.getContext(), mComponent, w, h);
             }
         }
 

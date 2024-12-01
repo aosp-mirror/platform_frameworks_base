@@ -28,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
-public class ComponentStart implements ComponentStartOperation {
+public class ComponentStart extends Operation implements ComponentStartOperation {
 
     int mType = DEFAULT;
     float mX;
@@ -157,11 +157,21 @@ public class ComponentStart implements ComponentStartOperation {
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "ComponentStart";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.COMPONENT_START;
     }
@@ -179,6 +189,12 @@ public class ComponentStart implements ComponentStartOperation {
         return 1 + 4 + 4 + 4;
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int type = buffer.readInt();
         int componentId = buffer.readInt();
@@ -187,6 +203,11 @@ public class ComponentStart implements ComponentStartOperation {
         operations.add(new ComponentStart(type, componentId, width, height));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(

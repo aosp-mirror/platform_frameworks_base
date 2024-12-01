@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Điện thoại này"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Máy tính bảng này"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Máy tính này (nội bộ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"TV này"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Loa có gắn đế"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Thiết bị bên ngoài"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Thiết bị đã kết nối"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Đã kết nối qua ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Đã kết nối qua eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Chế độ mặc định của TV"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Đầu ra HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Các loa trong"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Loa tích hợp"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Âm thanh TV"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sự cố kết nối. Hãy tắt thiết bị rồi bật lại"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Thiết bị âm thanh có dây"</string>
     <string name="help_label" msgid="3528360748637781274">"Trợ giúp và phản hồi"</string>

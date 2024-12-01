@@ -798,7 +798,7 @@ public class ApplicationPackageManager extends PackageManager {
     private final static PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>
             mHasSystemFeatureCache = new PropertyInvalidatedCache<>(
                 new PropertyInvalidatedCache.Args(MODULE_SYSTEM)
-                .api(HAS_SYSTEM_FEATURE_API).maxEntries(256).isolateUids(false),
+                .api(HAS_SYSTEM_FEATURE_API).maxEntries(SDK_FEATURE_COUNT).isolateUids(false),
                 HAS_SYSTEM_FEATURE_API, null) {
 
                 @Override

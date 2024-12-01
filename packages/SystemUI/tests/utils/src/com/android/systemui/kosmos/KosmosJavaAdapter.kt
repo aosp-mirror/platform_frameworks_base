@@ -78,6 +78,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.activeNotif
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import com.android.systemui.statusbar.phone.fakeAutoHideControllerStore
 import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.phone.scrimController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.mobileConnectionsRepository
@@ -132,6 +133,7 @@ class KosmosJavaAdapter() {
     val simBouncerInteractor by lazy { kosmos.simBouncerInteractor }
     val statusBarStateController by lazy { kosmos.statusBarStateController }
     val statusBarModePerDisplayRepository by lazy { kosmos.fakeStatusBarModePerDisplayRepository }
+    val autoHideControllerStore by lazy { kosmos.fakeAutoHideControllerStore }
     val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
     val fakeSceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     val sceneInteractor by lazy { kosmos.sceneInteractor }

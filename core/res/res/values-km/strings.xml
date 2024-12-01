@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"មិន​បាន​ដាក់​កម្រិត​លេខ​សម្គាល់​អ្នក​ហៅ​លំនាំ​ដើម។ ការ​ហៅ​បន្ទាប់៖​ បាន​ដាក់កម្រិត"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"បានប្ដូរទិន្នន័យទៅ <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ដល់ <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ប្រតិទិនណាមួយ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> កំពុង​បិទសំឡេង​មួយចំនួន"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ហើយវាអ្នកមិនមានស្ថេរភាព រហូតទាល់តែអ្នកកំណត់ដូចដើមវិញទាំងស្រុង។"</string>

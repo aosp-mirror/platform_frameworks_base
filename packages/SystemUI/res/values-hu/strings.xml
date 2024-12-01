@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth használata"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Csatlakozva"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Hang megosztása"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Koppintással átkapcsolhatja vagy megoszthatja a hangot"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Támogatja a hang megosztását"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Mentve"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"leválasztás"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiválás"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"A lezárási képernyő moduljai"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Ha modul használatával szeretne megnyitni egy alkalmazást, igazolnia kell a személyazonosságát. Ne felejtse továbbá, hogy bárki megtekintheti a modulokat, még akkor is, amikor zárolva van a táblagép. Előfordulhat, hogy bizonyos modulokat nem a lezárási képernyőn való használatra terveztek, ezért nem biztonságos a hozzáadásuk."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Értem"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Modulok"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Ha szeretné gyorsparancsként hozzáadni a Modulok a lezárási képernyőn funkciót, győződjön meg arról, hogy a funkció engedélyezve van a beállításokban."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Felhasználóváltás"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"lehúzható menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"A munkamenetben található összes alkalmazás és adat törlődni fog."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"A beszélgetésekre vonatkozó értesítések tetején, lebegő buborékként látható, megjeleníti a profilképet a lezárási képernyőn, és megszakítja a Ne zavarjanak funkciót"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritás"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> nem támogatja a beszélgetési funkciókat"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Visszajelzés küldése a csomagról"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ezeket az értesítéseket nem lehet módosítani."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"A hívásértesítéseket nem lehet módosítani."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Az értesítések jelen csoportját itt nem lehet beállítani"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Váltás a bal oldalt, illetve fent lévő appra osztott képernyő esetén"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Osztott képernyőn: az egyik alkalmazás lecserélése egy másikra"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Aktív ablak áthelyezése egyik kijelzőről a másikra"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Bevitel"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Váltás a következő nyelvre"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Váltás az előző nyelvre"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Legfeljebb <xliff:g id="LENGTH">%1$d</xliff:g> karaktert használhat"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildszám"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildszám a vágólapra másolva."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"Másolás a vágólapra."</string>
     <string name="basic_status" msgid="2315371112182658176">"Beszélgetés megnyitása"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Beszélgetési modulok"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Koppintson a kívánt beszélgetésre a kezdőképernyőre való felvételhez"</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"A nagyobb felbontás érdekében fordítsa meg a telefont"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Összehajtható eszköz kihajtása"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Összehajtható eszköz körbeforgatása"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Előlapi képernyő bekapcsolva"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"összehajtva"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"kihajtva"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1427,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Kisegítő lehetőségek"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Billentyűparancsok"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"A billentyűparancsok személyre szabása"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Nyomja meg a billentyűt a parancsikon hozzárendeléséhez"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Eltávolítja a billentyűparancsot?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Nyomja meg a billentyűt a billentyűparancs hozzárendeléséhez"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Ezzel véglegesen törli az egyéni billentyűparancsot."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Billentyűparancsok keresése"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nincsenek keresési találatok"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Összecsukás ikon"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Kész"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Kibontás ikon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"vagy"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Fogópont"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Billentyűzetbeállítások"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Billentyűparancs beállítása"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Eltávolítás"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Mégse"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Nyomja le a billentyűt"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"A billentyűkombináció már használatban van. Próbálkozzon másik kulccsal."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"A billentyűkombináció már használatban van. Próbálkozzon másik billentyűvel."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Nem lehet beállítani a billentyűparancsot."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigáció a billentyűzet segítségével"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Billentyűparancsok megismerése"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigálás az érintőpaddal"</string>

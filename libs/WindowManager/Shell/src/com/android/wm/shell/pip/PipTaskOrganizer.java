@@ -94,6 +94,7 @@ import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
@@ -152,7 +153,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     @Nullable private final PipPerfHintController mPipPerfHintController;
-    private final Optional<DesktopRepository> mDesktopRepositoryOptional;
+    private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final DisplayController mDisplayController;
     protected final ShellTaskOrganizer mTaskOrganizer;
@@ -398,7 +399,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
-            Optional<DesktopRepository> desktopRepositoryOptional,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
@@ -426,7 +427,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
         mSplitScreenOptional = splitScreenOptional;
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
-        mDesktopRepositoryOptional = desktopRepositoryOptional;
+        mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mDisplayController = displayController;
         mTaskOrganizer = shellTaskOrganizer;
@@ -764,7 +765,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             //    previous freeform bounds that is saved in DesktopRepository.
             // 2) If PiP was entered through other means (e.g. user swipe up), exit to initial
             //    freeform bounds. Note that this case has a flicker at the moment (b/379984108).
-            Rect freeformBounds = mDesktopRepositoryOptional.get().removeBoundsBeforeMinimize(
+            Rect freeformBounds = getCurrentRepo().removeBoundsBeforeMinimize(
                     mTaskInfo.taskId);
             return freeformBounds != null
                     ? freeformBounds
@@ -779,9 +780,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     /** Returns whether PiP is exiting while we're in desktop mode. */
     // TODO(b/377581840): Update this check to include non-minimized cases, e.g. split to PiP etc.
     private boolean isPipExitingToDesktopMode() {
-        return Flags.enableDesktopWindowingPip() && mDesktopRepositoryOptional.isPresent()
-                && (mDesktopRepositoryOptional.get().getVisibleTaskCount(mTaskInfo.displayId) > 0
+        DesktopRepository currentRepo = getCurrentRepo();
+        return Flags.enableDesktopWindowingPip() && currentRepo != null
+                && (currentRepo.getVisibleTaskCount(mTaskInfo.displayId) > 0
                     || isDisplayInFreeform());
+    }
+
+    private DesktopRepository getCurrentRepo() {
+        return mDesktopUserRepositoriesOptional.map(DesktopUserRepositories::getCurrent).orElse(
+                null);
     }
 
     private void exitLaunchIntoPipTask(WindowContainerTransaction wct) {

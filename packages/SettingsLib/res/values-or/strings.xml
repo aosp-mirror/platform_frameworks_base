@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ଏହି ଫୋନ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ଏହି ଟାବଲେଟ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ଏହି କମ୍ପ୍ୟୁଟର (ଇଣ୍ଟର୍ନଲ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ଏହି ଟିଭି"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ଡକ ସ୍ପିକର"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ଏକ୍ସଟର୍ନଲ ଡିଭାଇସ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"କନେକ୍ଟ କରାଯାଇଥିବା ଡିଭାଇସ"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ଟିଭିର ଡିଫଲ୍ଟ ଅଡିଓ ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ଇଣ୍ଟର୍ନଲ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ବିଲ୍ଟ-ଇନ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ଟିଭି ଅଡିଓ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ସଂଯୋଗ କରିବାରେ ସମସ୍ୟା ହେଉଛି। ଡିଭାଇସ୍ ବନ୍ଦ କରି ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ତାରଯୁକ୍ତ ଅଡିଓ ଡିଭାଇସ୍"</string>
     <string name="help_label" msgid="3528360748637781274">"ସାହାଯ୍ୟ ଓ ମତାମତ"</string>

@@ -49,6 +49,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.transition.Transitions
@@ -72,7 +73,7 @@ class DesktopTilingWindowDecoration(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
-    private val taskRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
     private val desktopModeEventLogger: DesktopModeEventLogger,
     private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() },
 ) :
@@ -630,6 +631,7 @@ class DesktopTilingWindowDecoration(
     private fun allTiledTasksVisible(): Boolean {
         val leftTiledTask = leftTaskResizingHelper ?: return false
         val rightTiledTask = rightTaskResizingHelper ?: return false
+        val taskRepository = desktopUserRepositories.current
         return taskRepository.isVisibleTask(leftTiledTask.taskInfo.taskId) &&
             taskRepository.isVisibleTask(rightTiledTask.taskInfo.taskId)
     }

@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"कलर ID पूर्वनिर्धारितको लागि रोकावट छ। अर्को कल: रोकावट छैन"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"कलर ID पूर्वनिर्धारितदेखि प्रतिबन्धित छैन। अर्को कल: प्रतिबन्धित छ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"कलर ID पूर्वनिर्धारितको लागि रोकावट छैन। अर्को कल: रोकावट छैन"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवाको व्यवस्था छैन।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"तपाईं कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> को डेटा प्रयोग गर्न थालिएको छ"</string>
@@ -1105,7 +1111,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"भ्वाइसमेल थप गर्नुहोस्"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"तपाईँको भ्वाइसमेल इनबक्समा सन्देश थप्नको लागि एपलाई अनुमति दिन्छ।"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ले तपाईंको क्लिपबोर्डमा रहेको जानकारी पेस्ट गरेको छ"</string>
-    <string name="more_item_label" msgid="7419249600215749115">"बढी"</string>
+    <string name="more_item_label" msgid="7419249600215749115">"थप"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"मेनु+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
     <string name="menu_ctrl_shortcut_label" msgid="131911133027196485">"Ctrl+"</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> देखि <xliff:g id="END">%2$s</xliff:g> सम्म"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"कुनै पनि पात्रो"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ले केही ध्वनिहरू म्युट गर्दै छ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"तपाईंको यन्त्रसँग आन्तरिक समस्या छ, र तपाईंले फ्याक्ट्री डाटा रिसेट नगर्दासम्म यो अस्थिर रहन्छ।"</string>

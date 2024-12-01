@@ -58,10 +58,13 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_windowing_scvh_cache"
+    name: "enable_desktop_windowing_scvh_cache_bug_fix"
     namespace: "lse_desktop_experience"
     description: "Enables a SurfaceControlViewHost cache for window decorations"
-    bug: "345146928"
+    bug: "360452034"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -242,13 +245,6 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_windowing_app_handle_education_integration"
-    namespace: "lse_desktop_experience"
-    description: "Enables desktop windowing app handle education and integrates new APIs"
-    bug: "380272815"
-}
-
-flag {
     name: "enable_desktop_windowing_transitions"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing transition & motion polish changes"
@@ -301,6 +297,14 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app-to-web education"
     bug: "348205896"
+    is_exported: true
+}
+
+flag {
+    name: "enable_desktop_windowing_app_to_web_education_integration"
+    namespace: "lse_desktop_experience"
+    description: "Enables desktop windowing App-to-Web education and integrates new APIs"
+    bug: "380272815"
 }
 
 flag {

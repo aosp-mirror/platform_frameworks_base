@@ -667,6 +667,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             faceProps,
             wakefulnessLifecycle,
             userManager,
+            null /* authContextPlugins */,
             lockPatternUtils,
             interactionJankMonitor,
             { promptSelectorInteractor },

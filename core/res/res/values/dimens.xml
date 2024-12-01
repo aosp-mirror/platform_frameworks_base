@@ -255,6 +255,19 @@
      This represents 16dp for the left margin + 40dp for the icon + 16dp for the right margin -->
     <dimen name="notification_2025_content_margin_start">72dp</dimen>
 
+    <!-- The margin on the start of the media actions, selected to ensure that action icons which
+     are visually 12x12 in a 24x24 drawable will align correctly with the text.  This means that
+     stock media action icons will align, but icons may be visually up to 20x20 and remain in-spec,
+     in which case they will protrude into the start column slightly.
+     72dp (content margin) - 8dp (media action padding) - 6dp (visual padding within drawable) -->
+    <dimen name="notification_2025_media_actions_margin_start">58dp</dimen>
+
+    <!-- The margin on the start of notification actions (2025 redesign version), to align them to
+     the rest of the notification content. Note that this can be set to 0 if the actions would not
+     fit with it included.
+     72dp (content margin) - 12dp (action padding) - 4dp (button inset) -->
+    <dimen name="notification_2025_actions_margin_start">56dp</dimen>
+
     <!-- The margin on the end of most content views (ignores the expander) -->
     <dimen name="notification_content_margin_end">16dp</dimen>
 
@@ -377,6 +390,9 @@
     <!-- the size of the notification close button -->
     <dimen name="notification_close_button_size">16dp</dimen>
 
+    <!-- Margin for all notification content -->
+    <dimen name="notification_2025_margin">16dp</dimen>
+
     <!-- Vertical margin for the headerless notification content, when content has 1 line -->
     <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_margin_oneline">16dp</dimen>
@@ -388,10 +404,19 @@
     <!-- The height of each of the 1 or 2 lines in the headerless notification template -->
     <dimen name="notification_headerless_line_height">24dp</dimen>
 
-    <!-- vertical margin for the headerless notification content -->
+    <!-- The minimum height of the notification content (even when there's only one line of text) -->
+    <dimen name="notification_2025_content_min_height">40dp</dimen>
+
+    <!-- Height of a headerless notification with one or two lines -->
+    <!-- 16 * 2 (margins) + 40 (min content height) = 72 (notification) -->
+    <dimen name="notification_2025_min_height">72dp</dimen>
+
+    <!-- Height of a headerless notification with one line -->
+    <!-- 16 * 2 (margins) + 24 (1 line) = 56 (notification) -->
     <dimen name="notification_headerless_min_height">56dp</dimen>
 
-    <!-- Height of a small notification in the status bar -->
+    <!-- Height of a small two-line notification -->
+    <!-- 20 * 2 (margins) + 24 * 2 (2 lines) = 88 (notification) -->
     <dimen name="notification_min_height">88dp</dimen>
 
     <!-- The width of the big icons in notifications. -->

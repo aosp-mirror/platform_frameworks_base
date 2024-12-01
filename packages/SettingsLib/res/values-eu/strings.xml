@@ -562,9 +562,9 @@
     <string name="save" msgid="3745809743277153149">"Gorde"</string>
     <string name="okay" msgid="949938843324579502">"Ados"</string>
     <string name="done" msgid="381184316122520313">"Eginda"</string>
-    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta abisuak"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta abisuak ezartzeko baimena"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta abisuak"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta gogorarazpenak"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta gogorarazpenak ezartzeko baimena"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta gogorarazpenak"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nBaimen hori ematen ez baduzu, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, gogorarazpena, erlojua"</string>
     <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ez molestatzeko"</string>
@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Telefono hau"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tableta hau"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ordenagailu hau (barnekoa)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Telebista hau"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Oinarri bozgorailuduna"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kanpoko gailua"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Konektatutako gailua"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC bidez konektatuta"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC bidez konektatuta"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Telebistaren audio-erreproduzigailu lehenetsia"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI irteera"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Barneko bozgorailuak"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Bozgorailu integratua"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Telebistako audioa"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>

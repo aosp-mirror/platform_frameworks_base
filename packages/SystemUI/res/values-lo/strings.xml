@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ໃຊ້ Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ເຊື່ອມຕໍ່ແລ້ວ"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ການແບ່ງປັນສຽງ"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ແຕະເພື່ອສະຫຼັບ ຫຼື ແບ່ງປັນສຽງ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"ຮອງຮັບການແບ່ງປັນສຽງ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ບັນທຶກແລ້ວ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ຕັດການເຊື່ອມຕໍ່"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ເປີດນຳໃຊ້"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ວິດເຈັດໃນໜ້າຈໍລັອກ"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ເພື່ອເປີດແອັບໂດຍໃຊ້ວິດເຈັດ, ທ່ານຈະຕ້ອງຢັ້ງຢືນວ່າແມ່ນທ່ານ. ນອກຈາກນັ້ນ, ກະລຸນາຮັບຊາບວ່າທຸກຄົນສາມາດເບິ່ງຂໍ້ມູນດັ່ງກ່າວໄດ້, ເຖິງແມ່ນວ່າແທັບເລັດຂອງທ່ານຈະລັອກຢູ່ກໍຕາມ. ວິດເຈັດບາງຢ່າງອາດບໍ່ໄດ້ມີໄວ້ສຳລັບໜ້າຈໍລັອກຂອງທ່ານ ແລະ ອາດບໍ່ປອດໄພທີ່ຈະເພີ່ມໃສ່ບ່ອນນີ້."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ເຂົ້າໃຈແລ້ວ"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ວິດເຈັດ"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"ເພື່ອເພີ່ມວິດເຈັດຢູ່ໜ້າຈໍລັອກເປັນທາງລັດ, ໃຫ້ແນ່ໃຈວ່າມັນຖືກເປີດການນຳໃຊ້ໃນການຕັ້ງຄ່າ."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ສະຫຼັບຜູ້ໃຊ້"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ເມນູແບບດຶງລົງ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"ສະແດງຢູ່ເທິງສຸດຂອງການແຈ້ງເຕືອນການສົນທະນາ ແລະ ເປັນຮູບໂປຣໄຟລ໌ຢູ່ໜ້າຈໍລັອກ, ປາກົດເປັນຟອງ, ສະແດງໃນໂໝດຫ້າມລົບກວນໄດ້"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ສຳຄັນ"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ຮອງຮັບຄຸນສົມບັດການສົນທະນາ"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"ໃຫ້ຄຳຕິຊົມເປັນຊຸດ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ບໍ່ສາມາດແກ້ໄຂການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄດ້."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"ບໍ່ສາມາດແກ້ໄຂການແຈ້ງເຕືອນການໂທໄດ້."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ບໍ່ສາມາດຕັ້ງຄ່າກຸ່ມການແຈ້ງເຕືອນນີ້ຢູ່ບ່ອນນີ້ໄດ້"</string>
@@ -872,6 +875,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ສະຫຼັບໄປໃຊ້ແອັບຢູ່ຊ້າຍ ຫຼື ທາງເທິງໃນຂະນະທີ່ໃຊ້ແບ່ງໜ້າຈໍ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ໃນລະຫວ່າງແບ່ງໜ້າຈໍ: ໃຫ້ປ່ຽນຈາກແອັບໜຶ່ງເປັນອີກແອັບໜຶ່ງ"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"ຍ້າຍໜ້າຈໍທີ່ເປີດຢູ່ໄປມາລະຫວ່າງຈໍສະແດງຜົນຕ່າງໆ"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"ຍ້າຍໜ້າຈໍໄປທາງຊ້າຍ"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"ຍ້າຍໜ້າຈໍໄປທາງຂວາ"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"ຂະຫຍາຍໜ້າຈໍຂຶ້ນ"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"ຫຍໍ້ໜ້າຈໍລົງ"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ການປ້ອນຂໍ້ມູນ"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ສະຫຼັບເປັນພາສາຖັດໄປ"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"ສະຫຼັບເປັນພາສາກ່ອນໜ້າ"</string>
@@ -1220,8 +1227,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"ໃຊ້ໜ້ອຍກວ່າ <xliff:g id="LENGTH">%1$d</xliff:g> ຕົວອັກສອນ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"ສຳເນົາໄປໃສ່ຄລິບບອດ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"ວິດເຈັດການສົນທະນາ"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ແຕະໃສ່ການສົນທະນາໃດໜຶ່ງເພື່ອເພີ່ມມັນໃສ່ໂຮມສະກຣີນຂອງທ່ານ"</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ເພື່ອຄວາມລະອຽດທີ່ສູງຂຶ້ນ, ໃຫ້ປີ້ນໂທລະສັບ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ອຸປະກອນທີ່ພັບໄດ້ກຳລັງກາງອອກ"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ອຸປະກອນທີ່ພັກໄດ້ກຳລັງປີ້ນໄປມາ"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"ເປີດໜ້າຈໍດ້ານໜ້າແລ້ວ"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ພັບແລ້ວ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ກາງອອກແລ້ວ"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1423,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ການຊ່ວຍເຂົ້າເຖິງ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"ຄີລັດ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"ປັບແຕ່ງຄີລັດ"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"ກົດປຸ່ມເພື່ອກໍານົດທາງລັດ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ລຶບທາງລັດອອກບໍ?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ກົດປຸ່ມເພື່ອກຳນົດທາງລັດ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ການດຳເນີນການນີ້ຈະລຶບທາງລັດທີ່ກຳນົດເອງຂອງທ່ານຢ່າງຖາວອນ."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ທາງລັດການຊອກຫາ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ບໍ່ມີຜົນການຊອກຫາ"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ໄອຄອນຫຍໍ້ລົງ"</string>
@@ -1428,12 +1435,17 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"ແລ້ວໆ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ໄອຄອນຂະຫຍາຍ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ຫຼື"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"ບວກ"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"ເຄື່ອງໝາຍທັບອຽງໄປໜ້າ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ບ່ອນຈັບລາກ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"ການຕັ້ງຄ່າແປ້ນພິມ"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ຕັ້ງທາງລັດ"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"ລຶບອອກ"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ຍົກເລີກ"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ກົດປຸ່ມ"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"ນໍາໃຊ້ປຸ່ມປະສົມຢູ່ແລ້ວ. ໃຫ້ລອງປຸ່ມອື່ນ."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"ນໍາໃຊ້ປຸ່ມປະສົມຢູ່ແລ້ວ. ໃຫ້ລອງປຸ່ມອື່ນ."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"ຕັ້ງທາງລັດບໍ່ໄດ້."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ນຳທາງໂດຍໃຊ້ແປ້ນພິມຂອງທ່ານ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ສຶກສາຄີລັດ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ນຳທາງໂດຍໃຊ້ແຜ່ນສຳຜັດຂອງທ່ານ"</string>

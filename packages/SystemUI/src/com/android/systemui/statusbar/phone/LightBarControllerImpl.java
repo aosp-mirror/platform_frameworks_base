@@ -527,12 +527,16 @@ public class LightBarControllerImpl implements
         @Override
         public LightBarController create(@NonNull Context context) {
             // TODO: b/380394368 - Make sure correct per display instances are used.
-            return mFactory.create(
+            LightBarControllerImpl lightBarController = mFactory.create(
                     context.getDisplayId(),
                     mApplicationScope,
                     mDarkIconDispatcherStore.getDefaultDisplay(),
                     mStatusBarModeRepositoryStore.getDefaultDisplay()
             );
+            // Calling start() manually to keep the legacy behavior. Before, LightBarControllerImpl
+            // was doing work in the constructor, which moved to start().
+            lightBarController.start();
+            return lightBarController;
         }
     }
 }

@@ -2012,6 +2012,8 @@
   <java-symbol type="array" name="config_locationProviderPackageNames" />
   <java-symbol type="array" name="config_locationDriverAssistancePackageNames" />
   <java-symbol type="array" name="config_locationExtraPackageNames" />
+  <java-symbol type="string" name="config_populationDensityProviderPackageName" />
+  <java-symbol type="bool" name="config_enablePopulationDensityProviderOverlay" />
   <java-symbol type="array" name="config_testLocationProviders" />
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_defaultNotificationVibeWaveform" />
@@ -2054,6 +2056,7 @@
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromDock" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromWindowLayout" />
   <java-symbol type="bool" name="config_keepDreamingWhenUnplugging" />
+  <java-symbol type="bool" name="config_glanceableHubEnabled" />
   <java-symbol type="integer" name="config_keyguardDrawnTimeout" />
   <java-symbol type="bool" name="config_goToSleepOnButtonPressTheaterMode" />
   <java-symbol type="bool" name="config_supportLongPressPowerWhenNonInteractive" />
@@ -2395,6 +2398,12 @@
   <java-symbol type="layout" name="notification_2025_template_header" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_messaging" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_media" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_big_picture" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_inbox" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_media" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_big_text" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_messaging" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_progress" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_compact_heads_up_base" />
@@ -2406,6 +2415,8 @@
   <java-symbol type="layout" name="notification_template_material_big_media" />
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_material_progress" />
+  <java-symbol type="layout" name="notification_template_material_messaging" />
+  <java-symbol type="layout" name="notification_template_material_big_messaging" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
   <java-symbol type="color" name="notification_progress_background_color" />
@@ -3345,8 +3356,6 @@
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 
   <java-symbol type="layout" name="app_anr_dialog" />
-  <java-symbol type="layout" name="notification_template_material_messaging" />
-  <java-symbol type="layout" name="notification_template_material_big_messaging" />
 
   <java-symbol type="id" name="aerr_wait" />
 
@@ -3448,6 +3457,8 @@
   <!-- Notifications: CallStyle -->
   <java-symbol type="layout" name="notification_template_material_call" />
   <java-symbol type="layout" name="notification_template_material_big_call" />
+  <java-symbol type="layout" name="notification_2025_template_collapsed_call" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_call" />
   <java-symbol type="string" name="call_notification_answer_action" />
   <java-symbol type="string" name="call_notification_answer_video_action" />
   <java-symbol type="string" name="call_notification_decline_action" />
@@ -3472,6 +3483,7 @@
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
+  <java-symbol type="dimen" name="notification_2025_actions_margin_start"/>
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_actions_padding_start"/>
   <java-symbol type="dimen" name="notification_actions_collapsed_priority_width"/>
@@ -4099,6 +4111,7 @@
   <java-symbol type="layout" name="notification_template_messaging_text_message" />
   <java-symbol type="layout" name="notification_template_messaging_image_message" />
   <java-symbol type="layout" name="notification_template_messaging_group" />
+  <java-symbol type="layout" name="notification_2025_messaging_group" />
   <java-symbol type="id" name="message_text" />
   <java-symbol type="id" name="message_name" />
   <java-symbol type="id" name="message_icon" />
@@ -4629,9 +4642,11 @@
   <java-symbol type="dimen" name="conversation_icon_container_top_padding" />
   <java-symbol type="dimen" name="conversation_icon_container_top_padding_small_avatar" />
   <java-symbol type="layout" name="notification_template_material_conversation" />
+  <java-symbol type="layout" name="notification_2025_template_conversation" />
   <java-symbol type="dimen" name="button_padding_horizontal_material" />
   <java-symbol type="dimen" name="button_inset_horizontal_material" />
   <java-symbol type="layout" name="conversation_face_pile_layout" />
+  <java-symbol type="layout" name="notification_2025_conversation_face_pile_layout" />
   <java-symbol type="string" name="unread_convo_overflow" />
   <java-symbol type="drawable" name="conversation_badge_background" />
   <java-symbol type="drawable" name="conversation_badge_ring" />
@@ -5811,5 +5826,35 @@
   <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
   <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
 
+  <!-- Style for Wear Material3 AlertDialog. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="AlertDialog.DeviceDefault.WearMaterial3" />
+
   <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
+
+  <!-- Material motion spec config tokens -->
+  <java-symbol type="integer" name="config_motionStandardFastSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardFastEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardDefaultSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardDefaultEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardSlowSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardSlowEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveFastSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveFastEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveDefaultSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveDefaultEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveSlowSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveSlowEffectStiffness"/>
+  <java-symbol type="dimen" name="config_motionStandardFastSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardFastEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardDefaultSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardDefaultEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardSlowSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardSlowEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveFastSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveFastEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveDefaultSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveDefaultEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveSlowSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveSlowEffectDamping"/>
+
 </resources>

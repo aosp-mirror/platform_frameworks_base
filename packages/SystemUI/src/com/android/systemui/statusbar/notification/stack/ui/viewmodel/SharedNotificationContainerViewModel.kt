@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
@@ -116,7 +117,7 @@ constructor(
     private val interactor: SharedNotificationContainerInteractor,
     dumpManager: DumpManager,
     @Application applicationScope: CoroutineScope,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -124,6 +125,8 @@ constructor(
     private val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
+    private val alternateBouncerToPrimaryBouncerTransitionViewModel:
+        AlternateBouncerToPrimaryBouncerTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
@@ -560,6 +563,7 @@ constructor(
             lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
             lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
             lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+            alternateBouncerToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
             occludedToAodTransitionViewModel.lockscreenAlpha,
             occludedToGoneTransitionViewModel.notificationAlpha(viewState),
             occludedToLockscreenTransitionViewModel.lockscreenAlpha,

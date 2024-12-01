@@ -116,7 +116,10 @@ constructor(
             .filter {
                 // Allow KEYCODE_UNKNOWN (0) because shortcuts can have just modifiers and no
                 // keycode, or they could have a baseCharacter instead of a keycode.
-                it.keycode == KeyEvent.KEYCODE_UNKNOWN || supportedKeyCodes.contains(it.keycode)
+                it.keycode == KeyEvent.KEYCODE_UNKNOWN ||
+                    supportedKeyCodes.contains(it.keycode) ||
+                    // Support keyboard function row key codes
+                    keyGlyphMap?.functionRowKeys?.contains(it.keycode) ?: false
             }
             .mapNotNull { toShortcut(keyGlyphMap, keyCharacterMap, it, keepIcons) }
 

@@ -1155,7 +1155,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String profileFile = null;
         boolean start = false;
         int userId = UserHandle.USER_CURRENT;
-        int profileType = 0;
+        int profileType = ProfilerInfo.PROFILE_TYPE_REGULAR;
         mSamplingInterval = 0;
         mStreaming = false;
         mClockType = ProfilerInfo.CLOCK_TYPE_DEFAULT;
@@ -1197,6 +1197,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 }
             }
             process = getNextArgRequired();
+        } else if ("lowoverhead".equals(cmd)) {
+            // This is an experimental low overhead profiling.
+            profileType = ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD;
+            cmd = getNextArgRequired();
+            if ("start".equals(cmd)) {
+                start = true;
+            } else if ("stop".equals(cmd)) {
+                start = false;
+            } else {
+                throw new IllegalArgumentException("Profile command not valid");
+            }
+            process = getNextArgRequired();
         } else {
             // Compatibility with old syntax: process is specified first.
             process = cmd;
@@ -1216,7 +1228,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
         ParcelFileDescriptor fd = null;
         ProfilerInfo profilerInfo = null;
 
-        if (start) {
+        // For regular method tracing  profileFile should be provided with the start command. For
+        // low overhead method tracing the profileFile is optional and provided with the stop
+        // command.
+        if ((start && profileType == ProfilerInfo.PROFILE_TYPE_REGULAR)
+                || (profileType == ProfilerInfo.PROFILE_TYPE_LOW_OVERHEAD
+                  && !start && getRemainingArgsCount() > 0)) {
             profileFile = getNextArgRequired();
             fd = openFileForSystem(profileFile, "w");
             if (fd == null) {

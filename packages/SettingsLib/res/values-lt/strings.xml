@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Šis telefonas"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Šis planšetinis kompiuteris"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Šis kompiuteris (vidinis)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Šis televizorius"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doko garsiakalbis"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Išorinis įrenginys"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Prijungtas įrenginys"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI „eARC“"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Prisijungta per ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Prisijungta per „eARC“"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV numatytoji išvestis"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI išvestis"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Vidiniai garsiakalbiai"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Įtaisytas garsiakalbis"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV garso įrašas"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Prisijungiant kilo problema. Išjunkite įrenginį ir vėl jį įjunkite"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Laidinis garso įrenginys"</string>
     <string name="help_label" msgid="3528360748637781274">"Pagalba ir atsiliepimai"</string>

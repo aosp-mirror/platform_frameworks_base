@@ -159,10 +159,13 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         LayoutManager layout = getLayout(currentLayoutIndex);
-        layout.computeWrapSize(context, maxWidth, maxHeight, measure, size);
+        layout.computeWrapSize(
+                context, maxWidth, maxHeight, horizontalWrap, verticalWrap, measure, size);
     }
 
     @Override
@@ -442,11 +445,7 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
                     int id = c.getPaintId();
                     for (int i = 0; i < idIndex; i++) {
                         if (cacheListElementsId[i] == id) {
-                            context.translate(
-                                    previousLayout.getMarginLeft(), previousLayout.getMarginTop());
                             c.paint(context);
-                            context.translate(
-                                    -currentLayout.getMarginLeft(), -currentLayout.getMarginTop());
                             break;
                         }
                     }
@@ -472,16 +471,10 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
                     // and fade in the new one
                     Component previousComponent = stateComponents[previousLayoutIndex];
                     if (previousComponent != null && component != previousComponent) {
-                        context.translate(
-                                currentLayout.getMarginLeft(), currentLayout.getMarginTop());
                         previousComponent.paint(context);
-                        context.translate(
-                                -currentLayout.getMarginLeft(), -currentLayout.getMarginTop());
                     }
                 }
-                context.translate(currentLayout.getMarginLeft(), currentLayout.getMarginTop());
                 component.paint(context);
-                context.translate(-currentLayout.getMarginLeft(), -currentLayout.getMarginTop());
             } else if (op instanceof PaintOperation) {
                 ((PaintOperation) op).paint(context);
             }
@@ -563,6 +556,12 @@ public class StateLayout extends LayoutManager implements ComponentStartOperatio
         buffer.writeInt(indexId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();

@@ -20,7 +20,6 @@ import android.app.StatusBarManager
 import android.content.testableContext
 import android.graphics.Rect
 import android.testing.TestableLooper.RunWithLooper
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
@@ -186,15 +185,12 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 val squishiness by collectLastValue(tileSquishinessInteractor.squishiness)
 
                 underTest.squishinessFraction = 0.3f
-                Snapshot.sendApplyNotifications()
                 assertThat(squishiness).isWithin(epsilon).of(0.3f.constrainSquishiness())
 
                 underTest.squishinessFraction = 0f
-                Snapshot.sendApplyNotifications()
                 assertThat(squishiness).isWithin(epsilon).of(0f.constrainSquishiness())
 
                 underTest.squishinessFraction = 1f
-                Snapshot.sendApplyNotifications()
                 assertThat(squishiness).isWithin(epsilon).of(1f.constrainSquishiness())
             }
         }
@@ -328,13 +324,9 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 setMediaState(ACTIVE_MEDIA)
 
                 setConfigurationForMediaInRow(mediaInRow = false)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
 
                 setConfigurationForMediaInRow(mediaInRow = true)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.COLLAPSED)
             }
         }
@@ -347,13 +339,9 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 setMediaState(ACTIVE_MEDIA)
 
                 setConfigurationForMediaInRow(mediaInRow = false)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
 
                 setConfigurationForMediaInRow(mediaInRow = true)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
             }
         }
@@ -366,13 +354,9 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 setMediaState(ACTIVE_MEDIA)
 
                 setCollapsedMediaInLandscape(false)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.EXPANDED)
 
                 setCollapsedMediaInLandscape(true)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qqsMediaHost.expansion).isEqualTo(MediaHostState.COLLAPSED)
             }
         }
@@ -401,13 +385,11 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 underTest.squishinessFraction = 0.3f
 
                 underTest.shouldUpdateSquishinessOnMedia = true
-                Snapshot.sendApplyNotifications()
                 runCurrent()
 
                 assertThat(underTest.qsMediaHost.squishFraction).isWithin(0.01f).of(0.3f)
 
                 underTest.shouldUpdateSquishinessOnMedia = false
-                Snapshot.sendApplyNotifications()
                 runCurrent()
                 assertThat(underTest.qsMediaHost.squishFraction).isWithin(0.01f).of(1f)
             }
@@ -421,19 +403,14 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 underTest.squishinessFraction = 0.3f
 
                 sysuiStatusBarStateController.setState(StatusBarState.SHADE)
-                Snapshot.sendApplyNotifications()
                 runCurrent()
                 assertThat(underTest.qsMediaHost.squishFraction).isWithin(epsilon).of(0.3f)
 
                 sysuiStatusBarStateController.setState(StatusBarState.KEYGUARD)
                 runCurrent()
-                Snapshot.sendApplyNotifications()
-                runCurrent()
                 assertThat(underTest.qsMediaHost.squishFraction).isWithin(epsilon).of(1f)
 
                 sysuiStatusBarStateController.setState(StatusBarState.SHADE_LOCKED)
-                runCurrent()
-                Snapshot.sendApplyNotifications()
                 runCurrent()
                 assertThat(underTest.qsMediaHost.squishFraction).isWithin(epsilon).of(1f)
             }
@@ -446,8 +423,6 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                 setMediaState(ACTIVE_MEDIA)
 
                 setConfigurationForMediaInRow(false)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
 
                 assertThat(underTest.qqsMediaHost.disappearParameters)
                     .isEqualTo(disappearParamsColumn)
@@ -455,8 +430,6 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
                     .isEqualTo(disappearParamsColumn)
 
                 setConfigurationForMediaInRow(true)
-                Snapshot.sendApplyNotifications()
-                runCurrent()
 
                 assertThat(underTest.qqsMediaHost.disappearParameters).isEqualTo(disappearParamsRow)
                 assertThat(underTest.qsMediaHost.disappearParameters).isEqualTo(disappearParamsRow)

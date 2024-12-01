@@ -29,6 +29,7 @@ import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -638,7 +639,9 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
             return NativeLibraryHelper.checkAlignmentForCompatMode(
                             handle, libraryRoot, nativeLibraryRootRequiresIsa, abiOverride);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Slog.e(PackageManagerService.TAG, "Failed to check alignment of package : "
+                    + pkg.getPackageName());
+            return ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
         }
     }
 }

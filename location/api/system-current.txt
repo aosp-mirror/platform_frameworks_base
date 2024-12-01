@@ -642,6 +642,14 @@ package android.location.provider {
     method public void onFlushComplete();
   }
 
+  @FlaggedApi("android.location.flags.population_density_provider") public abstract class PopulationDensityProviderBase {
+    ctor public PopulationDensityProviderBase(@NonNull android.content.Context, @NonNull String);
+    method @Nullable public final android.os.IBinder getBinder();
+    method public abstract void onGetCoarsenedS2Cell(double, double, @NonNull android.os.OutcomeReceiver<long[],java.lang.Throwable>);
+    method public abstract void onGetDefaultCoarseningLevel(@NonNull android.os.OutcomeReceiver<java.lang.Integer,java.lang.Throwable>);
+    field public static final String ACTION_POPULATION_DENSITY_PROVIDER = "com.android.location.service.PopulationDensityProvider";
+  }
+
   public final class ProviderRequest implements android.os.Parcelable {
     method public int describeContents();
     method @IntRange(from=0) public long getIntervalMillis();

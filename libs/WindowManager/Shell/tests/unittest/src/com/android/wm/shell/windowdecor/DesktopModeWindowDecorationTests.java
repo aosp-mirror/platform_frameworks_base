@@ -61,7 +61,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -110,6 +109,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -166,7 +166,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock
-    private DesktopRepository mMockDesktopRepository;
+    private DesktopUserRepositories mMockDesktopUserRepositories;
     @Mock
     private Choreographer mMockChoreographer;
     @Mock
@@ -215,6 +215,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private WindowDecorCaptionHandleRepository mMockCaptionHandleRepository;
     @Mock
     private DesktopModeEventLogger mDesktopModeEventLogger;
+    @Mock
+    private DesktopRepository mDesktopRepository;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
     @Captor
@@ -271,6 +273,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
                 any())).thenReturn(mMockAppHeaderViewHolder);
+        when(mMockDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
+        when(mMockDesktopUserRepositories.getProfile(anyInt())).thenReturn(mDesktopRepository);
     }
 
     @After
@@ -295,8 +299,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void updateRelayoutParams_noSysPropFlagsSet_windowShadowsAreEnabled() {
+    public void updateRelayoutParams_noSysPropFlagsSet_windowShadowsAreSetForFreeform() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(
@@ -309,7 +314,46 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* hasGlobalFocus= */ true,
                 mExclusionRegion);
 
-        assertThat(relayoutParams.mShadowRadiusId).isNotEqualTo(Resources.ID_NULL);
+        assertThat(relayoutParams.mShadowRadius)
+                .isNotEqualTo(WindowDecoration.INVALID_SHADOW_RADIUS);
+    }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_windowShadowsAreNotSetForFullscreen() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ false,
+                new InsetsState(),
+                /* hasGlobalFocus= */ true,
+                mExclusionRegion);
+
+        assertThat(relayoutParams.mShadowRadius).isEqualTo(WindowDecoration.INVALID_SHADOW_RADIUS);
+    }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_windowShadowsAreNotSetForSplit() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ false,
+                new InsetsState(),
+                /* hasGlobalFocus= */ true,
+                mExclusionRegion);
+
+        assertThat(relayoutParams.mShadowRadius).isEqualTo(WindowDecoration.INVALID_SHADOW_RADIUS);
     }
 
     @Test
@@ -339,6 +383,29 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersNotSetForFullscreen() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        fillRoundedCornersResources(/* fillValue= */ 30);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ false,
+                new InsetsState(),
+                /* hasGlobalFocus= */ true,
+                mExclusionRegion);
+
+        assertThat(relayoutParams.mCornerRadius).isEqualTo(INVALID_CORNER_RADIUS);
+    }
+
+    @Test
+    public void updateRelayoutParams_noSysPropFlagsSet_roundedCornersNotSetForSplit() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         fillRoundedCornersResources(/* fillValue= */ 30);
         RelayoutParams relayoutParams = new RelayoutParams();
 
@@ -1407,8 +1474,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration decoration = createWindowDecoration(taskInfo,
                 true /* relayout */);
-        when(mMockDesktopRepository.isTaskInFullImmersiveState(taskInfo.taskId))
-                .thenReturn(true);
+        when(mMockDesktopUserRepositories.getCurrent()
+                .isTaskInFullImmersiveState(taskInfo.taskId)).thenReturn(true);
 
         createHandleMenu(decoration);
 
@@ -1429,7 +1496,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
     @Test
     @DisableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION,
-            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION})
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION_INTEGRATION})
     public void notifyCaptionStateChanged_flagDisabled_doNoNotify() {
         when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
@@ -1643,8 +1710,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             boolean relayout) {
         final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
                 mContext, mMockDisplayController, mMockSplitScreenController,
-                mMockDesktopRepository, mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
-                mMockHandler, mBgExecutor, mMockChoreographer, mMockSyncQueue,
+                mMockDesktopUserRepositories, mMockShellTaskOrganizer, taskInfo,
+                mMockSurfaceControl, mMockHandler, mBgExecutor, mMockChoreographer, mMockSyncQueue,
                 mMockAppHeaderViewHolderFactory, mMockRootTaskDisplayAreaOrganizer,
                 mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,

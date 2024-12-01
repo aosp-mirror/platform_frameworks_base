@@ -27,6 +27,7 @@ import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.WindowUtils
 import android.tools.traces.parsers.toFlickerComponent
+import com.android.server.wm.flicker.helpers.PipAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.wm.shell.Flags
@@ -68,6 +69,7 @@ import org.junit.runners.Parameterized
 @RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class FromSplitScreenEnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) :
     EnterPipTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
     private val portraitDisplayBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
     /** Second app used to enter split screen mode */
     private val secondAppForSplitScreen =

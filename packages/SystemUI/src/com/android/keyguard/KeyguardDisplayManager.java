@@ -44,6 +44,7 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository;
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -103,7 +104,8 @@ public class KeyguardDisplayManager {
             };
 
     @Inject
-    public KeyguardDisplayManager(Context context,
+    public KeyguardDisplayManager(
+            @ShadeDisplayAware Context context,
             Lazy<NavigationBarController> navigationBarControllerLazy,
             DisplayTracker displayTracker,
             @Main Executor mainExecutor,
@@ -331,7 +333,8 @@ public class KeyguardDisplayManager {
         private boolean mIsInConcurrentDisplayState;
 
         @Inject
-        DeviceStateHelper(Context context,
+        DeviceStateHelper(
+                @ShadeDisplayAware Context context,
                 DeviceStateManager deviceStateManager,
                 @Main Executor mainExecutor) {
 

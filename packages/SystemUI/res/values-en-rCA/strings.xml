@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Use Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Connected"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Audio Sharing"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Tap to switch or share audio"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Supports audio sharing"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Saved"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"disconnect"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activate"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Lock screen widgets"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"To open an app using a widget, you’ll need to verify it’s you. Also, keep in mind that anyone can view them, even when your tablet’s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Got it"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"To add Widgets on the lock screen as a shortcut, make sure it is enabled in settings."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Switch user"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"pulldown menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"All apps and data in this session will be deleted."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Shows at the top of conversation notifications and as a profile picture on lock screen, appears as a bubble, interrupts Do Not Disturb"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priority"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> doesn’t support conversation features"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Provide Bundle Feedback"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"These notifications can\'t be modified."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Call notifications can\'t be modified."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"This group of notifications cannot be configured here"</string>
@@ -872,6 +875,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Switch to app on left or above while using split screen"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"During split screen: replace an app from one to another"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Move active window between displays"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Move window to the left"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Move window to the right"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Maximize window"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Minimize window"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Switch to next language"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Switch to previous language"</string>
@@ -1220,8 +1227,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Use fewer than <xliff:g id="LENGTH">%1$d</xliff:g> characters"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build number"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build number copied to clipboard."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"copy to clipboard."</string>
     <string name="basic_status" msgid="2315371112182658176">"Open conversation"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Conversation widgets"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Tap a conversation to add it to your Home screen"</string>
@@ -1417,7 +1423,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibility"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Keyboard shortcuts"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Customize keyboard shortcuts"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Press key to assign shortcut"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Remove shortcut?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Press key to assign shortcut"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"This will delete your custom shortcut permanently."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Search shortcuts"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"No search results"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Collapse icon"</string>
@@ -1427,12 +1435,17 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Done"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Expand icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"or"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"plus"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"forward slash"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Drag handle"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Keyboard Settings"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Set shortcut"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Remove"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancel"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Press key"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Key combination already in use. Try another key."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Key combination already in use. Try another key."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Shortcut cannot be set."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigate using your keyboard"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Learn keyboards shortcuts"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigate using your touchpad"</string>

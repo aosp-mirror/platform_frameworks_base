@@ -48,7 +48,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel;
 import com.android.systemui.compose.ComposeInitializer;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.qs.flags.QSComposeFragment;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
@@ -96,7 +96,7 @@ public class BrightnessDialog extends Activity {
         super.onCreate(savedInstanceState);
         setWindowAttributes();
         View view;
-        if (!QSComposeFragment.isEnabled()) {
+        if (!QsInCompose.isEnabled()) {
             setContentView(R.layout.brightness_mirror_container);
             view = findViewById(R.id.brightness_mirror_container);
             setDialogContent((FrameLayout) view);
@@ -140,7 +140,7 @@ public class BrightnessDialog extends Activity {
         window.getDecorView();
         window.setLayout(WRAP_CONTENT, WRAP_CONTENT);
         getTheme().applyStyle(R.style.Theme_SystemUI_QuickSettings, false);
-        if (QSComposeFragment.isEnabled()) {
+        if (QsInCompose.isEnabled()) {
             window.getDecorView().addOnAttachStateChangeListener(
                     new View.OnAttachStateChangeListener() {
                         @Override
@@ -217,7 +217,7 @@ public class BrightnessDialog extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (!QSComposeFragment.isEnabled()) {
+        if (!QsInCompose.isEnabled()) {
             mBrightnessController.registerCallbacks();
         }
         MetricsLogger.visible(this, MetricsEvent.BRIGHTNESS_DIALOG);
@@ -241,7 +241,7 @@ public class BrightnessDialog extends Activity {
     protected void onStop() {
         super.onStop();
         MetricsLogger.hidden(this, MetricsEvent.BRIGHTNESS_DIALOG);
-        if (!QSComposeFragment.isEnabled()) {
+        if (!QsInCompose.isEnabled()) {
             mBrightnessController.unregisterCallbacks();
         }
     }

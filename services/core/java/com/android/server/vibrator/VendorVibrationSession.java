@@ -86,6 +86,8 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     @GuardedBy("mLock")
     private Status mEndStatusRequest;
     @GuardedBy("mLock")
+    private boolean mEndedByVendor;
+    @GuardedBy("mLock")
     private long mStartTime; // for debugging
     @GuardedBy("mLock")
     private long mEndUptime;
@@ -119,14 +121,15 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     public void finishSession() {
         // Do not abort session in HAL, wait for ongoing vibration requests to complete.
         // This might take a while to end the session, but it can be aborted by cancelSession.
-        requestEndSession(Status.FINISHED, /* shouldAbort= */ false);
+        requestEndSession(Status.FINISHED, /* shouldAbort= */ false, /* isVendorRequest= */ true);
     }
 
     @Override
     public void cancelSession() {
         // Always abort session in HAL while cancelling it.
         // This might be triggered after finishSession was already called.
-        requestEndSession(Status.CANCELLED_BY_USER, /* shouldAbort= */ true);
+        requestEndSession(Status.CANCELLED_BY_USER, /* shouldAbort= */ true,
+                /* isVendorRequest= */ true);
     }
 
     @Override
@@ -158,7 +161,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     public DebugInfo getDebugInfo() {
         synchronized (mLock) {
             return new DebugInfoImpl(mStatus, mCallerInfo, mCreateUptime, mCreateTime, mStartTime,
-                    mEndUptime, mEndTime, mVibrations);
+                    mEndUptime, mEndTime, mEndedByVendor, mVibrations);
         }
     }
 
@@ -172,13 +175,15 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     @Override
     public void onCancel() {
         Slog.d(TAG, "Cancellation signal received, cancelling vibration session...");
-        requestEnd(Status.CANCELLED_BY_USER, /* endedBy= */ null, /* immediate= */ false);
+        requestEndSession(Status.CANCELLED_BY_USER, /* shouldAbort= */ true,
+                /* isVendorRequest= */ true);
     }
 
     @Override
     public void binderDied() {
         Slog.d(TAG, "Binder died, cancelling vibration session...");
-        requestEnd(Status.CANCELLED_BINDER_DIED, /* endedBy= */ null, /* immediate= */ false);
+        requestEndSession(Status.CANCELLED_BINDER_DIED, /* shouldAbort= */ true,
+                /* isVendorRequest= */ false);
     }
 
     @Override
@@ -207,7 +212,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
         // All requests to end a session should abort it to stop ongoing vibrations, even if
         // immediate flag is false. Only the #finishSession API will not abort and wait for
         // session vibrations to complete, which might take a long time.
-        requestEndSession(status, /* shouldAbort= */ true);
+        requestEndSession(status, /* shouldAbort= */ true, /* isVendorRequest= */ false);
     }
 
     @Override
@@ -224,7 +229,8 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     public void notifySessionCallback() {
         synchronized (mLock) {
             // If end was not requested then the HAL has cancelled the session.
-            maybeSetEndRequestLocked(Status.CANCELLED_BY_UNKNOWN_REASON);
+            maybeSetEndRequestLocked(Status.CANCELLED_BY_UNKNOWN_REASON,
+                    /* isVendorRequest= */ false);
             maybeSetStatusToRequestedLocked();
             clearVibrationConductor();
         }
@@ -335,10 +341,10 @@ final class VendorVibrationSession extends IVibrationSession.Stub
         }
     }
 
-    private void requestEndSession(Status status, boolean shouldAbort) {
+    private void requestEndSession(Status status, boolean shouldAbort, boolean isVendorRequest) {
         boolean shouldTriggerSessionHook = false;
         synchronized (mLock) {
-            maybeSetEndRequestLocked(status);
+            maybeSetEndRequestLocked(status, isVendorRequest);
             if (isStarted()) {
                 // Always trigger session hook after it has started, in case new request aborts an
                 // already finishing session. Wait for HAL callback before actually ending here.
@@ -354,12 +360,13 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     }
 
     @GuardedBy("mLock")
-    private void maybeSetEndRequestLocked(Status status) {
+    private void maybeSetEndRequestLocked(Status status, boolean isVendorRequest) {
         if (mEndStatusRequest != null) {
             // End already requested, keep first requested status and time.
             return;
         }
         mEndStatusRequest = status;
+        mEndedByVendor = isVendorRequest;
         mEndTime = System.currentTimeMillis();
         mEndUptime = SystemClock.uptimeMillis();
         if (mConductor != null) {
@@ -442,15 +449,18 @@ final class VendorVibrationSession extends IVibrationSession.Stub
         private final long mStartTime;
         private final long mEndTime;
         private final long mDurationMs;
+        private final boolean mEndedByVendor;
 
         DebugInfoImpl(Status status, CallerInfo callerInfo, long createUptime, long createTime,
-                long startTime, long endUptime, long endTime, List<DebugInfo> vibrations) {
+                long startTime, long endUptime, long endTime, boolean endedByVendor,
+                List<DebugInfo> vibrations) {
             mStatus = status;
             mCallerInfo = callerInfo;
             mCreateUptime = createUptime;
             mCreateTime = createTime;
             mStartTime = startTime;
             mEndTime = endTime;
+            mEndedByVendor = endedByVendor;
             mDurationMs = endUptime > 0 ? endUptime - createUptime : -1;
             mVibrations = vibrations == null ? new ArrayList<>() : new ArrayList<>(vibrations);
         }
@@ -478,6 +488,15 @@ final class VendorVibrationSession extends IVibrationSession.Stub
 
         @Override
         public void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
+            if (mStartTime > 0) {
+                // Only log sessions that have started.
+                statsLogger.logVibrationVendorSessionStarted(mCallerInfo.uid);
+                statsLogger.logVibrationVendorSessionVibrations(mCallerInfo.uid,
+                        mVibrations.size());
+                if (!mEndedByVendor) {
+                    statsLogger.logVibrationVendorSessionInterrupted(mCallerInfo.uid);
+                }
+            }
             for (DebugInfo vibration : mVibrations) {
                 vibration.logMetrics(statsLogger);
             }

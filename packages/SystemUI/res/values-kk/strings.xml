@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth-ты пайдалану"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Қосылды"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Аудио бөлісу"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Аудионы бөлісу немесе ауыстыру үшін түртіңіз."</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Аудио бөлісуге мүмкіндік береді."</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Сақталды"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ажырату"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"іске қосу"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Құлып экранының виджеттері"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Қолданбаны виджет көмегімен ашу үшін жеке басыңызды растауыңыз керек. Сондай-ақ басқалар оларды планшетіңіз құлыптаулы кезде де көре алатынын ескеріңіз. Кейбір виджеттер құлып экранына арналмаған болады, сондықтан оларды мұнда қосу қауіпсіз болмауы мүмкін."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Түсінікті"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виджеттер"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"To add Widgets on the lock screen as a shortcut, make sure it is enabled in settings."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Пайдаланушыны ауыстыру"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ашылмалы мәзір"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданба мен дерек жойылады."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Әңгіме туралы хабарландырулардың жоғарғы жағында тұрады және құлыптаулы экранда профиль суреті болып көрсетіледі, қалқыма хабар түрінде шығады, Мазаламау режимін тоқтатады."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңызды"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгіме функцияларын қолдамайды."</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Пакет туралы пікір жіберу"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бұл хабарландыруларды өзгерту мүмкін емес."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Қоңырау туралы хабарландыруларды өзгерту мүмкін емес."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Мұндай хабарландырулар бұл жерде конфигурацияланбайды."</string>
@@ -853,7 +856,7 @@
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Қазіргі қолданбаға арналған жылдам пәрмендер көрсетіледі."</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Хабарландыруларды көру"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Скриншот жасау"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Жылдам пәрмендерді көрсету"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Пернелер тіркесімдерін көрсету"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Артқа"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Негізгі экранға өту"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Соңғы қолданбаларды көру"</string>
@@ -872,6 +875,14 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Бөлінген экранда сол не жоғары жақтағы қолданбаға ауысу"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Экранды бөлу кезінде: бір қолданбаны басқасымен алмастыру"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Дисплейлер арасында қосулы терезені ауыстыру"</string>
+    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
+    <skip />
+    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
+    <skip />
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Енгізу"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Келесі тілге ауысу"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Алдыңғы тілге ауысу"</string>
@@ -1201,7 +1212,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Динамиктер мен дисплейлер"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Ұсынылған құрылғылар"</string>
-    <string name="media_input_group_title" msgid="2057057473860783021">"Кіріс"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Енгізу"</string>
     <string name="media_output_group_title" msgid="6789001895863332576">"Шығыс"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Мультимедиа файлын басқа құрылғыға жылжыту үшін ортақ сеансты тоқтатыңыз."</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Тоқтату"</string>
@@ -1220,8 +1231,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Ең көбі <xliff:g id="LENGTH">%1$d</xliff:g> таңба пайдаланыңыз."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Құрама нөмірі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Құрама нөмірі буферге көшірілді."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"буферге көшіріңіз."</string>
     <string name="basic_status" msgid="2315371112182658176">"Ашық әңгіме"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Әңгіме виджеттері"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Негізгі экранға қосқыңыз келетін әңгімені түртіңіз."</string>
@@ -1357,8 +1367,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Жоғары ажыратымдылық үшін телефонды айналдырыңыз."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Бүктемелі құрылғы ашылып жатыр."</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Бүктемелі құрылғы аударылып жатыр."</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Алдыңғы экран қосылды."</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"жабық"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ашық"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1412,13 +1421,15 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Мультитаскинг"</string>
     <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Соңғы қолданбалар"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Экранды бөлу"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Кіріс"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Енгізу"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Қолданба таңбашалары"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Қолданыстағы қолданба"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Арнайы мүмкіндіктер"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Перне тіркесімдері"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Пернелер тіркесімін бейімдеу"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"Жылдам пәрменді тағайындау үшін пернені басыңыз."</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Жылдам пәрменді өшіру керек пе?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Жылдам пәрменді тағайындау үшін пернені басыңыз."</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Арнаулы жылдам пәрменіңіз біржола жойылады."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Іздеу жылдам пәрмендері"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Іздеу нәтижелері жоқ."</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Жию белгішесі"</string>
@@ -1428,12 +1439,19 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Дайын"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Жаю белгішесі"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"немесе"</string>
+    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
+    <skip />
+    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
+    <skip />
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Сүйрейтін тетік"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Пернетақта параметрлері"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Жылдам пәрменді орнату"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Өшіру"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Бас тарту"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Пернені басыңыз"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"Бұл пернелер тіркесімі қазір қолданыста. Басқа пернені таңдаңыз."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Бұл пернелер тіркесімі қазір қолданыста. Басқа перне таңдаңыз."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Перне тіркесімін орнату мүмкін емес."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Пернетақтамен жұмыс істеңіз"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Перне тіркесімдерін үйреніңіз."</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Сенсорлық тақтамен жұмыс істеңіз"</string>

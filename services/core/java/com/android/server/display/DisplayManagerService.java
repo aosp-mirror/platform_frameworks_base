@@ -668,7 +668,8 @@ public final class DisplayManagerService extends SystemService {
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
         if (mFlags.isDisplayTopologyEnabled()) {
             mDisplayTopologyCoordinator =
-                    new DisplayTopologyCoordinator(this::isExtendedDisplayEnabled);
+                    new DisplayTopologyCoordinator(this::isExtendedDisplayEnabled,
+                            this::deliverTopologyUpdate, new HandlerExecutor(mHandler), mSyncRoot);
         } else {
             mDisplayTopologyCoordinator = null;
         }
@@ -1681,7 +1682,12 @@ public final class DisplayManagerService extends SystemService {
         if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
             return checkCallingPermission(ADD_MIRROR_DISPLAY, "canCreateMirrorDisplays");
         }
-        return virtualDevice != null;
+        try {
+            return virtualDevice != null && virtualDevice.canCreateMirrorDisplays();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to query virtual device for permissions", e);
+            return false;
+        }
     }
 
     private boolean canProjectVideo(IMediaProjection projection) {
@@ -3502,6 +3508,28 @@ public final class DisplayManagerService extends SystemService {
         callbackRecord.notifyDisplayEventAsync(displayId, event);
     }
 
+    private void deliverTopologyUpdate(DisplayTopology topology) {
+        if (DEBUG) {
+            Slog.d(TAG, "Delivering topology update");
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+            Trace.instant(Trace.TRACE_TAG_POWER, "deliverTopologyUpdate");
+        }
+
+        // Grab the lock and copy the callbacks.
+        List<CallbackRecord> callbacks = new ArrayList<>();
+        synchronized (mSyncRoot) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                callbacks.add(mCallbacks.valueAt(i));
+            }
+        }
+
+        // After releasing the lock, send the notifications out.
+        for (CallbackRecord callback : callbacks) {
+            callback.notifyTopologyUpdateAsync(topology);
+        }
+    }
+
     private boolean extraLogging(String packageName) {
         return mExtraDisplayEventLogging && mExtraDisplayLoggingPackageName.equals(packageName);
     }
@@ -4137,7 +4165,7 @@ public final class DisplayManagerService extends SystemService {
          * cached or frozen.
          */
         public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
-            if (!shouldSendEvent(event)) {
+            if (!shouldSendDisplayEvent(event)) {
                 if (extraLogging(mPackageName)) {
                     Slog.i(TAG,
                             "Not sending displayEvent: " + event + " due to mask:"
@@ -4191,7 +4219,7 @@ public final class DisplayManagerService extends SystemService {
         /**
          * Return true if the client is interested in this event.
          */
-        private boolean shouldSendEvent(@DisplayEvent int event) {
+        private boolean shouldSendDisplayEvent(@DisplayEvent int event) {
             final long mask = mInternalEventFlagsMask.get();
             switch (event) {
                 case DisplayManagerGlobal.EVENT_DISPLAY_ADDED:
@@ -4250,6 +4278,45 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
             mPendingEvents.add(new Event(displayId, event));
+        }
+
+        /**
+         * @return {@code false} if RemoteException happens; otherwise {@code true} for
+         * success.
+         */
+        boolean notifyTopologyUpdateAsync(DisplayTopology topology) {
+            if ((mInternalEventFlagsMask.get()
+                    & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED) == 0) {
+                if (extraLogging(mPackageName)) {
+                    Slog.i(TAG, "Not sending topology update: " + topology + " due to mask: "
+                            + mInternalEventFlagsMask);
+                }
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                    Trace.instant(Trace.TRACE_TAG_POWER,
+                            "notifyTopologyUpdateAsync#notSendingUpdate=" + topology
+                                    + ",mInternalEventFlagsMask=" + mInternalEventFlagsMask);
+                }
+                // The client is not interested in this event, so do nothing.
+                return true;
+            }
+            return transmitTopologyUpdate(topology);
+        }
+
+        /**
+         * Transmit a single display topology update. The client is presumed ready. Return true on
+         * success and false if the client died.
+         */
+        private boolean transmitTopologyUpdate(DisplayTopology topology) {
+            // The client is ready to receive the event.
+            try {
+                mCallback.onTopologyChanged(topology);
+                return true;
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process "
+                        + mPid + " that display topology changed, assuming it died.", ex);
+                binderDied();
+                return false;
+            }
         }
 
         // Send all pending events.  This can safely be called if the process is not ready, but it

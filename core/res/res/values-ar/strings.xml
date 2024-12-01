@@ -75,6 +75,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"الإعداد التلقائي لمعرف المتصل هو محظور  . الاتصال التالي: غير محظور"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: محظور"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عملية التأكُّد من محاذاة ملفات APK. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عملية التأكُّد من محاذاة ملفات ELF. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏هذا التطبيق غير متوافق مع حجم الصفحة الذي يبلغ 16 كيلوبايت. وتعذَّر إكمال عمليات التأكُّد من محاذاة ملفات APK وELF. وسيتم تشغيل هذا التطبيق باستخدام الوضع المتوافق مع حجم الصفحة. ولكي يتوافق التطبيق مع الأجهزة بشكلٍ أفضل، يُرجى إعادة تحويله برمجيًا ليصبح متوافقًا مع حجم الصفحة الذي يبلغ 16 كيلوبايت. لمزيد من المعلومات، يُرجى الاطّلاع على الرابط &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"تم تبديل البيانات إلى <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1951,6 +1954,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"من <xliff:g id="START">%1$s</xliff:g> إلى <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"من <xliff:g id="START">%1$s</xliff:g> إلى <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>، <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"أي تقويم"</string>
     <string name="muted_by" msgid="91464083490094950">"يعمل <xliff:g id="THIRD_PARTY">%1$s</xliff:g> على كتم بعض الأصوات."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"حدثت مشكلة داخلية في جهازك، وقد لا يستقر وضعه حتى إجراء إعادة الضبط على الإعدادات الأصلية."</string>

@@ -366,10 +366,10 @@
     <string name="debug_app" msgid="8903350241392391766">"Kies ontfoutprogram"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Geen ontfoutprogram gestel nie"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Ontfoutingsprogram: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="2543228890535466325">"Kies program"</string>
+    <string name="select_application" msgid="2543228890535466325">"Kies app"</string>
     <string name="no_application" msgid="9038334538870247690">"Niks"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Wag vir ontfouter"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Ontfoutde program wag vir ontfouter om te heg voordat dit uitgevoer word"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Ontfoute app wag vir ontfouter om te heg voordat dit uitgevoer word"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Invoer"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Skets"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardeware-versnelde lewering"</string>
@@ -428,11 +428,11 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Vernietig elke aktiwiteit sodra die gebruiker dit verlaat"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Agtergrondproseslimiet"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Wys agtergrond-ANR\'e"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wys Program Reageer Nie-dialoog vir agtergrondprogramme"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wys App Reageer Nie-dialoog vir agtergrondapps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Wys kennisgewingkanaalwaarskuwings"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wys waarskuwing op skerm wanneer \'n program \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wys waarskuwing op skerm wanneer \'n app \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Dwing toelating op eksterne berging"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Maak dat enige app na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Dwing aktiwiteite om verstelbaar te wees"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktiveer vormvrye vensters"</string>
@@ -546,7 +546,7 @@
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktiewe invoermetodes"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik stelseltale"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Kon nie instellings vir <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> oopmaak nie"</string>
-    <string name="ime_security_warning" msgid="6547562217880551450">"Die invoermetode kan dalk alle teks wat jy invoer, versamel, insluitend persoonlike data soos wagwoorde en kredietkaartnommers. Dit kom van die program <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Wil jy dié invoermetode gebruik?"</string>
+    <string name="ime_security_warning" msgid="6547562217880551450">"Die invoermetode kan dalk alle teks wat jy invoer, versamel, insluitend persoonlike data soos wagwoorde en kredietkaartnommers. Dit kom van die app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Wil jy dié invoermetode gebruik?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Let wel: Ná \'n herselflaai kan hierdie app nie begin voordat jy jou foon ontsluit het nie"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registrasiestaat"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreer"</string>
@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Hierdie foon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Hierdie tablet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Hierdie rekenaar (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Hierdie TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokluidspreker"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Eksterne toestel"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Gekoppelde toestel"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Gekoppel deur ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Gekoppel deur eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV-verstek"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-uitset"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne luidsprekers"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Ingeboude luidspreker"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV-oudio"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kan nie koppel nie. Skakel toestel af en weer aan"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedrade oudiotoestel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hulp en terugvoer"</string>

@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -123,21 +124,25 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
             @NonNull PaintContext context,
             float maxWidth,
             float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
             @NonNull MeasurePass measure,
             @NonNull Size size) {
         DebugLog.s(() -> "COMPUTE WRAP SIZE in " + this + " (" + mComponentId + ")");
-        //        int visibleChildrens = 0;
+        int visibleChildrens = 0;
+        float currentMaxWidth = maxWidth;
         for (Component c : mChildrenComponents) {
-            c.measure(context, 0f, maxWidth, 0f, maxHeight, measure);
+            c.measure(context, 0f, currentMaxWidth, 0f, maxHeight, measure);
             ComponentMeasure m = measure.get(c);
             if (m.getVisibility() != Visibility.GONE) {
                 size.setWidth(size.getWidth() + m.getW());
                 size.setHeight(Math.max(size.getHeight(), m.getH()));
-                //                visibleChildrens++;
+                visibleChildrens++;
+                currentMaxWidth -= m.getW();
             }
         }
         if (!mChildrenComponents.isEmpty()) {
-            size.setWidth(size.getWidth() + (mSpacedBy * (mChildrenComponents.size() - 1)));
+            size.setWidth(size.getWidth() + (mSpacedBy * (visibleChildrens - 1)));
         }
         DebugLog.e();
     }
@@ -163,11 +168,11 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
     }
 
     @Override
-    public float intrinsicWidth() {
-        float width = computeModifierDefinedWidth();
+    public float intrinsicWidth(@Nullable RemoteContext context) {
+        float width = computeModifierDefinedWidth(context);
         float componentWidths = 0f;
         for (Component c : mChildrenComponents) {
-            componentWidths += c.intrinsicWidth();
+            componentWidths += c.intrinsicWidth(context);
         }
         return Math.max(width, componentWidths);
     }
@@ -340,11 +345,21 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
         DebugLog.e();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "RowLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_ROW;
     }
@@ -364,6 +379,12 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
         buffer.writeFloat(spacedBy);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
@@ -380,6 +401,11 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
                         spacedBy));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(

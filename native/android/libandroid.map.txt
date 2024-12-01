@@ -301,7 +301,6 @@ LIBANDROID {
     ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
-    ASurfaceTransaction_setFrameRateParams; # introduced=36
     ASurfaceTransaction_clearFrameRate; # introduced=34
     ASurfaceTransaction_setFrameTimeline; # introduced=Tiramisu
     ASurfaceTransaction_setGeometry; # introduced=29
@@ -376,6 +375,7 @@ LIBANDROID {
     APerformanceHint_notifyWorkloadIncrease; # introduced=36
     APerformanceHint_notifyWorkloadReset; # introduced=36
     APerformanceHint_borrowSessionFromJava; # introduced=36
+    APerformanceHint_setNativeSurfaces; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
@@ -388,6 +388,8 @@ LIBANDROID {
     ASessionCreationConfig_setTargetWorkDurationNanos; # introduced=36
     ASessionCreationConfig_setPreferPowerEfficiency; # introduced=36
     ASessionCreationConfig_setGraphicsPipeline; # introduced=36
+    ASessionCreationConfig_setNativeSurfaces; # introduced=36
+    ASessionCreationConfig_setUseAutoTiming; # introduced=36
   local:
     *;
 };

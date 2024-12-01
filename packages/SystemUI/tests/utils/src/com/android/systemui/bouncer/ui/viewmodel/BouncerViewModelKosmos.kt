@@ -28,6 +28,7 @@ import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardDismissActionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardMediaKeyInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -63,6 +64,7 @@ val Kosmos.bouncerSceneContentViewModel by Fixture {
         bouncerHapticPlayer = bouncerHapticPlayer,
         keyguardMediaKeyInteractor = keyguardMediaKeyInteractor,
         bouncerActionButtonInteractor = bouncerActionButtonInteractor,
+        keyguardDismissActionInteractor = keyguardDismissActionInteractor,
     )
 }
 

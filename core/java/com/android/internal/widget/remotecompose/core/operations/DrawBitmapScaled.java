@@ -27,11 +27,13 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ImageScaling;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Operation to draw a given cached bitmap */
-public class DrawBitmapScaled extends PaintOperation implements VariableSupport {
+public class DrawBitmapScaled extends PaintOperation
+        implements VariableSupport, AccessibleComponent {
     private static final int OP_CODE = Operations.DRAW_BITMAP_SCALED;
     private static final String CLASS_NAME = "DrawBitmapScaled";
     int mImageId;
@@ -191,11 +193,26 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
                 + Utils.floatToString(mScaleFactor, mOutScaleFactor);
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescId;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -232,6 +249,12 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         buffer.writeInt(cdId);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
 
@@ -265,6 +288,11 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         operations.add(op);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")

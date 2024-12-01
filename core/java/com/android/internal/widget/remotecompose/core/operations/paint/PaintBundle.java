@@ -498,6 +498,11 @@ public class PaintBundle {
         return ret;
     }
 
+    /**
+     * Write a bundle of paint changes to the buffer
+     *
+     * @param buffer bundle to write
+     */
     public void writeBundle(@NonNull WireBuffer buffer) {
         buffer.writeInt(mPos);
         for (int index = 0; index < mPos; index++) {
@@ -505,6 +510,11 @@ public class PaintBundle {
         }
     }
 
+    /**
+     * This will read the paint bundle off the wire buffer
+     *
+     * @param buffer the buffer to read
+     */
     public void readBundle(@NonNull WireBuffer buffer) {
         int len = buffer.readInt();
         if (len <= 0 || len > 1024) {
@@ -586,6 +596,9 @@ public class PaintBundle {
     public static final int LINEAR_GRADIENT = 0;
     public static final int RADIAL_GRADIENT = 1;
     public static final int SWEEP_GRADIENT = 2;
+
+    private int mLastShaderSet = -1;
+    private boolean mColorFilterSet = false;
 
     /**
      * sets a shader that draws a linear gradient along a line.
@@ -722,12 +735,14 @@ public class PaintBundle {
         mArray[mPos] = COLOR_FILTER_ID | (mode << 16);
         mPos++;
         mArray[mPos++] = color;
+        mColorFilterSet = true;
     }
 
     /** This sets the color filter to null */
     public void clearColorFilter() {
         mArray[mPos] = CLEAR_COLOR_FILTER;
         mPos++;
+        mColorFilterSet = false;
     }
 
     /**
@@ -843,6 +858,7 @@ public class PaintBundle {
      * @param shaderId
      */
     public void setShader(int shaderId) {
+        mLastShaderSet = shaderId;
         mArray[mPos] = SHADER;
         mPos++;
         mArray[mPos] = shaderId;
@@ -909,11 +925,23 @@ public class PaintBundle {
         mPos++;
     }
 
+    /**
+     * clear a series of paint parameters. Currently not used
+     *
+     * @param mask bit pattern of the attributes to clear
+     */
     public void clear(long mask) { // unused for now
     }
 
+    /** Reset the content of the paint bundle so that it can be reused */
     public void reset() {
         mPos = 0;
+        if (mColorFilterSet) {
+            clearColorFilter();
+        }
+        if (mLastShaderSet != -1 && mLastShaderSet != 0) {
+            setShader(0);
+        }
     }
 
     public static @NonNull String blendModeString(int mode) {

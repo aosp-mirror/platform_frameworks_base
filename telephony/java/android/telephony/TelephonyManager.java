@@ -5251,6 +5251,36 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the Group Identifier Level 2 in hexadecimal format.
+     * @return the Group Identifier Level 2 for the SIM card.
+     *         Return null if it is unavailable.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_GET_GROUP_ID_LEVEL2)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @SystemApi
+    @Nullable
+    public String getGroupIdLevel2() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                return null;
+            }
+            return info.getGroupIdLevel2ForSubscriber(getSubId(), mContext.getOpPackageName(),
+                    mContext.getAttributionTag());
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
      * Returns the phone number string for line 1, for example, the MSISDN
      * for a GSM phone for a particular subscription. Return null if it is unavailable.
      * <p>

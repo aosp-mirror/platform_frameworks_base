@@ -32,11 +32,21 @@ public class WidthModifierOperation extends DimensionModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_WIDTH;
     public static final String CLASS_NAME = "WidthModifierOperation";
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -47,6 +57,12 @@ public class WidthModifierOperation extends DimensionModifierOperation {
         buffer.writeFloat(value);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
     public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         Type type = Type.fromInt(buffer.readInt());
         float value = buffer.readFloat();
@@ -83,6 +99,11 @@ public class WidthModifierOperation extends DimensionModifierOperation {
         return "WIDTH";
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the animation")

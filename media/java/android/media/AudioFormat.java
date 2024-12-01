@@ -714,7 +714,7 @@ public final class AudioFormat implements Parcelable {
     /**
      * @hide
      * Return a channel mask ready to be used by native code
-     * @param mask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
+     * @param javaMask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
      * @return a native channel mask
      */
     public static int convertChannelOutMaskToNativeMask(int javaMask) {
@@ -724,11 +724,96 @@ public final class AudioFormat implements Parcelable {
     /**
      * @hide
      * Return a java output channel mask
-     * @param mask a native channel mask
+     * @param nativeMask a native channel mask
      * @return a combination of the CHANNEL_OUT_* definitions
      */
     public static int convertNativeChannelMaskToOutMask(int nativeMask) {
         return (nativeMask << 2);
+    }
+
+    /**
+     * @hide
+     * Return a human-readable string from a java channel mask
+     * @param javaMask a bit field of CHANNEL_OUT_* values
+     * @return a string in the "mono", "stereo", "5.1" style, or the hex version when not a standard
+     *   mask.
+     */
+    public static String javaChannelOutMaskToString(int javaMask) {
+        // save haptics info for end of string
+        int haptics = javaMask & (CHANNEL_OUT_HAPTIC_A | CHANNEL_OUT_HAPTIC_B);
+        // continue without looking at haptic channels
+        javaMask &= ~(CHANNEL_OUT_HAPTIC_A | CHANNEL_OUT_HAPTIC_B);
+        StringBuilder result = new StringBuilder("");
+        switch (javaMask) {
+            case CHANNEL_OUT_MONO:
+                result.append("mono");
+                break;
+            case CHANNEL_OUT_STEREO:
+                result.append("stereo");
+                break;
+            case CHANNEL_OUT_QUAD:
+                result.append("quad");
+                break;
+            case CHANNEL_OUT_QUAD_SIDE:
+                result.append("quad side");
+                break;
+            case CHANNEL_OUT_SURROUND:
+                result.append("4.0");
+                break;
+            case CHANNEL_OUT_5POINT1:
+                result.append("5.1");
+                break;
+            case CHANNEL_OUT_6POINT1:
+                result.append("6.1");
+                break;
+            case CHANNEL_OUT_5POINT1_SIDE:
+                result.append("5.1 side");
+                break;
+            case CHANNEL_OUT_7POINT1:
+                result.append("7.1 (5 fronts)");
+                break;
+            case CHANNEL_OUT_7POINT1_SURROUND:
+                result.append("7.1");
+                break;
+            case CHANNEL_OUT_5POINT1POINT2:
+                result.append("5.1.2");
+                break;
+            case CHANNEL_OUT_5POINT1POINT4:
+                result.append("5.1.4");
+                break;
+            case CHANNEL_OUT_7POINT1POINT2:
+                result.append("7.1.2");
+                break;
+            case CHANNEL_OUT_7POINT1POINT4:
+                result.append("7.1.4");
+                break;
+            case CHANNEL_OUT_9POINT1POINT4:
+                result.append("9.1.4");
+                break;
+            case CHANNEL_OUT_9POINT1POINT6:
+                result.append("9.1.6");
+                break;
+            case CHANNEL_OUT_13POINT_360RA:
+                result.append("360RA 13ch");
+                break;
+            case CHANNEL_OUT_22POINT2:
+                result.append("22.2");
+                break;
+            default:
+                result.append("0x").append(Integer.toHexString(javaMask));
+                break;
+        }
+        if ((haptics & (CHANNEL_OUT_HAPTIC_A | CHANNEL_OUT_HAPTIC_B)) != 0) {
+            result.append("(+haptic ");
+            if ((haptics & CHANNEL_OUT_HAPTIC_A) == CHANNEL_OUT_HAPTIC_A) {
+                result.append("A");
+            }
+            if ((haptics & CHANNEL_OUT_HAPTIC_B) == CHANNEL_OUT_HAPTIC_B) {
+                result.append("B");
+            }
+            result.append(")");
+        }
+        return result.toString();
     }
 
     public static final int CHANNEL_IN_DEFAULT = 1;

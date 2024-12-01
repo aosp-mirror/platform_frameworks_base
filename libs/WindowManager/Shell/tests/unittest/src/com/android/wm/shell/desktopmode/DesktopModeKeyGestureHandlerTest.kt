@@ -53,10 +53,9 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCUTS
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
-import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel
@@ -91,7 +90,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
     private val rootTaskDisplayAreaOrganizer = mock<RootTaskDisplayAreaOrganizer>()
     private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
     private val focusTransitionObserver = mock<FocusTransitionObserver>()
-    private val testExecutor = mock<ShellExecutor>()
+    private val testExecutor = TestShellExecutor()
     private val inputManager = mock<InputManager>()
     private val displayController = mock<DisplayController>()
     private val displayLayout = mock<DisplayLayout>()
@@ -137,8 +136,13 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
 
         desktopModeKeyGestureHandler = DesktopModeKeyGestureHandler(
             context,
-            Optional.of(desktopModeWindowDecorViewModel), Optional.of(desktopTasksController),
-            inputManager, shellTaskOrganizer, focusTransitionObserver, testExecutor
+            Optional.of(desktopModeWindowDecorViewModel),
+            Optional.of(desktopTasksController),
+            inputManager,
+            shellTaskOrganizer,
+            focusTransitionObserver,
+            testExecutor,
+            displayController
         )
     }
 
@@ -148,6 +152,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
 
         runningTasks.clear()
         testScope.cancel()
+        testExecutor.flushAll()
     }
 
     @Test
@@ -201,12 +206,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
 
         assertThat(result).isTrue()
-        verify(desktopModeWindowDecorViewModel).onSnapResize(
-            task.taskId,
-            true,
-            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
-            /* fromMenu= */ false
-        )
+        assertThat(testExecutor.callbacks.size).isEqualTo(1)
     }
 
     @Test
@@ -228,12 +228,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
 
         assertThat(result).isTrue()
-        verify(desktopModeWindowDecorViewModel).onSnapResize(
-            task.taskId,
-            false,
-            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
-            /* fromMenu= */ false
-        )
+        assertThat(testExecutor.callbacks.size).isEqualTo(1)
     }
 
     @Test
@@ -255,11 +250,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
 
         assertThat(result).isTrue()
-        verify(desktopTasksController).toggleDesktopTaskSize(
-            task,
-            ResizeTrigger.MAXIMIZE_MENU,
-            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
-        )
+        assertThat(testExecutor.callbacks.size).isEqualTo(1)
     }
 
     @Test
@@ -281,6 +272,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
 
         assertThat(result).isTrue()
+        assertThat(testExecutor.callbacks.size).isEqualTo(1)
     }
 
     private fun setUpFreeformTask(

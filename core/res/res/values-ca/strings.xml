@@ -72,6 +72,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"El valor predeterminat de l\'identificador de trucada és restringit. Trucada següent: no restringit"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: restringit"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"El valor predeterminat de l\'identificador de trucada és no restringit. Trucada següent: no restringit"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"No s\'ha proveït el servei."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"No pots canviar la configuració de l\'identificador de trucada."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Les dades s\'han canviat a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1948,6 +1954,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"De <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsevol calendari"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> està silenciant alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"S\'ha produït un error intern al dispositiu i és possible que funcioni de manera inestable fins que restableixis les dades de fàbrica."</string>

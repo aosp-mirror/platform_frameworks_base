@@ -26,10 +26,12 @@ import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.hardware.devicestate.DeviceStateUtil;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import androidx.annotation.BinderThread;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -43,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -69,36 +72,46 @@ public final class DeviceStateManagerFoldingFeatureProducer
     private DeviceState mCurrentDeviceState = INVALID_DEVICE_STATE;
 
     @NonNull
+    private final Context mContext;
+
+    @NonNull
     private final RawFoldingFeatureProducer mRawFoldSupplier;
 
     @NonNull
     private final DeviceStateMapper mDeviceStateMapper;
 
-    @VisibleForTesting
-    final DeviceStateCallback mDeviceStateCallback = new DeviceStateCallback() {
-        // The GuardedBy analysis is intra-procedural, meaning it doesn’t consider the getData()
-        // implementation. See https://errorprone.info/bugpattern/GuardedBy for limitations.
-        @SuppressWarnings("GuardedBy")
-        @MainThread
+    private final DeviceStateCallback mDeviceStateCallback = new DeviceStateCallback() {
+        @BinderThread // Subsequent callback after registered.
+        @MainThread // Initial callback if registration is on the main thread.
         @Override
         public void onDeviceStateChanged(@NonNull DeviceState state) {
-            mCurrentDeviceState = state;
-            mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer.this
-                    ::notifyFoldingFeatureChangeLocked);
+            final boolean isMainThread = Looper.myLooper() == Looper.getMainLooper();
+            final Executor executor = isMainThread ? Runnable::run : mContext.getMainExecutor();
+            executor.execute(() -> {
+                DeviceStateManagerFoldingFeatureProducer.this.onDeviceStateChanged(state);
+            });
         }
     };
 
     public DeviceStateManagerFoldingFeatureProducer(@NonNull Context context,
             @NonNull RawFoldingFeatureProducer rawFoldSupplier,
             @NonNull DeviceStateManager deviceStateManager) {
+        mContext = context;
         mRawFoldSupplier = rawFoldSupplier;
         mDeviceStateMapper =
                 new DeviceStateMapper(context, deviceStateManager.getSupportedDeviceStates());
 
         if (!mDeviceStateMapper.isDeviceStateToPostureMapEmpty()) {
             Objects.requireNonNull(deviceStateManager)
-                    .registerCallback(context.getMainExecutor(), mDeviceStateCallback);
+                    .registerCallback(Runnable::run, mDeviceStateCallback);
         }
+    }
+
+    @MainThread
+    @VisibleForTesting
+    void onDeviceStateChanged(@NonNull DeviceState state) {
+        mCurrentDeviceState = state;
+        mRawFoldSupplier.getData(this::notifyFoldingFeatureChangeLocked);
     }
 
     /**
@@ -118,9 +131,6 @@ public final class DeviceStateManagerFoldingFeatureProducer
         }
     }
 
-    // The GuardedBy analysis is intra-procedural, meaning it doesn’t consider the implementation of
-    // addDataChangedCallback(). See https://errorprone.info/bugpattern/GuardedBy for limitations.
-    @SuppressWarnings("GuardedBy")
     @Override
     protected void onListenersChanged() {
         super.onListenersChanged();

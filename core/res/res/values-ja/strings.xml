@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"既定: 発信者番号非通知、次の発信: 通知"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"既定: 発信者番号通知、次の発信: 非通知"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"既定: 発信者番号通知、次の発信: 通知"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"このアプリは 16 KB アライメントではありません。APK のアライメント チェックが失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"このアプリは 16 KB アライメントではありません。ELF のアライメント チェックに失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"このアプリは 16 KB アライメントではありません。APK と ELF のアライメント チェックが失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"発信者番号の設定は変更できません。"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"データが <xliff:g id="CARRIERDISPLAY">%s</xliff:g> に切り替わりました"</string>
@@ -1947,6 +1950,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>、<xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"すべてのカレンダー"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"デバイスで内部的な問題が発生しました。データが初期化されるまで不安定になる可能性があります。"</string>

@@ -32,12 +32,12 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.net.vcn.persistablebundleutils.TunnelConnectionParamsUtils;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

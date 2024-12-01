@@ -78,6 +78,7 @@ flag {
     description: "Prevent intent redirect attacks"
     bug: "361143368"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -93,6 +94,21 @@ flag {
     description: "Prevent intent redirect attacks by showing a toast when activity start is blocked"
     bug: "361143368"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "prevent_intent_redirect_show_toast_if_nested_keys_not_collected"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by showing a toast if not yet collected"
+    bug: "361143368"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "prevent_intent_redirect_show_toast_if_nested_keys_not_collected_r_w"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by showing a toast if not yet collected"
+    bug: "361143368"
 }
 
 flag {

@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्‍लूटूथ वापरा"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट केले"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ऑडिओ शेअरिंग"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"व्हिडिओवर स्विच करण्यासाठी टॅप करा किंवा शेअर करा"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"ऑडिओ शेअरिंगला सपोर्ट करते"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव्ह केले"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट करा"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ॲक्टिव्हेट करा"</string>
@@ -528,6 +528,8 @@
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"लॉक स्‍क्रीन विजेट"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"विजेट वापरून अ‍ॅप उघडण्यासाठी, तुम्हाला हे तुम्हीच असल्याची पडताळणी करावी लागेल. तसेच, लक्षात ठेवा, तुमचा टॅबलेट लॉक असतानादेखील कोणीही ती पाहू शकते. काही विजेट कदाचित तुमच्या लॉक स्‍क्रीनसाठी नाहीत आणि ती इथे जोडणे असुरक्षित असू शकते."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"समजले"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"विजेट"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"विजेट शॉर्टकट म्हणून लॉक स्‍क्रीनवर जोडण्यासाठी, सेटिंग्जमध्ये ती सुरू असल्याची खात्री करा."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"वापरकर्ता स्विच करा"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनू"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
@@ -780,6 +782,7 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
+    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"बंडलसंबंधित फीडबॅक द्या"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉलशी संबंधित सूचनांमध्ये फेरबदल केला जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
@@ -872,6 +875,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रीन वापरताना डावीकडील किंवा वरील अ‍ॅपवर स्विच करा"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रीनदरम्यान: एक अ‍ॅप दुसऱ्या अ‍ॅपने बदला"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"ॲक्टिव्ह विंडो डिस्प्लेदरम्यान हलवा"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"विंडो डावीकडे हलवा"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"विंडो उजवीकडे हलवा"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"विंडो मोठी करा"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"विंडो लहान करा"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"इनपुट"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"पुढील भाषेवर स्विच करा"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"मागील भाषेवर स्विच करा"</string>
@@ -1220,8 +1227,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> वर्णांपेक्षा कमी वर्ण वापरा"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर क्लिपबोर्डवर कॉपी केला."</string>
-    <!-- no translation found for copy_to_clipboard_a11y_action (4312789069718446749) -->
-    <skip />
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"क्लिपबोर्डवर कॉपी करा."</string>
     <string name="basic_status" msgid="2315371112182658176">"संभाषण उघडा"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"संभाषण विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"तुमच्या होम स्क्रीन वर संभाषण जोडण्यासाठी त्यावर टॅप करा"</string>
@@ -1357,8 +1363,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"उच्च रेझोल्यूशनसाठी, फोन फ्लिप करा"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"फोल्ड करता येण्यासारखे डिव्हाइस अनफोल्ड केले जात आहे"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"फोल्ड करता येण्यासारखे डिव्हाइस आजूबाजूला फ्लिप केले जात आहे"</string>
-    <!-- no translation found for rear_display_unfolded_front_screen_on (5946436677205643170) -->
-    <skip />
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"पुढील स्क्रीन सुरू केलेली आहे"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"फोल्ड केलेले"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"फोल्ड न केलेले"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1418,7 +1423,9 @@
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"कीबोर्ड शॉर्टकट"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"कीबोर्ड शॉर्टकट कस्टमाइझ करा"</string>
-    <string name="shortcut_helper_customize_mode_sub_title" msgid="2479732335876820286">"शॉर्टकट असाइन करण्यासाठी की प्रेस करा"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"शॉर्टकट काढून टाकायचा आहे का?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"शॉर्टकट असाइन करण्यासाठी की प्रेस करा"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"यामुळे तुमचा कस्टम शॉर्टकट कायमचा हटवला जाईल."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"शोधण्यासाठी शॉर्टकट"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"कोणतेही शोध परिणाम नाहीत"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"कोलॅप्स करा आयकन"</string>
@@ -1428,12 +1435,17 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"पूर्ण झाले"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"विस्तार करा आयकन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"किंवा"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"अधिक"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"फॉरवर्ड स्लॅश"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ड्रॅग हॅंडल"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"कीबोर्ड सेटिंग्ज"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"शॉर्टकट सेट करा"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"काढून टाका"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"रद्द करा"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"की प्रेस करा"</string>
-    <string name="shortcut_helper_customize_dialog_error_message" msgid="5954264095841845768">"की कॉम्बिनेशन आधीपासून वापरले जात आहे. दुसरी की वापरून पहा."</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"की कॉम्बिनेशन आधीपासून वापरले जात आहे. दुसरी की वापरून पहा."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"शॉर्टकट सेट करू शकत नाही."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"तुमचा कीबोर्ड वापरून नेव्हिगेट करा"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"कीबोर्ड शॉर्टकट जाणून घ्या"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"तुमचा टचपॅड वापरून नेव्हिगेट करा"</string>

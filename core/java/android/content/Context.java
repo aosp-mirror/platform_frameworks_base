@@ -18,6 +18,7 @@ package android.content;
 
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
+import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE;
 import static android.security.Flags.FLAG_SECURE_LOCKDOWN;
 
 import android.annotation.AttrRes;
@@ -640,12 +641,15 @@ public abstract class Context {
     public static final int BIND_FOREGROUND_SERVICE_WHILE_AWAKE = 0x02000000;
 
     /**
-     * @hide Flag for {@link #bindService}: For only the case where the binding
+     * Flag for {@link #bindService}: For only the case where the binding
      * is coming from the system, set the process state to BOUND_FOREGROUND_SERVICE
      * instead of the normal maximum of IMPORTANT_FOREGROUND.  That is, this is
      * saying that the process shouldn't participate in the normal power reduction
      * modes (removing network access etc).
+     * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
     public static final int BIND_FOREGROUND_SERVICE = 0x04000000;
 
     /**

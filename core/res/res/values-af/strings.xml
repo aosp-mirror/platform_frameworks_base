@@ -71,6 +71,12 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Beller-ID se verstek is beperk. Volgende oproep: nie beperk nie"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Beller-ID se verstek is nie beperk nie. Volgende oproep: beperk"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Beller-ID se verstek is nie beperk nie. Volgende oproep: nie beperk nie"</string>
+    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
+    <skip />
+    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
+    <skip />
+    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
+    <skip />
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Diens nie verskaf nie."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Jy kan nie die beller-ID-instelling verander nie."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Het data oorgeskakel na <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -523,7 +529,7 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Hierdie bevoorregte of stelselprogram kan enige tyd met \'n stelselkamera foto\'s neem en video\'s opneem. Vereis dat die program ook die android.permission.CAMERA-toestemming het"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Hierdie program kan terugbeloproepe ontvang wanneer enige kameratoestel oopgemaak (deur watter program) of toegemaak word."</string>
-    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Laat ’n program of diens toe om toegang tot die kamera te verkry as ’n stelselgebruiker sonder koppelvlak."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Laat ’n app of diens toe om toegang tot die kamera te verkry as ’n stelselgebruiker sonder koppelvlak."</string>
     <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Hierdie app het toegang tot die kamera as ’n stelselgebruiker sonder koppelvlak."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"beheer vibrasie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
@@ -1947,6 +1953,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> tot <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Enige kalender"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> demp sekere klanke"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Daar is \'n interne probleem met jou toestel en dit sal dalk onstabiel wees totdat jy \'n fabriekterugstelling doen."</string>
@@ -2038,7 +2045,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou Android TV-toestel."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou foon."</string>
-    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Hierdie program is vir ’n ouer weergawe van Android gebou. Dit sal dalk nie behoorlik werk nie en dit sluit nie die jongste sekuriteit en privaatheidbeskermings in nie. Kyk of daar ’n opdatering is of kontak die program se ontwikkelaar."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Hierdie app is vir ’n ouer weergawe van Android gebou. Dit sal dalk nie behoorlik werk nie en dit sluit nie die jongste sekuriteit en privaatheidbeskermings in nie. Kyk of daar ’n opdatering is of kontak die app se ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kyk vir opdatering"</string>
     <string name="deprecated_abi_message" msgid="6820548011196218091">"Hierdie app is nie met die jongste weergawe van Android versoenbaar nie. Kyk of daar ’n opdatering is, of kontak die app se ontwikkelaar."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jy het nuwe boodskappe"</string>

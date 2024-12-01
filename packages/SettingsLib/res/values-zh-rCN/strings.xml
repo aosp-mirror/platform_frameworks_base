@@ -359,7 +359,7 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"启用终端应用，以便在本地访问 Shell"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 开发环境"</string>
     <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"（实验性）在 Android 上运行 Linux 终端"</string>
-    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"如果您停用它，Linux 终端数据会被清除"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"停用后，Linux 终端数据会被清除"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 检查"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"设置 HDCP 检查行为"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"调试"</string>
@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"这部手机"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"这部平板电脑"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此计算机（内部）"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"此电视"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
@@ -607,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"已通过 ARC 连接"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"已通过 eARC 连接"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"电视默认设置"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI 输出"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"内置扬声器"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"内置扬声器"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"电视音频"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>

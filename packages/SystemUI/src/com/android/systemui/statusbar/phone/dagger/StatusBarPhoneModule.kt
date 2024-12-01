@@ -35,8 +35,6 @@ import com.android.systemui.statusbar.data.repository.PrivacyDotViewControllerSt
 import com.android.systemui.statusbar.data.repository.PrivacyDotWindowControllerStoreModule
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.events.PrivacyDotViewControllerModule
-import com.android.systemui.statusbar.phone.AutoHideController
-import com.android.systemui.statusbar.phone.AutoHideControllerImpl
 import com.android.systemui.statusbar.phone.AutoHideControllerStore
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks
 import com.android.systemui.statusbar.phone.MultiDisplayAutoHideControllerStore
@@ -79,9 +77,6 @@ interface StatusBarPhoneModule {
     ): StatusBarInitializer.Factory
 
     @Binds fun statusBarInitializer(@Default impl: StatusBarInitializerImpl): StatusBarInitializer
-
-    @Binds
-    fun autoHideControllerFactory(impl: AutoHideControllerImpl.Factory): AutoHideController.Factory
 
     companion object {
         /** Binds {@link StatusBarInitializer} as a {@link CoreStartable}. */
@@ -128,6 +123,7 @@ interface StatusBarPhoneModule {
             statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
             initializerStore: StatusBarInitializerStore,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
+            autoHideControllerStore: AutoHideControllerStore,
             statusBarOrchestratorFactory: StatusBarOrchestrator.Factory,
         ): StatusBarOrchestrator {
             return statusBarOrchestratorFactory.create(
@@ -137,6 +133,7 @@ interface StatusBarPhoneModule {
                 statusBarModeRepositoryStore.defaultDisplay,
                 initializerStore.defaultDisplay,
                 statusBarWindowControllerStore.defaultDisplay,
+                autoHideControllerStore.defaultDisplay,
             )
         }
 

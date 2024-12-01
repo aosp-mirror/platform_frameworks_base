@@ -1027,7 +1027,8 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void setImeInputTargetRequestedVisibility(boolean visible) {
+            public void setImeInputTargetRequestedVisibility(boolean visible,
+                    @NonNull ImeTracker.Token statsToken) {
             }
         };
     }

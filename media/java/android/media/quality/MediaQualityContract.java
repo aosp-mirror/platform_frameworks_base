@@ -74,6 +74,130 @@ public class MediaQualityContract {
          */
         public static final String PARAMETER_SATURATION = "saturation";
 
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR = "color";
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_HUE = "hue";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_BACKLIGHT = "backlight";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_BRIGHTNESS = "color_tuner_brightness";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_SATURATION = "color_tuner_saturation";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_HUE = "color_tuner_hue";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_REDO_FFSET = "color_tuner_red_offset";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_GREEN_OFFSET = "color_tuner_green_offset";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_BLUE_OFFSET = "color_tuner_blue_offset";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_RED_GAIN = "color_tuner_red_gain";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_GREEN_GAIN = "color_tuner_green_gain";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNER_BLUE_GAIN = "color_tuner_blue_gain";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_AI_PQ = "ai_pq";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_AI_SUPER_RESOLUTION = "ai_super_resolution";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_NOISE_REDUCTION = "noise_reduction";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_MPEG_NOISE_REDUCTION = "mpeg_noise_reduction";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_FLESH_TONE = "flesh_tone";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DECONTOUR = "decontour";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DYNAMIC_LUMA_CONTROL = "dynamic_luma_control";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_FILM_MODE = "film_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_BLACK_STRETCH = "black_stretch";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_BLUE_STRETCH = "blue_stretch";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TUNE = "color_tune";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_COLOR_TEMPERATURE = "color_temperature";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_GLOBAL_DIMMING = "global_dimming";
+
         private PictureQuality() {
         }
     }
@@ -104,6 +228,129 @@ public class MediaQualityContract {
          * <p>Type: INTEGER
          */
         public static final String PARAMETER_TREBLE = "treble";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SOUND_MODE = "sound_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SURROUND_SOUND = "surround_sound";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_EQUALIZER_DETAIL = "equalizer_detail";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SPEAKERS = "speakers";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_SPEAKERS_DELAY = "speakers_delay";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_EARC = "earc";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_AUTO_VOLUME_CONTROL = "auto_volume_control";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOWN_MIX_MODE = "down_mix_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_DRC = "dts_drc";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING = "dolby_audio_processing";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_SOUND_MODE =
+                "dolby_audio_processing_sound_mode";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_VOLUME_LEVELER =
+                "dolby_audio_processing_volume_leveler";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_SURROUND_VIRTUALIZER =
+                "dolby_audio_processing_surround_virtualizer";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DOLBY_AUDIO_PROCESSING_DOLBY_ATMOS =
+                "dolby_audio_processing_dolby_atmos";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DIALOGUE_ENHANCER = "dialogue_enhancer";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X = "dts_virtual_x";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_TBHDX = "dts_virtual_x_tbhdx";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_LIMITER = "dts_virtual_x_limiter";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_TRU_SURROUND_X =
+                "dts_virtual_x_tru_surround_x";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_TRU_VOLUME_HD =
+                "dts_virtual_x_tru_volume_hd";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_DIALOG_CLARITY =
+                "dts_virtual_x_dialog_clarity";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_DEFINITION = "dts_virtual_x_definition";
+
+        /**
+         * @hide
+         */
+        public static final String PARAMETER_DTS_VIRTUAL_X_HEIGHT = "dts_virtual_x_height";
+
 
         private SoundQuality() {
         }

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.content.Context
 import android.graphics.Rect
 import android.graphics.Region
 import android.util.ArrayMap
@@ -30,11 +29,8 @@ import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
-import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
-import com.android.wm.shell.sysui.ShellInit
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
@@ -42,26 +38,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /** Tracks desktop data for Android Desktop Windowing. */
-class DesktopRepository (
-    private val context: Context,
-    shellInit: ShellInit,
+class DesktopRepository(
     private val persistentRepository: DesktopPersistentRepository,
-    private val repositoryInitializer: DesktopRepositoryInitializer,
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
-){
-
+    val userId: Int,
+) {
     /**
      * Task data tracked per desktop.
      *
      * @property activeTasks task ids of active tasks currently or previously visible in Desktop
-     * mode session. Tasks become inactive when task closes or when desktop mode session ends.
+     *   mode session. Tasks become inactive when task closes or when desktop mode session ends.
      * @property visibleTasks task ids for active freeform tasks that are currently visible. There
-     * might be other active tasks in desktop mode that are not visible.
+     *   might be other active tasks in desktop mode that are not visible.
      * @property minimizedTasks task ids for active freeform tasks that are currently minimized.
      * @property closingTasks task ids for tasks that are going to close, but are currently visible.
      * @property freeformTasksInZOrder list of current freeform task ids ordered from top to bottom
      * @property fullImmersiveTaskId the task id of the desktop task that is in full-immersive mode.
-     * (top is at index 0).
+     *   (top is at index 0).
      */
     private data class DesktopTaskData(
         val activeTasks: ArraySet<Int> = ArraySet(),
@@ -72,14 +65,16 @@ class DesktopRepository (
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
         var fullImmersiveTaskId: Int? = null,
     ) {
-        fun deepCopy(): DesktopTaskData = DesktopTaskData(
-            activeTasks = ArraySet(activeTasks),
-            visibleTasks = ArraySet(visibleTasks),
-            minimizedTasks = ArraySet(minimizedTasks),
-            closingTasks = ArraySet(closingTasks),
-            freeformTasksInZOrder = ArrayList(freeformTasksInZOrder),
-            fullImmersiveTaskId = fullImmersiveTaskId
-        )
+        fun deepCopy(): DesktopTaskData =
+            DesktopTaskData(
+                activeTasks = ArraySet(activeTasks),
+                visibleTasks = ArraySet(visibleTasks),
+                minimizedTasks = ArraySet(minimizedTasks),
+                closingTasks = ArraySet(closingTasks),
+                freeformTasksInZOrder = ArrayList(freeformTasksInZOrder),
+                fullImmersiveTaskId = fullImmersiveTaskId,
+            )
+
         fun clear() {
             activeTasks.clear()
             visibleTasks.clear()
@@ -111,21 +106,12 @@ class DesktopRepository (
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
 
-    private val desktopTaskDataByDisplayId = object : SparseArray<DesktopTaskData>() {
-        /** Gets [DesktopTaskData] for existing [displayId] or creates a new one. */
-        fun getOrCreate(displayId: Int): DesktopTaskData =
-            this[displayId] ?: DesktopTaskData().also { this[displayId] = it }
-    }
-
-    init {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
-            shellInit.addInitCallback(::initRepoFromPersistentStorage, this)
+    private val desktopTaskDataByDisplayId =
+        object : SparseArray<DesktopTaskData>() {
+            /** Gets [DesktopTaskData] for existing [displayId] or creates a new one. */
+            fun getOrCreate(displayId: Int): DesktopTaskData =
+                this[displayId] ?: DesktopTaskData().also { this[displayId] = it }
         }
-    }
-
-    private fun initRepoFromPersistentStorage() {
-        repositoryInitializer.initialize(this)
-    }
 
     /** Adds [activeTasksListener] to be notified of updates to active tasks. */
     fun addActiveTaskListener(activeTasksListener: ActiveTasksListener) {
@@ -137,9 +123,7 @@ class DesktopRepository (
         visibleTasksListeners[visibleTasksListener] = executor
         desktopTaskDataByDisplayId.keyIterator().forEach {
             val visibleTaskCount = getVisibleTaskCount(it)
-            executor.execute {
-                visibleTasksListener.onTasksVisibilityChanged(it, visibleTaskCount)
-            }
+            executor.execute { visibleTasksListener.onTasksVisibilityChanged(it, visibleTaskCount) }
         }
     }
 
@@ -201,8 +185,7 @@ class DesktopRepository (
     /** Removes task from active task list of displays excluding the [excludedDisplayId]. */
     fun removeActiveTask(taskId: Int, excludedDisplayId: Int? = null) {
         desktopTaskDataByDisplayId.forEach { displayId, desktopTaskData ->
-            if ((displayId != excludedDisplayId)
-                && desktopTaskData.activeTasks.remove(taskId)) {
+            if ((displayId != excludedDisplayId) && desktopTaskData.activeTasks.remove(taskId)) {
                 logD("Removed active task=%d displayId=%d", taskId, displayId)
                 updateActiveTasksListeners(displayId)
             }
@@ -229,16 +212,18 @@ class DesktopRepository (
     }
 
     fun isActiveTask(taskId: Int) = desktopTaskDataSequence().any { taskId in it.activeTasks }
+
     fun isClosingTask(taskId: Int) = desktopTaskDataSequence().any { taskId in it.closingTasks }
+
     fun isVisibleTask(taskId: Int) = desktopTaskDataSequence().any { taskId in it.visibleTasks }
+
     fun isMinimizedTask(taskId: Int) = desktopTaskDataSequence().any { taskId in it.minimizedTasks }
 
     /** Checks if a task is the only visible, non-closing, non-minimized task on its display. */
     fun isOnlyVisibleNonClosingTask(taskId: Int): Boolean =
-        desktopTaskDataSequence().any { it.visibleTasks
-            .subtract(it.closingTasks)
-            .subtract(it.minimizedTasks)
-            .singleOrNull() == taskId
+        desktopTaskDataSequence().any {
+            it.visibleTasks.subtract(it.closingTasks).subtract(it.minimizedTasks).singleOrNull() ==
+                taskId
         }
 
     fun getActiveTasks(displayId: Int): ArraySet<Int> =
@@ -272,10 +257,12 @@ class DesktopRepository (
     /**
      * Updates visibility of a freeform task with [taskId] on [displayId] and notifies listeners.
      *
-     * If task was visible on a different display with a different [displayId], removes from
-     * the set of visible tasks on that display and notifies listeners.
+     * If task was visible on a different display with a different [displayId], removes from the set
+     * of visible tasks on that display and notifies listeners.
      */
     fun updateTask(displayId: Int, taskId: Int, isVisible: Boolean) {
+        logD("updateTask taskId=%d, displayId=%d, isVisible=%b", taskId, displayId, isVisible)
+
         if (isVisible) {
             // If task is visible, remove it from any other display besides [displayId].
             removeVisibleTask(taskId, excludedDisplayId = displayId)
@@ -293,8 +280,12 @@ class DesktopRepository (
         }
         val newCount = getVisibleTaskCount(displayId)
         if (prevCount != newCount) {
-            logD("Update task visibility taskId=%d visible=%b displayId=%d",
-                taskId, isVisible, displayId)
+            logD(
+                "Update task visibility taskId=%d visible=%b displayId=%d",
+                taskId,
+                isVisible,
+                displayId,
+            )
             logD("VisibleTaskCount has changed from %d to %d", prevCount, newCount)
             notifyVisibleTaskListeners(displayId, newCount)
             if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
@@ -332,9 +323,8 @@ class DesktopRepository (
 
     /** Gets number of visible tasks on given [displayId] */
     fun getVisibleTaskCount(displayId: Int): Int =
-        desktopTaskDataByDisplayId[displayId]?.visibleTasks?.size ?: 0.also {
-            logD("getVisibleTaskCount=$it")
-        }
+        desktopTaskDataByDisplayId[displayId]?.visibleTasks?.size
+            ?: 0.also { logD("getVisibleTaskCount=$it") }
 
     /**
      * Adds task (or moves if it already exists) to the top of the ordered list.
@@ -357,9 +347,8 @@ class DesktopRepository (
         if (displayId == INVALID_DISPLAY) {
             // When a task vanishes it doesn't have a displayId. Find the display of the task and
             // mark it as minimized.
-            getDisplayIdForTask(taskId)?.let {
-                minimizeTask(it, taskId)
-            } ?: logW("Minimize task: No display id found for task: taskId=%d", taskId)
+            getDisplayIdForTask(taskId)?.let { minimizeTask(it, taskId) }
+                ?: logW("Minimize task: No display id found for task: taskId=%d", taskId)
         } else {
             logD("Minimize Task: display=%d, task=%d", displayId, taskId)
             desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
@@ -373,8 +362,8 @@ class DesktopRepository (
     /** Unminimizes the task for [taskId] and [displayId] */
     fun unminimizeTask(displayId: Int, taskId: Int) {
         logD("Unminimize Task: display=%d, task=%d", displayId, taskId)
-        desktopTaskDataByDisplayId[displayId]?.minimizedTasks?.remove(taskId) ?:
-            logW("Unminimize Task: display=%d, task=%d, no task data", displayId, taskId)
+        desktopTaskDataByDisplayId[displayId]?.minimizedTasks?.remove(taskId)
+            ?: logW("Unminimize Task: display=%d, task=%d, no task data", displayId, taskId)
     }
 
     private fun getDisplayIdForTask(taskId: Int): Int? {
@@ -407,16 +396,14 @@ class DesktopRepository (
         desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
         boundsBeforeMaximizeByTaskId.remove(taskId)
         boundsBeforeFullImmersiveByTaskId.remove(taskId)
-        logD("Remaining freeform tasks: %s",
-            desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString())
+        logD(
+            "Remaining freeform tasks: %s",
+            desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.toDumpString(),
+        )
         // Remove task from unminimized task if it is minimized.
         unminimizeTask(displayId, taskId)
         // Mark task as not in immersive if it was immersive.
-        setTaskInFullImmersiveState(
-            displayId = displayId,
-            taskId = taskId,
-            immersive = false
-        )
+        setTaskInFullImmersiveState(displayId = displayId, taskId = taskId, immersive = false)
         removeActiveTask(taskId)
         removeVisibleTask(taskId)
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) {
@@ -495,15 +482,16 @@ class DesktopRepository (
                     persistentRepository.addOrUpdateDesktop(
                         // Use display id as desktop id for now since only once desktop per display
                         // is supported.
+                        userId = userId,
                         desktopId = displayId,
                         visibleTasks = desktopTaskDataByDisplayIdCopy.visibleTasks,
                         minimizedTasks = desktopTaskDataByDisplayIdCopy.minimizedTasks,
-                        freeformTasksInZOrder = desktopTaskDataByDisplayIdCopy.freeformTasksInZOrder
+                        freeformTasksInZOrder = desktopTaskDataByDisplayIdCopy.freeformTasksInZOrder,
                     )
                 } catch (exception: Exception) {
                     logE(
                         "An exception occurred while updating the persistent repository \n%s",
-                        exception.stackTrace
+                        exception.stackTrace,
                     )
                 }
             }
@@ -529,6 +517,7 @@ class DesktopRepository (
             )
             pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
             pw.println("${innerPrefix}fullImmersiveTaskId=${data.fullImmersiveTaskId}")
+            pw.println("${innerPrefix}wallpaperActivityToken=$wallpaperActivityToken")
         }
     }
 
