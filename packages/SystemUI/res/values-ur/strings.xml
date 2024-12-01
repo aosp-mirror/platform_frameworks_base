@@ -792,12 +792,12 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"واپس جائیں"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"ہوم اسکرین پر جائیں"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"حالیہ ایپس دیکھیں"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"حالیہ ایپس کے ذریعے آگے کی طرف سائیکل کریں"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"حالیہ ایپس کے ذریعے پیچھے کی طرف سائیکل کریں"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"حالیہ ایپس میں اگلی ایپ پر جائیں"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"حالیہ ایپس میں پچھلی ایپ پر جائیں"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ایپس کی فہرست کھولیں"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ترتیبات کھولیں"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"اسسٹنٹ کھولیں"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"مقفل اسکرین"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"اسکرین لاک کریں"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"نوٹ لیں"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ملٹی ٹاسکنگ"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"دائیں جانب موجودہ ایپ کے ساتھ اسپلٹ اسکرین کا استعمال کریں"</string>

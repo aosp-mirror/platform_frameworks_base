@@ -287,7 +287,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Να επιτρέπεται το ξεκλείδωμα λειτουργίας εκκίνησης"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Να επιτρέπεται το ξεκλείδωμα OEM;"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ΠΡΟΕΙΔΟΠΟΙΗΣΗ: Οι λειτουργίες προστασίας συσκευής δεν θα λειτουργούν σε αυτήν τη συσκευή, όταν είναι ενεργοποιημένη αυτή η ρύθμιση."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Επιλογή εφ/γής τεχνητής τοπ/σίας"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Επιλογή εφαρμ. τεχνητής τοποθ."</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Δεν ορίστηκε εφαρμογή τεχνητής τοποθεσίας"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Εφαρμογή τεχνητής τοποθεσίας: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Δικτύωση"</string>
@@ -329,7 +329,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Όταν ενεργοποιηθεί αυτή η λειτουργία, η διεύθυνση MAC αυτής της συσκευής μπορεί να αλλάζει κάθε φορά που συνδέεται σε ένα δίκτυο όπου έχει ενεργοποιηθεί η τυχαία σειρά διευθύνσεων MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Μέτρηση με βάση τη χρήση"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Χωρίς μέτρηση με βάση τη χρήση"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Μέγεθος προσωρινής μνήμης για τη λειτ. καταγραφής"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Μέγεθος αρχείων κατ/φής ανά προ/νή μνήμη αρχείου κατ/φής"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Εκκαθάριση αποθηκευτικού χώρου μόνιμων αρχείων καταγραφής;"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Όταν δεν γίνεται πλέον παρακολούθηση με μόνιμο αρχείο καταγραφής, θα πρέπει να διαγραφούν τα δεδομένα του αρχείου καταγραφής στη συσκευή σας."</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Επιτρέπει τη λειτουργία Βελτιωμένης συνδεσιμότητας."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Τοπική τερματική εφαρμογή"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Ενεργοπ.τερμ.εφαρμογής που προσφέρει πρόσβαση στο τοπικό κέλυφος"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Περιβάλλον ανάπτυξης Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Πειραματικό) Εκτέλεση τερματικού Linux σε Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Εάν απενεργοποιηθεί, τα δεδομένα τερματικού Linux θα διαγραφούν"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Έλεγχος HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Ρύθμιση συμπεριφοράς ελέγχου HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Εντοπισμός σφαλμάτων"</string>
@@ -511,7 +514,7 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Γρήγορη φόρτιση"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ελέγχονται από το διαχειριστή"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Ελέγχεται από τη Ρύθμιση με περιορισμό"</string>
-    <string name="disabled" msgid="8017887509554714950">"Απενεργοποιημένο"</string>
+    <string name="disabled" msgid="8017887509554714950">"Απενεργοποιημένη"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Επιτρέπεται"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Δεν επιτρέπεται"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Εγκατ. άγνωστων εφ."</string>

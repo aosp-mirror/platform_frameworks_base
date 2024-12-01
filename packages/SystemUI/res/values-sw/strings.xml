@@ -787,7 +787,7 @@
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Inaonyesha njia za mkato za kufungua programu"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Inaonyesha njia za mkato za programu unayotumia kwa sasa"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Tazama arifa"</string>
-    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Kupiga picha ya skrini"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Piga picha ya skrini"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Onyesha njia za mkato"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Rudi nyuma"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Nenda kwenye skrini ya kwanza"</string>

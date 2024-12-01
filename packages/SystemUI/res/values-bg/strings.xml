@@ -799,7 +799,7 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Отваряне на Асистент"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заключване на екрана"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Създаване на бележка"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Изпълняване на няколко задачи едновременно"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Няколко задачи едновременно"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Използване на разделен екран с текущото приложение вдясно"</string>
     <string name="system_multitasking_lhs" msgid="8402954791206308783">"Използване на разделен екран с текущото приложение вляво"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Превключване от разделен към цял екран"</string>
@@ -1334,7 +1334,7 @@
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Използва се от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Наскоро използвано от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Системни"</string>
-    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Изпълняване на няколко задачи едновременно"</string>
+    <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Няколко задачи едновременно"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Въвеждане"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Преки пътища към приложения"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Достъпност"</string>

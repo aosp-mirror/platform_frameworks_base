@@ -19,12 +19,12 @@ package com.android.server.vcn.routeselection;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_ANY;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_FORBIDDEN;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import static android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener;
 
 import static com.android.server.VcnManagementService.LOCAL_LOG;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.getWifiEntryRssiThreshold;
 import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.getWifiExitRssiThreshold;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,6 +39,7 @@ import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
+import android.net.vcn.util.LogUtils;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
@@ -54,7 +55,6 @@ import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.routeselection.UnderlyingNetworkEvaluator.NetworkEvaluatorCallback;
-import com.android.server.vcn.util.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;

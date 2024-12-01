@@ -77,6 +77,8 @@ import android.net.vcn.VcnConfigTest;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
+import android.net.vcn.util.PersistableBundleUtils;
+import android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
@@ -99,8 +101,6 @@ import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
-import com.android.server.vcn.util.PersistableBundleUtils;
-import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
 import org.junit.Rule;

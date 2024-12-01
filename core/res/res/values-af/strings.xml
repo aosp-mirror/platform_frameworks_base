@@ -523,7 +523,7 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Hierdie bevoorregte of stelselprogram kan enige tyd met \'n stelselkamera foto\'s neem en video\'s opneem. Vereis dat die program ook die android.permission.CAMERA-toestemming het"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Hierdie program kan terugbeloproepe ontvang wanneer enige kameratoestel oopgemaak (deur watter program) of toegemaak word."</string>
-    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Laat ’n program of diens toe om toegang tot die kamera te verkry as ’n stelselgebruiker sonder koppelvlak."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Laat ’n app of diens toe om toegang tot die kamera te verkry as ’n stelselgebruiker sonder koppelvlak."</string>
     <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Hierdie app het toegang tot die kamera as ’n stelselgebruiker sonder koppelvlak."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"beheer vibrasie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Laat die program toe om relatiewe posisie tussen ultrabreëbandtoestelle in die omtrek te bepaal"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"om interaksie met wi‑fi-toestelle in die omtrek te hê"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Laat die program toe om op toestelle in die omtrek te adverteer, aan hulle te koppel en hul relatiewe posisie te bepaal"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"bepaal relatiewe posisie tussen toestelle in die omtrek"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Laat die app toe om relatiewe posisie tussen toestelle in die omtrek te bepaal"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Voorkeur-NFC-betalingdiensinligting"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
@@ -2024,7 +2026,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou Android TV-toestel."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou foon."</string>
-    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Hierdie program is vir ’n ouer weergawe van Android gebou. Dit sal dalk nie behoorlik werk nie en dit sluit nie die jongste sekuriteit en privaatheidbeskermings in nie. Kyk of daar ’n opdatering is of kontak die program se ontwikkelaar."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Hierdie app is vir ’n ouer weergawe van Android gebou. Dit sal dalk nie behoorlik werk nie en dit sluit nie die jongste sekuriteit en privaatheidbeskermings in nie. Kyk of daar ’n opdatering is of kontak die app se ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kyk vir opdatering"</string>
     <string name="deprecated_abi_message" msgid="6820548011196218091">"Hierdie app is nie met die jongste weergawe van Android versoenbaar nie. Kyk of daar ’n opdatering is, of kontak die app se ontwikkelaar."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jy het nuwe boodskappe"</string>

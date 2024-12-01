@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class RavenwoodContext extends RavenwoodBaseContext {
-    private static final String TAG = "Ravenwood";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     private final Object mLock = new Object();
     private final String mPackageName;

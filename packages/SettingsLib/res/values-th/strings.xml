@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"เร็วมาก"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"หมดอายุแล้ว"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ตัดการเชื่อมต่อ"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"ยกเลิกการเชื่อมต่อแล้ว"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"กำลังตัดการเชื่อมต่อ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"กำลังเชื่อมต่อ…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"เชื่อมต่อแล้ว<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -304,7 +304,7 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชันของบลูทูธ MAP"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชันของบลูทูธ MAP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"อัตราตัวอย่างเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: อัตราตัวอย่าง"</string>
@@ -313,7 +313,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: บิตต่อตัวอย่าง"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"โหมดช่องสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: โหมดช่องสัญญาณ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ตัวแปลงสัญญาณเสียงบลูทูธที่ใช้ LDAC: คุณภาพการเล่น"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ตัวแปลงรหัสเสียงบลูทูธที่ใช้ LDAC: คุณภาพการเล่น"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ทริกเกอร์การเลือกตัวแปลงรหัส LDAC\nเสียงบลูทูธ: คุณภาพการเล่น"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"สตรีมมิง: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS ส่วนตัว"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"เปิดใช้ฟีเจอร์การเชื่อมต่อที่ปรับปรุงแล้ว"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"สภาพแวดล้อมในการพัฒนาซอฟต์แวร์ Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ทดลอง) เรียกใช้เทอร์มินัล Linux ใน Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"หากปิดใช้ ระบบจะล้างข้อมูลเทอร์มินัล Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"การตรวจสอบ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"ตั้งค่าการตรวจสอบ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"การแก้ไขข้อบกพร่อง"</string>

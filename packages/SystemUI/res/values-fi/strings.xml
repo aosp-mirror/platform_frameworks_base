@@ -797,7 +797,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Avaa sovelluslista"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Avaa asetukset"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Avaa Assistant"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukitusnäyttö"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukitse näyttö"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Tee muistiinpano"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitaskaus"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Käytä jaettua näyttöä niin, että nyt käytettävä sovellus on oikealla"</string>

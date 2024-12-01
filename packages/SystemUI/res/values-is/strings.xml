@@ -1335,11 +1335,11 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Nýlega notað af <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="shortcut_helper_category_system" msgid="462110876978937359">"Kerfi"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Fjölvinnsla"</string>
-    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Inntak"</string>
+    <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Innsláttur"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Flýtileiðir forrita"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Aðgengi"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Flýtilyklar"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Leitarflýtileiðir"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Leita að flýtileiðum"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Minnka tákn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Stækka tákn"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eða"</string>

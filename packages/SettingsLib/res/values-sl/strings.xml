@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Omogoči funkcijo Izboljšana povezljivost."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Omogočanje terminalske aplikacije za dostop do lokalne lupine"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Razvojno okolje Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Preizkusno) Zagon terminala Linux v Androidu"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Če to onemogočite, bodo podatki terminala Linux izbrisani."</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Preverjanje HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Nastavi preverjanje HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Odpravljanje napak"</string>

@@ -63,8 +63,6 @@ import java.util.function.BiConsumer;
  * - Handle {@link android.platform.test.annotations.DisabledOnRavenwood}.
  */
 public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase {
-    public static final String TAG = "Ravenwood";
-
     /** Scope of a hook. */
     public enum Scope {
         Class,
@@ -132,9 +130,6 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         mTestClass = new TestClass(testClass);
 
         Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
-
-        // This is needed to make AndroidJUnit4ClassRunner happy.
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
 
         // Hook point to allow more customization.
         runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);

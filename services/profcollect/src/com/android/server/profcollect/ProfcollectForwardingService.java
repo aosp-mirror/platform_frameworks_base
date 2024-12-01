@@ -70,6 +70,7 @@ public final class ProfcollectForwardingService extends SystemService {
     private int mUsageSetting;
     private boolean mUploadEnabled;
 
+    private static boolean sVerityEnforced;
     private boolean mAdbActive;
 
     private IProfCollectd mIProfcollect;
@@ -115,6 +116,13 @@ public final class ProfcollectForwardingService extends SystemService {
         } catch (SettingNotFoundException e) {
             Log.e(LOG_TAG, "Usage setting not found: " + e.getMessage());
             mUsageSetting = -1;
+        }
+
+        // Check verity, disable profile upload if not enforced.
+        final String verityMode = SystemProperties.get("ro.boot.veritymode");
+        sVerityEnforced = verityMode.equals("enforcing");
+        if (!sVerityEnforced) {
+            Log.d(LOG_TAG, "verity is not enforced: " + verityMode);
         }
 
         mUploadEnabled =
@@ -371,6 +379,10 @@ public final class ProfcollectForwardingService extends SystemService {
             }
             if (!pfs.mUploadEnabled) {
                 Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
+            if (!sVerityEnforced) {
+                Log.i(LOG_TAG, "Verity is not enforced.");
                 return;
             }
             Intent intent = new Intent()

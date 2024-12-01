@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"മെച്ചപ്പെടുത്തിയ കണക്റ്റിവിറ്റി ഫീച്ചർ പ്രവർത്തനക്ഷമമാക്കുന്നു."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ഡെവലപ്പ്മെന്റ് എൻവയോൺമെന്റ്"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(പരീക്ഷണാത്മകം) Android-ൽ Linux ടെർമിനൽ റൺ ചെയ്യുക"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"പ്രവർത്തനരഹിതമാക്കുകയാണെങ്കിൽ, Linux ടെർമിനൽ ഡാറ്റ മായ്ക്കും"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP പരിശോധന"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ചെക്കിംഗ്‌രീതി സജ്ജമാക്കുക"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ്ഗിംഗ്"</string>

@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Միացնում է «Տվյալների լավացված փոխանակում» գործառույթը։"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Տեղային տերմինալ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Միացնել տերմինալային հավելվածը, որն առաջարկում է մուտք տեղային խեցի"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Լինուքսի մշակման միջավայր"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"Գործարկել Լինուքս տերմինալը Android-ում (փորձնական)"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Եթե անջատեք, Լինուքս տերմինալի տվյալները կջնջվեն"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ստուգում"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP-ի ստուգման կարգը"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Վրիպազերծում"</string>

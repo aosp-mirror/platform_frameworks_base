@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"بایت"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> ‏<xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="3381766946944136678">"‏&lt;بدون عنوان&gt;"</string>
+    <string name="untitled" msgid="3381766946944136678">"‏&lt;بی‌عنوان&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(بدون شماره تلفن)"</string>
     <string name="unknownName" msgid="7078697621109055330">"نامشخص"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"پست صوتی"</string>
@@ -196,7 +196,7 @@
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"توسط یک شخص ثالث ناشناس"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"توسط سرپرست نمایه کاری شما"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"توسط <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"نمایه کار حذف شد"</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"نمایه کاری حذف شد"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"برنامه سرپرست نمایه کاری یا وجود ندارد یا خراب است. در نتیجه، نمایه کاری شما و داده‌های مرتبط با آن حذف شده است. برای دریافت راهنمایی با سرپرست سیستم تماس بگیرید."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"نمایه کاری شما دیگر در این دستگاه دردسترس نیست"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"تلاش‌های بسیار زیادی برای وارد کردن گذرواژه انجام شده است"</string>
@@ -405,7 +405,7 @@
     <string name="permdesc_getTasks" msgid="7388138607018233726">"به برنامه امکان می‌دهد اطلاعات مربوط به کارهای در حال اجرای اخیر و کنونی را بازیابی کند. این ممکن است به برنامه امکان دهد به اطلاعات مربوط به برنامه‌هایی که در دستگاه استفاده می‌شوند دست یابد."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"مدیریت نمایه و مالکان دستگاه"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="7304240671781989283">"به برنامه‌ها امکان می‌دهد، مالکان نمایه و مالک دستگاه را تنظیم کنند."</string>
-    <string name="permlab_reorderTasks" msgid="7598562301992923804">"تنظیم مجدد ترتیب برنامه‌های در حال اجرا"</string>
+    <string name="permlab_reorderTasks" msgid="7598562301992923804">"تغییر ترتیب برنامه‌های درحال اجرا"</string>
     <string name="permdesc_reorderTasks" msgid="8796089937352344183">"‏به برنامه اجازه می‎دهد تا کارها را به پیش‌زمینه و پس‌زمینه منتقل کند. برنامه‎ ممکن است بدون دخالت شما این کار را انجام دهد."</string>
     <string name="permlab_enableCarMode" msgid="893019409519325311">"فعال کردن حالت خودرو"</string>
     <string name="permdesc_enableCarMode" msgid="56419168820473508">"‏به برنامه اجازه می‎دهد تا حالت خودرو را فعال کند."</string>
@@ -458,12 +458,12 @@
     <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"اجرای سرویس پیش‌نما از نوع «استفاده ویژه»"</string>
     <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"به برنامه اجازه می‌دهد از سرویس‌های پیش‌نما از نوع «استفاده ویژه» استفاده کند"</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"اندازه‌گیری اندازه فضای ذخیره‌سازی برنامه"</string>
-    <string name="permdesc_getPackageSize" msgid="742743530909966782">"‏به برنامه اجازه می‎دهد تا کدها، داده‎ها و اندازه‎های حافظهٔ پنهان خود را بازیابی کند"</string>
+    <string name="permdesc_getPackageSize" msgid="742743530909966782">"‏به برنامه اجازه می‎دهد تا کدها، داده‎ها و اندازه‎های حافظه نهان خود را بازیابی کند"</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"تغییر تنظیمات سیستم"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"‏به برنامه اجازه می‎دهد تا داده‎های تنظیم سیستم را تغییر دهد. برنامه‌های مخرب می‎توانند پیکربندی سیستم شما را خراب کنند."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"اجرا شدن در هنگام راه‌اندازی"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏به برنامه اجازه می‌دهد به‌محض اتمام راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4900842256047614307">"‏به برنامه اجازه می‌دهد به‌محض تمام کردن راه‌اندازی سیستم، خود را راه‌اندازی کند. ممکن است این مجوز باعث شود دستگاه Android TV آهسته‌تر راه‌اندازی شود و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودن، سرعت کلی دستگاه را کاهش دهد."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="7912677044558690092">"به برنامه اجازه می‌دهد که به محض پایان راه‌اندازی سیستم، راه‌اندازی شود. این ویژگی ممکن است باعث شود راه‌اندازی دستگاه مدت زمان بیشتری طول بکشد و به برنامه اجازه می‌دهد با همیشه درحال اجرا بودنش باعث کاهش سرعت کلی دستگاه شود."</string>
     <string name="permlab_broadcastSticky" msgid="4552241916400572230">"ارسال پخش چسبنده"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="5058486069846384013">"‏به برنامه اجازه می‎دهد تا پخش‌های ماندگار را که پس از اتمام پخش باقی می‎مانند ارسال کند. استفاده بیش از حد این ویژگی ممکن است باعث مصرف بیش از حد حافظه و در نتیجه کندی یا ناپایداری رایانهٔ لوحی شود."</string>
@@ -612,6 +612,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های «فراپهن‌باند» اطراف را مشخص کند"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"‏برقراری تعامل با دستگاه‌های Wi-Fi اطراف"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"‏به برنامه اجازه می‌دهد در دستگاه‌های Wi-Fi اطراف تبلیغ کند، به آن‌ها متصل شود، و موقعیت نسبی آن‌ها را تشخیص دهد"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"تعیین موقعیت نسبی بین دستگاه‌های اطراف"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"به برنامه اجازه داده می‌شود موقعیت نسبی بین دستگاه‌های اطراف را تعیین کند"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"‏اطلاعات ترجیحی سرویس پرداخت NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پرداخت NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
@@ -678,8 +680,8 @@
     <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت تنظیم اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="5541771463159727513">"عملکرد اثر انگشت لغو شد"</string>
     <string name="fingerprint_error_user_canceled" msgid="2017941773466506863">"کاربر عملیات اثر انگشت را لغو کرد"</string>
-    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تلاش‌ها از حد مجاز بیشتر شده است. به‌جای آن از قفل صفحه استفاده کنید."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"تلاش‌های بیش‌ازحد. حالا از قفل صفحه استفاده کنید."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تلاش‌های بسیار زیاد ناموفق. به‌جای آن، از قفل صفحه استفاده کنید."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"تلاش‌های بسیار زیاد ناموفق. حالا از قفل صفحه استفاده کنید."</string>
     <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"اثر انگشت پردازش نشد. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="3144806556204061862">"اثر انگشتی ثبت نشده است"</string>
     <string name="fingerprint_error_hw_not_present" msgid="5898827259419366359">"این دستگاه حسگر اثر انگشت ندارد"</string>
@@ -740,9 +742,9 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"عملیات شناسایی چهره لغو شد."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"کاربر «قفل‌گشایی با چهره» را لغو کرد"</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"تعداد تلاش‌ها از حد مجاز بیشتر شده است. قفل‌گشایی با چهره دردسترس نیست."</string>
-    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تلاش‌ها بیش از حدمجاز شده است. درعوض قفل صفحه را وارد کنید."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"تلاش‌های بسیار زیاد ناموفق. بعداً دوباره امتحان کنید."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"تلاش‌های بسیار زیاد ناموفق. قفل‌گشایی با چهره دردسترس نیست."</string>
+    <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تلاش‌های بسیار زیاد ناموفق. درعوض، قفل صفحه را وارد کنید."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چهره تأیید نشد. دوباره امتحان کنید."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"«قفل‌گشایی با چهره» را راه‌اندازی نکرده‌اید"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"از «قفل‌گشایی با چهره» در این دستگاه پشتیبانی نمی‌شود"</string>
@@ -914,7 +916,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"سفارشی"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"خانه"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"تلفن همراه"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"کاری"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"محل کار"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"نمابر محل کار"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"نمابر خانه"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"پی‌جو"</string>
@@ -1288,9 +1290,9 @@
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> درحال ارتقا است...."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
-    <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
+    <string name="android_upgrading_complete" msgid="409800058018374746">"درحال تمام کردن راه‌اندازی."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام تک‌ضرب بزنید."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"برای اتمام راه‌اندازی، صفحه را خاموش کنید"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"برای تمام کردن راه‌اندازی، صفحه را خاموش کنید"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"خاموش کردن"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام تک‌ضرب بزنید."</string>
@@ -1443,7 +1445,7 @@
     <string name="ext_media_checking_notification_message" product="tv" msgid="7986154434946021415">"درحال تجزیه‌وتحلیل فضای ذخیره‌سازی رسانه"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> جدید"</string>
     <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
-    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"برای راه‌اندازی تک‌ضرب بزنید"</string>
+    <string name="ext_media_new_notification_message" msgid="6095403121990786986">"برای راه‌اندازی، تک‌ضرب بزنید"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"برای راه‌اندازی، انتخاب کنید"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، تک‌ضرب بزنید."</string>
     <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"برای ذخیره کردن عکس، ویدیو، موسیقی و غیره"</string>
@@ -1455,7 +1457,7 @@
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید. برای خارج کردن، تک‌ضرب بزنید."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> تشخیص داده شد"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> کار نمی‌کند"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"برای راه‌اندازی تک‌ضرب بزنید."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"برای راه‌اندازی، تک‌ضرب بزنید."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"برای راه‌اندازی <xliff:g id="NAME">%s</xliff:g> در قالب پشتیبانی‌شده، انتخاب کنید."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"شاید لازم باشد دستگاه را دوباره قالب‌بندی کنید"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> به‌طور غیرمنتظره جدا شد"</string>
@@ -1563,7 +1565,7 @@
     <string name="gpsNotifMessage" msgid="7346649122793758032">"درخواست‌کننده <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="3719843080744112940">"بله"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"نه"</string>
-    <string name="sync_too_many_deletes" msgid="6999440774578705300">"از حد مجاز حذف فراتر رفت"</string>
+    <string name="sync_too_many_deletes" msgid="6999440774578705300">"از حد حذف کردن فراتر رفتید"</string>
     <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"‏<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف‌شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می‎خواهید چه کار بکنید؟"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"حذف موارد"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"واگرد موارد حذف شده"</string>

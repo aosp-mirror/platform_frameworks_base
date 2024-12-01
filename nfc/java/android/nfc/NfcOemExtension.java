@@ -39,6 +39,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.se.omapi.Reader;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -146,6 +147,48 @@ public final class NfcOemExtension {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ControllerMode{}
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_NONE = 0;
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_A = 1;
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_B = 1 << 1;
+
+    /**
+     * Technology Type for {@link #getActiveNfceeList()}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public static final int NFCEE_TECH_F = 1 << 2;
+
+    /**
+     * Nfc technology flags for {@link #getActiveNfceeList()}.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, value = {
+        NFCEE_TECH_NONE,
+        NFCEE_TECH_A,
+        NFCEE_TECH_B,
+        NFCEE_TECH_F,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NfceeTechnology {}
 
     /**
      * Event that Host Card Emulation is activated.
@@ -627,14 +670,18 @@ public final class NfcOemExtension {
     /**
      * Get the Active NFCEE (NFC Execution Environment) List
      *
-     * @return List of activated secure elements on success
-     *         which can contain "eSE" and "UICC", otherwise empty list.
+     * @see Reader#getName() for the list of possible NFCEE names.
+     *
+     * @return Map< String, @NfceeTechnology Integer >
+     *         A HashMap where keys are activated secure elements and
+     *         the values are bitmap of technologies supported by each secure element
+     *         on success keys can contain "eSE" and "UICC", otherwise empty map.
      */
     @NonNull
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
-    public List<String> getActiveNfceeList() {
+    public Map<String, Integer> getActiveNfceeList() {
         return NfcAdapter.callServiceReturn(() ->
-            NfcAdapter.sService.fetchActiveNfceeList(), new ArrayList<String>());
+            NfcAdapter.sService.fetchActiveNfceeList(), new HashMap<String, Integer>());
     }
 
     /**
@@ -701,15 +748,16 @@ public final class NfcOemExtension {
     /**
      * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond.
      * In case of {@code timeoutInMs} is zero or invalid polling will be stopped indefinitely.
-     * Use {@link #resumePolling() to resume the polling.
-     * @param timeoutInMs the pause polling duration in millisecond, ranging from 0 to 40000.
+     * Use {@link #resumePolling()} to resume the polling.
+     * Use {@link #getMaxPausePollingTimeoutMs()} to check the max timeout value.
+     * @param timeoutInMs the pause polling duration in millisecond.
      * @return status of the operation
      * @throws IllegalArgumentException if timeoutInMs value is invalid
      *         (0 < timeoutInMs < max).
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong int timeoutInMs) {
+    public @PollingStateChangeStatusCode int pausePolling(@DurationMillisLong long timeoutInMs) {
         return NfcAdapter.callServiceReturn(() ->
                 NfcAdapter.sService.pausePolling(timeoutInMs),
                 POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
@@ -726,6 +774,18 @@ public final class NfcOemExtension {
         return NfcAdapter.callServiceReturn(() ->
                 NfcAdapter.sService.resumePolling(),
                 POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE);
+    }
+
+    /**
+     * Gets the max pause polling timeout value in millisecond.
+     * @return long integer representing the max timeout
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    @DurationMillisLong
+    public long getMaxPausePollingTimeoutMills() {
+        return NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.getMaxPausePollingTimeoutMs(), 0L);
     }
 
     /**

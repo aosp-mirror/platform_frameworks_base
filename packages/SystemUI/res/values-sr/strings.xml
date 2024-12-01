@@ -72,7 +72,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Омогући USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Сазнајте више"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Снимак екрана"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Продужено откључавање је онемогућено"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Продужено откључано је онемогућено"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"је послао/ла слику"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Снимак екрана се чува на пословном профилу…"</string>
@@ -749,7 +749,7 @@
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Размак"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
-    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Тастер за брисање уназад"</string>
+    <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Тастер за репродукцију/паузирање"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Тастер за заустављање"</string>
     <string name="keyboard_key_media_next" msgid="8502476691227914952">"Тастер Следећа"</string>
@@ -797,13 +797,13 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Отвори листу апликација"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Отвори подешавања"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Отвори Помоћник"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Закључавање екрана"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Откључавање екрана"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Направи белешку"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Обављање више задатака истовремено"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Користите подељени екран са актуелном апликацијом с десне стране"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Користите подељени екран са актуелном апликацијом с леве стране"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Користи подељени екран са том апликацијом с десне стране"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Користи подељени екран са том апликацијом с леве стране"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Пређи са подељеног екрана на цео екран"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Пређите у апликацију здесна или испод док користите подељени екран"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Пређи у апликацију здесна или испод док је подељен екран"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Пређите у апликацију слева или изнад док користите подељени екран"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"У режиму подељеног екрана: замена једне апликације другом"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Унос"</string>
@@ -1339,7 +1339,7 @@
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Пречице за апликације"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Приступачност"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Тастерске пречице"</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Пречице претраге"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Претражите пречице"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за скупљање"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Икона за проширивање"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
