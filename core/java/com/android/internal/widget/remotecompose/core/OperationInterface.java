@@ -33,4 +33,14 @@ public interface OperationInterface {
     /** Debug utility to display an operation + indentation */
     @NonNull
     String deepToString(@NonNull String indent);
+
+    /**
+     * Returns true if the operation is marked as "dirty"
+     *
+     * @return true if dirty
+     */
+    boolean isDirty();
+
+    /** Mark the operation as "dirty" to indicate it will need to be re-executed. */
+    void markNotDirty();
 }

@@ -32,6 +32,11 @@ public class WidthModifierOperation extends DimensionModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_WIDTH;
     public static final String CLASS_NAME = "WidthModifierOperation";
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -94,6 +99,11 @@ public class WidthModifierOperation extends DimensionModifierOperation {
         return "WIDTH";
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the animation")

@@ -98,8 +98,10 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostNamedActionOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.MarqueeModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.OffsetModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RippleModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueFloatChangeActionOperation;
@@ -110,6 +112,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
+import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
 import com.android.internal.widget.remotecompose.core.types.BooleanConstant;
 import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
 import com.android.internal.widget.remotecompose.core.types.LongConstant;
@@ -126,6 +129,9 @@ public class Operations {
     public static final int CLICK_AREA = 64;
     public static final int ROOT_CONTENT_BEHAVIOR = 65;
     public static final int ROOT_CONTENT_DESCRIPTION = 103;
+    // TODO reorder before submitting
+    public static final int ACCESSIBILITY_SEMANTICS = 250;
+    //    public static final int ACCESSIBILITY_CUSTOM_ACTION = 251;
 
     ////////////////////////////////////////
     // Draw commands
@@ -223,6 +229,8 @@ public class Operations {
     public static final int MODIFIER_ZINDEX = 223;
     public static final int MODIFIER_GRAPHICS_LAYER = 224;
     public static final int MODIFIER_SCROLL = 226;
+    public static final int MODIFIER_MARQUEE = 228;
+    public static final int MODIFIER_RIPPLE = 229;
 
     public static final int LOOP_START = 215;
     public static final int LOOP_END = 216;
@@ -327,6 +335,8 @@ public class Operations {
         map.put(MODIFIER_ZINDEX, ZIndexModifierOperation::read);
         map.put(MODIFIER_GRAPHICS_LAYER, GraphicsLayerModifierOperation::read);
         map.put(MODIFIER_SCROLL, ScrollModifierOperation::read);
+        map.put(MODIFIER_MARQUEE, MarqueeModifierOperation::read);
+        map.put(MODIFIER_RIPPLE, RippleModifierOperation::read);
 
         map.put(OPERATIONS_LIST_END, OperationsListEnd::read);
 
@@ -362,5 +372,8 @@ public class Operations {
         map.put(PATH_TWEEN, PathTween::read);
         map.put(PATH_CREATE, PathCreate::read);
         map.put(PATH_ADD, PathAppend::read);
+
+        map.put(ACCESSIBILITY_SEMANTICS, CoreSemantics::read);
+        //        map.put(ACCESSIBILITY_CUSTOM_ACTION, CoreSemantics::read);
     }
 }

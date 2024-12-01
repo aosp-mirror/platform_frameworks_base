@@ -72,6 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non è possibile modificare l\'impostazione ID chiamante."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"I dati sono stati trasferiti a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1948,8 +1951,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"Da <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsiasi calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> sta disattivando alcuni suoni"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>

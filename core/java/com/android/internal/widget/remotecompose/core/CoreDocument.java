@@ -18,6 +18,7 @@ package com.android.internal.widget.remotecompose.core;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
@@ -28,7 +29,6 @@ import com.android.internal.widget.remotecompose.core.operations.layout.ClickMod
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.OperationsListEnd;
@@ -38,6 +38,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.TouchDow
 import com.android.internal.widget.remotecompose.core.operations.layout.TouchUpModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.ArrayList;
@@ -53,13 +54,14 @@ import java.util.Set;
 public class CoreDocument {
 
     private static final boolean DEBUG = false;
+    private static final int DOCUMENT_API_LEVEL = 2;
 
     @NonNull ArrayList<Operation> mOperations = new ArrayList<>();
 
     @Nullable RootLayoutComponent mRootLayoutComponent = null;
 
     @NonNull RemoteComposeState mRemoteComposeState = new RemoteComposeState();
-    @NonNull TimeVariables mTimeVariables = new TimeVariables();
+    @VisibleForTesting @NonNull public TimeVariables mTimeVariables = new TimeVariables();
     // Semantic version of the document
     @NonNull Version mVersion = new Version(0, 1, 0);
 
@@ -85,6 +87,11 @@ public class CoreDocument {
     private HashSet<Component> mAppliedTouchOperations = new HashSet<>();
 
     private int mLastId = 1; // last component id when inflating the file
+
+    /** Returns a version number that is monotonically increasing. */
+    public static int getDocumentApiLevel() {
+        return DOCUMENT_API_LEVEL;
+    }
 
     @Nullable
     public String getContentDescription() {
@@ -565,6 +572,7 @@ public class CoreDocument {
         TouchUpModifierOperation currentTouchUpModifier = null;
         TouchCancelModifierOperation currentTouchCancelModifier = null;
         LoopOperation currentLoop = null;
+        ScrollModifierOperation currentScrollModifier = null;
 
         mLastId = -1;
         for (Operation o : operations) {
@@ -579,8 +587,8 @@ public class CoreDocument {
                     mLastId = component.getComponentId();
                 }
             } else if (o instanceof ComponentEnd) {
-                if (currentComponent instanceof LayoutComponent) {
-                    ((LayoutComponent) currentComponent).inflate();
+                if (currentComponent != null) {
+                    currentComponent.inflate();
                 }
                 components.remove(components.size() - 1);
                 if (!components.isEmpty()) {
@@ -602,6 +610,9 @@ public class CoreDocument {
             } else if (o instanceof TouchCancelModifierOperation) {
                 currentTouchCancelModifier = (TouchCancelModifierOperation) o;
                 ops = currentTouchCancelModifier.getList();
+            } else if (o instanceof ScrollModifierOperation) {
+                currentScrollModifier = (ScrollModifierOperation) o;
+                ops = currentScrollModifier.getList();
             } else if (o instanceof OperationsListEnd) {
                 ops = currentComponent.getList();
                 if (currentClickModifier != null) {
@@ -616,6 +627,9 @@ public class CoreDocument {
                 } else if (currentTouchCancelModifier != null) {
                     ops.add(currentTouchCancelModifier);
                     currentTouchCancelModifier = null;
+                } else if (currentScrollModifier != null) {
+                    ops.add(currentScrollModifier);
+                    currentScrollModifier = null;
                 }
             } else if (o instanceof LoopOperation) {
                 currentLoop = (LoopOperation) o;
@@ -881,7 +895,7 @@ public class CoreDocument {
         }
         if (mRootLayoutComponent != null) {
             for (Component component : mAppliedTouchOperations) {
-                component.onTouchUp(context, this, x, y, true);
+                component.onTouchUp(context, this, x, y, dx, dy, true);
             }
             mAppliedTouchOperations.clear();
         }
@@ -1039,7 +1053,13 @@ public class CoreDocument {
                                 || context.getTheme() == Theme.UNSPECIFIED;
             }
             if (apply) {
-                op.apply(context);
+                if (op.isDirty() || op instanceof PaintOperation) {
+                    if (op.isDirty() && op instanceof VariableSupport) {
+                        op.markNotDirty();
+                        ((VariableSupport) op).updateVariables(context);
+                    }
+                    op.apply(context);
+                }
             }
         }
         if (context.getPaintContext().doesNeedsRepaint()

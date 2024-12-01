@@ -26,6 +26,7 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.DrawBase4;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
@@ -57,6 +58,11 @@ public class RoundedClipRectModifierOperation extends DrawBase4
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -67,6 +73,11 @@ public class RoundedClipRectModifierOperation extends DrawBase4
         apply(buffer, v1, v2, v3, v4);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", id(), "RoundedClipRectModifierOperation")
                 .description("clip with rectangle")
@@ -107,7 +118,8 @@ public class RoundedClipRectModifierOperation extends DrawBase4
     }
 
     @Override
-    public void layout(@NonNull RemoteContext context, float width, float height) {
+    public void layout(
+            @NonNull RemoteContext context, Component component, float width, float height) {
         this.mWidth = width;
         this.mHeight = height;
     }

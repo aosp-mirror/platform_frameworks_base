@@ -24,11 +24,13 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Describe a content description for the document */
-public class RootContentDescription extends Operation implements RemoteComposeOperation {
+public class RootContentDescription extends Operation
+        implements RemoteComposeOperation, AccessibleComponent {
     private static final int OP_CODE = Operations.ROOT_CONTENT_DESCRIPTION;
     private static final String CLASS_NAME = "RootContentDescription";
     int mContentDescription;
@@ -40,6 +42,11 @@ public class RootContentDescription extends Operation implements RemoteComposeOp
      */
     public RootContentDescription(int contentDescription) {
         this.mContentDescription = contentDescription;
+    }
+
+    @Override
+    public boolean isInterestingForSemantics() {
+        return mContentDescription != 0;
     }
 
     @Override
@@ -64,6 +71,16 @@ public class RootContentDescription extends Operation implements RemoteComposeOp
         return toString();
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescription;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
