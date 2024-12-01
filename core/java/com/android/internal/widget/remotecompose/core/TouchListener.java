@@ -15,10 +15,34 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+/** Interface used by objects to register for touch events */
 public interface TouchListener {
+    /**
+     * Called when touch down happens
+     *
+     * @param context The players context
+     * @param x the x location of the down touch
+     * @param y the y location of the down touch
+     */
     void touchDown(RemoteContext context, float x, float y);
 
+    /**
+     * called on touch up
+     *
+     * @param context the players context
+     * @param x the x location
+     * @param y the y location
+     * @param dx the x velocity when the touch up happened
+     * @param dy the y valocity when the touch up happened
+     */
     void touchUp(RemoteContext context, float x, float y, float dx, float dy);
 
+    /**
+     * Drag event (occur between down and up)
+     *
+     * @param context the players context
+     * @param x the x coord of the drag
+     * @param y the y coord of the drag
+     */
     void touchDrag(RemoteContext context, float x, float y);
 }

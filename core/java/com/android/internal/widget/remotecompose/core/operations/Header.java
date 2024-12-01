@@ -39,7 +39,7 @@ public class Header extends Operation implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.HEADER;
     private static final String CLASS_NAME = "Header";
     public static final int MAJOR_VERSION = 0;
-    public static final int MINOR_VERSION = 1;
+    public static final int MINOR_VERSION = 2;
     public static final int PATCH_VERSION = 0;
 
     int mMajorVersion;
@@ -115,6 +115,11 @@ public class Header extends Operation implements RemoteComposeOperation {
         return toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

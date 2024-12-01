@@ -90,6 +90,11 @@ public class ComponentVisibilityOperation extends Operation
         operations.add(new ComponentVisibilityOperation(valueId));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ComponentVisibility")
                 .description(
@@ -125,5 +130,6 @@ public class ComponentVisibilityOperation extends Operation
     }
 
     @Override
-    public void layout(@NonNull RemoteContext context, float width, float height) {}
+    public void layout(
+            @NonNull RemoteContext context, Component component, float width, float height) {}
 }

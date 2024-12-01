@@ -31,8 +31,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 public class ComponentValue extends Operation implements SerializableToString {
-    public static final int OP_CODE = Operations.COMPONENT_VALUE;
-    public static final String CLASS_NAME = "ComponentValue";
+    private static final int OP_CODE = Operations.COMPONENT_VALUE;
+    private static final String CLASS_NAME = "ComponentValue";
 
     public static final int WIDTH = 0;
     public static final int HEIGHT = 1;
@@ -50,6 +50,11 @@ public class ComponentValue extends Operation implements SerializableToString {
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
