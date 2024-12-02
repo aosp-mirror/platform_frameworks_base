@@ -19,6 +19,8 @@ package com.android.server.display.brightness.clamper;
 import static android.view.Display.STATE_OFF;
 import static android.view.Display.STATE_ON;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -267,6 +269,24 @@ public class BrightnessClamperControllerTest {
         mTestHandler.flush();
 
         verify(mMockExternalListener).onChanged();
+    }
+
+    @Test
+    public void test_doesNotScheduleRecalculateBeforeStart() {
+        mTestInjector = new TestInjector(List.of()) {
+            @Override
+            List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
+                    Handler handler, BrightnessClamperController.ClamperChangeListener listener,
+                    BrightnessClamperController.DisplayDeviceData displayDeviceData,
+                    float currentBrightness) {
+                listener.onChanged();
+                return super.getModifiers(flags, context, handler, listener, displayDeviceData,
+                        currentBrightness);
+            }
+        };
+        mClamperController = createBrightnessClamperController();
+
+        assertThat(mTestHandler.getPendingMessages()).isEmpty();
     }
 
     private BrightnessClamperController createBrightnessClamperController() {
