@@ -183,6 +183,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
             .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)
             .build()
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+        testExecutor.flushAll()
 
         assertThat(result).isTrue()
         verify(desktopTasksController).moveToNextDisplay(task.taskId)
