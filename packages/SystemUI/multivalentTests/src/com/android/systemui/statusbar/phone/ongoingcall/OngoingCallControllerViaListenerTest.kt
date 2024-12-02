@@ -87,7 +87,7 @@ private const val PROC_STATE_INVISIBLE = ActivityManager.PROCESS_STATE_FOREGROUN
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
-@DisableFlags(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP)
+@DisableFlags(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP, StatusBarChipsModernization.FLAG_NAME)
 class OngoingCallControllerViaListenerTest : SysuiTestCase() {
     private val kosmos = Kosmos()
 

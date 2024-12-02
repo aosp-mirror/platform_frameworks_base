@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.chips.call.domain.interactor
+package com.android.systemui.statusbar.phone.ongoingcall.domain.interactor
 
+import com.android.systemui.activity.data.repository.activityManagerRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.statusbar.chips.statusBarChipsLogger
-import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
-import com.android.systemui.statusbar.phone.ongoingcall.domain.interactor.ongoingCallInteractor
+import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 
-val Kosmos.callChipInteractor: CallChipInteractor by
+val Kosmos.ongoingCallInteractor: OngoingCallInteractor by
     Kosmos.Fixture {
-        CallChipInteractor(
-            scope = applicationCoroutineScope,
-            repository = ongoingCallRepository,
-            ongoingCallInteractor = ongoingCallInteractor,
-            logger = statusBarChipsLogger,
-        )
+      OngoingCallInteractor(
+          scope = applicationCoroutineScope,
+          activeNotificationsInteractor = activeNotificationsInteractor,
+          activityManagerRepository = activityManagerRepository,
+          logBuffer = logcatLogBuffer("OngoingCallInteractorKosmos"),
+      )
     }
