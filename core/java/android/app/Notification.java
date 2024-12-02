@@ -6024,8 +6024,9 @@ public class Notification implements Parcelable
         /**
          * @param isHeader If the notification is a notification header
          * @return An instance of mColors after resolving the palette
+         * @hide
          */
-        private Colors getColors(boolean isHeader) {
+        public Colors getColors(boolean isHeader) {
             mColors.resolvePalette(mContext, mN.color, !isHeader && mN.isColorized(), mInNightMode);
             return mColors;
         }
@@ -14765,7 +14766,6 @@ public class Notification implements Parcelable
      * A utility which stores and calculates the palette of colors used to color notifications.
      * @hide
      */
-    @VisibleForTesting
     public static class Colors {
         private int mPaletteIsForRawColor = COLOR_INVALID;
         private boolean mPaletteIsForColorized = false;
