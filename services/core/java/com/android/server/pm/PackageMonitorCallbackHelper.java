@@ -73,22 +73,16 @@ public class PackageMonitorCallbackHelper {
     }
 
     public void onUserRemoved(int userId) {
-        ArrayList<IRemoteCallback> targetUnRegisteredCallbacks = null;
+        final ArrayList<IRemoteCallback> targetUnRegisteredCallbacks = new ArrayList<>();
         synchronized (mLock) {
-            int registerCount = mCallbacks.getRegisteredCallbackCount();
-            for (int i = 0; i < registerCount; i++) {
-                RegisterUser registerUser =
-                        (RegisterUser) mCallbacks.getRegisteredCallbackCookie(i);
+            mCallbacks.broadcast((callback, user) -> {
+                RegisterUser registerUser = (RegisterUser) user;
                 if (registerUser.getUserId() == userId) {
-                    IRemoteCallback callback = mCallbacks.getRegisteredCallbackItem(i);
-                    if (targetUnRegisteredCallbacks == null) {
-                        targetUnRegisteredCallbacks = new ArrayList<>();
-                    }
                     targetUnRegisteredCallbacks.add(callback);
                 }
-            }
+            });
         }
-        if (targetUnRegisteredCallbacks != null && targetUnRegisteredCallbacks.size() > 0) {
+        if (!targetUnRegisteredCallbacks.isEmpty()) {
             int count = targetUnRegisteredCallbacks.size();
             for (int i = 0; i < count; i++) {
                 unregisterPackageMonitorCallback(targetUnRegisteredCallbacks.get(i));
