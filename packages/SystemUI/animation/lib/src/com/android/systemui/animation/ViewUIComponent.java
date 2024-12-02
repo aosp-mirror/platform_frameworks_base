@@ -57,6 +57,14 @@ public class ViewUIComponent implements UIComponent {
         mView = view;
     }
 
+    /**
+     * @return the view wrapped by this UI component.
+     * @hide
+     */
+    public View getView() {
+        return mView;
+    }
+
     @Override
     public float getAlpha() {
         return mView.getAlpha();
