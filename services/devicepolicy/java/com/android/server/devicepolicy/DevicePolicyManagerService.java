@@ -9085,11 +9085,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         CallerIdentity caller = getCallerIdentity(who);
 
-        if (!Flags.setAutoTimeEnabledCoexistence()) {
+        if (Flags.setAutoTimeEnabledCoexistence()) {
+            Preconditions.checkCallAuthorization(hasPermission(SET_TIME, caller.getPackageName()));
+        } else {
             Objects.requireNonNull(who, "ComponentName is null");
-        }
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
+        }
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
     }
@@ -9166,10 +9168,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who);
-
-        if (!Flags.setAutoTimeZoneEnabledCoexistence()) {
-            Objects.requireNonNull(who, "ComponentName is null");
-        }
+        Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
                 caller));
@@ -9193,10 +9192,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who);
-        Objects.requireNonNull(who, "ComponentName is null");
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
+            Preconditions.checkCallAuthorization(
+                hasPermission(SET_TIME_ZONE, caller.getPackageName()));
+        } else {
+            Objects.requireNonNull(who, "ComponentName is null");
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
                 caller));
+        }
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
 
