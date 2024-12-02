@@ -1882,3 +1882,10 @@ flag {
     description: "Implement the depth push scaling effect on Launcher when users pull down shade."
     bug: "370562309"
 }
+
+flag {
+    name: "spatial_model_app_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on the current app when users pull down shade."
+    bug: "370560660"
+}
