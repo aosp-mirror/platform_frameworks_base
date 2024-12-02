@@ -119,7 +119,7 @@ public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
     protected void handleUpdateState(State state, Object arg) {
         state.label = mContext.getString(R.string.qr_code_scanner_title);
         state.contentDescription = state.label;
-        state.icon = ResourceIcon.get(R.drawable.ic_qr_code_scanner);
+        state.icon = maybeLoadResourceIcon(R.drawable.ic_qr_code_scanner);
         state.state = mQRCodeScannerController.isAbleToLaunchScannerActivity() ? Tile.STATE_INACTIVE
                 : Tile.STATE_UNAVAILABLE;
         // The assumption is that if the OEM has the QR code scanner module enabled then the scanner

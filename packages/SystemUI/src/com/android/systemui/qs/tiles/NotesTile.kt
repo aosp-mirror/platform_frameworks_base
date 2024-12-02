@@ -40,14 +40,14 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import javax.inject.Inject
-import kotlinx.coroutines.runBlocking
 
 /** Quick settings tile: Notes */
 class NotesTile
-@Inject constructor(
+@Inject
+constructor(
     private val host: QSHost,
     private val uiEventLogger: QsEventLogger,
-    @Background private val  backgroundLooper: Looper,
+    @Background private val backgroundLooper: Looper,
     @Main private val mainHandler: Handler,
     private val falsingManager: FalsingManager,
     private val metricsLogger: MetricsLogger,
@@ -74,8 +74,7 @@ class NotesTile
     private lateinit var tileState: QSTileState
     private val config = qsTileConfigProvider.getConfig(TILE_SPEC)
 
-    override fun getTileLabel(): CharSequence =
-        mContext.getString(config.uiConfig.labelRes)
+    override fun getTileLabel(): CharSequence = mContext.getString(config.uiConfig.labelRes)
 
     override fun newTileState(): QSTile.State? {
         return QSTile.State().apply { state = Tile.STATE_INACTIVE }
@@ -88,13 +87,12 @@ class NotesTile
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
     override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
-        val model =
-            if (arg is NotesTileModel) arg else dataInteractor.getCurrentTileModel()
+        val model = if (arg is NotesTileModel) arg else dataInteractor.getCurrentTileModel()
         tileState = tileMapper.map(config, model)
 
         state?.apply {
             this.state = tileState.activationState.legacyState
-            icon = ResourceIcon.get(tileState.iconRes ?: R.drawable.ic_qs_notes)
+            icon = maybeLoadResourceIcon(tileState.iconRes ?: R.drawable.ic_qs_notes)
             label = tileState.label
             contentDescription = tileState.contentDescription
             expandedAccessibilityClassName = tileState.expandedAccessibilityClassName

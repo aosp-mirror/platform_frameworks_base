@@ -167,7 +167,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         } else {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
-        state.icon = ResourceIcon.get(state.state == Tile.STATE_ACTIVE
+        state.icon = maybeLoadResourceIcon(state.state == Tile.STATE_ACTIVE
                 ? R.drawable.qs_light_dark_theme_icon_on
                 : R.drawable.qs_light_dark_theme_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();
