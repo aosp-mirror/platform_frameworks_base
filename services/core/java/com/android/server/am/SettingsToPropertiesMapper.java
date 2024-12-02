@@ -146,6 +146,7 @@ public class SettingsToPropertiesMapper {
         "aaos_window_triage",
         "aaos_audio_triage",
         "aaos_power_triage",
+        "aaos_storage_triage",
         "aaos_sdv",
         "accessibility",
         "android_core_networking",
