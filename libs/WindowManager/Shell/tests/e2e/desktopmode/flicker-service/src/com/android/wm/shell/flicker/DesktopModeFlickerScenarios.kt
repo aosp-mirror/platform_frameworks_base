@@ -272,9 +272,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowCoversLeftHalfScreenAtEnd(DESKTOP_MODE_APP))
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversLeftHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_RIGHT_WITH_DRAG =
@@ -287,9 +289,11 @@ class DesktopModeFlickerScenarios {
                         TaggedCujTransitionMatcher(associatedTransitionRequired = false)
                     )
                     .build(),
-                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS +
-                        listOf(AppWindowCoversRightHalfScreenAtEnd(DESKTOP_MODE_APP))
-                            .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversRightHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
         val SNAP_RESIZE_WITH_DRAG_NON_RESIZABLE =
