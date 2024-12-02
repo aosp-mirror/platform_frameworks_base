@@ -26,8 +26,9 @@
 #define CHECK_NOT_NULL(name) \
     LOG_ALWAYS_FATAL_IF(name == nullptr, "nullptr passed as " #name " argument");
 
-ADisplayLutsEntry* ADisplayLutsEntry_createEntry(float* buffer, int32_t length, int32_t dimension,
-                                                 int32_t key) {
+ADisplayLutsEntry* ADisplayLutsEntry_createEntry(float* buffer, int32_t length,
+                                                 ADisplayLuts_Dimension dimension,
+                                                 ADisplayLuts_SamplingKey key) {
     CHECK_NOT_NULL(buffer);
     LOG_ALWAYS_FATAL_IF(length >= ADISPLAYLUTS_BUFFER_LENGTH_LIMIT,
                         "the lut raw buffer length is too big to handle");
@@ -64,7 +65,7 @@ void ADisplayLutsEntry_destroy(ADisplayLutsEntry* entry) {
 
 ADisplayLuts_Dimension ADisplayLutsEntry_getDimension(const ADisplayLutsEntry* entry) {
     CHECK_NOT_NULL(entry);
-    return static_cast<ADisplayLuts_Dimension>(entry->properties.dimension);
+    return entry->properties.dimension;
 }
 
 int32_t ADisplayLutsEntry_getSize(const ADisplayLutsEntry* entry) {
@@ -74,7 +75,7 @@ int32_t ADisplayLutsEntry_getSize(const ADisplayLutsEntry* entry) {
 
 ADisplayLuts_SamplingKey ADisplayLutsEntry_getSamplingKey(const ADisplayLutsEntry* entry) {
     CHECK_NOT_NULL(entry);
-    return static_cast<ADisplayLuts_SamplingKey>(entry->properties.samplingKey);
+    return entry->properties.samplingKey;
 }
 
 const float* ADisplayLutsEntry_getBuffer(const ADisplayLutsEntry* _Nonnull entry) {
