@@ -59,7 +59,7 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
-class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : HeadsUpManagerImplTest(flags) {
+class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplOldTest(flags) {
 
     private val mHeadsUpManagerLogger = HeadsUpManagerLogger(logcatLogBuffer())
 
