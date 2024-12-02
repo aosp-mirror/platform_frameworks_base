@@ -22,6 +22,7 @@ import android.animation.ValueAnimator
 import android.view.ViewPropertyAnimator
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
+import com.airbnb.lottie.LottieDrawable
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -66,7 +67,7 @@ suspend fun ViewPropertyAnimator.suspendAnimate(
  * is cancelled.
  */
 @Suppress("UNCHECKED_CAST")
-suspend fun <T> ValueAnimator.awaitAnimation(onValueChanged: (T) -> Unit) {
+suspend fun <T> ValueAnimator.suspendAnimate(onValueChanged: (T) -> Unit) {
     suspendCancellableCoroutine { continuation ->
         addListener(
             object : AnimatorListenerAdapter() {
@@ -100,6 +101,29 @@ suspend fun SpringAnimation.suspendAnimate(
         animationUpdateListener?.let(::removeUpdateListener)
         animationEndListener?.let(::removeEndListener)
         cancel()
+    }
+}
+
+/**
+ * Starts the animation and suspends until it's finished. Cancels the animation if the running
+ * coroutine is cancelled.
+ */
+suspend fun LottieDrawable.suspendAnimate() = suspendCancellableCoroutine { continuation ->
+    val listener =
+        object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                continuation.resumeIfCan(Unit)
+            }
+
+            override fun onAnimationCancel(animation: Animator) {
+                continuation.resumeIfCan(Unit)
+            }
+        }
+    addAnimatorListener(listener)
+    start()
+    continuation.invokeOnCancellation {
+        removeAnimatorListener(listener)
+        stop()
     }
 }
 

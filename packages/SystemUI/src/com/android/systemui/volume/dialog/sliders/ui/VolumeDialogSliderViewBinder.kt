@@ -26,7 +26,7 @@ import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderStateModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
-import com.android.systemui.volume.dialog.ui.utils.awaitAnimation
+import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
 import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
 import javax.inject.Inject
@@ -84,5 +84,5 @@ private suspend fun Slider.setValueAnimated(
             interpolator = DecelerateInterpolator()
             addListener(jankListener)
         }
-        .awaitAnimation<Float> { value = it }
+        .suspendAnimate<Float> { value = it }
 }
