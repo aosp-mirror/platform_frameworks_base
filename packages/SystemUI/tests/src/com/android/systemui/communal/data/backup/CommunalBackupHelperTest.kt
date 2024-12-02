@@ -32,6 +32,7 @@ import com.android.systemui.communal.data.backup.CommunalBackupUtilsTest.FakeWid
 import com.android.systemui.communal.data.db.CommunalDatabase
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.proto.toCommunalHubState
+import com.android.systemui.communal.shared.model.SpanValue
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -120,21 +121,32 @@ class CommunalBackupHelperTest : SysuiTestCase() {
                     componentName = "com.android.fakePackage1/fakeWidget1",
                     rank = 0,
                     userSerialNumber = 0,
+                    spanY = SpanValue.Responsive(1),
                 ),
                 FakeWidgetMetadata(
                     widgetId = 12,
                     componentName = "com.android.fakePackage2/fakeWidget2",
                     rank = 1,
                     userSerialNumber = 0,
+                    spanY = SpanValue.Responsive(2),
                 ),
                 FakeWidgetMetadata(
                     widgetId = 13,
                     componentName = "com.android.fakePackage3/fakeWidget3",
                     rank = 2,
                     userSerialNumber = 10,
+                    spanY = SpanValue.Responsive(3),
                 ),
             )
-            .onEach { dao.addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber) }
+            .onEach {
+                dao.addWidget(
+                    widgetId = it.widgetId,
+                    componentName = it.componentName,
+                    rank = it.rank,
+                    userSerialNumber = it.userSerialNumber,
+                    spanY = it.spanY,
+                )
+            }
     }
 
     private fun getBackupDataInputStream(): BackupDataInputStream {
