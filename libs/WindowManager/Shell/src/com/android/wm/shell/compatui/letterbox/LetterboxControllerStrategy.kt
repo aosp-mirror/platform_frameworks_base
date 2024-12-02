@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.compatui.letterbox
 
+import com.android.wm.shell.compatui.letterbox.LetterboxControllerStrategy.LetterboxMode.MULTIPLE_SURFACES
+import com.android.wm.shell.compatui.letterbox.LetterboxControllerStrategy.LetterboxMode.SINGLE_SURFACE
 import com.android.wm.shell.dagger.WMSingleton
 import javax.inject.Inject
 
@@ -24,24 +26,28 @@ import javax.inject.Inject
  * implementing letterbox in shell.
  */
 @WMSingleton
-class LetterboxControllerStrategy @Inject constructor() {
+class LetterboxControllerStrategy @Inject constructor(
+    private val letterboxConfiguration: LetterboxConfiguration
+) {
 
     // Different letterbox implementation modes.
     enum class LetterboxMode { SINGLE_SURFACE, MULTIPLE_SURFACES }
 
     @Volatile
-    private var currentMode: LetterboxMode = LetterboxMode.SINGLE_SURFACE
+    private var currentMode: LetterboxMode = SINGLE_SURFACE
 
     fun configureLetterboxMode() {
         // TODO(b/377875146): Define criteria for switching between [LetterboxMode]s.
-        currentMode = if (android.os.SystemProperties.getInt(
-                "multi_interface",
-                0
-            ) == 0
-        ) {
-            LetterboxMode.SINGLE_SURFACE
+        // At the moment, we use the presence of rounded corners to understand if to use a single
+        // surface or multiple surfaces for the letterbox areas. This rule will change when
+        // considering transparent activities which won't have rounded corners leading to the
+        // [MULTIPLE_SURFACES] option.
+        // The chosen strategy will depend on performance considerations,
+        // including surface memory usage and the impact of the rounded corners solution.
+        currentMode = if (letterboxConfiguration.isLetterboxActivityCornersRounded()) {
+            SINGLE_SURFACE
         } else {
-            LetterboxMode.MULTIPLE_SURFACES
+            MULTIPLE_SURFACES
         }
     }
 
