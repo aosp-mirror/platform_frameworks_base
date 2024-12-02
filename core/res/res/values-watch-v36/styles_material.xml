@@ -102,25 +102,4 @@
         <item name="maxHeight">@dimen/progress_bar_height</item>
         <item name="mirrorForRtl">true</item>
     </style>
-
-    <!-- TextAppearance for material3 AlertDialog Body  -->
-    <style name="TextAppearance.AlertDialog.Body1" parent="TextAppearance.Material.Body1">
-        <item name="android:fontFamily">font-family-flex-device-default</item>
-        <item name="android:fontVariationSettings">"'wdth' 90, 'wght' 450, 'ROND' 100, 'GRAD' 0"</item>
-        <item name="android:textSize">@dimen/alertDialog_material_text_size_body_1</item>
-        <item name="android:lineHeight">@dimen/alertDialog_material_line_height_body_1</item>
-        <item name="android:letterSpacing">@dimen/alertDialog_material_letter_spacing_body_1</item>
-    </style>
-
-    <!-- TextAppearance for material3 AlertDialog Title  -->
-    <style name="TextAppearance.AlertDialog.Title" parent="TextAppearance.Material.Title">
-        <item name="android:fontFamily">font-family-flex-device-default</item>
-        <item name="android:fontVariationSettings">"'wdth' 100, 'wght' 550, 'ROND' 100, 'GRAD' 0"</item>
-        <item name="android:textSize">@dimen/alertDialog_material_text_size_title</item>
-        <item name="android:lineHeight">@dimen/alertDialog_material_line_height_title</item>
-        <item name="android:letterSpacing">@dimen/alertDialog_material_letter_spacing_title</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:shadowRadius">0</item>
-        <item name="android:ellipsize">end</item>
-    </style>
 </resources>
