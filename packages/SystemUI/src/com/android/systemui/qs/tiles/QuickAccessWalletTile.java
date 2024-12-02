@@ -142,8 +142,16 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
         mUiHandler.post(
-                () -> mController.startQuickAccessUiIntent(
-                        mActivityStarter, animationController, mSelectedCard != null));
+                () -> {
+                    if (android.service.quickaccesswallet.Flags.launchSelectedCardFromQsTile()
+                            && mSelectedCard != null) {
+                        mController.startWalletCardPendingIntent(
+                                mSelectedCard, mActivityStarter, animationController);
+                    } else {
+                        mController.startQuickAccessUiIntent(
+                                mActivityStarter, animationController, mSelectedCard != null);
+                    }
+                });
     }
 
     @Override
