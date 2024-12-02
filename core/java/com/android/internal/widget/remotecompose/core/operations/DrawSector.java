@@ -27,7 +27,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 public class DrawSector extends DrawBase6 {
-    public static final int OP_CODE = Operations.DRAW_SECTOR;
+    private static final int OP_CODE = Operations.DRAW_SECTOR;
     private static final String CLASS_NAME = "DrawSector";
 
     /**

@@ -26,9 +26,10 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 
 import java.util.List;
 
+/** Scale the rendering matrix command */
 public class MatrixScale extends DrawBase4 {
-    public static final int OP_CODE = Operations.MATRIX_SCALE;
-    public static final String CLASS_NAME = "MatrixScale";
+    private static final int OP_CODE = Operations.MATRIX_SCALE;
+    private static final String CLASS_NAME = "MatrixScale";
 
     /**
      * Read this operation and add it to the list of operations
@@ -50,6 +51,11 @@ public class MatrixScale extends DrawBase4 {
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

@@ -117,7 +117,7 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
             for (float i = mFromOut; i < mUntilOut; i += mStepOut) {
                 context.getContext().loadFloat(mIndexVariableId, i);
                 for (Operation op : mList) {
-                    if (op instanceof VariableSupport) {
+                    if (op instanceof VariableSupport && op.isDirty()) {
                         ((VariableSupport) op).updateVariables(context.getContext());
                     }
                     op.apply(context.getContext());
@@ -126,6 +126,11 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "Loop";
@@ -154,6 +159,11 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
         operations.add(new LoopOperation(indexId, from, step, until));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Operations", OP_CODE, name())
                 .description("Loop. This operation execute" + " a list of action in a loop")

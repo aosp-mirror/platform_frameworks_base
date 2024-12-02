@@ -60,6 +60,11 @@ public class IntegerConstant extends Operation {
         return "IntegerConstant[" + mId + "] = " + mValue + "";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "IntegerConstant";
@@ -100,6 +105,11 @@ public class IntegerConstant extends Operation {
         operations.add(new IntegerConstant(id, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", id(), "IntegerConstant")
                 .description("A integer and its associated id")

@@ -83,7 +83,7 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
 
             assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Available::class.java)
             assertThat((ringerViewModel as RingerViewModelState.Available).uiModel.drawerState)
-                .isEqualTo(RingerDrawerState.Closed(normalRingerMode))
+                .isEqualTo(RingerDrawerState.Closed(normalRingerMode, normalRingerMode))
         }
 
     @Test
@@ -91,8 +91,9 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val ringerViewModel by collectLastValue(underTest.ringerViewModel)
             val vibrateRingerMode = RingerMode(RINGER_MODE_VIBRATE)
+            val normalRingerMode = RingerMode(RINGER_MODE_NORMAL)
 
-            setUpRingerModeAndOpenDrawer(RingerMode(RINGER_MODE_NORMAL))
+            setUpRingerModeAndOpenDrawer(normalRingerMode)
             // Select vibrate ringer mode.
             underTest.onRingerButtonClicked(vibrateRingerMode)
             controller.getState()
@@ -103,7 +104,8 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
             var uiModel = (ringerViewModel as RingerViewModelState.Available).uiModel
             assertThat(uiModel.availableButtons[uiModel.currentButtonIndex]?.ringerMode)
                 .isEqualTo(vibrateRingerMode)
-            assertThat(uiModel.drawerState).isEqualTo(RingerDrawerState.Closed(vibrateRingerMode))
+            assertThat(uiModel.drawerState)
+                .isEqualTo(RingerDrawerState.Closed(vibrateRingerMode, normalRingerMode))
 
             val silentRingerMode = RingerMode(RINGER_MODE_SILENT)
             // Open drawer
@@ -120,7 +122,8 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
             uiModel = (ringerViewModel as RingerViewModelState.Available).uiModel
             assertThat(uiModel.availableButtons[uiModel.currentButtonIndex]?.ringerMode)
                 .isEqualTo(silentRingerMode)
-            assertThat(uiModel.drawerState).isEqualTo(RingerDrawerState.Closed(silentRingerMode))
+            assertThat(uiModel.drawerState)
+                .isEqualTo(RingerDrawerState.Closed(silentRingerMode, vibrateRingerMode))
             assertThat(controller.hasScheduledTouchFeedback).isFalse()
             assertThat(vibratorHelper.totalVibrations).isEqualTo(2)
         }

@@ -49,6 +49,11 @@ public class OperationsListEnd extends Operation {
         return (indent != null ? indent : "") + toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "ListEnd";
@@ -77,6 +82,11 @@ public class OperationsListEnd extends Operation {
         operations.add(new OperationsListEnd());
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("End tag for list of operations.");

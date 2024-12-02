@@ -41,6 +41,11 @@ public class CanvasContent extends Component implements ComponentStartOperation 
         super(parent, componentId, animationId, x, y, width, height);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "CanvasContent";
@@ -77,6 +82,11 @@ public class CanvasContent extends Component implements ComponentStartOperation 
         operations.add(new CanvasContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")

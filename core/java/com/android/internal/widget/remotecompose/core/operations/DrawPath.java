@@ -62,6 +62,11 @@ public class DrawPath extends PaintOperation {
         operations.add(op);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

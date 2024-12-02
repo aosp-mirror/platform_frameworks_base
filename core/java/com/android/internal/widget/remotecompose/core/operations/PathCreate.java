@@ -48,6 +48,7 @@ public class PathCreate extends PaintOperation implements VariableSupport {
 
     @Override
     public void updateVariables(@NonNull RemoteContext context) {
+
         for (int i = 0; i < mFloatPath.length; i++) {
             float v = mFloatPath[i];
             if (Utils.isVariable(v)) {
@@ -81,7 +82,19 @@ public class PathCreate extends PaintOperation implements VariableSupport {
     @NonNull
     @Override
     public String toString() {
-        return "PathCreate[" + mInstanceId + "] = " + "\"" + deepToString(" ") + "\"";
+        return "PathCreate["
+                + mInstanceId
+                + "] = "
+                + "\""
+                + deepToString(" ")
+                + "\"["
+                + Utils.idStringFromNan(mFloatPath[1])
+                + "] "
+                + mOutputPath[1]
+                + " ["
+                + Utils.idStringFromNan(mFloatPath[2])
+                + "] "
+                + mOutputPath[2];
     }
 
     public static final int MOVE = 10;
@@ -99,6 +112,11 @@ public class PathCreate extends PaintOperation implements VariableSupport {
     public static final float CLOSE_NAN = Utils.asNan(CLOSE);
     public static final float DONE_NAN = Utils.asNan(DONE);
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -197,7 +215,9 @@ public class PathCreate extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void paint(PaintContext context) {}
+    public void paint(PaintContext context) {
+        apply(context.getContext());
+    }
 
     @Override
     public void apply(@NonNull RemoteContext context) {

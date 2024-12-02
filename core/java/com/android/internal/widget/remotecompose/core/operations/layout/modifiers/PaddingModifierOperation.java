@@ -113,6 +113,11 @@ public class PaddingModifierOperation extends Operation implements ModifierOpera
                 + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -150,6 +155,11 @@ public class PaddingModifierOperation extends Operation implements ModifierOpera
         operations.add(new PaddingModifierOperation(left, top, right, bottom));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Padding Modifier")
