@@ -324,6 +324,19 @@ public final class MediaProjection {
     }
 
     /**
+     * Stops projection.
+     * @hide
+     */
+    public void stop(@StopReason int stopReason) {
+        try {
+            Log.d(TAG, "Content Recording: stopping projection");
+            mImpl.stop(stopReason);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to stop projection", e);
+        }
+    }
+
+    /**
      * Get the underlying IMediaProjection.
      * @hide
      */

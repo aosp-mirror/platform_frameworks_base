@@ -26,6 +26,9 @@ import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_BACK
 import android.view.KeyEvent.KEYCODE_HOME
 import android.view.KeyEvent.KEYCODE_RECENT_APPS
+import android.view.KeyEvent.KEYCODE_TAB
+import android.view.KeyEvent.META_ALT_ON
+import android.view.KeyEvent.META_SHIFT_ON
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_SHORTCUT_HELPER_KEY_GLYPH
@@ -132,7 +135,33 @@ class SystemShortcutsSourceTest : SysuiTestCase() {
             assertThat(shortcuts).doesNotContain(hardwareShortcut)
         }
 
-    companion object {
+    @Test
+    fun shortcutGroups_containsCycleThroughRecentAppsShortcuts() {
+        testScope.runTest {
+            val groups = source.shortcutGroups(TEST_DEVICE_ID)
+
+            val shortcuts =
+                groups.flatMap { it.items }.map { c -> Triple(c.label, c.modifiers, c.keycode) }
+
+            val cycleThroughRecentAppsShortcuts =
+                listOf(
+                    Triple(
+                        context.getString(R.string.group_system_cycle_forward),
+                        META_ALT_ON,
+                        KEYCODE_TAB,
+                    ),
+                    Triple(
+                        context.getString(R.string.group_system_cycle_back),
+                        META_SHIFT_ON or META_ALT_ON,
+                        KEYCODE_TAB,
+                    ),
+                )
+
+            assertThat(shortcuts).containsAtLeastElementsIn(cycleThroughRecentAppsShortcuts)
+        }
+    }
+
+    private companion object {
         private const val TEST_DEVICE_ID = 1234
     }
 }

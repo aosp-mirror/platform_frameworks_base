@@ -504,12 +504,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 notificationIconArea.requireViewById(R.id.notificationIcons);
         mNotificationIconAreaInner = notificationIcons;
         int displayId = mHomeStatusBarComponent.getDisplayId();
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            //TODO(b/369337701): implement notification icons for all displays.
-            // Currently if we try to bind for all displays, there is a crash, because the same
-            // notification icon view can't have multiple parents.
-            mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons, displayId);
-        }
+        mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons, displayId);
 
         if (!StatusBarRootModernization.isEnabled()) {
             updateNotificationIconAreaAndOngoingActivityChip(/* animate= */ false);

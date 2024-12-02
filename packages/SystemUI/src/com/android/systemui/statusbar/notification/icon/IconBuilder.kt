@@ -25,7 +25,11 @@ import javax.inject.Inject
 
 /** Testable wrapper around Context. */
 class IconBuilder @Inject constructor(private val context: Context) {
-    fun createIconView(entry: NotificationEntry): StatusBarIconView {
+    @JvmOverloads
+    fun createIconView(
+        entry: NotificationEntry,
+        context: Context = this.context,
+    ): StatusBarIconView {
         return StatusBarIconView(
             context,
             "${entry.sbn.packageName}/0x${Integer.toHexString(entry.sbn.id)}",

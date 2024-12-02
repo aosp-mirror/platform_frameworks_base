@@ -214,6 +214,13 @@ public abstract class RemoteContext {
      */
     public abstract void hapticEffect(int type);
 
+    /** Set the repaint flag. This will trigger a repaint of the current document. */
+    public void needsRepaint() {
+        if (mPaintContext != null) {
+            mPaintContext.needsRepaint();
+        }
+    }
+
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
      * - UNSET : all operations will get executed - DATA : only operations dealing with DATA (eg

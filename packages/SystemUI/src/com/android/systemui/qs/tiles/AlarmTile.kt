@@ -42,35 +42,35 @@ constructor(
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
     private val userTracker: UserTracker,
-    nextAlarmController: NextAlarmController
-) : QSTileImpl<QSTile.State>(
-    host,
-    uiEventLogger,
-    backgroundLooper,
-    mainHandler,
-    falsingManager,
-    metricsLogger,
-    statusBarStateController,
-    activityStarter,
-    qsLogger
-) {
+    nextAlarmController: NextAlarmController,
+) :
+    QSTileImpl<QSTile.State>(
+        host,
+        uiEventLogger,
+        backgroundLooper,
+        mainHandler,
+        falsingManager,
+        metricsLogger,
+        statusBarStateController,
+        activityStarter,
+        qsLogger,
+    ) {
 
     private var lastAlarmInfo: AlarmManager.AlarmClockInfo? = null
-    private val icon = ResourceIcon.get(R.drawable.ic_alarm)
+    private var icon: QSTile.Icon? = null
     @VisibleForTesting internal val defaultIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
-    private val callback = NextAlarmController.NextAlarmChangeCallback { nextAlarm ->
-        lastAlarmInfo = nextAlarm
-        refreshState()
-    }
+    private val callback =
+        NextAlarmController.NextAlarmChangeCallback { nextAlarm ->
+            lastAlarmInfo = nextAlarm
+            refreshState()
+        }
 
     init {
         nextAlarmController.observe(this, callback)
     }
 
     override fun newTileState(): QSTile.State {
-        return QSTile.State().apply {
-            handlesLongClick = false
-        }
+        return QSTile.State().apply { handlesLongClick = false }
     }
 
     override fun handleClick(expandable: Expandable?) {
@@ -82,21 +82,28 @@ constructor(
         if (pendingIntent != null) {
             mActivityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)
         } else {
-            mActivityStarter.postStartActivityDismissingKeyguard(defaultIntent, 0,
-                    animationController)
+            mActivityStarter.postStartActivityDismissingKeyguard(
+                defaultIntent,
+                0,
+                animationController,
+            )
         }
     }
 
     override fun handleUpdateState(state: QSTile.State, arg: Any?) {
+        if (icon == null) {
+            icon = maybeLoadResourceIcon(R.drawable.ic_alarm)
+        }
         state.icon = icon
         state.label = tileLabel
         lastAlarmInfo?.let {
             state.secondaryLabel = formatNextAlarm(it)
             state.state = Tile.STATE_ACTIVE
-        } ?: run {
-            state.secondaryLabel = mContext.getString(R.string.qs_alarm_tile_no_alarm)
-            state.state = Tile.STATE_INACTIVE
         }
+            ?: run {
+                state.secondaryLabel = mContext.getString(R.string.qs_alarm_tile_no_alarm)
+                state.state = Tile.STATE_INACTIVE
+            }
         state.contentDescription = TextUtils.concat(state.label, ", ", state.secondaryLabel)
     }
 

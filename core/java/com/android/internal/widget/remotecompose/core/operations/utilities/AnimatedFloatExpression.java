@@ -20,58 +20,147 @@ import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.MonotonicSpline;
 
+import java.util.Random;
+
 /** high performance floating point expression evaluator used in animation */
 public class AnimatedFloatExpression {
     @NonNull static IntMap<String> sNames = new IntMap<>();
+
+    /** The START POINT in the float NaN space for operators */
     public static final int OFFSET = 0x310_000;
+
+    /** ADD operator */
     public static final float ADD = asNan(OFFSET + 1);
+
+    /** SUB operator */
     public static final float SUB = asNan(OFFSET + 2);
+
+    /** MUL operator */
     public static final float MUL = asNan(OFFSET + 3);
+
+    /** DIV operator */
     public static final float DIV = asNan(OFFSET + 4);
+
+    /** MOD operator */
     public static final float MOD = asNan(OFFSET + 5);
+
+    /** MIN operator */
     public static final float MIN = asNan(OFFSET + 6);
+
+    /** MAX operator */
     public static final float MAX = asNan(OFFSET + 7);
+
+    /** POW operator */
     public static final float POW = asNan(OFFSET + 8);
+
+    /** SQRT operator */
     public static final float SQRT = asNan(OFFSET + 9);
+
+    /** ABS operator */
     public static final float ABS = asNan(OFFSET + 10);
+
+    /** SIGN operator */
     public static final float SIGN = asNan(OFFSET + 11);
+
+    /** COPY_SIGN operator */
     public static final float COPY_SIGN = asNan(OFFSET + 12);
+
+    /** EXP operator */
     public static final float EXP = asNan(OFFSET + 13);
+
+    /** FLOOR operator */
     public static final float FLOOR = asNan(OFFSET + 14);
+
+    /** LOG operator */
     public static final float LOG = asNan(OFFSET + 15);
+
+    /** LN operator */
     public static final float LN = asNan(OFFSET + 16);
+
+    /** ROUND operator */
     public static final float ROUND = asNan(OFFSET + 17);
+
+    /** SIN operator */
     public static final float SIN = asNan(OFFSET + 18);
+
+    /** COS operator */
     public static final float COS = asNan(OFFSET + 19);
+
+    /** TAN operator */
     public static final float TAN = asNan(OFFSET + 20);
+
+    /** ASIN operator */
     public static final float ASIN = asNan(OFFSET + 21);
+
+    /** ACOS operator */
     public static final float ACOS = asNan(OFFSET + 22);
 
+    /** ATAN operator */
     public static final float ATAN = asNan(OFFSET + 23);
 
+    /** ATAN2 operator */
     public static final float ATAN2 = asNan(OFFSET + 24);
+
+    /** MAD operator */
     public static final float MAD = asNan(OFFSET + 25);
+
+    /** IFELSE operator */
     public static final float IFELSE = asNan(OFFSET + 26);
 
+    /** CLAMP operator */
     public static final float CLAMP = asNan(OFFSET + 27);
+
+    /** CBRT operator */
     public static final float CBRT = asNan(OFFSET + 28);
+
+    /** DEG operator */
     public static final float DEG = asNan(OFFSET + 29);
+
+    /** RAD operator */
     public static final float RAD = asNan(OFFSET + 30);
+
+    /** CEIL operator */
     public static final float CEIL = asNan(OFFSET + 31);
 
     // Array ops
+    /** A DEREF operator */
     public static final float A_DEREF = asNan(OFFSET + 32);
+
+    /** Array MAX operator */
     public static final float A_MAX = asNan(OFFSET + 33);
+
+    /** Array MIN operator */
     public static final float A_MIN = asNan(OFFSET + 34);
+
+    /** A_SUM operator */
     public static final float A_SUM = asNan(OFFSET + 35);
+
+    /** A_AVG operator */
     public static final float A_AVG = asNan(OFFSET + 36);
+
+    /** A_LEN operator */
     public static final float A_LEN = asNan(OFFSET + 37);
+
+    /** A_SPLINE operator */
     public static final float A_SPLINE = asNan(OFFSET + 38);
 
-    public static final int LAST_OP = OFFSET + 38;
+    /** RAND Random number 0..1 */
+    public static final float RAND = asNan(OFFSET + 39);
 
-    public static final float VAR1 = asNan(OFFSET + 39);
-    public static final float VAR2 = asNan(OFFSET + 40);
+    /** RAND_SEED operator */
+    public static final float RAND_SEED = asNan(OFFSET + 40);
+
+    /** LAST valid operator */
+    public static final int LAST_OP = OFFSET + 40;
+
+    /** VAR1 operator */
+    public static final float VAR1 = asNan(OFFSET + 41);
+
+    /** VAR2 operator */
+    public static final float VAR2 = asNan(OFFSET + 42);
+
+    /** VAR2 operator */
+    public static final float VAR3 = asNan(OFFSET + 43);
 
     // TODO CLAMP, CBRT, DEG, RAD, EXPM1, CEIL, FLOOR
     //    private static final float FP_PI = (float) Math.PI;
@@ -83,6 +172,7 @@ public class AnimatedFloatExpression {
     @NonNull float[] mVar = new float[0];
     @Nullable CollectionsAccess mCollectionsAccess;
     IntMap<MonotonicSpline> mSplineMap = new IntMap<>();
+    private Random mRandom;
 
     private float getSplineValue(int arrayId, float pos) {
         MonotonicSpline fit = mSplineMap.get(arrayId);
@@ -151,10 +241,11 @@ public class AnimatedFloatExpression {
     /**
      * Evaluate a float expression
      *
-     * @param ca
-     * @param exp
-     * @param var
-     * @return
+     * @param ca Access to float array collections
+     * @param exp the expressions
+     * @param len the length of the expression array
+     * @param var variables if the expression contains VAR tags
+     * @return the value the expression evaluated to
      */
     public float eval(
             @NonNull CollectionsAccess ca, @NonNull float[] exp, int len, @NonNull float... var) {
@@ -183,9 +274,10 @@ public class AnimatedFloatExpression {
     /**
      * Evaluate a float expression
      *
-     * @param ca
-     * @param exp
-     * @return
+     * @param ca The access to float arrays
+     * @param exp the expression
+     * @param len the length of the expression sections
+     * @return the value the expression evaluated to
      */
     public float eval(@NonNull CollectionsAccess ca, @NonNull float[] exp, int len) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
@@ -304,6 +396,8 @@ public class AnimatedFloatExpression {
         sNames.put(k++, "A_AVG");
         sNames.put(k++, "A_LEN");
         sNames.put(k++, "A_SPLINE");
+        sNames.put(k++, "RAND");
+        sNames.put(k++, "RAND_SEED");
 
         sNames.put(k++, "a[0]");
         sNames.put(k++, "a[1]");
@@ -518,9 +612,12 @@ public class AnimatedFloatExpression {
     private static final int OP_A_AVG = OFFSET + 36;
     private static final int OP_A_LEN = OFFSET + 37;
     private static final int OP_A_SPLINE = OFFSET + 38;
-    private static final int OP_FIRST_VAR = OFFSET + 39;
-    private static final int OP_SECOND_VAR = OFFSET + 40;
-    private static final int OP_THIRD_VAR = OFFSET + 41;
+    private static final int OP_RAND = OFFSET + 39;
+    private static final int OP_RAND_SEED = OFFSET + 40;
+
+    private static final int OP_FIRST_VAR = OFFSET + 41;
+    private static final int OP_SECOND_VAR = OFFSET + 42;
+    private static final int OP_THIRD_VAR = OFFSET + 43;
 
     int opEval(int sp, int id) {
         float[] array;
@@ -706,6 +803,26 @@ public class AnimatedFloatExpression {
             case OP_A_SPLINE:
                 id = fromNaN(mStack[sp - 1]);
                 mStack[sp - 1] = getSplineValue(id, mStack[sp]);
+                return sp - 1;
+
+            case OP_RAND:
+                if (mRandom == null) {
+                    mRandom = new Random();
+                }
+                mStack[sp + 1] = mRandom.nextFloat();
+                return sp + 1;
+
+            case OP_RAND_SEED:
+                float seed = mStack[sp];
+                if (seed == 0) {
+                    mRandom = new Random();
+                } else {
+                    if (mRandom == null) {
+                        mRandom = new Random(Float.floatToRawIntBits(seed));
+                    } else {
+                        mRandom.setSeed(Float.floatToRawIntBits(seed));
+                    }
+                }
                 return sp - 1;
 
             case OP_FIRST_VAR:

@@ -156,8 +156,7 @@ class InputManagerServiceTests {
                 }
 
                 override fun getKeyboardBacklightController(
-                    nativeService: NativeInputManagerService?,
-                    dataStore: PersistentDataStore?
+                    nativeService: NativeInputManagerService?
                 ): InputManagerService.KeyboardBacklightControllerInterface {
                     return kbdController
                 }

@@ -25,7 +25,7 @@ import com.android.systemui.plugins.clocks.DefaultClockFaceLayout.Companion.getS
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
@@ -38,20 +38,29 @@ constructor(
     val clockViewModel: KeyguardClockViewModel,
     private val systemBarUtils: SystemBarUtilsProxy,
 ) {
-
-    val selectedClockSize: StateFlow<ClockSizeSetting> = interactor.selectedClockSize
+    // overrideClockSize will override the clock size that is currently set to the system.
+    private val overrideClockSize: MutableStateFlow<ClockSizeSetting?> = MutableStateFlow(null)
+    val previewingClockSize =
+        combine(overrideClockSize, interactor.selectedClockSize) {
+            overrideClockSize,
+            selectedClockSize ->
+            overrideClockSize ?: selectedClockSize
+        }
 
     val shouldHideSmartspace: Flow<Boolean> =
-        combine(interactor.selectedClockSize, interactor.currentClockId, ::Pair).map {
-            (size, currentClockId) ->
+        combine(previewingClockSize, interactor.currentClockId, ::Pair).map { (size, clockId) ->
             when (size) {
                 // TODO (b/284122375) This is temporary. We should use clockController
                 //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
                 //      ClockRegistry.createCurrentClock is not reliable.
-                ClockSizeSetting.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
+                ClockSizeSetting.DYNAMIC -> clockId == "DIGITAL_CLOCK_WEATHER"
                 ClockSizeSetting.SMALL -> false
             }
         }
+
+    fun setOverrideClockSize(clockSize: ClockSizeSetting) {
+        overrideClockSize.value = clockSize
+    }
 
     fun getSmartspaceStartPadding(context: Context): Int {
         return KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)

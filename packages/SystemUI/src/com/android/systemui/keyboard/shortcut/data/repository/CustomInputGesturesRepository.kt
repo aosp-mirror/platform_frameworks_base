@@ -57,7 +57,11 @@ constructor(private val userTracker: UserTracker,
         _customInputGesture.onStart { refreshCustomInputGestures() }
 
     private fun refreshCustomInputGestures() {
-        _customInputGesture.value = retrieveCustomInputGestures()
+        setCustomInputGestures(inputGestures = retrieveCustomInputGestures())
+    }
+
+    private fun setCustomInputGestures(inputGestures: List<InputGestureData>) {
+        _customInputGesture.value = inputGestures
     }
 
     fun retrieveCustomInputGestures(): List<InputGestureData> {
@@ -108,6 +112,22 @@ constructor(private val userTracker: UserTracker,
                     )
                     ERROR_OTHER
                 }
+            }
+        }
+    }
+
+    suspend fun resetAllCustomInputGestures(): ShortcutCustomizationRequestResult {
+        return withContext(bgCoroutineContext) {
+            try {
+                inputManager.removeAllCustomInputGestures(/* filter= */ InputGestureData.Filter.KEY)
+                setCustomInputGestures(emptyList())
+                SUCCESS
+            } catch (e: Exception) {
+                Log.w(
+                    TAG,
+                    "Attempted to remove all custom shortcut but ran into a remote error: $e",
+                )
+                ERROR_OTHER
             }
         }
     }

@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 /** Base interface for RemoteCompose operations */
 public abstract class Operation {
 
+    private static final boolean ENABLE_DIRTY_FLAG_OPTIMIZATION = true;
+
     /** add the operation to the buffer */
     public abstract void write(@NonNull WireBuffer buffer);
 
@@ -33,4 +35,30 @@ public abstract class Operation {
     /** Debug utility to display an operation + indentation */
     @NonNull
     public abstract String deepToString(@NonNull String indent);
+
+    private boolean mDirty = true;
+
+    /** Mark the operation as "dirty" to indicate it will need to be re-executed. */
+    public void markDirty() {
+        mDirty = true;
+    }
+
+    /** Mark the operation as "not dirty" */
+    public void markNotDirty() {
+        if (ENABLE_DIRTY_FLAG_OPTIMIZATION) {
+            mDirty = false;
+        }
+    }
+
+    /**
+     * Returns true if the operation is marked as "dirty"
+     *
+     * @return true if dirty
+     */
+    public boolean isDirty() {
+        if (ENABLE_DIRTY_FLAG_OPTIMIZATION) {
+            return mDirty;
+        }
+        return true;
+    }
 }

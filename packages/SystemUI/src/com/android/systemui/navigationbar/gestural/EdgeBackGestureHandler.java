@@ -68,6 +68,7 @@ import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.window.BackEvent;
 
 import androidx.annotation.DimenRes;
@@ -585,6 +586,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mNonLinearFactor = getDimenFloat(res,
                 com.android.internal.R.dimen.back_progress_non_linear_factor);
         updateBackAnimationThresholds();
+        mBackgroundExecutor.execute(this::disableNavBarVirtualKeyHapticFeedback);
     }
 
     private float getDimenFloat(Resources res, @DimenRes int resId) {
@@ -1284,6 +1286,15 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mRightInset = rightInset;
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setInsets(leftInset, rightInset);
+        }
+    }
+
+    private void disableNavBarVirtualKeyHapticFeedback() {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .setNavBarVirtualKeyHapticFeedbackEnabled(false);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to disable navigation bar button haptics: ", e);
         }
     }
 

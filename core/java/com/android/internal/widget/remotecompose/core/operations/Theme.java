@@ -72,6 +72,11 @@ public class Theme extends Operation implements RemoteComposeOperation {
         return indent + toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

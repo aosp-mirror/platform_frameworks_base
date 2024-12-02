@@ -17,10 +17,10 @@
 <MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <Transition
-        android:id="@+id/transition"
+        android:id="@+id/close_to_open_transition"
         app:constraintSetEnd="@+id/volume_dialog_ringer_drawer_open"
         app:constraintSetStart="@+id/volume_dialog_ringer_drawer_close"
-        app:transitionEasing="path(0.05f, 0.7f, 0.1f, 1f)"
+        app:transitionEasing="cubic(0.05, 0.7, 0.1, 1.0)"
         app:duration="400">
     </Transition>
 

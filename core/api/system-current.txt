@@ -5254,9 +5254,9 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void close();
+    method public void close();
     method @Nullable public android.hardware.contexthub.HubServiceInfo getServiceInfo();
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
+    method @NonNull public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
@@ -7192,8 +7192,8 @@ package android.hardware.soundtrigger {
     method public int getAudioCapabilities();
     method @NonNull public byte[] getData();
     method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphrases();
-    method public boolean isAllowMultipleTriggers();
     method public boolean isCaptureRequested();
+    method public boolean isMultipleTriggersAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
   }
@@ -7201,11 +7201,11 @@ package android.hardware.soundtrigger {
   public static final class SoundTrigger.RecognitionConfig.Builder {
     ctor public SoundTrigger.RecognitionConfig.Builder();
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig build();
-    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAllowMultipleTriggers(boolean);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAudioCapabilities(int);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setCaptureRequested(boolean);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@NonNull byte[]);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setKeyphrases(@NonNull java.util.Collection<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setMultipleTriggersAllowed(boolean);
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -10610,28 +10610,6 @@ package android.net.util {
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
     method @Deprecated @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int, @NonNull byte[]);
-  }
-
-}
-
-package android.net.vcn {
-
-  public class VcnManager {
-    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void addVcnNetworkPolicyChangeListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnNetworkPolicyChangeListener);
-    method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public android.net.vcn.VcnNetworkPolicyResult applyVcnNetworkPolicy(@NonNull android.net.NetworkCapabilities, @NonNull android.net.LinkProperties);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void removeVcnNetworkPolicyChangeListener(@NonNull android.net.vcn.VcnManager.VcnNetworkPolicyChangeListener);
-  }
-
-  public static interface VcnManager.VcnNetworkPolicyChangeListener {
-    method public void onPolicyChanged();
-  }
-
-  public final class VcnNetworkPolicyResult implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
-    method public boolean isTeardownRequested();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnNetworkPolicyResult> CREATOR;
   }
 
 }
@@ -16271,6 +16249,7 @@ package android.telephony {
     method @FlaggedApi("android.permission.flags.get_emergency_role_holder_api_enabled") @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getEmergencyAssistancePackageName();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
+    method @FlaggedApi("com.android.internal.telephony.flags.get_group_id_level2") @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getGroupIdLevel2();
     method @FlaggedApi("com.android.internal.telephony.flags.support_isim_record") @NonNull @RequiresPermission(value=android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, conditional=true) public java.util.List<java.lang.String> getImsPcscfAddresses();
     method @FlaggedApi("com.android.internal.telephony.flags.support_isim_record") @Nullable @RequiresPermission(android.Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER) public String getImsPrivateUserIdentity();
     method @FlaggedApi("com.android.internal.telephony.flags.support_isim_record") @NonNull @RequiresPermission(value=android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, conditional=true) public java.util.List<android.net.Uri> getImsPublicUserIdentities();

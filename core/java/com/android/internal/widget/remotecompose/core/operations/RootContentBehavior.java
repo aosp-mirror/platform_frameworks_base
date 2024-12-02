@@ -200,6 +200,11 @@ public class RootContentBehavior extends Operation implements RemoteComposeOpera
         return toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -239,6 +244,11 @@ public class RootContentBehavior extends Operation implements RemoteComposeOpera
         operations.add(rootContentBehavior);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description("Describes the behaviour of the root")

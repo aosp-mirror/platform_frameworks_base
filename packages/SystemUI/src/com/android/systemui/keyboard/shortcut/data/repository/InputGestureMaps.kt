@@ -104,7 +104,6 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
                 R.string.shortcut_helper_category_system_apps,
 
             // Multitasking Category
-            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to R.string.shortcutHelper_category_recent_apps,
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to
                 R.string.shortcutHelper_category_split_screen,
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to

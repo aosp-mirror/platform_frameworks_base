@@ -61,6 +61,11 @@ public class ColorConstant extends Operation {
         return "ColorConstant[" + mColorId + "] = " + Utils.colorInt(mColor) + "";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

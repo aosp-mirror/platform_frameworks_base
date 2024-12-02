@@ -26,7 +26,12 @@ import java.io.PrintWriter;
 
 /**
  * Source of truth for keyguard state: If locked, occluded, has password, trusted etc.
+ *
+ * @deprecated this class is not supported when KEYGUARD_WM_STATE_REFACTOR is enabled.
+ * Use {@link com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor}
+ * or {@link com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor} instead.
  */
+@Deprecated
 public interface KeyguardStateController extends CallbackController<Callback>, Dumpable {
 
     /**

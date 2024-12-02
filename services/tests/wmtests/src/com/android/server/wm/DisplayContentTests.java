@@ -601,12 +601,12 @@ public class DisplayContentTests extends WindowTestsBase {
                 TYPE_WALLPAPER, TYPE_APPLICATION);
 
         // Verify not waiting for display without system decorations.
-        doReturn(false).when(secondaryDisplay).supportsSystemDecorations();
+        doReturn(false).when(secondaryDisplay).isSystemDecorationsSupported();
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify waiting for non-drawn windows on display with system decorations.
         reset(secondaryDisplay);
-        doReturn(true).when(secondaryDisplay).supportsSystemDecorations();
+        doReturn(true).when(secondaryDisplay).isSystemDecorationsSupported();
         assertTrue(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify not waiting for drawn windows on display with system decorations.
@@ -1865,7 +1865,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mRootWindowContainer.getDisplayRotationCoordinator();
         final DisplayContent defaultDisplayContent = mDisplayContent;
         final DisplayRotation defaultDisplayRotation = defaultDisplayContent.getDisplayRotation();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -1922,7 +1921,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -2263,25 +2261,25 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testForceDesktopMode() {
+    public void testIsPublicSecondaryDisplayWithDesktopModeForceEnabled() {
         mWm.mForceDesktopModeOnExternalDisplays = true;
         // Not applicable for default display
-        assertFalse(mDefaultDisplay.forceDesktopMode());
+        assertFalse(mDefaultDisplay.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Not applicable for private secondary display.
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.flags = FLAG_PRIVATE;
         final DisplayContent privateDc = createNewDisplay(displayInfo);
-        assertFalse(privateDc.forceDesktopMode());
+        assertFalse(privateDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Applicable for public secondary display.
         final DisplayContent publicDc = createNewDisplay();
-        assertTrue(publicDc.forceDesktopMode());
+        assertTrue(publicDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Make sure forceDesktopMode() is false when the force config is disabled.
         mWm.mForceDesktopModeOnExternalDisplays = false;
-        assertFalse(publicDc.forceDesktopMode());
+        assertFalse(publicDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
     }
 
     @Test

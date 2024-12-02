@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.window.DesktopModeFlags
 import android.window.TransitionInfo
@@ -78,7 +79,10 @@ class DesktopMixedTransitionHandler(
 
     /** Starts close transition and handles or delegates desktop task close animation. */
     override fun startRemoveTransition(wct: WindowContainerTransaction?): IBinder {
-        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue) {
+        if (
+            !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue &&
+                !DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX.isTrue
+        ) {
             return freeformTaskTransitionHandler.startRemoveTransition(wct)
         }
         requireNotNull(wct)
@@ -102,7 +106,8 @@ class DesktopMixedTransitionHandler(
     ): IBinder {
         if (
             !Flags.enableFullyImmersiveInDesktop() &&
-                !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue
+                !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue &&
+                !DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue
         ) {
             return transitions.startTransition(transitionType, wct, /* handler= */ null)
         }
@@ -193,8 +198,9 @@ class DesktopMixedTransitionHandler(
             logW("Should have closing desktop task")
             return false
         }
-        if (isLastDesktopTask(closeChange)) {
-            // Dispatch close desktop task animation to the default transition handlers.
+        if (isWallpaperActivityClosing(info)) {
+            // If the wallpaper activity is closing then the desktop is closing, animate the closing
+            // desktop by dispatching to other transition handlers.
             return dispatchCloseLastDesktopTaskAnimation(
                 transition,
                 info,
@@ -250,7 +256,10 @@ class DesktopMixedTransitionHandler(
             minimizeChange?.taskInfo?.taskId,
             immersiveExitChange?.taskInfo?.taskId,
         )
-        if (DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue) {
+        if (
+            DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS.isTrue ||
+                DesktopModeFlags.ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX.isTrue
+        ) {
             // Only apply minimize change reparenting here if we implement the new app launch
             // transitions, otherwise this reparenting is handled in the default handler.
             minimizeChange?.let {
@@ -412,10 +421,12 @@ class DesktopMixedTransitionHandler(
         ) != null
     }
 
-    private fun isLastDesktopTask(change: TransitionInfo.Change): Boolean =
-        change.taskInfo?.let {
-            desktopUserRepositories.getProfile(it.userId).getExpandedTaskCount(it.displayId) == 1
-        } ?: false
+    private fun isWallpaperActivityClosing(info: TransitionInfo) =
+        info.changes.any { change ->
+            change.mode == TRANSIT_CLOSE &&
+                change.taskInfo != null &&
+                DesktopWallpaperActivity.isWallpaperTask(change.taskInfo!!)
+        }
 
     private fun findCloseDesktopTaskChange(info: TransitionInfo): TransitionInfo.Change? {
         if (info.type != WindowManager.TRANSIT_CLOSE) return null

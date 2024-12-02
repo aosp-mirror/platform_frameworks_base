@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
  *
  * <p>This preference shows number in usage summary with enlarged font size.
  */
-public class UsageProgressBarPreference extends Preference {
+public class UsageProgressBarPreference extends Preference implements GroupSectionDividerMixin {
 
     private final Pattern mNumberPattern = Pattern.compile("[\\d]*[\\٫.,]?[\\d]+");
 

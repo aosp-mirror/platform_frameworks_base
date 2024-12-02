@@ -24,6 +24,7 @@ import android.service.quicksettings.Tile.STATE_INACTIVE
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -260,6 +261,28 @@ fun TileContainer(
                 .tilePadding(),
         content = content,
     )
+}
+
+@Composable
+fun LargeStaticTile(uiState: TileUiState, modifier: Modifier = Modifier) {
+    val colors = TileDefaults.getColorForState(uiState = uiState, iconOnly = false)
+
+    Box(
+        modifier
+            .clip(TileDefaults.animateTileShape(state = uiState.state))
+            .background(colors.background)
+            .height(TileHeight)
+            .tilePadding()
+    ) {
+        LargeTileContent(
+            label = uiState.label,
+            secondaryLabel = "",
+            icon = getTileIcon(icon = uiState.icon),
+            sideDrawable = null,
+            colors = colors,
+            squishiness = { 1f },
+        )
+    }
 }
 
 @Composable

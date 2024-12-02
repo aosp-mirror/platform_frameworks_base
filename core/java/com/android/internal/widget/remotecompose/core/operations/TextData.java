@@ -54,6 +54,11 @@ public class TextData extends Operation implements SerializableToString {
         return "TextData[" + mTextId + "] = \"" + Utils.trimString(mText, 10) + "\"";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

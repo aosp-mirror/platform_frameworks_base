@@ -523,12 +523,12 @@ class TestPhoneWindowManager {
     }
 
     void prepareBrightnessDecrease(float currentBrightness) {
-        doReturn(0.0f).when(mPowerManager)
-                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
-        doReturn(1.0f).when(mPowerManager)
-                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+        doReturn(0.0f).when(mPowerManager).getBrightnessConstraint(
+                DEFAULT_DISPLAY, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+        doReturn(1.0f).when(mPowerManager).getBrightnessConstraint(
+                DEFAULT_DISPLAY, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
         doReturn(currentBrightness).when(mDisplayManager)
-                .getBrightness(0);
+                .getBrightness(DEFAULT_DISPLAY);
     }
 
     void verifyNewBrightness(float newBrightness) {

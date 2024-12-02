@@ -24,6 +24,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.display.feature.flags.Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -70,6 +71,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
@@ -1838,6 +1840,30 @@ public final class DisplayManager {
     @RequiresPermission(MANAGE_DISPLAYS)
     public void setDisplayTopology(DisplayTopology topology) {
         mGlobal.setDisplayTopology(topology);
+    }
+
+    /**
+     * Register a listener to receive display topology updates.
+     * @param executor The executor specifying the thread on which the callbacks will be invoked
+     * @param listener The listener
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void registerTopologyListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<DisplayTopology> listener) {
+        mGlobal.registerTopologyListener(executor, listener, ActivityThread.currentPackageName());
+    }
+
+    /**
+     * Unregister a display topology listener.
+     * @param listener The listener to unregister
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_DISPLAYS)
+    public void unregisterTopologyListener(@NonNull Consumer<DisplayTopology> listener) {
+        mGlobal.unregisterTopologyListener(listener);
     }
 
     /**

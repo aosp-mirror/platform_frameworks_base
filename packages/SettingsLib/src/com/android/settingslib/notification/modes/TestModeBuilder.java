@@ -41,32 +41,24 @@ public class TestModeBuilder {
     private String mId;
     private AutomaticZenRule mRule;
     private ZenModeConfig.ZenRule mConfigZenRule;
+    private boolean mIsManualDnd;
 
     public static final ZenMode EXAMPLE = new TestModeBuilder().build();
 
-    public static final ZenMode MANUAL_DND_ACTIVE = manualDnd(Uri.EMPTY,
+    public static final ZenMode MANUAL_DND_ACTIVE = manualDnd(
             INTERRUPTION_FILTER_PRIORITY, true);
 
-    public static final ZenMode MANUAL_DND_INACTIVE = manualDnd(Uri.EMPTY,
+    public static final ZenMode MANUAL_DND_INACTIVE = manualDnd(
             INTERRUPTION_FILTER_PRIORITY, false);
 
     @NonNull
     public static ZenMode manualDnd(@NotificationManager.InterruptionFilter int filter,
             boolean isActive) {
-        return manualDnd(Uri.EMPTY, filter, isActive);
-    }
-
-    private static ZenMode manualDnd(Uri conditionId,
-            @NotificationManager.InterruptionFilter int filter, boolean isActive) {
-        return ZenMode.manualDndMode(
-                new AutomaticZenRule.Builder("Do Not Disturb", conditionId)
-                        .setInterruptionFilter(filter)
-                        .setType(AutomaticZenRule.TYPE_OTHER)
-                        .setManualInvocationAllowed(true)
-                        .setPackage(SystemZenRules.PACKAGE_ANDROID)
-                        .setZenPolicy(new ZenPolicy.Builder().disallowAllSounds().build())
-                        .build(),
-                isActive);
+        return new TestModeBuilder()
+                .makeManualDnd()
+                .setInterruptionFilter(filter)
+                .setActive(isActive)
+                .build();
     }
 
     public TestModeBuilder() {
@@ -91,6 +83,10 @@ public class TestModeBuilder {
         mConfigZenRule.enabled = previous.getRule().isEnabled();
         mConfigZenRule.pkg = previous.getRule().getPackageName();
         setActive(previous.isActive());
+
+        if (previous.isManualDnd()) {
+            makeManualDnd();
+        }
     }
 
     public TestModeBuilder setId(String id) {
@@ -222,7 +218,25 @@ public class TestModeBuilder {
         return this;
     }
 
+    public TestModeBuilder makeManualDnd() {
+        mIsManualDnd = true;
+        // Set the "fixed" properties of a DND mode. Other things, such as policy/filter may be set
+        // separately or copied from a preexisting DND, so they are not overwritten here.
+        setId(ZenMode.MANUAL_DND_MODE_ID);
+        setName("Do Not Disturb");
+        setType(AutomaticZenRule.TYPE_OTHER);
+        setManualInvocationAllowed(true);
+        setPackage(SystemZenRules.PACKAGE_ANDROID);
+        setConditionId(Uri.EMPTY);
+        return this;
+    }
+
     public ZenMode build() {
-        return new ZenMode(mId, mRule, mConfigZenRule);
+        if (mIsManualDnd) {
+            return ZenMode.manualDndMode(mRule, mConfigZenRule.condition != null
+                    && mConfigZenRule.condition.state == Condition.STATE_TRUE);
+        } else {
+            return new ZenMode(mId, mRule, mConfigZenRule);
+        }
     }
 }

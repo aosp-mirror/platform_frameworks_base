@@ -75,7 +75,6 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 import android.util.jar.StrictJarFile;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ComponentMutateUtils;
@@ -120,10 +119,9 @@ final class ScanPackageUtils {
      * @param currentTime The current time, in millis
      * @return The results of the scan
      */
-    @GuardedBy("mPm.mInstallLock")
     @VisibleForTesting
     @NonNull
-    public static ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
+    public static ScanResult scanPackageOnly(@NonNull ScanRequest request,
             PackageManagerServiceInjector injector,
             boolean isUnderFactoryTest, long currentTime)
             throws PackageManagerException {

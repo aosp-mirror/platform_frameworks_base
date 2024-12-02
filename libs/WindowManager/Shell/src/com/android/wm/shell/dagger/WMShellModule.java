@@ -17,6 +17,7 @@
 package com.android.wm.shell.dagger;
 
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 import static android.window.DesktopModeFlags.ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS;
@@ -73,8 +74,9 @@ import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.common.transition.TransitionStateHolder;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
 import com.android.wm.shell.compatui.letterbox.LetterboxController;
+import com.android.wm.shell.compatui.letterbox.LetterboxControllerStrategy;
 import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
-import com.android.wm.shell.compatui.letterbox.SingleSurfaceLetterboxController;
+import com.android.wm.shell.compatui.letterbox.MixedLetterboxController;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
@@ -854,7 +856,8 @@ public abstract class WMShellModule {
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             InteractionJankMonitor interactionJankMonitor) {
         return (Flags.enableDesktopWindowingTransitions()
-                        || ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS.isTrue())
+                        || ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS.isTrue()
+                        || ENABLE_DESKTOP_WINDOWING_ENTER_TRANSITIONS_BUGFIX.isTrue())
                 ? new SpringDragToDesktopTransitionHandler(
                         context, transitions, rootTaskDisplayAreaOrganizer, interactionJankMonitor)
                 : new DefaultDragToDesktopTransitionHandler(
@@ -1336,14 +1339,15 @@ public abstract class WMShellModule {
             @NonNull ShellInit shellInit,
             @NonNull Transitions transitions,
             @NonNull LetterboxController letterboxController,
-            @NonNull TransitionStateHolder transitionStateHolder
+            @NonNull TransitionStateHolder transitionStateHolder,
+            @NonNull LetterboxControllerStrategy letterboxControllerStrategy
     ) {
         return new LetterboxTransitionObserver(shellInit, transitions, letterboxController,
-                transitionStateHolder);
+                transitionStateHolder, letterboxControllerStrategy);
     }
 
     @WMSingleton
     @Binds
     abstract LetterboxController bindsLetterboxController(
-            SingleSurfaceLetterboxController letterboxController);
+            MixedLetterboxController letterboxController);
 }

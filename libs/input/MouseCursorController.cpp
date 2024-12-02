@@ -28,12 +28,14 @@
 #define INDENT "  "
 #define INDENT2 "    "
 
+namespace android {
+
 namespace {
+
 // Time to spend fading out the pointer completely.
 const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
-} // namespace
 
-namespace android {
+} // namespace
 
 // --- MouseCursorController ---
 
@@ -64,17 +66,23 @@ MouseCursorController::~MouseCursorController() {
     mLocked.pointerSprite.clear();
 }
 
-void MouseCursorController::move(float deltaX, float deltaY) {
+FloatPoint MouseCursorController::move(float deltaX, float deltaY) {
 #if DEBUG_MOUSE_CURSOR_UPDATES
     ALOGD("Move pointer by deltaX=%0.3f, deltaY=%0.3f", deltaX, deltaY);
 #endif
     if (deltaX == 0.0f && deltaY == 0.0f) {
-        return;
+        return {0, 0};
     }
 
+    // When transition occurs, the MouseCursorController object may or may not be deleted, depending
+    // if there's another display on the other side of the transition. At this point we still need
+    // to move the cursor to the boundary.
     std::scoped_lock lock(mLock);
-
-    setPositionLocked(mLocked.pointerX + deltaX, mLocked.pointerY + deltaY);
+    const FloatPoint position{mLocked.pointerX + deltaX, mLocked.pointerY + deltaY};
+    setPositionLocked(position.x, position.y);
+    // The amount of the delta that was not consumed as a result of the cursor
+    // hitting the edge of the display.
+    return {position.x - mLocked.pointerX, position.y - mLocked.pointerY};
 }
 
 void MouseCursorController::setPosition(float x, float y) {
@@ -85,19 +93,23 @@ void MouseCursorController::setPosition(float x, float y) {
     setPositionLocked(x, y);
 }
 
-void MouseCursorController::setPositionLocked(float x, float y) REQUIRES(mLock) {
-    const auto& v = mLocked.viewport;
-    if (!v.isValid()) return;
-
+FloatRect MouseCursorController::getBoundsLocked() REQUIRES(mLock) {
     // The valid bounds for a mouse cursor. Since the right and bottom edges are considered outside
     // the display, clip the bounds by one pixel instead of letting the cursor get arbitrarily
     // close to the outside edge.
-    const FloatRect bounds{
+    return FloatRect{
             static_cast<float>(mLocked.viewport.logicalLeft),
             static_cast<float>(mLocked.viewport.logicalTop),
             static_cast<float>(mLocked.viewport.logicalRight - 1),
             static_cast<float>(mLocked.viewport.logicalBottom - 1),
     };
+}
+
+void MouseCursorController::setPositionLocked(float x, float y) REQUIRES(mLock) {
+    const auto& v = mLocked.viewport;
+    if (!v.isValid()) return;
+
+    const FloatRect bounds = getBoundsLocked();
     mLocked.pointerX = std::max(bounds.left, std::min(bounds.right, x));
     mLocked.pointerY = std::max(bounds.top, std::min(bounds.bottom, y));
 

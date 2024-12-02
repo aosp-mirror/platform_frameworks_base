@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -71,7 +72,7 @@ constructor(
     private val primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor,
     private val falsingCollector: FalsingCollector,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val trustRepository: TrustRepository,
     @Application private val applicationScope: CoroutineScope,

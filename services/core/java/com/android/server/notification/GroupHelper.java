@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -243,7 +244,7 @@ public class GroupHelper {
                 if (!sbn.isAppGroup()) {
                     sbnToBeAutogrouped = maybeGroupWithSections(record, autogroupSummaryExists);
                 } else {
-                    maybeUngroupWithSections(record);
+                    maybeUngroupOnAppGrouped(record);
                 }
             } else {
                 final StatusBarNotification sbn = record.getSbn();
@@ -553,11 +554,13 @@ public class GroupHelper {
     }
 
     /**
-     * A non-app grouped notification has been added or updated
+     * A non-app-grouped notification has been added or updated
      * Evaluate if:
      * (a) an existing autogroup summary needs updated attributes
      * (b) a new autogroup summary needs to be added with correct attributes
      * (c) other non-app grouped children need to be moved to the autogroup
+     * (d) the notification has been updated from a groupable to a non-groupable section and needs
+     *  to trigger a cleanup
      *
      * This method implements autogrouping with sections support.
      *
@@ -567,11 +570,11 @@ public class GroupHelper {
             boolean autogroupSummaryExists) {
         final StatusBarNotification sbn = record.getSbn();
         boolean sbnToBeAutogrouped = false;
-
         final NotificationSectioner sectioner = getSection(record);
         if (sectioner == null) {
+            maybeUngroupOnNonGroupableUpdate(record);
             if (DEBUG) {
-                Log.i(TAG, "Skipping autogrouping for " + record + " no valid section found.");
+                Slog.i(TAG, "Skipping autogrouping for " + record + " no valid section found.");
             }
             return false;
         }
@@ -584,7 +587,6 @@ public class GroupHelper {
         if (record.getGroupKey().equals(fullAggregateGroupKey.toString())) {
             return false;
         }
-
         synchronized (mAggregatedNotifications) {
             ArrayMap<String, NotificationAttributes> ungrouped =
                 mUngroupedAbuseNotifications.getOrDefault(fullAggregateGroupKey, new ArrayMap<>());
@@ -601,11 +603,11 @@ public class GroupHelper {
             if (ungrouped.size() >= mAutoGroupAtCount || autogroupSummaryExists) {
                 if (DEBUG) {
                     if (ungrouped.size() >= mAutoGroupAtCount) {
-                        Log.i(TAG,
+                        Slog.i(TAG,
                             "Found >=" + mAutoGroupAtCount
                                 + " ungrouped notifications => force grouping");
                     } else {
-                        Log.i(TAG, "Found aggregate summary => force grouping");
+                        Slog.i(TAG, "Found aggregate summary => force grouping");
                     }
                 }
 
@@ -642,7 +644,24 @@ public class GroupHelper {
     }
 
     /**
-     * A notification was added that's app grouped.
+     * A notification was added that was previously part of a valid section and needs to trigger
+     * GH state cleanup.
+     */
+    private void maybeUngroupOnNonGroupableUpdate(NotificationRecord record) {
+        maybeUngroupWithSections(record, getPreviousValidSectionKey(record));
+    }
+
+    /**
+     * A notification was added that is app-grouped.
+     */
+    private void maybeUngroupOnAppGrouped(NotificationRecord record) {
+        maybeUngroupWithSections(record, getSectionGroupKeyWithFallback(record));
+    }
+
+    /**
+     * Called when a notification is posted and is either app-grouped or was previously part of
+     * a valid section and needs to trigger GH state cleanup.
+     *
      * Evaluate whether:
      * (a) an existing autogroup summary needs updated attributes
      * (b) if we need to remove our autogroup overlay for this notification
@@ -652,13 +671,20 @@ public class GroupHelper {
      *
      * And updates the internal state of un-app-grouped notifications and their flags.
      */
-    private void maybeUngroupWithSections(NotificationRecord record) {
+    private void maybeUngroupWithSections(NotificationRecord record,
+            @Nullable FullyQualifiedGroupKey fullAggregateGroupKey) {
+        if (fullAggregateGroupKey == null) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "Skipping maybeUngroupWithSections for " + record
+                            + " no valid section found.");
+            }
+            return;
+        }
+
         final StatusBarNotification sbn = record.getSbn();
         final String pkgName = sbn.getPackageName();
         final int userId = record.getUserId();
-        final FullyQualifiedGroupKey fullAggregateGroupKey = new FullyQualifiedGroupKey(userId,
-                pkgName, getSection(record));
-
         synchronized (mAggregatedNotifications) {
             // if this notification still exists and has an autogroup overlay, but is now
             // grouped by the app, clear the overlay
@@ -675,21 +701,22 @@ public class GroupHelper {
                 mAggregatedNotifications.put(fullAggregateGroupKey, aggregatedNotificationsAttrs);
 
                 if (DEBUG) {
-                    Log.i(TAG, "maybeUngroup removeAutoGroup: " + record);
+                    Slog.i(TAG, "maybeUngroup removeAutoGroup: " + record);
                 }
 
                 mCallback.removeAutoGroup(sbn.getKey());
 
                 if (aggregatedNotificationsAttrs.isEmpty()) {
                     if (DEBUG) {
-                        Log.i(TAG, "Aggregate group is empty: " + fullAggregateGroupKey);
+                        Slog.i(TAG, "Aggregate group is empty: " + fullAggregateGroupKey);
                     }
                     mCallback.removeAutoGroupSummary(userId, pkgName,
                             fullAggregateGroupKey.toString());
                     mAggregatedNotifications.remove(fullAggregateGroupKey);
                 } else {
                     if (DEBUG) {
-                        Log.i(TAG, "Aggregate group not empty, updating: " + fullAggregateGroupKey);
+                        Slog.i(TAG,
+                                "Aggregate group not empty, updating: " + fullAggregateGroupKey);
                     }
                     updateAggregateAppGroup(fullAggregateGroupKey, sbn.getKey(), true, 0);
                 }
@@ -860,8 +887,15 @@ public class GroupHelper {
         final StatusBarNotification sbn = record.getSbn();
         final String pkgName = sbn.getPackageName();
         final int userId = record.getUserId();
-        final FullyQualifiedGroupKey fullAggregateGroupKey = new FullyQualifiedGroupKey(userId,
-                pkgName, getSection(record));
+
+        final FullyQualifiedGroupKey fullAggregateGroupKey = getSectionGroupKeyWithFallback(record);
+        if (fullAggregateGroupKey == null) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "Skipping autogroup cleanup for " + record + " no valid section found.");
+            }
+            return;
+        }
 
         synchronized (mAggregatedNotifications) {
             ArrayMap<String, NotificationAttributes> ungrouped =
@@ -879,14 +913,15 @@ public class GroupHelper {
 
                 if (aggregatedNotificationsAttrs.isEmpty()) {
                     if (DEBUG) {
-                        Log.i(TAG, "Aggregate group is empty: " + fullAggregateGroupKey);
+                        Slog.i(TAG, "Aggregate group is empty: " + fullAggregateGroupKey);
                     }
                     mCallback.removeAutoGroupSummary(userId, pkgName,
                             fullAggregateGroupKey.toString());
                     mAggregatedNotifications.remove(fullAggregateGroupKey);
                 } else {
                     if (DEBUG) {
-                        Log.i(TAG, "Aggregate group not empty, updating: " + fullAggregateGroupKey);
+                        Slog.i(TAG,
+                                "Aggregate group not empty, updating: " + fullAggregateGroupKey);
                     }
                     updateAggregateAppGroup(fullAggregateGroupKey, sbn.getKey(), true, 0);
                 }
@@ -898,6 +933,52 @@ public class GroupHelper {
                 }
             }
         }
+    }
+
+    /**
+     * Get the section key for a notification. If the section is invalid, ie. notification is not
+     * auto-groupable, then return the previous valid section, if any.
+     * @param record the notification
+     * @return a section group key, null if not found
+     */
+    @Nullable
+    private FullyQualifiedGroupKey getSectionGroupKeyWithFallback(final NotificationRecord record) {
+        final NotificationSectioner sectioner = getSection(record);
+        if (sectioner != null) {
+            return new FullyQualifiedGroupKey(record.getUserId(), record.getSbn().getPackageName(),
+                sectioner);
+        } else {
+            return getPreviousValidSectionKey(record);
+        }
+    }
+
+    /**
+     * Get the previous valid section key of a notification that may have been updated to an invalid
+     * section. This is needed in case a notification is updated as an ungroupable (invalid section)
+     *  => auto-groups need to be updated/GH state cleanup.
+     * @param record the notification
+     * @return a section group key or null if not found
+     */
+    @Nullable
+    private FullyQualifiedGroupKey getPreviousValidSectionKey(final NotificationRecord record) {
+        synchronized (mAggregatedNotifications) {
+            final String recordKey = record.getKey();
+            // Search in ungrouped
+            for (Entry<FullyQualifiedGroupKey, ArrayMap<String, NotificationAttributes>>
+                        ungroupedSection : mUngroupedAbuseNotifications.entrySet()) {
+                if (ungroupedSection.getValue().containsKey(recordKey)) {
+                    return ungroupedSection.getKey();
+                }
+            }
+            // Search in aggregated
+            for (Entry<FullyQualifiedGroupKey, ArrayMap<String, NotificationAttributes>>
+                    aggregatedSection : mAggregatedNotifications.entrySet()) {
+                if (aggregatedSection.getValue().containsKey(recordKey)) {
+                    return aggregatedSection.getKey();
+                }
+            }
+        }
+        return null;
     }
 
     /**

@@ -73,7 +73,6 @@ public class ValueFloatChangeActionOperation extends Operation implements Action
     @Override
     public void runAction(
             RemoteContext context, CoreDocument document, Component component, float x, float y) {
-        System.out.println("OVERRIDE " + mTargetValueId + " TO " + mValue);
         context.overrideFloat(mTargetValueId, mValue);
     }
 

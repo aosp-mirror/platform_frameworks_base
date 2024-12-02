@@ -75,6 +75,7 @@ open class TopIntroPreference @JvmOverloads constructor(
         (holder.findViewById(R.id.collapsable_text_view) as? CollapsableTextView)?.apply {
             setCollapsable(isCollapsable)
             setMinLines(minLines)
+            visibility = if (title.isNullOrEmpty()) View.GONE else View.VISIBLE
             setText(title.toString())
             if (hyperlinkListener != null) {
                 setHyperlinkListener(hyperlinkListener)
