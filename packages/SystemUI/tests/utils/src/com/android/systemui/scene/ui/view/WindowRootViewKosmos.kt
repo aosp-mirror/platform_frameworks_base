@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package android.content.res
+package com.android.systemui.scene.ui.view
 
-import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 
-var Kosmos.mainResources: Resources by Kosmos.Fixture { applicationContext.resources }
-
-var Kosmos.mockResources: Resources by Kosmos.Fixture { mock(Resources::class.java) }
+val Kosmos.mockShadeRootView by Kosmos.Fixture { mock<WindowRootView>() }

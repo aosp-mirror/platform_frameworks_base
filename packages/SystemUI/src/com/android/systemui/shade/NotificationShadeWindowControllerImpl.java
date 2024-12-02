@@ -38,10 +38,10 @@ import android.view.IWindowSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
-import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Flags;
@@ -102,11 +102,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private final Context mContext;
     private final WindowRootViewComponent.Factory mWindowRootViewComponentFactory;
-    private final ViewCaptureAwareWindowManager mWindowManager;
+    private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
     private final ShadeWindowLogger mLogger;
+    private final LayoutParams mShadeWindowLayoutParams;
     private final LayoutParams mLpChanged;
     private final long mLockScreenDisplayTimeout;
     private final float mKeyguardPreferredRefreshRate; // takes precedence over max
@@ -148,7 +149,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     public NotificationShadeWindowControllerImpl(
             @ShadeDisplayAware Context context,
             WindowRootViewComponent.Factory windowRootViewComponentFactory,
-            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            @ShadeDisplayAware WindowManager windowManager,
             IActivityManager activityManager,
             DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
@@ -167,14 +168,16 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             UserTracker userTracker,
             NotificationShadeWindowModel notificationShadeWindowModel,
             SecureSettings secureSettings,
-            Lazy<CommunalInteractor> communalInteractor) {
+            Lazy<CommunalInteractor> communalInteractor,
+            @ShadeDisplayAware LayoutParams shadeWindowLayoutParams) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
-        mWindowManager = viewCaptureAwareWindowManager;
+        mWindowManager = windowManager;
         mActivityManager = activityManager;
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
         mLogger = logger;
+        mShadeWindowLayoutParams = shadeWindowLayoutParams;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -271,7 +274,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         // Now that the notification shade encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
-        mLp = ShadeWindowLayoutParams.INSTANCE.create(mContext);
+        // mLP is assigned here (instead of the constructor) as its null value is also used to check
+        // if the shade window has been attached.
+        mLp = mShadeWindowLayoutParams;
         mWindowManager.addView(mWindowRootView, mLp);
 
         // We use BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE here, however, there is special logic in
