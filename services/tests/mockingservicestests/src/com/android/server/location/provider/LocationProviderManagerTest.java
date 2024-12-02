@@ -1448,7 +1448,7 @@ public class LocationProviderManagerTest {
         Location test = new Location("any-provider");
         mManager.getPermittedLocation(test, PERMISSION_COARSE);
 
-        verify(provider, never()).getCoarsenedS2Cell(anyDouble(), anyDouble(), any());
+        verify(provider, never()).getCoarsenedS2Cells(anyDouble(), anyDouble(), anyInt(), any());
     }
 
     @Test
@@ -1472,7 +1472,7 @@ public class LocationProviderManagerTest {
         Location test = new Location("any-provider");
         mManager.getPermittedLocation(test, PERMISSION_COARSE);
 
-        verify(provider, never()).getCoarsenedS2Cell(anyDouble(), anyDouble(), any());
+        verify(provider, never()).getCoarsenedS2Cells(anyDouble(), anyDouble(), anyInt(), any());
     }
 
     @Test
@@ -1499,7 +1499,7 @@ public class LocationProviderManagerTest {
 
         // We can't test that 10.0, 20.0 was passed due to the offset. We only test that a call
         // happened.
-        verify(provider).getCoarsenedS2Cell(anyDouble(), anyDouble(), any());
+        verify(provider).getCoarsenedS2Cells(anyDouble(), anyDouble(), anyInt(), any());
     }
 
     @MediumTest
