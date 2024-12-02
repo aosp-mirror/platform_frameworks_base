@@ -1266,9 +1266,17 @@ public final class PowerManager {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public float getBrightnessConstraint(int constraint) {
+    public float getBrightnessConstraint(@BrightnessConstraint int constraint) {
+        return getBrightnessConstraint(Display.DEFAULT_DISPLAY, constraint);
+    }
+
+    /**
+     * Gets a float screen brightness setting for a specific display.
+     * @hide
+     */
+    public float getBrightnessConstraint(int displayId, @BrightnessConstraint int constraint) {
         try {
-            return mService.getBrightnessConstraint(constraint);
+            return mService.getBrightnessConstraint(displayId, constraint);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
