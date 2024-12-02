@@ -36,4 +36,7 @@ public interface VariableSupport {
      * @param context
      */
     void updateVariables(@NonNull RemoteContext context);
+
+    /** Mark the operation as dirty to indicate that the variables it references are out of date. */
+    void markDirty();
 }

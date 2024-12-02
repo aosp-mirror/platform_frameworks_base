@@ -20,6 +20,7 @@ import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.GeneralEasing;
 
+/** Value animation for layouts */
 public class AnimatableValue {
     boolean mIsVariable = false;
     int mId = 0;
@@ -34,6 +35,11 @@ public class AnimatableValue {
     int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
     FloatAnimation mMotionEasing;
 
+    /**
+     * Value to animate
+     *
+     * @param value value
+     */
     public AnimatableValue(float value) {
         if (Utils.isVariable(value)) {
             mId = Utils.idFromNan(value);
@@ -43,10 +49,21 @@ public class AnimatableValue {
         }
     }
 
+    /**
+     * Get the value
+     *
+     * @return the value
+     */
     public float getValue() {
         return mValue;
     }
 
+    /**
+     * Evaluate going through FloatAnimation if needed
+     *
+     * @param context the paint context
+     * @return the current value
+     */
     public float evaluate(PaintContext context) {
         if (!mIsVariable) {
             return mValue;

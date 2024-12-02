@@ -24,11 +24,12 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Operation to draw a given cached bitmap */
-public class DrawBitmapInt extends PaintOperation {
+public class DrawBitmapInt extends PaintOperation implements AccessibleComponent {
     private static final int OP_CODE = Operations.DRAW_BITMAP_INT;
     private static final String CLASS_NAME = "DrawBitmapInt";
     int mImageId;
@@ -106,6 +107,16 @@ public class DrawBitmapInt extends PaintOperation {
                 + ";";
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescId;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -170,6 +181,11 @@ public class DrawBitmapInt extends PaintOperation {
         operations.add(op);
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")

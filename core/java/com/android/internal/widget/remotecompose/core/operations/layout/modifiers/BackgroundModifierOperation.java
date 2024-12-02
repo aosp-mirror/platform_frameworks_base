@@ -25,6 +25,7 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
@@ -98,7 +99,8 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void layout(@NonNull RemoteContext context, float width, float height) {
+    public void layout(
+            @NonNull RemoteContext context, Component component, float width, float height) {
         this.mWidth = width;
         this.mHeight = height;
     }
@@ -109,6 +111,11 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         return "BackgroundModifierOperation(" + mWidth + " x " + mHeight + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -182,6 +189,11 @@ public class BackgroundModifierOperation extends DecoratorModifierOperation {
         context.restorePaint();
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Modifier Operations", OP_CODE, CLASS_NAME)
                 .description("define the Background Modifier")

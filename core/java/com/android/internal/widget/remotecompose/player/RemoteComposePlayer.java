@@ -85,6 +85,7 @@ public class RemoteComposePlayer extends FrameLayout {
             }
         } else {
             mInner.setDocument(null);
+            this.setAccessibilityDelegate(null);
         }
         mapColors();
         setupSensors();

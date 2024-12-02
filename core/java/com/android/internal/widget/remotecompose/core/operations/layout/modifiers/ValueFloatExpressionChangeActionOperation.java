@@ -101,6 +101,11 @@ public class ValueFloatExpressionChangeActionOperation extends Operation
         operations.add(new ValueFloatExpressionChangeActionOperation(valueId, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueIntegerExpressionChangeActionOperation")
                 .description(

@@ -32,12 +32,12 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.ringer.domain.VolumeDialogRingerInteractor
 import com.android.systemui.volume.dialog.ringer.shared.model.VolumeDialogRingerModel
 import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,8 +50,9 @@ import kotlinx.coroutines.launch
 
 private const val SHOW_RINGER_TOAST_COUNT = 12
 
+@VolumeDialogScope
 class VolumeDialogRingerDrawerViewModel
-@AssistedInject
+@Inject
 constructor(
     @Application private val applicationContext: Context,
     @VolumeDialog private val coroutineScope: CoroutineScope,
@@ -98,7 +99,10 @@ constructor(
                     RingerDrawerState.Open(ringerMode)
                 }
                 is RingerDrawerState.Open -> {
-                    RingerDrawerState.Closed(ringerMode)
+                    RingerDrawerState.Closed(
+                        ringerMode,
+                        (drawerState.value as RingerDrawerState.Open).mode,
+                    )
                 }
                 is RingerDrawerState.Closed -> {
                     RingerDrawerState.Open(ringerMode)
@@ -258,10 +262,5 @@ constructor(
             toastText?.let { Toast.makeText(applicationContext, it, Toast.LENGTH_SHORT).show() }
             interactor.updateToastCount(seenToastCount)
         }
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(): VolumeDialogRingerDrawerViewModel
     }
 }

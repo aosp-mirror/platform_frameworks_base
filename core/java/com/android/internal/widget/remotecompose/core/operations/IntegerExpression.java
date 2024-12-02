@@ -136,6 +136,11 @@ public class IntegerExpression extends Operation implements VariableSupport {
         return "IntegerExpression[" + mId + "] = (" + s + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

@@ -38,6 +38,7 @@ public class PathData extends Operation implements VariableSupport {
     int mInstanceId;
     float[] mFloatPath;
     float[] mOutputPath;
+    private boolean mPathChanged = true;
 
     PathData(int instanceId, float[] floatPath) {
         mInstanceId = instanceId;
@@ -50,7 +51,11 @@ public class PathData extends Operation implements VariableSupport {
         for (int i = 0; i < mFloatPath.length; i++) {
             float v = mFloatPath[i];
             if (Utils.isVariable(v)) {
+                float tmp = mOutputPath[i];
                 mOutputPath[i] = Float.isNaN(v) ? context.getFloat(Utils.idFromNan(v)) : v;
+                if (tmp != mOutputPath[i]) {
+                    mPathChanged = true;
+                }
             } else {
                 mOutputPath[i] = v;
             }
@@ -107,6 +112,11 @@ public class PathData extends Operation implements VariableSupport {
     public static final float CLOSE_NAN = Utils.asNan(CLOSE);
     public static final float DONE_NAN = Utils.asNan(DONE);
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -216,6 +226,9 @@ public class PathData extends Operation implements VariableSupport {
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        context.loadPathData(mInstanceId, mOutputPath);
+        if (mPathChanged) {
+            context.loadPathData(mInstanceId, mOutputPath);
+        }
+        mPathChanged = false;
     }
 }

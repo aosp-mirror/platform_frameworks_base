@@ -96,6 +96,11 @@ public class LongConstant extends Operation {
         operations.add(new LongConstant(id, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, "LongConstant")
                 .description("A boolean and its associated id")
