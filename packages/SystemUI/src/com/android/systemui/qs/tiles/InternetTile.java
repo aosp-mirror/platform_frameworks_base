@@ -30,7 +30,7 @@ import android.service.quicksettings.Tile;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Switch;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
@@ -136,7 +136,7 @@ public class InternetTile extends QSTileImpl<QSTile.BooleanState> {
     }
 
     @Override
-    public void secondaryClick(@Nullable Expandable expandable) {
+    public void handleSecondaryClick(@Nullable Expandable expandable) {
         // TODO(b/358352265): Figure out the correct action for the secondary click
         // Toggle Wifi
         mWifiStateWorker.setWifiEnabled(!mWifiStateWorker.isWifiEnabled());
@@ -577,7 +577,7 @@ public class InternetTile extends QSTileImpl<QSTile.BooleanState> {
         state.contentDescription = minimalContentDescription.toString();
         state.dualLabelContentDescription = r.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         if (DEBUG) {
             Log.d(TAG, "handleUpdateWifiState: " + "BooleanState = " + state.toString());
         }
@@ -594,7 +594,7 @@ public class InternetTile extends QSTileImpl<QSTile.BooleanState> {
         boolean mobileDataEnabled = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
         state.value = mobileDataEnabled;
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
 
         if (cb.mAirplaneModeEnabled && cb.mQsTypeIcon != TelephonyIcons.ICON_CWF) {
             state.state = Tile.STATE_INACTIVE;

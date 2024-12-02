@@ -40,6 +40,7 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.WalletCard;
 import android.service.quicksettings.Tile;
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -186,6 +187,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             state.secondaryLabel = null;
             state.sideViewCustomDrawable = null;
         }
+        state.expandedAccessibilityClassName = Button.class.getName();
     }
 
     @Override
