@@ -321,7 +321,7 @@ interface IActivityManager {
     oneway void removeContentProvider(in IBinder connection, boolean stable);
     @UnsupportedAppUsage
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
-    void unbindFinished(in IBinder token, in Intent service, boolean doRebind);
+    void unbindFinished(in IBinder token, in Intent service);
     @UnsupportedAppUsage
     void setProcessImportant(in IBinder token, int pid, boolean isForeground, String reason);
     void setServiceForeground(in ComponentName className, in IBinder token,
