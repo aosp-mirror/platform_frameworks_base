@@ -659,7 +659,6 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
     private void verifySetSafeModeAlarm(
             boolean safeModeEnabledByCaller,
-            boolean safeModeConfigFlagEnabled,
             boolean expectingSafeModeEnabled)
             throws Exception {
         final VcnGatewayConnectionConfig config =
@@ -670,7 +669,6 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
                 mock(VcnGatewayConnection.Dependencies.class);
         setUpWakeupMessage(
                 mSafeModeTimeoutAlarm, VcnGatewayConnection.SAFEMODE_TIMEOUT_ALARM, deps);
-        doReturn(safeModeConfigFlagEnabled).when(mFeatureFlags).safeModeConfig();
 
         final VcnGatewayConnection connection =
                 new VcnGatewayConnection(
@@ -694,35 +692,17 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
-    public void testSafeModeEnabled_configFlagEnabled() throws Exception {
+    public void testSafeModeEnabled() throws Exception {
         verifySetSafeModeAlarm(
                 true /* safeModeEnabledByCaller */,
-                true /* safeModeConfigFlagEnabled */,
                 true /* expectingSafeModeEnabled */);
     }
 
     @Test
-    public void testSafeModeEnabled_configFlagDisabled() throws Exception {
-        verifySetSafeModeAlarm(
-                true /* safeModeEnabledByCaller */,
-                false /* safeModeConfigFlagEnabled */,
-                true /* expectingSafeModeEnabled */);
-    }
-
-    @Test
-    public void testSafeModeDisabled_configFlagEnabled() throws Exception {
+    public void testSafeModeDisabled() throws Exception {
         verifySetSafeModeAlarm(
                 false /* safeModeEnabledByCaller */,
-                true /* safeModeConfigFlagEnabled */,
                 false /* expectingSafeModeEnabled */);
-    }
-
-    @Test
-    public void testSafeModeDisabled_configFlagDisabled() throws Exception {
-        verifySetSafeModeAlarm(
-                false /* safeModeEnabledByCaller */,
-                false /* safeModeConfigFlagEnabled */,
-                true /* expectingSafeModeEnabled */);
     }
 
     private Consumer<VcnNetworkAgent> setupNetworkAndGetUnwantedCallback() {
