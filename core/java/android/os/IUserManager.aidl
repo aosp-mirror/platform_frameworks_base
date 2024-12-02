@@ -83,6 +83,8 @@ interface IUserManager {
     long getUserCreationTime(int userId);
     int getUserSwitchability(int userId);
     boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable, int mUserId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USERS)")
+    int getUserLogoutability(int userId);
     boolean isRestricted(int userId);
     boolean canHaveRestrictedProfile(int userId);
     boolean canAddPrivateProfile(int userId);
