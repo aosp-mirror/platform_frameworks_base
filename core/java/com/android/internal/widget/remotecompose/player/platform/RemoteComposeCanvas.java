@@ -209,15 +209,27 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mARContext.loadFloat(id, value);
     }
 
+    /**
+     * Returns true if the document supports drag touch events
+     *
+     * @return true if draggable content, false otherwise
+     */
+    public boolean isDraggable() {
+        if (mDocument == null) {
+            return false;
+        }
+        return mDocument.getDocument().hasTouchListener();
+    }
+
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
 
-    public void addClickListener(ClickCallbacks callback) {
+    public void addIdActionListener(ClickCallbacks callback) {
         if (mDocument == null) {
             return;
         }
-        mDocument.getDocument().addClickListener((id, metadata) -> callback.click(id, metadata));
+        mDocument.getDocument().addIdActionListener((id, metadata) -> callback.click(id, metadata));
     }
 
     public int getTheme() {
@@ -267,6 +279,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                     invalidate();
                     return true;
                 }
+                return false;
 
             case MotionEvent.ACTION_UP:
                 mInActionDown = false;
@@ -280,6 +293,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                     invalidate();
                     return true;
                 }
+                return false;
 
             case MotionEvent.ACTION_MOVE:
                 if (mInActionDown) {
@@ -293,6 +307,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                     }
                     return true;
                 }
+                return false;
         }
         return false;
     }

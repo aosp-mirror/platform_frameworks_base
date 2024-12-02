@@ -15,11 +15,19 @@
  */
 package com.android.internal.widget.remotecompose.accessibility;
 
+import android.view.View;
+
+import com.android.internal.widget.remotecompose.core.CoreDocument;
+
 /**
- * This class is the entry point for finding the AccessibilityDelegate for a RemoteCompose document.
+ * Interface for registering and clearing accessibility delegates for remote compose players.
+ *
+ * <p>This interface is responsible for managing the accessibility delegate associated with a remote
+ * compose player view. It allows for setting and clearing the delegate, which is used to handle
+ * accessibility events and provide accessibility information for the remote compose content.
  */
-public class RemoteComposeTouchHelper {
-    /** Get the platform specific accessibility delegate registrar */
-    public static final RemoteComposeAccessibilityRegistrar REGISTRAR =
-            new PlatformRemoteComposeAccessibilityRegistrar();
+public interface RemoteComposeAccessibilityRegistrar {
+    void setAccessibilityDelegate(View remoteComposePlayer, CoreDocument document);
+
+    void clearAccessibilityDelegate(View remoteComposePlayer);
 }

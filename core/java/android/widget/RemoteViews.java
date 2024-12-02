@@ -5825,7 +5825,7 @@ public class RemoteViews implements Parcelable, Filter {
                 }
                 try (ByteArrayInputStream is = new ByteArrayInputStream(bytes.get(0))) {
                     player.setDocument(new RemoteComposeDocument(is));
-                    player.addClickListener((viewId, metadata) -> {
+                    player.addIdActionListener((viewId, metadata) -> {
                         mActions.forEach(action -> {
                             if (viewId == action.mViewId
                                     && action instanceof SetOnClickResponse setOnClickResponse) {
