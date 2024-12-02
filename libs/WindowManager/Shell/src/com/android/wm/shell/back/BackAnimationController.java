@@ -552,6 +552,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     // start animation immediately for non-gestural sources (without ACTION_MOVE
                     // events)
                     mThresholdCrossed = true;
+                    mPointersPilfered = true;
                     onGestureStarted(touchX, touchY, swipeEdge);
                     mShouldStartOnNextMoveEvent = false;
                 } else {
