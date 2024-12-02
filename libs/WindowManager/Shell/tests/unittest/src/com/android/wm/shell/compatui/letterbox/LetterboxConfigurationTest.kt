@@ -26,6 +26,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.internal.R
 import com.android.wm.shell.ShellTestCase
 import java.util.function.Consumer
+import kotlin.test.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
@@ -51,6 +52,14 @@ class LetterboxConfigurationTest : ShellTestCase() {
         val COLOR_WHITE_RESOURCE_ID = android.R.color.white
         @JvmStatic
         val COLOR_BLACK_RESOURCE_ID = android.R.color.black
+        @JvmStatic
+        val ROUNDED_CORNER_RADIUS_DEFAULT = 32
+        @JvmStatic
+        val ROUNDED_CORNER_RADIUS_VALID = 16
+        @JvmStatic
+        val ROUNDED_CORNER_RADIUS_NONE = 0
+        @JvmStatic
+        val ROUNDED_CORNER_RADIUS_INVALID = -10
     }
 
     @Test
@@ -112,6 +121,68 @@ class LetterboxConfigurationTest : ShellTestCase() {
         }
     }
 
+    @Test
+    fun `default rounded corner radius is used if override is not set`() {
+        runTestScenario { r ->
+            r.setDefaultRoundedCornerRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+            r.loadConfiguration()
+            r.checkRoundedCornersRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+        }
+    }
+
+    @Test
+    fun `new rounded corner radius is used after setting a valid value`() {
+        runTestScenario { r ->
+            r.setDefaultRoundedCornerRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+            r.loadConfiguration()
+            r.overrideRoundedCornersRadius(ROUNDED_CORNER_RADIUS_VALID)
+            r.checkRoundedCornersRadius(ROUNDED_CORNER_RADIUS_VALID)
+        }
+    }
+
+    @Test
+    fun `no rounded corner radius is used after setting an invalid value`() {
+        runTestScenario { r ->
+            r.setDefaultRoundedCornerRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+            r.loadConfiguration()
+            r.overrideRoundedCornersRadius(ROUNDED_CORNER_RADIUS_INVALID)
+            r.checkRoundedCornersRadius(ROUNDED_CORNER_RADIUS_NONE)
+        }
+    }
+
+    @Test
+    fun `has rounded corners for different values`() {
+        runTestScenario { r ->
+            r.setDefaultRoundedCornerRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+            r.loadConfiguration()
+            r.checkIsLetterboxActivityCornersRounded(true)
+
+            r.overrideRoundedCornersRadius(ROUNDED_CORNER_RADIUS_INVALID)
+            r.checkIsLetterboxActivityCornersRounded(false)
+
+            r.overrideRoundedCornersRadius(ROUNDED_CORNER_RADIUS_NONE)
+            r.checkIsLetterboxActivityCornersRounded(false)
+
+            r.overrideRoundedCornersRadius(ROUNDED_CORNER_RADIUS_VALID)
+            r.checkIsLetterboxActivityCornersRounded(true)
+        }
+    }
+
+    @Test
+    fun `reset rounded corners radius`() {
+        runTestScenario { r ->
+            r.setDefaultRoundedCornerRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+            r.loadConfiguration()
+            r.checkRoundedCornersRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+
+            r.overrideRoundedCornersRadius(ROUNDED_CORNER_RADIUS_VALID)
+            r.checkRoundedCornersRadius(ROUNDED_CORNER_RADIUS_VALID)
+
+            r.resetRoundedCornersRadius()
+            r.checkRoundedCornersRadius(ROUNDED_CORNER_RADIUS_DEFAULT)
+        }
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
@@ -135,6 +206,11 @@ class LetterboxConfigurationTest : ShellTestCase() {
                 .getColor(R.color.config_letterboxBackgroundColor, null)
         }
 
+        fun setDefaultRoundedCornerRadius(radius: Int) {
+            doReturn(radius).`when`(resources)
+                .getInteger(R.integer.config_letterboxActivityCornersRadius)
+        }
+
         fun loadConfiguration() {
             letterboxConfig = LetterboxConfiguration(ctx)
         }
@@ -147,14 +223,30 @@ class LetterboxConfigurationTest : ShellTestCase() {
             letterboxConfig.resetLetterboxBackgroundColor()
         }
 
+        fun resetRoundedCornersRadius() {
+            letterboxConfig.resetLetterboxActivityCornersRadius()
+        }
+
         fun overrideBackgroundColorId(@ColorRes colorId: Int) {
             letterboxConfig.setLetterboxBackgroundColorResourceId(colorId)
+        }
+
+        fun overrideRoundedCornersRadius(radius: Int) {
+            letterboxConfig.setLetterboxActivityCornersRadius(radius)
         }
 
         fun checkBackgroundColor(expected: Color) {
             val colorComponents = letterboxConfig.getBackgroundColorRgbArray()
             val expectedComponents = expected.components
             assert(expectedComponents.contentEquals(colorComponents))
+        }
+
+        fun checkRoundedCornersRadius(expected: Int) {
+            assertEquals(expected, letterboxConfig.getLetterboxActivityCornersRadius())
+        }
+
+        fun checkIsLetterboxActivityCornersRounded(expected: Boolean) {
+            assertEquals(expected, letterboxConfig.isLetterboxActivityCornersRounded())
         }
     }
 }
