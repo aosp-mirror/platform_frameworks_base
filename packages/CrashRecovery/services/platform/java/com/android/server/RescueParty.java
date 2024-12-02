@@ -387,7 +387,7 @@ public class RescueParty {
             callingPackageList.addAll(callingPackages);
             Slog.i(TAG, "Starting to observe: " + callingPackageList + ", updated namespace: "
                     + updatedNamespace);
-            PackageWatchdog.getInstance(context).startObservingHealth(
+            PackageWatchdog.getInstance(context).startExplicitHealthCheck(
                     rescuePartyObserver,
                     callingPackageList,
                     DEFAULT_OBSERVING_DURATION_MS);

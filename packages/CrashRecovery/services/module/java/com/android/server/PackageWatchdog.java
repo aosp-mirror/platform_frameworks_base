@@ -392,7 +392,7 @@ public class PackageWatchdog {
      * @throws IllegalStateException if the observer was not previously registered
      * @hide
      */
-    public void startObservingHealth(@NonNull PackageHealthObserver observer,
+    public void startExplicitHealthCheck(@NonNull PackageHealthObserver observer,
             @NonNull List<String> packageNames, long timeoutMs) {
         synchronized (sLock) {
             if (!mAllObservers.containsKey(observer.getUniqueIdentifier())) {
@@ -918,7 +918,7 @@ public class PackageWatchdog {
          * passed to observers in these API.
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
-         * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
+         * it has not explicitly asked to watch the package with {@link #startExplicitHealthCheck}.
          */
         default boolean mayObservePackage(@NonNull String packageName) {
             return false;

@@ -281,7 +281,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     @AnyThread
     @NonNull
     public void startObservingHealth(@NonNull List<String> packages, @NonNull long durationMs) {
-        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
+        PackageWatchdog.getInstance(mContext).startExplicitHealthCheck(this, packages, durationMs);
     }
 
     @AnyThread

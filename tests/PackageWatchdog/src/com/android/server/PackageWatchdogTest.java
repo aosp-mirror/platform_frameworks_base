@@ -231,7 +231,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -248,9 +248,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
                         new VersionedPackage(APP_B, VERSION_CODE)),
@@ -268,7 +268,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.unregisterHealthObserver(observer);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
@@ -285,9 +285,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.unregisterHealthObserver(observer2);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
@@ -305,7 +305,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
         moveTimeForwardAndDispatch(SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
@@ -322,9 +322,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A), LONG_DURATION);
         moveTimeForwardAndDispatch(SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
@@ -344,13 +344,13 @@ public class PackageWatchdogTest {
 
         // Start observing APP_A
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then advance time half-way
         moveTimeForwardAndDispatch(SHORT_DURATION / 2);
 
         // Start observing APP_A again
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then advance time such that it should have expired were it not for the second observation
         moveTimeForwardAndDispatch((SHORT_DURATION / 2) + 1);
@@ -373,9 +373,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog1.registerHealthObserver(observer1, mTestExecutor);
-        watchdog1.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog1.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog1.registerHealthObserver(observer2, mTestExecutor);
-        watchdog1.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
+        watchdog1.startExplicitHealthCheck(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
         // Then advance time and run IO Handler so file is saved
         mTestLooper.dispatchAll();
         // Then start a new watchdog
@@ -405,9 +405,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A below the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount() - 1; i++) {
@@ -434,9 +434,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_B), SHORT_DURATION);
 
         // Then fail APP_C (not observed) above the threshold
         raiseFatalFailureAndDispatch(watchdog,
@@ -469,7 +469,7 @@ public class PackageWatchdogTest {
             };
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A (different version) above the threshold
         raiseFatalFailureAndDispatch(watchdog,
@@ -499,16 +499,16 @@ public class PackageWatchdogTest {
 
         // Start observing for all impact observers
         watchdog.registerHealthObserver(observerNone, mTestExecutor);
-        watchdog.startObservingHealth(observerNone, Arrays.asList(APP_A, APP_B, APP_C, APP_D),
+        watchdog.startExplicitHealthCheck(observerNone, Arrays.asList(APP_A, APP_B, APP_C, APP_D),
                 SHORT_DURATION);
         watchdog.registerHealthObserver(observerHigh, mTestExecutor);
-        watchdog.startObservingHealth(observerHigh, Arrays.asList(APP_A, APP_B, APP_C),
+        watchdog.startExplicitHealthCheck(observerHigh, Arrays.asList(APP_A, APP_B, APP_C),
                 SHORT_DURATION);
         watchdog.registerHealthObserver(observerMid, mTestExecutor);
-        watchdog.startObservingHealth(observerMid, Arrays.asList(APP_A, APP_B),
+        watchdog.startExplicitHealthCheck(observerMid, Arrays.asList(APP_A, APP_B),
                 SHORT_DURATION);
         watchdog.registerHealthObserver(observerLow, mTestExecutor);
-        watchdog.startObservingHealth(observerLow, Arrays.asList(APP_A),
+        watchdog.startExplicitHealthCheck(observerLow, Arrays.asList(APP_A),
                 SHORT_DURATION);
 
         // Then fail all apps above the threshold
@@ -549,16 +549,16 @@ public class PackageWatchdogTest {
 
         // Start observing for all impact observers
         watchdog.registerHealthObserver(observerNone, mTestExecutor);
-        watchdog.startObservingHealth(observerNone, Arrays.asList(APP_A, APP_B, APP_C, APP_D),
+        watchdog.startExplicitHealthCheck(observerNone, Arrays.asList(APP_A, APP_B, APP_C, APP_D),
                 SHORT_DURATION);
         watchdog.registerHealthObserver(observerHigh, mTestExecutor);
-        watchdog.startObservingHealth(observerHigh, Arrays.asList(APP_A, APP_B, APP_C),
+        watchdog.startExplicitHealthCheck(observerHigh, Arrays.asList(APP_A, APP_B, APP_C),
                 SHORT_DURATION);
         watchdog.registerHealthObserver(observerMid, mTestExecutor);
-        watchdog.startObservingHealth(observerMid, Arrays.asList(APP_A, APP_B),
+        watchdog.startExplicitHealthCheck(observerMid, Arrays.asList(APP_A, APP_B),
                 SHORT_DURATION);
         watchdog.registerHealthObserver(observerLow, mTestExecutor);
-        watchdog.startObservingHealth(observerLow, Arrays.asList(APP_A),
+        watchdog.startExplicitHealthCheck(observerLow, Arrays.asList(APP_A),
                 SHORT_DURATION);
 
         // Then fail all apps above the threshold
@@ -607,9 +607,9 @@ public class PackageWatchdogTest {
 
         // Start observing for observerFirst and observerSecond with failure handling
         watchdog.registerHealthObserver(observerFirst, mTestExecutor);
-        watchdog.startObservingHealth(observerFirst, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observerFirst, Arrays.asList(APP_A), LONG_DURATION);
         watchdog.registerHealthObserver(observerSecond, mTestExecutor);
-        watchdog.startObservingHealth(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
 
         // Then fail APP_A above the threshold
         raiseFatalFailureAndDispatch(watchdog,
@@ -673,9 +673,9 @@ public class PackageWatchdogTest {
 
         // Start observing for observerFirst and observerSecond with failure handling
         watchdog.registerHealthObserver(observerFirst, mTestExecutor);
-        watchdog.startObservingHealth(observerFirst, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observerFirst, Arrays.asList(APP_A), LONG_DURATION);
         watchdog.registerHealthObserver(observerSecond, mTestExecutor);
-        watchdog.startObservingHealth(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observerSecond, Arrays.asList(APP_A), LONG_DURATION);
 
         // Then fail APP_A above the threshold
         raiseFatalFailureAndDispatch(watchdog,
@@ -743,9 +743,9 @@ public class PackageWatchdogTest {
 
         // Start observing for observer1 and observer2 with failure handling
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A above the threshold
         raiseFatalFailureAndDispatch(watchdog,
@@ -767,9 +767,9 @@ public class PackageWatchdogTest {
 
         // Start observing for observer1 and observer2 with failure handling
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then fail APP_A above the threshold
         raiseFatalFailureAndDispatch(watchdog,
@@ -800,9 +800,9 @@ public class PackageWatchdogTest {
         // with observer1 and observer2
         controller.setSupportedPackages(Arrays.asList(APP_A, APP_B));
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_B), SHORT_DURATION);
 
         // Run handler so requests are dispatched to the controller
         mTestLooper.dispatchAll();
@@ -819,7 +819,7 @@ public class PackageWatchdogTest {
         // it starts out with a non-passing explicit health check and has to wait for a pass
         // otherwise it would be notified of APP_A failure on expiry
         watchdog.registerHealthObserver(observer3, mTestExecutor);
-        watchdog.startObservingHealth(observer3, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer3, Arrays.asList(APP_A), SHORT_DURATION);
 
         // Then expire observers
         moveTimeForwardAndDispatch(SHORT_DURATION);
@@ -850,8 +850,8 @@ public class PackageWatchdogTest {
         // Start observing with explicit health checks for APP_A and APP_B
         controller.setSupportedPackages(Arrays.asList(APP_A, APP_B, APP_C));
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_B), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_B), LONG_DURATION);
 
         // Run handler so requests are dispatched to the controller
         mTestLooper.dispatchAll();
@@ -887,7 +887,7 @@ public class PackageWatchdogTest {
         // Then set new supported packages
         controller.setSupportedPackages(Arrays.asList(APP_C));
         // Start observing APP_A and APP_C; only APP_C has support for explicit health checks
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_C), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A, APP_C), SHORT_DURATION);
 
         // Run handler so requests/cancellations are dispatched to the controller
         mTestLooper.dispatchAll();
@@ -919,7 +919,7 @@ public class PackageWatchdogTest {
         // health check duration == SHORT_DURATION (set by default in the TestController)
         controller.setSupportedPackages(Arrays.asList(APP_A));
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), LONG_DURATION);
 
         // Then APP_A has exceeded health check duration
         moveTimeForwardAndDispatch(SHORT_DURATION);
@@ -951,7 +951,7 @@ public class PackageWatchdogTest {
         // health check duration == SHORT_DURATION (set by default in the TestController)
         controller.setSupportedPackages(Arrays.asList(APP_A));
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION / 2);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION / 2);
 
         // Forward time to expire the observation duration
         moveTimeForwardAndDispatch(SHORT_DURATION / 2);
@@ -1024,7 +1024,7 @@ public class PackageWatchdogTest {
         // Start observing with failure handling
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
                 PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
-        wd.startObservingHealth(observer, Collections.singletonList(APP_A), SHORT_DURATION);
+        wd.startExplicitHealthCheck(observer, Collections.singletonList(APP_A), SHORT_DURATION);
 
         // Notify of NetworkStack failure
         mConnectivityModuleCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
@@ -1044,7 +1044,7 @@ public class PackageWatchdogTest {
         // Start observing with failure handling
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
                 PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
-        wd.startObservingHealth(observer, Collections.singletonList(APP_A), SHORT_DURATION);
+        wd.startExplicitHealthCheck(observer, Collections.singletonList(APP_A), SHORT_DURATION);
 
         // Notify of NetworkStack failure
         mConnectivityModuleCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
@@ -1066,7 +1066,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), SHORT_DURATION);
         // Fail APP_A below the threshold which should not trigger package failures
         for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
             watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
@@ -1095,7 +1095,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
         watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
@@ -1120,8 +1120,8 @@ public class PackageWatchdogTest {
     }
 
     /**
-     * Test default monitoring duration is used when PackageWatchdog#startObservingHealth is offered
-     * an invalid durationMs.
+     * Test default monitoring duration is used when PackageWatchdog#startExplicitHealthCheck is
+     * offered an invalid durationMs.
      */
     @Test
     public void testInvalidMonitoringDuration_beforeExpiry() {
@@ -1129,7 +1129,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), -1);
         // Note: Don't move too close to the expiration time otherwise the handler will be thrashed
         // by PackageWatchdog#scheduleNextSyncStateLocked which keeps posting runnables with very
         // small timeouts.
@@ -1143,8 +1143,8 @@ public class PackageWatchdogTest {
     }
 
     /**
-     * Test default monitoring duration is used when PackageWatchdog#startObservingHealth is offered
-     * an invalid durationMs.
+     * Test default monitoring duration is used when PackageWatchdog#startExplicitHealthCheck is
+     * offered an invalid durationMs.
      */
     @Test
     public void testInvalidMonitoringDuration_afterExpiry() {
@@ -1152,7 +1152,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), -1);
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS + 1);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
@@ -1175,7 +1175,7 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), Long.MAX_VALUE);
+        watchdog.startExplicitHealthCheck(observer, Arrays.asList(APP_A), Long.MAX_VALUE);
         // Raise 2 failures at t=0 and t=900 respectively
         watchdog.notifyPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -1203,9 +1203,9 @@ public class PackageWatchdogTest {
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
 
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.registerHealthObserver(observer2, mTestExecutor);
-        watchdog.startObservingHealth(observer2, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer2, Arrays.asList(APP_B), SHORT_DURATION);
 
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_CRASH);
@@ -1225,7 +1225,7 @@ public class PackageWatchdogTest {
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, Arrays.asList(APP_A), SHORT_DURATION);
 
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
@@ -1246,7 +1246,7 @@ public class PackageWatchdogTest {
         persistentObserver.setMayObservePackages(true);
 
         watchdog.registerHealthObserver(persistentObserver, mTestExecutor);
-        watchdog.startObservingHealth(persistentObserver, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(persistentObserver, Arrays.asList(APP_B), SHORT_DURATION);
 
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -1265,7 +1265,7 @@ public class PackageWatchdogTest {
         persistentObserver.setMayObservePackages(false);
 
         watchdog.registerHealthObserver(persistentObserver, mTestExecutor);
-        watchdog.startObservingHealth(persistentObserver, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(persistentObserver, Arrays.asList(APP_B), SHORT_DURATION);
 
         raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
                 VERSION_CODE)), PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -1431,7 +1431,7 @@ public class PackageWatchdogTest {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
         watchdog.registerHealthObserver(observer1, mTestExecutor);
-        watchdog.startObservingHealth(observer1, List.of(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observer1, List.of(APP_A), LONG_DURATION);
 
         raiseFatalFailureAndDispatch(watchdog, null, PackageWatchdog.FAILURE_REASON_APP_CRASH);
         assertThat(observer1.mMitigatedPackages).isEmpty();
@@ -1450,17 +1450,17 @@ public class PackageWatchdogTest {
 
         TestObserver testObserver1 = new TestObserver(OBSERVER_NAME_1);
         watchdog.registerHealthObserver(testObserver1, mTestExecutor);
-        watchdog.startObservingHealth(testObserver1, List.of(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(testObserver1, List.of(APP_A), LONG_DURATION);
         mTestLooper.dispatchAll();
 
         TestObserver testObserver2 = new TestObserver(OBSERVER_NAME_2);
         watchdog.registerHealthObserver(testObserver2, mTestExecutor);
-        watchdog.startObservingHealth(testObserver2, List.of(APP_B), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(testObserver2, List.of(APP_B), LONG_DURATION);
         mTestLooper.dispatchAll();
 
         TestObserver testObserver3 = new TestObserver(OBSERVER_NAME_3);
         watchdog.registerHealthObserver(testObserver3, mTestExecutor);
-        watchdog.startObservingHealth(testObserver3, List.of(APP_C), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(testObserver3, List.of(APP_C), LONG_DURATION);
         mTestLooper.dispatchAll();
 
         watchdog.unregisterHealthObserver(testObserver1);
@@ -1493,14 +1493,14 @@ public class PackageWatchdogTest {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, List.of(APP_A), SHORT_DURATION);
+        watchdog.startExplicitHealthCheck(observer, List.of(APP_A), SHORT_DURATION);
         for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
             watchdog.notifyPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
                     PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         mTestLooper.dispatchAll();
         assertThat(observer.mMitigatedPackages).isEmpty();
-        watchdog.startObservingHealth(observer, List.of(APP_A), LONG_DURATION);
+        watchdog.startExplicitHealthCheck(observer, List.of(APP_A), LONG_DURATION);
         watchdog.notifyPackageFailure(List.of(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
@@ -1516,7 +1516,7 @@ public class PackageWatchdogTest {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
         watchdog.registerHealthObserver(observer, mTestExecutor);
-        watchdog.startObservingHealth(observer, List.of(APP_A),
+        watchdog.startExplicitHealthCheck(observer, List.of(APP_A),
                 PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS * 2);
 
 

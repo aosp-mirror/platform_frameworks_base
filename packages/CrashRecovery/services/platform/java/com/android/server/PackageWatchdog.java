@@ -397,7 +397,7 @@ public class PackageWatchdog {
      * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      * @hide
      */
-    public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
+    public void startExplicitHealthCheck(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
         if (packageNames.isEmpty()) {
             Slog.wtf(TAG, "No packages to observe, " + observer.getUniqueIdentifier());
@@ -862,7 +862,7 @@ public class PackageWatchdog {
          * otherwise
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
-         * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
+         * it has not explicitly asked to watch the package with {@link #startExplicitHealthCheck}.
          */
         default boolean mayObservePackage(@NonNull String packageName) {
             return false;
