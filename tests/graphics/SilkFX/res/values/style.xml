@@ -16,7 +16,7 @@
   -->
 <!-- Styles for immersive actions UI. -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme.BackgroundBlurTheme" parent= "Theme.AppCompat.Dialog">
+    <style name="Theme.BackgroundBlurTheme" parent="Theme.AppCompat.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBlurBehindEnabled">true</item>
         <item name="android:backgroundDimEnabled">false</item>
