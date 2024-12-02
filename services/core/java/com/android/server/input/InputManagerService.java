@@ -471,11 +471,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         KeyboardBacklightControllerInterface getKeyboardBacklightController(
-                NativeInputManagerService nativeService, PersistentDataStore dataStore) {
-            return InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
-                    ? new KeyboardBacklightController(mContext, nativeService, dataStore,
-                    mLooper, mUEventManager)
-                    : new KeyboardBacklightControllerInterface() {};
+                NativeInputManagerService nativeService) {
+            return new KeyboardBacklightController(mContext, nativeService, mLooper,
+                    mUEventManager);
         }
     }
 
@@ -500,7 +498,7 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
-        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative, mDataStore);
+        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative);
         mStickyModifierStateController = new StickyModifierStateController();
         mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
