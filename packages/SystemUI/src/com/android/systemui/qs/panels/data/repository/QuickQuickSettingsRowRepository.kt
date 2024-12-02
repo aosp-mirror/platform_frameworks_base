@@ -19,7 +19,6 @@ package com.android.systemui.qs.panels.data.repository
 import android.content.res.Resources
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.emitOnStart
@@ -30,7 +29,7 @@ import kotlinx.coroutines.flow.map
 class QuickQuickSettingsRowRepository
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     @ShadeDisplayAware configurationRepository: ConfigurationRepository,
 ) {
     val rows =
