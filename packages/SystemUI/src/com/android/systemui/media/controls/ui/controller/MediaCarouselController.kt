@@ -37,6 +37,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.DiffUtil
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -115,7 +116,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "MediaCarouselController"
@@ -752,7 +752,11 @@ constructor(
         }
     }
 
-    private fun onAdded(commonViewModel: MediaCommonViewModel, position: Int) {
+    private fun onAdded(
+        commonViewModel: MediaCommonViewModel,
+        position: Int,
+        configChanged: Boolean = false,
+    ) {
         val viewController = mediaViewControllerFactory.get()
         viewController.sizeChangedListener = this::updateCarouselDimensions
         val lp =
@@ -763,12 +767,13 @@ constructor(
         when (commonViewModel) {
             is MediaCommonViewModel.MediaControl -> {
                 val viewHolder = MediaViewHolder.create(LayoutInflater.from(context), mediaContent)
-                if (SceneContainerFlag.isEnabled) {
-                    viewController.widthInSceneContainerPx = widthInSceneContainerPx
-                    viewController.heightInSceneContainerPx = heightInSceneContainerPx
-                }
+                viewController.widthInSceneContainerPx = widthInSceneContainerPx
+                viewController.heightInSceneContainerPx = heightInSceneContainerPx
                 viewController.attachPlayer(viewHolder)
                 viewController.mediaViewHolder?.player?.layoutParams = lp
+                if (configChanged) {
+                    commonViewModel.controlViewModel.onMediaConfigChanged()
+                }
                 MediaControlViewBinder.bind(
                     viewHolder,
                     commonViewModel.controlViewModel,
@@ -1271,23 +1276,14 @@ constructor(
             ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
         if (recreateMedia) {
             mediaContent.removeAllViews()
-            commonViewModels.forEach { viewModel ->
+            commonViewModels.forEachIndexed { index, viewModel ->
                 when (viewModel) {
-                    is MediaCommonViewModel.MediaControl -> {
-                        controllerById[viewModel.instanceId.toString()]?.let {
-                            it.widthInSceneContainerPx = widthInSceneContainerPx
-                            it.heightInSceneContainerPx = heightInSceneContainerPx
-                            mediaContent.addView(it.mediaViewHolder?.player)
-                        }
-                    }
-                    is MediaCommonViewModel.MediaRecommendations -> {
-                        controllerById[viewModel.key]?.let {
-                            it.widthInSceneContainerPx = widthInSceneContainerPx
-                            it.heightInSceneContainerPx = heightInSceneContainerPx
-                            mediaContent.addView(it.recommendationViewHolder?.recommendations)
-                        }
-                    }
+                    is MediaCommonViewModel.MediaControl ->
+                        controllerById[viewModel.instanceId.toString()]?.onDestroy()
+                    is MediaCommonViewModel.MediaRecommendations ->
+                        controllerById[viewModel.key]?.onDestroy()
                 }
+                onAdded(viewModel, index, configChanged = true)
             }
         }
     }
