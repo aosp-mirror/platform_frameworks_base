@@ -42,7 +42,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
     fun notificationChip_startsWithStartingModel() =
         kosmos.runTest {
             val icon = mock<StatusBarIconView>()
-            val startingNotif = activeNotificationModel(key = "notif1", statusBarChipIcon = icon)
+            val startingNotif =
+                activeNotificationModel(key = "notif1", statusBarChipIcon = icon, whenTime = 5432)
 
             val underTest = factory.create(startingNotif)
 
@@ -50,6 +51,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest!!.key).isEqualTo("notif1")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(icon)
+            assertThat(latest!!.whenTime).isEqualTo(5432)
         }
 
     @Test
@@ -65,11 +67,16 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
 
             val newIconView = mock<StatusBarIconView>()
             underTest.setNotification(
-                activeNotificationModel(key = "notif1", statusBarChipIcon = newIconView)
+                activeNotificationModel(
+                    key = "notif1",
+                    statusBarChipIcon = newIconView,
+                    whenTime = 6543,
+                )
             )
 
             assertThat(latest!!.key).isEqualTo("notif1")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(newIconView)
+            assertThat(latest!!.whenTime).isEqualTo(6543)
         }
 
     @Test

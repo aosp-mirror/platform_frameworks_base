@@ -63,9 +63,13 @@ constructor(
                     )
                 }
             }
-        return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        return OngoingActivityChipModel.Shown.ShortTimeDelta(
+            icon,
+            colors,
+            time = this.whenTime,
+            onClickListener,
+        )
         // TODO(b/364653005): Use Notification.showWhen to determine if we should show the time.
-        // TODO(b/364653005): If Notification.whenTime is in the past, show "ago" in the text.
         // TODO(b/364653005): If Notification.shortCriticalText is set, use that instead of `when`.
         // TODO(b/364653005): If the app that posted the notification is in the foreground, don't
         // show that app's chip.
