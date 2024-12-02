@@ -191,7 +191,9 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity) {
-        return activity.inFreeformWindowingMode()
+        return  activity.mAppCompatController.getAppCompatCameraOverrides()
+                .shouldApplyFreeformTreatmentForCameraCompat()
+                && activity.inFreeformWindowingMode()
                 && mCameraStateMonitor.isCameraRunningForActivity(activity);
     }
 
