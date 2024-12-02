@@ -49,7 +49,7 @@ data class InternalKeyboardShortcutGroup(
  * @param isCustomShortcut If Shortcut is user customized or system defined.
  */
 data class InternalKeyboardShortcutInfo(
-    val label: String,
+    val label: String = "",
     val keycode: Int,
     val modifiers: Int,
     val baseCharacter: Char = Char.MIN_VALUE,

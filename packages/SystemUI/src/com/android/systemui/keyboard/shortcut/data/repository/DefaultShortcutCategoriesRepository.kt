@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyboard.shortcut.data.repository
 
-import android.hardware.input.InputManager
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import com.android.systemui.dagger.SysUISingleton
@@ -36,29 +35,24 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.InputMethodEditor
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.withContext
 
 @SysUISingleton
 class DefaultShortcutCategoriesRepository
 @Inject
 constructor(
     @Background private val backgroundScope: CoroutineScope,
-    @Background private val backgroundDispatcher: CoroutineDispatcher,
     @SystemShortcuts private val systemShortcutsSource: KeyboardShortcutGroupsSource,
     @MultitaskingShortcuts private val multitaskingShortcutsSource: KeyboardShortcutGroupsSource,
     @AppCategoriesShortcuts private val appCategoriesShortcutsSource: KeyboardShortcutGroupsSource,
     @InputShortcuts private val inputShortcutsSource: KeyboardShortcutGroupsSource,
     @CurrentAppShortcuts private val currentAppShortcutsSource: KeyboardShortcutGroupsSource,
-    private val inputManager: InputManager,
-    stateRepository: ShortcutHelperStateRepository,
+    inputDeviceRepository: ShortcutHelperInputDeviceRepository,
     shortcutCategoriesUtils: ShortcutCategoriesUtils,
 ) : ShortcutCategoriesRepository {
 
@@ -83,17 +77,8 @@ constructor(
             ),
         )
 
-    private val activeInputDevice =
-        stateRepository.state.map {
-            if (it is Active) {
-                withContext(backgroundDispatcher) { inputManager.getInputDevice(it.deviceId) }
-            } else {
-                null
-            }
-        }
-
     override val categories: Flow<List<ShortcutCategory>> =
-        activeInputDevice
+        inputDeviceRepository.activeInputDevice
             .map { inputDevice ->
                 if (inputDevice == null) {
                     return@map emptyList()
