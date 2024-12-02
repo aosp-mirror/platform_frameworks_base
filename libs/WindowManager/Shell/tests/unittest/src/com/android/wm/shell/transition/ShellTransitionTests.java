@@ -110,7 +110,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.recents.IRecentsAnimationRunner;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
-import com.android.wm.shell.shared.ShellSharedConstants;
+import com.android.wm.shell.shared.IShellTransitions;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -176,7 +176,7 @@ public class ShellTransitionTests extends ShellTestCase {
                 mock(FocusTransitionObserver.class));
         shellInit.init();
         verify(shellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS), any(), any());
+                eq(IShellTransitions.DESCRIPTOR), any(), any());
     }
 
     @Test
