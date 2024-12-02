@@ -299,6 +299,24 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         return mRequestType;
     }
 
+    /**
+     * Get the stream ids corresponding to the target surfaces.
+     *
+     * @hide
+     */
+    public int[] getStreamIds() {
+        return mStreamIdxArray;
+    };
+
+    /**
+     * Get the surface ids corresponding to the target surfaces.
+     *
+     * @hide
+     */
+    public int[] getSurfaceIds() {
+        return mSurfaceIdxArray;
+    };
+
     // If this request is part of constrained high speed request list that was created by
     // {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}
     private boolean mIsPartOfCHSRequestList = false;

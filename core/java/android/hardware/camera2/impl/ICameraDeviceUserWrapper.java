@@ -65,6 +65,17 @@ public class ICameraDeviceUserWrapper {
         }
     }
 
+    public SubmitInfo startStreaming(int[] streamIdxArray, int[] surfaceIdxArray)
+            throws CameraAccessException {
+        try {
+            return mRemoteDevice.startStreaming(streamIdxArray, surfaceIdxArray);
+        } catch (ServiceSpecificException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        } catch (RemoteException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        }
+    }
+
     public SubmitInfo submitRequest(CaptureRequest request, boolean streaming)
             throws CameraAccessException  {
         try {

@@ -1803,6 +1803,19 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Get the flag indicating if this {@link OutputConfiguration} is for a multi-resolution output
+     * with a MultiResolutionImageReader.
+     *
+     * @return true if this {@link OutputConfiguration} is for a multi-resolution output with a
+     *              MultiResolutionImageReader.
+     *
+     * @hide
+     */
+    public boolean isMultiResolution() {
+        return mIsMultiResolution;
+    }
+
+    /**
      * Get the physical camera ID associated with this {@link OutputConfiguration}.
      *
      * <p>If this OutputConfiguration isn't targeting a physical camera of a logical

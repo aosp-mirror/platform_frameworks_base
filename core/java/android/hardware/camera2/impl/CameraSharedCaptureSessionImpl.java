@@ -19,6 +19,8 @@ import android.annotation.FlaggedApi;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraOfflineSession;
+import android.hardware.camera2.CameraOfflineSession.CameraOfflineSessionCallback;
 import android.hardware.camera2.CameraSharedCaptureSession;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -28,6 +30,7 @@ import android.view.Surface;
 
 import com.android.internal.camera.flags.Flags;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -46,7 +49,8 @@ public class CameraSharedCaptureSessionImpl
     private static final String TAG = "CameraSharedCaptureSessionImpl";
     private final CameraCaptureSessionImpl mSessionImpl;
     private final ConditionVariable mInitialized = new ConditionVariable();
-    private boolean mIsPrimary;
+    private final android.hardware.camera2.impl.CameraDeviceImpl mCameraDevice;
+    private final Executor mDeviceExecutor;  
 
     /**
      * Create a new CameraCaptureSession.
@@ -54,24 +58,32 @@ public class CameraSharedCaptureSessionImpl
     CameraSharedCaptureSessionImpl(int id,
             CameraCaptureSession.StateCallback callback, Executor stateExecutor,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
-            Executor deviceStateExecutor, boolean configureSuccess, boolean isPrimary) {
+            Executor deviceStateExecutor, boolean configureSuccess) {
         CameraCaptureSession.StateCallback wrapperCallback = new WrapperCallback(callback);
         mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, wrapperCallback,
                 stateExecutor, deviceImpl, deviceStateExecutor, configureSuccess);
-        mIsPrimary = isPrimary;
+        mCameraDevice = deviceImpl;
+        mDeviceExecutor = deviceStateExecutor;
         mInitialized.open();
     }
 
     @Override
-    public int startStreaming(List<Surface> surfaces, Executor executor, CaptureCallback listener)
+    public int startStreaming(List<Surface> surfaces, Executor executor, CaptureCallback callback)
             throws CameraAccessException {
-        // Todo: Need to add implementation.
-        return 0;
+        if (surfaces.isEmpty()) {
+            throw new IllegalArgumentException("No surfaces provided for streaming");
+        } else if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+
+        return mSessionImpl.startStreaming(surfaces, executor, callback);
     }
 
     @Override
     public void stopStreaming() throws CameraAccessException {
-      // Todo: Need to add implementation.
+        mSessionImpl.stopRepeating();
     }
 
     @Override
@@ -90,16 +102,24 @@ public class CameraSharedCaptureSessionImpl
     }
 
     @Override
+    public boolean supportsOfflineProcessing(Surface surface) {
+        return false;
+    }
+
+    @Override
     public void abortCaptures() throws CameraAccessException {
-        if (mIsPrimary) {
+        if (mCameraDevice.isPrimaryClient()) {
             mSessionImpl.abortCaptures();
+            return;
         }
+        throw new UnsupportedOperationException("Shared capture session only supports this method"
+                + " for primary clients");
     }
 
     @Override
     public int setRepeatingRequest(CaptureRequest request, CaptureCallback listener,
             Handler handler) throws CameraAccessException {
-        if (mIsPrimary) {
+        if (mCameraDevice.isPrimaryClient()) {
             return mSessionImpl.setRepeatingRequest(request, listener, handler);
         }
         throw new UnsupportedOperationException("Shared capture session only supports this method"
@@ -107,17 +127,42 @@ public class CameraSharedCaptureSessionImpl
     }
 
     @Override
-    public void stopRepeating() throws CameraAccessException {
-        if (mIsPrimary) {
-            mSessionImpl.stopRepeating();
+    public int setSingleRepeatingRequest(CaptureRequest request, Executor executor,
+            CaptureCallback listener)
+            throws CameraAccessException {
+        if (mCameraDevice.isPrimaryClient()) {
+            return mSessionImpl.setSingleRepeatingRequest(request, executor, listener);
         }
+        throw new UnsupportedOperationException("Shared capture session only supports this method"
+                + " for primary clients");
+    }
+
+    @Override
+    public void stopRepeating() throws CameraAccessException {
+        if (mCameraDevice.isPrimaryClient()) {
+            mSessionImpl.stopRepeating();
+            return;
+        }
+        throw new UnsupportedOperationException("Shared capture session only supports this method"
+                + " for primary clients");
     }
 
     @Override
     public int capture(CaptureRequest request, CaptureCallback listener, Handler handler)
             throws CameraAccessException {
-        if (mIsPrimary) {
+        if (mCameraDevice.isPrimaryClient()) {
             return mSessionImpl.capture(request, listener, handler);
+        }
+        throw new UnsupportedOperationException("Shared capture session only supports this method"
+                + " for primary clients");
+    }
+
+    @Override
+    public int captureSingleRequest(CaptureRequest request, Executor executor,
+            CaptureCallback listener)
+            throws CameraAccessException {
+        if (mCameraDevice.isPrimaryClient()) {
+            return mSessionImpl.captureSingleRequest(request, executor, listener);
         }
         throw new UnsupportedOperationException("Shared capture session only supports this method"
                 + " for primary clients");
@@ -149,48 +194,72 @@ public class CameraSharedCaptureSessionImpl
     }
 
     @Override
+    public CameraOfflineSession switchToOffline(Collection<Surface> offlineSurfaces,
+            Executor executor, CameraOfflineSessionCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Shared capture session do not support this method"
+                );
+    }
+
+    @Override
     public int setRepeatingBurst(List<CaptureRequest> requests, CaptureCallback listener,
             Handler handler) throws CameraAccessException {
-        throw new UnsupportedOperationException("Shared Capture session doesn't support"
+        throw new UnsupportedOperationException("Shared Capture session do not support"
+                + " this method");
+    }
+
+    @Override
+    public int setRepeatingBurstRequests(List<CaptureRequest> requests,
+            Executor executor, CaptureCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Shared Capture session do not support"
                 + " this method");
     }
 
     @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureCallback listener,
             Handler handler) throws CameraAccessException {
-        throw new UnsupportedOperationException("Shared Capture session doesn't support"
+        throw new UnsupportedOperationException("Shared Capture session do not support"
+                + " this method");
+    }
+
+    @Override
+    public int captureBurstRequests(List<CaptureRequest> requests,
+            Executor executor, CaptureCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Shared Capture session do not support"
                 + " this method");
     }
 
     @Override
     public void updateOutputConfiguration(OutputConfiguration config)
             throws CameraAccessException {
-        throw new UnsupportedOperationException("Shared capture session doesn't support"
+        throw new UnsupportedOperationException("Shared capture session do not support"
                 + " this method");
     }
 
     @Override
     public void finalizeOutputConfigurations(List<OutputConfiguration> deferredOutputConfigs)
             throws CameraAccessException {
-        throw new UnsupportedOperationException("Shared capture session doesn't support"
+        throw new UnsupportedOperationException("Shared capture session do not support"
                 + " this method");
     }
 
     @Override
     public void prepare(Surface surface) throws CameraAccessException {
-        throw new UnsupportedOperationException("Shared capture session doesn't support"
+        throw new UnsupportedOperationException("Shared capture session do not support"
                 + " this method");
     }
 
     @Override
     public void prepare(int maxCount, Surface surface) throws CameraAccessException {
-        throw new UnsupportedOperationException("Shared capture session doesn't support"
+        throw new UnsupportedOperationException("Shared capture session do not support"
                 + " this method");
     }
 
     @Override
     public void closeWithoutDraining() {
-        throw new UnsupportedOperationException("Shared capture session doesn't support"
+        throw new UnsupportedOperationException("Shared capture session do not support"
                 + " this method");
     }
 

@@ -1375,6 +1375,9 @@ public final class CameraManager {
      * @throws SecurityException if the application does not have permission to
      *                           access the camera
      *
+     * @throws UnsupportedOperationException if {@link #isCameraDeviceSharingSupported} returns
+     *                                       false for the given {@code cameraId}.
+     *
      * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      *
@@ -1392,6 +1395,10 @@ public final class CameraManager {
             throws CameraAccessException {
         if (executor == null) {
             throw new IllegalArgumentException("executor was null");
+        }
+        if (!isCameraDeviceSharingSupported(cameraId)) {
+            throw new UnsupportedOperationException(
+                    "CameraDevice sharing is not supported for Camera ID: " + cameraId);
         }
         openCameraImpl(cameraId, callback, executor, /*oomScoreOffset*/0,
                 getRotationOverride(mContext), /*sharedMode*/true);
