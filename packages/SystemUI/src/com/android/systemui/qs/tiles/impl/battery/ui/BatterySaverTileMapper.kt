@@ -18,19 +18,21 @@ package com.android.systemui.qs.tiles.impl.battery.ui
 
 import android.content.res.Resources
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.battery.domain.model.BatterySaverTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [BatterySaverTileModel] to [QSTileState]. */
 open class BatterySaverTileMapper
 @Inject
-constructor(@Main protected val resources: Resources, private val theme: Resources.Theme) :
-    QSTileDataToStateMapper<BatterySaverTileModel> {
+constructor(
+    @ShadeDisplayAware protected val resources: Resources,
+    private val theme: Resources.Theme,
+) : QSTileDataToStateMapper<BatterySaverTileModel> {
 
     override fun map(config: QSTileConfig, data: BatterySaverTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {

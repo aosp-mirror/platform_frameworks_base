@@ -21,19 +21,19 @@ import android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_WORK_PROFILE_
 import android.content.res.Resources
 import android.service.quicksettings.Tile
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.work.domain.model.WorkModeTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [WorkModeTileModel] to [QSTileState]. */
 class WorkModeTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Resources.Theme,
     private val devicePolicyManager: DevicePolicyManager,
 ) : QSTileDataToStateMapper<WorkModeTileModel> {
