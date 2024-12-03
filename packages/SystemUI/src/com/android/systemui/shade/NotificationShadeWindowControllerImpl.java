@@ -27,6 +27,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -252,6 +253,19 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         if (mCurrentState.shadeOrQsExpanded != isExpanded) {
             mCurrentState.shadeOrQsExpanded = isExpanded;
             apply(mCurrentState);
+
+            final IBinder token;
+            if (com.android.window.flags.Flags.schedulingForNotificationShade()
+                    && (token = mWindowRootView.getWindowToken()) != null) {
+                mBackgroundExecutor.execute(() -> {
+                    try {
+                        WindowManagerGlobal.getWindowManagerService()
+                                .onNotificationShadeExpanded(token, isExpanded);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to call onNotificationShadeExpanded", e);
+                    }
+                });
+            }
         }
     }
 

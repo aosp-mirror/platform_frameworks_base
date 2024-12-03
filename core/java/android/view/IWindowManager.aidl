@@ -722,6 +722,9 @@ interface IWindowManager
      */
     void setDisplayImePolicy(int displayId, int imePolicy);
 
+    /** Called when the expanded state of notification shade is changed. */
+    void onNotificationShadeExpanded(IBinder token, boolean expanded);
+
     /**
      * Waits until input information has been sent from WindowManager to native InputManager,
      * optionally waiting for animations to complete.
