@@ -233,6 +233,14 @@ flag {
 }
 
 flag {
+    name: "material_shape_tokens"
+    namespace: "systemui"
+    description: "Adding new Material Tokens for M3 Shape (corner radius) Spec"
+    bug: "324928718"
+    is_exported: true
+}
+
+flag {
     name: "message_queue_tail_tracking"
     namespace: "system_performance"
     description: "track tail of message queue."
