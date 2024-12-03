@@ -16,14 +16,19 @@
 
 package com.android.wm.shell.shared.desktopmode;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.SystemProperties;
 import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
+import com.android.wm.shell.shared.Utils.Lazy;
 
 import java.io.PrintWriter;
 
@@ -34,6 +39,8 @@ import java.io.PrintWriter;
 public class DesktopModeStatus {
 
     private static final String TAG = "DesktopModeStatus";
+
+    private static Lazy<Boolean> sIsFoldableDevice = new Lazy<>();
 
     /**
      * Flag to indicate whether task resizing is veiled.
@@ -195,8 +202,7 @@ public class DesktopModeStatus {
      * necessarily enabling desktop mode
      */
     public static boolean overridesShowAppHandle(@NonNull Context context) {
-        return Flags.showAppHandleLargeScreens()
-                && context.getResources().getBoolean(R.bool.config_enableAppHandle);
+        return Flags.showAppHandleLargeScreens() && isDeviceFoldable(context);
     }
 
     /**
@@ -244,6 +250,17 @@ public class DesktopModeStatus {
     }
 
     /**
+     * @return {@code true} if this is a foldable device
+     */
+    private static boolean isDeviceFoldable(@NonNull Context context) {
+        return sIsFoldableDevice.get(() -> context.getSystemService(DeviceStateManager.class)
+                .getSupportedDeviceStates().stream().anyMatch(state ->
+                        state.hasProperty(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                                || state.hasProperty(
+                                        PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)));
+    }
+
+    /**
      * Return {@code true} if a display should enter desktop mode by default when the windowing mode
      * of the display's root [TaskDisplayArea] is set to WINDOWING_MODE_FREEFORM.
      */
@@ -283,6 +300,6 @@ public class DesktopModeStatus {
         pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
 
         pw.print(innerPrefix); pw.print("showAppHandle config override=");
-        pw.print(context.getResources().getBoolean(R.bool.config_enableAppHandle));
+        pw.print(overridesShowAppHandle(context));
     }
 }
