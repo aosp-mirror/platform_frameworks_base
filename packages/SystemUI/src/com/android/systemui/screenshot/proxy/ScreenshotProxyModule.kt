@@ -18,14 +18,13 @@ package com.android.systemui.screenshot.proxy
 
 import android.app.Service
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.screenshot.ScreenshotProxyService
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
 @Module
-interface SystemUiProxyModule {
+interface ScreenshotProxyModule {
 
     @Binds
     @IntoMap
@@ -34,5 +33,5 @@ interface SystemUiProxyModule {
 
     @Binds
     @SysUISingleton
-    fun bindSystemUiProxy(systemUiProxyClient: SystemUiProxyClient): SystemUiProxy
+    fun bindSystemUiProxy(screenshotProxyClient: ScreenshotProxyClient): ScreenshotProxy
 }

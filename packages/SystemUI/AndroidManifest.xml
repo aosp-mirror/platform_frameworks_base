@@ -459,7 +459,7 @@
                   android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
-        <service android:name=".screenshot.ScreenshotProxyService"
+        <service android:name=".screenshot.proxy.ScreenshotProxyService"
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
