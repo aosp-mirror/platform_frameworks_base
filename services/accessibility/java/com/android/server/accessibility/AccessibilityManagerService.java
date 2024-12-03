@@ -1071,8 +1071,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                         newValue, restoredFromSdk);
                             }
                         }
+                        // Currently in SUW, the user can't see gesture shortcut option as the
+                        // navigation system is set to button navigation. We'll rely on the
+                        // SettingsBackupAgent to restore the settings since we don't
+                        // need to merge an empty gesture target.
                         case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                             Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
                              Settings.Secure.ACCESSIBILITY_QS_TARGETS,
                              Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
                                 restoreShortcutTargets(newValue,
