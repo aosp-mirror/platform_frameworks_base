@@ -4347,6 +4347,40 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Indicates that app functions are not controlled by policy.
+     *
+     * <p>If no admin set this policy, it means appfunctions are enabled.
+     */
+    @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final int APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY = 0;
+
+    /** Indicates that app functions are controlled and disabled by a policy. */
+    @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final int APP_FUNCTIONS_DISABLED = 1;
+
+    /**
+     * Indicates that app functions are controlled and disabled by a policy for cross profile
+     * interactions only.
+     *
+     * <p>This is different from {@link #APP_FUNCTIONS_DISABLED} in that it only disables cross
+     * profile interactions (even if the caller has permissions required to interact across users).
+     * appfunctions can still be used within the a user profile boundary.
+     */
+    @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final int APP_FUNCTIONS_DISABLED_CROSS_PROFILE = 2;
+
+    /** @hide */
+    @IntDef(
+            prefix = {"APP_FUNCTIONS_"},
+            value = {
+                    APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY,
+                    APP_FUNCTIONS_DISABLED,
+                    APP_FUNCTIONS_DISABLED_CROSS_PROFILE
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AppFunctionsPolicy {}
+
+    /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or
      * disabled through this Config.

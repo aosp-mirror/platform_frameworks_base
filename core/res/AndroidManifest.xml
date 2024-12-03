@@ -4149,6 +4149,14 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to manage policy related to AppFunctions.
+        <p>Protection level: internal|role
+        @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set policy related to subscriptions downloaded by an admin.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
         APIs protected by this permission on users different to the calling user.
