@@ -7093,7 +7093,11 @@ public final class PowerManagerService extends SystemService
                     if ((flags & PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP) != 0) {
                         if (mFoldGracePeriodProvider.isEnabled()) {
                             if (!powerGroup.hasWakeLockKeepingScreenOnLocked()) {
+                                Slog.d(TAG, "Showing dismissible keyguard");
                                 mNotifier.showDismissibleKeyguard();
+                            } else {
+                                Slog.i(TAG, "There is a screen wake lock present: "
+                                        + "sleep request will be ignored");
                             }
                             continue; // never actually goes to sleep for SOFT_SLEEP
                         } else {
