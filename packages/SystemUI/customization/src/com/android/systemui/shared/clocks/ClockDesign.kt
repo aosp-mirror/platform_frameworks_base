@@ -33,7 +33,7 @@ data class ClockDesign(
     val thumbnail: String? = null,
     val large: ClockFace? = null,
     val small: ClockFace? = null,
-    val colorPalette: MonetStyle? = null,
+    @MonetStyle.Type val colorPalette: Int? = null,
 )
 
 /** Describes a clock using layers */

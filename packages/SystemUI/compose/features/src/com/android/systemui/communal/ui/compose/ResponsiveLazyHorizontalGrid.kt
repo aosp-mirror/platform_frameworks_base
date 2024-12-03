@@ -147,9 +147,9 @@ fun ResponsiveLazyHorizontalGrid(
                 SizeInfo(
                     cellSize = finalSize,
                     contentPadding = finalContentPadding,
-                    horizontalArrangement = minHorizontalArrangement,
                     verticalArrangement = minVerticalArrangement,
                     maxHeight = maxHeight,
+                    gridSize = gridSize,
                 )
             )
         }
@@ -176,16 +176,15 @@ private fun calculateClosestSize(maxWidth: Dp, maxHeight: Dp, aspectRatio: Float
  * Provides size info of the responsive grid, since the size is dynamic.
  *
  * @property cellSize The size of each cell in the grid.
- * @property contentPadding The final content padding of the grid.
- * @property horizontalArrangement The space between columns in the grid.
  * @property verticalArrangement The space between rows in the grid.
+ * @property gridSize The size of the grid, in cell units.
  * @property availableHeight The maximum height an item in the grid may occupy.
  */
 data class SizeInfo(
     val cellSize: DpSize,
-    val contentPadding: PaddingValues,
-    val horizontalArrangement: Dp,
     val verticalArrangement: Dp,
+    val gridSize: IntSize,
+    private val contentPadding: PaddingValues,
     private val maxHeight: Dp,
 ) {
     val availableHeight: Dp
@@ -193,6 +192,11 @@ data class SizeInfo(
             maxHeight -
                 contentPadding.calculateBottomPadding() -
                 contentPadding.calculateTopPadding()
+
+    /** Calculates the height in dp of a certain number of rows. */
+    fun calculateHeight(numRows: Int): Dp {
+        return numRows * cellSize.height + (numRows - 1) * verticalArrangement
+    }
 }
 
 @Composable

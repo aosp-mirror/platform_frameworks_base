@@ -662,7 +662,7 @@ object TestShortcuts {
     val standardAddShortcutRequest =
         ShortcutCustomizationRequestInfo.Add(
             label = "Standard shortcut",
-            categoryType = ShortcutCategoryType.System,
+            categoryType = System,
             subCategoryLabel = "Standard subcategory",
         )
 }

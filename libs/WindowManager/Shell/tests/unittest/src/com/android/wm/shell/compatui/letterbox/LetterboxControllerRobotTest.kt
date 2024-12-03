@@ -98,6 +98,10 @@ open class LetterboxControllerRobotTest(
         activityBounds = activityBounds
     )
 
+    fun invokeDump() {
+        letterboxController.dump()
+    }
+
     fun checkSurfaceBuilderInvoked(times: Int = 1, name: String = "", callSite: String = "") {
         verify(surfaceBuilder, times(times)).createSurface(
             eq(transaction),

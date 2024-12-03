@@ -80,6 +80,9 @@ import static android.view.WindowLayoutParamsProto.WINDOW_ANIMATIONS;
 import static android.view.WindowLayoutParamsProto.X;
 import static android.view.WindowLayoutParamsProto.Y;
 
+import static com.android.hardware.input.Flags.FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
+import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
+
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -4465,6 +4468,29 @@ public interface WindowManager extends ViewManager {
         public static final int INPUT_FEATURE_SENSITIVE_FOR_PRIVACY = 1 << 3;
 
         /**
+         * Input feature used to indicate that the system should send power key events to this
+         * window when it's in the foreground. The window can override the double press power key
+         * gesture behavior.
+         *
+         * A double press gesture is defined as two
+         * {@link KeyEvent.Callback#onKeyDown(int, KeyEvent)} events within a time span defined by
+         *  {@link ViewConfiguration#getMultiPressTimeout()}.
+         *
+         * Note: While the window may receive all power key {@link KeyEvent}s, it can only
+         * override the double press gesture behavior. The system will perform default behavior for
+         * single, long-press and other multi-press gestures, regardless of if the app handles the
+         * key or not.
+         *
+         * To override the default behavior for double press, the app must return true for the
+         * second {@link KeyEvent.Callback#onKeyDown(int, KeyEvent)}. If the app returns false, the
+         * system behavior will be performed for double press.
+         * @hide
+         */
+        @RequiresPermission(permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        public static final int
+                INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS = 1 << 4;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
          * NOTE: These are not the same as {@link android.os.InputConfig} flags.
@@ -4477,6 +4503,7 @@ public interface WindowManager extends ViewManager {
                 INPUT_FEATURE_DISABLE_USER_ACTIVITY,
                 INPUT_FEATURE_SPY,
                 INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
+                INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS
         })
         public @interface InputFeatureFlags {
         }
@@ -4763,6 +4790,44 @@ public interface WindowManager extends ViewManager {
         public void setFitInsetsIgnoringVisibility(boolean ignore) {
             mFitInsetsIgnoringVisibility = ignore;
             privateFlags |= PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
+        }
+
+        /**
+         * Specifies if the system should send power key events to this window when it's in the
+         * foreground, with only the double tap gesture behavior being overrideable.
+         *
+         * @param enabled if true, the system should send power key events to this window when it's
+         *              in the foreground, with only the power key double tap gesture being
+         *              overrideable.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        @FlaggedApi(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        public void setReceivePowerKeyDoublePressEnabled(boolean enabled) {
+            if (enabled) {
+                inputFeatures
+                        |= INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
+            } else {
+                inputFeatures
+                        &= ~INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
+            }
+        }
+
+        /**
+         * Returns whether or not the system should send power key events to this window when it's
+         * in the foreground, with only the double tap gesture being overrideable.
+         *
+         * @return if the system should send power key events to this window when it's in the
+         * foreground, with only the double tap gesture being overrideable.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        @FlaggedApi(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+        public boolean isReceivePowerKeyDoublePressEnabled() {
+            return (inputFeatures
+                    & INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS) != 0;
         }
 
         /**
@@ -6156,6 +6221,16 @@ public interface WindowManager extends ViewManager {
             if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
                 inputFeatures &= ~INPUT_FEATURE_SPY;
                 features.add("INPUT_FEATURE_SPY");
+            }
+            if (overridePowerKeyBehaviorInFocusedWindow()) {
+                if ((inputFeatures
+                        & INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS)
+                        != 0) {
+                    inputFeatures
+                            &=
+                            ~INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
+                    features.add("INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS");
+                }
             }
             if (inputFeatures != 0) {
                 features.add(Integer.toHexString(inputFeatures));

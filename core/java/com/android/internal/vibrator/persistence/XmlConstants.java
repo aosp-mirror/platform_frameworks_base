@@ -42,14 +42,22 @@ public final class XmlConstants {
     public static final String TAG_PREDEFINED_EFFECT = "predefined-effect";
     public static final String TAG_PRIMITIVE_EFFECT = "primitive-effect";
     public static final String TAG_VENDOR_EFFECT = "vendor-effect";
+    public static final String TAG_WAVEFORM_ENVELOPE_EFFECT = "waveform-envelope-effect";
+    public static final String TAG_BASIC_ENVELOPE_EFFECT = "basic-envelope-effect";
     public static final String TAG_WAVEFORM_EFFECT = "waveform-effect";
     public static final String TAG_WAVEFORM_ENTRY = "waveform-entry";
     public static final String TAG_REPEATING = "repeating";
+    public static final String TAG_CONTROL_POINT = "control-point";
 
     public static final String ATTRIBUTE_NAME = "name";
     public static final String ATTRIBUTE_FALLBACK = "fallback";
     public static final String ATTRIBUTE_DURATION_MS = "durationMs";
     public static final String ATTRIBUTE_AMPLITUDE = "amplitude";
+    public static final String ATTRIBUTE_FREQUENCY_HZ = "frequencyHz";
+    public static final String ATTRIBUTE_INITIAL_FREQUENCY_HZ = "initialFrequencyHz";
+    public static final String ATTRIBUTE_INTENSITY = "intensity";
+    public static final String ATTRIBUTE_SHARPNESS = "sharpness";
+    public static final String ATTRIBUTE_INITIAL_SHARPNESS = "initialSharpness";
     public static final String ATTRIBUTE_SCALE = "scale";
     public static final String ATTRIBUTE_DELAY_MS = "delayMs";
     public static final String ATTRIBUTE_DELAY_TYPE = "delayType";

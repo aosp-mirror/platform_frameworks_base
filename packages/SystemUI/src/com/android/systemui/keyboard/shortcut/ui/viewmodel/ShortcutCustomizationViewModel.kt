@@ -73,29 +73,19 @@ constructor(
                         shortcutLabel = requestInfo.label,
                         defaultCustomShortcutModifierKey =
                             shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
-                        isDialogShowing = false,
                         pressedKeys = emptyList(),
                     )
                 shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
 
             is ShortcutCustomizationRequestInfo.Delete -> {
-                _shortcutCustomizationUiState.value = DeleteShortcutDialog(isDialogShowing = false)
+                _shortcutCustomizationUiState.value = DeleteShortcutDialog
                 shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
 
             ShortcutCustomizationRequestInfo.Reset -> {
-                _shortcutCustomizationUiState.value = ResetShortcutDialog(isDialogShowing = false)
+                _shortcutCustomizationUiState.value = ResetShortcutDialog
             }
-        }
-    }
-
-    fun onDialogShown() {
-        _shortcutCustomizationUiState.update { uiState ->
-            (uiState as? AddShortcutDialog)?.copy(isDialogShowing = true)
-                ?: (uiState as? DeleteShortcutDialog)?.copy(isDialogShowing = true)
-                ?: (uiState as? ResetShortcutDialog)?.copy(isDialogShowing = true)
-                ?: uiState
         }
     }
 

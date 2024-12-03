@@ -427,6 +427,18 @@ flag {
     }
 }
 
+
+flag {
+    name: "status_bar_chips_modernization"
+    namespace: "systemui"
+    description: "Deprecate OngoingCallController and implement OngoingActivityChips"
+    "in compose"
+    bug: "372657935"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
 flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
@@ -1201,6 +1213,13 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "communal_responsive_grid"
+  namespace: "systemui"
+  description: "Enables responsive grid on glanceable hub"
+  bug: "378171351"
 }
 
 flag {

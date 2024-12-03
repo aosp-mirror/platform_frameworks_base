@@ -340,6 +340,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private boolean mIsWindowManagerMirroring;
         private final DisplayCutout mDisplayCutout;
         private final float mDefaultBrightness;
+        private final float mDimBrightness;
         private float mCurrentBrightness;
         private final IBrightnessListener mBrightnessListener;
 
@@ -359,6 +360,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mRequestedRefreshRate = virtualDisplayConfig.getRequestedRefreshRate();
             mDisplayCutout = virtualDisplayConfig.getDisplayCutout();
             mDefaultBrightness = virtualDisplayConfig.getDefaultBrightness();
+            mDimBrightness = virtualDisplayConfig.getDimBrightness();
             mCurrentBrightness = PowerManager.BRIGHTNESS_INVALID;
             mBrightnessListener = virtualDisplayConfig.getBrightnessListener();
             mMode = createMode(mWidth, mHeight, getRefreshRate());
@@ -645,6 +647,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
                 mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
                 mInfo.brightnessDefault = mDefaultBrightness;
+                mInfo.brightnessDim = mDimBrightness;
 
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;

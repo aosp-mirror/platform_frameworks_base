@@ -52,6 +52,12 @@
                 <xs:element name="primitive-effect" type="PrimitiveEffect"/>
             </xs:sequence>
 
+            <!-- Waveform envelope effect -->
+            <xs:element name="waveform-envelope-effect" type="WaveformEnvelopeEffect"/>
+
+            <!-- Basic envelope effect -->
+            <xs:element name="basic-envelope-effect" type="BasicEnvelopeEffect"/>
+
         </xs:choice>
     </xs:complexType>
 
@@ -154,6 +160,56 @@
         <xs:restriction base="xs:string">
             <xs:enumeration value="pause"/>
             <xs:enumeration value="relative_start_offset"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Definition of a waveform envelope effect -->
+    <xs:complexType name="WaveformEnvelopeEffect">
+        <xs:sequence>
+            <xs:element name="control-point" maxOccurs="unbounded" minOccurs="1"
+                type="WaveformControlPoint" />
+        </xs:sequence>
+        <xs:attribute name="initialFrequencyHz" type="ControlPointFrequency" />
+    </xs:complexType>
+
+    <!-- Definition of a basic envelope effect -->
+    <xs:complexType name="BasicEnvelopeEffect">
+        <xs:sequence>
+            <xs:element name="control-point" maxOccurs="unbounded" minOccurs="1"
+                type="BasicControlPoint" />
+        </xs:sequence>
+        <xs:attribute name="initialSharpness" type="NormalizedControlPointUnit" />
+    </xs:complexType>
+
+    <xs:complexType name="WaveformControlPoint">
+        <xs:attribute name="amplitude" type="NormalizedControlPointUnit" use="required"/>
+        <xs:attribute name="frequencyHz" type="ControlPointFrequency" use="required"/>
+        <xs:attribute name="durationMs" type="PositiveLong" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="BasicControlPoint">
+        <xs:attribute name="intensity" type="NormalizedControlPointUnit" use="required"/>
+        <xs:attribute name="sharpness" type="NormalizedControlPointUnit" use="required"/>
+        <xs:attribute name="durationMs" type="PositiveLong" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="ControlPointFrequency">
+        <xs:restriction base="xs:float">
+            <xs:minExclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PositiveLong">
+        <xs:restriction base="xs:long">
+            <xs:minExclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Normalized control point unit float in [0,1] -->
+    <xs:simpleType name="NormalizedControlPointUnit">
+        <xs:restriction base="xs:float">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
         </xs:restriction>
     </xs:simpleType>
 

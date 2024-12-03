@@ -5159,7 +5159,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 try {
                     if (doRebind) {
                         ActivityManager.getService().unbindFinished(
-                                data.token, data.intent, doRebind);
+                                data.token, data.intent);
                     } else {
                         ActivityManager.getService().serviceDoneExecuting(
                                 data.token, SERVICE_DONE_EXECUTING_UNBIND, 0, 0, data.intent);

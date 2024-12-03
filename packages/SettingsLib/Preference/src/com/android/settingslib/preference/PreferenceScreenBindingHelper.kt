@@ -194,8 +194,8 @@ class PreferenceScreenBindingHelper(
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        for (preference in lifecycleAwarePreferences) {
-            if (preference.onActivityResult(requestCode, resultCode, data)) break
+        lifecycleAwarePreferences.firstOrNull {
+            it.onActivityResult(preferenceLifecycleContext, requestCode, resultCode, data)
         }
     }
 

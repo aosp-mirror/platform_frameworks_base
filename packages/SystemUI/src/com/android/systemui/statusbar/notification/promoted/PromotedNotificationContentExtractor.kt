@@ -27,6 +27,7 @@ import android.app.Notification.EXTRA_TITLE
 import android.app.Notification.ProgressStyle
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
@@ -38,7 +39,7 @@ class PromotedNotificationContentExtractor
 @Inject
 constructor(
     private val promotedNotificationsProvider: PromotedNotificationsProvider,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val logger: PromotedNotificationLogger,
 ) {
     fun extractContent(

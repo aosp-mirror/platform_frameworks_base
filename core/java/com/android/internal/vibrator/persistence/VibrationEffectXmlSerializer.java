@@ -19,9 +19,11 @@ package com.android.internal.vibrator.persistence;
 import android.annotation.NonNull;
 import android.os.PersistableBundle;
 import android.os.VibrationEffect;
+import android.os.vibrator.BasicPwleSegment;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.PwleSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 
@@ -45,6 +47,8 @@ import java.util.List;
  *     <li>A composition created exclusively via
  *         {@link VibrationEffect.Composition#addPrimitive(int, float, int)}
  *     <li>{@link VibrationEffect#createVendorEffect(PersistableBundle)}
+ *     <li>{@link VibrationEffect.WaveformEnvelopeBuilder}
+ *     <li>{@link VibrationEffect.BasicEnvelopeBuilder}
  * </ul>
  *
  * @hide
@@ -77,6 +81,12 @@ public final class VibrationEffectXmlSerializer {
         if (firstSegment instanceof PrimitiveSegment) {
             return serializePrimitiveEffect(composed);
         }
+        if (Flags.normalizedPwleEffects() && firstSegment instanceof PwleSegment) {
+            return serializeWaveformEnvelopeEffect(composed);
+        }
+        if (Flags.normalizedPwleEffects() && firstSegment instanceof BasicPwleSegment) {
+            return serializeBasicEnvelopeEffect(composed);
+        }
         return serializeWaveformEffect(composed);
     }
 
@@ -108,6 +118,53 @@ public final class VibrationEffectXmlSerializer {
         }
 
         return new SerializedComposedEffect(primitives);
+    }
+
+    private static SerializedComposedEffect serializeWaveformEnvelopeEffect(
+            VibrationEffect.Composed effect) throws XmlSerializerException {
+        SerializedWaveformEnvelopeEffect.Builder builder =
+                new SerializedWaveformEnvelopeEffect.Builder();
+        List<VibrationEffectSegment> segments = effect.getSegments();
+        XmlValidator.checkSerializerCondition(effect.getRepeatIndex() == -1,
+                "Unsupported repeating waveform envelope effect %s", effect);
+        for (int i = 0; i < segments.size(); i++) {
+            XmlValidator.checkSerializerCondition(segments.get(i) instanceof PwleSegment,
+                    "Unsupported segment for waveform envelope effect %s", segments.get(i));
+            PwleSegment segment = (PwleSegment) segments.get(i);
+
+            if (i == 0 && segment.getStartFrequencyHz() != segment.getEndFrequencyHz()) {
+                // Initial frequency explicitly defined.
+                builder.setInitialFrequencyHz(segment.getStartFrequencyHz());
+            }
+
+            builder.addControlPoint(segment.getEndAmplitude(), segment.getEndFrequencyHz(),
+                    segment.getDuration());
+        }
+
+        return new SerializedComposedEffect(builder.build());
+    }
+
+    private static SerializedComposedEffect serializeBasicEnvelopeEffect(
+            VibrationEffect.Composed effect) throws XmlSerializerException {
+        SerializedBasicEnvelopeEffect.Builder builder = new SerializedBasicEnvelopeEffect.Builder();
+        List<VibrationEffectSegment> segments = effect.getSegments();
+        XmlValidator.checkSerializerCondition(effect.getRepeatIndex() == -1,
+                "Unsupported repeating basic envelope effect %s", effect);
+        for (int i = 0; i < segments.size(); i++) {
+            XmlValidator.checkSerializerCondition(segments.get(i) instanceof BasicPwleSegment,
+                    "Unsupported segment for basic envelope effect %s", segments.get(i));
+            BasicPwleSegment segment = (BasicPwleSegment) segments.get(i);
+
+            if (i == 0 && segment.getStartSharpness() != segment.getEndSharpness()) {
+                // Initial sharpness explicitly defined.
+                builder.setInitialSharpness(segment.getStartSharpness());
+            }
+
+            builder.addControlPoint(segment.getEndIntensity(), segment.getEndSharpness(),
+                    segment.getDuration());
+        }
+
+        return new SerializedComposedEffect(builder.build());
     }
 
     private static SerializedComposedEffect serializeWaveformEffect(

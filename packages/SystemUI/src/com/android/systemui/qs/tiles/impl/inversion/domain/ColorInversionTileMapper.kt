@@ -19,18 +19,18 @@ package com.android.systemui.qs.tiles.impl.inversion.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.inversion.domain.model.ColorInversionTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [ColorInversionTileModel] to [QSTileState]. */
 class ColorInversionTileMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Theme) :
+constructor(@ShadeDisplayAware private val resources: Resources, private val theme: Theme) :
     QSTileDataToStateMapper<ColorInversionTileModel> {
     override fun map(config: QSTileConfig, data: ColorInversionTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {

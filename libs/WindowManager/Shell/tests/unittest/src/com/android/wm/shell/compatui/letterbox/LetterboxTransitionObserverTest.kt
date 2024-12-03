@@ -96,6 +96,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
 
                 validateOutput {
                     r.creationEventDetected(expected = false)
+                    r.configureStrategyInvoked(expected = false)
                     r.visibilityEventDetected(expected = false)
                     r.destroyEventDetected(expected = false)
                     r.updateSurfaceBoundsEventDetected(expected = false)
@@ -123,6 +124,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
 
                 validateOutput {
                     r.creationEventDetected(expected = true)
+                    r.configureStrategyInvoked(expected = true)
                     r.visibilityEventDetected(expected = true, visible = true)
                     r.destroyEventDetected(expected = false)
                     r.updateSurfaceBoundsEventDetected(
@@ -217,6 +219,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
         private val letterboxController: LetterboxController
         private val letterboxObserver: LetterboxTransitionObserver
         private val transitionStateHolder: TransitionStateHolder
+        private val letterboxStrategy: LetterboxControllerStrategy
 
         val observerFactory: () -> LetterboxTransitionObserver
 
@@ -225,6 +228,7 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
             shellInit = ShellInit(executor)
             transitions = mock<Transitions>()
             letterboxController = mock<LetterboxController>()
+            letterboxStrategy = mock<LetterboxControllerStrategy>()
             transitionStateHolder =
                 TransitionStateHolder(shellInit, mock<RecentsTransitionHandler>())
             spyOn(transitionStateHolder)
@@ -233,7 +237,8 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
                     shellInit,
                     transitions,
                     letterboxController,
-                    transitionStateHolder
+                    transitionStateHolder,
+                    letterboxStrategy
                 )
             observerFactory = { letterboxObserver }
         }
@@ -301,6 +306,9 @@ class LetterboxTransitionObserverTest : ShellTestCase() {
             eq(taskBounds),
             eq(activityBounds)
         )
+
+        fun configureStrategyInvoked(expected: Boolean) =
+            verify(letterboxStrategy, expected.asMode()).configureLetterboxMode()
 
         fun createTopActivityChange(
             inputBuilder: TransitionObserverInputBuilder,

@@ -24,6 +24,8 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Locale;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NdefRecordTest {
@@ -54,6 +56,22 @@ public class NdefRecordTest {
         assertThat(ndefRecord).isNotNull();
         assertThat(ndefRecord.getTnf()).isEqualTo(NdefRecord.TNF_WELL_KNOWN);
         assertThat(ndefRecord.getType()).isEqualTo(NdefRecord.RTD_URI);
+    }
+
+    @Test
+    public void testCreateMime() {
+        NdefRecord ndefRecord = NdefRecord.createMime("text/plain", "example".getBytes());
+        assertThat(ndefRecord).isNotNull();
+        assertThat(ndefRecord.getTnf()).isEqualTo(NdefRecord.TNF_MIME_MEDIA);
+    }
+
+    @Test
+    public void testCreateTextRecord() {
+        String languageCode = Locale.getDefault().getLanguage();
+        NdefRecord ndefRecord = NdefRecord.createTextRecord(languageCode, "testdata");
+        assertThat(ndefRecord).isNotNull();
+        assertThat(ndefRecord.getTnf()).isEqualTo(NdefRecord.TNF_WELL_KNOWN);
+        assertThat(ndefRecord.getType()).isEqualTo(NdefRecord.RTD_TEXT);
     }
 
 }

@@ -180,6 +180,7 @@ public class InternetTileTest extends SysuiTestCase {
         when(mWifiStateWorker.isWifiEnabled()).thenReturn(true);
 
         mTile.secondaryClick(null);
+        mTestableLooper.processAllMessages();
 
         verify(mWifiStateWorker, times(1)).setWifiEnabled(eq(false));
     }
@@ -189,6 +190,7 @@ public class InternetTileTest extends SysuiTestCase {
         when(mWifiStateWorker.isWifiEnabled()).thenReturn(false);
 
         mTile.secondaryClick(null);
+        mTestableLooper.processAllMessages();
 
         verify(mWifiStateWorker, times(1)).setWifiEnabled(eq(true));
     }

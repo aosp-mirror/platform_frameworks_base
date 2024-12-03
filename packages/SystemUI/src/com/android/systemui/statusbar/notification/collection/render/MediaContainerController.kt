@@ -19,15 +19,16 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import javax.inject.Inject
 
 @SysUISingleton
-class MediaContainerController @Inject constructor(
-    private val layoutInflater: LayoutInflater
-) : NodeController {
+class MediaContainerController
+@Inject
+constructor(@ShadeDisplayAware private val layoutInflater: LayoutInflater) : NodeController {
 
     override val nodeLabel = "MediaContainer"
     var mediaContainerView: MediaContainerView? = null
@@ -42,11 +43,12 @@ class MediaContainerController @Inject constructor(
                 parent.removeView(_view)
             }
         }
-        val inflated = layoutInflater.inflate(
+        val inflated =
+            layoutInflater.inflate(
                 R.layout.keyguard_media_container,
                 parent,
-                false /* attachToRoot */)
-                as MediaContainerView
+                false, /* attachToRoot */
+            ) as MediaContainerView
         if (oldPos != -1) {
             parent.addView(inflated, oldPos)
         }
@@ -57,6 +59,8 @@ class MediaContainerController @Inject constructor(
         get() = mediaContainerView!!
 
     override fun offerToKeepInParentForAnimation(): Boolean = false
+
     override fun removeFromParentIfKeptForAnimation(): Boolean = false
+
     override fun resetKeepInParentForAnimation() {}
 }

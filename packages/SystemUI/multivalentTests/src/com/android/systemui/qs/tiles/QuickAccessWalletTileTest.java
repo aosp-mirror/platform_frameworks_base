@@ -46,6 +46,9 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.service.quickaccesswallet.Flags;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -221,6 +224,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
     public void testHandleClick_startQuickAccessUiIntent_noCard() {
         setUpWalletCard(/* hasCard= */ false);
 
@@ -234,6 +238,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
     public void testHandleClick_startQuickAccessUiIntent_hasCard() {
         setUpWalletCard(/* hasCard= */ true);
 
@@ -244,6 +249,34 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 eq(mActivityStarter),
                 eq(null),
                 /* hasCard= */ eq(true));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
+    public void testHandleClick_startCardIntent_noCard() {
+        setUpWalletCard(/* hasCard= */ false);
+
+        mTile.handleClick(/* view= */ null);
+        mTestableLooper.processAllMessages();
+
+        verify(mController).startQuickAccessUiIntent(
+                eq(mActivityStarter),
+                eq(null),
+                /* hasCard= */ eq(false));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
+    public void testHandleClick_startCardIntent_hasCard() {
+        setUpWalletCard(/* hasCard= */ true);
+
+        mTile.handleClick(null /* view */);
+        mTestableLooper.processAllMessages();
+
+        verify(mController).startWalletCardPendingIntent(
+                any(),
+                eq(mActivityStarter),
+                eq(null));
     }
 
     @Test
