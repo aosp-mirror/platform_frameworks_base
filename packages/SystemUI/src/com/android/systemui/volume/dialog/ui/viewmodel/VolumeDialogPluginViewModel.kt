@@ -18,14 +18,17 @@ package com.android.systemui.volume.dialog.ui.viewmodel
 
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.VolumeDialog
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
+import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogSafetyWarningInteractor
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 
@@ -34,29 +37,35 @@ import kotlinx.coroutines.flow.mapLatest
 class VolumeDialogPluginViewModel
 @Inject
 constructor(
+    @VolumeDialogPlugin private val coroutineScope: CoroutineScope,
     private val dialogVisibilityInteractor: VolumeDialogVisibilityInteractor,
+    private val dialogSafetyWarningInteractor: VolumeDialogSafetyWarningInteractor,
     private val volumeDialogProvider: Provider<VolumeDialog>,
     private val logger: VolumeDialogLogger,
 ) {
 
-    suspend fun launchVolumeDialog() {
-        coroutineScope {
-            dialogVisibilityInteractor.dialogVisibility
-                .mapLatest { visibilityModel ->
-                    with(visibilityModel) {
-                        if (this is VolumeDialogVisibilityModel.Visible) {
-                            showDialog()
-                            Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked)
-                            logger.onShow(reason)
-                        }
-                        if (this is VolumeDialogVisibilityModel.Dismissed) {
-                            Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason)
-                            logger.onDismiss(reason)
-                        }
+    fun launchVolumeDialog() {
+        dialogVisibilityInteractor.dialogVisibility
+            .mapLatest { visibilityModel ->
+                with(visibilityModel) {
+                    if (this is VolumeDialogVisibilityModel.Visible) {
+                        showDialog()
+                        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked)
+                        logger.onShow(reason)
+                    }
+                    if (this is VolumeDialogVisibilityModel.Dismissed) {
+                        Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason)
+                        logger.onDismiss(reason)
                     }
                 }
-                .launchIn(this)
-        }
+            }
+            .launchIn(coroutineScope)
+    }
+
+    val isShowingSafetyWarning: Flow<Boolean> = dialogSafetyWarningInteractor.isShowingSafetyWarning
+
+    fun onSafetyWarningDismissed() {
+        dialogSafetyWarningInteractor.onSafetyWarningDismissed()
     }
 
     private fun showDialog() {

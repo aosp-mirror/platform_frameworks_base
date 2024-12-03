@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -226,8 +227,8 @@ public class LocationFudgerCacheTest {
 
         cache.getCoarseningLevel(POINT_IN_TIMES_SQUARE[0], POINT_IN_TIMES_SQUARE[1]);
 
-        verify(provider).getCoarsenedS2Cell(eq(POINT_IN_TIMES_SQUARE[0]),
-                eq(POINT_IN_TIMES_SQUARE[1]), any());
+        verify(provider).getCoarsenedS2Cells(eq(POINT_IN_TIMES_SQUARE[0]),
+                eq(POINT_IN_TIMES_SQUARE[1]), anyInt(), any());
     }
 
     @Test
@@ -242,8 +243,8 @@ public class LocationFudgerCacheTest {
 
         ArgumentCaptor<IS2CellIdsCallback> argumentCaptor = ArgumentCaptor.forClass(
                 IS2CellIdsCallback.class);
-        verify(provider).getCoarsenedS2Cell(eq(POINT_IN_TIMES_SQUARE[0]),
-                eq(POINT_IN_TIMES_SQUARE[1]), argumentCaptor.capture());
+        verify(provider).getCoarsenedS2Cells(eq(POINT_IN_TIMES_SQUARE[0]),
+                eq(POINT_IN_TIMES_SQUARE[1]), anyInt(), argumentCaptor.capture());
 
         // Results from the proxy should set the cache
         int expectedLevel = 4;
@@ -264,8 +265,21 @@ public class LocationFudgerCacheTest {
 
         cache.addToCache(TIMES_SQUARE_S2_ID);
 
-        verify(provider, never()).getCoarsenedS2Cell(anyDouble(), anyDouble(), any());
+        verify(provider, never()).getCoarsenedS2Cells(anyDouble(), anyDouble(), anyInt(), any());
     }
+
+    @Test
+    public void locationFudgerCache_whenQueryIsCached_askForMaxCacheSizeElems() {
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+        int numAdditionalCells = cache.MAX_CACHE_SIZE - 1;
+
+        cache.getCoarseningLevel(POINT_IN_TIMES_SQUARE[0], POINT_IN_TIMES_SQUARE[1]);
+
+        verify(provider).getCoarsenedS2Cells(eq(POINT_IN_TIMES_SQUARE[0]),
+                eq(POINT_IN_TIMES_SQUARE[1]), eq(numAdditionalCells), any());
+    }
+
 
     @Test
     public void locationFudgerCache_canContainUpToMaxSizeItems() {

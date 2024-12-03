@@ -116,3 +116,14 @@ flag {
     description: "Relax the assumption of non-match parent activity"
     bug: "356277166"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "allow_multiple_adjacent_task_fragments"
+    description: "Refactor to allow more than 2 adjacent TaskFragments"
+    bug: "373709676"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

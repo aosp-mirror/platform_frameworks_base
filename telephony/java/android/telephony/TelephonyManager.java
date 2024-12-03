@@ -19636,7 +19636,7 @@ public class TelephonyManager {
      * Android assigns each carrier with a canonical integer a.k.a. carrier id.
      * The carrier ID is an Android platform-wide identifier for a carrier.
      * AOSP maintains carrier ID assignments in
-     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/latest_carrier_id/carrier_list.textpb">here</a>
+     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/main/assets/latest_carrier_id/carrier_list.textpb">here</a>
      *
      * @param carrierIdentifier {@link CarrierIdentifier}
      *

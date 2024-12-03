@@ -20,18 +20,20 @@ import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.applicationContext
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.contextualeducation.GestureType.HOME
+import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.contextualEducationInteractor
 import com.android.systemui.education.domain.interactor.keyboardTouchpadEduInteractor
 import com.android.systemui.education.ui.view.ContextualEduUiCoordinator
 import com.android.systemui.education.ui.viewmodel.ContextualEduViewModel
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
@@ -56,11 +58,13 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-class ContextualEduUiCoordinatorTest : SysuiTestCase() {
+class ContextualEduUiCoordinatorTest(private val gestureType: GestureType) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val interactor = kosmos.contextualEducationInteractor
@@ -112,23 +116,23 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     @Test
     fun showDialogOnNewEdu() =
         testScope.runTest {
-            triggerEducation(BACK)
+            triggerEducation(gestureType)
             verify(dialog).show()
         }
 
     @Test
     fun showNotificationOn2ndEdu() =
         testScope.runTest {
-            triggerEducation(BACK)
+            triggerEducation(gestureType)
             eduClock.offset(minDurationForNextEdu)
-            triggerEducation(BACK)
+            triggerEducation(gestureType)
             verify(notificationManager).notifyAsUser(any(), anyInt(), any(), any())
         }
 
     @Test
     fun dismissDialogAfterTimeout() =
         testScope.runTest {
-            triggerEducation(BACK)
+            triggerEducation(gestureType)
             advanceTimeBy(timeoutMillis + 1)
             verify(dialog).dismiss()
         }
@@ -142,26 +146,59 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
         }
 
     @Test
-    fun verifyBackEduToastContent() =
+    fun verifyEduToastContent() =
         testScope.runTest {
-            triggerEducation(BACK)
-            assertThat(toastContent).isEqualTo(context.getString(R.string.back_edu_toast_content))
+            triggerEducation(gestureType)
+
+            val expectedContent =
+                when (gestureType) {
+                    BACK -> R.string.back_edu_toast_content
+                    HOME -> R.string.home_edu_toast_content
+                    OVERVIEW -> R.string.overview_edu_toast_content
+                    ALL_APPS -> R.string.all_apps_edu_toast_content
+                }
+
+            assertThat(toastContent).isEqualTo(context.getString(expectedContent))
         }
 
     @Test
-    fun verifyBackEduNotificationContent() =
+    fun verifyEduNotificationContent() =
         testScope.runTest {
             val notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
-            triggerEducation(BACK)
+            triggerEducation(gestureType)
 
             eduClock.offset(minDurationForNextEdu)
-            triggerEducation(BACK)
+            triggerEducation(gestureType)
 
             verify(notificationManager)
                 .notifyAsUser(any(), anyInt(), notificationCaptor.capture(), any())
+
+            val expectedTitle =
+                when (gestureType) {
+                    BACK -> R.string.back_edu_notification_title
+                    HOME -> R.string.home_edu_notification_title
+                    OVERVIEW -> R.string.overview_edu_notification_title
+                    ALL_APPS -> R.string.all_apps_edu_notification_title
+                }
+
+            val expectedContent =
+                when (gestureType) {
+                    BACK -> R.string.back_edu_notification_content
+                    HOME -> R.string.home_edu_notification_content
+                    OVERVIEW -> R.string.overview_edu_notification_content
+                    ALL_APPS -> R.string.all_apps_edu_notification_content
+                }
+
+            val expectedTutorialClassName =
+                when (gestureType) {
+                    OVERVIEW -> TUTORIAL_ACTION
+                    else -> KeyboardTouchpadTutorialActivity::class.qualifiedName
+                }
+
             verifyNotificationContent(
-                R.string.back_edu_notification_title,
-                R.string.back_edu_notification_content,
+                expectedTitle,
+                expectedContent,
+                expectedTutorialClassName,
                 notificationCaptor.value,
             )
         }
@@ -169,6 +206,7 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     private fun verifyNotificationContent(
         titleResId: Int,
         contentResId: Int,
+        expectedTutorialClassName: String?,
         notification: Notification,
     ) {
         val expectedContent = context.getString(contentResId)
@@ -177,6 +215,10 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
         val actualTitle = notification.getString(Notification.EXTRA_TITLE)
         assertThat(actualContent).isEqualTo(expectedContent)
         assertThat(actualTitle).isEqualTo(expectedTitle)
+        val actualTutorialClassName =
+            notification.contentIntent.intent.component?.className
+                ?: notification.contentIntent.intent.action
+        assertThat(actualTutorialClassName).isEqualTo(expectedTutorialClassName)
     }
 
     private fun Notification.getString(key: String): String =
@@ -187,5 +229,15 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
             interactor.incrementSignalCount(gestureType)
         }
         runCurrent()
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getGestureTypes(): List<GestureType> {
+            return listOf(BACK, HOME, OVERVIEW, ALL_APPS)
+        }
+
+        private const val TUTORIAL_ACTION: String = "com.android.systemui.action.TOUCHPAD_TUTORIAL"
     }
 }

@@ -19,12 +19,12 @@ package com.android.systemui.qs.tiles.impl.alarm.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.time.SystemClock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -36,7 +36,7 @@ import javax.inject.Inject
 class AlarmTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Theme,
     private val clock: SystemClock,
 ) : QSTileDataToStateMapper<AlarmTileModel> {

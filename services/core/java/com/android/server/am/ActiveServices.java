@@ -4604,7 +4604,7 @@ public final class ActiveServices {
         return true;
     }
 
-    void unbindFinishedLocked(ServiceRecord r, Intent intent, boolean doRebind) {
+    void unbindFinishedLocked(ServiceRecord r, Intent intent) {
         final long origId = mAm.mInjector.clearCallingIdentity();
         try {
             if (r != null) {

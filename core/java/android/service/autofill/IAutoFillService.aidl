@@ -25,6 +25,8 @@ import android.service.autofill.ISaveCallback;
 import android.service.autofill.SaveRequest;
 import com.android.internal.os.IResultReceiver;
 
+parcelable FillEventHistory;
+
 /**
  * Interface from the system to an auto fill service.
  *
@@ -38,4 +40,5 @@ oneway interface IAutoFillService {
     void onSaveRequest(in SaveRequest request, in ISaveCallback callback);
     void onSavedPasswordCountRequest(in IResultReceiver receiver);
     void onConvertCredentialRequest(in ConvertCredentialRequest convertCredentialRequest, in IConvertCredentialCallback convertCredentialCallback);
+    void onSessionDestroyed(in FillEventHistory history);
 }

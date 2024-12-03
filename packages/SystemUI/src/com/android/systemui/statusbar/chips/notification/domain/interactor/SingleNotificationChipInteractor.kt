@@ -105,7 +105,7 @@ constructor(
             }
             return null
         }
-        return NotificationChipModel(key, statusBarChipIconView)
+        return NotificationChipModel(key, statusBarChipIconView, whenTime)
     }
 
     @AssistedFactory

@@ -25,11 +25,13 @@ public final class Entry implements Parcelable {
     private final byte mType;
     private final byte mNfceeId;
     private final String mEntry;
+    private final String mRoutingType;
 
-    public Entry(String entry, byte type, byte nfceeId) {
+    public Entry(String entry, byte type, byte nfceeId, String routingType) {
         mEntry = entry;
         mType = type;
         mNfceeId = nfceeId;
+        mRoutingType = routingType;
     }
 
     public byte getType() {
@@ -44,6 +46,10 @@ public final class Entry implements Parcelable {
         return mEntry;
     }
 
+    public String getRoutingType() {
+        return mRoutingType;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -53,6 +59,7 @@ public final class Entry implements Parcelable {
         this.mEntry = in.readString();
         this.mNfceeId = in.readByte();
         this.mType = in.readByte();
+        this.mRoutingType = in.readString();
     }
 
     public static final @NonNull Parcelable.Creator<Entry> CREATOR =
@@ -73,5 +80,6 @@ public final class Entry implements Parcelable {
         dest.writeString(mEntry);
         dest.writeByte(mNfceeId);
         dest.writeByte(mType);
+        dest.writeString(mRoutingType);
     }
 }

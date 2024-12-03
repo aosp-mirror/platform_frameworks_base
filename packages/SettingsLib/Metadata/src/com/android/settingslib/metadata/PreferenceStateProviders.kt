@@ -123,7 +123,12 @@ interface PreferenceLifecycleProvider {
      *
      * @return true if the result is handled
      */
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean = false
+    fun onActivityResult(
+        context: PreferenceLifecycleContext,
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ): Boolean = false
 }
 
 /**

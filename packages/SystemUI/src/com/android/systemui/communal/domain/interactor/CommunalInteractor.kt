@@ -34,9 +34,9 @@ import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.shared.model.CommunalContentSize.FULL
-import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
-import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
+import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.FULL
+import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.HALF
+import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
