@@ -130,6 +130,24 @@ class BubbleBarAnimationHelperTest {
     }
 
     @Test
+    fun animateSwitch_bubbleToBubble_handleColorTransferred() {
+        val fromBubble = createBubble(key = "from").initialize(container)
+        fromBubble.bubbleBarExpandedView!!
+            .handleView
+            .updateHandleColor(/* isRegionDark= */ true, /* animated= */ false)
+        val toBubble = createBubble(key = "to").initialize(container)
+
+        getInstrumentation().runOnMainSync {
+            animationHelper.animateSwitch(fromBubble, toBubble, /* afterAnimation= */ null)
+            animatorTestRule.advanceTimeBy(1000)
+        }
+        getInstrumentation().waitForIdleSync()
+
+        assertThat(toBubble.bubbleBarExpandedView!!.handleView.handleColor)
+            .isEqualTo(fromBubble.bubbleBarExpandedView!!.handleView.handleColor)
+    }
+
+    @Test
     fun animateSwitch_bubbleToOverflow_oldHiddenNewShown() {
         val fromBubble = createBubble(key = "from").initialize(container)
         val overflow = createOverflow().initialize(container)
