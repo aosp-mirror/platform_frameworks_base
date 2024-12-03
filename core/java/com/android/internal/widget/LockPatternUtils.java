@@ -1101,12 +1101,20 @@ public class LockPatternUtils {
         return type == CREDENTIAL_TYPE_PATTERN;
     }
 
+    private boolean hasActivePointerDeviceAttached() {
+        return !getEnabledNonTouchInputDevices(InputDevice.SOURCE_CLASS_POINTER).isEmpty();
+    }
+
     /**
      * @return Whether the visible pattern is enabled.
      */
     @UnsupportedAppUsage
     public boolean isVisiblePatternEnabled(int userId) {
-        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, true, userId);
+        boolean defaultValue = true;
+        if (hideLastCharWithPhysicalInput()) {
+            defaultValue = !hasActivePointerDeviceAttached();
+        }
+        return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, defaultValue, userId);
     }
 
     /**

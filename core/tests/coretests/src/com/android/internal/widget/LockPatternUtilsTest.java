@@ -500,4 +500,61 @@ public class LockPatternUtilsTest {
         session.close();
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_HIDE_LAST_CHAR_WITH_PHYSICAL_INPUT)
+    public void isVisiblePatternEnabled_noDevices() throws RemoteException {
+        InputManagerGlobal.TestSession session = configureExternalHardwareTest(new InputDevice[0]);
+        assertTrue(mLockPatternUtils.isVisiblePatternEnabled(USER_ID));
+        session.close();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HIDE_LAST_CHAR_WITH_PHYSICAL_INPUT)
+    public void isVisiblePatternEnabled_noEnabledDevices() throws RemoteException {
+        InputDevice.Builder builder = new InputDevice.Builder();
+        builder.setEnabled(false);
+        InputManagerGlobal.TestSession session =
+                configureExternalHardwareTest(new InputDevice[]{builder.build()});
+        assertTrue(mLockPatternUtils.isVisiblePatternEnabled(USER_ID));
+        session.close();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HIDE_LAST_CHAR_WITH_PHYSICAL_INPUT)
+    public void isVisiblePatternEnabled_noPointingDevices() throws RemoteException {
+        InputDevice.Builder builder = new InputDevice.Builder();
+        builder
+                .setEnabled(true)
+                .setSources(InputDevice.SOURCE_TOUCHSCREEN);
+        InputManagerGlobal.TestSession session =
+                configureExternalHardwareTest(new InputDevice[]{builder.build()});
+        assertTrue(mLockPatternUtils.isVisiblePatternEnabled(USER_ID));
+        session.close();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_HIDE_LAST_CHAR_WITH_PHYSICAL_INPUT)
+    public void isVisiblePatternEnabled_externalPointingDevice() throws RemoteException {
+        InputDevice.Builder builder = new InputDevice.Builder();
+        builder
+                .setEnabled(true)
+                .setSources(InputDevice.SOURCE_CLASS_POINTER);
+        InputManagerGlobal.TestSession session =
+                configureExternalHardwareTest(new InputDevice[]{builder.build()});
+        assertFalse(mLockPatternUtils.isVisiblePatternEnabled(USER_ID));
+        session.close();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_HIDE_LAST_CHAR_WITH_PHYSICAL_INPUT)
+    public void isVisiblePatternEnabled_externalPointingDeviceOldDefault() throws RemoteException {
+        InputDevice.Builder builder = new InputDevice.Builder();
+        builder
+                .setEnabled(true)
+                .setSources(InputDevice.SOURCE_CLASS_POINTER);
+        InputManagerGlobal.TestSession session =
+                configureExternalHardwareTest(new InputDevice[]{builder.build()});
+        assertTrue(mLockPatternUtils.isVisiblePatternEnabled(USER_ID));
+        session.close();
+    }
 }
