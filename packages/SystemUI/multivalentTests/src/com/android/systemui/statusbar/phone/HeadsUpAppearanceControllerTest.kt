@@ -23,24 +23,26 @@ import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.DarkIconDispatcher
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.plugins.fakeDarkIconDispatcher
+import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.shade.ShadeHeadsUpTracker
-import com.android.systemui.shade.ShadeViewController
-import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.shade.shadeViewController
 import com.android.systemui.statusbar.HeadsUpStatusBarView
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
+import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.domain.interactor.headsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
+import com.android.systemui.statusbar.notification.headsup.headsUpManager
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.Clock
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.policy.keyguardStateController
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import org.junit.Before
@@ -56,18 +58,20 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class HeadsUpAppearanceControllerTest : SysuiTestCase() {
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+
     private val stackScrollerController = mock<NotificationStackScrollLayoutController>()
-    private val shadeViewController = mock<ShadeViewController>()
+    private val shadeViewController = kosmos.shadeViewController
     private val shadeHeadsUpTracker = mock<ShadeHeadsUpTracker>()
-    private val darkIconDispatcher = mock<DarkIconDispatcher>()
-    private val statusBarStateController = mock<StatusBarStateController>()
-    private val phoneStatusBarTransitions = mock<PhoneStatusBarTransitions>()
-    private val bypassController = mock<KeyguardBypassController>()
-    private val wakeUpCoordinator = mock<NotificationWakeUpCoordinator>()
-    private val keyguardStateController = mock<KeyguardStateController>()
-    private val commandQueue = mock<CommandQueue>()
+    private val darkIconDispatcher = kosmos.fakeDarkIconDispatcher
+    private val statusBarStateController = kosmos.statusBarStateController
+    private val phoneStatusBarTransitions = kosmos.mockPhoneStatusBarTransitions
+    private val bypassController = kosmos.keyguardBypassController
+    private val wakeUpCoordinator = kosmos.notificationWakeUpCoordinator
+    private val keyguardStateController = kosmos.keyguardStateController
+    private val commandQueue = kosmos.commandQueue
     private val notificationRoundnessManager = mock<NotificationRoundnessManager>()
-    private var headsUpManager = mock<HeadsUpManager>()
+    private var headsUpManager = kosmos.headsUpManager
 
     private lateinit var testHelper: NotificationTestHelper
     private lateinit var row: ExpandableNotificationRow
@@ -103,7 +107,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
                 notificationRoundnessManager,
                 headsUpStatusBarView,
                 Clock(mContext, null),
-                mock<HeadsUpNotificationIconInteractor>(),
+                kosmos.headsUpNotificationIconInteractor,
                 Optional.of(operatorNameView),
             )
         underTest.setAppearFraction(0.0f, 0.0f)
@@ -201,14 +205,13 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     @Test
     fun testDestroy() {
         reset(headsUpManager)
-        reset(darkIconDispatcher)
         reset(shadeHeadsUpTracker)
         reset(stackScrollerController)
 
         underTest.onViewDetached()
 
         verify(headsUpManager).removeListener(any())
-        verify(darkIconDispatcher).removeDarkReceiver(any())
+        assertThat(darkIconDispatcher.receivers).isEmpty()
         verify(shadeHeadsUpTracker).removeTrackingHeadsUpListener(any())
         verify(shadeHeadsUpTracker).setHeadsUpAppearanceController(null)
         verify(stackScrollerController).removeOnExpandedHeightChangedListener(any())
