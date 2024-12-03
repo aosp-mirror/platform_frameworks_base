@@ -107,7 +107,7 @@ public class HubEndpoint {
                 public void onSessionOpenRequest(
                         int sessionId,
                         HubEndpointInfo initiator,
-                        @Nullable HubServiceInfo serviceInfo)
+                        @Nullable String serviceDescriptor)
                         throws RemoteException {
                     HubEndpointSession activeSession;
                     synchronized (mLock) {
@@ -128,16 +128,16 @@ public class HubEndpoint {
                                         processSessionOpenRequestResult(
                                                 sessionId,
                                                 initiator,
-                                                serviceInfo,
+                                                serviceDescriptor,
                                                 mLifecycleCallback.onSessionOpenRequest(
-                                                        initiator, serviceInfo)));
+                                                        initiator, serviceDescriptor)));
                     }
                 }
 
                 private void processSessionOpenRequestResult(
                         int sessionId,
                         HubEndpointInfo initiator,
-                        @Nullable HubServiceInfo serviceInfo,
+                        @Nullable String serviceDescriptor,
                         HubEndpointSessionResult result) {
                     if (result == null) {
                         throw new IllegalArgumentException(
@@ -145,7 +145,7 @@ public class HubEndpoint {
                     }
 
                     if (result.isAccepted()) {
-                        acceptSession(sessionId, initiator, serviceInfo);
+                        acceptSession(sessionId, initiator, serviceDescriptor);
                     } else {
                         Log.i(
                                 TAG,
@@ -162,7 +162,7 @@ public class HubEndpoint {
                 private void acceptSession(
                         int sessionId,
                         HubEndpointInfo initiator,
-                        @Nullable HubServiceInfo serviceInfo) {
+                        @Nullable String serviceDescriptor) {
                     if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
                         // No longer registered?
                         return;
@@ -187,7 +187,7 @@ public class HubEndpoint {
                                         HubEndpoint.this,
                                         mAssignedHubEndpointInfo,
                                         initiator,
-                                        serviceInfo);
+                                        serviceDescriptor);
                         try {
                             // oneway call to notify system service that the request is completed
                             mServiceToken.openSessionRequestComplete(sessionId);
@@ -334,7 +334,6 @@ public class HubEndpoint {
             @Nullable IHubEndpointMessageCallback endpointMessageCallback,
             @NonNull Executor messageCallbackExecutor) {
         mPendingHubEndpointInfo = pendingEndpointInfo;
-
         mLifecycleCallback = endpointLifecycleCallback;
         mLifecycleCallbackExecutor = lifecycleCallbackExecutor;
         mMessageCallback = endpointMessageCallback;
@@ -387,7 +386,7 @@ public class HubEndpoint {
     }
 
     /** @hide */
-    public void openSession(HubEndpointInfo destinationInfo, @Nullable HubServiceInfo serviceInfo) {
+    public void openSession(HubEndpointInfo destinationInfo, @Nullable String serviceDescriptor) {
         // TODO(b/378974199): Consider refactor these assertions
         if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
             // No longer registered?
@@ -397,7 +396,7 @@ public class HubEndpoint {
         HubEndpointSession newSession;
         try {
             // Request system service to assign session id.
-            int sessionId = mServiceToken.openSession(destinationInfo, serviceInfo);
+            int sessionId = mServiceToken.openSession(destinationInfo, serviceDescriptor);
 
             // Save the newly created session
             synchronized (mLock) {
@@ -407,7 +406,7 @@ public class HubEndpoint {
                                 HubEndpoint.this,
                                 destinationInfo,
                                 mAssignedHubEndpointInfo,
-                                serviceInfo);
+                                serviceDescriptor);
                 mActiveSessions.put(sessionId, newSession);
             }
         } catch (RemoteException e) {
