@@ -133,6 +133,7 @@ class ScreenRecordPermissionDialogDelegate(
         dialog.setTitle(R.string.screenrecord_title)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
+            val selectedScreenShareOption = getSelectedScreenShareOption()
             if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
                 requestScreenCapture(/* captureTarget= */ null, selectedScreenShareOption.displayId)
             }
@@ -212,7 +213,8 @@ class ScreenRecordPermissionDialogDelegate(
     }
 
     private fun updateTapsViewVisibility() {
-        tapsView.visibility = if (selectedScreenShareOption.mode == SINGLE_APP) GONE else VISIBLE
+        tapsView.visibility =
+            if (getSelectedScreenShareOption().mode == SINGLE_APP) GONE else VISIBLE
     }
 
     /**
@@ -226,7 +228,7 @@ class ScreenRecordPermissionDialogDelegate(
         displayId: Int = Display.DEFAULT_DISPLAY,
     ) {
         val userContext = userContextProvider.userContext
-        val showTaps = selectedScreenShareOption.mode != SINGLE_APP && tapsSwitch.isChecked
+        val showTaps = getSelectedScreenShareOption().mode != SINGLE_APP && tapsSwitch.isChecked
         val audioMode =
             if (audioSwitch.isChecked) options.selectedItem as ScreenRecordingAudioSource
             else ScreenRecordingAudioSource.NONE
