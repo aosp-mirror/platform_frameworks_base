@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.data.repository
+package com.android.systemui.volume.dialog.ringer
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
+import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
+import com.android.systemui.volume.dialog.ringer.ui.viewmodel.volumeDialogRingerDrawerViewModel
 
-var Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }
+val Kosmos.volumeDialogRingerViewBinder by
+    Kosmos.Fixture { VolumeDialogRingerViewBinder(volumeDialogRingerDrawerViewModel) }

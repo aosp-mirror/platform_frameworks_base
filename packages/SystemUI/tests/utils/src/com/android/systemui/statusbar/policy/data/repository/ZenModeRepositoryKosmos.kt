@@ -20,5 +20,5 @@ import com.android.settingslib.notification.data.repository.FakeZenModeRepositor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.zenModeRepository by Fixture { fakeZenModeRepository }
+var Kosmos.zenModeRepository by Fixture { fakeZenModeRepository }
 val Kosmos.fakeZenModeRepository by Fixture { FakeZenModeRepository() }
