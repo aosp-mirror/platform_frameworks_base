@@ -2345,8 +2345,32 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * {@link WindowManager#DISPLAY_IME_POLICY_HIDE}
      */
     static int computeImeDisplayIdForTarget(int displayId, @NonNull ImeDisplayValidator checker) {
-        if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
-            return FALLBACK_DISPLAY_ID;
+        return computeImeDisplayIdForTargetInner(displayId, checker, FALLBACK_DISPLAY_ID);
+    }
+
+    /**
+     * Find the display where the IME should be shown for a visible background user.
+     *
+     * @param displayId the ID of the display where the IME client target is
+     * @param userId the ID of the user who own the IME
+     * @param checker   instance of {@link ImeDisplayValidator} which is used for
+     *                  checking display config to adjust the final target display
+     * @return the ID of the display where the IME should be shown or
+     * {@link android.view.Display#INVALID_DISPLAY} if the display has an ImePolicy of
+     * {@link WindowManager#DISPLAY_IME_POLICY_HIDE}
+     */
+    int computeImeDisplayIdForVisibleBackgroundUserOnAutomotive(
+            int displayId, @UserIdInt int userId, @NonNull ImeDisplayValidator checker) {
+        // Visible background user can be assigned to a secondary display, not the default display.
+        // The main display assigned to the user will be used as the fallback display.
+        final int mainDisplayId = mUserManagerInternal.getMainDisplayAssignedToUser(userId);
+        return computeImeDisplayIdForTargetInner(displayId, checker, mainDisplayId);
+    }
+
+    private static int computeImeDisplayIdForTargetInner(
+            int displayId, @NonNull ImeDisplayValidator checker, int fallbackDisplayId) {
+        if (displayId == fallbackDisplayId || displayId == INVALID_DISPLAY) {
+            return fallbackDisplayId;
         }
 
         // Show IME window on fallback display when the display doesn't support system decorations
@@ -2356,9 +2380,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return displayId;
         } else if (result == DISPLAY_IME_POLICY_HIDE) {
             return INVALID_DISPLAY;
-        } else {
-            return FALLBACK_DISPLAY_ID;
         }
+        return fallbackDisplayId;
     }
 
     @GuardedBy("ImfLock.class")

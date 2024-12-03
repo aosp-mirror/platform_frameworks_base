@@ -40,6 +40,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
@@ -58,6 +59,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.PrintWriter;
@@ -78,6 +80,7 @@ public final class ImeVisibilityStateComputer {
     private final int mUserId;
 
     private final InputMethodManagerService mService;
+    private final UserManagerInternal mUserManagerInternal;
     private final WindowManagerInternal mWindowManagerInternal;
 
     final InputMethodManagerService.ImeDisplayValidator mImeDisplayValidator;
@@ -188,6 +191,7 @@ public final class ImeVisibilityStateComputer {
     public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service,
             @UserIdInt int userId) {
         this(service,
+                LocalServices.getService(UserManagerInternal.class),
                 LocalServices.getService(WindowManagerInternal.class),
                 LocalServices.getService(WindowManagerInternal.class)::getDisplayImePolicy,
                 new ImeVisibilityPolicy(), userId);
@@ -196,11 +200,14 @@ public final class ImeVisibilityStateComputer {
     @VisibleForTesting
     public ImeVisibilityStateComputer(@NonNull InputMethodManagerService service,
             @NonNull Injector injector) {
-        this(service, injector.getWmService(), injector.getImeValidator(),
-                new ImeVisibilityPolicy(), injector.getUserId());
+        this(service, injector.getUserManagerService(), injector.getWmService(),
+                injector.getImeValidator(), new ImeVisibilityPolicy(), injector.getUserId());
     }
 
     interface Injector {
+        @NonNull
+        UserManagerInternal getUserManagerService();
+
         @NonNull
         WindowManagerInternal getWmService();
 
@@ -212,11 +219,13 @@ public final class ImeVisibilityStateComputer {
     }
 
     private ImeVisibilityStateComputer(InputMethodManagerService service,
+            UserManagerInternal userManagerInternal,
             WindowManagerInternal wmService,
             InputMethodManagerService.ImeDisplayValidator imeDisplayValidator,
             ImeVisibilityPolicy imePolicy, @UserIdInt int userId) {
         mUserId = userId;
         mService = service;
+        mUserManagerInternal = userManagerInternal;
         mWindowManagerInternal = wmService;
         mImeDisplayValidator = imeDisplayValidator;
         mPolicy = imePolicy;
@@ -337,7 +346,16 @@ public final class ImeVisibilityStateComputer {
 
     @GuardedBy("ImfLock.class")
     int computeImeDisplayId(@NonNull ImeTargetWindowState state, int displayId) {
-        final int displayToShowIme = computeImeDisplayIdForTarget(displayId, mImeDisplayValidator);
+        final int displayToShowIme;
+        final PackageManager pm = mService.mContext.getPackageManager();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                && mUserManagerInternal.isVisibleBackgroundFullUser(mUserId)
+                && Flags.fallbackDisplayForSecondaryUserOnSecondaryDisplay()) {
+            displayToShowIme = mService.computeImeDisplayIdForVisibleBackgroundUserOnAutomotive(
+                    displayId, mUserId, mImeDisplayValidator);
+        } else {
+            displayToShowIme = computeImeDisplayIdForTarget(displayId, mImeDisplayValidator);
+        }
         state.setImeDisplayId(displayToShowIme);
         final boolean imeHiddenByPolicy = displayToShowIme == INVALID_DISPLAY;
         mPolicy.setImeHiddenByDisplayPolicy(imeHiddenByPolicy);
