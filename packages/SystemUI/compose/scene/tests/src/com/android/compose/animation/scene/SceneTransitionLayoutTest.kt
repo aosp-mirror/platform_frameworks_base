@@ -379,8 +379,8 @@ class SceneTransitionLayoutTest {
         assertThat(transition).hasProgress(0.5f)
         rule.waitForIdle()
 
-        // B and C are composed.
-        rule.onNodeWithTag("aRoot").assertDoesNotExist()
+        // A, B and C are still composed given that B => C is not finished yet.
+        rule.onNodeWithTag("aRoot").assertExists()
         rule.onNodeWithTag("bRoot").assertExists()
         rule.onNodeWithTag("cRoot").assertExists()
 
