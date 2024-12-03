@@ -76,6 +76,13 @@ public class LocationFudgerCache {
         asyncFetchDefaultCoarseningLevel();
     }
 
+    /** If the cache's default coarsening value hasn't been set, asynchronously fetches it. */
+    public void fetchDefaultCoarseningLevelIfNeeded() {
+        if (!hasDefaultValue()) {
+            asyncFetchDefaultCoarseningLevel();
+        }
+    }
+
     /** Returns true if the cache has successfully received a default value from the provider. */
     public boolean hasDefaultValue() {
         synchronized (mLock) {

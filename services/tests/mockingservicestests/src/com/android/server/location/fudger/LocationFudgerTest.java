@@ -222,6 +222,20 @@ public class LocationFudgerTest {
     }
 
     @Test
+    public void testDensityBasedCoarsening_ifFeatureIsEnabledButNoDefaultValue_defaultIsFetched() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
+        LocationFudgerCache cache = mock(LocationFudgerCache.class);
+        doReturn(false).when(cache).hasDefaultValue();
+
+        mFudger.setLocationFudgerCache(cache);
+
+        mFudger.createCoarse(createLocation("test", mRandom));
+
+        verify(cache).fetchDefaultCoarseningLevelIfNeeded();
+    }
+
+    @Test
     public void testDensityBasedCoarsening_ifFeatureIsEnabledAndDefaultIsSet_cacheIsUsed() {
         mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
         mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
