@@ -3262,6 +3262,7 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean hasPromotableCharacteristics() {
         return isColorizedRequested()
+                && isOngoingEvent()
                 && hasTitle()
                 && !isGroupSummary()
                 && !containsCustomViews()
@@ -4153,6 +4154,13 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public String getShortCriticalText() {
         return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOngoingEvent() {
+        return (flags & FLAG_ONGOING_EVENT) != 0;
     }
 
     /**

@@ -17314,6 +17314,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
 
@@ -17327,6 +17328,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
         StatusBarNotification sbn1 = new StatusBarNotification(mPkg, mPkg, 7, null, mUid, 0,
@@ -17339,6 +17341,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
         StatusBarNotification sbn2 = new StatusBarNotification(PKG_O, PKG_O, 7, null, UID_O, 0,
@@ -17388,6 +17391,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
 
@@ -17420,6 +17424,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
@@ -17434,6 +17439,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
@@ -17483,6 +17489,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
@@ -17515,6 +17522,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
                 n, UserHandle.getUserHandleForUid(mUid), null, 0);
@@ -17543,6 +17551,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
@@ -17570,6 +17579,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
