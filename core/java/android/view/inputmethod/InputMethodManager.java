@@ -946,11 +946,16 @@ public final class InputMethodManager {
                         if (state == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
                             // when losing focus (e.g., by going to another window), we reset the
                             // requestedVisibleTypes of WindowInsetsController by hiding the IME
+                            final var statsToken = ImeTracker.forLogging().onStart(
+                                    ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_CLIENT,
+                                    SoftInputShowHideReason.REASON_HIDE_WINDOW_LOST_FOCUS,
+                                    false /* fromUser */);
                             if (DEBUG) {
                                 Log.d(TAG, "onWindowLostFocus, hiding IME because "
                                         + "of STATE_ALWAYS_HIDDEN");
                             }
-                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime(),
+                                    false /* fromIme */, statsToken);
                         }
                     }
 
