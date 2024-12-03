@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"پیش‌فرض شناسه تماس‌گیرنده روی محدود است. تماس بعدی: بدون محدودیت"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"پیش‌فرض شناسه تماس‌گیرنده روی غیرمحدود است. تماس بعدی: محدود"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"پیش‌فرض شناسه تماس‌گیرنده روی غیرمحدود است. تماس بعدی: بدون محدودیت"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"‏این برنامه با صفحه ۱۶ کیلوبایتی سازگار نیست. بررسی تراز APK ناموفق بود. این برنامه بااستفاده از حالت سازگار اندازه صفحه اجرا خواهد شد. برای بهترین سازگاری، لطفاً برنامه را با پشتیبانی از صفحه ۱۶ کیلوبایتی دوباره ترجمه کنید. برای اطلاعات بیشتر، به &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; مراجعه کنید"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"‏این برنامه با صفحه ۱۶ کیلوبایتی سازگار نیست. بررسی تراز ELF ناموفق بود. این برنامه بااستفاده از حالت سازگار اندازه صفحه اجرا خواهد شد. برای بهترین سازگاری، لطفاً برنامه را با پشتیبانی از صفحه ۱۶ کیلوبایتی دوباره ترجمه کنید. برای اطلاعات بیشتر، به &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; مراجعه کنید"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"‏این برنامه با صفحه ۱۶ کیلوبایتی سازگار نیست. بررسی‌های تراز APK و ELF ناموفق بود. این برنامه بااستفاده از حالت سازگار اندازه صفحه اجرا خواهد شد. برای بهترین سازگاری، لطفاً برنامه را با پشتیبانی از صفحه ۱۶ کیلوبایتی دوباره ترجمه کنید. برای اطلاعات بیشتر، به &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; مراجعه کنید"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سرویس دارای مجوز نیست."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏شما می‎توانید تنظیم شناسه تماس‌گیرنده را تغییر دهید."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"داده به <xliff:g id="CARRIERDISPLAY">%s</xliff:g> تغییر کرد"</string>
@@ -1161,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"تا <xliff:g id="COUNT">%d</xliff:g> ساعت دیگر"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"تا <xliff:g id="COUNT">%d</xliff:g> روز دیگر"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"تا <xliff:g id="COUNT">%d</xliff:g> سال دیگر"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# دقیقه قبل}one{# دقیقه قبل}other{# دقیقه قبل}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ساعت قبل}one{# ساعت قبل}other{# ساعت قبل}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# روز قبل}one{# روز قبل}other{# روز قبل}}"</string>

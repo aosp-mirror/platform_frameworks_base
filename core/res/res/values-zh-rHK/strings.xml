@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"預設不顯示來電號碼，但下一通電話則顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"預設顯示來電號碼，但下一通電話不顯示。"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"預設顯示來電號碼，下一通電話也繼續顯示。"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"此應用程式不兼容 16KB。未能通過 APK 一致性檢查。此應用程式將使用頁面大小兼容模式運行。為達至最佳的兼容性，請將應用程式重新編譯為支援 16KB。詳情請瀏覽 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"此應用程式不兼容 16KB。未能通過電子商務記錄格式一致性檢查。此應用程式將使用頁面大小兼容模式運行。為達至最佳的兼容性，請將應用程式重新編譯為支援 16KB。詳情請瀏覽 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"此應用程式不兼容 16KB。未能通過 APK 和電子商務記錄格式一致性檢查。此應用程式將使用頁面大小兼容模式運行。為達至最佳的兼容性，請將應用程式重新編譯為支援 16KB。詳情請瀏覽 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"未提供此服務。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"你無法更改來電顯示設定。"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"流動數據已切換至「<xliff:g id="CARRIERDISPLAY">%s</xliff:g>」"</string>
@@ -1161,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> 小時後"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> 天後"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> 年後"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# 分鐘前}other{# 分鐘前}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# 小時前}other{# 小時前}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# 天前}other{# 天前}}"</string>
