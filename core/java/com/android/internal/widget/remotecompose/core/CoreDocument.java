@@ -441,11 +441,11 @@ public class CoreDocument {
         mActionListeners.clear();
     }
 
-    public interface ClickCallbacks {
-        void click(int id, @Nullable String metadata);
+    public interface IdActionCallback {
+        void onAction(int id, @Nullable String metadata);
     }
 
-    @NonNull HashSet<ClickCallbacks> mClickListeners = new HashSet<>();
+    @NonNull HashSet<IdActionCallback> mIdActionListeners = new HashSet<>();
     @NonNull HashSet<TouchListener> mTouchListeners = new HashSet<>();
     @NonNull HashSet<ClickAreaRepresentation> mClickAreas = new HashSet<>();
 
@@ -769,12 +769,12 @@ public class CoreDocument {
     }
 
     /**
-     * Add a click listener. This will get called when a click is detected on the document
+     * Add an id action listener. This will get called when e.g. a click is detected on the document
      *
-     * @param callback called when a click area has been hit, passing the click are id and metadata.
+     * @param callback called when an action is executed, passing the id and metadata.
      */
-    public void addClickListener(@NonNull ClickCallbacks callback) {
-        mClickListeners.add(callback);
+    public void addIdActionListener(@NonNull IdActionCallback callback) {
+        mIdActionListeners.add(callback);
     }
 
     /**
@@ -783,8 +783,8 @@ public class CoreDocument {
      * @return set of click listeners
      */
     @NonNull
-    public HashSet<CoreDocument.ClickCallbacks> getClickListeners() {
-        return mClickListeners;
+    public HashSet<IdActionCallback> getIdActionListeners() {
+        return mIdActionListeners;
     }
 
     /**
@@ -813,15 +813,15 @@ public class CoreDocument {
                 warnClickListeners(clickArea);
             }
         }
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(id, "");
+        for (IdActionCallback listener : mIdActionListeners) {
+            listener.onAction(id, "");
         }
     }
 
     /** Warn click listeners when a click area is activated */
     private void warnClickListeners(@NonNull ClickAreaRepresentation clickArea) {
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(clickArea.mId, clickArea.mMetadata);
+        for (IdActionCallback listener : mIdActionListeners) {
+            listener.onAction(clickArea.mId, clickArea.mMetadata);
         }
     }
 
