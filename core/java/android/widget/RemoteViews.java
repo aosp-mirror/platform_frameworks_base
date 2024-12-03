@@ -128,6 +128,7 @@ import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
+import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
 import com.android.internal.widget.remotecompose.player.RemoteComposePlayer;
 
@@ -9829,7 +9830,7 @@ public class RemoteViews implements Parcelable, Filter {
          */
         @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
         public static long getSupportedVersion() {
-            return VERSION;
+            return (long) CoreDocument.getDocumentApiLevel();
         }
 
         /**
