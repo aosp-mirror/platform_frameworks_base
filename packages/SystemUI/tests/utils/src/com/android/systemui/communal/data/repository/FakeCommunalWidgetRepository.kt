@@ -55,7 +55,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
         rank: Int = 0,
         category: Int = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
         userId: Int = 0,
-        spanY: Int = CommunalContentSize.HALF.span,
+        spanY: Int = CommunalContentSize.FixedSize.HALF.span,
     ) {
         fakeDatabase[appWidgetId] =
             CommunalWidgetContentModel.Available(
@@ -87,7 +87,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
                 componentName = ComponentName.unflattenFromString(componentName)!!,
                 icon = icon,
                 user = UserHandle(userId),
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
         updateListFromDatabase()
     }
@@ -143,7 +143,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
                 appWidgetId = id,
                 providerInfo = providerInfo,
                 rank = rank,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
         updateListFromDatabase()
     }

@@ -21,11 +21,12 @@ import android.view.Surface
 import android.view.WindowManager
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.Utils
+import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.docking.domain.interactor.KeyboardDockingIndicationInteractor
-import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.surfaceeffects.glowboxeffect.GlowBoxConfig
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -37,9 +38,9 @@ class KeyboardDockingIndicationViewModel
 @Inject
 constructor(
     private val windowManager: WindowManager,
-    private val context: Context,
+    @Application private val context: Context,
     keyboardDockingIndicationInteractor: KeyboardDockingIndicationInteractor,
-    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
+    @GlobalConfig configurationInteractor: ConfigurationInteractor,
     @Background private val backgroundScope: CoroutineScope,
 ) {
 

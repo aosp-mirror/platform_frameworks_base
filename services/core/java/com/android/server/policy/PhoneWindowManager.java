@@ -4426,9 +4426,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
 
         float minLinearBrightness = mPowerManager.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+                screenDisplayId, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
         float maxLinearBrightness = mPowerManager.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+                screenDisplayId, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
         float linearBrightness = mDisplayManager.getBrightness(screenDisplayId);
 
         float gammaBrightness = BrightnessUtils.convertLinearToGamma(linearBrightness);

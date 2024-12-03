@@ -188,7 +188,8 @@ constructor(
     private val shortcutsBindings = mutableSetOf<KeyguardQuickAffordanceViewBinder.Binding>()
 
     private val coroutineScope: CoroutineScope
-    private var themeStyle: Style? = null
+
+    @Style.Type private var themeStyle: Int? = null
 
     init {
         coroutineScope =
@@ -660,6 +661,7 @@ constructor(
             // Seed color null means users do not override any color on the clock. The default
             // color will need to use wallpaper's extracted color and consider if the
             // wallpaper's color is dark or light.
+            @Style.Type
             val style = themeStyle ?: fetchThemeStyleFromSetting().also { themeStyle = it }
             val wallpaperColorScheme = ColorScheme(colors, false, style)
             val lightClockColor = wallpaperColorScheme.accent1.s100
@@ -712,7 +714,8 @@ constructor(
         }
     }
 
-    private suspend fun fetchThemeStyleFromSetting(): Style {
+    @Style.Type
+    private suspend fun fetchThemeStyleFromSetting(): Int {
         val overlayPackageJson =
             withContext(backgroundDispatcher) {
                 secureSettings.getString(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)

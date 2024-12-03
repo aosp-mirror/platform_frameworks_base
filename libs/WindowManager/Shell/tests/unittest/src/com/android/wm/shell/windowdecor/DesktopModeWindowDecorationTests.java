@@ -29,6 +29,7 @@ import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlTransaction;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.CLOSE_MAXIMIZE_MENU_DELAY_MS;
 import static com.android.wm.shell.windowdecor.WindowDecoration.INVALID_CORNER_RADIUS;
 
@@ -305,7 +306,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(
-                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                relayoutParams, mContext, taskInfo, mMockSplitScreenController,
+                /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
@@ -325,7 +327,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(
-                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                relayoutParams, mContext, taskInfo, mMockSplitScreenController,
+                /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
@@ -344,7 +347,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         RelayoutParams relayoutParams = new RelayoutParams();
 
         DesktopModeWindowDecoration.updateRelayoutParams(
-                relayoutParams, mContext, taskInfo, /* applyStartTransactionOnDraw= */ true,
+                relayoutParams, mContext, taskInfo, mMockSplitScreenController,
+                /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
                 /* isKeyguardVisibleAndOccluded */ false,
@@ -367,6 +371,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -390,6 +395,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -413,6 +419,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -440,6 +447,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -468,6 +476,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -493,6 +502,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -518,6 +528,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -542,6 +553,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -566,6 +578,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -589,6 +602,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -612,6 +626,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -634,6 +649,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -657,6 +673,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -680,6 +697,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -704,6 +722,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -729,6 +748,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -752,6 +772,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -777,6 +798,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -789,6 +811,31 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         assertThat(
                 (relayoutParams.mInsetSourceFlags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) == 0)
                 .isTrue();
+    }
+
+    @Test
+    public void updateRelayoutParams_handle_bottomSplitIsInsetSource() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+        when(mMockSplitScreenController.isLeftRightSplit()).thenReturn(false);
+        when(mMockSplitScreenController.getSplitPosition(taskInfo.taskId))
+                .thenReturn(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                mMockSplitScreenController,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ true,
+                new InsetsState(),
+                /* hasGlobalFocus= */ true,
+                mExclusionRegion);
+
+        assertThat(relayoutParams.mIsInsetSource).isTrue();
     }
 
     @Test
@@ -808,6 +855,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -832,6 +880,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -855,6 +904,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ false,
@@ -878,6 +928,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -900,6 +951,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ false,
@@ -922,6 +974,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -945,6 +998,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,
@@ -960,6 +1014,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ false,
@@ -983,6 +1038,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 relayoutParams,
                 mTestableContext,
                 taskInfo,
+                mMockSplitScreenController,
                 /* applyStartTransactionOnDraw= */ true,
                 /* shouldSetTaskPositionAndCrop */ false,
                 /* isStatusBarVisible */ true,

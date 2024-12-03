@@ -42,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -189,7 +190,7 @@ public class HeadsUpManagerImpl
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
             VisualStabilityProvider visualStabilityProvider,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             @Main Handler handler,
             GlobalSettings globalSettings,
             SystemClock systemClock,

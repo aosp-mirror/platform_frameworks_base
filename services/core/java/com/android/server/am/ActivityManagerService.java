@@ -13977,14 +13977,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void unbindFinished(IBinder token, Intent intent, boolean doRebind) {
+    public void unbindFinished(IBinder token, Intent intent) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
         synchronized(this) {
-            mServices.unbindFinishedLocked((ServiceRecord)token, intent, doRebind);
+            mServices.unbindFinishedLocked((ServiceRecord)token, intent);
         }
     }
 

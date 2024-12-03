@@ -180,7 +180,8 @@ public class LocationFudgerCache {
                 Log.e(sTAG, "could not get population density");
             }
         };
-        mPopulationDensityProvider.getCoarsenedS2Cell(latitude, longitude, callback);
+        mPopulationDensityProvider.getCoarsenedS2Cells(latitude, longitude, MAX_CACHE_SIZE - 1,
+                callback);
     }
 
     /**

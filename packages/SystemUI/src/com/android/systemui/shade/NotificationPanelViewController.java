@@ -172,6 +172,7 @@ import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirr
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -2269,7 +2270,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     float getDisplayDensity() {
-        return mCentralSurfaces.getDisplayDensity();
+        if (ShadeWindowGoesAround.isEnabled()) {
+            return mView.getContext().getResources().getConfiguration().densityDpi;
+        } else {
+            return mCentralSurfaces.getDisplayDensity();
+        }
     }
 
     /** Return whether a touch is near the gesture handle at the bottom of screen */
@@ -3830,7 +3835,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     /* screenOnFromTouch=*/ getWakefulness().isAwakeFromTapOrGesture());
             // Log collapse gesture if on lock screen.
             if (!expand && onKeyguard) {
-                float displayDensity = mCentralSurfaces.getDisplayDensity();
+                float displayDensity = getDisplayDensity();
                 int heightDp = (int) Math.abs((y - mInitialExpandY) / displayDensity);
                 int velocityDp = (int) Math.abs(vel / displayDensity);
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_UNLOCK, heightDp, velocityDp);

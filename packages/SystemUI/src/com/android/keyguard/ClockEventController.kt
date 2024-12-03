@@ -63,6 +63,7 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R as SysuiR
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
@@ -466,6 +467,15 @@ constructor(
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         zenModeController.addCallback(zenModeCallback)
+        if (SceneContainerFlag.isEnabled) {
+            handleDoze(
+                when (AOD) {
+                    keyguardTransitionInteractor.getCurrentState() -> 1f
+                    keyguardTransitionInteractor.getStartedState() -> 1f
+                    else -> 0f
+                }
+            )
+        }
         disposableHandle =
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {

@@ -160,6 +160,7 @@ val Kosmos.shortcutHelperCategoriesInteractor by
 val Kosmos.shortcutHelperViewModel by
     Kosmos.Fixture {
         ShortcutHelperViewModel(
+            applicationContext,
             mockRoleManager,
             userTracker,
             applicationCoroutineScope,

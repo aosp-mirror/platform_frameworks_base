@@ -354,14 +354,6 @@ flag {
 }
 
 flag {
-    name: "support_minor_versions_in_minsdkversion"
-    namespace: "package_manager_service"
-    description: "Block app installations that specify an incompatible minor SDK version"
-    bug: "377302905"
-    is_exported: true
-}
-
-flag {
     name: "app_compat_option_16kb"
     is_exported: true
     namespace: "devoptions_settings"
