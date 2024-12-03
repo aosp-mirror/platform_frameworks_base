@@ -1332,22 +1332,17 @@ public final class Display {
      *
      * <p> For example, an animation that does not require fast render rates can use
      * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
-     * The suggested frame rate then can be used in the
-     * {@link Surface.FrameRateParams.Builder#setDesiredRateRange} for desiredMinRate.
      *
      * <pre>{@code
      *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
-     *  Surface.FrameRateParams params = new Surface.FrameRateParams.Builder().
-     *                                      setDesiredRateRange(desiredMinRate, Float.MAX).build();
-     *  surface.setFrameRate(params);
+     *  surface.setFrameRate(desiredMinRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
      * }</pre>
      * </p>
      *
      * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
      *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
      *
-     * @see Surface#setFrameRate(Surface.FrameRateParams)
-     * @see SurfaceControl.Transaction#setFrameRate(SurfaceControl, Surface.FrameRateParams)
+     * @see Surface#setFrameRate(float, int)
      * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
      * or {@link #FRAME_RATE_CATEGORY_HIGH}
      */
