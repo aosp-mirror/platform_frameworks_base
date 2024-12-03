@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
@@ -754,5 +755,20 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
         mPhoneWindowManager.assertTalkBack(false);
+    }
+
+    @Test
+    public void testKeyGestureToggleDoNotDisturb() {
+        mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_OFF);
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB));
+        mPhoneWindowManager.assertZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+
+        mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB));
+        mPhoneWindowManager.assertZenMode(Settings.Global.ZEN_MODE_OFF);
     }
 }

@@ -4106,6 +4106,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB:
                         return true;
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD:
@@ -4354,6 +4355,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (complete && isUserSetupComplete() && !keyguardOn
                         && data != null && mModifierShortcutManager.launchApplication(data)) {
                     dismissKeyboardShortcutsMenu();
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB:
+                NotificationManager nm = getNotificationService();
+                if (nm != null) {
+                    boolean isEnabled = nm.getZenMode() != Settings.Global.ZEN_MODE_OFF;
+                    nm.setZenMode(isEnabled ? Settings.Global.ZEN_MODE_OFF
+                                    : Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
+                            "Key gesture DND", true);
                 }
                 return true;
         }
