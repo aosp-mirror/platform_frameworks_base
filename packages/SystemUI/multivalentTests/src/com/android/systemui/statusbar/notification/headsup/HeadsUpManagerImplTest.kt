@@ -42,8 +42,6 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -58,18 +56,18 @@ import platform.test.runner.parameterized.Parameters
 @RunWithLooper
 class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplOldTest(flags) {
 
-    private val mHeadsUpManagerLogger = HeadsUpManagerLogger(logcatLogBuffer())
+    private val headsUpManagerLogger = HeadsUpManagerLogger(logcatLogBuffer())
 
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
 
-    private val mGroupManager = mock<GroupMembershipManager>()
-    private val mBgHandler = mock<Handler>()
+    private val groupManager = mock<GroupMembershipManager>()
+    private val bgHandler = mock<Handler>()
 
     val statusBarStateController = kosmos.sysuiStatusBarStateController
-    private val mJavaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
+    private val javaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
 
-    private lateinit var mAvalancheController: AvalancheController
+    private lateinit var avalancheController: AvalancheController
     private lateinit var underTest: HeadsUpManagerImpl
 
     @Before
@@ -94,31 +92,31 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
         whenever(kosmos.keyguardBypassController.bypassEnabled).thenReturn(false)
         kosmos.visualStabilityProvider.isReorderingAllowed = true
-        mAvalancheController =
+        avalancheController =
             AvalancheController(
                 kosmos.dumpManager,
                 kosmos.uiEventLoggerFake,
-                mHeadsUpManagerLogger,
-                mBgHandler,
+                headsUpManagerLogger,
+                bgHandler,
             )
         underTest =
             HeadsUpManagerImpl(
                 mContext,
-                mHeadsUpManagerLogger,
+                headsUpManagerLogger,
                 statusBarStateController,
                 kosmos.keyguardBypassController,
-                mGroupManager,
+                groupManager,
                 kosmos.visualStabilityProvider,
                 kosmos.configurationController,
-                mockExecutorHandler(mExecutor),
-                mGlobalSettings,
-                mSystemClock,
-                mExecutor,
+                mockExecutorHandler(executor),
+                globalSettings,
+                systemClock,
+                executor,
                 kosmos.accessibilityManagerWrapper,
                 kosmos.uiEventLoggerFake,
-                mJavaAdapter,
+                javaAdapter,
                 kosmos.shadeInteractor,
-                mAvalancheController,
+                avalancheController,
             )
     }
 
@@ -127,7 +125,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
         underTest.showNotification(entry)
         underTest.snooze()
-        Assert.assertTrue(underTest.isSnoozed(entry.sbn.packageName))
+        assertThat(underTest.isSnoozed(entry.sbn.packageName)).isTrue()
     }
 
     @Test
@@ -143,8 +141,8 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
                 /* releaseImmediately= */ false,
                 /* reason= */ "swipe out",
             )
-        Assert.assertTrue(removedImmediately)
-        Assert.assertFalse(underTest.isHeadsUpEntry(entry.key))
+        assertThat(removedImmediately).isTrue()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
     }
 
     @Test
@@ -154,7 +152,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         underTest.addSwipedOutNotification(entry.key)
 
         // Notification is swiped so it can be immediately removed.
-        Assert.assertTrue(underTest.canRemoveImmediately(entry.key))
+        assertThat(underTest.canRemoveImmediately(entry.key)).isTrue()
     }
 
     @Ignore("b/141538055")
@@ -167,7 +165,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         underTest.showNotification(laterEntry)
 
         // Notification is "behind" a higher priority notification so we can remove it immediately.
-        Assert.assertTrue(underTest.canRemoveImmediately(earlierEntry.key))
+        assertThat(underTest.canRemoveImmediately(earlierEntry.key)).isTrue()
     }
 
     @Test
@@ -175,8 +173,8 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
         underTest.showNotification(entry)
         underTest.extendHeadsUp()
-        mSystemClock.advanceTime(((TEST_AUTO_DISMISS_TIME + TEST_EXTENSION_TIME) / 2).toLong())
-        Assert.assertTrue(underTest.isHeadsUpEntry(entry.key))
+        systemClock.advanceTime(((TEST_AUTO_DISMISS_TIME + TEST_EXTENSION_TIME) / 2).toLong())
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
     }
 
     @Test
@@ -234,7 +232,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
 
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
-            Assert.assertFalse(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
 
     @Test
@@ -251,7 +249,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
             headsUpEntry!!.mWasUnpinned = false
 
-            Assert.assertTrue(underTest.shouldHeadsUpBecomePinned(notifEntry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(notifEntry)).isTrue()
         }
 
     @Test
@@ -268,7 +266,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
             headsUpEntry!!.mWasUnpinned = true
 
-            Assert.assertFalse(underTest.shouldHeadsUpBecomePinned(notifEntry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(notifEntry)).isFalse()
         }
 
     @Test
@@ -283,7 +281,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             statusBarStateController.setState(StatusBarState.SHADE)
 
             // THEN
-            Assert.assertTrue(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isTrue()
         }
 
     @Test
@@ -294,7 +292,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             statusBarStateController.setState(StatusBarState.SHADE_LOCKED)
 
             // THEN
-            Assert.assertFalse(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
 
     @Test
@@ -305,7 +303,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             statusBarStateController.setState(1207)
 
             // THEN
-            Assert.assertFalse(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
 
     @Test
@@ -318,7 +316,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             statusBarStateController.setState(StatusBarState.KEYGUARD)
 
             // THEN
-            Assert.assertTrue(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isTrue()
         }
 
     @Test
@@ -331,7 +329,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             statusBarStateController.setState(StatusBarState.KEYGUARD)
 
             // THEN
-            Assert.assertFalse(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
 
     @Test
@@ -346,7 +344,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             statusBarStateController.setState(StatusBarState.SHADE)
 
             // THEN
-            Assert.assertFalse(underTest.shouldHeadsUpBecomePinned(entry))
+            assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
 
     companion object {
