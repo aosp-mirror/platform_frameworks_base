@@ -84,7 +84,7 @@ public class RavenwoodSystemProperties {
         var ravenwoodProps = readProperties(path + RAVENWOOD_BUILD_PROP);
         var deviceProps = readProperties(path + DEVICE_BUILD_PROP);
 
-        Log.i(TAG, "Default system properties:");
+        Log.v(TAG, "Default system properties:");
         ravenwoodProps.forEach((key, origValue) -> {
             final String value;
 
@@ -100,7 +100,7 @@ public class RavenwoodSystemProperties {
             } else {
                 value = origValue;
             }
-            Log.i(TAG, key + "=" + value);
+            Log.v(TAG, key + "=" + value);
             sDefaultValues.put(key, value);
         });
 
