@@ -7857,6 +7857,10 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int URI_ALLOW_UNSAFE = 1<<2;
 
+    static {
+        Bundle.intentClass = Intent.class;
+    }
+
     // ---------------------------------------------------------------------
 
     private String mAction;
