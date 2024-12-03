@@ -8325,7 +8325,9 @@ public class TelephonyManager {
             if (telephony == null) {
                 throw new IllegalStateException("telephony service is null.");
             }
-            telephony.rebootModem(getSlotIndex());
+            if (!telephony.rebootModem(getSlotIndex())) {
+                throw new RuntimeException("Couldn't reboot modem (it may be not supported)");
+            }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "rebootRadio RemoteException", ex);
             throw ex.rethrowAsRuntimeException();
