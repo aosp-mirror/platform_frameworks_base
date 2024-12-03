@@ -1801,16 +1801,6 @@ flag {
 }
 
 flag {
-  name: "ensure_enr_views_visibility"
-  namespace: "systemui"
-  description: "Ensures public and private visibilities"
-  bug: "361552380"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "shade_expands_on_status_bar_long_press"
   namespace: "systemui"
   description: "Expands the shade on long press of any status bar"
