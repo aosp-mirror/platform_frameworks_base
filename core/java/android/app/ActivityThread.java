@@ -1372,7 +1372,8 @@ public final class ActivityThread extends ClientTransactionHandler
             data.startRequestedElapsedTime = startRequestedElapsedTime;
             data.startRequestedUptime = startRequestedUptime;
             updateCompatOverrideScale(compatInfo);
-            CompatibilityInfo.applyOverrideScaleIfNeeded(config);
+            updateCompatOverrideDisplayRotation(compatInfo);
+            CompatibilityInfo.applyOverrideIfNeeded(config);
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -1383,6 +1384,15 @@ public final class ActivityThread extends ClientTransactionHandler
             } else {
                 CompatibilityInfo.setOverrideInvertedScale(/* invertScale */ 1f,
                         /* densityInvertScale */1f);
+            }
+        }
+
+        private void updateCompatOverrideDisplayRotation(@NonNull CompatibilityInfo info) {
+            if (info.isOverrideDisplayRotationRequired()) {
+                CompatibilityInfo.setOverrideDisplayRotation(info.applicationDisplayRotation);
+            } else {
+                CompatibilityInfo.setOverrideDisplayRotation(
+                        WindowConfiguration.ROTATION_UNDEFINED);
             }
         }
 
@@ -2036,6 +2046,7 @@ public final class ActivityThread extends ClientTransactionHandler
             ucd.pkg = pkg;
             ucd.info = info;
             updateCompatOverrideScale(info);
+            updateCompatOverrideDisplayRotation(info);
             sendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
         }
 
