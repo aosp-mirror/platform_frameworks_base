@@ -55,7 +55,7 @@ interface IPowerManager
     void goToSleepWithDisplayId(int displayId, long time, int reason, int flags);
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void nap(long time);
-    float getBrightnessConstraint(int constraint);
+    float getBrightnessConstraint(int displayId, int constraint);
     @UnsupportedAppUsage
     boolean isInteractive();
     boolean isDisplayInteractive(int displayId);

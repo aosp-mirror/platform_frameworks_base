@@ -29,6 +29,7 @@ import static android.view.Display.FLAG_OWN_FOCUS;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
@@ -46,6 +47,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.hardware.input.Flags.FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
@@ -75,6 +77,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -1133,6 +1136,53 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
                         FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY,
                         null /* region */));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+    public void testUpdateInputChannel_sanitizeWithoutPermission_ThrowsError() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
+
+
+        final InputChannel inputChannel = new InputChannel();
+
+        assertThrows(IllegalArgumentException.class, () ->
+                mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY,
+                        surfaceControl, window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE,
+                        0 /* privateFlags */,
+                        INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS,
+                        TYPE_APPLICATION, null /* windowToken */, inputTransferToken,
+                        "TestInputChannel", inputChannel));
+    }
+
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+    public void testUpdateInputChannel_sanitizeWithPermission_doesNotThrowError() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
+
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mWm.mContext).checkPermission(
+                android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW,
+                callingPid,
+                callingUid);
+
+        final InputChannel inputChannel = new InputChannel();
+
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, 0 /* privateFlags */,
+                INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS,
+                TYPE_APPLICATION, null /* windowToken */, inputTransferToken, "TestInputChannel",
+                inputChannel);
     }
 
     @Test

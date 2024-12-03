@@ -35,11 +35,11 @@ oneway interface IPopulationDensityProvider {
     void getDefaultCoarseningLevel(in IS2LevelCallback callback);
 
     /**
-     * Returns a list of IDs of the S2 cells to be used to coarsen a location. The answer should
+     * Requests a list of IDs of the S2 cells to be used to coarsen a location. The answer should
      * contain at least one S2 cell, which should contain the requested location. Its level
-     * represents the population density. Optionally, additional nearby cells can be also returned,
-     * to assist in coarsening nearby locations.
+     * represents the population density. Optionally, if numAdditionalCells is greater than 0,
+     * additional nearby cells can be also returned, to assist in coarsening nearby locations.
      */
-    void getCoarsenedS2Cell(double latitudeDegrees, double longitudeDegrees, in IS2CellIdsCallback
-        callback);
+    void getCoarsenedS2Cells(double latitudeDegrees, double longitudeDegrees,
+        int numAdditionalCells, in IS2CellIdsCallback callback);
 }

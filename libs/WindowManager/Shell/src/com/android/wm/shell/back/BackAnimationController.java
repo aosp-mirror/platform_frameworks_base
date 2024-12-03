@@ -32,7 +32,6 @@ import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.window.flags.Flags.unifyBackNavigationTransition;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -308,7 +307,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
         updateEnableAnimationFromFlags();
         createAdapter();
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
+        mShellController.addExternalInterface(IBackAnimation.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mShellController.addConfigurationChangeListener(this);
@@ -552,6 +551,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     // start animation immediately for non-gestural sources (without ACTION_MOVE
                     // events)
                     mThresholdCrossed = true;
+                    mPointersPilfered = true;
                     onGestureStarted(touchX, touchY, swipeEdge);
                     mShouldStartOnNextMoveEvent = false;
                 } else {

@@ -16,27 +16,39 @@
 
 package com.android.systemui.communal.shared.model
 
+import com.android.systemui.Flags.communalResponsiveGrid
+
 /**
  * Supported sizes for communal content in the layout grid.
  *
- * @param span The span of the content in a column. For example, if FULL is 6, then 3 represents
- *   HALF, 2 represents THIRD, and 1 represents SIXTH.
+ * @property span The span of the content in a column.
  */
-enum class CommunalContentSize(val span: Int) {
-    /** Content takes the full height of the column. */
-    FULL(6),
+sealed interface CommunalContentSize {
+    val span: Int
 
-    /** Content takes half of the height of the column. */
-    HALF(3),
+    @Deprecated("Use Responsive size instead")
+    enum class FixedSize(override val span: Int) : CommunalContentSize {
+        /** Content takes the full height of the column. */
+        FULL(6),
 
-    /** Content takes a third of the height of the column. */
-    THIRD(2);
+        /** Content takes half of the height of the column. */
+        HALF(3),
+
+        /** Content takes a third of the height of the column. */
+        THIRD(2),
+    }
+
+    @JvmInline value class Responsive(override val span: Int) : CommunalContentSize
 
     companion object {
         /** Converts from span to communal content size. */
         fun toSize(span: Int): CommunalContentSize {
-            return entries.find { it.span == span }
-                ?: throw IllegalArgumentException("$span is not a valid span size")
+            return if (communalResponsiveGrid()) {
+                Responsive(span)
+            } else {
+                FixedSize.entries.find { it.span == span }
+                    ?: throw IllegalArgumentException("$span is not a valid span size")
+            }
         }
     }
 }

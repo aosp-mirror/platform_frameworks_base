@@ -543,9 +543,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         final boolean inFullImmersive = mDesktopUserRepositories.getProfile(taskInfo.userId)
                 .isTaskInFullImmersiveState(taskInfo.taskId);
-        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
-                shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
-                mIsKeyguardVisibleAndOccluded, inFullImmersive,
+        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, mSplitScreenController,
+                applyStartTransactionOnDraw, shouldSetTaskVisibilityPositionAndCrop,
+                mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded, inFullImmersive,
                 mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus,
                 displayExclusionRegion);
 
@@ -877,6 +877,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             RelayoutParams relayoutParams,
             Context context,
             ActivityManager.RunningTaskInfo taskInfo,
+            SplitScreenController splitScreenController,
             boolean applyStartTransactionOnDraw,
             boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean isStatusBarVisible,
@@ -918,7 +919,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
         }
         relayoutParams.mIsCaptionVisible = showCaption;
-        relayoutParams.mIsInsetSource = isAppHeader && !inFullImmersiveMode;
+        final boolean isBottomSplit = !splitScreenController.isLeftRightSplit()
+                && splitScreenController.getSplitPosition(taskInfo.taskId)
+                == SPLIT_POSITION_BOTTOM_OR_RIGHT;
+        relayoutParams.mIsInsetSource = (isAppHeader && !inFullImmersiveMode) || isBottomSplit;
         if (isAppHeader) {
             if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
                 // The app is requesting to customize the caption bar, which means input on

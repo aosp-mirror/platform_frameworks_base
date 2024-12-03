@@ -765,6 +765,7 @@ public class DisplayDeviceConfig {
     private float mBacklightMinimum = Float.NaN;
     private float mBacklightMaximum = Float.NaN;
     private float mBrightnessDefault = Float.NaN;
+    private float mBrightnessDim = Float.NaN;
     private float mBrightnessRampFastDecrease = Float.NaN;
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
@@ -1282,12 +1283,39 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * Return the minimum brightness on a scale of 0.0f - 1.0f
+     *
+     * @return minimum brightness
+     */
+    public float getBrightnessMinimum() {
+        return getBrightnessFromBacklight(mBacklightMinimum);
+    }
+
+    /**
+     * Return the maximum brightness on a scale of 0.0f - 1.0f
+     *
+     * @return maximum brightness
+     */
+    public float getBrightnessMaximum() {
+        return getBrightnessFromBacklight(mBacklightMaximum);
+    }
+
+    /**
      * Return the default brightness on a scale of 0.0f - 1.0f
      *
      * @return default brightness
      */
     public float getBrightnessDefault() {
         return mBrightnessDefault;
+    }
+
+    /**
+     * Return the dim brightness on a scale of 0.0f - 1.0f
+     *
+     * @return dim brightness
+     */
+    public float getBrightnessDim() {
+        return mBrightnessDim;
     }
 
     public float getBrightnessRampFastDecrease() {
@@ -1689,6 +1717,7 @@ public class DisplayDeviceConfig {
                 + ", mBacklightMinimum=" + mBacklightMinimum
                 + ", mBacklightMaximum=" + mBacklightMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
+                + ", mBrightnessDim=" + mBrightnessDim
                 + ", mQuirks=" + mQuirks
                 + "\n"
                 + "mLuxThrottlingData=" + mLuxThrottlingData
@@ -1906,6 +1935,7 @@ public class DisplayDeviceConfig {
         mBacklightMinimum = PowerManager.BRIGHTNESS_MIN;
         mBacklightMaximum = PowerManager.BRIGHTNESS_MAX;
         mBrightnessDefault = BRIGHTNESS_DEFAULT;
+        mBrightnessDim = PowerManager.BRIGHTNESS_INVALID;
         mBrightnessRampFastDecrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampFastIncrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
@@ -2002,6 +2032,15 @@ public class DisplayDeviceConfig {
         } else {
             mBacklightMinimum = min;
             mBacklightMaximum = max;
+        }
+        final float dim = mContext.getResources().getFloat(com.android.internal.R.dimen
+                .config_screenBrightnessDimFloat);
+        if (dim == INVALID_BRIGHTNESS_IN_CONFIG) {
+            mBrightnessDim = BrightnessSynchronizer.brightnessIntToFloat(
+                    mContext.getResources().getInteger(com.android.internal.R.integer
+                            .config_screenBrightnessDim));
+        } else {
+            mBrightnessDim = dim;
         }
     }
 

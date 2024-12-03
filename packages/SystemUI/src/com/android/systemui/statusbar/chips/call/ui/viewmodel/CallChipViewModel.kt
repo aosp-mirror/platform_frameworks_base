@@ -59,7 +59,8 @@ constructor(
         interactor.ongoingCallState
             .map { state ->
                 when (state) {
-                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden()
+                    is OngoingCallModel.NoCall,
+                    is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
                         val icon =
                             if (

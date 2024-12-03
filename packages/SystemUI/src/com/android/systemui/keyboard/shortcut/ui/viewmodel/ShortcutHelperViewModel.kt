@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.shortcut.ui.viewmodel
 
 import android.app.role.RoleManager
+import android.content.Context
 import android.content.pm.PackageManager.NameNotFoundException
 import android.util.Log
 import androidx.compose.material.icons.Icons
@@ -40,7 +41,6 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,10 +51,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class ShortcutHelperViewModel
 @Inject
 constructor(
+    private val context: Context,
     private val roleManager: RoleManager,
     private val userTracker: UserTracker,
     @Background private val backgroundScope: CoroutineScope,
@@ -88,6 +90,7 @@ constructor(
                         shortcutCategories = shortcutCategoriesUi,
                         defaultSelectedCategory = getDefaultSelectedCategory(filteredCategories),
                         isShortcutCustomizerFlagEnabled = keyboardShortcutHelperShortcutCustomizer(),
+                        shouldShowResetButton = shouldShowResetButton(shortcutCategoriesUi)
                     )
                 }
             }
@@ -96,6 +99,10 @@ constructor(
                 started = SharingStarted.Lazily,
                 initialValue = ShortcutsUiState.Inactive,
             )
+
+    private fun shouldShowResetButton(categoriesUi: List<ShortcutCategoryUi>): Boolean {
+        return categoriesUi.any { it.containsCustomShortcuts }
+    }
 
     private fun convertCategoriesModelToUiModel(
         categories: List<ShortcutCategory>
@@ -136,13 +143,13 @@ constructor(
     private fun getShortcutCategoryLabel(type: ShortcutCategoryType): String =
         when (type) {
             ShortcutCategoryType.System ->
-                userContext.getString(R.string.shortcut_helper_category_system)
+                context.getString(R.string.shortcut_helper_category_system)
             ShortcutCategoryType.MultiTasking ->
-                userContext.getString(R.string.shortcut_helper_category_multitasking)
+                context.getString(R.string.shortcut_helper_category_multitasking)
             ShortcutCategoryType.InputMethodEditor ->
-                userContext.getString(R.string.shortcut_helper_category_input)
+                context.getString(R.string.shortcut_helper_category_input)
             ShortcutCategoryType.AppCategories ->
-                userContext.getString(R.string.shortcut_helper_category_app_shortcuts)
+                context.getString(R.string.shortcut_helper_category_app_shortcuts)
             is CurrentApp -> getApplicationLabelForCurrentApp(type)
         }
 

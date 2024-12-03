@@ -136,6 +136,16 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
         return mExtras;
     }
 
+    /**
+     * Returns the size of the request in bytes.
+     *
+     * @hide
+     */
+    public int getRequestDataSize() {
+        return mTargetPackageName.getBytes().length + mFunctionIdentifier.getBytes().length
+                + mParameters.getDataSize() + mExtras.getSize();
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mTargetPackageName);

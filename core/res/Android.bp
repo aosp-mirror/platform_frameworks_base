@@ -162,6 +162,7 @@ android_app {
         "android.appwidget.flags-aconfig",
         "android.companion.virtualdevice.flags-aconfig",
         "android.content.pm.flags-aconfig",
+        "android.location.flags-aconfig",
         "android.media.audio-aconfig",
         "android.provider.flags-aconfig",
         "camera_platform_flags",

@@ -2145,6 +2145,21 @@
     <permission android:name="android.permission.CONTROL_AUTOMOTIVE_GNSS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to bind to a
+         android.service.PopulationDensityProviderService for the purpose of
+         querying population density. This prevents arbitrary clients connecting
+         to the service. The system server checks that the provider's intent
+         service explicitly sets this permission via the android:permission
+         attribute of the service.
+         This is only expected to be possessed by the system server outside of
+         tests.
+         @FlaggedApi(android.location.flags.Flags.FLAG_POPULATION_DENSITY_PROVIDER)
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_POPULATION_DENSITY_PROVIDER_SERVICE"
+        android:featureFlag="android.location.flags.population_density_provider"
+        android:protectionLevel="signature" />
+
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->

@@ -135,6 +135,15 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
         return mExtras;
     }
 
+    /**
+     * Returns the size of the response in bytes.
+     *
+     * @hide
+     */
+    public int getResponseDataSize() {
+        return mResultDocumentWrapper.getDataSize() + mExtras.getSize();
+    }
+
     @Override
     public int describeContents() {
         return 0;

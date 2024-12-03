@@ -16,123 +16,98 @@
 
 <!-- This layout is the AlertDialog template. It overrides the system layout with the same name.
     Make sure to include all the existing id of the overridden alert_dialog_material.-->
-<com.android.internal.widget.WatchListDecorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.WatchListDecorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <ScrollView
         android:id="@+id/scrollView"
+        android:fillViewport="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <requestFocus />
-
+        android:layout_height="match_parent">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginStart="@dimen/alertDialog_material_side_margin"
-            android:layout_marginEnd="@dimen/alertDialog_material_side_margin"
-            android:gravity="center_vertical">
-
-            <!-- Top Spacer -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/alertDialog_material_top_margin" />
-
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
             <!-- Top Panel -->
             <FrameLayout
-                android:id="@+id/topPanel"
+                android:paddingLeft="?dialogPreferredPadding"
+                android:paddingRight="?dialogPreferredPadding"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/topPanel"
                 android:minHeight="@dimen/dialog_list_padding_top_no_title">
-
-                <include
-                    android:id="@+id/title_template"
-                    layout="@layout/alert_dialog_title_material"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                <include android:id="@+id/title_template"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         layout="@layout/alert_dialog_title_material"/>
             </FrameLayout>
 
             <!-- Content Panel -->
-            <FrameLayout
-                android:id="@+id/contentPanel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="12dp">
-
-                <TextView
-                    android:id="@+id/message"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/alertDialog_material_side_margin_body"
-                    android:layout_marginEnd="@dimen/alertDialog_material_side_margin_body"
-                    android:textAppearance="@style/TextAppearance.AlertDialog.Body1"
-                    android:gravity="center_horizontal|top" />
+            <FrameLayout android:id="@+id/contentPanel"
+                         android:layout_width="match_parent"
+                         android:layout_height="wrap_content"
+                         android:clipToPadding="false">
+                <TextView android:id="@+id/message"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:gravity="center_horizontal|top"
+                          android:textAppearance="@style/TextAppearance.DeviceDefault.Body1"
+                          android:paddingStart="?dialogPreferredPadding"
+                          android:paddingEnd="?dialogPreferredPadding"
+                          android:paddingTop="8dip"
+                          android:paddingBottom="8dip"/>
             </FrameLayout>
 
             <!-- Custom Panel, to replace content panel if needed -->
-            <FrameLayout
-                android:id="@+id/customPanel"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minHeight="64dp">
-
-                <FrameLayout
-                    android:id="@+android:id/custom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+            <FrameLayout android:id="@+id/customPanel"
+                         android:layout_width="match_parent"
+                         android:layout_height="match_parent"
+                         android:minHeight="64dp">
+                <FrameLayout android:id="@+android:id/custom"
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content" />
             </FrameLayout>
 
             <!-- Button Panel -->
             <FrameLayout
                 android:id="@+id/buttonPanel"
+                android:minHeight="@dimen/dialog_list_padding_bottom_no_buttons"
+                android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:minHeight="@dimen/dialog_list_padding_bottom_no_buttons">
-
+                android:layout_gravity="center">
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_gravity="bottom"
-                    android:orientation="vertical">
-
-                    <Button
-                        android:id="@+id/button1"
-                        style="@*android:style/Widget.DeviceDefault.Button.Filled"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:gravity="center" />
-
-                    <Button
-                        android:id="@+id/button2"
-                        style="@*android:style/Widget.DeviceDefault.Button.WearMaterial3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:layout_gravity="center"
-                        android:gravity="center" />
-
-                    <Button
-                        android:id="@+id/button3"
-                        style="?android:attr/buttonBarButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center" />
+                    android:orientation="vertical"
+                    android:paddingBottom="?dialogPreferredPadding"
+                    android:measureWithLargestChild="true">
+                    <Button android:id="@+id/button2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_weight="1"
+                            style="@*android:style/Widget.DeviceDefault.Button.WearMaterial3"/>
+                    <Button android:id="@+id/button3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_weight="1"
+                            style="?android:attr/buttonBarButtonStyle"/>
+                    <Button android:id="@+id/button1"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:layout_weight="1"
+                            style="@*android:style/Widget.DeviceDefault.Button.Filled"/>
                 </LinearLayout>
             </FrameLayout>
-
-            <!-- Bottom Spacer -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/alertDialog_material_bottom_margin" />
-
         </LinearLayout>
     </ScrollView>
 </com.android.internal.widget.WatchListDecorLayout>

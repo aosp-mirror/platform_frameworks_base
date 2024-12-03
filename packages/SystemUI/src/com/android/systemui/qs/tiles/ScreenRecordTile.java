@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.media.projection.StopReason;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
@@ -138,9 +139,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.value = isRecording || isStarting;
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_screen_record_label);
-        state.icon = ResourceIcon.get(state.value
-                ? R.drawable.qs_screen_record_icon_on
-                : R.drawable.qs_screen_record_icon_off);
+        state.icon = maybeLoadResourceIcon(state.value
+                ? R.drawable.qs_screen_record_icon_on : R.drawable.qs_screen_record_icon_off);
         // Show expand icon when clicking will open a dialog
         state.forceExpandIcon = state.state == Tile.STATE_INACTIVE;
 
@@ -225,7 +225,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     private void stopRecording() {
-        mController.stopRecording();
+        mController.stopRecording(StopReason.STOP_QS_TILE);
     }
 
     private final class Callback implements RecordingController.RecordingStateChangeCallback {

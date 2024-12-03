@@ -19,28 +19,24 @@ package com.android.systemui.qs.tiles.impl.notes.domain
 import android.content.res.Resources
 import android.widget.Button
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.notes.domain.model.NotesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 class NotesTileMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
-    QSTileDataToStateMapper<NotesTileModel> {
+constructor(
+    @ShadeDisplayAware private val resources: Resources,
+    private val theme: Resources.Theme,
+) : QSTileDataToStateMapper<NotesTileModel> {
     override fun map(config: QSTileConfig, data: NotesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             iconRes = R.drawable.ic_qs_notes
-            icon =
-                Icon.Loaded(
-                    resources.getDrawable(
-                        iconRes!!,
-                        theme),
-                    contentDescription = null
-                )
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
             contentDescription = label
             activationState = QSTileState.ActivationState.INACTIVE
             sideViewIcon = QSTileState.SideViewIcon.Chevron

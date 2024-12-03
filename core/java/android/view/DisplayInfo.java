@@ -361,6 +361,12 @@ public final class DisplayInfo implements Parcelable {
     public float brightnessDefault;
 
     /**
+     * The current dim brightness of the display. Value between 0.0 and 1.0,
+     * derived from the configuration of the display device of this logical display.
+     */
+    public float brightnessDim;
+
+    /**
      * The {@link RoundedCorners} if present, otherwise {@code null}.
      */
     @Nullable
@@ -479,6 +485,7 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
+                && brightnessDim == other.brightnessDim
                 && Objects.equals(roundedCorners, other.roundedCorners)
                 && installOrientation == other.installOrientation
                 && Objects.equals(displayShape, other.displayShape)
@@ -546,6 +553,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        brightnessDim = other.brightnessDim;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
         displayShape = other.displayShape;
@@ -620,6 +628,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         brightnessDefault = source.readFloat();
+        brightnessDim = source.readFloat();
         roundedCorners = source.readTypedObject(RoundedCorners.CREATOR);
         int numUserDisabledFormats = source.readInt();
         userDisabledHdrTypes = new int[numUserDisabledFormats];
@@ -696,6 +705,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeFloat(brightnessDefault);
+        dest.writeFloat(brightnessDim);
         dest.writeTypedObject(roundedCorners, flags);
         dest.writeInt(userDisabledHdrTypes.length);
         for (int i = 0; i < userDisabledHdrTypes.length; i++) {
@@ -994,6 +1004,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessMaximum);
         sb.append(", brightnessDefault ");
         sb.append(brightnessDefault);
+        sb.append(", brightnessDim ");
+        sb.append(brightnessDim);
         sb.append(", installOrientation ");
         sb.append(Surface.rotationToString(installOrientation));
         sb.append(", layoutLimitedRefreshRate ");

@@ -35,7 +35,6 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystem
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,7 +76,6 @@ class DesktopHeaderManageWindowsMenuTest : ShellTestCase() {
     }
 
     @Test
-    @Ignore("Test is failing internally")
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     fun testShow_forImmersiveTask_usesSystemViewContainer() {
         val task = createFreeformTask()
@@ -110,6 +108,7 @@ class DesktopHeaderManageWindowsMenuTest : ShellTestCase() {
         .setToken(MockToken().token())
         .setActivityType(ACTIVITY_TYPE_STANDARD)
         .setWindowingMode(WINDOWING_MODE_FREEFORM)
+        .setUserId(DEFAULT_USER_ID)
         .build()
 
     private companion object {

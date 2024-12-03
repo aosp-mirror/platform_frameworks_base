@@ -20,7 +20,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.widget.Switch
+import android.widget.Button
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
@@ -71,7 +71,7 @@ constructor(
         metricsLogger,
         statusBarStateController,
         activityStarter,
-        qsLogger
+        qsLogger,
     ) {
     private var model: InternetTileModel = viewModel.tileModel.value
 
@@ -110,7 +110,7 @@ constructor(
         return InternetDetailsViewModel { longClick(null) }
     }
 
-    override fun secondaryClick(expandable: Expandable?) {
+    override fun handleSecondaryClick(expandable: Expandable?) {
         // TODO(b/358352265): Figure out the correct action for the secondary click
         // Toggle wifi
         wifiStateWorker.isWifiEnabled = !wifiStateWorker.isWifiEnabled
@@ -118,7 +118,7 @@ constructor(
 
     override fun handleUpdateState(state: QSTile.BooleanState, arg: Any?) {
         state.label = mContext.resources.getString(R.string.quick_settings_internet_label)
-        state.expandedAccessibilityClassName = Switch::class.java.name
+        state.expandedAccessibilityClassName = Button::class.java.name
 
         model.applyTo(state, mContext)
     }

@@ -96,14 +96,15 @@ public class ProxyPopulationDensityProvider {
 
 
     /** Gets the population density at the requested location. */
-    public void getCoarsenedS2Cell(double latitudeDegrees, double longitudeDegrees,
-              IS2CellIdsCallback callback) {
+    public void getCoarsenedS2Cells(double latitudeDegrees, double longitudeDegrees,
+              int numAdditionalCells, IS2CellIdsCallback callback) {
         mServiceWatcher.runOnBinder(
                 new ServiceWatcher.BinderOperation() {
                     @Override
                     public void run(IBinder binder) throws RemoteException {
                         IPopulationDensityProvider.Stub.asInterface(binder)
-                              .getCoarsenedS2Cell(latitudeDegrees, longitudeDegrees, callback);
+                                .getCoarsenedS2Cells(latitudeDegrees, longitudeDegrees,
+                                      numAdditionalCells, callback);
                     }
 
                     @Override

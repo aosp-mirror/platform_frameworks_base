@@ -51,7 +51,7 @@ public:
 
     ~PointerController() override;
 
-    void move(float deltaX, float deltaY) override;
+    FloatPoint move(float deltaX, float deltaY) override;
     void setPosition(float x, float y) override;
     FloatPoint getPosition() const override;
     ui::LogicalDisplayId getDisplayId() const override;
@@ -67,6 +67,7 @@ public:
     void setCustomPointerIcon(const SpriteIcon& icon) override;
     void setSkipScreenshotFlagForDisplay(ui::LogicalDisplayId displayId) override;
     void clearSkipScreenshotFlags() override;
+    ui::Transform getDisplayTransform() const override;
 
     virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
@@ -165,7 +166,7 @@ public:
 
     ~TouchPointerController() override;
 
-    void move(float, float) override {
+    FloatPoint move(float, float) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void setPosition(float, float) override {
