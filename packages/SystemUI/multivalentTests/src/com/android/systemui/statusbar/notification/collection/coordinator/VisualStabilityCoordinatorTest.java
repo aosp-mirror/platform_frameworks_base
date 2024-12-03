@@ -16,17 +16,21 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag;
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
 
+
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +52,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.BrokenWithSceneContainer;
 import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.EnableSceneContainer;
+import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -86,9 +91,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
 import java.util.List;
+import java.util.Set;
 
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.test.TestScope;
+
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
 
@@ -99,7 +106,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return parameterizeSceneContainerFlag();
+        return SceneContainerFlagParameterizationKt
+                .andSceneContainer(allCombinationsOf(Flags.FLAG_STABILIZE_HEADS_UP_GROUP));
     }
 
     private VisualStabilityCoordinator mCoordinator;
@@ -122,7 +130,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
-    private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
+    private FakeExecutor mFakeBackgroundExecutor = new FakeExecutor(mFakeSystemClock);
+    private FakeExecutor mFakeMainExecutor = new FakeExecutor(mFakeSystemClock);
     private final TestScope mTestScope = mKosmos.getTestScope();
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
@@ -147,7 +156,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(
                 new ShadeAnimationRepository(), mShadeRepository);
         mCoordinator = new VisualStabilityCoordinator(
-                mFakeExecutor,
+                mFakeBackgroundExecutor,
+                mFakeMainExecutor,
                 mDumpManager,
                 mHeadsUpManager,
                 mShadeAnimationInteractor,
@@ -417,8 +427,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
         // WHEN the timeout for the temporarily allow section reordering runnable is finsihed
-        mFakeExecutor.advanceClockToNext();
-        mFakeExecutor.runNextReady();
+        mFakeBackgroundExecutor.advanceClockToNext();
+        mFakeBackgroundExecutor.runNextReady();
 
         // THEN section changes aren't allowed anymore
         assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -699,6 +709,212 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // BUT pruning the group for which this is the summary would still NOT be allowed.
         assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+    }
+
+    @Test
+    public void everyChangeAllowed_onReorderingEnabled_legacy() {
+        assumeFalse(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        // THEN
+        assertThat(mNotifStabilityManager.isEveryChangeAllowed()).isTrue();
+        assertThat(mNotifStabilityManager.isGroupChangeAllowed(any())).isTrue();
+        assertThat(mNotifStabilityManager.isGroupPruneAllowed(any())).isTrue();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(any())).isTrue();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(any())).isTrue();
+    }
+
+    @Test
+    public void everyChangeAllowed_noActiveHeadsUpGroup_onReorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        // GIVEN - empty heads-up-group keys
+        mCoordinator.setHeadsUpGroupKeys(Set.of());
+
+        // THEN
+        assertThat(mNotifStabilityManager.isEveryChangeAllowed()).isTrue();
+        assertThat(mNotifStabilityManager.isGroupChangeAllowed(any())).isTrue();
+        assertThat(mNotifStabilityManager.isGroupPruneAllowed(any())).isTrue();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(any())).isTrue();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(any())).isTrue();
+    }
+
+    @Test
+    public void everyChangeDisallowed_activeHeadsUpGroup_onReorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        // GIVEN - there is a group heads-up.
+        mCoordinator.setHeadsUpGroupKeys(Set.of("heads_up_group_key"));
+
+        // THEN
+        assertThat(mNotifStabilityManager.isEveryChangeAllowed()).isFalse();
+    }
+
+    @Test
+    public void nonHeadsUpGroup_changesAllowed_onReorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        //  GIVEN - there is a group heads-up.
+        String headsUpGroupKey = "heads_up_group_key";
+        mCoordinator.setHeadsUpGroupKeys(Set.of(headsUpGroupKey));
+        when(mHeadsUpManager.isHeadsUpEntry(headsUpGroupKey)).thenReturn(true);
+
+        // GIVEN - HUN Group Summary
+        final NotificationEntry nonHeadsUpGroupSummary = mock(NotificationEntry.class);
+        when(nonHeadsUpGroupSummary.getKey()).thenReturn("non_heads_up_group_key");
+        when(nonHeadsUpGroupSummary.isSummaryWithChildren()).thenReturn(true);
+        final GroupEntry nonHeadsUpGroupEntry = mock(GroupEntry.class);
+        when(nonHeadsUpGroupEntry.getSummary()).thenReturn(nonHeadsUpGroupSummary);
+        when(nonHeadsUpGroupEntry.getRepresentativeEntry()).thenReturn(nonHeadsUpGroupSummary);
+
+        // THEN
+        assertThat(mNotifStabilityManager.isGroupPruneAllowed(nonHeadsUpGroupEntry)).isTrue();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(nonHeadsUpGroupEntry)).isTrue();
+    }
+
+    @Test
+    public void headsUpGroup_changesDisallowed_onReorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        //  GIVEN - there is a group heads-up.
+        final String headsUpGroupKey = "heads_up_group_key";
+        mCoordinator.setHeadsUpGroupKeys(Set.of(headsUpGroupKey));
+        when(mHeadsUpManager.isHeadsUpEntry(headsUpGroupKey)).thenReturn(true);
+
+        // GIVEN - HUN Group
+        final NotificationEntry headsUpGroupSummary = mock(NotificationEntry.class);
+        when(headsUpGroupSummary.rowIsChildInGroup()).thenReturn(false);
+        when(headsUpGroupSummary.getKey()).thenReturn(headsUpGroupKey);
+        when(headsUpGroupSummary.isSummaryWithChildren()).thenReturn(true);
+
+        final GroupEntry headsUpGroupEntry = mock(GroupEntry.class);
+        when(headsUpGroupEntry.getSummary()).thenReturn(headsUpGroupSummary);
+        when(headsUpGroupEntry.getRepresentativeEntry()).thenReturn(headsUpGroupSummary);
+
+        when(headsUpGroupSummary.getParent()).thenReturn(headsUpGroupEntry);
+
+        // GIVEN - HUN is in visible location
+        when(mVisibilityLocationProvider.isInVisibleLocation(headsUpGroupSummary)).thenReturn(true);
+
+        // THEN
+        assertThat(mNotifStabilityManager.isGroupPruneAllowed(headsUpGroupEntry)).isFalse();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(headsUpGroupEntry)).isFalse();
+    }
+
+    @Test
+    public void headsUpGroupSummaries_changesDisallowed_onReorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        //  GIVEN - there is a group heads-up.
+        final String headsUpGroupKey = "heads_up_group_key";
+        mCoordinator.setHeadsUpGroupKeys(Set.of(headsUpGroupKey));
+        when(mHeadsUpManager.isHeadsUpEntry(headsUpGroupKey)).thenReturn(true);
+
+        // GIVEN - HUN Group
+        final NotificationEntry headsUpGroupSummary = mock(NotificationEntry.class);
+        when(headsUpGroupSummary.rowIsChildInGroup()).thenReturn(false);
+        when(headsUpGroupSummary.getKey()).thenReturn(headsUpGroupKey);
+        when(headsUpGroupSummary.isSummaryWithChildren()).thenReturn(true);
+
+        final GroupEntry headsUpGroupEntry = mock(GroupEntry.class);
+        when(headsUpGroupEntry.getSummary()).thenReturn(headsUpGroupSummary);
+        when(headsUpGroupEntry.getRepresentativeEntry()).thenReturn(headsUpGroupSummary);
+
+        when(headsUpGroupSummary.getParent()).thenReturn(headsUpGroupEntry);
+
+        // GIVEN - HUN is in visible location
+        when(mVisibilityLocationProvider.isInVisibleLocation(headsUpGroupSummary)).thenReturn(true);
+
+        // THEN
+        assertThat(mNotifStabilityManager.isGroupChangeAllowed(headsUpGroupSummary)).isFalse();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(headsUpGroupSummary)).isFalse();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(headsUpGroupSummary)).isFalse();
+    }
+
+    @Test
+    public void notificationInNonHUNGroup_changesAllowed_onReorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        //  GIVEN - there is a group heads-up.
+        String headsUpGroupKey = "heads_up_group_key";
+        mCoordinator.setHeadsUpGroupKeys(Set.of(headsUpGroupKey));
+        when(mHeadsUpManager.isHeadsUpEntry(headsUpGroupKey)).thenReturn(true);
+
+        // GIVEN - non HUN parent Group Summary
+        final NotificationEntry groupSummary = mock(NotificationEntry.class);
+        when(groupSummary.getKey()).thenReturn("non_heads_up_group_key");
+        when(groupSummary.isSummaryWithChildren()).thenReturn(true);
+
+        final GroupEntry nonHeadsUpGroupEntry = mock(GroupEntry.class);
+        when(nonHeadsUpGroupEntry.getSummary()).thenReturn(groupSummary);
+        when(nonHeadsUpGroupEntry.getRepresentativeEntry()).thenReturn(groupSummary);
+
+        // GIVEN - child entry in a non heads-up group.
+        final NotificationEntry childEntry = mock(NotificationEntry.class);
+        when(childEntry.rowIsChildInGroup()).thenReturn(true);
+        when(childEntry.getParent()).thenReturn(nonHeadsUpGroupEntry);
+        when(childEntry.getParent()).thenReturn(nonHeadsUpGroupEntry);
+
+        // THEN
+        assertThat(mNotifStabilityManager.isGroupChangeAllowed(childEntry)).isTrue();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(childEntry)).isTrue();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(nonHeadsUpGroupEntry)).isTrue();
+    }
+
+    @Test
+    public void notificationInHUNGroup_changesDisallowed_reorderingEnabled() {
+        assumeTrue(StabilizeHeadsUpGroup.isEnabled());
+        // GIVEN - reordering is allowed.
+        setPulsing(false);
+        setPanelExpanded(false);
+
+        // GIVEN - there is a group heads-up.
+        final String headsUpGroupKey = "heads_up_group_key";
+        mCoordinator.setHeadsUpGroupKeys(Set.of(headsUpGroupKey));
+        when(mHeadsUpManager.isHeadsUpEntry(headsUpGroupKey)).thenReturn(true);
+
+        // GIVEN - HUN Group Summary
+        final NotificationEntry headsUpGroupSummary = mock(NotificationEntry.class);
+        when(headsUpGroupSummary.rowIsChildInGroup()).thenReturn(false);
+        when(headsUpGroupSummary.getKey()).thenReturn(headsUpGroupKey);
+        when(headsUpGroupSummary.isSummaryWithChildren()).thenReturn(true);
+
+        final GroupEntry nonHeadsUpGroupEntry = mock(GroupEntry.class);
+        when(nonHeadsUpGroupEntry.getSummary()).thenReturn(headsUpGroupSummary);
+        when(nonHeadsUpGroupEntry.getRepresentativeEntry()).thenReturn(headsUpGroupSummary);
+
+        // GIVEN - child entry in a non heads-up group.
+        final NotificationEntry childEntry = mock(NotificationEntry.class);
+        when(childEntry.rowIsChildInGroup()).thenReturn(true);
+        when(childEntry.getParent()).thenReturn(nonHeadsUpGroupEntry);
+
+        // GIVEN - HUN is in visible location
+        when(mVisibilityLocationProvider.isInVisibleLocation(headsUpGroupSummary)).thenReturn(true);
+
+        // THEN
+        assertThat(mNotifStabilityManager.isGroupChangeAllowed(childEntry)).isFalse();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(childEntry)).isFalse();
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(childEntry)).isFalse();
     }
 
     private void verifyStabilityManagerWasInvalidated(VerificationMode mode) {
