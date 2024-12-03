@@ -257,6 +257,24 @@ public final class MediaQualityManager {
     }
 
     /**
+     * Sets preferred default picture profile.
+     *
+     * @param id the ID of the default profile. {@code null} to unset the default profile.
+     * @return {@code true} if it's set successfully; {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE)
+    public boolean setDefaultPictureProfile(@Nullable String id) {
+        try {
+            return mService.setDefaultPictureProfile(id, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets all package names whose picture profiles are available.
      *
      * @see #getPictureProfilesByPackage(String)
@@ -394,6 +412,24 @@ public final class MediaQualityManager {
     public List<SoundProfile> getAvailableSoundProfiles() {
         try {
             return mService.getAvailableSoundProfiles(mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets preferred default sound profile.
+     *
+     * @param id the ID of the default profile. {@code null} to unset the default profile.
+     * @return {@code true} if it's set successfully; {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE)
+    public boolean setDefaultSoundProfile(@Nullable String id) {
+        try {
+            return mService.setDefaultSoundProfile(id, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
