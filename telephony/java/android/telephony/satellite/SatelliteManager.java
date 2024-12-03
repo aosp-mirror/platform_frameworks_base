@@ -282,6 +282,13 @@ public final class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestSatelliteDisplayName(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_DISPLAY_NAME = "satellite_display_name";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestSelectedNbIotSatelliteSubscriptionId(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -3473,6 +3480,65 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestSatelliteSubscriberProvisionStatus() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Request to get the display name of satellite feature in the UI.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return display name of the satellite feature in string format. Defaults
+     *                 to satellite. If the request is not successful,
+     *                 {@link OutcomeReceiver#onError(Throwable)} will return an error with
+     *                 a SatelliteException.
+     *
+     * @throws SecurityException     if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestSatelliteDisplayName(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<String, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_SATELLITE_DISPLAY_NAME)) {
+                                String satelliteDisplayName =
+                                        resultData.getString(KEY_SATELLITE_DISPLAY_NAME);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(satelliteDisplayName)));
+                            } else {
+                                loge("KEY_SATELLITE_DISPLAY_NAME does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestSatelliteDisplayName(receiver);
+            } else {
+                loge("requestSatelliteDisplayName() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("requestSatelliteDisplayName() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }
