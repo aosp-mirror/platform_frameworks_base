@@ -15,10 +15,14 @@
  */
 package com.android.systemui.statusbar.notification.headsup
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.os.Handler
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
+import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import android.view.accessibility.accessibilityManager
 import android.view.accessibility.accessibilityManagerWrapper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLoggerFake
@@ -32,8 +36,10 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.policy.configurationController
@@ -46,6 +52,8 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -67,6 +75,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     val statusBarStateController = kosmos.sysuiStatusBarStateController
     private val javaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
 
+    private lateinit var testHelper: NotificationTestHelper
     private lateinit var avalancheController: AvalancheController
     private lateinit var underTest: HeadsUpManagerImpl
 
@@ -89,6 +98,9 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
                 TEST_STICKY_AUTO_DISMISS_TIME,
             )
         }
+
+        allowTestableLooperAsMainThread()
+        testHelper = NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
 
         whenever(kosmos.keyguardBypassController.bypassEnabled).thenReturn(false)
         kosmos.visualStabilityProvider.isReorderingAllowed = true
@@ -226,6 +238,107 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     }
 
     @Test
+    fun testShowNotification_sticky_neverAutoDismisses() {
+        val entry = createStickyEntry(id = 0)
+        useAccessibilityTimeout(false)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime(
+            (TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME).toLong()
+        )
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testShowNotification_stickyForSomeTime_autoDismissesWithStickyTimeout() {
+        val entry = createStickyForSomeTimeEntry(id = 0)
+        useAccessibilityTimeout(false)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime(
+            (TEST_TOUCH_ACCEPTANCE_TIME +
+                    (TEST_AUTO_DISMISS_TIME + TEST_STICKY_AUTO_DISMISS_TIME) / 2)
+                .toLong()
+        )
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testShowNotification_stickyForSomeTime_autoDismissesWithAccessibilityTimeout() {
+        val entry = createStickyForSomeTimeEntry(id = 0)
+        useAccessibilityTimeout(true)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime(
+            (TEST_TOUCH_ACCEPTANCE_TIME +
+                    (TEST_STICKY_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
+                .toLong()
+        )
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testIsSticky_rowPinnedAndExpanded_true() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val row = testHelper.createRow()
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        notifEntry.row = row
+
+        underTest.showNotification(notifEntry)
+
+        val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
+        headsUpEntry!!.setExpanded(true)
+
+        assertThat(underTest.isSticky(notifEntry.key)).isTrue()
+    }
+
+    @Test
+    fun testIsSticky_remoteInputActive_true() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(notifEntry)
+
+        val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
+        headsUpEntry!!.mRemoteInputActive = true
+
+        assertThat(underTest.isSticky(notifEntry.key)).isTrue()
+    }
+
+    @Test
+    fun testIsSticky_hasFullScreenIntent_true() {
+        val notifEntry = HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(notifEntry)
+
+        assertThat(underTest.isSticky(notifEntry.key)).isTrue()
+    }
+
+    @Test
+    fun testIsSticky_stickyForSomeTime_false() {
+        val entry = createStickyForSomeTimeEntry(id = 0)
+
+        underTest.showNotification(entry)
+
+        assertThat(underTest.isSticky(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testIsSticky_false() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(notifEntry)
+
+        val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
+        headsUpEntry!!.setExpanded(false)
+        headsUpEntry.mRemoteInputActive = false
+
+        assertThat(underTest.isSticky(notifEntry.key)).isFalse()
+    }
+
+    @Test
     fun testShouldHeadsUpBecomePinned_noFSI_false() =
         kosmos.runTest {
             statusBarStateController.setState(StatusBarState.KEYGUARD)
@@ -346,6 +459,36 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             // THEN
             assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
+
+    private fun createStickyEntry(id: Int): NotificationEntry {
+        val notif =
+            Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setFullScreenIntent(mock<PendingIntent>(), /* highPriority= */ true)
+                .build()
+        return HeadsUpManagerTestUtil.createEntry(id, notif)
+    }
+
+    private fun createStickyForSomeTimeEntry(id: Int): NotificationEntry {
+        val notif =
+            Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setFlag(Notification.FLAG_FSI_REQUESTED_BUT_DENIED, true)
+                .build()
+        return HeadsUpManagerTestUtil.createEntry(id, notif)
+    }
+
+    override fun useAccessibilityTimeout(use: Boolean) {
+        super.useAccessibilityTimeout(use)
+        if (use) {
+            whenever(kosmos.accessibilityManager.getRecommendedTimeoutMillis(any(), any()))
+                .thenReturn(TEST_A11Y_AUTO_DISMISS_TIME)
+        } else {
+            doAnswer { it.getArgument(0) as Int }
+                .whenever(kosmos.accessibilityManager)
+                .getRecommendedTimeoutMillis(any(), any())
+        }
+    }
 
     companion object {
         @get:Parameters(name = "{0}")

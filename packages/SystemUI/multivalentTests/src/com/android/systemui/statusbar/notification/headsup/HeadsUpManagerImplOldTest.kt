@@ -31,7 +31,6 @@ import com.android.systemui.kosmos.KosmosJavaAdapter
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl.HeadsUpEntry
@@ -108,28 +107,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         )
     }
 
-    private fun createStickyEntry(id: Int): NotificationEntry {
-        val notif =
-            Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setFullScreenIntent(
-                    Mockito.mock(PendingIntent::class.java), /* highPriority */
-                    true,
-                )
-                .build()
-        return HeadsUpManagerTestUtil.createEntry(id, notif)
-    }
-
-    private fun createStickyForSomeTimeEntry(id: Int): NotificationEntry {
-        val notif =
-            Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setFlag(Notification.FLAG_FSI_REQUESTED_BUT_DENIED, true)
-                .build()
-        return HeadsUpManagerTestUtil.createEntry(id, notif)
-    }
-
-    private fun useAccessibilityTimeout(use: Boolean) {
+    open fun useAccessibilityTimeout(use: Boolean) {
         if (use) {
             Mockito.doReturn(TEST_A11Y_AUTO_DISMISS_TIME)
                 .`when`(mAccessibilityMgr!!)
@@ -346,36 +324,6 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     }
 
     @Test
-    fun testShowNotification_stickyForSomeTime_autoDismissesWithStickyTimeout() {
-        val hum = createHeadsUpManager()
-        val entry = createStickyForSomeTimeEntry(/* id= */ 0)
-        useAccessibilityTimeout(false)
-
-        hum.showNotification(entry)
-        systemClock.advanceTime(
-            (TEST_TOUCH_ACCEPTANCE_TIME +
-                    (TEST_AUTO_DISMISS_TIME + TEST_STICKY_AUTO_DISMISS_TIME) / 2)
-                .toLong()
-        )
-
-        assertThat(hum.isHeadsUpEntry(entry.key)).isTrue()
-    }
-
-    @Test
-    fun testShowNotification_sticky_neverAutoDismisses() {
-        val hum = createHeadsUpManager()
-        val entry = createStickyEntry(/* id= */ 0)
-        useAccessibilityTimeout(false)
-
-        hum.showNotification(entry)
-        systemClock.advanceTime(
-            (TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME).toLong()
-        )
-
-        assertThat(hum.isHeadsUpEntry(entry.key)).isTrue()
-    }
-
-    @Test
     fun testShowNotification_autoDismissesWithAccessibilityTimeout() {
         val hum = createHeadsUpManager()
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -385,22 +333,6 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME +
                     (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
-                .toLong()
-        )
-
-        assertThat(hum.isHeadsUpEntry(entry.key)).isTrue()
-    }
-
-    @Test
-    fun testShowNotification_stickyForSomeTime_autoDismissesWithAccessibilityTimeout() {
-        val hum = createHeadsUpManager()
-        val entry = createStickyForSomeTimeEntry(/* id= */ 0)
-        useAccessibilityTimeout(true)
-
-        hum.showNotification(entry)
-        systemClock.advanceTime(
-            (TEST_TOUCH_ACCEPTANCE_TIME +
-                    (TEST_STICKY_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
                 .toLong()
         )
 
@@ -465,68 +397,6 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
             )
         assertThat(removedImmediately).isTrue()
         assertThat(hum.isHeadsUpEntry(entry.key)).isFalse()
-    }
-
-    @Test
-    fun testIsSticky_rowPinnedAndExpanded_true() {
-        val hum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        Mockito.`when`(mRow!!.isPinned).thenReturn(true)
-        notifEntry.row = mRow
-
-        hum.showNotification(notifEntry)
-
-        val headsUpEntry = hum.getHeadsUpEntry(notifEntry.key)
-        headsUpEntry!!.setExpanded(true)
-
-        assertThat(hum.isSticky(notifEntry.key)).isTrue()
-    }
-
-    @Test
-    fun testIsSticky_remoteInputActive_true() {
-        val hum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-
-        hum.showNotification(notifEntry)
-
-        val headsUpEntry = hum.getHeadsUpEntry(notifEntry.key)
-        headsUpEntry!!.mRemoteInputActive = true
-
-        assertThat(hum.isSticky(notifEntry.key)).isTrue()
-    }
-
-    @Test
-    fun testIsSticky_hasFullScreenIntent_true() {
-        val hum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id= */ 0, mContext)
-
-        hum.showNotification(notifEntry)
-
-        assertThat(hum.isSticky(notifEntry.key)).isTrue()
-    }
-
-    @Test
-    fun testIsSticky_stickyForSomeTime_false() {
-        val hum = createHeadsUpManager()
-        val entry = createStickyForSomeTimeEntry(/* id= */ 0)
-
-        hum.showNotification(entry)
-
-        assertThat(hum.isSticky(entry.key)).isFalse()
-    }
-
-    @Test
-    fun testIsSticky_false() {
-        val hum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-
-        hum.showNotification(notifEntry)
-
-        val headsUpEntry = hum.getHeadsUpEntry(notifEntry.key)
-        headsUpEntry!!.setExpanded(false)
-        headsUpEntry.mRemoteInputActive = false
-
-        assertThat(hum.isSticky(notifEntry.key)).isFalse()
     }
 
     @Test
