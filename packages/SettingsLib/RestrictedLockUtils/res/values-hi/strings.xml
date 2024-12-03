@@ -19,8 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="enabled_by_admin" msgid="6630472777476410137">"एडमिन की ओर से चालू किया गया"</string>
     <string name="disabled_by_admin" msgid="4023569940620832713">"एडमिन ने यह सुविधा बंद की हुई है"</string>
-    <!-- no translation found for enabled_by_advanced_protection (6236917660829422499) -->
-    <skip />
-    <!-- no translation found for disabled_by_advanced_protection (369596009193239632) -->
-    <skip />
+    <string name="enabled_by_advanced_protection" msgid="6236917660829422499">"\'ऐडवांस सुरक्षा\' सेटिंग ने चालू किया है"</string>
+    <string name="disabled_by_advanced_protection" msgid="369596009193239632">"\'ऐडवांस सुरक्षा\' सेटिंग ने बंद किया है"</string>
 </resources>
