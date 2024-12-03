@@ -24,6 +24,8 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
+import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -470,6 +473,21 @@ public class CoreDocument {
         float mBottom;
         @Nullable final String mMetadata;
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ClickAreaRepresentation)) return false;
+            ClickAreaRepresentation that = (ClickAreaRepresentation) o;
+            return mId == that.mId
+                    && Objects.equals(mContentDescription, that.mContentDescription)
+                    && Objects.equals(mMetadata, that.mMetadata);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mId, mContentDescription, mMetadata);
+        }
+
         public ClickAreaRepresentation(
                 int id,
                 @Nullable String contentDescription,
@@ -754,9 +772,13 @@ public class CoreDocument {
             float right,
             float bottom,
             @Nullable String metadata) {
-        mClickAreas.add(
+
+        ClickAreaRepresentation car =
                 new ClickAreaRepresentation(
-                        id, contentDescription, left, top, right, bottom, metadata));
+                        id, contentDescription, left, top, right, bottom, metadata);
+
+        boolean old = mClickAreas.remove(car);
+        mClickAreas.add(car);
     }
 
     /**
@@ -1067,7 +1089,6 @@ public class CoreDocument {
             mRepaintNext = 1;
         }
         context.mMode = RemoteContext.ContextMode.UNSET;
-        // System.out.println(">>   " + (  System.nanoTime() - time)*1E-6f+" ms");
         if (DEBUG && mRootLayoutComponent != null) {
             System.out.println(mRootLayoutComponent.displayHierarchy());
         }
@@ -1162,5 +1183,31 @@ public class CoreDocument {
     @NonNull
     public List<Operation> getOperations() {
         return mOperations;
+    }
+
+    /** defines if a shader can be run */
+    public interface ShaderControl {
+        boolean isShaderValid(String shader);
+    }
+
+    /**
+     * validate the shaders
+     *
+     * @param context the remote context
+     * @param ctl the call back to allow evaluation of shaders
+     */
+    public void checkShaders(RemoteContext context, ShaderControl ctl) {
+        int count = 0;
+        for (Operation op : mOperations) {
+            if (op instanceof TextData) {
+                op.apply(context);
+            }
+            if (op instanceof ShaderData) {
+                ShaderData sd = (ShaderData) op;
+                int id = sd.getShaderTextId();
+                String str = context.getText(id);
+                sd.enable(ctl.isShaderValid(str));
+            }
+        }
     }
 }
