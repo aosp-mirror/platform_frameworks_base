@@ -61,6 +61,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Handler;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
@@ -143,6 +144,8 @@ public class WindowDecorationTests extends ShellTestCase {
     private SurfaceControl mMockTaskSurface;
     @Mock
     private DesktopModeEventLogger mDesktopModeEventLogger;
+    @Mock
+    private Handler mMockHandler;
 
     private final List<SurfaceControl.Transaction> mMockSurfaceControlTransactions =
             new ArrayList<>();
@@ -901,37 +904,71 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void updateViewHost_applyTransactionOnDrawIsTrue_surfaceControlIsUpdated() {
+    public void relayout_applyTransactionOnDrawIsTrue_updatesViewWithDrawTransaction() {
         final TestWindowDecoration windowDecor = createWindowDecoration(
-                new TestRunningTaskInfoBuilder().build());
+                new TestRunningTaskInfoBuilder()
+                        .setVisible(true)
+                        .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                        .build());
         mRelayoutParams.mApplyStartTransactionOnDraw = true;
         mRelayoutResult.mRootView = mMockView;
 
-        windowDecor.updateViewHost(mRelayoutParams, mMockSurfaceControlStartT, mRelayoutResult);
+        windowDecor.relayout(
+                windowDecor.mTaskInfo,
+                /* hasGlobalFocus= */ true,
+                Region.obtain());
 
         verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockSurfaceControlStartT);
+        windowDecor.close();
     }
 
     @Test
-    public void updateViewHost_nullDrawTransaction_applyTransactionOnDrawIsTrue_throwsException() {
+    public void relayout_applyTransactionOnDrawIsTrue_asyncViewHostRendering_throwsException() {
         final TestWindowDecoration windowDecor = createWindowDecoration(
-                new TestRunningTaskInfoBuilder().build());
+                new TestRunningTaskInfoBuilder()
+                        .setVisible(true)
+                        .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                        .build());
         mRelayoutParams.mApplyStartTransactionOnDraw = true;
+        mRelayoutParams.mAsyncViewHost = true;
         mRelayoutResult.mRootView = mMockView;
 
+        windowDecor.relayout(
+                windowDecor.mTaskInfo,
+                /* hasGlobalFocus= */ true,
+                Region.obtain());
+        final ArgumentCaptor<Runnable> updateViewHostCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler).post(updateViewHostCaptor.capture());
         assertThrows(IllegalArgumentException.class,
-                () -> windowDecor.updateViewHost(
-                        mRelayoutParams, null /* onDrawTransaction */, mRelayoutResult));
+                () -> updateViewHostCaptor.getValue().run());
+        windowDecor.close();
     }
 
     @Test
-    public void updateViewHost_nullDrawTransaction_applyTransactionOnDrawIsFalse_doesNotThrow() {
+    public void relayout_asyncViewHostRendering() {
         final TestWindowDecoration windowDecor = createWindowDecoration(
-                new TestRunningTaskInfoBuilder().build());
+                new TestRunningTaskInfoBuilder()
+                        .setVisible(true)
+                        .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                        .build());
         mRelayoutParams.mApplyStartTransactionOnDraw = false;
+        mRelayoutParams.mAsyncViewHost = true;
         mRelayoutResult.mRootView = mMockView;
 
-        windowDecor.updateViewHost(mRelayoutParams, null /* onDrawTransaction */, mRelayoutResult);
+        windowDecor.relayout(
+                windowDecor.mTaskInfo,
+                /* hasGlobalFocus= */ true,
+                Region.obtain());
+
+        final ArgumentCaptor<Runnable> updateViewHostCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        verify(mMockHandler).post(updateViewHostCaptor.capture());
+
+        updateViewHostCaptor.getValue().run();
+
+        verify(mMockSurfaceControlViewHost).setView(eq(mMockView), any());
+        windowDecor.close();
     }
 
     @Test
@@ -1009,7 +1046,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
     private TestWindowDecoration createWindowDecoration(ActivityManager.RunningTaskInfo taskInfo) {
         return new TestWindowDecoration(mContext, mContext, mMockDisplayController,
-                mMockShellTaskOrganizer, taskInfo, mMockTaskSurface,
+                mMockShellTaskOrganizer, mMockHandler, taskInfo, mMockTaskSurface,
                 new MockObjectSupplier<>(mMockSurfaceControlBuilders,
                         () -> createMockSurfaceControlBuilder(mock(SurfaceControl.class))),
                 new MockObjectSupplier<>(mMockSurfaceControlTransactions,
@@ -1049,7 +1086,9 @@ public class WindowDecorationTests extends ShellTestCase {
     private class TestWindowDecoration extends WindowDecoration<TestView> {
         TestWindowDecoration(Context context, @NonNull Context userContext,
                 DisplayController displayController,
-                ShellTaskOrganizer taskOrganizer, ActivityManager.RunningTaskInfo taskInfo,
+                ShellTaskOrganizer taskOrganizer,
+                Handler handler,
+                ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
                 Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
                 Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
@@ -1057,8 +1096,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 Supplier<SurfaceControl> surfaceControlSupplier,
                 SurfaceControlViewHostFactory surfaceControlViewHostFactory,
                 DesktopModeEventLogger desktopModeEventLogger) {
-            super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
-                    surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
+            super(context, userContext, displayController, taskOrganizer, handler, taskInfo,
+                    taskSurface, surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                     windowContainerTransactionSupplier, surfaceControlSupplier,
                     surfaceControlViewHostFactory, desktopModeEventLogger);
         }
@@ -1071,8 +1110,12 @@ public class WindowDecorationTests extends ShellTestCase {
         @Override
         void relayout(ActivityManager.RunningTaskInfo taskInfo, boolean hasGlobalFocus,
                 @NonNull Region displayExclusionRegion) {
-            relayout(taskInfo, false /* applyStartTransactionOnDraw */, hasGlobalFocus,
-                    displayExclusionRegion);
+            mRelayoutParams.mRunningTaskInfo = taskInfo;
+            mRelayoutParams.mHasGlobalFocus = hasGlobalFocus;
+            mRelayoutParams.mDisplayExclusionRegion.set(displayExclusionRegion);
+            mRelayoutParams.mLayoutResId = R.layout.caption_layout;
+            relayout(mRelayoutParams, mMockSurfaceControlStartT, mMockSurfaceControlFinishT,
+                    mMockWindowContainerTransaction, mMockView, mRelayoutResult);
         }
 
         @Override
@@ -1096,13 +1139,8 @@ public class WindowDecorationTests extends ShellTestCase {
         void relayout(ActivityManager.RunningTaskInfo taskInfo,
                 boolean applyStartTransactionOnDraw, boolean hasGlobalFocus,
                 @NonNull Region displayExclusionRegion) {
-            mRelayoutParams.mRunningTaskInfo = taskInfo;
             mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
-            mRelayoutParams.mLayoutResId = R.layout.caption_layout;
-            mRelayoutParams.mHasGlobalFocus = hasGlobalFocus;
-            mRelayoutParams.mDisplayExclusionRegion.set(displayExclusionRegion);
-            relayout(mRelayoutParams, mMockSurfaceControlStartT, mMockSurfaceControlFinishT,
-                    mMockWindowContainerTransaction, mMockView, mRelayoutResult);
+            relayout(taskInfo, hasGlobalFocus, displayExclusionRegion);
         }
 
         private AdditionalViewContainer addTestViewContainer() {
