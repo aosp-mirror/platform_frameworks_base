@@ -61,7 +61,7 @@ open class BaseMediaProjectionPermissionViewBinder(
         startButton.text = startButtonText
     }
 
-    fun onItemSelected(pos: Int) {
+    open fun onItemSelected(pos: Int) {
         selectedScreenShareOption = screenShareOptions[pos]
         setOptionSpecificFields()
     }
