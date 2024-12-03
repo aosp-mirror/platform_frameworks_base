@@ -19,6 +19,7 @@ package com.android.server.accessibility.magnification;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION_CALLBACK;
 import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
+import static android.os.UserHandle.getCallingUserId;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
@@ -54,6 +55,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -209,6 +211,7 @@ public class MagnificationConnectionManager implements
     private final Callback mCallback;
     private final AccessibilityTraceManager mTrace;
     private final MagnificationScaleProvider mScaleProvider;
+    private final UserManagerInternal mUserManagerInternal;
 
     public MagnificationConnectionManager(Context context, Object lock, @NonNull Callback callback,
             AccessibilityTraceManager trace, MagnificationScaleProvider scaleProvider) {
@@ -217,6 +220,7 @@ public class MagnificationConnectionManager implements
         mCallback = callback;
         mTrace = trace;
         mScaleProvider = scaleProvider;
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
     /**
@@ -280,12 +284,18 @@ public class MagnificationConnectionManager implements
      * Requests {@link IMagnificationConnection} through
      * {@link StatusBarManagerInternal#requestMagnificationConnection(boolean)} and
      * destroys all window magnifications if necessary.
+     * NOTE: Currently, this is not allowed to call from visible background users.(b/332222893)
      *
      * @param connect {@code true} if needs connection, otherwise set the connection to null and
      *                destroy all window magnifications.
      * @return {@code true} if {@link IMagnificationConnection} state is going to change.
      */
     public boolean requestConnection(boolean connect) {
+        final int callingUserId = getCallingUserId();
+        if (mUserManagerInternal.isVisibleBackgroundFullUser(callingUserId)) {
+            throw new SecurityException("Visible background user(u" + callingUserId
+                    + " is not permitted to request magnification connection.");
+        }
         if (DBG) {
             Slog.d(TAG, "requestConnection :" + connect);
         }

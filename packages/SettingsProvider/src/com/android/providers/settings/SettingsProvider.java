@@ -2479,10 +2479,10 @@ public class SettingsProvider extends ContentProvider {
         final long identity = Binder.clearCallingIdentity();
         try {
             int currentUser = ActivityManager.getCurrentUser();
-            if (callingUser == currentUser) {
-                // enforce the deny list only if the caller is not current user. Currently only auto
-                // uses background visible user, and auto doesn't support profiles so profiles of
-                // current users is not checked here.
+            if (callingUser == currentUser || callingUser == UserHandle.USER_SYSTEM) {
+                // enforce the deny list only if the caller is not current user or not a system
+                // user. Currently only auto uses background visible user, and auto doesn't
+                // support profiles so profiles of current users is not checked here.
                 return;
             }
         } finally {

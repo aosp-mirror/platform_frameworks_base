@@ -341,12 +341,8 @@ constructor(
                             when {
                                 // If there are no notification icons to show, then it can be hidden
                                 !hasAodIcons -> false
-                                // If we're bypassing, then we're visible
-                                isBypassEnabled -> true
                                 // If we are pulsing (and not bypassing), then we are hidden
                                 isPulseExpanding -> false
-                                // Besides bypass above, they should not be visible on lockscreen
-                                isOnLockscreen -> false
                                 // If notifs are fully gone, then we're visible
                                 areNotifsFullyHidden -> true
                                 // Otherwise, we're hidden

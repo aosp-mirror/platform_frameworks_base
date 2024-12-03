@@ -1501,10 +1501,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 int rootIdx = -1;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change c = info.getChanges().get(i);
-                    if (c.hasFlags(FLAG_IS_WALLPAPER)) {
-                        st.setAlpha(c.getLeash(), 1.0f);
-                        continue;
-                    }
                     if (TransitionUtil.isOpeningMode(c.getMode())) {
                         final Point offset = c.getEndRelOffset();
                         st.setPosition(c.getLeash(), offset.x, offset.y);

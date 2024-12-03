@@ -141,10 +141,13 @@ public class MixedTransitionHelper {
             pipHandler.setEnterAnimationType(ANIM_TYPE_ALPHA);
             pipHandler.startEnterAnimation(pipChange, startTransaction, finishTransaction,
                     finishCB);
+            // make a new finishTransaction because pip's startEnterAnimation "consumes" it so
+            // we need a separate one to send over to launcher.
+            SurfaceControl.Transaction otherFinishT = new SurfaceControl.Transaction();
             // Dispatch the rest of the transition normally. This will most-likely be taken by
             // recents or default handler.
             mixed.mLeftoversHandler = player.dispatchTransition(mixed.mTransition, everythingElse,
-                    otherStartT, finishTransaction, finishCB, mixedHandler);
+                    otherStartT, otherFinishT, finishCB, mixedHandler);
         } else {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  Not leaving split, so just "
                     + "forward animation to Pip-Handler.");
