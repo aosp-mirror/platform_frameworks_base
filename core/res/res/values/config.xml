@@ -2372,7 +2372,7 @@
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
     <!-- Flag indicating whether the current device supports "Ask every time" for sms-->
-    <bool name="config_sms_ask_every_time_support">true</bool>
+    <bool name="config_sms_ask_every_time_support">false</bool>
 
     <!-- Flag indicating whether the current device allows acknowledgement of SIM operation like
          SM-PP or saving SMS to SIM can be done via the IMS interfaces.
