@@ -58,7 +58,6 @@ import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.widget.Toast;
 
 import com.android.internal.R;
@@ -289,9 +288,7 @@ public class AccessibilityShortcutController {
                     cr, Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, DialogStatus.SHOWN,
                     userId);
         } else {
-            if (Flags.restoreA11yShortcutTargetService()) {
-                enableDefaultHardwareShortcut(userId);
-            }
+            enableDefaultHardwareShortcut(userId);
             playNotificationTone();
             if (mAlertDialog != null) {
                 mAlertDialog.dismiss();

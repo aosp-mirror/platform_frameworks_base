@@ -1762,7 +1762,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreShortcutTargets_hardware_targetsMerged() {
         // TODO: remove the assumption when we fix b/381294327
         assumeTrue("The test is setup to run as a user 0",
@@ -1790,7 +1789,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreShortcutTargets_hardware_alreadyHadDefaultService_doesNotClear() {
         // TODO: remove the assumption when we fix b/381294327
         assumeTrue("The test is setup to run as a user 0",
@@ -1819,7 +1817,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreShortcutTargets_hardware_didNotHaveDefaultService_clearsDefaultService() {
         // TODO: remove the assumption when we fix b/381294327
         assumeTrue("The test is setup to run as a user 0",
@@ -1847,7 +1844,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_CLEAR_DEFAULT_FROM_A11Y_SHORTCUT_TARGET_SERVICE_RESTORE)
     public void restoreShortcutTargets_hardware_nullSetting_clearsDefaultService() {
         // TODO: remove the assumption when we fix b/381294327
         assumeTrue("The test is setup to run as a user 0",
