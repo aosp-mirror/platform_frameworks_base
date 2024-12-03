@@ -182,12 +182,6 @@ public class HintManagerServiceTest {
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
         mSupportInfo = new SupportInfo();
-        mSupportInfo.usesSessions = true;
-        mSupportInfo.sessionHints = 5;
-        mSupportInfo.sessionModes = 1;
-        mSupportInfo.modes = 3;
-        mSupportInfo.boosts = 3;
-        mSupportInfo.sessionTags = 63;
         mSupportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
         mSupportInfo.headroom.isCpuSupported = true;
         mSupportInfo.headroom.cpuMinIntervalMillis = 2000;
