@@ -1879,3 +1879,10 @@ flag {
     description: "Implement the depth push scaling effect on the current app when users pull down shade."
     bug: "370560660"
 }
+
+flag {
+    name: "expanded_privacy_indicators_on_large_screen"
+    namespace: "systemui"
+    description: "Larger privacy indicators on large screen"
+    bug: "381864715"
+}
