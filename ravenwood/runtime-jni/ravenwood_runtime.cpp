@@ -204,7 +204,7 @@ static const JNINativeMethod sMethods[] =
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
-    ALOGI("%s: JNI_OnLoad", __FILE__);
+    ALOGV("%s: JNI_OnLoad", __FILE__);
 
     JNIEnv* env = GetJNIEnvOrDie(vm);
     g_StructStat = FindGlobalClassOrDie(env, "android/system/StructStat");
