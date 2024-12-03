@@ -56,146 +56,139 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class HeadsUpAppearanceControllerTest : SysuiTestCase() {
-    private val mStackScrollerController: NotificationStackScrollLayoutController =
-        mock<NotificationStackScrollLayoutController>()
-    private val mShadeViewController: ShadeViewController = mock<ShadeViewController>()
-    private val mShadeHeadsUpTracker: ShadeHeadsUpTracker = mock<ShadeHeadsUpTracker>()
-    private val mDarkIconDispatcher: DarkIconDispatcher = mock<DarkIconDispatcher>()
-    private var mHeadsUpAppearanceController: HeadsUpAppearanceController? = null
-    private var mTestHelper: NotificationTestHelper? = null
-    private var mRow: ExpandableNotificationRow? = null
-    private var mEntry: NotificationEntry? = null
-    private var mHeadsUpStatusBarView: HeadsUpStatusBarView? = null
-    private var mHeadsUpManager: HeadsUpManager? = null
-    private var mOperatorNameView: View? = null
-    private var mStatusbarStateController: StatusBarStateController? = null
-    private var mPhoneStatusBarTransitions: PhoneStatusBarTransitions? = null
-    private var mBypassController: KeyguardBypassController? = null
-    private var mWakeUpCoordinator: NotificationWakeUpCoordinator? = null
-    private var mKeyguardStateController: KeyguardStateController? = null
-    private var mCommandQueue: CommandQueue? = null
-    private var mNotificationRoundnessManager: NotificationRoundnessManager? = null
+    private val stackScrollerController = mock<NotificationStackScrollLayoutController>()
+    private val shadeViewController = mock<ShadeViewController>()
+    private val shadeHeadsUpTracker = mock<ShadeHeadsUpTracker>()
+    private val darkIconDispatcher = mock<DarkIconDispatcher>()
+    private val statusBarStateController = mock<StatusBarStateController>()
+    private val phoneStatusBarTransitions = mock<PhoneStatusBarTransitions>()
+    private val bypassController = mock<KeyguardBypassController>()
+    private val wakeUpCoordinator = mock<NotificationWakeUpCoordinator>()
+    private val keyguardStateController = mock<KeyguardStateController>()
+    private val commandQueue = mock<CommandQueue>()
+    private val notificationRoundnessManager = mock<NotificationRoundnessManager>()
+    private var headsUpManager = mock<HeadsUpManager>()
+
+    private lateinit var testHelper: NotificationTestHelper
+    private lateinit var row: ExpandableNotificationRow
+    private lateinit var entry: NotificationEntry
+    private lateinit var headsUpStatusBarView: HeadsUpStatusBarView
+    private lateinit var operatorNameView: View
+
+    private lateinit var underTest: HeadsUpAppearanceController
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
         allowTestableLooperAsMainThread()
-        mTestHelper = NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
-        mRow = mTestHelper!!.createRow()
-        mEntry = mRow!!.entry
-        mHeadsUpStatusBarView = HeadsUpStatusBarView(mContext, mock<View>(), mock<TextView>())
-        mHeadsUpManager = mock<HeadsUpManager>()
-        mOperatorNameView = View(mContext)
-        mStatusbarStateController = mock<StatusBarStateController>()
-        mPhoneStatusBarTransitions = mock<PhoneStatusBarTransitions>()
-        mBypassController = mock<KeyguardBypassController>()
-        mWakeUpCoordinator = mock<NotificationWakeUpCoordinator>()
-        mKeyguardStateController = mock<KeyguardStateController>()
-        mCommandQueue = mock<CommandQueue>()
-        mNotificationRoundnessManager = mock<NotificationRoundnessManager>()
-        whenever(mShadeViewController.shadeHeadsUpTracker).thenReturn(mShadeHeadsUpTracker)
-        mHeadsUpAppearanceController =
+        testHelper = NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
+        row = testHelper.createRow()
+        entry = row.entry
+        headsUpStatusBarView = HeadsUpStatusBarView(mContext, mock<View>(), mock<TextView>())
+        operatorNameView = View(mContext)
+
+        whenever(shadeViewController.shadeHeadsUpTracker).thenReturn(shadeHeadsUpTracker)
+        underTest =
             HeadsUpAppearanceController(
-                mHeadsUpManager,
-                mStatusbarStateController,
-                mPhoneStatusBarTransitions,
-                mBypassController,
-                mWakeUpCoordinator,
-                mDarkIconDispatcher,
-                mKeyguardStateController,
-                mCommandQueue,
-                mStackScrollerController,
-                mShadeViewController,
-                mNotificationRoundnessManager,
-                mHeadsUpStatusBarView,
+                headsUpManager,
+                statusBarStateController,
+                phoneStatusBarTransitions,
+                bypassController,
+                wakeUpCoordinator,
+                darkIconDispatcher,
+                keyguardStateController,
+                commandQueue,
+                stackScrollerController,
+                shadeViewController,
+                notificationRoundnessManager,
+                headsUpStatusBarView,
                 Clock(mContext, null),
                 mock<HeadsUpNotificationIconInteractor>(),
-                Optional.of(mOperatorNameView!!),
+                Optional.of(operatorNameView),
             )
-        mHeadsUpAppearanceController!!.setAppearFraction(0.0f, 0.0f)
+        underTest.setAppearFraction(0.0f, 0.0f)
     }
 
     @Test
     fun testShowinEntryUpdated() {
-        mRow!!.setPinnedStatus(PinnedStatus.PinnedBySystem)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(true)
-        whenever(mHeadsUpManager!!.getTopEntry()).thenReturn(mEntry)
-        mHeadsUpAppearanceController!!.onHeadsUpPinned(mEntry)
-        assertThat(mHeadsUpStatusBarView!!.showingEntry).isEqualTo(mRow!!.entry)
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
+        whenever(headsUpManager.getTopEntry()).thenReturn(entry)
+        underTest.onHeadsUpPinned(entry)
+        assertThat(headsUpStatusBarView.showingEntry).isEqualTo(row.entry)
 
-        mRow!!.setPinnedStatus(PinnedStatus.NotPinned)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(false)
-        mHeadsUpAppearanceController!!.onHeadsUpUnPinned(mEntry)
-        assertThat(mHeadsUpStatusBarView!!.showingEntry).isNull()
+        row.setPinnedStatus(PinnedStatus.NotPinned)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(false)
+        underTest.onHeadsUpUnPinned(entry)
+        assertThat(headsUpStatusBarView.showingEntry).isNull()
     }
 
     @Test
     fun testPinnedStatusUpdated() {
-        mRow!!.setPinnedStatus(PinnedStatus.PinnedBySystem)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(true)
-        whenever(mHeadsUpManager!!.getTopEntry()).thenReturn(mEntry)
-        mHeadsUpAppearanceController!!.onHeadsUpPinned(mEntry)
-        assertThat(mHeadsUpAppearanceController!!.pinnedStatus)
-            .isEqualTo(PinnedStatus.PinnedBySystem)
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
+        whenever(headsUpManager.getTopEntry()).thenReturn(entry)
+        underTest.onHeadsUpPinned(entry)
+        assertThat(underTest.pinnedStatus).isEqualTo(PinnedStatus.PinnedBySystem)
 
-        mRow!!.setPinnedStatus(PinnedStatus.NotPinned)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(false)
-        mHeadsUpAppearanceController!!.onHeadsUpUnPinned(mEntry)
-        assertThat(mHeadsUpAppearanceController!!.pinnedStatus).isEqualTo(PinnedStatus.NotPinned)
+        row.setPinnedStatus(PinnedStatus.NotPinned)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(false)
+        underTest.onHeadsUpUnPinned(entry)
+        assertThat(underTest.pinnedStatus).isEqualTo(PinnedStatus.NotPinned)
     }
 
     @Test
     @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     fun testHeaderUpdated() {
-        mRow!!.setPinnedStatus(PinnedStatus.PinnedBySystem)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(true)
-        whenever(mHeadsUpManager!!.getTopEntry()).thenReturn(mEntry)
-        mHeadsUpAppearanceController!!.onHeadsUpPinned(mEntry)
-        assertThat(mRow!!.headerVisibleAmount).isEqualTo(0.0f)
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
+        whenever(headsUpManager.getTopEntry()).thenReturn(entry)
+        underTest.onHeadsUpPinned(entry)
+        assertThat(row.headerVisibleAmount).isEqualTo(0.0f)
 
-        mRow!!.setPinnedStatus(PinnedStatus.NotPinned)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(false)
-        mHeadsUpAppearanceController!!.onHeadsUpUnPinned(mEntry)
-        assertThat(mRow!!.headerVisibleAmount).isEqualTo(1.0f)
+        row.setPinnedStatus(PinnedStatus.NotPinned)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(false)
+        underTest.onHeadsUpUnPinned(entry)
+        assertThat(row.headerVisibleAmount).isEqualTo(1.0f)
     }
 
     @Test
     fun testOperatorNameViewUpdated() {
-        mHeadsUpAppearanceController!!.setAnimationsEnabled(false)
+        underTest.setAnimationsEnabled(false)
 
-        mRow!!.setPinnedStatus(PinnedStatus.PinnedBySystem)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(true)
-        whenever(mHeadsUpManager!!.getTopEntry()).thenReturn(mEntry)
-        mHeadsUpAppearanceController!!.onHeadsUpPinned(mEntry)
-        assertThat(mOperatorNameView!!.visibility).isEqualTo(View.INVISIBLE)
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(true)
+        whenever(headsUpManager.getTopEntry()).thenReturn(entry)
+        underTest.onHeadsUpPinned(entry)
+        assertThat(operatorNameView.visibility).isEqualTo(View.INVISIBLE)
 
-        mRow!!.setPinnedStatus(PinnedStatus.NotPinned)
-        whenever(mHeadsUpManager!!.hasPinnedHeadsUp()).thenReturn(false)
-        mHeadsUpAppearanceController!!.onHeadsUpUnPinned(mEntry)
-        assertThat(mOperatorNameView!!.visibility).isEqualTo(View.VISIBLE)
+        row.setPinnedStatus(PinnedStatus.NotPinned)
+        whenever(headsUpManager.hasPinnedHeadsUp()).thenReturn(false)
+        underTest.onHeadsUpUnPinned(entry)
+        assertThat(operatorNameView.visibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun constructor_animationValuesUpdated() {
         val appearFraction = .75f
         val expandedHeight = 400f
-        whenever(mStackScrollerController.appearFraction).thenReturn(appearFraction)
-        whenever(mStackScrollerController.expandedHeight).thenReturn(expandedHeight)
+        whenever(stackScrollerController.appearFraction).thenReturn(appearFraction)
+        whenever(stackScrollerController.expandedHeight).thenReturn(expandedHeight)
 
         val newController =
             HeadsUpAppearanceController(
-                mHeadsUpManager,
-                mStatusbarStateController,
-                mPhoneStatusBarTransitions,
-                mBypassController,
-                mWakeUpCoordinator,
-                mDarkIconDispatcher,
-                mKeyguardStateController,
-                mCommandQueue,
-                mStackScrollerController,
-                mShadeViewController,
-                mNotificationRoundnessManager,
-                mHeadsUpStatusBarView,
+                headsUpManager,
+                statusBarStateController,
+                phoneStatusBarTransitions,
+                bypassController,
+                wakeUpCoordinator,
+                darkIconDispatcher,
+                keyguardStateController,
+                commandQueue,
+                stackScrollerController,
+                shadeViewController,
+                notificationRoundnessManager,
+                headsUpStatusBarView,
                 Clock(mContext, null),
                 mock<HeadsUpNotificationIconInteractor>(),
                 Optional.empty(),
@@ -207,77 +200,77 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
 
     @Test
     fun testDestroy() {
-        reset(mHeadsUpManager)
-        reset(mDarkIconDispatcher)
-        reset(mShadeHeadsUpTracker)
-        reset(mStackScrollerController)
+        reset(headsUpManager)
+        reset(darkIconDispatcher)
+        reset(shadeHeadsUpTracker)
+        reset(stackScrollerController)
 
-        mHeadsUpAppearanceController!!.onViewDetached()
+        underTest.onViewDetached()
 
-        verify(mHeadsUpManager!!).removeListener(any())
-        verify(mDarkIconDispatcher).removeDarkReceiver(any())
-        verify(mShadeHeadsUpTracker).removeTrackingHeadsUpListener(any())
-        verify(mShadeHeadsUpTracker).setHeadsUpAppearanceController(null)
-        verify(mStackScrollerController).removeOnExpandedHeightChangedListener(any())
+        verify(headsUpManager).removeListener(any())
+        verify(darkIconDispatcher).removeDarkReceiver(any())
+        verify(shadeHeadsUpTracker).removeTrackingHeadsUpListener(any())
+        verify(shadeHeadsUpTracker).setHeadsUpAppearanceController(null)
+        verify(stackScrollerController).removeOnExpandedHeightChangedListener(any())
     }
 
     @Test
     fun testPulsingRoundness_onUpdateHeadsUpAndPulsingRoundness() {
         // Pulsing: Enable flag and dozing
-        whenever(mNotificationRoundnessManager!!.shouldRoundNotificationPulsing()).thenReturn(true)
-        whenever(mTestHelper!!.statusBarStateController.isDozing).thenReturn(true)
+        whenever(notificationRoundnessManager.shouldRoundNotificationPulsing()).thenReturn(true)
+        whenever(testHelper.statusBarStateController.isDozing).thenReturn(true)
 
         // Pulsing: Enabled
-        mRow!!.isHeadsUp = true
-        mHeadsUpAppearanceController!!.updateHeadsUpAndPulsingRoundness(mEntry)
+        row.isHeadsUp = true
+        underTest.updateHeadsUpAndPulsingRoundness(entry)
 
-        val debugString: String = mRow!!.roundableState.debugString()
+        val debugString: String = row.roundableState.debugString()
         // If Pulsing is enabled, roundness should be set to 1
-        assertThat(mRow!!.topRoundness.toDouble()).isWithin(0.001).of(1.0)
+        assertThat(row.topRoundness.toDouble()).isWithin(0.001).of(1.0)
         assertThat(debugString).contains("Pulsing")
 
         // Pulsing: Disabled
-        mRow!!.isHeadsUp = false
-        mHeadsUpAppearanceController!!.updateHeadsUpAndPulsingRoundness(mEntry)
+        row.isHeadsUp = false
+        underTest.updateHeadsUpAndPulsingRoundness(entry)
 
         // If Pulsing is disabled, roundness should be set to 0
-        assertThat(mRow!!.topRoundness.toDouble()).isWithin(0.001).of(0.0)
+        assertThat(row.topRoundness.toDouble()).isWithin(0.001).of(0.0)
     }
 
     @Test
     fun testPulsingRoundness_onHeadsUpStateChanged() {
         // Pulsing: Enable flag and dozing
-        whenever(mNotificationRoundnessManager!!.shouldRoundNotificationPulsing()).thenReturn(true)
-        whenever(mTestHelper!!.statusBarStateController.isDozing).thenReturn(true)
+        whenever(notificationRoundnessManager.shouldRoundNotificationPulsing()).thenReturn(true)
+        whenever(testHelper.statusBarStateController.isDozing).thenReturn(true)
 
         // Pulsing: Enabled
-        mEntry!!.setHeadsUp(true)
-        mHeadsUpAppearanceController!!.onHeadsUpStateChanged(mEntry!!, true)
+        entry.setHeadsUp(true)
+        underTest.onHeadsUpStateChanged(entry, true)
 
-        val debugString: String = mRow!!.roundableState.debugString()
+        val debugString: String = row.roundableState.debugString()
         // If Pulsing is enabled, roundness should be set to 1
-        assertThat(mRow!!.topRoundness.toDouble()).isWithin(0.001).of(1.0)
+        assertThat(row.topRoundness.toDouble()).isWithin(0.001).of(1.0)
         assertThat(debugString).contains("Pulsing")
 
         // Pulsing: Disabled
-        mEntry!!.setHeadsUp(false)
-        mHeadsUpAppearanceController!!.onHeadsUpStateChanged(mEntry!!, false)
+        entry.setHeadsUp(false)
+        underTest.onHeadsUpStateChanged(entry, false)
 
         // If Pulsing is disabled, roundness should be set to 0
-        assertThat(mRow!!.topRoundness.toDouble()).isWithin(0.001).of(0.0)
+        assertThat(row.topRoundness.toDouble()).isWithin(0.001).of(0.0)
     }
 
     @Test
     fun onHeadsUpStateChanged_true_transitionsNotified() {
-        mHeadsUpAppearanceController!!.onHeadsUpStateChanged(mEntry!!, true)
+        underTest.onHeadsUpStateChanged(entry, true)
 
-        verify(mPhoneStatusBarTransitions!!).onHeadsUpStateChanged(true)
+        verify(phoneStatusBarTransitions).onHeadsUpStateChanged(true)
     }
 
     @Test
     fun onHeadsUpStateChanged_false_transitionsNotified() {
-        mHeadsUpAppearanceController!!.onHeadsUpStateChanged(mEntry!!, false)
+        underTest.onHeadsUpStateChanged(entry, false)
 
-        verify(mPhoneStatusBarTransitions!!).onHeadsUpStateChanged(false)
+        verify(phoneStatusBarTransitions).onHeadsUpStateChanged(false)
     }
 }
