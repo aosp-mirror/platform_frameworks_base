@@ -205,6 +205,12 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         return count;
     }
 
+    /**
+     * set a float externally
+     *
+     * @param id
+     * @param value
+     */
     public void setExternalFloat(int id, float value) {
         mARContext.loadFloat(id, value);
     }
@@ -219,6 +225,15 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             return false;
         }
         return mDocument.getDocument().hasTouchListener();
+    }
+
+    /**
+     * Check shaders and disable them
+     *
+     * @param shaderControl the callback to validate the shader
+     */
+    public void checkShaders(CoreDocument.ShaderControl shaderControl) {
+        mDocument.getDocument().checkShaders(mARContext, shaderControl);
     }
 
     public interface ClickCallbacks {

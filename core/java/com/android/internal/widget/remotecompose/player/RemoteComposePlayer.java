@@ -110,6 +110,7 @@ public class RemoteComposePlayer extends FrameLayout {
                         provideHapticFeedback(type);
                     }
                 });
+        mInner.checkShaders(mShaderControl);
     }
 
     /**
@@ -683,5 +684,20 @@ public class RemoteComposePlayer extends FrameLayout {
      */
     public float getEvalTime() {
         return mInner.getEvalTime();
+    }
+
+    private CoreDocument.ShaderControl mShaderControl =
+            (shader) -> {
+                return false;
+            };
+
+    /**
+     * Sets the controller for shaders. Note set before loading the document. The default is to not
+     * accept shaders.
+     *
+     * @param ctl the controller
+     */
+    public void setShaderControl(CoreDocument.ShaderControl ctl) {
+        mShaderControl = ctl;
     }
 }
