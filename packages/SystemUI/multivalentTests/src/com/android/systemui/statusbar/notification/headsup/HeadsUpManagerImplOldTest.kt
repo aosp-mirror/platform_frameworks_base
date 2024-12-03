@@ -15,9 +15,6 @@
  */
 package com.android.systemui.statusbar.notification.headsup
 
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Person
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -31,7 +28,6 @@ import com.android.systemui.kosmos.KosmosJavaAdapter
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl.HeadsUpEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -397,87 +393,6 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
             )
         assertThat(removedImmediately).isTrue()
         assertThat(hum.isHeadsUpEntry(entry.key)).isFalse()
-    }
-
-    @Test
-    fun testCompareTo_withNullEntries() {
-        val hum = createHeadsUpManager()
-        val alertEntry = NotificationEntryBuilder().setTag("alert").build()
-
-        hum.showNotification(alertEntry)
-
-        assertThat(hum.compare(alertEntry, null)).isLessThan(0)
-        assertThat(hum.compare(null, alertEntry)).isGreaterThan(0)
-        assertThat(hum.compare(null, null)).isEqualTo(0)
-    }
-
-    @Test
-    fun testCompareTo_withNonAlertEntries() {
-        val hum = createHeadsUpManager()
-
-        val nonAlertEntry1 = NotificationEntryBuilder().setTag("nae1").build()
-        val nonAlertEntry2 = NotificationEntryBuilder().setTag("nae2").build()
-        val alertEntry = NotificationEntryBuilder().setTag("alert").build()
-        hum.showNotification(alertEntry)
-
-        assertThat(hum.compare(alertEntry, nonAlertEntry1)).isLessThan(0)
-        assertThat(hum.compare(nonAlertEntry1, alertEntry)).isGreaterThan(0)
-        assertThat(hum.compare(nonAlertEntry1, nonAlertEntry2)).isEqualTo(0)
-    }
-
-    @Test
-    fun testAlertEntryCompareTo_ongoingCallLessThanActiveRemoteInput() {
-        val hum = createHeadsUpManager()
-
-        val ongoingCall =
-            hum.HeadsUpEntry(
-                NotificationEntryBuilder()
-                    .setSbn(
-                        HeadsUpManagerTestUtil.createSbn(
-                            /* id = */ 0,
-                            Notification.Builder(mContext, "")
-                                .setCategory(Notification.CATEGORY_CALL)
-                                .setOngoing(true),
-                        )
-                    )
-                    .build()
-            )
-
-        val activeRemoteInput =
-            hum.HeadsUpEntry(HeadsUpManagerTestUtil.createEntry(/* id= */ 1, mContext))
-        activeRemoteInput.mRemoteInputActive = true
-
-        assertThat(ongoingCall.compareTo(activeRemoteInput)).isLessThan(0)
-        assertThat(activeRemoteInput.compareTo(ongoingCall)).isGreaterThan(0)
-    }
-
-    @Test
-    fun testAlertEntryCompareTo_incomingCallLessThanActiveRemoteInput() {
-        val hum = createHeadsUpManager()
-
-        val person = Person.Builder().setName("person").build()
-        val intent = Mockito.mock(PendingIntent::class.java)
-        val incomingCall =
-            hum.HeadsUpEntry(
-                NotificationEntryBuilder()
-                    .setSbn(
-                        HeadsUpManagerTestUtil.createSbn(
-                            /* id = */ 0,
-                            Notification.Builder(mContext, "")
-                                .setStyle(
-                                    Notification.CallStyle.forIncomingCall(person, intent, intent)
-                                ),
-                        )
-                    )
-                    .build()
-            )
-
-        val activeRemoteInput =
-            hum.HeadsUpEntry(HeadsUpManagerTestUtil.createEntry(/* id= */ 1, mContext))
-        activeRemoteInput.mRemoteInputActive = true
-
-        assertThat(incomingCall.compareTo(activeRemoteInput)).isLessThan(0)
-        assertThat(activeRemoteInput.compareTo(incomingCall)).isGreaterThan(0)
     }
 
     @Test

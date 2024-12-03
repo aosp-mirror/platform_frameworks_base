@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.notification.headsup
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.app.Person
 import android.os.Handler
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
@@ -37,6 +38,7 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
@@ -459,6 +461,80 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
             // THEN
             assertThat(underTest.shouldHeadsUpBecomePinned(entry)).isFalse()
         }
+
+    @Test
+    fun testCompareTo_withNullEntries() {
+        val alertEntry = NotificationEntryBuilder().setTag("alert").build()
+
+        underTest.showNotification(alertEntry)
+
+        assertThat(underTest.compare(alertEntry, null)).isLessThan(0)
+        assertThat(underTest.compare(null, alertEntry)).isGreaterThan(0)
+        assertThat(underTest.compare(null, null)).isEqualTo(0)
+    }
+
+    @Test
+    fun testCompareTo_withNonAlertEntries() {
+        val nonAlertEntry1 = NotificationEntryBuilder().setTag("nae1").build()
+        val nonAlertEntry2 = NotificationEntryBuilder().setTag("nae2").build()
+        val alertEntry = NotificationEntryBuilder().setTag("alert").build()
+        underTest.showNotification(alertEntry)
+
+        assertThat(underTest.compare(alertEntry, nonAlertEntry1)).isLessThan(0)
+        assertThat(underTest.compare(nonAlertEntry1, alertEntry)).isGreaterThan(0)
+        assertThat(underTest.compare(nonAlertEntry1, nonAlertEntry2)).isEqualTo(0)
+    }
+
+    @Test
+    fun testAlertEntryCompareTo_ongoingCallLessThanActiveRemoteInput() {
+        val ongoingCall =
+            underTest.HeadsUpEntry(
+                NotificationEntryBuilder()
+                    .setSbn(
+                        HeadsUpManagerTestUtil.createSbn(
+                            /* id = */ 0,
+                            Notification.Builder(mContext, "")
+                                .setCategory(Notification.CATEGORY_CALL)
+                                .setOngoing(true),
+                        )
+                    )
+                    .build()
+            )
+
+        val activeRemoteInput =
+            underTest.HeadsUpEntry(HeadsUpManagerTestUtil.createEntry(/* id= */ 1, mContext))
+        activeRemoteInput.mRemoteInputActive = true
+
+        assertThat(ongoingCall.compareTo(activeRemoteInput)).isLessThan(0)
+        assertThat(activeRemoteInput.compareTo(ongoingCall)).isGreaterThan(0)
+    }
+
+    @Test
+    fun testAlertEntryCompareTo_incomingCallLessThanActiveRemoteInput() {
+        val person = Person.Builder().setName("person").build()
+        val intent = mock<PendingIntent>()
+        val incomingCall =
+            underTest.HeadsUpEntry(
+                NotificationEntryBuilder()
+                    .setSbn(
+                        HeadsUpManagerTestUtil.createSbn(
+                            /* id = */ 0,
+                            Notification.Builder(mContext, "")
+                                .setStyle(
+                                    Notification.CallStyle.forIncomingCall(person, intent, intent)
+                                ),
+                        )
+                    )
+                    .build()
+            )
+
+        val activeRemoteInput =
+            underTest.HeadsUpEntry(HeadsUpManagerTestUtil.createEntry(/* id= */ 1, mContext))
+        activeRemoteInput.mRemoteInputActive = true
+
+        assertThat(incomingCall.compareTo(activeRemoteInput)).isLessThan(0)
+        assertThat(activeRemoteInput.compareTo(incomingCall)).isGreaterThan(0)
+    }
 
     private fun createStickyEntry(id: Int): NotificationEntry {
         val notif =
