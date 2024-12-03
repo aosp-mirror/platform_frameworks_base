@@ -550,6 +550,7 @@ package android {
     field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
     field public static final int config_systemUi = 17039418; // 0x104003a
     field public static final int config_systemUiIntelligence = 17039410; // 0x1040032
+    field @FlaggedApi("android.permission.flags.system_vendor_intelligence_role_enabled") public static final int config_systemVendorIntelligence;
     field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
     field public static final int config_systemWearHealthService = 17039428; // 0x1040044
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
