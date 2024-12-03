@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
+import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -132,6 +133,54 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
                 kosmos.shadeInteractor,
                 avalancheController,
             )
+    }
+
+    @Test
+    fun testHasNotifications_headsUpManagerMapNotEmpty_true() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        underTest.showNotification(entry)
+
+        assertThat(underTest.mHeadsUpEntryMap).isNotEmpty()
+        assertThat(underTest.hasNotifications()).isTrue()
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testHasNotifications_avalancheMapNotEmpty_true() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val headsUpEntry = underTest.createHeadsUpEntry(notifEntry)
+        avalancheController.addToNext(headsUpEntry) {}
+
+        assertThat(avalancheController.getWaitingEntryList()).isNotEmpty()
+        assertThat(underTest.hasNotifications()).isTrue()
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testHasNotifications_false() {
+        assertThat(underTest.mHeadsUpEntryMap).isEmpty()
+        assertThat(avalancheController.getWaitingEntryList()).isEmpty()
+        assertThat(underTest.hasNotifications()).isFalse()
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testGetHeadsUpEntryList_includesAvalancheEntryList() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val headsUpEntry = underTest.createHeadsUpEntry(notifEntry)
+        avalancheController.addToNext(headsUpEntry) {}
+
+        assertThat(underTest.headsUpEntryList).contains(headsUpEntry)
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testGetHeadsUpEntry_returnsAvalancheEntry() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val headsUpEntry = underTest.createHeadsUpEntry(notifEntry)
+        avalancheController.addToNext(headsUpEntry) {}
+
+        assertThat(underTest.getHeadsUpEntry(notifEntry.key)).isEqualTo(headsUpEntry)
     }
 
     @Test

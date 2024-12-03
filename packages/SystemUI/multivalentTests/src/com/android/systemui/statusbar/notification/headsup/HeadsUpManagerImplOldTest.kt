@@ -151,59 +151,6 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     }
 
     @Test
-    fun testHasNotifications_headsUpManagerMapNotEmpty_true() {
-        val bhum = createHeadsUpManager()
-        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        bhum.showNotification(entry)
-
-        Truth.assertThat(bhum.mHeadsUpEntryMap).isNotEmpty()
-        Truth.assertThat(bhum.hasNotifications()).isTrue()
-    }
-
-    @Test
-    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testHasNotifications_avalancheMapNotEmpty_true() {
-        val bhum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val headsUpEntry = bhum.createHeadsUpEntry(notifEntry)
-        mAvalancheController!!.addToNext(headsUpEntry) {}
-
-        Truth.assertThat(mAvalancheController!!.getWaitingEntryList()).isNotEmpty()
-        Truth.assertThat(bhum.hasNotifications()).isTrue()
-    }
-
-    @Test
-    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testHasNotifications_false() {
-        val bhum = createHeadsUpManager()
-        Truth.assertThat(bhum.mHeadsUpEntryMap).isEmpty()
-        Truth.assertThat(mAvalancheController!!.getWaitingEntryList()).isEmpty()
-        Truth.assertThat(bhum.hasNotifications()).isFalse()
-    }
-
-    @Test
-    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testGetHeadsUpEntryList_includesAvalancheEntryList() {
-        val bhum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val headsUpEntry = bhum.createHeadsUpEntry(notifEntry)
-        mAvalancheController!!.addToNext(headsUpEntry) {}
-
-        Truth.assertThat(bhum.headsUpEntryList).contains(headsUpEntry)
-    }
-
-    @Test
-    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testGetHeadsUpEntry_returnsAvalancheEntry() {
-        val bhum = createHeadsUpManager()
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val headsUpEntry = bhum.createHeadsUpEntry(notifEntry)
-        mAvalancheController!!.addToNext(headsUpEntry) {}
-
-        Truth.assertThat(bhum.getHeadsUpEntry(notifEntry.key)).isEqualTo(headsUpEntry)
-    }
-
-    @Test
     fun testShowNotification_addsEntry() {
         val alm = createHeadsUpManager()
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
