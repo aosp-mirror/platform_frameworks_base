@@ -108,7 +108,6 @@ public final class DisplayTopology implements Parcelable {
 
     public DisplayTopology() {}
 
-    @VisibleForTesting
     public DisplayTopology(TreeNode root, int primaryDisplayId) {
         mRoot = root;
         if (mRoot != null) {
@@ -541,6 +540,19 @@ public final class DisplayTopology implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DisplayTopology)) {
+            return false;
+        }
+        return obj.toString().equals(toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
     public String toString() {
         StringWriter out = new StringWriter();
         PrintWriter writer = new PrintWriter(out);
@@ -610,7 +622,7 @@ public final class DisplayTopology implements Parcelable {
     }
 
     @Nullable
-    private static TreeNode findDisplay(int displayId, @Nullable TreeNode startingNode) {
+    public static TreeNode findDisplay(int displayId, @Nullable TreeNode startingNode) {
         if (startingNode == null) {
             return null;
         }
@@ -775,16 +787,22 @@ public final class DisplayTopology implements Parcelable {
          */
         private float mOffset;
 
-        private final List<TreeNode> mChildren = new ArrayList<>();
+        private final List<TreeNode> mChildren;
 
         @VisibleForTesting
         public TreeNode(int displayId, float width, float height, @Position int position,
                 float offset) {
+            this(displayId, width, height, position, offset, List.of());
+        }
+
+        public TreeNode(int displayId, float width, float height, int position,
+                        float offset, List<TreeNode> children) {
             mDisplayId = displayId;
             mWidth = width;
             mHeight = height;
             mPosition = position;
             mOffset = offset;
+            mChildren = new ArrayList<>(children);
         }
 
         public TreeNode(Parcel source) {

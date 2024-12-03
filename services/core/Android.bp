@@ -143,6 +143,7 @@ java_library_static {
         ":platform-compat-overrides",
         ":display-device-config",
         ":display-layout-config",
+        ":display-topology",
         ":device-state-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
