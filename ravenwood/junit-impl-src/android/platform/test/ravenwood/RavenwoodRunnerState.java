@@ -15,6 +15,8 @@
  */
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -59,16 +61,22 @@ public final class RavenwoodRunnerState {
     private Description mMethodDescription;
 
     public void enterTestRunner() {
-        Log.i(TAG, "enterTestRunner: " + mRunner);
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "enterTestRunner: " + mRunner);
+        }
         RavenwoodRuntimeEnvironmentController.initForRunner();
     }
 
     public void enterTestClass() {
-        Log.i(TAG, "enterTestClass: " + mRunner.mTestJavaClass.getName());
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "enterTestClass: " + mRunner.mTestJavaClass.getName());
+        }
     }
 
     public void exitTestClass() {
-        Log.i(TAG, "exitTestClass: " + mRunner.mTestJavaClass.getName());
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "exitTestClass: " + mRunner.mTestJavaClass.getName());
+        }
         assertTrue(RAVENWOOD_RULE_ERROR, sActiveProperties.isEmpty());
         RavenwoodRuntimeEnvironmentController.exitTestClass();
     }
