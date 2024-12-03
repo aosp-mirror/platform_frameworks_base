@@ -18,7 +18,6 @@ package android.view;
 
 import static android.adpf.Flags.adpfViewrootimplActionDownBoost;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.content.pm.ActivityInfo.OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS;
 import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
 import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
@@ -2653,8 +2652,7 @@ public final class ViewRootImpl implements ViewParent,
             mStopped = stopped;
             final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
             if (renderer != null) {
-                if (DEBUG_DRAW)
-                    Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
+                if (DEBUG_DRAW) Log.d(mTag, "WindowStopped on " + getTitle() + " set to " + mStopped);
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
@@ -7979,9 +7977,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private boolean moveFocusToAdjacentWindow(@FocusDirection int direction) {
-            final int windowingMode = getConfiguration().windowConfiguration.getWindowingMode();
-            if (!(windowingMode == WINDOWING_MODE_MULTI_WINDOW
-                    || windowingMode == WINDOWING_MODE_FREEFORM)) {
+            if (getConfiguration().windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_MULTI_WINDOW) {
                 return false;
             }
             try {
