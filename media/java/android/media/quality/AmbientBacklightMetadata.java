@@ -110,9 +110,10 @@ public final class AmbientBacklightMetadata implements Parcelable {
     /**
      * Gets the number of horizontal color zones.
      *
-     * <p>A color zone is a group of lights that always display the same color.
+     * <p>A color zone is represented by one single aggregated color. The number should not be
+     * larger than 128.
      */
-    @IntRange(from = 0)
+    @IntRange(from = 0, to = 128)
     public int getHorizontalZonesNumber() {
         return mHorizontalZonesNumber;
     }
@@ -120,9 +121,10 @@ public final class AmbientBacklightMetadata implements Parcelable {
     /**
      * Gets the number of vertical color zones.
      *
-     * <p>A color zone is a group of lights that always display the same color.
+     * <p>A color zone is represented by one single aggregated color. The number should not be
+     * larger than 80.
      */
-    @IntRange(from = 0)
+    @IntRange(from = 0, to = 80)
     public int getVerticalZonesNumber() {
         return mVerticalZonesNumber;
     }

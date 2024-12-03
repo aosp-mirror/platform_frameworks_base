@@ -669,6 +669,7 @@ public final class MediaQualityManager {
     /**
      * Registers a {@link AmbientBacklightCallback}.
      */
+    @RequiresPermission(android.Manifest.permission.READ_COLOR_ZONES)
     public void registerAmbientBacklightCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AmbientBacklightCallback callback) {
@@ -682,6 +683,7 @@ public final class MediaQualityManager {
     /**
      * Unregisters the existing {@link AmbientBacklightCallback}.
      */
+    @RequiresPermission(android.Manifest.permission.READ_COLOR_ZONES)
     public void unregisterAmbientBacklightCallback(
             @NonNull final AmbientBacklightCallback callback) {
         Preconditions.checkNotNull(callback);
@@ -702,6 +704,7 @@ public final class MediaQualityManager {
      *
      * @param settings The settings to use for the backlight detector.
      */
+    @RequiresPermission(android.Manifest.permission.READ_COLOR_ZONES)
     public void setAmbientBacklightSettings(
             @NonNull AmbientBacklightSettings settings) {
         Preconditions.checkNotNull(settings);
@@ -728,6 +731,7 @@ public final class MediaQualityManager {
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
      */
+    @RequiresPermission(android.Manifest.permission.READ_COLOR_ZONES)
     public void setAmbientBacklightEnabled(boolean enabled) {
         try {
             mService.setAmbientBacklightEnabled(enabled, mUserId);
