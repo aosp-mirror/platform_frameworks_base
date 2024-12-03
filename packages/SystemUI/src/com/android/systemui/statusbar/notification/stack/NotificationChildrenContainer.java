@@ -499,7 +499,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
         mGroupHeaderWrapper.setExpanded(mChildrenExpanded);
         mGroupHeaderWrapper.onContentUpdated(mContainingNotification);
-
+        resetHeaderVisibilityIfNeeded(mGroupHeader, calculateDesiredHeader());
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
 
@@ -535,6 +535,7 @@ public class NotificationChildrenContainer extends ViewGroup
         invalidate();
 
         mMinimizedGroupHeaderWrapper.onContentUpdated(mContainingNotification);
+        resetHeaderVisibilityIfNeeded(mMinimizedGroupHeader, calculateDesiredHeader());
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
     }
