@@ -32,7 +32,6 @@ import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
-import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeTestUtil
@@ -41,6 +40,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl.HeadsUpEntry
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.keyguardBypassController
@@ -49,7 +50,6 @@ import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -57,7 +57,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -67,7 +70,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWithLooper
 class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplOldTest(flags) {
 
-    private val headsUpManagerLogger = HeadsUpManagerLogger(logcatLogBuffer())
+    private val headsUpManagerLogger = mock<HeadsUpManagerLogger>()
 
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
@@ -184,6 +187,172 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     }
 
     @Test
+    fun testShowNotification_addsEntry() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry)
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+        assertThat(underTest.hasNotifications()).isTrue()
+        assertThat(underTest.getEntry(entry.key)).isEqualTo(entry)
+    }
+
+    @Test
+    fun testShowNotification_autoDismisses() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime((TEST_AUTO_DISMISS_TIME * 3 / 2).toLong())
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testRemoveNotification_removeDeferred() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry)
+
+        val removedImmediately =
+            underTest.removeNotification(
+                entry.key,
+                /* releaseImmediately= */ false,
+                "removeDeferred",
+            )
+        assertThat(removedImmediately).isFalse()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testRemoveNotification_forceRemove() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry)
+
+        val removedImmediately =
+            underTest.removeNotification(entry.key, /* releaseImmediately= */ true, "forceRemove")
+        assertThat(removedImmediately).isTrue()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testReleaseAllImmediately() {
+        for (i in 0 until 4) {
+            val entry = HeadsUpManagerTestUtil.createEntry(i, mContext)
+            entry.row = mock<ExpandableNotificationRow>()
+            underTest.showNotification(entry)
+        }
+
+        underTest.releaseAllImmediately()
+
+        assertThat(underTest.allEntries.count()).isEqualTo(0)
+    }
+
+    @Test
+    fun testCanRemoveImmediately_notShownLongEnough() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry)
+
+        // The entry has just been added so we should not remove immediately.
+        assertThat(underTest.canRemoveImmediately(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testHunRemovedLogging() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        val headsUpEntry = underTest.HeadsUpEntry(notifEntry)
+        headsUpEntry.setRowPinnedStatus(PinnedStatus.NotPinned)
+
+        underTest.onEntryRemoved(headsUpEntry, "test")
+
+        verify(headsUpManagerLogger, times(1)).logNotificationActuallyRemoved(eq(notifEntry))
+    }
+
+    @Test
+    fun testShowNotification_autoDismissesIncludingTouchAcceptanceDelay() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        useAccessibilityTimeout(false)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime((TEST_TOUCH_ACCEPTANCE_TIME / 2 + TEST_AUTO_DISMISS_TIME).toLong())
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testShowNotification_autoDismissesWithDefaultTimeout() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        useAccessibilityTimeout(false)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime(
+            (TEST_TOUCH_ACCEPTANCE_TIME +
+                    (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
+                .toLong()
+        )
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testRemoveNotification_beforeMinimumDisplayTime() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        useAccessibilityTimeout(false)
+
+        underTest.showNotification(entry)
+
+        val removedImmediately =
+            underTest.removeNotification(
+                entry.key,
+                /* releaseImmediately = */ false,
+                "beforeMinimumDisplayTime",
+            )
+        assertThat(removedImmediately).isFalse()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+
+        systemClock.advanceTime(((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2).toLong())
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testRemoveNotification_afterMinimumDisplayTime() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        useAccessibilityTimeout(false)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime(((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2).toLong())
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+
+        val removedImmediately =
+            underTest.removeNotification(
+                entry.key,
+                /* releaseImmediately = */ false,
+                "afterMinimumDisplayTime",
+            )
+        assertThat(removedImmediately).isTrue()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testRemoveNotification_releaseImmediately() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry)
+
+        val removedImmediately =
+            underTest.removeNotification(
+                entry.key,
+                /* releaseImmediately = */ true,
+                "afterMinimumDisplayTime",
+            )
+        assertThat(removedImmediately).isTrue()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
     fun testSnooze() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
         underTest.showNotification(entry)
@@ -296,6 +465,21 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         underTest.showNotification(entry)
         systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME).toLong()
+        )
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testShowNotification_autoDismissesWithAccessibilityTimeout() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        useAccessibilityTimeout(true)
+
+        underTest.showNotification(entry)
+        systemClock.advanceTime(
+            (TEST_TOUCH_ACCEPTANCE_TIME +
+                    (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
+                .toLong()
         )
 
         assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
