@@ -163,7 +163,6 @@ public class SystemPerformanceHinter {
     // The active sessions
     private final ArrayList<HighPerfSession> mActiveSessions = new ArrayList<>();
     private final SurfaceControl.Transaction mTransaction;
-    private final PerformanceHintManager mPerfHintManager;
     private @Nullable PerformanceHintManager.Session mAdpfSession;
     private @Nullable DisplayRootProvider mDisplayRootProvider;
 
@@ -184,7 +183,6 @@ public class SystemPerformanceHinter {
             @Nullable DisplayRootProvider displayRootProvider,
             @Nullable Supplier<SurfaceControl.Transaction> transactionSupplier) {
         mDisplayRootProvider = displayRootProvider;
-        mPerfHintManager = context.getSystemService(PerformanceHintManager.class);
         mTransaction = transactionSupplier != null
                 ? transactionSupplier.get()
                 : new SurfaceControl.Transaction();
@@ -273,7 +271,7 @@ public class SystemPerformanceHinter {
                 asyncTraceBegin(HINT_SF_EARLY_WAKEUP, Display.INVALID_DISPLAY);
             }
         }
-        if (nowEnabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
+        if (mAdpfSession != null && nowEnabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
             mAdpfSession.sendHint(PerformanceHintManager.Session.CPU_LOAD_UP);
             if (isTraceEnabled) {
                 asyncTraceBegin(HINT_ADPF, Display.INVALID_DISPLAY);
@@ -323,7 +321,7 @@ public class SystemPerformanceHinter {
                 asyncTraceEnd(HINT_SF_EARLY_WAKEUP);
             }
         }
-        if (nowDisabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
+        if (mAdpfSession != null && nowDisabled(oldGlobalFlags, newGlobalFlags, HINT_ADPF)) {
             mAdpfSession.sendHint(PerformanceHintManager.Session.CPU_LOAD_RESET);
             if (isTraceEnabled) {
                 asyncTraceEnd(HINT_ADPF);
