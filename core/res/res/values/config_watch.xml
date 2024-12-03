@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false"
-          android:alpha="?attr/disabledAlpha"
-          android:color="@color/materialColorOnSurface" />
-    <item android:color="@color/materialColorOutline" />
-</selector>
+<resources>
+    <!--  TODO(b/382103556): use predefined Material3 token  -->
+    <!-- For Wear Material3 -->
+    <dimen name="config_wearMaterial3_buttonCornerRadius">26dp</dimen>
+    <dimen name="config_wearMaterial3_bottomDialogCornerRadius">18dp</dimen>
+</resources>

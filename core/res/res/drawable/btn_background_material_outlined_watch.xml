@@ -16,10 +16,21 @@
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
         android:color="?attr/colorControlHighlight">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/config_wearMaterial3_buttonCornerRadius"/>
+            <solid android:color="#fff"/>
+            <size
+                android:width="@dimen/btn_material_width"
+                android:height="@dimen/btn_material_height" />
+        </shape>
+    </item>
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/btn_material_filled_background_color"/>
             <corners android:radius="@dimen/config_wearMaterial3_buttonCornerRadius"/>
+            <stroke
+                android:width="1dp"
+                android:color="@color/btn_material_outlined_background_color_watch" />
             <size
                 android:width="@dimen/btn_material_width"
                 android:height="@dimen/btn_material_height" />

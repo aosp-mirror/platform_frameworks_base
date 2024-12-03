@@ -14,15 +14,9 @@
   ~ limitations under the License.
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        android:color="?attr/colorControlHighlight">
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/btn_material_filled_tonal_background_color"/>
-            <corners android:radius="@dimen/config_wearMaterial3_buttonCornerRadius"/>
-            <size
-                android:width="@dimen/btn_material_width"
-                android:height="@dimen/btn_material_height" />
-        </shape>
-    </item>
-</ripple>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false"
+          android:alpha="@dimen/disabled_alpha_wear_material3"
+          android:color="@color/materialColorOnSurface" />
+    <item android:color="@color/materialColorOutline" />
+</selector>

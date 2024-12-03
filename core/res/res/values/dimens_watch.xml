@@ -13,8 +13,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <resources>
-    <!-- values for material3 button -->
+    <!-- values for wear material3 button -->
     <dimen name="btn_material_width">172dp</dimen>
     <dimen name="btn_material_height">52dp</dimen>
     <dimen name="btn_horizontal_edge_padding">14dp</dimen>
@@ -22,18 +23,27 @@
     <dimen name="btn_lineHeight">18sp</dimen>
     <dimen name="btn_textSize">15sp</dimen>
 
-    <!-- values for material3 AlertDialog -->
+    <!-- values for wear material3 AlertDialog -->
     <dimen name="dialog_btn_negative_width">60dp</dimen>
     <dimen name="dialog_btn_negative_height">60dp</dimen>
     <dimen name="dialog_btn_confirm_width">62dp</dimen>
     <dimen name="dialog_btn_confirm_height">60dp</dimen>
 
-    <!-- Opacity factor for disabled material3 widget -->
+    <!-- Opacity factor for disabled wear material3 widget -->
+    <!-- Alpha transparency for widgets that set enablement/disablement programmatically
+       transparency is applied in the disabled state -->
     <dimen name="disabled_alpha_device_default">0.12</dimen>
+    <!-- Alpha transparency applied to elements which are considered primary (e.g. primary text) -->
     <dimen name="primary_content_alpha_device_default">0.38</dimen>
 
-    <!--  values for material3 progress bar(progress indicator)  -->
+    <!--  values for wear material3 progress bar(progress indicator)  -->
     <item name="progressbar_inner_radius_ratio" format="float" type="dimen">2.12</item>
     <dimen name="progressbar_thickness">8dp</dimen>
     <dimen name="progressbar_elevation">0.1dp</dimen>
+
+    <!-- Alpha transparency for wigets that set enablement/disablement programmatically
+     transparency is applied in the disabled state -->
+    <dimen name="disabled_alpha_wear_material3">0.12</dimen>
+    <!-- Alpha transparency applied to elements which are considered primary (e.g. primary text) -->
+    <dimen name="primary_content_alpha_wear_material3">0.38</dimen>
 </resources>

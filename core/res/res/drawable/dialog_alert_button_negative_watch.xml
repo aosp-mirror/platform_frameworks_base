@@ -15,8 +15,8 @@
   -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/dialog_alert_button_background_positive"/>
+    <item android:drawable="@drawable/dialog_alert_button_background_negative_watch"/>
     <item
-        android:drawable="@drawable/ic_check"
+        android:drawable="@drawable/ic_close_watch"
         android:gravity="center" />
 </layer-list>
