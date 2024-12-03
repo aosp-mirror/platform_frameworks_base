@@ -218,16 +218,12 @@ public class AconfigFlags {
             negated = true;
             featureFlag = featureFlag.substring(1).strip();
         }
-        final Boolean flagValue = getFlagValue(featureFlag);
+        Boolean flagValue = getFlagValue(featureFlag);
         if (flagValue == null) {
-            Slog.w(LOG_TAG, "Skipping element " + parser.getName()
-                    + " due to unknown feature flag " + featureFlag);
-            return true;
+            flagValue = false;
         }
         // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
         if (flagValue == negated) {
-            Slog.v(LOG_TAG, "Skipping element " + parser.getName()
-                    + " behind feature flag " + featureFlag + " = " + flagValue);
             return true;
         }
         return false;
