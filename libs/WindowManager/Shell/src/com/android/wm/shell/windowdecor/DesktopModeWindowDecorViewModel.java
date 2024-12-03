@@ -79,6 +79,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
@@ -965,8 +966,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             }
             if (mInputManager != null
                     && !Flags.enableAccessibleCustomHeaders()) {
-                // Pilfer so that windows below receive cancellations for this gesture.
-                mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
+                ViewRootImpl viewRootImpl = v.getViewRootImpl();
+                if (viewRootImpl != null) {
+                    // Pilfer so that windows below receive cancellations for this gesture.
+                    mInputManager.pilferPointers(viewRootImpl.getInputToken());
+                }
             }
             if (isUpOrCancel) {
                 // Gesture is finished, reset state.
