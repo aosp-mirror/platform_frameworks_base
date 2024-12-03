@@ -53,7 +53,22 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     private lateinit var cancelButton: TextView
     private lateinit var screenShareModeSpinner: Spinner
     protected lateinit var dialog: AlertDialog
-    private lateinit var viewBinder: BaseMediaProjectionPermissionViewBinder
+    protected lateinit var viewBinder: BaseMediaProjectionPermissionViewBinder
+
+    /**
+     * Create the view binder for the permission dialog, this can be override by child classes to
+     * support a different type of view binder
+     */
+    open fun createViewBinder(): BaseMediaProjectionPermissionViewBinder {
+        return BaseMediaProjectionPermissionViewBinder(
+            screenShareOptions,
+            appName,
+            hostUid,
+            mediaProjectionMetricsLogger,
+            defaultSelectedMode,
+            dialog,
+        )
+    }
 
     @CallSuper
     override fun onStop(dialog: T) {
@@ -71,15 +86,7 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
         updateIcon()
         createOptionsView(getOptionsViewLayoutId())
         if (!::viewBinder.isInitialized) {
-            viewBinder =
-                BaseMediaProjectionPermissionViewBinder(
-                    screenShareOptions,
-                    appName,
-                    hostUid,
-                    mediaProjectionMetricsLogger,
-                    defaultSelectedMode,
-                    dialog,
-                )
+            viewBinder = createViewBinder()
         }
         viewBinder.bind()
         initScreenShareSpinner()
