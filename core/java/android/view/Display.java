@@ -1301,17 +1301,23 @@ public final class Display {
     }
 
     /**
-     * Represents the {@link FrameRateCategory} for the Normal frame rate
+     * Normal category determines the framework's recommended normal frame rate.
+     * Opt for this normal rate unless a higher frame rate significantly enhances
+     * the user experience.
      *
-     * @see FrameRateCategory
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_HIGH
      */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
 
     /**
-     * Represents the {@link FrameRateCategory} for the High frame rate
+     * High category determines the framework's recommended high frame rate.
+     * Opt for this high rate when a higher frame rate significantly enhances
+     * the user experience.
      *
-     * @see FrameRateCategory
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_NORMAL
      */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_HIGH = 1;
