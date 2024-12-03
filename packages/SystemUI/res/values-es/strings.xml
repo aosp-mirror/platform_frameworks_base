@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para abrir una aplicación usando un widget, deberás verificar que eres tú. Además, ten en cuenta que cualquier persona podrá verlos, incluso aunque tu tablet esté bloqueada. Es posible que algunos widgets no estén pensados para la pantalla de bloqueo y no sea seguro añadirlos aquí."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entendido"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Para añadir la función de widgets en la pantalla de bloqueo como combinación de teclas, asegúrate de que la opción esté habilitada en los ajustes."</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambiar de usuario"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menú desplegable"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
@@ -875,14 +878,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Cambiar a la app de la izquierda o de arriba en pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Mover ventana activa de una pantalla a otra"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Mover ventana a la izquierda"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Mover ventana a la derecha"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Maximizar ventana"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Minimizar ventana"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Cambiar a siguiente idioma"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Cambiar a idioma anterior"</string>
@@ -1419,7 +1418,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Controles del sistema"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Aplicaciones del sistema"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitarea"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Aplicaciones recientes"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Pantalla dividida"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Entrada"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Accesos directos a aplicaciones"</string>
@@ -1428,25 +1426,31 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Combinaciones de teclas"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalizar las combinaciones de teclas"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"¿Eliminar combinación de teclas?"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Pulsa una tecla para asignar una combinación de teclas"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Se eliminará tu combinación de teclas personalizada de forma permanente."</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Atajos de búsqueda"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"No hay resultados de búsqueda"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Icono de contraer"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Icono de la tecla de acción o de la tecla Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Icono de más"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizar"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Hecho"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Icono de desplegar"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"más"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"barra inclinada"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Controlador de arrastre"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Ajustes del teclado"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Establecer combinación de teclas"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Eliminar"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancelar"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pulsa una tecla"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"La combinación de teclas ya se está usando. Prueba con otra tecla."</string>

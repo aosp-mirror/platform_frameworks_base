@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ウィジェットを使用してアプリを起動するには、本人確認が必要です。タブレットがロックされた状態でも他のユーザーにウィジェットが表示されますので、注意してください。一部のウィジェットについてはロック画面での使用を想定していないため、ロック画面への追加は危険な場合があります。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ウィジェット"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"ロック画面にウィジェットをショートカットとして追加するには、設定でウィジェットが有効になっていることをご確認ください。"</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
@@ -1415,7 +1418,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"システム コントロール"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"システムアプリ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"マルチタスク"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"最近使ったアプリ"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"分割画面"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"入力"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"アプリのショートカット"</string>
@@ -1424,14 +1426,20 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"キーボード ショートカット"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"キーボード ショートカットをカスタマイズする"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ショートカットを削除しますか？"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ショートカットを割り当てるキーを押してください"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"この操作を行うと、カスタム ショートカットが完全に削除されます。"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"検索ショートカット"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"検索結果がありません"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"アクションキーまたはメタキーのアイコン"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"プラスアイコン"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"カスタマイズ"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完了"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"開くアイコン"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"または"</string>
@@ -1441,6 +1449,8 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"キーボードの設定"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ショートカットの設定"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"削除"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"キャンセル"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"キーを押してください"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"このキーの組み合わせはすでに使用されています。別のキーを試してください。"</string>
