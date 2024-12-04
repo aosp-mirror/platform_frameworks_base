@@ -15,24 +15,23 @@
  */
 package com.android.wm.shell.windowdecor.common.viewhost
 
-import android.content.Context
-import android.view.Display
+import android.content.res.Configuration
+import android.graphics.Region
 import android.view.SurfaceControl
-import com.android.wm.shell.shared.annotations.ShellMainThread
-import kotlinx.coroutines.CoroutineScope
+import android.view.SurfaceControlViewHost
+import android.view.WindowlessWindowManager
 
 /**
- * A supplier of [DefaultWindowDecorViewHost]s. It creates a new one every time one is requested.
+ * A [WindowlessWindowManager] for the window decor caption that allows customizing the touchable
+ * region.
  */
-class DefaultWindowDecorViewHostSupplier(
-    @ShellMainThread private val mainScope: CoroutineScope
-) : WindowDecorViewHostSupplier<WindowDecorViewHost> {
+class WindowDecorWindowlessWindowManager(
+    configuration: Configuration,
+    rootSurface: SurfaceControl,
+) : WindowlessWindowManager(configuration, rootSurface, /* hostInputTransferToken= */ null) {
 
-    override fun acquire(context: Context, display: Display): WindowDecorViewHost {
-        return DefaultWindowDecorViewHost(context, mainScope, display)
-    }
-
-    override fun release(viewHost: WindowDecorViewHost, t: SurfaceControl.Transaction) {
-        viewHost.release(t)
+    /** Set the view host's touchable region. */
+    fun setTouchRegion(viewHost: SurfaceControlViewHost, region: Region?) {
+        setTouchRegion(viewHost.windowToken.asBinder(), region)
     }
 }

@@ -105,6 +105,8 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHandleViewHolder;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -219,6 +221,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             DesktopModeEventLogger desktopModeEventLogger) {
@@ -230,6 +233,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 WindowContainerTransaction::new, SurfaceControl::new, new WindowManagerWrapper(
                         context.getSystemService(WindowManager.class)),
                 new SurfaceControlViewHostFactory() {},
+                windowDecorViewHostSupplier,
                 DefaultMaximizeMenuFactory.INSTANCE,
                 DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper,
                 windowDecorCaptionHandleRepository, desktopModeEventLogger);
@@ -258,15 +262,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Supplier<SurfaceControl> surfaceControlSupplier,
             WindowManagerWrapper windowManagerWrapper,
             SurfaceControlViewHostFactory surfaceControlViewHostFactory,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MaximizeMenuFactory maximizeMenuFactory,
             HandleMenuFactory handleMenuFactory,
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             DesktopModeEventLogger desktopModeEventLogger) {
-        super(context, userContext, displayController, taskOrganizer, handler, taskInfo,
+        super(context, userContext, displayController, taskOrganizer, taskInfo,
                 taskSurface, surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
-                surfaceControlViewHostFactory, desktopModeEventLogger);
+                surfaceControlViewHostFactory, windowDecorViewHostSupplier, desktopModeEventLogger);
         mSplitScreenController = splitScreenController;
         mHandler = handler;
         mBgExecutor = bgExecutor;
@@ -1760,6 +1765,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
                 AppToWebGenericLinksParser genericLinksParser,
                 AssistContentRequester assistContentRequester,
+                @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost>
+                        windowDecorViewHostSupplier,
                 MultiInstanceHelper multiInstanceHelper,
                 WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
                 DesktopModeEventLogger desktopModeEventLogger) {
@@ -1780,6 +1787,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     rootTaskDisplayAreaOrganizer,
                     genericLinksParser,
                     assistContentRequester,
+                    windowDecorViewHostSupplier,
                     multiInstanceHelper,
                     windowDecorCaptionHandleRepository,
                     desktopModeEventLogger);
