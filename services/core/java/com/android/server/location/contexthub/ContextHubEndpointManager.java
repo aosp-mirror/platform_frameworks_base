@@ -38,7 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @hide
  */
-/* package */ class ContextHubEndpointManager {
+/* package */ class ContextHubEndpointManager
+        implements ContextHubHalEndpointCallback.IEndpointSessionCallback {
     private static final String TAG = "ContextHubEndpointManager";
 
     /** The hub ID of the Context Hub Service. */
@@ -55,6 +56,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
     /** The proxy to talk to the Context Hub. */
     private final IContextHubWrapper mContextHubProxy;
+
+    private final HubInfoRegistry mHubInfoRegistry;
 
     /** A map of endpoint IDs to brokers currently registered. */
     private final Map<Long, ContextHubEndpointBroker> mEndpointMap = new ConcurrentHashMap<>();
@@ -85,9 +88,11 @@ import java.util.concurrent.ConcurrentHashMap;
     /** Initialized to true if all initialization in the constructor succeeds. */
     private final boolean mSessionIdsValid;
 
-    /* package */ ContextHubEndpointManager(Context context, IContextHubWrapper contextHubProxy) {
+    /* package */ ContextHubEndpointManager(
+            Context context, IContextHubWrapper contextHubProxy, HubInfoRegistry hubInfoRegistry) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
+        mHubInfoRegistry = hubInfoRegistry;
         int[] range = null;
         try {
             range = mContextHubProxy.requestSessionIdRange(SERVICE_SESSION_RANGE);
@@ -210,6 +215,70 @@ import java.util.concurrent.ConcurrentHashMap;
         mEndpointMap.remove(endpointId);
     }
 
+    @Override
+    public void onEndpointSessionOpenRequest(
+            int sessionId,
+            HubEndpointInfo.HubEndpointIdentifier destination,
+            HubEndpointInfo.HubEndpointIdentifier initiator,
+            String serviceDescriptor) {
+        if (destination.getHub() != SERVICE_HUB_ID) {
+            Log.e(
+                    TAG,
+                    "onEndpointSessionOpenRequest: invalid destination hub ID: "
+                            + destination.getHub());
+            return;
+        }
+        ContextHubEndpointBroker broker = mEndpointMap.get(destination.getEndpoint());
+        if (broker == null) {
+            Log.e(
+                    TAG,
+                    "onEndpointSessionOpenRequest: unknown destination endpoint ID: "
+                            + destination.getEndpoint());
+            return;
+        }
+        HubEndpointInfo initiatorInfo = mHubInfoRegistry.getEndpointInfo(initiator);
+        if (initiatorInfo == null) {
+            Log.e(
+                    TAG,
+                    "onEndpointSessionOpenRequest: unknown initiator endpoint ID: "
+                            + initiator.getEndpoint());
+            return;
+        }
+        broker.onEndpointSessionOpenRequest(sessionId, initiatorInfo, serviceDescriptor);
+    }
+
+    @Override
+    public void onCloseEndpointSession(int sessionId, byte reason) {
+        boolean callbackInvoked = false;
+        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
+            if (broker.hasSessionId(sessionId)) {
+                broker.onCloseEndpointSession(sessionId, reason);
+                callbackInvoked = true;
+                break;
+            }
+        }
+
+        if (!callbackInvoked) {
+            Log.w(TAG, "onCloseEndpointSession: unknown session ID " + sessionId);
+        }
+    }
+
+    @Override
+    public void onEndpointSessionOpenComplete(int sessionId) {
+        boolean callbackInvoked = false;
+        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
+            if (broker.hasSessionId(sessionId)) {
+                broker.onEndpointSessionOpenComplete(sessionId);
+                callbackInvoked = true;
+                break;
+            }
+        }
+
+        if (!callbackInvoked) {
+            Log.w(TAG, "onEndpointSessionOpenComplete: unknown session ID " + sessionId);
+        }
+    }
+
     /** @return an available endpoint ID */
     private long getNewEndpointId() {
         synchronized (mEndpointLock) {
@@ -220,6 +289,9 @@ import java.util.concurrent.ConcurrentHashMap;
         }
     }
 
+    /**
+     * @return true if the provided session ID range is valid
+     */
     private boolean isSessionIdRangeValid(int minId, int maxId) {
         return (minId <= maxId) && (minId >= 0) && (maxId >= 0);
     }
