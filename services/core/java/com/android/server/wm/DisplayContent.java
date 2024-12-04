@@ -7113,9 +7113,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         /**
          * @see #getRequestedVisibleTypes()
          */
-        void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
-            if (mRequestedVisibleTypes != requestedVisibleTypes) {
-                mRequestedVisibleTypes = requestedVisibleTypes;
+        void updateRequestedVisibleTypes(@InsetsType int visibleTypes, @InsetsType int mask) {
+            int newRequestedVisibleTypes =
+                    (mRequestedVisibleTypes & ~mask) | (visibleTypes & mask);
+            if (mRequestedVisibleTypes != newRequestedVisibleTypes) {
+                mRequestedVisibleTypes = newRequestedVisibleTypes;
             }
         }
     }
