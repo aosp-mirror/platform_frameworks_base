@@ -31,8 +31,10 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.settings.FakeSettings
@@ -94,7 +96,7 @@ class BatterySaverTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 batteryController,
-                secureSettings
+                secureSettings,
             )
 
         tile.initialize()
@@ -150,8 +152,7 @@ class BatterySaverTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_battery_saver_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_battery_saver_icon_off))
     }
 
     @Test
@@ -161,7 +162,14 @@ class BatterySaverTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_battery_saver_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_battery_saver_icon_on))
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }
