@@ -764,6 +764,28 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(launchingAffordance).isFalse()
         }
 
+    @Test
+    fun onQuickAffordanceTriggered_updatesLaunchingFromTriggeredResult() =
+        testScope.runTest {
+            // WHEN selecting and triggering a quick affordance at a slot
+            val key = homeControls.key
+            val slot = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+            val encodedKey = "$slot::$key"
+            val actionLaunched = true
+            homeControls.onTriggeredResult =
+                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(actionLaunched)
+            underTest.select(slot, key)
+            runCurrent()
+            underTest.onQuickAffordanceTriggered(encodedKey, expandable = null, slot)
+
+            // THEN the latest triggered result shows that an action launched for the same key and
+            // slot
+            val launchingFromTriggeredResult by
+                collectLastValue(underTest.launchingFromTriggeredResult)
+            assertThat(launchingFromTriggeredResult?.launched).isEqualTo(actionLaunched)
+            assertThat(launchingFromTriggeredResult?.configKey).isEqualTo(encodedKey)
+        }
+
     companion object {
         private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
         private val ICON: Icon =

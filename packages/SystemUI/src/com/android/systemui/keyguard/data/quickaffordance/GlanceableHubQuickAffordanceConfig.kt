@@ -111,7 +111,7 @@ constructor(
                 transitionKey = CommunalTransitionKeys.SimpleFade,
             )
         }
-        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(true)
     }
 
     companion object {
