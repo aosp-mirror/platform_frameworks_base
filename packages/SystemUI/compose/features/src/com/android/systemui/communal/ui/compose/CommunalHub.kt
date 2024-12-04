@@ -1193,6 +1193,7 @@ private fun CommunalContent(
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
+        is CommunalContentModel.Spacer -> Box(Modifier.fillMaxSize())
     }
 }
 
