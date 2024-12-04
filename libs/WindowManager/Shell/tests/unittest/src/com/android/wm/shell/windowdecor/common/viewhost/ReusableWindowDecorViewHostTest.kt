@@ -157,6 +157,14 @@ class ReusableWindowDecorViewHostTest : ShellTestCase() {
         verify(reusableVH.viewHostAdapter).release(t)
     }
 
+    @Test
+    fun warmUp_addsRootView() = runTest {
+        val reusableVH = createReusableViewHost().apply { warmUp() }
+
+        assertThat(reusableVH.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(reusableVH.view()).isEqualTo(reusableVH.rootView)
+    }
+
     private fun CoroutineScope.createReusableViewHost() =
         ReusableWindowDecorViewHost(
             context = context,
