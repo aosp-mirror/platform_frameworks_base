@@ -20,10 +20,8 @@ import android.content.res.Configuration
 import android.graphics.Region
 import android.view.Display
 import android.view.SurfaceControl
-import android.view.SurfaceControlViewHost
 import android.view.View
 import android.view.WindowManager
-import android.view.WindowlessWindowManager
 import androidx.tracing.Trace
 import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -31,41 +29,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-typealias SurfaceControlViewHostFactory =
-    (Context, Display, WindowlessWindowManager, String) -> SurfaceControlViewHost
-
 /**
- * A default implementation of [WindowDecorViewHost] backed by a [SurfaceControlViewHost].
+ * A default implementation of [WindowDecorViewHost] backed by a [SurfaceControlViewHostAdapter].
  *
- * It does not support swapping the root view added to the VRI of the [SurfaceControlViewHost], and
- * any attempts to do will throw, which means that once a [View] is added using [updateView] or
- * [updateViewAsync], only its properties and binding may be changed, its children views may be
- * added, removed or changed and its [WindowManager.LayoutParams] may be changed. It also supports
- * asynchronously updating the view hierarchy using [updateViewAsync], in which case the update work
- * will be posted on the [ShellMainThread] with no delay.
+ * It supports asynchronously updating the view hierarchy using [updateViewAsync], in which
+ * case the update work will be posted on the [ShellMainThread] with no delay.
  */
 class DefaultWindowDecorViewHost(
-    private val context: Context,
+    context: Context,
     @ShellMainThread private val mainScope: CoroutineScope,
-    private val display: Display,
-    private val surfaceControlViewHostFactory: SurfaceControlViewHostFactory = { c, d, wwm, s ->
-        SurfaceControlViewHost(c, d, wwm, s)
-    },
+    display: Display,
+    @VisibleForTesting val viewHostAdapter: SurfaceControlViewHostAdapter =
+        SurfaceControlViewHostAdapter(context, display),
 ) : WindowDecorViewHost {
-
-    private val rootSurface: SurfaceControl =
-        SurfaceControl.Builder()
-            .setName("DefaultWindowDecorViewHost surface")
-            .setContainerLayer()
-            .setCallsite("DefaultWindowDecorViewHost#init")
-            .build()
-
-    private var wwm: WindowDecorWindowlessWindowManager? = null
-    @VisibleForTesting var viewHost: SurfaceControlViewHost? = null
     private var currentUpdateJob: Job? = null
 
     override val surfaceControl: SurfaceControl
-        get() = rootSurface
+        get() = viewHostAdapter.rootSurface
 
     override fun updateView(
         view: View,
@@ -103,8 +83,7 @@ class DefaultWindowDecorViewHost(
 
     override fun release(t: SurfaceControl.Transaction) {
         clearCurrentUpdateJob()
-        viewHost?.release()
-        t.remove(rootSurface)
+        viewHostAdapter.release(t)
     }
 
     private fun updateViewHost(
@@ -115,46 +94,16 @@ class DefaultWindowDecorViewHost(
         onDrawTransaction: SurfaceControl.Transaction?,
     ) {
         Trace.beginSection("DefaultWindowDecorViewHost#updateViewHost")
-        if (wwm == null) {
-            wwm = WindowDecorWindowlessWindowManager(configuration, rootSurface)
+        viewHostAdapter.prepareViewHost(configuration, touchableRegion)
+        onDrawTransaction?.let {
+            viewHostAdapter.applyTransactionOnDraw(it)
         }
-        if (viewHost == null) {
-            viewHost =
-                surfaceControlViewHostFactory.invoke(
-                    context,
-                    display,
-                    requireWindowlessWindowManager(),
-                    "DefaultWindowDecorViewHost#updateViewHost",
-                )
-        }
-        requireWindowlessWindowManager().apply {
-            setConfiguration(configuration)
-            setTouchRegion(requireViewHost(), touchableRegion)
-        }
-        onDrawTransaction?.let { requireViewHost().rootSurfaceControl.applyTransactionOnDraw(it) }
-        if (requireViewHost().view == null) {
-            Trace.beginSection("DefaultWindowDecorViewHost#updateViewHost-setView")
-            requireViewHost().setView(view, attrs)
-            Trace.endSection()
-        } else {
-            check(requireViewHost().view == view) { "Changing view is not allowed" }
-            Trace.beginSection("DefaultWindowDecorViewHost#updateViewHost-relayout")
-            requireViewHost().relayout(attrs)
-            Trace.endSection()
-        }
+        viewHostAdapter.updateView(view, attrs)
         Trace.endSection()
     }
 
     private fun clearCurrentUpdateJob() {
         currentUpdateJob?.cancel()
         currentUpdateJob = null
-    }
-
-    private fun requireWindowlessWindowManager(): WindowDecorWindowlessWindowManager {
-        return wwm ?: error("Expected non-null windowless window manager")
-    }
-
-    private fun requireViewHost(): SurfaceControlViewHost {
-        return viewHost ?: error("Expected non-null view host")
     }
 }
