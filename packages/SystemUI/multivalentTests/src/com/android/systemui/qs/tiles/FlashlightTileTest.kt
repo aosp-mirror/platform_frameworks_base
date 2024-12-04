@@ -6,7 +6,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -14,8 +13,11 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.FlashlightController
 import com.google.common.truth.Truth
 import org.junit.After
@@ -69,7 +71,7 @@ class FlashlightTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                flashlightController
+                flashlightController,
             )
     }
 
@@ -87,8 +89,7 @@ class FlashlightTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        Truth.assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_flashlight_icon_on))
+        Truth.assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_flashlight_icon_on))
     }
 
     @Test
@@ -100,7 +101,7 @@ class FlashlightTileTest : SysuiTestCase() {
         tile.handleUpdateState(state, /* arg= */ null)
 
         Truth.assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_flashlight_icon_off))
+            .isEqualTo(createExpectedIcon(R.drawable.qs_flashlight_icon_off))
     }
 
     @Test
@@ -111,6 +112,14 @@ class FlashlightTileTest : SysuiTestCase() {
         tile.handleUpdateState(state, /* arg= */ null)
 
         Truth.assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_flashlight_icon_off))
+            .isEqualTo(createExpectedIcon(R.drawable.qs_flashlight_icon_off))
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }

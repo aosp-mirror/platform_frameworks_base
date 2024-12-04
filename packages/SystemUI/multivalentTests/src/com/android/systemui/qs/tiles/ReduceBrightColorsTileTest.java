@@ -46,6 +46,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.ReduceBrightColorsController;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R.drawable;
@@ -234,7 +235,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(drawable.qs_extra_dim_icon_on));
+        assertEquals(state.icon, createExpectedIcon(drawable.qs_extra_dim_icon_on));
     }
 
     @Test
@@ -245,7 +246,15 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(drawable.qs_extra_dim_icon_off));
+        assertEquals(state.icon, createExpectedIcon(drawable.qs_extra_dim_icon_off));
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 
 }
