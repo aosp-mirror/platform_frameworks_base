@@ -203,6 +203,58 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testIsFreeformLetterboxingForCameraAllowed_featureDisabled_returnsFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertFalse(mCameraCompatFreeformPolicy.isFreeformLetterboxingForCameraAllowed(mActivity));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    public void testIsFreeformLetterboxingForCameraAllowed_overrideDisabled_returnsFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertFalse(mCameraCompatFreeformPolicy.isFreeformLetterboxingForCameraAllowed(mActivity));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testIsFreeformLetterboxingForCameraAllowed_cameraNotRunning_returnsFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertFalse(mCameraCompatFreeformPolicy.isFreeformLetterboxingForCameraAllowed(mActivity));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testIsFreeformLetterboxingForCameraAllowed_notFreeformWindowing_returnsFalse() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT, WINDOWING_MODE_FULLSCREEN);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertFalse(mCameraCompatFreeformPolicy.isFreeformLetterboxingForCameraAllowed(mActivity));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testIsFreeformLetterboxingForCameraAllowed_optInFreeformCameraRunning_true() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        assertTrue(mCameraCompatFreeformPolicy.isFreeformLetterboxingForCameraAllowed(mActivity));
+    }
+
+    @Test
     @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
     public void testFullscreen_doesNotActivateCameraCompatMode() {
