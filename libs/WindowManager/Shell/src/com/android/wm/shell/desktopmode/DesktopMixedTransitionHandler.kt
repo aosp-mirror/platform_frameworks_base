@@ -239,7 +239,6 @@ class DesktopMixedTransitionHandler(
             pending.minimizingTask?.let { minimizingTask -> findTaskChange(info, minimizingTask) }
         val launchChange = findDesktopTaskLaunchChange(info, pending.launchingTask)
         if (launchChange == null) {
-            check(minimizeChange == null)
             check(immersiveExitChange == null)
             logV("No launch Change, returning")
             return false
