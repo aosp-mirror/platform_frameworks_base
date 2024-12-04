@@ -276,7 +276,11 @@ constructor(
                     false
                 } else if (
                     currentState == KeyguardState.DREAMING &&
-                        deviceEntryInteractor.get().isUnlocked.value
+                        if (SceneContainerFlag.isEnabled) {
+                            deviceEntryInteractor.get().isUnlocked.value
+                        } else {
+                            keyguardInteractor.isKeyguardDismissible.value
+                        }
                 ) {
                     // Dreams dismiss keyguard and return to GONE if they can.
                     false
