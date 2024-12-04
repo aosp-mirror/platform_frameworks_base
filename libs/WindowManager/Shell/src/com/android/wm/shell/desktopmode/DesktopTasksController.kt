@@ -2048,7 +2048,11 @@ class DesktopTasksController(
                     syncQueue,
                     taskInfo,
                     displayController,
-                    context,
+                    if (Flags.enableBugFixesForSecondaryDisplay()) {
+                        displayController.getDisplayContext(taskInfo.displayId)
+                    } else {
+                        context
+                    },
                     taskSurface,
                     rootTaskDisplayAreaOrganizer,
                     dragStartState,
