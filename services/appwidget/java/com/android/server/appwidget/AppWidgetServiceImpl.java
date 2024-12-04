@@ -330,6 +330,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     // Handler to the background thread that saves states to disk.
     private Handler mSaveStateHandler;
+
+    private Handler mAlarmHandler;
     // Handler to the background thread that saves generated previews to disk. All operations that
     // modify saved previews must be run on this Handler.
     private Handler mSavePreviewsHandler;
@@ -373,6 +375,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (removeAppWidgetServiceIoFromCriticalPath()) {
             mSaveStateHandler = new Handler(BackgroundThread.get().getLooper(),
                     this::handleSaveMessage);
+            mAlarmHandler = new Handler(BackgroundThread.get().getLooper());
         } else {
             mSaveStateHandler = BackgroundThread.getHandler();
         }
@@ -2739,10 +2742,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         if (provider.broadcast != null) {
             final PendingIntent broadcast = provider.broadcast;
-            mSaveStateHandler.post(() -> {
-                    mAlarmManager.cancel(broadcast);
-                    broadcast.cancel();
-            });
+            Runnable cancelRunnable = () -> {
+                mAlarmManager.cancel(broadcast);
+                broadcast.cancel();
+            };
+            if (removeAppWidgetServiceIoFromCriticalPath()) {
+                mAlarmHandler.post(cancelRunnable);
+            } else {
+                mSaveStateHandler.post(cancelRunnable);
+            }
             provider.broadcast = null;
         }
     }
@@ -3422,10 +3430,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // invariant and established the PendingIntent safely.
                 final long period = Math.max(info.updatePeriodMillis, MIN_UPDATE_PERIOD);
                 final PendingIntent broadcast = provider.broadcast;
-                mSaveStateHandler.post(() ->
+
+                Runnable repeatRunnable = () -> {
                     mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + period, period, broadcast)
-                );
+                            SystemClock.elapsedRealtime() + period, period, broadcast);
+                };
+                if (removeAppWidgetServiceIoFromCriticalPath()) {
+                    mAlarmHandler.post(repeatRunnable);
+                } else {
+                    mSaveStateHandler.post(repeatRunnable);
+                }
             }
         }
     }

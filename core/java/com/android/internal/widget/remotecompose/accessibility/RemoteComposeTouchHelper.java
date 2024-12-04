@@ -15,17 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.accessibility;
 
-import android.annotation.NonNull;
-import android.view.View;
-
-import com.android.internal.widget.remotecompose.core.CoreDocument;
-
+/**
+ * This class is the entry point for finding the AccessibilityDelegate for a RemoteCompose document.
+ */
 public class RemoteComposeTouchHelper {
-    public static View.AccessibilityDelegate forRemoteComposePlayer(
-            View player, @NonNull CoreDocument coreDocument) {
-        return new PlatformRemoteComposeTouchHelper<>(
-                player,
-                new CoreDocumentAccessibility(coreDocument),
-                new AndroidPlatformSemanticNodeApplier());
-    }
+    /** Get the platform specific accessibility delegate registrar */
+    public static final RemoteComposeAccessibilityRegistrar REGISTRAR =
+            new PlatformRemoteComposeAccessibilityRegistrar();
 }

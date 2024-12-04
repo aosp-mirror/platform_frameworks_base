@@ -24,6 +24,11 @@ import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.location.IContextHubTransactionCallback;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class that represents a broker for the endpoint registered by the client app. This class
@@ -31,7 +36,8 @@ import android.hardware.location.IContextHubTransactionCallback;
  *
  * @hide
  */
-public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
+public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
+        implements IBinder.DeathRecipient {
     private static final String TAG = "ContextHubEndpointBroker";
 
     /** The context of the service. */
@@ -51,6 +57,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
 
     /** The remote callback interface for this endpoint. */
     private final IContextHubEndpointCallback mContextHubEndpointCallback;
+
+    /** True if this endpoint is registered with the service. */
+    private AtomicBoolean mIsRegistered = new AtomicBoolean(true);
 
     /* package */ ContextHubEndpointBroker(
             Context context,
@@ -72,27 +81,55 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     }
 
     @Override
-    public int openSession(HubEndpointInfo destination, HubServiceInfo serviceInfo) {
-        // TODO(b/378487799): Implement this
-        return 0;
+    public int openSession(HubEndpointInfo destination, HubServiceInfo serviceInfo)
+            throws RemoteException {
+        ContextHubServiceUtil.checkPermissions(mContext);
+        if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
+        int sessionId = mEndpointManager.reserveSessionId();
+        EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
+        try {
+            mContextHubProxy.openEndpointSession(
+                    sessionId,
+                    halEndpointInfo.id,
+                    mHalEndpointInfo.id,
+                    serviceInfo == null ? null : serviceInfo.getServiceDescriptor());
+        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while calling HAL openEndpointSession", e);
+            mEndpointManager.returnSessionId(sessionId);
+            throw e;
+        }
+
+        return sessionId;
     }
 
     @Override
-    public void closeSession(int sessionId, int reason) {
-        // TODO(b/378487799): Implement this
-
+    public void closeSession(int sessionId, int reason) throws RemoteException {
+        ContextHubServiceUtil.checkPermissions(mContext);
+        if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
+        try {
+            mContextHubProxy.closeEndpointSession(sessionId, (byte) reason);
+        } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
+            Log.e(TAG, "Exception while calling HAL closeEndpointSession", e);
+            throw e;
+        }
     }
 
     @Override
     public void openSessionRequestComplete(int sessionId) {
         // TODO(b/378487799): Implement this
-
     }
 
     @Override
     public void unregister() {
-        // TODO(b/378487799): Implement this
-
+        ContextHubServiceUtil.checkPermissions(mContext);
+        mIsRegistered.set(false);
+        try {
+            mContextHubProxy.unregisterEndpoint(mHalEndpointInfo);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while calling HAL unregisterEndpoint", e);
+        }
+        // TODO(b/378487799): Release reserved session IDs
+        mEndpointManager.unregisterEndpoint(mEndpointInfo.getIdentifier().getEndpoint());
     }
 
     @Override
@@ -104,5 +141,17 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub {
     @Override
     public void sendMessageDeliveryStatus(int sessionId, int messageSeqNumber, byte errorCode) {
         // TODO(b/381102453): Implement this
+    }
+
+    /** Invoked when the underlying binder of this broker has died at the client process. */
+    @Override
+    public void binderDied() {
+        unregister();
+    }
+
+    /* package */ void attachDeathRecipient() throws RemoteException {
+        if (mContextHubEndpointCallback != null) {
+            mContextHubEndpointCallback.asBinder().linkToDeath(this, 0 /* flags */);
+        }
     }
 }

@@ -505,6 +505,9 @@ public class AndroidPaintContext extends PaintContext {
                             return;
                         }
                         ShaderData data = getShaderData(shaderId);
+                        if (data == null) {
+                            return;
+                        }
                         RuntimeShader shader = new RuntimeShader(getText(data.getShaderTextId()));
                         String[] names = data.getUniformFloatNames();
                         for (int i = 0; i < names.length; i++) {

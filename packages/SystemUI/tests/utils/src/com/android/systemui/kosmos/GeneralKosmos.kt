@@ -8,7 +8,10 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
 import com.android.systemui.util.mockito.mock
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -58,3 +61,27 @@ fun Kosmos.runCurrent() = testScope.runCurrent()
 fun <T> Kosmos.collectLastValue(flow: Flow<T>) = testScope.collectLastValue(flow)
 
 fun <T> Kosmos.collectValues(flow: Flow<T>): FlowValue<List<T>> = testScope.collectValues(flow)
+
+/**
+ * Retrieve the current value of this [StateFlow] safely. Needs a [TestScope] in order to make sure
+ * that all pending tasks have run before returning a value. Tests that directly access
+ * [StateFlow.value] may be incorrect, since the value returned may be stale if the current test
+ * dispatcher is a [StandardTestDispatcher].
+ *
+ * If you want to assert on a [Flow] that is not a [StateFlow], please use
+ * [TestScope.collectLastValue], to make sure that the desired value is captured when emitted.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+fun <T> TestScope.currentValue(stateFlow: StateFlow<T>): T {
+    val values = mutableListOf<T>()
+    val job = backgroundScope.launch { stateFlow.collect(values::add) }
+    runCurrent()
+    job.cancel()
+    // StateFlow should always have at least one value
+    return values.last()
+}
+
+/** Retrieve the current value of this [StateFlow] safely. See `currentValue(TestScope)`. */
+fun <T> Kosmos.currentValue(stateFlow: StateFlow<T>): T {
+    return testScope.currentValue(stateFlow)
+}

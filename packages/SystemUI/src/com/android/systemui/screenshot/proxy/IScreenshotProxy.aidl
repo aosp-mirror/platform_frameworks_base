@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.proxy;
 
-import com.android.systemui.screenshot.IOnDoneCallback;
+import com.android.systemui.screenshot.proxy.IOnDoneCallback;
 
 /** Interface implemented by ScreenshotProxyService */
 interface IScreenshotProxy {

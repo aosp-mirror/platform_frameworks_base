@@ -1,0 +1,9 @@
+package: "com.android.internal.widget.flags"
+container: "system"
+
+flag {
+    name: "hide_last_char_with_physical_input"
+    namespace: "input"
+    description: "Feature flag for changing the default of hiding the last interacted symbol when a physical input device is present"
+    bug: "339270220"
+}

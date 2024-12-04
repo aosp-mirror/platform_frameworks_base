@@ -3471,6 +3471,17 @@ interface ITelephony {
     void requestSatelliteSubscriberProvisionStatus(in ResultReceiver result);
 
     /**
+     * Request to get the name to display for Satellite subscription.
+     *
+     * @param receiver The result receiver that returns the diplay name to be used for the satellite
+     * subscription.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSatelliteDisplayName(in ResultReceiver receiver);
+
+    /**
      * Deliver the list of provisioned satellite subscriber infos.
      *
      * @param list The list of provisioned satellite subscriber infos.

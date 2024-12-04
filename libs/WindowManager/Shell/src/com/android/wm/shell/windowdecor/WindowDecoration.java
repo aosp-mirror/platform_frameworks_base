@@ -39,6 +39,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.Trace;
 import android.view.Display;
 import android.view.InsetsSource;
@@ -58,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer;
@@ -121,6 +123,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     final @NonNull Context mUserContext;
     final @NonNull DisplayController mDisplayController;
     final @NonNull DesktopModeEventLogger mDesktopModeEventLogger;
+    private final @ShellMainThread Handler mMainHandler;
     final ShellTaskOrganizer mTaskOrganizer;
     final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
     final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
@@ -167,15 +170,18 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     private final Binder mOwner = new Binder();
     private final float[] mTmpColor = new float[3];
 
+    private Runnable mCurrentUpdateViewHostRunnable;
+
     WindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
+            @ShellMainThread Handler mainHandler,
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface) {
-        this(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
-                SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
+        this(context, userContext, displayController, taskOrganizer, mainHandler, taskInfo,
+                taskSurface, SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new,
                 new SurfaceControlViewHostFactory() {}, new DesktopModeEventLogger());
     }
@@ -185,6 +191,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             @NonNull Context userContext,
             @NonNull DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
+            @ShellMainThread Handler mainHandler,
             RunningTaskInfo taskInfo,
             @NonNull SurfaceControl taskSurface,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
@@ -198,6 +205,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mUserContext = userContext;
         mDisplayController = displayController;
         mTaskOrganizer = taskOrganizer;
+        mMainHandler = mainHandler;
         mTaskInfo = taskInfo;
         mTaskSurface = cloneSurfaceControl(taskSurface, surfaceControlSupplier);
         mDesktopModeEventLogger = desktopModeEventLogger;
@@ -240,15 +248,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     void relayout(RelayoutParams params, SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT, WindowContainerTransaction wct, T rootView,
             RelayoutResult<T> outResult) {
-        updateViewsAndSurfaces(params, startT, finishT, wct, rootView, outResult);
-        if (outResult.mRootView != null) {
-            updateViewHost(params, startT, outResult);
-        }
-    }
-
-    protected void updateViewsAndSurfaces(RelayoutParams params,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            WindowContainerTransaction wct, T rootView, RelayoutResult<T> outResult) {
+        Trace.beginSection("WindowDecoration#relayout");
         outResult.reset();
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
@@ -263,17 +263,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             if (params.mSetTaskVisibilityPositionAndCrop) {
                 finishT.hide(mTaskSurface);
             }
+            Trace.endSection(); // WindowDecoration#relayout
             return;
         }
-
+        Trace.beginSection("WindowDecoration#relayout-inflateIfNeeded");
         inflateIfNeeded(params, wct, rootView, oldLayoutResId, outResult);
-        if (outResult.mRootView == null) {
-            // Didn't manage to create a root view, early out.
+        Trace.endSection();
+        final boolean hasCaptionView = outResult.mRootView != null;
+        if (!hasCaptionView) {
+            Trace.endSection(); // WindowDecoration#relayout
             return;
         }
-        rootView = null; // Clear it just in case we use it accidentally
 
+        Trace.beginSection("WindowDecoration#relayout-updateCaptionVisibility");
         updateCaptionVisibility(outResult.mRootView, params);
+        Trace.endSection();
 
         final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
         outResult.mWidth = taskBounds.width();
@@ -288,10 +292,118 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         outResult.mCaptionY = 0;
         outResult.mCaptionTopPadding = params.mCaptionTopPadding;
 
+        Trace.beginSection("WindowDecoration#relayout-updateSurfacesAndInsets");
         updateDecorationContainerSurface(startT, outResult);
-        updateCaptionContainerSurface(startT, outResult);
+        final SurfaceControl captionSurface = getOrCreateCaptionSurface();
+        updateCaptionContainerSurface(captionSurface, startT, outResult);
         updateCaptionInsets(params, wct, outResult, taskBounds);
         updateTaskSurface(params, startT, finishT, outResult);
+        Trace.endSection();
+
+        Trace.beginSection("WindowDecoration#relayout-updateViewHost");
+        clearCurrentViewHostRunnable();
+        if (params.mAsyncViewHost) {
+            mCurrentUpdateViewHostRunnable = () -> updateViewHost(params, startT, outResult);
+            mMainHandler.post(mCurrentUpdateViewHostRunnable);
+        } else {
+            updateViewHost(params, startT, outResult);
+        }
+        Trace.endSection();
+
+        Trace.endSection(); // WindowDecoration#relayout
+    }
+
+    private void clearCurrentViewHostRunnable() {
+        if (mCurrentUpdateViewHostRunnable != null) {
+            mMainHandler.removeCallbacks(mCurrentUpdateViewHostRunnable);
+            mCurrentUpdateViewHostRunnable = null;
+        }
+    }
+
+    private void updateViewHost(RelayoutParams params, SurfaceControl.Transaction startT,
+            RelayoutResult<T> outResult) {
+        createCaptionWindowManagerIfNeeded();
+        Trace.beginSection("updateViewHost-createViewHostIfNeeded");
+        final boolean firstLayout = createViewHostIfNeeded(mDecorWindowContext, mDisplay);
+        Trace.endSection();
+
+        outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
+        mCaptionWindowManager.setConfiguration(mTaskInfo.getConfiguration());
+        final Rect localCaptionBounds = new Rect(
+                outResult.mCaptionX,
+                outResult.mCaptionY,
+                outResult.mCaptionX + outResult.mCaptionWidth,
+                outResult.mCaptionY + outResult.mCaptionHeight);
+        final Region touchableRegion = params.mLimitTouchRegionToSystemAreas
+                ? calculateLimitedTouchableRegion(params, localCaptionBounds)
+                : null;
+        if (params.mLimitTouchRegionToSystemAreas) {
+            mCaptionWindowManager.setTouchRegion(mViewHost, touchableRegion);
+        }
+        if (touchableRegion != null) {
+            touchableRegion.recycle();
+        }
+        updateViewHierarchy(params, outResult, startT, firstLayout);
+    }
+
+    private SurfaceControl getOrCreateCaptionSurface() {
+        if (mCaptionContainerSurface == null) {
+            final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
+            mCaptionContainerSurface = builder
+                    .setName("Caption container of Task=" + mTaskInfo.taskId)
+                    .setContainerLayer()
+                    .setParent(mDecorationContainerSurface)
+                    .setCallsite("WindowDecoration.updateCaptionContainerSurface")
+                    .build();
+        }
+        return mCaptionContainerSurface;
+    }
+
+    private boolean createViewHostIfNeeded(@NonNull Context context, @NonNull Display display) {
+        if (mViewHost == null) {
+            mViewHost = mSurfaceControlViewHostFactory.create(context, display,
+                    mCaptionWindowManager);
+            Trace.endSection();
+            return true;
+        }
+        return false;
+    }
+
+    private void createCaptionWindowManagerIfNeeded() {
+        if (mCaptionWindowManager == null) {
+            // Put caption under a container surface because ViewRootImpl sets the destination frame
+            // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
+            mCaptionWindowManager = new CaptionWindowlessWindowManager(
+                    mTaskInfo.getConfiguration(), mCaptionContainerSurface);
+        }
+    }
+
+    private void updateViewHierarchy(@NonNull RelayoutParams params,
+            @NonNull RelayoutResult<T> outResult, @NonNull SurfaceControl.Transaction startT,
+            boolean firstLayout) {
+        Trace.beginSection("WindowDecoration#updateViewHierarchy");
+        final WindowManager.LayoutParams lp =
+                new WindowManager.LayoutParams(
+                        outResult.mCaptionWidth,
+                        outResult.mCaptionHeight,
+                        TYPE_APPLICATION,
+                        FLAG_NOT_FOCUSABLE | FLAG_SPLIT_TOUCH,
+                        PixelFormat.TRANSPARENT);
+        lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
+        lp.setTrustedOverlay();
+        lp.inputFeatures = params.mInputFeatures;
+        if (params.mApplyStartTransactionOnDraw) {
+            if (params.mAsyncViewHost) {
+                throw new IllegalArgumentException("Cannot use sync draw tx with async relayout");
+            }
+            mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
+        }
+        if (firstLayout) {
+            mViewHost.setView(outResult.mRootView, lp);
+        } else {
+            mViewHost.relayout(lp);
+        }
+        Trace.endSection();
     }
 
     private void inflateIfNeeded(RelayoutParams params, WindowContainerTransaction wct,
@@ -359,23 +471,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .show(mDecorationContainerSurface);
     }
 
-    private void updateCaptionContainerSurface(
+    private void updateCaptionContainerSurface(@NonNull SurfaceControl captionSurface,
             SurfaceControl.Transaction startT, RelayoutResult<T> outResult) {
-        if (mCaptionContainerSurface == null) {
-            final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
-            mCaptionContainerSurface = builder
-                    .setName("Caption container of Task=" + mTaskInfo.taskId)
-                    .setContainerLayer()
-                    .setParent(mDecorationContainerSurface)
-                    .setCallsite("WindowDecoration.updateCaptionContainerSurface")
-                    .build();
-        }
-
-        startT.setWindowCrop(mCaptionContainerSurface, outResult.mCaptionWidth,
-                        outResult.mCaptionHeight)
-                .setPosition(mCaptionContainerSurface, outResult.mCaptionX, 0 /* y */)
-                .setLayer(mCaptionContainerSurface, CAPTION_LAYER_Z_ORDER)
-                .show(mCaptionContainerSurface);
+        startT.reparent(captionSurface, mDecorationContainerSurface)
+                .setWindowCrop(captionSurface, outResult.mCaptionWidth, outResult.mCaptionHeight)
+                .setPosition(captionSurface, outResult.mCaptionX, 0 /* y */)
+                .setLayer(captionSurface, CAPTION_LAYER_Z_ORDER)
+                .show(captionSurface);
     }
 
     private void updateCaptionInsets(RelayoutParams params, WindowContainerTransaction wct,
@@ -467,80 +569,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
             finishT.setCornerRadius(mTaskSurface, params.mCornerRadius);
         }
-    }
-
-    /**
-     * Updates a {@link SurfaceControlViewHost} to connect the window decoration surfaces with our
-     * View hierarchy.
-     *
-     * @param params parameters to use from the last relayout
-     * @param onDrawTransaction a transaction to apply in sync with #onDraw
-     * @param outResult results to use from the last relayout
-     *
-     */
-    protected void updateViewHost(RelayoutParams params,
-            SurfaceControl.Transaction onDrawTransaction, RelayoutResult<T> outResult) {
-        Trace.beginSection("CaptionViewHostLayout");
-        if (mCaptionWindowManager == null) {
-            // Put caption under a container surface because ViewRootImpl sets the destination frame
-            // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
-            mCaptionWindowManager = new CaptionWindowlessWindowManager(
-                    mTaskInfo.getConfiguration(), mCaptionContainerSurface);
-        }
-        mCaptionWindowManager.setConfiguration(mTaskInfo.getConfiguration());
-        final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(
-                        outResult.mCaptionWidth,
-                        outResult.mCaptionHeight,
-                        TYPE_APPLICATION,
-                        FLAG_NOT_FOCUSABLE | FLAG_SPLIT_TOUCH,
-                        PixelFormat.TRANSPARENT);
-        lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
-        lp.setTrustedOverlay();
-        lp.inputFeatures = params.mInputFeatures;
-        final Rect localCaptionBounds = new Rect(
-                outResult.mCaptionX,
-                outResult.mCaptionY,
-                outResult.mCaptionX + outResult.mCaptionWidth,
-                outResult.mCaptionY + outResult.mCaptionHeight);
-        final Region touchableRegion = params.mLimitTouchRegionToSystemAreas
-                ? calculateLimitedTouchableRegion(params, localCaptionBounds)
-                : null;
-        if (mViewHost == null) {
-            Trace.beginSection("CaptionViewHostLayout-new");
-            mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
-                    mCaptionWindowManager);
-            if (params.mApplyStartTransactionOnDraw) {
-                if (onDrawTransaction == null) {
-                    throw new IllegalArgumentException("Trying to sync a null Transaction");
-                }
-                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
-            }
-            outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
-            if (params.mLimitTouchRegionToSystemAreas) {
-                mCaptionWindowManager.setTouchRegion(mViewHost, touchableRegion);
-            }
-            mViewHost.setView(outResult.mRootView, lp);
-            Trace.endSection();
-        } else {
-            Trace.beginSection("CaptionViewHostLayout-relayout");
-            if (params.mApplyStartTransactionOnDraw) {
-                if (onDrawTransaction == null) {
-                    throw new IllegalArgumentException("Trying to sync a null Transaction");
-                }
-                mViewHost.getRootSurfaceControl().applyTransactionOnDraw(onDrawTransaction);
-            }
-            outResult.mRootView.setPadding(0, params.mCaptionTopPadding, 0, 0);
-            if (params.mLimitTouchRegionToSystemAreas) {
-                mCaptionWindowManager.setTouchRegion(mViewHost, touchableRegion);
-            }
-            mViewHost.relayout(lp);
-            Trace.endSection();
-        }
-        if (touchableRegion != null) {
-            touchableRegion.recycle();
-        }
-        Trace.endSection(); // CaptionViewHostLayout
     }
 
     @NonNull
@@ -725,6 +753,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     @Override
     public void close() {
         Trace.beginSection("WindowDecoration#close");
+        clearCurrentViewHostRunnable();
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
         releaseViews(wct);
@@ -855,6 +884,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         boolean mIsCaptionVisible;
 
         Configuration mWindowDecorConfig;
+        boolean mAsyncViewHost;
 
         boolean mApplyStartTransactionOnDraw;
         boolean mSetTaskVisibilityPositionAndCrop;
@@ -880,6 +910,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mApplyStartTransactionOnDraw = false;
             mSetTaskVisibilityPositionAndCrop = false;
             mWindowDecorConfig = null;
+            mAsyncViewHost = false;
             mHasGlobalFocus = false;
         }
 

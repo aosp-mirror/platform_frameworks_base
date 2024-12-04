@@ -550,6 +550,7 @@ package android {
     field public static final int config_systemTextIntelligence = 17039414; // 0x1040036
     field public static final int config_systemUi = 17039418; // 0x104003a
     field public static final int config_systemUiIntelligence = 17039410; // 0x1040032
+    field @FlaggedApi("android.permission.flags.system_vendor_intelligence_role_enabled") public static final int config_systemVendorIntelligence;
     field public static final int config_systemVisualIntelligence = 17039415; // 0x1040037
     field public static final int config_systemWearHealthService = 17039428; // 0x1040044
     field public static final int config_systemWellbeing = 17039408; // 0x1040030
@@ -5264,9 +5265,9 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
-    method public void close();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void close();
     method @Nullable public android.hardware.contexthub.HubServiceInfo getServiceInfo();
-    method @NonNull public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
@@ -8136,6 +8137,8 @@ package android.media.quality {
     method @NonNull public java.util.List<android.media.quality.SoundProfile> getSoundProfilesByPackage(@NonNull String);
     method public void setAutoPictureQualityEnabled(boolean);
     method public void setAutoSoundQualityEnabled(boolean);
+    method public boolean setDefaultPictureProfile(@Nullable String);
+    method public boolean setDefaultSoundProfile(@Nullable String);
     method public void setPictureProfileAllowList(@NonNull java.util.List<java.lang.String>);
     method public void setSoundProfileAllowList(@NonNull java.util.List<java.lang.String>);
     method public void setSuperResolutionEnabled(boolean);

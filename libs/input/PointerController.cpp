@@ -138,7 +138,7 @@ std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
 }
 
-FloatPoint PointerController::move(float deltaX, float deltaY) {
+vec2 PointerController::move(float deltaX, float deltaY) {
     const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     ui::Transform transform;
     {
@@ -147,10 +147,7 @@ FloatPoint PointerController::move(float deltaX, float deltaY) {
     }
 
     const vec2 transformed = transformWithoutTranslation(transform, {deltaX, deltaY});
-
-    const FloatPoint unconsumedDelta = mCursorController.move(transformed.x, transformed.y);
-    return FloatPoint(transformWithoutTranslation(transform.inverse(),
-                                                  {unconsumedDelta.x, unconsumedDelta.y}));
+    return transformWithoutTranslation(transform.inverse(), mCursorController.move(transformed));
 }
 
 void PointerController::setPosition(float x, float y) {
@@ -161,16 +158,15 @@ void PointerController::setPosition(float x, float y) {
         const auto& transform = getTransformForDisplayLocked(displayId);
         transformed = transform.transform(x, y);
     }
-    mCursorController.setPosition(transformed.x, transformed.y);
+    mCursorController.setPosition(transformed);
 }
 
-FloatPoint PointerController::getPosition() const {
+vec2 PointerController::getPosition() const {
     const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     const auto p = mCursorController.getPosition();
     {
         std::scoped_lock lock(getLock());
-        const auto& transform = getTransformForDisplayLocked(displayId);
-        return FloatPoint{transform.inverse().transform(p.x, p.y)};
+        return getTransformForDisplayLocked(displayId).inverse().transform(p.x, p.y);
     }
 }
 

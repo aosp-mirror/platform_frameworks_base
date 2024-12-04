@@ -170,6 +170,18 @@ object KeyguardClockViewBinder {
                 }
             }
 
+        disposables +=
+            keyguardRootView.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    viewModel.currentClock.collect { currentClock ->
+                        currentClock?.apply {
+                            smallClock.run { events.onThemeChanged(theme) }
+                            largeClock.run { events.onThemeChanged(theme) }
+                        }
+                    }
+                }
+            }
+
         return disposables
     }
 

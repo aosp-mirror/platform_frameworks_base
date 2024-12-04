@@ -57,7 +57,6 @@ import androidx.annotation.UiContext;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
-import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.R;
 import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
@@ -383,9 +382,7 @@ public class A11yMenuOverlayLayout {
             return;
         }
         snackbar.setText(text);
-        if (Flags.a11yMenuSnackbarLiveRegion()) {
-            snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
-        }
+        snackbar.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
 
         // Remove any existing fade-out animation before starting any new animations.
         mHandler.removeCallbacksAndMessages(null);
