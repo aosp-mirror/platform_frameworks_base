@@ -28,7 +28,6 @@ import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
-import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
@@ -366,15 +365,6 @@ public class InputSettings {
     }
 
     /**
-     * Returns true if the feature flag for touchpad tap dragging is enabled.
-     *
-     * @hide
-     */
-    public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
-        return touchpadTapDragging();
-    }
-
-    /**
      * Returns true if the feature flag for disabling system gestures on touchpads is enabled.
      *
      * @hide
@@ -461,9 +451,6 @@ public class InputSettings {
      * @hide
      */
     public static boolean useTouchpadTapDragging(@NonNull Context context) {
-        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
-            return false;
-        }
         return Settings.System.getIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_DRAGGING, 0, UserHandle.USER_CURRENT) == 1;
     }
@@ -480,9 +467,6 @@ public class InputSettings {
      */
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
-        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
-            return;
-        }
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_DRAGGING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);

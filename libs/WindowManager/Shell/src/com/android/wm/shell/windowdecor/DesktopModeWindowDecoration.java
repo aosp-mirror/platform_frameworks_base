@@ -43,7 +43,6 @@ import static com.android.wm.shell.windowdecor.DragPositioningCallbackUtility.Dr
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.assist.AssistContent;
@@ -128,7 +127,6 @@ import java.util.function.Supplier;
  */
 public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
     private static final String TAG = "DesktopModeWindowDecoration";
-    private static final int CAPTURED_LINK_TIMEOUT_MS = 7000;
 
     @VisibleForTesting
     static final long CLOSE_MAXIMIZE_MENU_DELAY_MS = 150L;
@@ -158,14 +156,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnMaximizeHoverListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
-    private Runnable mCurrentViewHostRunnable = null;
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private DisabledEdge mDisabledResizingEdge =
             NONE;
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
-    private final Runnable mViewHostRunnable =
-            () -> updateViewHost(mRelayoutParams, null /* onDrawTransaction */, mResult);
 
     private final Point mPositionInParent = new Point();
     private HandleMenu mHandleMenu;
@@ -203,7 +198,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     // being hovered. There's a small delay after stopping the hover, to allow a quick reentry
     // to cancel the close.
     private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
-    private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopUserRepositories mDesktopUserRepositories;
@@ -269,8 +263,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             DesktopModeEventLogger desktopModeEventLogger) {
-        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
-                surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
+        super(context, userContext, displayController, taskOrganizer, handler, taskInfo,
+                taskSurface, surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
                 surfaceControlViewHostFactory, desktopModeEventLogger);
         mSplitScreenController = splitScreenController;
@@ -451,78 +445,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
             boolean hasGlobalFocus, @NonNull Region displayExclusionRegion) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
-        if (taskInfo.isFreeform()) {
-            // The Task is in Freeform mode -> show its header in sync since it's an integral part
-            // of the window itself - a delayed header might cause bad UX.
-            relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus, displayExclusionRegion);
-        } else {
-            // The Task is outside Freeform mode -> allow the handle view to be delayed since the
-            // handle is just a small addition to the window.
-            relayoutWithDelayedViewHost(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus, displayExclusionRegion);
-        }
-        Trace.endSection();
-    }
 
-    /** Run the whole relayout phase immediately without delay. */
-    private void relayoutInSync(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
-            boolean hasGlobalFocus, @NonNull Region displayExclusionRegion) {
-        // Clear the current ViewHost runnable as we will update the ViewHost here
-        clearCurrentViewHostRunnable();
-        updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                shouldSetTaskVisibilityPositionAndCrop, hasGlobalFocus, displayExclusionRegion);
-        if (mResult.mRootView != null) {
-            updateViewHost(mRelayoutParams, startT, mResult);
-        }
-    }
-
-    /**
-     * Clear the current ViewHost runnable - to ensure it doesn't run once relayout params have been
-     * updated.
-     */
-    private void clearCurrentViewHostRunnable() {
-        if (mCurrentViewHostRunnable != null) {
-            mHandler.removeCallbacks(mCurrentViewHostRunnable);
-            mCurrentViewHostRunnable = null;
-        }
-    }
-
-    /**
-     * Relayout the window decoration but repost some of the work, to unblock the current callstack.
-     */
-    private void relayoutWithDelayedViewHost(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
-            boolean hasGlobalFocus,
-            @NonNull Region displayExclusionRegion) {
-        if (applyStartTransactionOnDraw) {
-            throw new IllegalArgumentException(
-                    "We cannot both sync viewhost ondraw and delay viewhost creation.");
-        }
-        // Clear the current ViewHost runnable as we will update the ViewHost here
-        clearCurrentViewHostRunnable();
-        updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */, shouldSetTaskVisibilityPositionAndCrop,
-                hasGlobalFocus, displayExclusionRegion);
-        if (mResult.mRootView == null) {
-            // This means something blocks the window decor from showing, e.g. the task is hidden.
-            // Nothing is set up in this case including the decoration surface.
-            return;
-        }
-        // Store the current runnable so it can be removed if we start a new relayout.
-        mCurrentViewHostRunnable = mViewHostRunnable;
-        mHandler.post(mCurrentViewHostRunnable);
-    }
-
-    @SuppressLint("MissingPermission")
-    private void updateRelayoutParamsAndSurfaces(ActivityManager.RunningTaskInfo taskInfo,
-            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskVisibilityPositionAndCrop,
-            boolean hasGlobalFocus, @NonNull Region displayExclusionRegion) {
-        Trace.beginSection("DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces");
         if (Flags.enableDesktopWindowingAppToWeb()) {
             setCapturedLink(taskInfo.capturedLink, taskInfo.capturedLinkTimestamp);
         }
@@ -553,9 +476,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        Trace.beginSection("DesktopModeWindowDecoration#relayout-updateViewsAndSurfaces");
-        updateViewsAndSurfaces(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
-        Trace.endSection();
+        relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
         Trace.beginSection("DesktopModeWindowDecoration#relayout-applyWCT");
@@ -570,7 +491,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             }
             mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
             disposeStatusBarInputLayer();
-            Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
+            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
 
@@ -578,7 +499,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             disposeStatusBarInputLayer();
             mWindowDecorViewHolder = createViewHolder();
         }
-        Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
 
         final Point position = new Point();
         if (isAppHandle(mWindowDecorViewHolder)) {
@@ -588,6 +508,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             notifyCaptionStateChanged();
         }
 
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-bindData");
         if (isAppHandle(mWindowDecorViewHolder)) {
             mWindowDecorViewHolder.bindData(new AppHandleViewHolder.HandleData(
                     mTaskInfo, position, mResult.mCaptionWidth, mResult.mCaptionHeight,
@@ -612,7 +533,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
         updateDragResizeListener(oldDecorationSurface, inFullImmersive);
         updateMaximizeMenu(startT, inFullImmersive);
-        Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
+        Trace.endSection(); // DesktopModeWindowDecoration#relayout
     }
 
     private boolean isCaptionVisible() {
@@ -625,22 +546,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             return;
         }
         mCapturedLink = new CapturedLink(capturedLink, timeStamp);
-        mHandler.postDelayed(mCapturedLinkExpiredRunnable, CAPTURED_LINK_TIMEOUT_MS);
-    }
-
-    private void onCapturedLinkExpired() {
-        mHandler.removeCallbacks(mCapturedLinkExpiredRunnable);
-        if (mCapturedLink != null) {
-            mCapturedLink.setExpired();
-        }
     }
 
     @Nullable
     private Intent getBrowserLink() {
         final Uri browserLink;
-        // If the captured link is available and has not expired, return the captured link.
-        // Otherwise, return the generic link which is set to null if a generic link is unavailable.
-        if (mCapturedLink != null && !mCapturedLink.mExpired) {
+        if (isCapturedLinkAvailable()) {
             browserLink = mCapturedLink.mUri;
         } else if (mWebUri != null) {
             browserLink = mWebUri;
@@ -752,7 +663,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private boolean isCapturedLinkAvailable() {
-        return mCapturedLink != null && !mCapturedLink.mExpired;
+        return mCapturedLink != null && !mCapturedLink.mUsed;
+    }
+
+    private void onCapturedLinkUsed() {
+        if (mCapturedLink != null) {
+            mCapturedLink.setUsed();
+        }
     }
 
     private void notifyNoCaptionHandle() {
@@ -897,6 +814,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
         relayoutParams.mHasGlobalFocus = hasGlobalFocus;
         relayoutParams.mDisplayExclusionRegion.set(displayExclusionRegion);
+        // Allow the handle view to be delayed since the handle is just a small addition to the
+        // window, whereas the header cannot be delayed because it is expected to be visible from
+        // the first frame.
+        relayoutParams.mAsyncViewHost = isAppHandle;
 
         final boolean showCaption;
         if (Flags.enableFullyImmersiveInDesktop()) {
@@ -1438,7 +1359,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onAspectRatioSettingsClickListener= */ mOnChangeAspectRatioClickListener,
                 /* openInBrowserClickListener= */ (intent) -> {
                     mOpenInBrowserClickListener.accept(intent);
-                    onCapturedLinkExpired();
+                    onCapturedLinkUsed();
                     if (Flags.enableDesktopWindowingAppToWebEducationIntegration()) {
                         mWindowDecorCaptionHandleRepository.onAppToWebUsage();
                     }
@@ -1703,7 +1624,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
         disposeStatusBarInputLayer();
-        clearCurrentViewHostRunnable();
         if (canEnterDesktopMode(mContext) && isEducationEnabled()) {
             notifyNoCaptionHandle();
         }
@@ -1870,16 +1790,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     static class CapturedLink {
         private final long mTimeStamp;
         private final Uri mUri;
-        private boolean mExpired;
+        private boolean mUsed;
 
         CapturedLink(@NonNull Uri uri, long timeStamp) {
             mUri = uri;
             mTimeStamp = timeStamp;
-            mExpired = false;
         }
 
-        void setExpired() {
-            mExpired = true;
+        private void setUsed() {
+            mUsed = true;
         }
     }
 

@@ -67,7 +67,6 @@ import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.Flags.enableFlexibleSplit
@@ -1483,7 +1482,10 @@ class DesktopTasksController(
         if (!DesktopModeStatus.useRoundedCorners()) {
             return
         }
-        val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+        val cornerRadius =
+            context.resources
+                .getDimensionPixelSize(R.dimen.desktop_windowing_freeform_rounded_corner_radius)
+                .toFloat()
         info.changes
             .filter { it.taskInfo?.windowingMode == WINDOWING_MODE_FREEFORM }
             .forEach { finishTransaction.setCornerRadius(it.leash, cornerRadius) }
@@ -1508,28 +1510,20 @@ class DesktopTasksController(
 
     /** Open an existing instance of an app. */
     fun openInstance(callingTask: RunningTaskInfo, requestedTaskId: Int) {
-        val wct = WindowContainerTransaction()
-        val options = createNewWindowOptions(callingTask)
-        if (options.launchWindowingMode == WINDOWING_MODE_FREEFORM) {
-            wct.startTask(requestedTaskId, options.toBundle())
-            val taskIdToMinimize =
-                bringDesktopAppsToFrontBeforeShowingNewTask(
-                    callingTask.displayId,
-                    wct,
+        if (callingTask.isFreeform) {
+            val requestedTaskInfo = shellTaskOrganizer.getRunningTaskInfo(requestedTaskId)
+            if (requestedTaskInfo?.isFreeform == true) {
+                // If requested task is an already open freeform task, just move it to front.
+                moveTaskToFront(requestedTaskId)
+            } else {
+                moveBackgroundTaskToDesktop(
                     requestedTaskId,
+                    WindowContainerTransaction(),
+                    DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON,
                 )
-            val exitResult =
-                desktopImmersiveController.exitImmersiveIfApplicable(
-                    wct = wct,
-                    displayId = callingTask.displayId,
-                    excludeTaskId = requestedTaskId,
-                    reason = DesktopImmersiveController.ExitReason.TASK_LAUNCH,
-                )
-            val transition = transitions.startTransition(TRANSIT_OPEN, wct, null)
-            taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
-            addPendingAppLaunchTransition(transition, requestedTaskId, taskIdToMinimize)
-            exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
+            }
         } else {
+            val options = createNewWindowOptions(callingTask)
             val splitPosition = splitScreenController.determineNewInstancePosition(callingTask)
             splitScreenController.startTask(
                 requestedTaskId,

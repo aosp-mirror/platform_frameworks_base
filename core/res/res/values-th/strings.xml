@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นถูกจำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ถูกจำกัด"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"แอปนี้ไม่รองรับขนาดหน้า 16 KB ผลการตรวจสอบการจัดตำแหน่ง APK คือไม่ผ่าน ด้วยเหตุนี้ แอปจะทำงานโดยใช้โหมดการใช้งานร่วมกับขนาดหน้าได้ เพื่อให้ใช้งานร่วมกันได้อย่างดีที่สุด โปรดคอมไพล์แอปพลิเคชันอีกครั้งโดยมีการรองรับขนาดหน้า 16 KB ดูข้อมูลเพิ่มเติมได้ที่ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"แอปนี้ไม่รองรับขนาดหน้า 16 KB ผลการตรวจสอบการจัดตำแหน่ง ELF คือไม่ผ่าน ด้วยเหตุนี้ แอปจะทำงานโดยใช้โหมดการใช้งานร่วมกับขนาดหน้าได้ เพื่อให้ใช้งานร่วมกันได้อย่างดีที่สุด โปรดคอมไพล์แอปพลิเคชันอีกครั้งโดยมีการรองรับขนาดหน้า 16 KB ดูข้อมูลเพิ่มเติมได้ที่ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"แอปนี้ไม่รองรับขนาดหน้า 16 KB ผลการตรวจสอบการจัดตำแหน่งของ APK และ ELF คือไม่ผ่าน ด้วยเหตุนี้ แอปจะทำงานโดยใช้โหมดการใช้งานร่วมกับขนาดหน้าได้ เพื่อให้ใช้งานร่วมกันได้อย่างดีที่สุด โปรดคอมไพล์แอปพลิเคชันอีกครั้งโดยมีการรองรับขนาดหน้า 16 KB ดูข้อมูลเพิ่มเติมได้ที่ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ไม่มีการนำเสนอบริการ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"คุณไม่สามารถเปลี่ยนการตั้งค่าหมายเลขผู้โทร"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"เปลี่ยนไปใช้อินเทอร์เน็ตมือถือของ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> แล้ว"</string>
@@ -1161,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"ใน <xliff:g id="COUNT">%d</xliff:g> ชม."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"ใน <xliff:g id="COUNT">%d</xliff:g> วัน"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"ใน <xliff:g id="COUNT">%d</xliff:g> ปี"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# นาทีที่ผ่านมา}other{# นาทีที่ผ่านมา}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ชั่วโมงที่ผ่านมา}other{# ชั่วโมงที่ผ่านมา}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# วันที่ผ่านมา}other{# วันที่ผ่านมา}}"</string>

@@ -119,8 +119,7 @@ public class HeadsUpManagerImpl
     protected int mAutoDismissTime;
     protected DelayableExecutor mExecutor;
 
-    @VisibleForTesting
-    public final int mExtensionTime;
+    private final int mExtensionTime;
 
     // TODO(b/328393698) move the topHeadsUpRow logic to an interactor
     private final MutableStateFlow<HeadsUpRowRepository> mTopHeadsUpRow =
@@ -213,7 +212,8 @@ public class HeadsUpManagerImpl
         mVisualStabilityProvider = visualStabilityProvider;
         Resources resources = context.getResources();
         mMinimumDisplayTime = NotificationThrottleHun.isEnabled()
-                ? 500 : resources.getInteger(R.integer.heads_up_notification_minimum_time);
+                ? resources.getInteger(R.integer.heads_up_notification_minimum_time_with_throttling)
+                : resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mStickyForSomeTimeAutoDismissTime = resources.getInteger(
                 R.integer.sticky_heads_up_notification_time);
         mAutoDismissTime = resources.getInteger(R.integer.heads_up_notification_decay);

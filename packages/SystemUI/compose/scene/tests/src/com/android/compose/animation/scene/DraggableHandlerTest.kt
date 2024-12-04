@@ -418,37 +418,6 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun onDragReversedDirection_changeToScene() = runGestureTest {
-        // Drag A -> B with progress 0.6
-        val dragController = onDragStarted(overSlop = -60f)
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneB,
-            progress = 0.6f,
-        )
-
-        // Reverse direction such that A -> C now with 0.4
-        dragController.onDragDelta(pixels = 100f)
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneC,
-            progress = 0.4f,
-        )
-
-        // After the drag stopped scene C should be committed
-        dragController.onDragStoppedAnimateNow(
-            velocity = velocityThreshold,
-            onAnimationStart = {
-                assertTransition(currentScene = SceneC, fromScene = SceneA, toScene = SceneC)
-            },
-            expectedConsumedVelocity = velocityThreshold,
-        )
-        assertIdle(currentScene = SceneC)
-    }
-
-    @Test
     fun onDragStartedWithoutActionsInBothDirections_stayIdle() = runGestureTest {
         onDragStarted(
             horizontalDraggableHandler,
@@ -498,31 +467,9 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun onDragWithActionsInBothDirections_dragToOppositeDirectionReplacesAction() = runGestureTest {
-        // We are on SceneA. UP -> B, DOWN-> C.
-        val dragController = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneB,
-            progress = 0.2f,
-        )
-
-        // Reverse drag direction, it will replace the previous transition
-        dragController.onDragDelta(pixels = down(fractionOfScreen = 0.5f))
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneC,
-            progress = 0.3f,
-        )
-    }
-
-    @Test
     fun onDragWithActionsInBothDirections_dragToOppositeDirectionNotReplaceable() = runGestureTest {
         // We are on SceneA. UP -> B, DOWN-> C. The up swipe is not replaceable though.
-        mutableUserActionsA =
-            mapOf(Swipe.Up to UserActionResult(SceneB, isIrreversible = true), Swipe.Down to SceneC)
+        mutableUserActionsA = mapOf(Swipe.Up to UserActionResult(SceneB), Swipe.Down to SceneC)
         val dragController =
             onDragStarted(
                 pointersInfo =
@@ -536,7 +483,7 @@ class DraggableHandlerTest {
             progress = 0.2f,
         )
 
-        // Reverse drag direction, it cannot replace the previous transition
+        // Reverse drag direction, it does not replace the previous transition.
         dragController.onDragDelta(pixels = down(fractionOfScreen = 0.5f))
         assertTransition(
             currentScene = SceneA,

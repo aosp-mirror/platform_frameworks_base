@@ -71,12 +71,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.split.SplitState;
-import com.android.wm.shell.common.transition.TransitionStateHolder;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
-import com.android.wm.shell.compatui.letterbox.LetterboxController;
-import com.android.wm.shell.compatui.letterbox.LetterboxControllerStrategy;
 import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
-import com.android.wm.shell.compatui.letterbox.MixedLetterboxController;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
@@ -182,7 +178,8 @@ import java.util.Optional;
  * <p>This module only defines Shell dependencies for handheld SystemUI implementation. Common
  * dependencies should go into {@link WMShellBaseModule}.
  */
-@Module(includes = {WMShellBaseModule.class, PipModule.class, ShellBackAnimationModule.class})
+@Module(includes = {WMShellBaseModule.class, PipModule.class, ShellBackAnimationModule.class,
+        LetterboxModule.class})
 public abstract class WMShellModule {
 
     //
@@ -1329,25 +1326,4 @@ public abstract class WMShellModule {
         return new Object();
     }
 
-    //
-    // App Compat
-    //
-
-    @WMSingleton
-    @Provides
-    static LetterboxTransitionObserver provideLetterboxTransitionObserver(
-            @NonNull ShellInit shellInit,
-            @NonNull Transitions transitions,
-            @NonNull LetterboxController letterboxController,
-            @NonNull TransitionStateHolder transitionStateHolder,
-            @NonNull LetterboxControllerStrategy letterboxControllerStrategy
-    ) {
-        return new LetterboxTransitionObserver(shellInit, transitions, letterboxController,
-                transitionStateHolder, letterboxControllerStrategy);
-    }
-
-    @WMSingleton
-    @Binds
-    abstract LetterboxController bindsLetterboxController(
-            MixedLetterboxController letterboxController);
 }

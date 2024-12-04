@@ -16,14 +16,12 @@
 
 package com.android.wm.shell.bubbles.bar
 
-import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.LauncherApps
 import android.graphics.PointF
 import android.os.Handler
 import android.os.UserManager
 import android.view.IWindowManager
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -37,19 +35,19 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.WindowManagerShellWrapper
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.BubbleController
 import com.android.wm.shell.bubbles.BubbleData
 import com.android.wm.shell.bubbles.BubbleDataRepository
 import com.android.wm.shell.bubbles.BubbleEducationController
-import com.android.wm.shell.bubbles.BubbleExpandedViewManager
 import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
-import com.android.wm.shell.bubbles.BubbleTaskView
-import com.android.wm.shell.bubbles.BubbleTaskViewFactory
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
+import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.FakeBubbleFactory
+import com.android.wm.shell.bubbles.FakeBubbleTaskViewFactory
 import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
 import com.android.wm.shell.bubbles.properties.BubbleProperties
@@ -57,7 +55,6 @@ import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
-import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
 import com.android.wm.shell.shared.TransactionPool
@@ -66,20 +63,16 @@ import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
-import com.android.wm.shell.taskview.TaskView
-import com.android.wm.shell.taskview.TaskViewTaskController
 import com.android.wm.shell.taskview.TaskViewTransitions
 import com.android.wm.shell.transition.Transitions
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
-import java.util.Collections
 import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 /** Tests for [BubbleBarLayerView] */
 @SmallTest
@@ -87,8 +80,7 @@ import org.mockito.kotlin.whenever
 class BubbleBarLayerViewTest {
 
     companion object {
-        @JvmField @ClassRule
-        val animatorTestRule: AnimatorTestRule = AnimatorTestRule()
+        @JvmField @ClassRule val animatorTestRule: AnimatorTestRule = AnimatorTestRule()
     }
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -112,8 +104,8 @@ class BubbleBarLayerViewTest {
         uiEventLoggerFake = UiEventLoggerFake()
         val bubbleLogger = BubbleLogger(uiEventLoggerFake)
 
-        val mainExecutor = TestExecutor()
-        val bgExecutor = TestExecutor()
+        val mainExecutor = TestShellExecutor()
+        val bgExecutor = TestShellExecutor()
 
         val windowManager = context.getSystemService(WindowManager::class.java)
 
@@ -145,24 +137,18 @@ class BubbleBarLayerViewTest {
 
         bubbleBarLayerView = BubbleBarLayerView(context, bubbleController, bubbleData, bubbleLogger)
 
-        val expandedViewManager = createExpandedViewManager()
-        val bubbleTaskView = FakeBubbleTaskViewFactory(mainExecutor).create()
+        val expandedViewManager = FakeBubbleExpandedViewManager(bubbleBar = true, expanded = true)
+        val bubbleTaskView = FakeBubbleTaskViewFactory(context, mainExecutor).create()
         val bubbleBarExpandedView =
-            (LayoutInflater.from(context)
-                    .inflate(R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */)
-                    as BubbleBarExpandedView)
-                .apply {
-                    initialize(
-                        expandedViewManager,
-                        bubblePositioner,
-                        bubbleLogger,
-                        false /* isOverflow */,
-                        bubbleTaskView,
-                        mainExecutor,
-                        bgExecutor,
-                        null, /* regionSamplingProvider */
-                    )
-                }
+            FakeBubbleFactory.createExpandedView(
+                context,
+                bubblePositioner,
+                expandedViewManager,
+                bubbleTaskView,
+                mainExecutor,
+                bgExecutor,
+                bubbleLogger,
+            )
 
         val viewInfo = FakeBubbleFactory.createViewInfo(bubbleBarExpandedView)
         bubble = FakeBubbleFactory.createChatBubble(context, viewInfo = viewInfo)
@@ -179,8 +165,8 @@ class BubbleBarLayerViewTest {
         windowManager: WindowManager?,
         bubbleLogger: BubbleLogger,
         bubblePositioner: BubblePositioner,
-        mainExecutor: TestExecutor,
-        bgExecutor: TestExecutor,
+        mainExecutor: TestShellExecutor,
+        bgExecutor: TestShellExecutor,
     ): BubbleController {
         val shellInit = ShellInit(mainExecutor)
         val shellCommandHandler = ShellCommandHandler()
@@ -310,74 +296,9 @@ class BubbleBarLayerViewTest {
         getInstrumentation().waitForIdleSync()
         getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(200) }
         PhysicsAnimatorTestUtils.blockUntilAnimationsEnd(
-            AnimatableScaleMatrix.SCALE_X, AnimatableScaleMatrix.SCALE_Y)
-    }
-
-    private inner class FakeBubbleTaskViewFactory(private val mainExecutor: ShellExecutor) :
-        BubbleTaskViewFactory {
-        override fun create(): BubbleTaskView {
-            val taskViewTaskController = mock<TaskViewTaskController>()
-            val taskView = TaskView(context, taskViewTaskController)
-            val taskInfo = mock<ActivityManager.RunningTaskInfo>()
-            whenever(taskViewTaskController.taskInfo).thenReturn(taskInfo)
-            return BubbleTaskView(taskView, mainExecutor)
-        }
-    }
-
-    private fun createExpandedViewManager(): BubbleExpandedViewManager {
-        return object : BubbleExpandedViewManager {
-            override val overflowBubbles: List<Bubble>
-                get() = Collections.emptyList()
-
-            override fun setOverflowListener(listener: BubbleData.Listener) {}
-
-            override fun collapseStack() {}
-
-            override fun updateWindowFlagsForBackpress(intercept: Boolean) {}
-
-            override fun promoteBubbleFromOverflow(bubble: Bubble) {}
-
-            override fun removeBubble(key: String, reason: Int) {}
-
-            override fun dismissBubble(bubble: Bubble, reason: Int) {}
-
-            override fun setAppBubbleTaskId(key: String, taskId: Int) {}
-
-            override fun isStackExpanded(): Boolean {
-                return true
-            }
-
-            override fun isShowingAsBubbleBar(): Boolean {
-                return true
-            }
-
-            override fun hideCurrentInputMethod() {}
-
-            override fun updateBubbleBarLocation(location: BubbleBarLocation, source: Int) {}
-        }
-    }
-
-    private class TestExecutor : ShellExecutor {
-
-        private val runnables: MutableList<Runnable> = mutableListOf()
-
-        override fun execute(runnable: Runnable) {
-            runnables.add(runnable)
-        }
-
-        override fun executeDelayed(runnable: Runnable, delayMillis: Long) {
-            execute(runnable)
-        }
-
-        override fun removeCallbacks(runnable: Runnable?) {}
-
-        override fun hasCallback(runnable: Runnable?): Boolean = false
-
-        fun flushAll() {
-            while (runnables.isNotEmpty()) {
-                runnables.removeAt(0).run()
-            }
-        }
+            AnimatableScaleMatrix.SCALE_X,
+            AnimatableScaleMatrix.SCALE_Y,
+        )
     }
 
     private fun View.dispatchTouchEvent(eventTime: Long, action: Int, point: PointF) {

@@ -24,7 +24,7 @@ package com.android.systemui.screenshot.proxy
  *
  * TODO: Rename and relocate 'ScreenshotProxyService' to this package and remove duplicate clients.
  */
-interface SystemUiProxy {
+interface ScreenshotProxy {
     /** Indicate if the notification shade is "open"... (not in the fully collapsed position) */
     suspend fun isNotificationShadeExpanded(): Boolean
 

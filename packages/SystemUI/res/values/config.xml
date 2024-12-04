@@ -172,6 +172,9 @@
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
+    <!-- Minimum display time for a heads up notification if throttling is enabled, in milliseconds. -->
+    <integer name="heads_up_notification_minimum_time_with_throttling">500</integer>
+
     <!-- Display time for a sticky heads up notification, in milliseconds. -->
     <integer name="sticky_heads_up_notification_time">60000</integer>
 

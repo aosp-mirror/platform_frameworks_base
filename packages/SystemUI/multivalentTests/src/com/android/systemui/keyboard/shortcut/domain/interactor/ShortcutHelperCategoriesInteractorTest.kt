@@ -369,6 +369,20 @@ class ShortcutHelperCategoriesInteractorTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun categories_showShortcutsInAscendingOrderOfKeySize() =
+        testScope.runTest {
+            systemShortcutsSource.setGroups(TestShortcuts.groupWithDifferentSizeOfShortcutKeys)
+            val categories by collectLastValue(interactor.shortcutCategories)
+
+            helper.showFromActivity()
+
+            val systemCategoryShortcuts = categories?.get(0)?.subCategories?.get(0)?.shortcuts
+            val shortcutKeyCount =
+                systemCategoryShortcuts?.flatMap { it.commands }?.map { it.keys.size }
+            assertThat(shortcutKeyCount).containsExactly(1, 2, 3).inOrder()
+        }
+
     private fun setCustomInputGestures(customInputGestures: List<InputGestureData>) {
         whenever(fakeInputManager.inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
             .thenReturn(customInputGestures)

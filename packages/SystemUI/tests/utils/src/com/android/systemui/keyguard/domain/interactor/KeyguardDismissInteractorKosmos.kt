@@ -38,8 +38,8 @@ val Kosmos.keyguardDismissInteractor by
             primaryBouncerInteractor = primaryBouncerInteractor,
             selectedUserInteractor = selectedUserInteractor,
             dismissCallbackRegistry = dismissCallbackRegistry,
-            trustRepository = trustRepository,
             alternateBouncerInteractor = alternateBouncerInteractor,
+            trustRepository = trustRepository,
             powerInteractor = powerInteractor,
         )
     }

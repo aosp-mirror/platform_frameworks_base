@@ -41,9 +41,9 @@ public:
     ~MouseCursorController();
 
     // Move the pointer and return unconsumed delta
-    FloatPoint move(float deltaX, float deltaY);
-    void setPosition(float x, float y);
-    FloatPoint getPosition() const;
+    vec2 move(vec2 delta);
+    void setPosition(vec2 position);
+    vec2 getPosition() const;
     ui::LogicalDisplayId getDisplayId() const;
     void fade(PointerControllerInterface::Transition transition);
     void unfade(PointerControllerInterface::Transition transition);
@@ -81,8 +81,7 @@ private:
         nsecs_t lastFrameUpdatedTime;
 
         int32_t pointerFadeDirection;
-        float pointerX;
-        float pointerY;
+        vec2 pointerPosition;
         float pointerAlpha;
         sp<Sprite> pointerSprite;
         SpriteIcon pointerIcon;
@@ -101,7 +100,7 @@ private:
 
     } mLocked GUARDED_BY(mLock);
 
-    void setPositionLocked(float x, float y);
+    void setPositionLocked(vec2 position);
 
     void updatePointerLocked();
 

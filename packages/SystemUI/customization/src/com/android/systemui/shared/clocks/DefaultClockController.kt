@@ -106,10 +106,8 @@ class DefaultClockController(
         largeClock.animations = LargeClockAnimations(largeClock.view, dozeFraction, foldFraction)
         smallClock.animations = DefaultClockAnimations(smallClock.view, dozeFraction, foldFraction)
 
-        val theme = ThemeConfig(isDarkTheme, settings?.seedColor)
-        largeClock.events.onThemeChanged(theme)
-        smallClock.events.onThemeChanged(theme)
-
+        largeClock.events.onThemeChanged(largeClock.theme.copy(isDarkTheme = isDarkTheme))
+        smallClock.events.onThemeChanged(smallClock.theme.copy(isDarkTheme = isDarkTheme))
         events.onTimeZoneChanged(TimeZone.getDefault())
 
         smallClock.events.onTimeTick()

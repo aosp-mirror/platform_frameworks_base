@@ -1795,14 +1795,45 @@ public final class PermissionManager {
         }
     }
 
-    /** @hide */
-    public static final String CACHE_KEY_PACKAGE_INFO =
+    // The legacy system property "package_info" had two purposes: to invalidate PIC caches and to
+    // signal that package information, and therefore permissions, might have changed.
+    // AudioSystem is the only client of the signaling behavior.  The "separate permissions
+    // notification" feature splits the two behaviors into two system property names.
+    //
+    // If the feature is disabled (legacy behavior) then the two system property names have the
+    // same value.  This means there is only one system property in use.
+    //
+    // If the feature is enabled, then the two system property names have different values, which
+    // means there is a system property used by PIC and a system property used for signaling.  The
+    // legacy value is hard-coded in native code that relies on the signaling behavior, so the
+    // system property name for signaling is the legacy property name, and the system property
+    // name for PIC is new.
+    private static String getPackageInfoCacheKey() {
+        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+            return PropertyInvalidatedCache.createSystemCacheKey("package_info_cache");
+        } else {
+            return CACHE_KEY_PACKAGE_INFO_NOTIFY;
+        }
+    }
+
+    /**
+     * The system property that is used to notify clients that package information, and therefore
+     * permissions, may have changed.
+     * @hide
+     */
+    public static final String CACHE_KEY_PACKAGE_INFO_NOTIFY =
             PropertyInvalidatedCache.createSystemCacheKey("package_info");
+
+    /**
+     * The system property that is used to invalidate PIC caches.
+     * @hide
+     */
+    public static final String CACHE_KEY_PACKAGE_INFO_CACHE = getPackageInfoCacheKey();
 
     /** @hide */
     private static final PropertyInvalidatedCache<PermissionQuery, Integer> sPermissionCache =
             new PropertyInvalidatedCache<PermissionQuery, Integer>(
-                    2048, CACHE_KEY_PACKAGE_INFO, "checkPermission") {
+                    2048, CACHE_KEY_PACKAGE_INFO_CACHE, "checkPermission") {
                 @Override
                 public Integer recompute(PermissionQuery query) {
                     return checkPermissionUncached(query.permission, query.pid, query.uid,
@@ -1920,7 +1951,7 @@ public final class PermissionManager {
     private static PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>
             sPackageNamePermissionCache =
             new PropertyInvalidatedCache<PackageNamePermissionQuery, Integer>(
-                    16, CACHE_KEY_PACKAGE_INFO, "checkPackageNamePermission") {
+                    16, CACHE_KEY_PACKAGE_INFO_CACHE, "checkPackageNamePermission") {
                 @Override
                 public Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(

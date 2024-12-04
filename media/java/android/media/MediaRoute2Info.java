@@ -189,6 +189,7 @@ public final class MediaRoute2Info implements Parcelable {
      * the device.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_BUILTIN_SPEAKER
      */
     public static final int TYPE_BUILTIN_SPEAKER = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
 
@@ -196,6 +197,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a headset, which is the combination of a headphones and a microphone.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_WIRED_HEADSET
      */
     public static final int TYPE_WIRED_HEADSET = AudioDeviceInfo.TYPE_WIRED_HEADSET;
 
@@ -203,6 +205,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a pair of wired headphones.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_WIRED_HEADPHONES
      */
     public static final int TYPE_WIRED_HEADPHONES = AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
 
@@ -210,6 +213,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a bluetooth device, such as a bluetooth speaker or headphones.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_BLUETOOTH_A2DP
      */
     public static final int TYPE_BLUETOOTH_A2DP = AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
 
@@ -217,6 +221,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is an HDMI connection.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HDMI
      */
     public static final int TYPE_HDMI = AudioDeviceInfo.TYPE_HDMI;
 
@@ -224,6 +229,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is an Audio Return Channel of an HDMI connection.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HDMI_ARC
      */
     @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public static final int TYPE_HDMI_ARC = AudioDeviceInfo.TYPE_HDMI_ARC;
@@ -232,24 +238,34 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is an Enhanced Audio Return Channel of an HDMI connection.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HDMI_EARC
      */
     @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public static final int TYPE_HDMI_EARC = AudioDeviceInfo.TYPE_HDMI_EARC;
 
     /**
      * Indicates the route is a digital line connection (for example S/PDIF).
+     *
+     * @see #getType
+     * @see AudioDeviceInfo#TYPE_LINE_DIGITAL
      */
     @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_LINE_DIGITAL = AudioDeviceInfo.TYPE_LINE_DIGITAL;
 
     /**
      * Indicates the route is an analog line-level connection.
+     *
+     * @see #getType
+     * @see AudioDeviceInfo#TYPE_LINE_ANALOG
      */
     @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_LINE_ANALOG = AudioDeviceInfo.TYPE_LINE_ANALOG;
 
     /**
      * Indicates the route is using the auxiliary line-level connectors.
+     *
+     * @see #getType
+     * @see AudioDeviceInfo#TYPE_AUX_LINE
      */
     @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_AUX_LINE = AudioDeviceInfo.TYPE_AUX_LINE;
@@ -258,6 +274,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a USB audio device.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_USB_DEVICE
      */
     public static final int TYPE_USB_DEVICE = AudioDeviceInfo.TYPE_USB_DEVICE;
 
@@ -265,6 +282,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a USB audio device in accessory mode.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_USB_ACCESSORY
      */
     public static final int TYPE_USB_ACCESSORY = AudioDeviceInfo.TYPE_USB_ACCESSORY;
 
@@ -272,6 +290,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is the audio device associated with a dock.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_DOCK
      */
     public static final int TYPE_DOCK = AudioDeviceInfo.TYPE_DOCK;
 
@@ -279,6 +298,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a USB audio headset.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_USB_HEADSET
      */
     public static final int TYPE_USB_HEADSET = AudioDeviceInfo.TYPE_USB_HEADSET;
 
@@ -286,6 +306,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a hearing aid.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HEARING_AID
      */
     public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
 
@@ -293,6 +314,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a Bluetooth Low Energy (BLE) HEADSET.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_BLE_HEADSET
      */
     public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
 
@@ -304,6 +326,7 @@ public final class MediaRoute2Info implements Parcelable {
      * to provide a better experience on multichannel contents.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_MULTICHANNEL_GROUP
      */
     @FlaggedApi(FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE)
     public static final int TYPE_MULTICHANNEL_SPEAKER_GROUP =

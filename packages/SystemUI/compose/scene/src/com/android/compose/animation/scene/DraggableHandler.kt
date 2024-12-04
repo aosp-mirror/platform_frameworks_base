@@ -124,7 +124,7 @@ internal class DraggableHandlerImpl(
         return newDragController
     }
 
-    internal fun createSwipeAnimation(swipes: Swipes, result: UserActionResult): SwipeAnimation<*> {
+    private fun createSwipeAnimation(swipes: Swipes, result: UserActionResult): SwipeAnimation<*> {
         val upOrLeftResult = swipes.upOrLeftResult
         val downOrRightResult = swipes.downOrRightResult
         val isUpOrLeft =
@@ -248,38 +248,8 @@ private class DragControllerImpl(
                 else -> desiredOffset.fastCoerceIn(distance, 0f)
             }
 
-        val consumedDelta = newOffset - previousOffset
-
         swipeAnimation.dragOffset = newOffset
-        val result = swipes.findUserActionResult(directionOffset = newOffset)
-
-        if (result == null) {
-            onCancel(canChangeContent = true)
-            return 0f
-        }
-
-        val currentTransitionIrreversible =
-            if (swipeAnimation.isUpOrLeft) {
-                swipes.upOrLeftResult?.isIrreversible ?: false
-            } else {
-                swipes.downOrRightResult?.isIrreversible ?: false
-            }
-
-        val needNewTransition =
-            !currentTransitionIrreversible &&
-                (result.toContent(layoutState.currentScene) != swipeAnimation.toContent ||
-                    result.transitionKey != swipeAnimation.contentTransition.key)
-
-        if (needNewTransition) {
-            // Make sure the current transition will finish to the right current scene.
-            swipeAnimation.currentContent = swipeAnimation.fromContent
-
-            val newSwipeAnimation = draggableHandler.createSwipeAnimation(swipes, result)
-            newSwipeAnimation.dragOffset = newOffset
-            updateTransition(newSwipeAnimation)
-        }
-
-        return consumedDelta
+        return newOffset - previousOffset
     }
 
     override suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float {

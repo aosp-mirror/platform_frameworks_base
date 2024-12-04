@@ -187,27 +187,39 @@ public final class SettingsPreferenceMetadata implements Parcelable {
 
     /** @hide */
     @IntDef(value = {
-            NOT_SENSITIVE,
-            SENSITIVE,
-            INTENT_ONLY
+            NO_SENSITIVITY,
+            EXPECT_POST_CONFIRMATION,
+            EXPECT_PRE_CONFIRMATION,
+            NO_DIRECT_ACCESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WriteSensitivity {}
 
     /**
-     * Preference is not sensitive, thus its value is writable without explicit consent, assuming
-     * all necessary permissions are granted.
+     * Indicates preference is not sensitive.
+     * <p>Its value is writable without explicit consent, assuming all necessary permissions are
+     * granted.
      */
-    public static final int NOT_SENSITIVE = 0;
+    public static final int NO_SENSITIVITY = 0;
     /**
-     * Preference is sensitive, meaning that in addition to necessary permissions, writing its value
-     * will also request explicit user consent.
+     * Indicates preference is mildly sensitive.
+     * <p>In addition to necessary permissions, after writing its value the user should be
+     * given the option to revert back.
      */
-    public static final int SENSITIVE = 1;
+    public static final int EXPECT_POST_CONFIRMATION = 1;
     /**
-     * Preference is not permitted for write-access via API and must be changed via Settings page.
+     * Indicates preference is sensitive.
+     * <p>In addition to necessary permissions, the user should be prompted for confirmation prior
+     * to making a change. Otherwise it is suggested to provide a deeplink to the Preference's page
+     * instead, accessible via {@link #getLaunchIntent}.
      */
-    public static final int INTENT_ONLY = 2;
+    public static final int EXPECT_PRE_CONFIRMATION = 2;
+    /**
+     * Indicates preference is highly sensitivity and carries significant user-risk.
+     * <p>This Preference cannot be changed through this API and no direct deeplink is available.
+     * Other Metadata is still available.
+     */
+    public static final int NO_DIRECT_ACCESS = 3;
 
     private SettingsPreferenceMetadata(@NonNull Builder builder) {
         mKey = builder.mKey;
@@ -303,7 +315,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
         private boolean mAvailable = false;
         private boolean mWritable = false;
         private boolean mRestricted = false;
-        @WriteSensitivity private int mSensitivity = INTENT_ONLY;
+        @WriteSensitivity private int mSensitivity = NO_DIRECT_ACCESS;
         private Intent mLaunchIntent;
         private Bundle mExtras;
 
@@ -436,6 +448,9 @@ public final class SettingsPreferenceMetadata implements Parcelable {
          */
         @NonNull
         public SettingsPreferenceMetadata build() {
+            if (mSensitivity == NO_DIRECT_ACCESS) {
+                mLaunchIntent = null;
+            }
             return new SettingsPreferenceMetadata(this);
         }
     }

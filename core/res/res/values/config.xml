@@ -7276,4 +7276,9 @@
     <!-- List of protected packages that require biometric authentication for modification
          (Disable, force-stop or uninstalling updates). -->
     <string-array name="config_biometric_protected_package_names" translatable="false" />
+
+    <!-- Package name of the on-device intelligent processor for vendor specific
+         features. Examples include the search functionality or the app
+         predictor. -->
+    <string name="config_systemVendorIntelligence" translatable="false"></string>
 </resources>

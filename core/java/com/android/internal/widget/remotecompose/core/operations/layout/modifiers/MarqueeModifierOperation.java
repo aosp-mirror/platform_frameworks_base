@@ -92,9 +92,7 @@ public class MarqueeModifierOperation extends DecoratorModifierOperation impleme
         return false;
     }
 
-    /**
-     * Reset the modifier
-     */
+    /** Reset the modifier */
     public void reset() {
         mLastTime = 0;
         mScrollX = 0f;

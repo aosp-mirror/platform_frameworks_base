@@ -18,10 +18,7 @@ package android.content.res
 
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresFlagsEnabled
-import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
-import android.platform.test.flag.junit.RavenwoodFlagsValueProvider
-import android.platform.test.ravenwood.RavenwoodRule
 import android.util.SparseArray
 import androidx.core.util.forEach
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -47,15 +44,7 @@ import org.junit.runner.RunWith
 class FontScaleConverterFactoryTest {
 
     @get:Rule
-    val ravenwoodRule: RavenwoodRule = RavenwoodRule.Builder().build()
-
-    @get:Rule
-    val checkFlagsRule: CheckFlagsRule =
-        if (RavenwoodRule.isOnRavenwood()) {
-            RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
-        } else {
-            DeviceFlagsValueProvider.createCheckFlagsRule()
-        }
+    val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     private var defaultLookupTables: SparseArray<FontScaleConverter>? = null
 

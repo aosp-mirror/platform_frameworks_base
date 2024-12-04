@@ -24,7 +24,6 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockEvents
 import com.android.systemui.plugins.clocks.ClockFontAxis
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
-import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.shared.clocks.view.FlexClockView
@@ -107,18 +106,16 @@ class FlexClockController(
         }
 
     override fun initialize(isDarkTheme: Boolean, dozeFraction: Float, foldFraction: Float) {
-        val theme = ThemeConfig(isDarkTheme, clockCtx.settings.seedColor)
         events.onFontAxesChanged(clockCtx.settings.axes)
-
         smallClock.run {
-            events.onThemeChanged(theme)
+            events.onThemeChanged(theme.copy(isDarkTheme = isDarkTheme))
             animations.doze(dozeFraction)
             animations.fold(foldFraction)
             events.onTimeTick()
         }
 
         largeClock.run {
-            events.onThemeChanged(theme)
+            events.onThemeChanged(theme.copy(isDarkTheme = isDarkTheme))
             animations.doze(dozeFraction)
             animations.fold(foldFraction)
             events.onTimeTick()

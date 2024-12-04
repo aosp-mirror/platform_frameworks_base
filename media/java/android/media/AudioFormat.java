@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.audio.Flags.FLAG_DOLBY_AC4_LEVEL4_ENCODING_API;
+import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -382,6 +383,103 @@ public final class AudioFormat implements Parcelable {
     @FlaggedApi(FLAG_DOLBY_AC4_LEVEL4_ENCODING_API)
     public static final int ENCODING_AC4_L4 = 32;
 
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in OPUS.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_OPUS = 33;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in AAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_AAC = 34;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in FLAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_FLAC = 35;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-simple">simple profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in PCM.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_SIMPLE_PROFILE_PCM = 36;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in OPUS.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_OPUS = 37;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in AAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_AAC = 38;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in FLAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_FLAC = 39;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base">base profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in PCM.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_PROFILE_PCM = 40;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in OPUS.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS = 41;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in AAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC = 42;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in FLAC.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC = 43;
+    /**
+     * Audio data format: IAMF using the
+     * <a href="https://aomediacodec.github.io/iamf/#profiles-base-enhanced">base-enhanced profile</a>
+     * with audio streams <a href="https://aomediacodec.github.io/iamf/#codec_id">encoded</a>
+     * in PCM.
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final int ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM = 44;
+
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
         switch(enc) {
@@ -449,6 +547,30 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_DTS_UHD_P2";
             case ENCODING_DSD:
                 return "ENCODING_DSD";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS";
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+                return "ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM";
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+                return "ENCODING_IAMF_BASE_PROFILE_AAC";
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+                return "ENCODING_IAMF_BASE_PROFILE_FLAC";
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+                return "ENCODING_IAMF_BASE_PROFILE_OPUS";
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+                return "ENCODING_IAMF_BASE_PROFILE_PCM";
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_AAC";
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_FLAC";
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_OPUS";
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
+                return "ENCODING_IAMF_SIMPLE_PROFILE_PCM";
             default :
                 return "invalid encoding " + enc;
         }
@@ -931,6 +1053,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
             case ENCODING_DSD:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                 return true;
             default:
                 return false;
@@ -972,6 +1106,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
             case ENCODING_DSD:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                 return true;
             default:
                 return false;
@@ -1015,6 +1161,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM: // PCM but inside compressed stream
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM: // PCM but inside compressed stream
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM: // PCM but inside compressed stream
                 return false;
             case ENCODING_INVALID:
             default:
@@ -1058,6 +1216,18 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+            case ENCODING_IAMF_BASE_PROFILE_AAC:
+            case ENCODING_IAMF_BASE_PROFILE_FLAC:
+            case ENCODING_IAMF_BASE_PROFILE_OPUS:
+            case ENCODING_IAMF_BASE_PROFILE_PCM:
+            case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+            case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+            case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                 return false;
             case ENCODING_INVALID:
             default:
@@ -1350,6 +1520,18 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_DTS_HD_MA:
                 case ENCODING_DTS_UHD_P2:
                 case ENCODING_DSD:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS:
+                case ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM:
+                case ENCODING_IAMF_BASE_PROFILE_AAC:
+                case ENCODING_IAMF_BASE_PROFILE_FLAC:
+                case ENCODING_IAMF_BASE_PROFILE_OPUS:
+                case ENCODING_IAMF_BASE_PROFILE_PCM:
+                case ENCODING_IAMF_SIMPLE_PROFILE_AAC:
+                case ENCODING_IAMF_SIMPLE_PROFILE_FLAC:
+                case ENCODING_IAMF_SIMPLE_PROFILE_OPUS:
+                case ENCODING_IAMF_SIMPLE_PROFILE_PCM:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1580,7 +1762,19 @@ public final class AudioFormat implements Parcelable {
         ENCODING_DRA,
         ENCODING_DTS_HD_MA,
         ENCODING_DTS_UHD_P2,
-        ENCODING_DSD }
+        ENCODING_DSD,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS,
+        ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM,
+        ENCODING_IAMF_BASE_PROFILE_AAC,
+        ENCODING_IAMF_BASE_PROFILE_FLAC,
+        ENCODING_IAMF_BASE_PROFILE_OPUS,
+        ENCODING_IAMF_BASE_PROFILE_PCM,
+        ENCODING_IAMF_SIMPLE_PROFILE_AAC,
+        ENCODING_IAMF_SIMPLE_PROFILE_FLAC,
+        ENCODING_IAMF_SIMPLE_PROFILE_OPUS,
+        ENCODING_IAMF_SIMPLE_PROFILE_PCM }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
@@ -1619,7 +1813,19 @@ public final class AudioFormat implements Parcelable {
             ENCODING_DRA,
             ENCODING_DTS_HD_MA,
             ENCODING_DTS_UHD_P2,
-            ENCODING_DSD }
+            ENCODING_DSD,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_AAC,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_FLAC,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_OPUS,
+            ENCODING_IAMF_BASE_ENHANCED_PROFILE_PCM,
+            ENCODING_IAMF_BASE_PROFILE_AAC,
+            ENCODING_IAMF_BASE_PROFILE_FLAC,
+            ENCODING_IAMF_BASE_PROFILE_OPUS,
+            ENCODING_IAMF_BASE_PROFILE_PCM,
+            ENCODING_IAMF_SIMPLE_PROFILE_AAC,
+            ENCODING_IAMF_SIMPLE_PROFILE_FLAC,
+            ENCODING_IAMF_SIMPLE_PROFILE_OPUS,
+            ENCODING_IAMF_SIMPLE_PROFILE_PCM }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncodingCanBeInvalid {}
