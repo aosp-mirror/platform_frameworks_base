@@ -182,21 +182,6 @@ java_device_for_host {
     visibility: [":__subpackages__"],
 }
 
-// Separated out from ravenwood-junit-impl since it needs to compile
-// against `module_current`
-java_library {
-    name: "ravenwood-junit-impl-flag",
-    srcs: [
-        "junit-flag-src/**/*.java",
-    ],
-    sdk_version: "module_current",
-    libs: [
-        "junit",
-        "flag-junit",
-    ],
-    visibility: ["//visibility:public"],
-}
-
 // Carefully compiles against only module_current to support tests that
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
@@ -651,7 +636,6 @@ android_ravenwood_libgroup {
         "flag-junit",
         "ravenwood-framework",
         "ravenwood-junit-impl",
-        "ravenwood-junit-impl-flag",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
 
