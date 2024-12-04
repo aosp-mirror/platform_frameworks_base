@@ -1202,9 +1202,12 @@ class DesktopTasksController(
         moveHomeTask(wct, toTop = true)
 
         // Currently, we only handle the desktop on the default display really.
-        if (displayId == DEFAULT_DISPLAY && ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()) {
+        if (
+            (displayId == DEFAULT_DISPLAY || Flags.enableBugFixesForSecondaryDisplay()) &&
+                ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()
+        ) {
             // Add translucent wallpaper activity to show the wallpaper underneath
-            addWallpaperActivity(wct)
+            addWallpaperActivity(displayId, wct)
         }
 
         val expandedTasksOrderedFrontToBack = taskRepository.getExpandedTasksOrdered(displayId)
@@ -1253,7 +1256,7 @@ class DesktopTasksController(
             ?.let { homeTask -> wct.reorder(homeTask.getToken(), /* onTop= */ toTop) }
     }
 
-    private fun addWallpaperActivity(wct: WindowContainerTransaction) {
+    private fun addWallpaperActivity(displayId: Int, wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
         val userHandle = UserHandle.of(userId)
         val userContext = context.createContextAsUser(userHandle, /* flags= */ 0)
@@ -1264,6 +1267,9 @@ class DesktopTasksController(
                 launchWindowingMode = WINDOWING_MODE_FULLSCREEN
                 pendingIntentBackgroundActivityStartMode =
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                if (Flags.enableBugFixesForSecondaryDisplay()) {
+                    launchDisplayId = displayId
+                }
             }
         val pendingIntent =
             PendingIntent.getActivityAsUser(
