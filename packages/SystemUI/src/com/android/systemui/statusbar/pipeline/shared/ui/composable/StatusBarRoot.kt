@@ -176,6 +176,7 @@ fun StatusBarRoot(
                     // This binder handles everything else
                     scope.launch {
                         statusBarViewBinder.bind(
+                            context.displayId,
                             phoneStatusBarView,
                             statusBarViewModel,
                             eventAnimationInteractor::animateStatusBarContentForChipEnter,
