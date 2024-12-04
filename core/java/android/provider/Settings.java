@@ -13710,6 +13710,14 @@ public final class Settings {
                 "render_shadows_in_compositor";
 
         /**
+         * Policy to be used for the display shade when connected to an external display.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_SHADE_DISPLAY_AWARENESS =
+                "shade_display_awareness";
+
+        /**
          * Path to the WindowManager display settings file. If unset, the default file path will
          * be used.
          *
