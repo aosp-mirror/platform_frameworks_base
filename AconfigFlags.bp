@@ -636,6 +636,11 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "aconfig_hardware_flags_c_lib",
+    aconfig_declarations: "android.hardware.flags-aconfig",
+}
+
 // Widget
 aconfig_declarations {
     name: "android.widget.flags-aconfig",
