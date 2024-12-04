@@ -17,11 +17,22 @@
 package com.android.providers.settings;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupAnnotations.BackupDestination;
+import android.app.backup.BackupAnnotations.OperationType;
+import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupRestoreEventLogger;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,7 +43,10 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.settings.validators.SettingsValidators;
 import android.provider.settings.validators.Validator;
@@ -44,8 +58,12 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.window.flags.Flags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,11 +72,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+
 
 /**
  * Tests for the SettingsHelperTest
@@ -73,6 +93,8 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
     private static final Map<String, String> DEVICE_SPECIFIC_TEST_VALUES = new HashMap<>();
     private static final Map<String, String> TEST_VALUES = new HashMap<>();
     private static final Map<String, Validator> TEST_VALUES_VALIDATORS = new HashMap<>();
+    private static final String TEST_KEY = "test_key";
+    private static final String TEST_VALUE = "test_value";
 
     static {
         DEVICE_SPECIFIC_TEST_VALUES.put(Settings.Secure.DISPLAY_DENSITY_FORCED,
@@ -85,6 +107,13 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
                 SettingsValidators.ANY_STRING_VALIDATOR);
         TEST_VALUES_VALIDATORS.put(PRESERVED_TEST_SETTING, SettingsValidators.ANY_STRING_VALIDATOR);
     }
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
+
+    @Mock private BackupDataOutput mBackupDataOutput;
 
     private TestFriendlySettingsBackupAgent mAgentUnderTest;
     private Context mContext;
@@ -262,6 +291,110 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         assertEquals("1.5", testedMethod.apply("1.8"));
     }
 
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void onCreate_metricsFlagIsDisabled_areAgentMetricsEnabledIsFalse() {
+        mAgentUnderTest.onCreate();
+
+        assertFalse(mAgentUnderTest.areAgentMetricsEnabled);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void onCreate_flagIsEnabled_areAgentMetricsEnabledIsTrue() {
+        mAgentUnderTest.onCreate();
+
+        assertTrue(mAgentUnderTest.areAgentMetricsEnabled);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void writeDataForKey_metricsFlagIsEnabled_numberOfSettingsPerKeyContainsKey_dataWriteSucceeds_logsSuccessMetrics()
+        throws IOException {
+        when(mBackupDataOutput.writeEntityHeader(anyString(), anyInt())).thenReturn(0);
+        when(mBackupDataOutput.writeEntityData(any(byte[].class), anyInt())).thenReturn(0);
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+        mAgentUnderTest.setNumberOfSettingsPerKey(TEST_KEY, 1);
+
+        mAgentUnderTest.writeDataForKey(
+            TEST_KEY, TEST_VALUE.getBytes(), mBackupDataOutput);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getSuccessCount(), 1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void writeDataForKey_metricsFlagIsEnabled_numberOfSettingsPerKeyContainsKey_writeEntityHeaderFails_logsFailureMetrics()
+        throws IOException {
+        when(mBackupDataOutput.writeEntityHeader(anyString(), anyInt())).thenThrow(new IOException());
+        when(mBackupDataOutput.writeEntityData(any(byte[].class), anyInt())).thenReturn(0);
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+        mAgentUnderTest.setNumberOfSettingsPerKey(TEST_KEY, 1);
+
+        mAgentUnderTest.writeDataForKey(
+            TEST_KEY, TEST_VALUE.getBytes(), mBackupDataOutput);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getFailCount(), 1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void writeDataForKey_metricsFlagIsEnabled_numberOfSettingsPerKeyContainsKey_writeEntityDataFails_logsFailureMetrics()
+        throws IOException {
+        when(mBackupDataOutput.writeEntityHeader(anyString(), anyInt())).thenReturn(0);
+        when(mBackupDataOutput.writeEntityData(any(byte[].class), anyInt())).thenThrow(new IOException());
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+        mAgentUnderTest.setNumberOfSettingsPerKey(TEST_KEY, 1);
+
+        mAgentUnderTest.writeDataForKey(
+            TEST_KEY, TEST_VALUE.getBytes(), mBackupDataOutput);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getFailCount(), 1);
+    }
+
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void writeDataForKey_metricsFlagIsDisabled_doesNotLogMetrics()
+        throws IOException {
+        when(mBackupDataOutput.writeEntityHeader(anyString(), anyInt())).thenReturn(0);
+        when(mBackupDataOutput.writeEntityData(any(byte[].class), anyInt())).thenReturn(0);
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+        mAgentUnderTest.setNumberOfSettingsPerKey(TEST_KEY, 1);
+
+        mAgentUnderTest.writeDataForKey(
+            TEST_KEY, TEST_VALUE.getBytes(), mBackupDataOutput);
+
+        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void writeDataForKey_metricsFlagIsEnabled_numberOfSettingsPerKeyDoesNotContainKey_doesNotLogMetrics()
+        throws IOException {
+        when(mBackupDataOutput.writeEntityHeader(anyString(), anyInt())).thenReturn(0);
+        when(mBackupDataOutput.writeEntityData(any(byte[].class), anyInt())).thenReturn(0);
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        mAgentUnderTest.writeDataForKey(
+            TEST_KEY, TEST_VALUE.getBytes(), mBackupDataOutput);
+
+        assertNull(getLoggingResultForDatatype(TEST_KEY, mAgentUnderTest));
+    }
+
     private byte[] generateBackupData(Map<String, String> keyValueData) {
         int totalBytes = 0;
         for (String key : keyValueData.keySet()) {
@@ -329,6 +462,21 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         }
     }
 
+    private DataTypeResult getLoggingResultForDatatype(
+        String dataType, SettingsBackupAgent agent) {
+        if (agent.getBackupRestoreEventLogger() == null) {
+            return null;
+        }
+        List<DataTypeResult> loggingResults =
+            agent.getBackupRestoreEventLogger().getLoggingResults();
+        for (DataTypeResult result : loggingResults) {
+            if (result.getDataType().equals(dataType)) {
+                return result;
+            }
+        }
+        return null;
+    }
+
     private byte[] generateSingleKeyTestBackupData(String key, String value) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             os.write(SettingsBackupAgent.toByteArray(key));
@@ -375,6 +523,12 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
             }
 
             return mSettingsWhitelist;
+        }
+
+        void setNumberOfSettingsPerKey(String key, int numberOfSettings) {
+            if (numberOfSettingsPerKey != null) {
+                this.numberOfSettingsPerKey.put(key, numberOfSettings);
+            }
         }
     }
 
