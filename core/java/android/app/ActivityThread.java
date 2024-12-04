@@ -7039,12 +7039,9 @@ public final class ActivityThread extends ClientTransactionHandler
             System.runFinalization();
             System.gc();
         }
-        if (dhd.dumpBitmaps != null) {
-            Bitmap.dumpAll(dhd.dumpBitmaps);
-        }
         try (ParcelFileDescriptor fd = dhd.fd) {
             if (dhd.managed) {
-                Debug.dumpHprofData(dhd.path, fd.getFileDescriptor());
+                Debug.dumpHprofData(dhd.path, fd.getFileDescriptor(), dhd.dumpBitmaps);
             } else if (dhd.mallocInfo) {
                 Debug.dumpNativeMallocInfo(fd.getFileDescriptor());
             } else {
@@ -7068,9 +7065,6 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         if (dhd.finishCallback != null) {
             dhd.finishCallback.sendResult(null);
-        }
-        if (dhd.dumpBitmaps != null) {
-            Bitmap.dumpAll(null); // clear dump
         }
     }
 
