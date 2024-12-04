@@ -17,14 +17,14 @@ flag {
 
 flag {
     name: "multi_window_screen_context"
-    namespace: "machine_learning"
+    namespace: "sysui_integrations"
     description: "Report screen context and positions for all windows."
     bug: "371065456"
 }
 
 flag {
     name: "contextual_search_window_layer"
-    namespace: "machine_learning"
+    namespace: "sysui_integrations"
     description: "Identify live contextual search UI to exclude from contextual search screenshot."
     bug: "372510690"
 }
