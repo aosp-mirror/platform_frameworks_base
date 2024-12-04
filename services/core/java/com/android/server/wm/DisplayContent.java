@@ -2274,7 +2274,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (shellTransitions) {
             // Before setDisplayProjection is applied by the start transaction of transition,
             // set the transform hint to avoid using surface in old rotation.
-            getPendingTransaction().setFixedTransformHint(mSurfaceControl, rotation);
+            setFixedTransformHint(getPendingTransaction(), mSurfaceControl, rotation);
             // The sync transaction should already contains setDisplayProjection, so unset the
             // hint to restore the natural state when the transaction is applied.
             transaction.unsetFixedTransformHint(mSurfaceControl);
@@ -2282,6 +2282,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         scheduleAnimation();
 
         mWmService.mRotationWatcherController.dispatchDisplayRotationChange(mDisplayId, rotation);
+    }
+
+    void setFixedTransformHint(Transaction t, SurfaceControl sc, int rotation) {
+        t.setFixedTransformHint(sc, (rotation + mDisplayInfo.installOrientation) % 4);
     }
 
     void configureDisplayPolicy() {
