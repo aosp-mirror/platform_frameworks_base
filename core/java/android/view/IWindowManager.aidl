@@ -933,6 +933,27 @@ interface IWindowManager
     void detachWindowContext(IBinder clientToken);
 
     /**
+     * Reparents the {@link android.window.WindowContext} to the
+     * {@link com.android.server.wm.DisplayArea} on another display.
+     * This method also reparent the WindowContext associated WindowToken to another display if
+     * necessary.
+     * <p>
+     * {@code type} and {@code options} must be the same as the previous call of
+     * {@link #attachWindowContextToDisplayArea} on the same Context otherwise this will fail
+     * silently.
+     *
+     * @param appThread the process that the window context is on.
+     * @param clientToken the window context's token
+     * @param type The window type of the WindowContext
+     * @param displayId The new display id this context windows should be parented to
+     * @param options Bundle the context was created with
+     *
+     * @return True if the operation was successful, False otherwise.
+     */
+    boolean reparentWindowContextToDisplayArea(in IApplicationThread appThread,
+                IBinder clientToken, int displayId);
+
+    /**
      * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.
      *
      * @param listener the listener to be registered
