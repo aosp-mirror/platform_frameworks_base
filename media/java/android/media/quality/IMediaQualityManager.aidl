@@ -23,6 +23,7 @@ import android.media.quality.ISoundProfileCallback;
 import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.PictureProfile;
+import android.media.quality.SoundProfileHandle;
 import android.media.quality.SoundProfile;
 
 /**
@@ -40,7 +41,7 @@ interface IMediaQualityManager {
     List<String> getPictureProfilePackageNames(int userId);
     List<String> getPictureProfileAllowList(int userId);
     void setPictureProfileAllowList(in List<String> packages, int userId);
-    PictureProfileHandle getPictureProfileHandle(in String id, int userId);
+    List<PictureProfileHandle> getPictureProfileHandle(in String[] id, int userId);
 
     SoundProfile createSoundProfile(in SoundProfile pp, int userId);
     void updateSoundProfile(in String id, in SoundProfile pp, int userId);
@@ -52,6 +53,7 @@ interface IMediaQualityManager {
     List<String> getSoundProfilePackageNames(int userId);
     List<String> getSoundProfileAllowList(int userId);
     void setSoundProfileAllowList(in List<String> packages, int userId);
+    List<SoundProfileHandle> getSoundProfileHandle(in String[] id, int userId);
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);
