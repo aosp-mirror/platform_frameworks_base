@@ -697,6 +697,7 @@ public class CoreDocument {
                     }
                 }
             }
+            op.markNotDirty();
             op.apply(context);
         }
     }
