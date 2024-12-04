@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis;
 
 import android.app.ActivityManager;
@@ -104,7 +103,7 @@ public class GestureLauncherService extends SystemService {
     /**
      * Number of taps required to launch camera shortcut.
      */
-    public static final int CAMERA_POWER_TAP_COUNT_THRESHOLD = 2;
+    private static final int CAMERA_POWER_TAP_COUNT_THRESHOLD = 2;
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
@@ -209,9 +208,7 @@ public class GestureLauncherService extends SystemService {
     }
 
     @VisibleForTesting
-    public GestureLauncherService(
-            Context context,
-            MetricsLogger metricsLogger,
+    GestureLauncherService(Context context, MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger) {
         super(context);
         mContext = context;
@@ -504,54 +501,14 @@ public class GestureLauncherService extends SystemService {
     }
 
     /**
-     * Processes a power key event in GestureLauncherService without performing an action. This
-     * method is called on every KEYCODE_POWER ACTION_DOWN event and ensures that, even if
-     * KEYCODE_POWER events are passed to and handled by the app, the GestureLauncherService still
-     * keeps track of all running KEYCODE_POWER events for its gesture detection and relevant
-     * actions.
-     */
-    public void processPowerKeyDown(KeyEvent event) {
-        if (mEmergencyGestureEnabled && mEmergencyGesturePowerButtonCooldownPeriodMs >= 0
-                && event.getEventTime() - mLastEmergencyGestureTriggered
-                < mEmergencyGesturePowerButtonCooldownPeriodMs) {
-            return;
-        }
-        if (event.isLongPress()) {
-            return;
-        }
-
-        final long powerTapInterval;
-
-        synchronized (this) {
-            powerTapInterval = event.getEventTime() - mLastPowerDown;
-            mLastPowerDown = event.getEventTime();
-            if (powerTapInterval >= POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
-                // Tap too slow, reset consecutive tap counts.
-                mFirstPowerDown = event.getEventTime();
-                mPowerButtonConsecutiveTaps = 1;
-                mPowerButtonSlowConsecutiveTaps = 1;
-            } else if (powerTapInterval >= CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
-                // Tap too slow for shortcuts
-                mFirstPowerDown = event.getEventTime();
-                mPowerButtonConsecutiveTaps = 1;
-                mPowerButtonSlowConsecutiveTaps++;
-            } else if (powerTapInterval > 0) {
-                // Fast consecutive tap
-                mPowerButtonConsecutiveTaps++;
-                mPowerButtonSlowConsecutiveTaps++;
-            }
-        }
-    }
-
-    /**
      * Attempts to intercept power key down event by detecting certain gesture patterns
      *
      * @param interactive true if the event's policy contains {@code FLAG_INTERACTIVE}
      * @param outLaunched true if some action is taken as part of the key intercept (eg, app launch)
      * @return true if the key down event is intercepted
      */
-    public boolean interceptPowerKeyDown(
-            KeyEvent event, boolean interactive, MutableBoolean outLaunched) {
+    public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
+            MutableBoolean outLaunched) {
         if (mEmergencyGestureEnabled && mEmergencyGesturePowerButtonCooldownPeriodMs >= 0
                 && event.getEventTime() - mLastEmergencyGestureTriggered
                 < mEmergencyGesturePowerButtonCooldownPeriodMs) {
@@ -589,7 +546,7 @@ public class GestureLauncherService extends SystemService {
                 mFirstPowerDown  = event.getEventTime();
                 mPowerButtonConsecutiveTaps = 1;
                 mPowerButtonSlowConsecutiveTaps++;
-            } else if (!overridePowerKeyBehaviorInFocusedWindow() || powerTapInterval > 0) {
+            } else {
                 // Fast consecutive tap
                 mPowerButtonConsecutiveTaps++;
                 mPowerButtonSlowConsecutiveTaps++;
