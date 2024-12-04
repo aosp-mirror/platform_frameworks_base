@@ -42,6 +42,7 @@ import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
+import static com.android.aconfig_new_storage.Flags.enableAconfigdFromMainline;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -462,16 +463,38 @@ public class SettingsToPropertiesMapper {
      * @param requests: request proto output stream
      * @return aconfigd socket return as proto input stream
      */
-    static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
+    static void sendAconfigdRequests(ProtoOutputStream requests) {
+        ProtoInputStream returns = sendAconfigdRequests("aconfigd_system", requests);
+        try {
+          parseAndLogAconfigdReturn(returns);
+        } catch (IOException ioe) {
+          logErr("failed to parse aconfigd return", ioe);
+        }
+        if (enableAconfigdFromMainline()) {
+            returns = sendAconfigdRequests("aconfigd_mainline", requests);
+            try {
+              parseAndLogAconfigdReturn(returns);
+            } catch (IOException ioe) {
+              logErr("failed to parse aconfigd return", ioe);
+            }
+        }
+    }
+
+    /**
+     * apply flag local override in aconfig new storage
+     * @param socketName: the socket to send to
+     * @param requests: request proto output stream
+     * @return aconfigd socket return as proto input stream
+     */
+    static ProtoInputStream sendAconfigdRequests(String socketName, ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
-        String socketName = "aconfigd_system";
         try {
             client.connect(new LocalSocketAddress(
                 socketName, LocalSocketAddress.Namespace.RESERVED));
-            Slog.d(TAG, "connected to aconfigd socket");
+            Slog.d(TAG, "connected to " + socketName + " socket");
         } catch (IOException ioe) {
-            logErr("failed to connect to aconfigd socket", ioe);
+            logErr("failed to connect to " + socketName + " socket", ioe);
             return null;
         }
 
@@ -490,9 +513,9 @@ public class SettingsToPropertiesMapper {
             byte[] requests_bytes = requests.getBytes();
             outputStream.writeInt(requests_bytes.length);
             outputStream.write(requests_bytes, 0, requests_bytes.length);
-            Slog.d(TAG, "flag override requests sent to aconfigd");
+            Slog.d(TAG, "flag override requests sent to " + socketName);
         } catch (IOException ioe) {
-            logErr("failed to send requests to aconfigd", ioe);
+            logErr("failed to send requests to " + socketName, ioe);
             return null;
         }
 
@@ -500,10 +523,10 @@ public class SettingsToPropertiesMapper {
         try {
             int num_bytes = inputStream.readInt();
             ProtoInputStream returns = new ProtoInputStream(inputStream);
-            Slog.d(TAG, "received " + num_bytes + " bytes back from aconfigd");
+            Slog.d(TAG, "received " + num_bytes + " bytes back from " + socketName);
             return returns;
         } catch (IOException ioe) {
-            logErr("failed to read requests return from aconfigd", ioe);
+            logErr("failed to read requests return from " + socketName, ioe);
             return null;
         }
     }
@@ -644,15 +667,8 @@ public class SettingsToPropertiesMapper {
           return;
         }
 
-        // send requests to aconfigd and obtain the return byte buffer
-        ProtoInputStream returns = sendAconfigdRequests(requests);
-
-        // deserialize back using proto input stream
-        try {
-          parseAndLogAconfigdReturn(returns);
-        } catch (IOException ioe) {
-            logErr("failed to parse aconfigd return", ioe);
-        }
+        // send requests to aconfigd
+        sendAconfigdRequests(requests);
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
@@ -762,15 +778,8 @@ public class SettingsToPropertiesMapper {
           return;
         }
 
-        // send requests to aconfigd and obtain the return
-        ProtoInputStream returns = sendAconfigdRequests(requests);
-
-        // deserialize back using proto input stream
-        try {
-            parseAndLogAconfigdReturn(returns);
-        } catch (IOException ioe) {
-            logErr("failed to parse aconfigd return", ioe);
-        }
+        // send requests to aconfigd
+        sendAconfigdRequests(requests);
     }
 
     /**
