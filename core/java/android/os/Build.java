@@ -403,7 +403,7 @@ public class Build {
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
          * This constant records the major version of Android. Use {@link
-         * SDK_INT_FULL} if you need to consider the minor version of Android
+         * #SDK_INT_FULL} if you need to consider the minor version of Android
          * as well.
          * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
