@@ -215,6 +215,7 @@ public class SettingsToPropertiesMapper {
         "pixel_bluetooth",
         "pixel_connectivity_gps",
         "pixel_continuity",
+        "pixel_display",
         "pixel_perf",
         "pixel_sensors",
         "pixel_state_server",
