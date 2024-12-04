@@ -409,6 +409,11 @@ final class SettingsState {
                         Slog.w(LOG_TAG, "Bulk sync request to acongid failed.");
                     }
                 }
+
+                if (Flags.disableBulkCompare()) {
+                    return;
+                }
+
                 // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
                 if (requests == null) {
                     Map<String, AconfigdFlagInfo> aconfigdFlagMap =
@@ -421,7 +426,7 @@ final class SettingsState {
         }
     }
 
-    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+    // TODO(b/312444587): remove the comparison logic after Test Mission 2.
     public int compareFlagValueInNewStorage(
             Map<String, AconfigdFlagInfo> defaultFlagMap,
             Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
