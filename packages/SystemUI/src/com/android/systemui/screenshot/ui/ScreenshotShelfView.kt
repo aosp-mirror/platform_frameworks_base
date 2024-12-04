@@ -162,7 +162,12 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
             )
 
         if (cutout == null) {
-            screenshotStatic.setPadding(0, 0, 0, navBarInsets.bottom)
+            screenshotStatic.setPadding(
+                navBarInsets.left,
+                navBarInsets.top,
+                navBarInsets.right,
+                navBarInsets.bottom,
+            )
         } else {
             val waterfall = cutout.waterfallInsets
             if (inPortrait) {
@@ -179,9 +184,9 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
                 )
             } else {
                 screenshotStatic.setPadding(
-                    max(cutout.safeInsetLeft, waterfall.left),
+                    max(cutout.safeInsetLeft, waterfall.left, navBarInsets.left),
                     waterfall.top,
-                    max(cutout.safeInsetRight, waterfall.right),
+                    max(cutout.safeInsetRight, waterfall.right, navBarInsets.right),
                     max(
                         navBarInsets.bottom + verticalPadding,
                         waterfall.bottom + verticalPadding,
