@@ -99,7 +99,7 @@ public class PipController implements ConfigurationChangeListener,
     private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
 
     // Wrapper for making Binder calls into PiP animation listener hosted in launcher's Recents.
-    private PipAnimationListener mPipRecentsAnimationListener;
+    @Nullable private PipAnimationListener mPipRecentsAnimationListener;
 
     @VisibleForTesting
     interface PipAnimationListener {
@@ -378,7 +378,9 @@ public class PipController implements ConfigurationChangeListener,
             tx.setLayer(overlay, Integer.MAX_VALUE);
             tx.apply();
         }
-        mPipRecentsAnimationListener.onPipAnimationStarted();
+        if (mPipRecentsAnimationListener != null) {
+            mPipRecentsAnimationListener.onPipAnimationStarted();
+        }
     }
 
     private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
