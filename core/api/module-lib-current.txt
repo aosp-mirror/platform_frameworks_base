@@ -499,6 +499,10 @@ package android.os {
     field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
   }
 
+  public class UpdateEngine {
+    method @FlaggedApi("android.os.update_engine_api") public void triggerPostinstall(@NonNull String);
+  }
+
 }
 
 package android.os.storage {
