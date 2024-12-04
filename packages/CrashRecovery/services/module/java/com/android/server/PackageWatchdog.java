@@ -346,7 +346,6 @@ public class PackageWatchdog {
      * @param observer instance of {@link PackageHealthObserver} for observing package failures
      *                 and boot loops.
      * @param executor Executor for the thread on which observers would receive callbacks
-     * @hide
      */
     public void registerHealthObserver(@NonNull PackageHealthObserver observer,
             @NonNull @CallbackExecutor Executor executor) {
@@ -390,7 +389,6 @@ public class PackageWatchdog {
      *                  less than 1, a default monitoring duration 2 days will be used.
      *
      * @throws IllegalStateException if the observer was not previously registered
-     * @hide
      */
     public void startExplicitHealthCheck(@NonNull PackageHealthObserver observer,
             @NonNull List<String> packageNames, long timeoutMs) {
@@ -458,9 +456,8 @@ public class PackageWatchdog {
      * Unregisters {@code observer} from listening to package failure.
      * Additionally, this stops observing any packages that may have previously been observed
      * even from a previous boot.
-     * @hide
      */
-    public void unregisterHealthObserver(PackageHealthObserver observer) {
+    public void unregisterHealthObserver(@NonNull PackageHealthObserver observer) {
         mLongTaskHandler.post(() -> {
             synchronized (sLock) {
                 mAllObservers.remove(observer.getUniqueIdentifier());

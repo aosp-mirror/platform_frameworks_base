@@ -274,16 +274,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         Preconditions.checkState(mHandler.getLooper().isCurrentThread());
     }
 
-    /**
-     * Start observing health of {@code packages} for {@code durationMs}.
-     * This may cause {@code packages} to be rolled back if they crash too freqeuntly.
-     */
-    @AnyThread
-    @NonNull
-    public void startObservingHealth(@NonNull List<String> packages, @NonNull long durationMs) {
-        PackageWatchdog.getInstance(mContext).startExplicitHealthCheck(this, packages, durationMs);
-    }
-
     @AnyThread
     @NonNull
     public void notifyRollbackAvailable(@NonNull RollbackInfo rollback) {
