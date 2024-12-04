@@ -9089,7 +9089,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CallerIdentity caller = getCallerIdentity(who);
 
         if (Flags.setAutoTimeEnabledCoexistence()) {
-            Preconditions.checkCallAuthorization(hasPermission(SET_TIME, caller.getPackageName()));
+            Preconditions.checkCallAuthorization(hasPermission(SET_TIME, callerPackageName));
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
@@ -9152,7 +9152,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                 /* who */ null,
                 SET_TIME,
-                caller.getPackageName(),
+                callerPackageName,
                 UserHandle.USER_ALL
         );
         Integer state = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
@@ -9197,7 +9197,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CallerIdentity caller = getCallerIdentity(who);
         if (Flags.setAutoTimeZoneEnabledCoexistence()) {
             Preconditions.checkCallAuthorization(
-                hasPermission(SET_TIME_ZONE, caller.getPackageName()));
+                hasPermission(SET_TIME_ZONE, callerPackageName));
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
@@ -9255,7 +9255,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                 /* who */ null,
                 SET_TIME_ZONE,
-                caller.getPackageName(),
+                callerPackageName,
                 UserHandle.USER_ALL
         );
         Integer state = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
