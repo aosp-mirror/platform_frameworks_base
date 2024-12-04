@@ -278,7 +278,7 @@ class TestPhoneWindowManager {
         mHandler = new Handler(mTestLooper.getLooper());
         mContext = mockingDetails(context).isSpy() ? context : spy(context);
         mGestureLauncherService = spy(new GestureLauncherService(mContext, mMetricsLogger,
-                mUiEventLogger));
+                mQuickAccessWalletClient, mUiEventLogger));
         setUp(supportSettingsUpdate);
         mTestLooper.dispatchAll();
     }
