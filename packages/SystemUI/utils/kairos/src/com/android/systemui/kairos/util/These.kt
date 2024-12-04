@@ -17,7 +17,7 @@
 package com.android.systemui.kairos.util
 
 /** Contains at least one of two potential values. */
-sealed class These<A, B> {
+sealed class These<out A, out B> {
     /** Contains a single potential value. */
     class This<A, B> internal constructor(val thiz: A) : These<A, B>()
 
@@ -29,10 +29,10 @@ sealed class These<A, B> {
 
     companion object {
         /** Constructs a [These] containing only [thiz]. */
-        fun <A, B> thiz(thiz: A): These<A, B> = This(thiz)
+        fun <A> thiz(thiz: A): These<A, Nothing> = This(thiz)
 
         /** Constructs a [These] containing only [that]. */
-        fun <A, B> that(that: B): These<A, B> = That(that)
+        fun <B> that(that: B): These<Nothing, B> = That(that)
 
         /** Constructs a [These] containing both [thiz] and [that]. */
         fun <A, B> both(thiz: A, that: B): These<A, B> = Both(thiz, that)

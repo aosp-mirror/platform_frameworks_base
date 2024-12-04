@@ -282,7 +282,7 @@ internal inline fun <A> switchDeferredImplSingle(
     crossinline getStorage: EvalScope.() -> EventsImpl<A>,
     crossinline getPatches: EvalScope.() -> EventsImpl<EventsImpl<A>>,
 ): EventsImpl<A> {
-    val patches = mapImpl(getPatches) { newFlow, _ -> singleOf(just(newFlow)).asIterable() }
+    val patches = mapImpl(getPatches) { newEvents, _ -> singleOf(just(newEvents)).asIterable() }
     val switchDeferredImpl =
         switchDeferredImpl(
             name = name,
@@ -402,7 +402,7 @@ internal inline fun <A, B> mergeNodes(
 ): EventsImpl<These<A, B>> {
     val storage =
         listOf(
-                mapImpl(getPulse) { it, _ -> These.thiz<A, B>(it) },
+                mapImpl(getPulse) { it, _ -> These.thiz(it) },
                 mapImpl(getOther) { it, _ -> These.that(it) },
             )
             .asIterableWithIndex()

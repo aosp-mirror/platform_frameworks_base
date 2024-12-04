@@ -311,7 +311,7 @@ internal inline fun <A> switchPromptImplSingle(
         switchPromptImpl(
             getStorage = { singleOf(getStorage()).asIterable() },
             getPatches = {
-                mapImpl(getPatches) { newFlow, _ -> singleOf(just(newFlow)).asIterable() }
+                mapImpl(getPatches) { newEvents, _ -> singleOf(just(newEvents)).asIterable() }
             },
             storeFactory = SingletonMapK.Factory(),
         )

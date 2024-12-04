@@ -444,6 +444,13 @@ interface BuildScope : StateScope {
     ): Pair<Events<Map<K, Maybe<A>>>, DeferredValue<Map<K, B>>> =
         applyLatestSpecForKey(deferredOf(initialSpecs), numKeys)
 
+    fun <K, V> Incremental<K, BuildSpec<V>>.applyLatestSpecForKey(
+        numKeys: Int? = null
+    ): Incremental<K, V> {
+        val (events, initial) = updates.applyLatestSpecForKey(sampleDeferred(), numKeys)
+        return events.foldStateMapIncrementally(initial)
+    }
+
     /**
      * Returns an [Events] containing the results of applying each [BuildSpec] emitted from the
      * original [Events].
@@ -455,10 +462,10 @@ interface BuildScope : StateScope {
      * If the [Maybe] contained within the value for an associated key is [none], then the
      * previously-active [BuildSpec] will be undone with no replacement.
      */
-    fun <K, A> Events<Map<K, Maybe<BuildSpec<A>>>>.applyLatestSpecForKey(
+    fun <K, V> Events<Map<K, Maybe<BuildSpec<V>>>>.applyLatestSpecForKey(
         numKeys: Int? = null
-    ): Events<Map<K, Maybe<A>>> =
-        applyLatestSpecForKey<K, A, Nothing>(deferredOf(emptyMap()), numKeys).first
+    ): Events<Map<K, Maybe<V>>> =
+        applyLatestSpecForKey<K, V, Nothing>(deferredOf(emptyMap()), numKeys).first
 
     /**
      * Returns a [State] containing the latest results of applying each [BuildSpec] emitted from the
@@ -471,10 +478,10 @@ interface BuildScope : StateScope {
      * If the [Maybe] contained within the value for an associated key is [none], then the
      * previously-active [BuildSpec] will be undone with no replacement.
      */
-    fun <K, A> Events<Map<K, Maybe<BuildSpec<A>>>>.holdLatestSpecForKey(
-        initialSpecs: DeferredValue<Map<K, BuildSpec<A>>>,
+    fun <K, V> Events<Map<K, Maybe<BuildSpec<V>>>>.holdLatestSpecForKey(
+        initialSpecs: DeferredValue<Map<K, BuildSpec<V>>>,
         numKeys: Int? = null,
-    ): State<Map<K, A>> {
+    ): Incremental<K, V> {
         val (changes, initialValues) = applyLatestSpecForKey(initialSpecs, numKeys)
         return changes.foldStateMapIncrementally(initialValues)
     }
@@ -490,10 +497,10 @@ interface BuildScope : StateScope {
      * If the [Maybe] contained within the value for an associated key is [none], then the
      * previously-active [BuildSpec] will be undone with no replacement.
      */
-    fun <K, A> Events<Map<K, Maybe<BuildSpec<A>>>>.holdLatestSpecForKey(
-        initialSpecs: Map<K, BuildSpec<A>> = emptyMap(),
+    fun <K, V> Events<Map<K, Maybe<BuildSpec<V>>>>.holdLatestSpecForKey(
+        initialSpecs: Map<K, BuildSpec<V>> = emptyMap(),
         numKeys: Int? = null,
-    ): State<Map<K, A>> = holdLatestSpecForKey(deferredOf(initialSpecs), numKeys)
+    ): Incremental<K, V> = holdLatestSpecForKey(deferredOf(initialSpecs), numKeys)
 
     /**
      * Returns an [Events] containing the results of applying [transform] to each value of the

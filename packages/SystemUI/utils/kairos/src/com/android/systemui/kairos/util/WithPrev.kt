@@ -16,5 +16,5 @@
 
 package com.android.systemui.kairos.util
 
-/** Holds a [newValue] emitted from a `TFlow`, along with the [previousValue] emitted value. */
+/** Holds a [newValue] emitted from a `Events`, along with the [previousValue] emitted value. */
 data class WithPrev<out S, out T : S>(val previousValue: S, val newValue: T)

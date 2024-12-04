@@ -50,6 +50,9 @@ internal class Init<out A>(val name: String?, private val block: InitScope.() ->
         }
 }
 
-internal fun <A> init(name: String?, block: InitScope.() -> A) = Init(name, block)
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun <A> init(name: String?, noinline block: InitScope.() -> A): Init<A> =
+    Init(name, block)
 
-internal fun <A> constInit(name: String?, value: A) = init(name) { value }
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun <A> constInit(name: String?, value: A): Init<A> = init(name) { value }

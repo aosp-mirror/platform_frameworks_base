@@ -31,7 +31,6 @@ import com.android.systemui.kairos.internal.demuxMap
 import com.android.systemui.kairos.internal.filterImpl
 import com.android.systemui.kairos.internal.filterJustImpl
 import com.android.systemui.kairos.internal.init
-import com.android.systemui.kairos.internal.map
 import com.android.systemui.kairos.internal.mapImpl
 import com.android.systemui.kairos.internal.mergeNodes
 import com.android.systemui.kairos.internal.mergeNodesLeft
@@ -44,7 +43,6 @@ import com.android.systemui.kairos.util.Left
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.Right
 import com.android.systemui.kairos.util.just
-import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.toMaybe
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KProperty
@@ -58,11 +56,11 @@ import kotlinx.coroutines.coroutineScope
 sealed class Events<out A> {
     companion object {
         /** An [Events] with no values. */
-        val empty: Events<Nothing> = EmptyFlow
+        val empty: Events<Nothing> = EmptyEvents
     }
 }
 
-/** AN [Events] with no values. */
+/** An [Events] with no values. */
 @ExperimentalKairosApi val emptyEvents: Events<Nothing> = Events.empty
 
 /**
@@ -82,7 +80,7 @@ class EventsLoop<A> : Events<A>() {
     var loopback: Events<A>? = null
         set(value) {
             value?.let {
-                check(!deferred.isInitialized()) { "TFlowLoop.loopback has already been set." }
+                check(!deferred.isInitialized()) { "EventsLoop.loopback has already been set." }
                 deferred.setValue(value)
                 field = value
             }
@@ -441,7 +439,7 @@ class GroupedEvents<in K, out A> internal constructor(internal val impl: DemuxIm
 @ExperimentalKairosApi
 fun <A> State<Events<A>>.switchEvents(name: String? = null): Events<A> {
     val patches =
-        mapImpl({ init.connect(this).changes }) { newFlow, _ -> newFlow.init.connect(this) }
+        mapImpl({ init.connect(this).changes }) { newEvents, _ -> newEvents.init.connect(this) }
     return EventsInit(
         constInit(
             name = null,
@@ -467,7 +465,7 @@ fun <A> State<Events<A>>.switchEvents(name: String? = null): Events<A> {
 @ExperimentalKairosApi
 fun <A> State<Events<A>>.switchEventsPromptly(): Events<A> {
     val patches =
-        mapImpl({ init.connect(this).changes }) { newFlow, _ -> newFlow.init.connect(this) }
+        mapImpl({ init.connect(this).changes }) { newEvents, _ -> newEvents.init.connect(this) }
     return EventsInit(
         constInit(
             name = null,
@@ -557,7 +555,7 @@ internal constructor(internal val network: Network, internal val impl: InputNode
     }
 }
 
-private data object EmptyFlow : Events<Nothing>()
+private data object EmptyEvents : Events<Nothing>()
 
 internal class EventsInit<out A>(val init: Init<EventsImpl<A>>) : Events<A>() {
     override fun toString(): String = "${this::class.simpleName}@$hashString"
@@ -566,7 +564,7 @@ internal class EventsInit<out A>(val init: Init<EventsImpl<A>>) : Events<A>() {
 internal val <A> Events<A>.init: Init<EventsImpl<A>>
     get() =
         when (this) {
-            is EmptyFlow -> constInit("EmptyFlow", neverImpl)
+            is EmptyEvents -> constInit("EmptyEvents", neverImpl)
             is EventsInit -> init
             is EventsLoop -> init
             is CoalescingMutableEvents<*, A> -> constInit(name, impl.activated())

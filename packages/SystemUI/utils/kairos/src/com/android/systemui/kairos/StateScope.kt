@@ -17,14 +17,12 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.util.Just
-import com.android.systemui.kairos.util.Left
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Right
 import com.android.systemui.kairos.util.WithPrev
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map
+import com.android.systemui.kairos.util.mapMaybeValues
 import com.android.systemui.kairos.util.none
-import com.android.systemui.kairos.util.partitionEithers
 import com.android.systemui.kairos.util.zipWith
 
 // TODO: caching story? should each Scope have a cache of applied Stateful instances?
@@ -70,6 +68,19 @@ interface StateScope : TransactionScope {
     fun <A> Events<A>.holdStateDeferred(initialValue: DeferredValue<A>): State<A>
 
     /**
+     * Returns a [State] holding a [Map] that is updated incrementally whenever this emits a value.
+     *
+     * The value emitted is used as a "patch" for the tracked [Map]; for each key [K] in the emitted
+     * map, an associated value of [Just] will insert or replace the value in the tracked [Map], and
+     * an associated value of [none] will remove the key from the tracked [Map].
+     */
+    fun <K, V> Events<Map<K, Maybe<V>>>.foldStateMapIncrementally(
+        initialValues: DeferredValue<Map<K, V>>
+    ): Incremental<K, V>
+
+    // TODO: everything below this comment can be made into extensions once we have context params
+
+    /**
      * Returns an [Events] that emits from a merged, incrementally-accumulated collection of
      * [Events] emitted from this, following the same "patch" rules as outlined in
      * [foldStateMapIncrementally].
@@ -90,7 +101,7 @@ interface StateScope : TransactionScope {
     fun <K, V> Events<Map<K, Maybe<Events<V>>>>.mergeIncrementally(
         name: String? = null,
         initialEvents: DeferredValue<Map<K, Events<V>>>,
-    ): Events<Map<K, V>>
+    ): Events<Map<K, V>> = foldStateMapIncrementally(initialEvents).mergeEventsIncrementally()
 
     /**
      * Returns an [Events] that emits from a merged, incrementally-accumulated collection of
@@ -113,9 +124,8 @@ interface StateScope : TransactionScope {
     fun <K, V> Events<Map<K, Maybe<Events<V>>>>.mergeIncrementallyPromptly(
         initialEvents: DeferredValue<Map<K, Events<V>>>,
         name: String? = null,
-    ): Events<Map<K, V>>
-
-    // TODO: everything below this comment can be made into extensions once we have context params
+    ): Events<Map<K, V>> =
+        foldStateMapIncrementally(initialEvents).mergeEventsIncrementallyPromptly()
 
     /**
      * Returns an [Events] that emits from a merged, incrementally-accumulated collection of
@@ -321,6 +331,13 @@ interface StateScope : TransactionScope {
     ): Pair<Events<Map<K, Maybe<A>>>, DeferredValue<Map<K, B>>> =
         applyLatestStatefulForKey(deferredOf(init), numKeys)
 
+    fun <K, V> Incremental<K, Stateful<V>>.applyLatestStatefulForKey(
+        numKeys: Int? = null
+    ): Incremental<K, V> {
+        val (events, init) = updates.applyLatestStatefulForKey(sampleDeferred())
+        return events.foldStateMapIncrementally(init)
+    }
+
     /**
      * Returns a [State] containing the latest results of applying each [Stateful] emitted from the
      * original [Events].
@@ -334,7 +351,7 @@ interface StateScope : TransactionScope {
     fun <K, A> Events<Map<K, Maybe<Stateful<A>>>>.holdLatestStatefulForKey(
         init: DeferredValue<Map<K, Stateful<A>>>,
         numKeys: Int? = null,
-    ): State<Map<K, A>> {
+    ): Incremental<K, A> {
         val (changes, initialValues) = applyLatestStatefulForKey(init, numKeys)
         return changes.foldStateMapIncrementally(initialValues)
     }
@@ -352,11 +369,11 @@ interface StateScope : TransactionScope {
     fun <K, A> Events<Map<K, Maybe<Stateful<A>>>>.holdLatestStatefulForKey(
         init: Map<K, Stateful<A>> = emptyMap(),
         numKeys: Int? = null,
-    ): State<Map<K, A>> = holdLatestStatefulForKey(deferredOf(init), numKeys)
+    ): Incremental<K, A> = holdLatestStatefulForKey(deferredOf(init), numKeys)
 
     /**
      * Returns an [Events] containing the results of applying each [Stateful] emitted from the
-     * original [Events], and a [DeferredValue] containing the result of applying [init]
+     * original [Events], and a [DeferredValue] containing the result of applying [stateInit]
      * immediately.
      *
      * When each [Stateful] is applied, state accumulation from the previously-active [Stateful]
@@ -537,7 +554,7 @@ interface StateScope : TransactionScope {
      * Shorthand for:
      * ```kotlin
      * val (changes, initApplied) = applyLatestStateful(init)
-     * return changes.toStateDeferred(initApplied)
+     * return changes.holdStateDeferred(initApplied)
      * ```
      */
     fun <A> Events<Stateful<A>>.holdLatestStateful(init: Stateful<A>): State<A> {
@@ -586,29 +603,8 @@ interface StateScope : TransactionScope {
      * an associated value of [none] will remove the key from the tracked [Map].
      */
     fun <K, V> Events<Map<K, Maybe<V>>>.foldStateMapIncrementally(
-        initialValues: DeferredValue<Map<K, V>>
-    ): State<Map<K, V>> =
-        foldStateDeferred(initialValues) { patch, map ->
-            val (adds: List<Pair<K, V>>, removes: List<K>) =
-                patch
-                    .asSequence()
-                    .map { (k, v) -> if (v is Just) Left(k to v.value) else Right(k) }
-                    .partitionEithers()
-            val removed: Map<K, V> = map - removes.toSet()
-            val updated: Map<K, V> = removed + adds
-            updated
-        }
-
-    /**
-     * Returns a [State] holding a [Map] that is updated incrementally whenever this emits a value.
-     *
-     * The value emitted is used as a "patch" for the tracked [Map]; for each key [K] in the emitted
-     * map, an associated value of [Just] will insert or replace the value in the tracked [Map], and
-     * an associated value of [none] will remove the key from the tracked [Map].
-     */
-    fun <K, V> Events<Map<K, Maybe<V>>>.foldStateMapIncrementally(
         initialValues: Map<K, V> = emptyMap()
-    ): State<Map<K, V>> = foldStateMapIncrementally(deferredOf(initialValues))
+    ): Incremental<K, V> = foldStateMapIncrementally(deferredOf(initialValues))
 
     /**
      * Returns an [Events] that wraps each emission of the original [Events] into an [IndexedValue],
@@ -757,4 +753,54 @@ interface StateScope : TransactionScope {
         other: State<B>,
         transform: TransactionScope.(A, B) -> C,
     ): State<C> = combineTransactionally(this, other, transform)
+
+    /**
+     * Returns an [Incremental] that reflects the state of the original [Incremental], but also adds
+     * / removes entries based on the state of the original's values.
+     */
+    fun <K, V> Incremental<K, State<Maybe<V>>>.applyStateIncrementally(): Incremental<K, V> =
+        mapValues { (_, v) -> v.changes }
+            .mergeEventsIncrementallyPromptly()
+            .foldStateMapIncrementally(
+                deferredStateScope { sample().mapMaybeValues { (_, s) -> s.sample() } }
+            )
+
+    /**
+     * Returns an [Incremental] that reflects the state of the original [Incremental], but also adds
+     * / removes entries based on the [State] returned from applying [transform] to the original's
+     * entries.
+     */
+    fun <K, V, U> Incremental<K, V>.mapIncrementalState(
+        transform: KairosScope.(Map.Entry<K, V>) -> State<Maybe<U>>
+    ): Incremental<K, U> = mapValues { transform(it) }.applyStateIncrementally()
+
+    /**
+     * Returns an [Incremental] that reflects the state of the original [Incremental], but also adds
+     * / removes entries based on the [State] returned from applying [transform] to the original's
+     * entries, such that entries are added when that state is `true`, and removed when `false`.
+     */
+    fun <K, V> Incremental<K, V>.filterIncrementally(
+        transform: KairosScope.(Map.Entry<K, V>) -> State<Boolean>
+    ): Incremental<K, V> = mapIncrementalState { entry ->
+        transform(entry).map { if (it) just(entry.value) else none }
+    }
+
+    /**
+     * Returns an [Incremental] that samples the [Transactionals][Transactional] held by the
+     * original within the same transaction that the incremental [updates].
+     */
+    fun <K, V> Incremental<K, Transactional<V>>.sampleTransactionals(): Incremental<K, V> =
+        updates
+            .map { patch -> patch.mapValues { (k, mv) -> mv.map { it.sample() } } }
+            .foldStateMapIncrementally(
+                deferredStateScope { sample().mapValues { (k, v) -> v.sample() } }
+            )
+
+    /**
+     * Returns an [Incremental] that tracks the entries of the original incremental, but values
+     * replaced with those obtained by applying [transform] to each original entry.
+     */
+    fun <K, V, U> Incremental<K, V>.mapValuesTransactionally(
+        transform: TransactionScope.(Map.Entry<K, V>) -> U
+    ): Incremental<K, U> = mapValues { transactionally { transform(it) } }.sampleTransactionals()
 }

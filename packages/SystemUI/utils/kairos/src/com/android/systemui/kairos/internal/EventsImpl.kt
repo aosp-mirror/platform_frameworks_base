@@ -16,7 +16,7 @@
 
 package com.android.systemui.kairos.internal
 
-/* Initialized TFlow */
+/* Initialized Events */
 internal fun interface EventsImpl<out A> {
     fun activate(evalScope: EvalScope, downstream: Schedulable): ActivationResult<A>?
 }

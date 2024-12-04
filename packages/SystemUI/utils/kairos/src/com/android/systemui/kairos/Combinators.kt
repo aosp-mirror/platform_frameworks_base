@@ -59,7 +59,7 @@ fun <A, B, C> Events<A>.samplePromptly(
     state: State<B>,
     transform: TransactionScope.(A, B) -> C,
 ): Events<C> =
-    sample(state) { a, b -> These.thiz<Pair<A, B>, B>(a to b) }
+    sample(state) { a, b -> These.thiz(a to b) }
         .mergeWith(state.changes.map { These.that(it) }) { thiz, that ->
             These.both((thiz as These.This).thiz, (that as These.That).that)
         }

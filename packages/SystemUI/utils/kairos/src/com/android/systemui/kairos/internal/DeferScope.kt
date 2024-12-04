@@ -45,17 +45,10 @@ internal inline fun <A> deferScope(block: DeferScope.() -> A): A {
 
 internal object NoValue
 
-internal class CompletableLazy<T> : Lazy<T> {
-
-    private var _value: Any?
-
-    constructor() {
-        _value = NoValue
-    }
-
-    constructor(init: T) {
-        _value = init
-    }
+internal class CompletableLazy<T>(
+    private var _value: Any? = NoValue,
+    private val name: String? = null,
+) : Lazy<T> {
 
     fun setValue(value: T) {
         check(_value === NoValue) { "CompletableLazy value already set" }
@@ -64,7 +57,7 @@ internal class CompletableLazy<T> : Lazy<T> {
 
     override val value: T
         get() {
-            check(_value !== NoValue) { "CompletableLazy accessed before initialized" }
+            check(_value !== NoValue) { "CompletableLazy($name) accessed before initialized" }
             @Suppress("UNCHECKED_CAST")
             return _value as T
         }
