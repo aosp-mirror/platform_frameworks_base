@@ -51,6 +51,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
@@ -658,6 +659,10 @@ public class InputManagerService extends IInputManager.Stub
         // Attempt to update the default pointer display when the viewports change.
         // Take care to not make calls to window manager while holding internal locks.
         mNative.setPointerDisplayId(mWindowManagerCallbacks.getPointerDisplayId());
+    }
+
+    private void setDisplayTopologyInternal(DisplayTopology topology) {
+        mNative.setDisplayTopology(topology.getGraph());
     }
 
     /**
@@ -3458,6 +3463,11 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setDisplayViewports(List<DisplayViewport> viewports) {
             setDisplayViewportsInternal(viewports);
+        }
+
+        @Override
+        public void setDisplayTopology(DisplayTopology topology) {
+            setDisplayTopologyInternal(topology);
         }
 
         @Override
