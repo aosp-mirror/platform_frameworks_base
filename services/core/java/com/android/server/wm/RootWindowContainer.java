@@ -156,6 +156,7 @@ import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.utils.RegionUtils;
+import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1794,12 +1795,24 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     activityAssistInfos.clear();
                     activityAssistInfos.add(new ActivityAssistInfo(top));
                     // Check if the activity on the split screen.
-                    final Task adjacentTask = top.getTask().getAdjacentTask();
-                    if (adjacentTask != null) {
-                        final ActivityRecord adjacentActivityRecord =
-                                adjacentTask.getTopNonFinishingActivity();
-                        if (adjacentActivityRecord != null) {
-                            activityAssistInfos.add(new ActivityAssistInfo(adjacentActivityRecord));
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        top.getTask().forOtherAdjacentTasks(task -> {
+                            final ActivityRecord adjacentActivityRecord =
+                                    task.getTopNonFinishingActivity();
+                            if (adjacentActivityRecord != null) {
+                                activityAssistInfos.add(
+                                        new ActivityAssistInfo(adjacentActivityRecord));
+                            }
+                        });
+                    } else {
+                        final Task adjacentTask = top.getTask().getAdjacentTask();
+                        if (adjacentTask != null) {
+                            final ActivityRecord adjacentActivityRecord =
+                                    adjacentTask.getTopNonFinishingActivity();
+                            if (adjacentActivityRecord != null) {
+                                activityAssistInfos.add(
+                                        new ActivityAssistInfo(adjacentActivityRecord));
+                            }
                         }
                     }
                     if (rootTask == topFocusedRootTask) {
