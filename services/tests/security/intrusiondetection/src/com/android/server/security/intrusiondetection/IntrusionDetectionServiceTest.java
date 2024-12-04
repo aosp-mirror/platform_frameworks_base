@@ -19,6 +19,7 @@ package com.android.server.security.intrusiondetection;
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE;
 import static android.Manifest.permission.READ_INTRUSION_DETECTION_STATE;
+import static android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,6 +45,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.Manifest;
 import android.os.IBinder;
 import android.os.Bundle;
 import android.os.Looper;
@@ -159,6 +161,7 @@ public class IntrusionDetectionServiceTest {
         mPermissionEnforcer = new FakePermissionEnforcer();
         mPermissionEnforcer.grant(READ_INTRUSION_DETECTION_STATE);
         mPermissionEnforcer.grant(MANAGE_INTRUSION_DETECTION_STATE);
+        mPermissionEnforcer.grant(BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE);
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
@@ -578,6 +581,9 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
+    @RequireRunOnSystemUser
+    @EnsureHasPermission(
+            android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE)
     public void test_StartIntrusionDetectionEventTransportService() {
         final String TAG = "test_StartIntrusionDetectionEventTransportService";
         ServiceConnection serviceConnection = null;
@@ -637,6 +643,20 @@ public class IntrusionDetectionServiceTest {
         assertEquals(1, transport.getEvents().size());
 
         return serviceConnection;
+    }
+
+    @Test
+    @RequireRunOnSystemUser
+    @EnsureHasPermission(
+            android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE)
+    public void testIntrusionDetectionEventTransportConnection_isValidAndBinds()
+            throws InterruptedException {
+        IntrusionDetectionEventTransportConnection intrusionDetectionEventTransportConnection =
+                new IntrusionDetectionEventTransportConnection(mContext);
+        // In a real scenario, the connection will be initialized by the service.
+        // Just to show that the connection is valid and able to bind,
+        // we initialize it here.
+        assertTrue(intrusionDetectionEventTransportConnection.initialize());
     }
 
     private class MockInjector implements IntrusionDetectionService.Injector {
