@@ -287,6 +287,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libasync_safe",
                 "libbinderthreadstateutils",
                 "libdmabufinfo",
+                "libgenfslabelsversion.ffi",
                 "libgui_window_info_static",
                 "libkernelconfigs",
                 "libnativehelper_lazy",
