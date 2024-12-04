@@ -49,6 +49,7 @@ import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.ResourcesManager;
+import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
@@ -79,6 +80,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
+import android.view.Surface;
 import android.view.View;
 import android.window.ActivityWindowInfo;
 import android.window.WindowContextInfo;
@@ -302,6 +304,59 @@ public class ActivityThreadTest {
         assertScreenScale(originalScale, app, originalAppConfig, originalAppMetrics);
     }
 
+    @Test
+    public void testOverrideDisplayRotation() throws Exception {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final Application app = activity.getApplication();
+        final ActivityThread activityThread = activity.getActivityThread();
+        final IApplicationThread appThread = activityThread.getApplicationThread();
+        final Configuration originalAppConfig =
+                new Configuration(app.getResources().getConfiguration());
+        final int originalDisplayRotation = originalAppConfig.windowConfiguration
+                .getDisplayRotation();
+
+        final Configuration newConfig = new Configuration(originalAppConfig);
+        newConfig.seq = BASE_SEQ + 1;
+
+        int sandboxedDisplayRotation = (originalDisplayRotation + 1) % 4;
+        CompatibilityInfo.setOverrideDisplayRotation(sandboxedDisplayRotation);
+        try {
+            // Send process level config change.
+            ClientTransaction transaction = newTransaction(activityThread);
+            transaction.addTransactionItem(
+                    new ConfigurationChangeItem(newConfig, DEVICE_ID_INVALID));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertDisplayRotation(sandboxedDisplayRotation, app);
+
+            sandboxedDisplayRotation = (sandboxedDisplayRotation + 1) % 4;
+            CompatibilityInfo.setOverrideDisplayRotation(sandboxedDisplayRotation);
+            // Send activity level config change.
+            newConfig.seq++;
+            transaction = newTransaction(activityThread);
+            transaction.addTransactionItem(new ActivityConfigurationChangeItem(
+                    activity.getActivityToken(), newConfig, new ActivityWindowInfo()));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertDisplayRotation(sandboxedDisplayRotation, activity);
+
+            // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
+            // the config should not change again.
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> activityThread.executeTransaction(
+                            newRelaunchResumeTransaction(activity)));
+
+            assertDisplayRotation(sandboxedDisplayRotation, activity);
+        } finally {
+            CompatibilityInfo.setOverrideDisplayRotation(WindowConfiguration.ROTATION_UNDEFINED);
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> restoreConfig(activityThread, originalAppConfig));
+        }
+        assertDisplayRotation(originalDisplayRotation, app);
+    }
+
     private static void assertScreenScale(float scale, Context context,
             Configuration origConfig, DisplayMetrics origMetrics) {
         final int expectedDpi = (int) (origConfig.densityDpi * scale + .5f);
@@ -324,6 +379,12 @@ public class ActivityThreadTest {
         assertEquals(expectedBounds, currentConfig.windowConfiguration.getBounds());
         assertEquals(expectedAppBounds, currentConfig.windowConfiguration.getAppBounds());
         assertEquals(expectedMaxBounds, currentConfig.windowConfiguration.getMaxBounds());
+    }
+
+    private static void assertDisplayRotation(@Surface.Rotation int expectedRotation,
+            Context context) {
+        final Configuration currentConfig = context.getResources().getConfiguration();
+        assertEquals(expectedRotation, currentConfig.windowConfiguration.getDisplayRotation());
     }
 
     @Test

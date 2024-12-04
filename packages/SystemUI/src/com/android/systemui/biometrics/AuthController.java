@@ -27,6 +27,7 @@ import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
+import android.app.KeyguardManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -737,6 +738,7 @@ public class AuthController implements
             @Background DelayableExecutor bgExecutor,
             @NonNull UdfpsUtils udfpsUtils,
             @NonNull VibratorHelper vibratorHelper,
+            @NonNull KeyguardManager keyguardManager,
             Lazy<ViewCapture> daggerLazyViewCapture,
             @NonNull MSDLPlayer msdlPlayer) {
         mContext = context;
@@ -767,6 +769,15 @@ public class AuthController implements
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
+
+        keyguardManager.addKeyguardLockedStateListener(
+                context.getMainExecutor(),
+                isKeyguardLocked -> {
+                    if (isKeyguardLocked) {
+                        closeDialog("Device lock");
+                    }
+                }
+        );
 
         mOrientationListener = new BiometricDisplayListener(
                 context,

@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot.proxy
+package android.security;
 
-import android.app.Service
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.screenshot.ScreenshotProxyService
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
-
-@Module
-interface SystemUiProxyModule {
-
-    @Binds
-    @IntoMap
-    @ClassKey(ScreenshotProxyService::class)
-    fun bindScreenshotProxyService(service: ScreenshotProxyService): Service
-
-    @Binds
-    @SysUISingleton
-    fun bindSystemUiProxy(systemUiProxyClient: SystemUiProxyClient): SystemUiProxy
+/**
+ * @hide This class is necessary to allow the version of the AIDL interface for Keystore and
+* KeyMint used in KeyStore2.java to differ by BUILD flag `RELEASE_ATTEST_MODULES`. When
+* `RELEASE_ATTEST_MODULES` is set, this file is included, and the latest HALs for Keystore (V5)
+* and KeyMint (V4) are used.
+*/
+class KeyStore2HalVersion {
+    public static byte[] getSupplementaryAttestationInfoHelper(int tag, KeyStore2 ks)
+            throws KeyStoreException {
+        return ks.handleRemoteExceptionWithRetry(
+            (service) -> service.getSupplementaryAttestationInfo(tag));
+    }
 }

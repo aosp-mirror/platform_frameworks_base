@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
@@ -30,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
+import static com.android.wm.shell.transition.Transitions.transitTypeToString;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -44,6 +46,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -280,6 +283,31 @@ public class PipTransition extends PipTransitionController implements
         mFinishCallback = null;
         return false;
     }
+
+    @Override
+    public boolean isEnteringPip(@NonNull TransitionInfo.Change change,
+            @WindowManager.TransitionType int transitType) {
+        if (change.getTaskInfo() != null
+                && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
+            // TRANSIT_TO_FRONT, though uncommon with triggering PiP, should semantically also
+            // be allowed to animate if the task in question is pinned already - see b/308054074.
+            if (transitType == TRANSIT_PIP || transitType == TRANSIT_OPEN
+                    || transitType == TRANSIT_TO_FRONT) {
+                return true;
+            }
+            // This can happen if the request to enter PIP happens when we are collecting for
+            // another transition, such as TRANSIT_CHANGE (display rotation).
+            if (transitType == TRANSIT_CHANGE) {
+                return true;
+            }
+
+            // Please file a bug to handle the unexpected transition type.
+            android.util.Slog.e(TAG, "Found new PIP in transition with mis-matched type="
+                    + transitTypeToString(transitType), new Throwable());
+        }
+        return false;
+    }
+
 
     @Override
     public void end() {
@@ -655,19 +683,6 @@ public class PipTransition extends PipTransitionController implements
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getTaskInfo() != null
                     && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
-                return change;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private TransitionInfo.Change getDeferConfigActivityChange(TransitionInfo info,
-            @NonNull WindowContainerToken parent) {
-        for (TransitionInfo.Change change : info.getChanges()) {
-            if (change.getTaskInfo() == null
-                    && change.hasFlags(TransitionInfo.FLAG_CONFIG_AT_END)
-                    && change.getParent() != null && change.getParent().equals(parent)) {
                 return change;
             }
         }

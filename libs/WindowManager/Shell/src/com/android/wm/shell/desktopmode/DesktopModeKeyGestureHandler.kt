@@ -65,7 +65,9 @@ class DesktopModeKeyGestureHandler(
             KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY -> {
                 logV("Key gesture MOVE_TO_NEXT_DISPLAY is handled")
                 getGloballyFocusedFreeformTask()?.let {
-                    desktopTasksController.get().moveToNextDisplay(it.taskId)
+                    mainExecutor.execute {
+                        desktopTasksController.get().moveToNextDisplay(it.taskId)
+                    }
                 }
                 return true
             }

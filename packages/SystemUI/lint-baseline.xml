@@ -33752,4 +33752,16 @@
             column="5"/>
     </issue>
 
+    <issue
+        id="ShadeDisplayAwareContextChecker"
+        message="UI elements of the shade window&#xA;should use ShadeDisplayAware-annotated ConfigurationInteractor, as the shade might move between windows, and only&#xA;@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so&#xA;might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).&#xA;If the usage of ConfigurationInteractor is not related to display specific configuration or UI, then there is&#xA;technically no need to use the annotation, and you can annotate the class with&#xA;@SuppressLint(&quot;ShadeDisplayAwareContextChecker&quot;)/@Suppress(&quot;ShadeDisplayAwareContextChecker&quot;)"
+        errorLine1="    @GlobalConfig configurationInteractor: ConfigurationInteractor,"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="frameworks/base/packages/SystemUI/src/com/android/systemui/keyboard/docking/ui/viewmodel/KeyboardDockingIndicationViewModel.kt"
+            line="43"
+            column="5"/>
+    </issue>
+
+
 </issues>

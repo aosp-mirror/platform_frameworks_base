@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.screenshot
+
+package com.android.systemui.screenshot.proxy
 
 import android.content.Intent
 import android.os.IBinder
@@ -67,7 +68,7 @@ constructor(
                 null,
                 true /* dismissShade */,
                 true /* afterKeyguardGone */,
-                true /* deferred */
+                true, /* deferred */
             )
         }
 

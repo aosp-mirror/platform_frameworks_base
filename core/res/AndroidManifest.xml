@@ -1139,6 +1139,16 @@
                 android:protectionLevel="signature|privileged|vendorPrivileged"
                 android:featureFlag="android.media.tv.flags.media_quality_fw"/>
 
+    <!--
+        @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+        Allows an application to read the aggregated color zones on the screen for use cases like
+        TV ambient backlight usages.
+        <p> Protection level: normal
+    -->
+    <permission android:name="android.permission.READ_COLOR_ZONES"
+                android:protectionLevel="normal"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
     <!-- ====================================================================== -->
@@ -4138,6 +4148,14 @@
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION"
                 android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to AppFunctions.
+        <p>Protection level: internal|role
+        @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set policy related to subscriptions downloaded by an admin.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call

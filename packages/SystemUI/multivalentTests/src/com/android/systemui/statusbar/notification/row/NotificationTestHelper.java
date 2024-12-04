@@ -25,7 +25,6 @@ import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.util.Assert.runWithCurrentThreadAsMainThread;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -59,8 +58,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
+import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -71,7 +70,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
-import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -79,6 +77,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -89,7 +88,6 @@ import com.android.systemui.statusbar.notification.row.NotificationRowContentBin
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
@@ -99,7 +97,6 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
-import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
 import kotlin.coroutines.CoroutineContext;
@@ -109,7 +106,6 @@ import kotlinx.coroutines.test.TestScope;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -149,7 +145,7 @@ public class NotificationTestHelper {
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
-    private final FakeFeatureFlags mFeatureFlags;
+    private final FakeFeatureFlagsClassic mFeatureFlags;
     private final SystemClock mSystemClock;
     private final RowInflaterTaskLogger mRowInflaterTaskLogger;
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
@@ -167,17 +163,17 @@ public class NotificationTestHelper {
             Context context,
             TestableDependency dependency,
             @Nullable TestableLooper testLooper) {
-        this(context, dependency, testLooper, new FakeFeatureFlags());
+        this(context, dependency, testLooper, new FakeFeatureFlagsClassic());
     }
 
     public NotificationTestHelper(
             Context context,
             TestableDependency dependency,
             @Nullable TestableLooper testLooper,
-            @NonNull FakeFeatureFlags featureFlags) {
+            @NonNull FakeFeatureFlagsClassic featureFlags) {
         mContext = context;
         mFeatureFlags = Objects.requireNonNull(featureFlags);
-        dependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
+        dependency.injectTestDependency(FeatureFlagsClassic.class, mFeatureFlags);
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(MediaOutputDialogManager.class);
@@ -277,24 +273,6 @@ public class NotificationTestHelper {
 
     public NotificationDismissibilityProvider getDismissibilityProvider() {
         return mDismissibilityProvider;
-    }
-
-    /**
-     * Creates a generic row with rounded border.
-     *
-     * @return a generic row with the set roundness.
-     * @throws Exception
-     */
-    public ExpandableNotificationRow createRowWithRoundness(
-            float topRoundness,
-            float bottomRoundness,
-            SourceType sourceType
-    ) throws Exception {
-        ExpandableNotificationRow row = createRow();
-        row.requestRoundness(topRoundness, bottomRoundness, sourceType, /*animate = */ false);
-        assertEquals(topRoundness, row.getTopRoundness(), /* delta = */ 0f);
-        assertEquals(bottomRoundness, row.getBottomRoundness(), /* delta = */ 0f);
-        return row;
     }
 
     /**
@@ -400,9 +378,8 @@ public class NotificationTestHelper {
                 null /* groupKey */,
                 makeBubbleMetadata(null /* deleteIntent */, false /* autoExpand */));
         n.flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
-        ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
+        return generateRow(n, PKG, UID, USER_HANDLE,
                 mDefaultInflationFlags, IMPORTANCE_HIGH);
-        return row;
     }
 
 
@@ -668,7 +645,6 @@ public class NotificationTestHelper {
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
-                Optional.of(mock(BubblesManager.class)),
                 mock(NotificationGutsManager.class),
                 mDismissibilityProvider,
                 mock(MetricsLogger.class),
@@ -676,7 +652,6 @@ public class NotificationTestHelper {
                 mock(ColorUpdateLogger.class),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
-                mFeatureFlags,
                 mock(IStatusBarService.class),
                 mock(UiEventLogger.class));
 

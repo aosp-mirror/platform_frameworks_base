@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
@@ -80,14 +81,14 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
 
     @Mock private val mAccessibilityMgr: AccessibilityManagerWrapper? = null
 
-    protected val mGlobalSettings: FakeGlobalSettings = FakeGlobalSettings()
-    protected val mSystemClock: FakeSystemClock = FakeSystemClock()
-    protected val mExecutor: FakeExecutor = FakeExecutor(mSystemClock)
+    protected val globalSettings: FakeGlobalSettings = FakeGlobalSettings()
+    protected val systemClock: FakeSystemClock = FakeSystemClock()
+    protected val executor: FakeExecutor = FakeExecutor(systemClock)
 
     @Mock protected var mRow: ExpandableNotificationRow? = null
 
     private fun createHeadsUpManager(): HeadsUpManagerImpl {
-        return TestableHeadsUpManager(
+        return HeadsUpManagerImpl(
             mContext,
             mLogger,
             mKosmos.statusBarStateController,
@@ -95,9 +96,10 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
             GroupMembershipManagerImpl(),
             mKosmos.visualStabilityProvider,
             mKosmos.configurationController,
-            mExecutor,
-            mGlobalSettings,
-            mSystemClock,
+            mockExecutorHandler(executor),
+            globalSettings,
+            systemClock,
+            executor,
             mAccessibilityMgr,
             mUiEventLoggerFake,
             JavaAdapter(mKosmos.testScope),
@@ -150,6 +152,24 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     @Throws(Exception::class)
     override fun SysuiSetup() {
         super.SysuiSetup()
+        mContext.getOrCreateTestableResources().apply {
+            this.addOverride(R.integer.ambient_notification_extension_time, TEST_EXTENSION_TIME)
+            this.addOverride(R.integer.touch_acceptance_delay, TEST_TOUCH_ACCEPTANCE_TIME)
+            this.addOverride(
+                R.integer.heads_up_notification_minimum_time,
+                TEST_MINIMUM_DISPLAY_TIME,
+            )
+            this.addOverride(
+                R.integer.heads_up_notification_minimum_time_with_throttling,
+                TEST_MINIMUM_DISPLAY_TIME,
+            )
+            this.addOverride(R.integer.heads_up_notification_decay, TEST_AUTO_DISMISS_TIME)
+            this.addOverride(
+                R.integer.sticky_heads_up_notification_time,
+                TEST_STICKY_AUTO_DISMISS_TIME,
+            )
+        }
+
         mAvalancheController =
             AvalancheController(dumpManager!!, mUiEventLoggerFake, mLogger, mBgHandler!!)
         Mockito.`when`(mShadeInteractor!!.isAnyExpanded).thenReturn(MutableStateFlow(true))
@@ -227,7 +247,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
         alm.showNotification(entry)
-        mSystemClock.advanceTime((TEST_AUTO_DISMISS_TIME * 3 / 2).toLong())
+        systemClock.advanceTime((TEST_AUTO_DISMISS_TIME * 3 / 2).toLong())
 
         assertThat(alm.isHeadsUpEntry(entry.key)).isFalse()
     }
@@ -304,7 +324,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(false)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime((TEST_TOUCH_ACCEPTANCE_TIME / 2 + TEST_AUTO_DISMISS_TIME).toLong())
+        systemClock.advanceTime((TEST_TOUCH_ACCEPTANCE_TIME / 2 + TEST_AUTO_DISMISS_TIME).toLong())
 
         assertThat(hum.isHeadsUpEntry(entry.key)).isTrue()
     }
@@ -316,7 +336,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(false)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime(
+        systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME +
                     (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
                 .toLong()
@@ -332,7 +352,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(false)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime(
+        systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME +
                     (TEST_AUTO_DISMISS_TIME + TEST_STICKY_AUTO_DISMISS_TIME) / 2)
                 .toLong()
@@ -348,7 +368,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(false)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime(
+        systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME).toLong()
         )
 
@@ -362,7 +382,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(true)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime(
+        systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME +
                     (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
                 .toLong()
@@ -378,7 +398,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(true)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime(
+        systemClock.advanceTime(
             (TEST_TOUCH_ACCEPTANCE_TIME +
                     (TEST_STICKY_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2)
                 .toLong()
@@ -404,9 +424,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         assertThat(removedImmediately).isFalse()
         assertThat(hum.isHeadsUpEntry(entry.key)).isTrue()
 
-        mSystemClock.advanceTime(
-            ((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2).toLong()
-        )
+        systemClock.advanceTime(((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2).toLong())
 
         assertThat(hum.isHeadsUpEntry(entry.key)).isFalse()
     }
@@ -418,9 +436,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         useAccessibilityTimeout(false)
 
         hum.showNotification(entry)
-        mSystemClock.advanceTime(
-            ((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2).toLong()
-        )
+        systemClock.advanceTime(((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2).toLong())
 
         assertThat(hum.isHeadsUpEntry(entry.key)).isTrue()
 
@@ -613,12 +629,10 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         hum.onEntryAdded(entryToPin)
 
         assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(2)
-        assertThat(
-            AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId(),
-        ).isEqualTo(mUiEventLoggerFake.eventId(0))
-        assertThat(
-            HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id,
-        ).isEqualTo(mUiEventLoggerFake.eventId(1))
+        assertThat(AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId())
+            .isEqualTo(mUiEventLoggerFake.eventId(0))
+        assertThat(HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id)
+            .isEqualTo(mUiEventLoggerFake.eventId(1))
     }
 
     @Test
@@ -640,9 +654,8 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
         hum.onEntryAdded(entryToPin)
 
         assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1)
-        assertThat(
-            HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id,
-        ).isEqualTo(mUiEventLoggerFake.eventId(0))
+        assertThat(HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id)
+            .isEqualTo(mUiEventLoggerFake.eventId(0))
     }
 
     @Test
@@ -662,6 +675,7 @@ open class HeadsUpManagerImplOldTest(flags: FlagsParameterization?) : SysuiTestC
     companion object {
         const val TEST_TOUCH_ACCEPTANCE_TIME: Int = 200
         const val TEST_A11Y_AUTO_DISMISS_TIME: Int = 1000
+        const val TEST_EXTENSION_TIME = 500
 
         const val TEST_MINIMUM_DISPLAY_TIME: Int = 400
         const val TEST_AUTO_DISMISS_TIME: Int = 600

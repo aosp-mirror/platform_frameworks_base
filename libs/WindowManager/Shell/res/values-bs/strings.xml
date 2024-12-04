@@ -87,7 +87,7 @@
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Upravljajte oblačićima u svakom trenutku"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Dodirnite ovdje da upravljate time koje aplikacije i razgovori mogu imati oblačić"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Oblačić"</string>
-    <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljaj"</string>
+    <string name="manage_bubbles_text" msgid="7730624269650594419">"Upravljajte"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Oblačić je odbačen."</string>
     <string name="bubble_shortcut_label" msgid="666269077944378311">"Oblačići"</string>
     <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Prikaz oblačića"</string>

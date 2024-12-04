@@ -38,9 +38,6 @@ data class ActiveNotificationModel(
     val groupKey: String?,
     /** When this notification was posted. */
     val whenTime: Long,
-    // TODO(b/377566661): Make isPromoted just check if promotedContent != null.
-    /** True if this notification should be promoted and false otherwise. */
-    val isPromoted: Boolean,
     /** Is this entry in the ambient / minimized section (lowest priority)? */
     val isAmbient: Boolean,
     /**

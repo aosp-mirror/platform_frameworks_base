@@ -79,11 +79,10 @@ constructor(
     /** The notifications that are promoted and ongoing. Sorted by priority order. */
     val promotedOngoingNotifications: Flow<List<ActiveNotificationModel>> =
         if (StatusBarNotifChips.isEnabled) {
-            // TODO(b/364653005): Filter all the notifications down to just the promoted ones.
             // TODO(b/364653005): [ongoingCallNotification] should be incorporated into this flow
             // instead of being separate.
             topLevelRepresentativeNotifications
-                .map { notifs -> notifs.filter { it.isPromoted } }
+                .map { notifs -> notifs.filter { it.promotedContent != null } }
                 .distinctUntilChanged()
                 .flowOn(backgroundDispatcher)
         } else {

@@ -68,8 +68,6 @@ constructor(
             .map { entries -> entries[instanceId]?.let { toMediaControlModel(it) } }
             .distinctUntilChanged()
 
-    val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
-
     fun removeMediaControl(
         token: MediaSession.Token?,
         instanceId: InstanceId,

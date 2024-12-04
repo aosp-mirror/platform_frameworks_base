@@ -10061,6 +10061,13 @@ public class CarrierConfigManager {
             "satellite_nidd_apn_name_string";
 
     /**
+     * The display name that will be used for satellite functionality within the UI.
+     * The default string value for this is "Satellite".
+     * @hide
+     */
+    public static final String KEY_SATELLITE_DISPLAY_NAME_STRING = "satellite_display_name_string";
+
+    /**
      * Default value {@code true}, meaning when an emergency call request comes in, if the device is
      * in emergency satellite mode but hasn't sent the first satellite datagram, then exits
      * satellite mode to allow the emergency call to go through.
@@ -11343,6 +11350,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
+        sDefaults.putString(KEY_SATELLITE_DISPLAY_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");

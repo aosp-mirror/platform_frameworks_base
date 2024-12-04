@@ -27,7 +27,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -319,16 +318,6 @@ public class AuthContainerView extends LinearLayout
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
         mMSDLPlayer = msdlPlayer;
-
-        // Listener for when device locks from adaptive auth, dismiss prompt
-        getContext().getSystemService(KeyguardManager.class).addKeyguardLockedStateListener(
-                getContext().getMainExecutor(),
-                isKeyguardLocked -> {
-                    if (isKeyguardLocked) {
-                        onStartedGoingToSleep();
-                    }
-                }
-        );
 
         final BiometricModalities biometricModalities = new BiometricModalities(
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),

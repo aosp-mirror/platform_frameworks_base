@@ -325,36 +325,6 @@ public final class HintManagerService extends SystemService {
         }
 
         SupportInfo supportInfo = new SupportInfo();
-        supportInfo.usesSessions = isHintSessionSupported();
-        // Global boosts & modes aren't currently relevant for HMS clients
-        supportInfo.boosts = 0;
-        supportInfo.modes = 0;
-        supportInfo.sessionHints = 0;
-        supportInfo.sessionModes = 0;
-        supportInfo.sessionTags = 0;
-        if (isHintSessionSupported()) {
-            if (mPowerHalVersion == 4) {
-                // Assume we support the V4 hints & modes unless specified
-                // otherwise; this is to avoid breaking backwards compat
-                // since we historically just assumed they were.
-                supportInfo.sessionHints = 31; // first 5 bits are ones
-            }
-            if (mPowerHalVersion == 5) {
-                // Assume we support the V5 hints & modes unless specified
-                // otherwise; this is to avoid breaking backwards compat
-                // since we historically just assumed they were.
-
-                // Hal V5 has 8 modes, all of which it assumes are supported,
-                // so we represent that by having the first 8 bits set
-                supportInfo.sessionHints = 255; // first 8 bits are ones
-                // Hal V5 has 1 mode which it assumes is supported, so we
-                // represent that by having the first bit set
-                supportInfo.sessionModes = 1;
-                // Hal V5 has 5 tags, all of which it assumes are supported,
-                // so we represent that by having the first 5 bits set
-                supportInfo.sessionTags = 31;
-            }
-        }
         supportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
         supportInfo.headroom.isCpuSupported = false;
         supportInfo.headroom.isGpuSupported = false;

@@ -17,10 +17,10 @@ package com.android.internal.widget.remotecompose.accessibility;
 
 import android.annotation.Nullable;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.os.Bundle;
 
 import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
@@ -31,9 +31,9 @@ import com.android.internal.widget.remotecompose.core.semantics.AccessibilitySem
 import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,11 +43,8 @@ import java.util.stream.Stream;
  * list of modifiers that must be tagged with {@link AccessibilitySemantics} either incidentally
  * (see {@link ClickModifierOperation}) or explicitly (see {@link CoreSemantics}).
  */
-public class CoreDocumentAccessibility
-        implements RemoteComposeDocumentAccessibility<Component, AccessibilitySemantics> {
+public class CoreDocumentAccessibility implements RemoteComposeDocumentAccessibility {
     private final CoreDocument mDocument;
-
-    private final Rect mMissingBounds = new Rect(0, 0, 1, 1);
 
     public CoreDocumentAccessibility(CoreDocument document) {
         this.mDocument = document;
@@ -74,17 +71,25 @@ public class CoreDocumentAccessibility
     }
 
     @Override
-    public List<CoreSemantics.Mode> mergeMode(Component component) {
+    public CoreSemantics.Mode mergeMode(Component component) {
         if (!(component instanceof LayoutComponent)) {
-            return Collections.singletonList(CoreSemantics.Mode.SET);
+            return CoreSemantics.Mode.SET;
         }
 
-        return ((LayoutComponent) component)
-                .getComponentModifiers().getList().stream()
-                        .filter(i -> i instanceof AccessibleComponent)
-                        .map(i -> ((AccessibleComponent) i).getMode())
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+        CoreSemantics.Mode result = CoreSemantics.Mode.SET;
+
+        for (ModifierOperation modifier :
+                ((LayoutComponent) component).getComponentModifiers().getList()) {
+            if (modifier instanceof AccessibleComponent) {
+                AccessibleComponent semantics = (AccessibleComponent) modifier;
+
+                if (semantics.getMode().ordinal() > result.ordinal()) {
+                    result = semantics.getMode();
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -101,6 +106,7 @@ public class CoreDocumentAccessibility
     @Override
     public String stringValue(int id) {
         Object value = mDocument.getRemoteComposeState().getFromId(id);
+
         return value != null ? String.valueOf(value) : null;
     }
 
@@ -124,12 +130,33 @@ public class CoreDocumentAccessibility
     }
 
     @Override
-    public List<Integer> semanticallyRelevantChildComponents(Component component) {
-        return componentStream(component)
-                .filter(i -> i.getComponentId() != component.getComponentId())
-                .filter(CoreDocumentAccessibility::isInteresting)
-                .map(Component::getComponentId)
-                .collect(Collectors.toList());
+    public List<Integer> semanticallyRelevantChildComponents(
+            Component component, boolean useUnmergedTree) {
+        if (!component.isVisible()) {
+            return Collections.emptyList();
+        }
+
+        CoreSemantics.Mode mergeMode = mergeMode(component);
+        if (mergeMode == CoreSemantics.Mode.CLEAR_AND_SET
+                || (!useUnmergedTree && mergeMode == CoreSemantics.Mode.MERGE)) {
+            return Collections.emptyList();
+        }
+
+        ArrayList<Integer> result = new ArrayList<>();
+
+        for (Operation child : component.mList) {
+            if (child instanceof Component) {
+                if (isInteresting((Component) child)) {
+                    result.add(((Component) child).getComponentId());
+                } else {
+                    result.addAll(
+                            semanticallyRelevantChildComponents(
+                                    (Component) child, useUnmergedTree));
+                }
+            }
+        }
+
+        return result;
     }
 
     static Stream<Component> componentStream(Component root) {
@@ -153,12 +180,13 @@ public class CoreDocumentAccessibility
     }
 
     static boolean isInteresting(Component component) {
-        boolean interesting =
-                isContainerWithSemantics(component)
-                        || modifiersStream(component)
-                                .anyMatch(CoreDocumentAccessibility::isModifierWithSemantics);
+        if (!component.isVisible()) {
+            return false;
+        }
 
-        return interesting && component.isVisible();
+        return isContainerWithSemantics(component)
+                || modifiersStream(component)
+                        .anyMatch(CoreDocumentAccessibility::isModifierWithSemantics);
     }
 
     static boolean isModifierWithSemantics(ModifierOperation modifier) {

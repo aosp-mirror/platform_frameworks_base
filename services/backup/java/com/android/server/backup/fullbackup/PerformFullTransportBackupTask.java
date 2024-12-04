@@ -272,8 +272,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
             }
         }
 
-        mPackages = backupManagerService.filterUserFacingPackages(mPackages);
-
         Set<String> packageNames = Sets.newHashSet();
         for (PackageInfo pkgInfo : mPackages) {
             packageNames.add(pkgInfo.packageName);

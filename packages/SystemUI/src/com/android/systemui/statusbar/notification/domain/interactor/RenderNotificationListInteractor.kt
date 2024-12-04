@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProvider
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
@@ -52,7 +51,6 @@ class RenderNotificationListInteractor
 constructor(
     private val repository: ActiveNotificationListRepository,
     private val sectionStyleProvider: SectionStyleProvider,
-    private val promotedNotificationsProvider: PromotedNotificationsProvider,
 ) {
     /**
      * Sets the current list of rendered notification entries as displayed in the notification list.
@@ -60,11 +58,7 @@ constructor(
     fun setRenderedList(entries: List<ListEntry>) {
         traceSection("RenderNotificationListInteractor.setRenderedList") {
             repository.activeNotifications.update { existingModels ->
-                buildActiveNotificationsStore(
-                    existingModels,
-                    sectionStyleProvider,
-                    promotedNotificationsProvider,
-                ) {
+                buildActiveNotificationsStore(existingModels, sectionStyleProvider) {
                     entries.forEach(::addListEntry)
                     setRankingsMap(entries)
                 }
@@ -76,21 +70,13 @@ constructor(
 private fun buildActiveNotificationsStore(
     existingModels: ActiveNotificationsStore,
     sectionStyleProvider: SectionStyleProvider,
-    promotedNotificationsProvider: PromotedNotificationsProvider,
     block: ActiveNotificationsStoreBuilder.() -> Unit,
 ): ActiveNotificationsStore =
-    ActiveNotificationsStoreBuilder(
-            existingModels,
-            sectionStyleProvider,
-            promotedNotificationsProvider,
-        )
-        .apply(block)
-        .build()
+    ActiveNotificationsStoreBuilder(existingModels, sectionStyleProvider).apply(block).build()
 
 private class ActiveNotificationsStoreBuilder(
     private val existingModels: ActiveNotificationsStore,
     private val sectionStyleProvider: SectionStyleProvider,
-    private val promotedNotificationsProvider: PromotedNotificationsProvider,
 ) {
     private val builder = ActiveNotificationsStore.Builder()
 
@@ -163,7 +149,6 @@ private class ActiveNotificationsStoreBuilder(
             key = key,
             groupKey = sbn.groupKey,
             whenTime = sbn.notification.`when`,
-            isPromoted = promotedNotificationsProvider.shouldPromote(this),
             isAmbient = sectionStyleProvider.isMinimized(this),
             isRowDismissed = isRowDismissed,
             isSilent = sectionStyleProvider.isSilent(this),
@@ -190,7 +175,6 @@ private fun ActiveNotificationsStore.createOrReuse(
     key: String,
     groupKey: String?,
     whenTime: Long,
-    isPromoted: Boolean,
     isAmbient: Boolean,
     isRowDismissed: Boolean,
     isSilent: Boolean,
@@ -215,7 +199,6 @@ private fun ActiveNotificationsStore.createOrReuse(
             key = key,
             groupKey = groupKey,
             whenTime = whenTime,
-            isPromoted = isPromoted,
             isAmbient = isAmbient,
             isRowDismissed = isRowDismissed,
             isSilent = isSilent,
@@ -240,7 +223,6 @@ private fun ActiveNotificationsStore.createOrReuse(
             key = key,
             groupKey = groupKey,
             whenTime = whenTime,
-            isPromoted = isPromoted,
             isAmbient = isAmbient,
             isRowDismissed = isRowDismissed,
             isSilent = isSilent,
@@ -266,7 +248,6 @@ private fun ActiveNotificationModel.isCurrent(
     key: String,
     groupKey: String?,
     whenTime: Long,
-    isPromoted: Boolean,
     isAmbient: Boolean,
     isRowDismissed: Boolean,
     isSilent: Boolean,
@@ -290,7 +271,6 @@ private fun ActiveNotificationModel.isCurrent(
         key != this.key -> false
         groupKey != this.groupKey -> false
         whenTime != this.whenTime -> false
-        isPromoted != this.isPromoted -> false
         isAmbient != this.isAmbient -> false
         isRowDismissed != this.isRowDismissed -> false
         isSilent != this.isSilent -> false

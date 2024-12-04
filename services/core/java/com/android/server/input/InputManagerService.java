@@ -181,6 +181,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
     private static final int MSG_CURRENT_USER_CHANGED = 4;
+    private static final int MSG_SYSTEM_READY = 5;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -351,6 +352,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
+    // Manages storage and retrieval of input data.
+    private final InputDataStore mInputDataStore;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -500,7 +504,9 @@ public class InputManagerService extends IInputManager.Stub
                 injector.getUEventManager());
         mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative);
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
+        mInputDataStore = new InputDataStore();
+        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper(),
+                mInputDataStore);
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -562,6 +568,14 @@ public class InputManagerService extends IInputManager.Stub
 
         // Add ourselves to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+    }
+
+    private void onBootPhase(int phase) {
+        // On ActivityManager thread, shift to handler to avoid blocking other system services in
+        // this boot phase.
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
+        }
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -3220,6 +3234,9 @@ public class InputManagerService extends IInputManager.Stub
                 case MSG_CURRENT_USER_CHANGED:
                     handleCurrentUserChanged((int) msg.obj);
                     break;
+                case MSG_SYSTEM_READY:
+                    systemRunning();
+                    break;
             }
         }
     }
@@ -3424,10 +3441,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void onBootPhase(int phase) {
-            // Called on ActivityManager thread.
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemRunning();
-            }
+            mService.onBootPhase(phase);
         }
 
         @Override
