@@ -1928,6 +1928,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
+        t.traceBegin("UpdateMetricsIfNeeded");
+        mPackageManagerService.updateMetricsIfNeeded();
+        t.traceEnd();
+
         t.traceBegin("PerformFstrimIfNeeded");
         try {
             mPackageManagerService.performFstrimIfNeeded();
