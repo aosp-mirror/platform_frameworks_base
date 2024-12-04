@@ -29,6 +29,7 @@ import android.widget.LinearLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
+import com.android.systemui.Flags.FLAG_STATUS_BAR_CHIPS_MODERNIZATION
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
 import com.android.systemui.Flags.FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP
 import com.android.systemui.SysuiTestCase
@@ -77,6 +78,7 @@ import org.mockito.kotlin.whenever
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP)
+@DisableFlags(StatusBarChipsModernization.FLAG_NAME)
 class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     private val kosmos = Kosmos()
 

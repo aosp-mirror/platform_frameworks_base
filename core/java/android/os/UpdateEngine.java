@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -663,6 +664,25 @@ public class UpdateEngine {
         try {
             mUpdateEngine.cleanupSuccessfulUpdate(callback);
             return callback.getResult();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Run postinstall script for specified partition |partition|
+     *
+     * @param partition The partition to trigger postinstall runs
+     *
+     * @throws ServiceSpecificException error code of this exception would be one of
+     * https://cs.android.com/android/platform/superproject/main/+/main:system/update_engine/common/error_code.h
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UPDATE_ENGINE_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void triggerPostinstall(@NonNull String partition) {
+        try {
+            mUpdateEngine.triggerPostinstall(partition);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

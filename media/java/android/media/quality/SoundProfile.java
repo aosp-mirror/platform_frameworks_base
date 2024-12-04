@@ -48,6 +48,7 @@ public final class SoundProfile implements Parcelable {
     private final String mPackageName;
     @NonNull
     private final PersistableBundle mParams;
+    private final SoundProfileHandle mHandle;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -120,6 +121,7 @@ public final class SoundProfile implements Parcelable {
         mInputId = in.readString();
         mPackageName = in.readString();
         mParams = in.readPersistableBundle();
+        mHandle = in.readParcelable(SoundProfileHandle.class.getClassLoader());
     }
 
     @Override
@@ -130,6 +132,7 @@ public final class SoundProfile implements Parcelable {
         dest.writeString(mInputId);
         dest.writeString(mPackageName);
         dest.writePersistableBundle(mParams);
+        dest.writeParcelable(mHandle, flags);
     }
 
     @Override
@@ -162,13 +165,15 @@ public final class SoundProfile implements Parcelable {
             @NonNull String name,
             @Nullable String inputId,
             @NonNull String packageName,
-            @NonNull PersistableBundle params) {
+            @NonNull PersistableBundle params,
+            @NonNull SoundProfileHandle handle) {
         this.mId = id;
         this.mType = type;
         this.mName = name;
         this.mInputId = inputId;
         this.mPackageName = packageName;
         this.mParams = params;
+        this.mHandle = handle;
     }
 
     /**
@@ -250,6 +255,15 @@ public final class SoundProfile implements Parcelable {
     }
 
     /**
+     * Gets profile handle
+     * @hide
+     */
+    @NonNull
+    public SoundProfileHandle getHandle() {
+        return mHandle;
+    }
+
+    /**
      * A builder for {@link SoundProfile}
      */
     public static final class Builder {
@@ -264,6 +278,7 @@ public final class SoundProfile implements Parcelable {
         private String mPackageName;
         @NonNull
         private PersistableBundle mParams;
+        private SoundProfileHandle mHandle;
 
         /**
          * Creates a new Builder.
@@ -282,6 +297,7 @@ public final class SoundProfile implements Parcelable {
             mPackageName = p.getPackageName();
             mInputId = p.getInputId();
             mParams = p.getParameters();
+            mHandle = p.getHandle();
         }
 
         /**
@@ -349,6 +365,16 @@ public final class SoundProfile implements Parcelable {
         }
 
         /**
+         * Sets profile handle.
+         * @hide
+         */
+        @NonNull
+        public Builder setHandle(@NonNull SoundProfileHandle handle) {
+            mHandle = handle;
+            return this;
+        }
+
+        /**
          * Builds the instance.
          */
         @NonNull
@@ -360,7 +386,8 @@ public final class SoundProfile implements Parcelable {
                     mName,
                     mInputId,
                     mPackageName,
-                    mParams);
+                    mParams,
+                    mHandle);
             return o;
         }
     }

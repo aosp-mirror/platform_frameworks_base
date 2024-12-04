@@ -41,6 +41,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -247,7 +248,7 @@ public class RotationLockTileTest extends SysuiTestCase {
 
         mLockTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_auto_rotate_icon_off));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_auto_rotate_icon_off));
     }
 
     @Test
@@ -257,7 +258,7 @@ public class RotationLockTileTest extends SysuiTestCase {
 
         mLockTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_auto_rotate_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_auto_rotate_icon_on));
     }
 
 
@@ -280,5 +281,13 @@ public class RotationLockTileTest extends SysuiTestCase {
 
     private void disableCameraBasedRotation() {
         when(mRotationPolicyWrapper.isCameraRotationEnabled()).thenReturn(false);
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 }

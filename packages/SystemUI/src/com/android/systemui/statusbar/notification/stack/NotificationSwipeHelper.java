@@ -40,6 +40,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -560,7 +561,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private NotificationRoundnessManager mNotificationRoundnessManager;
 
         @Inject
-        Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
+        Builder(@ShadeDisplayAware Resources resources, ViewConfiguration viewConfiguration,
                 DumpManager dumpManager,
                 FalsingManager falsingManager, FeatureFlags featureFlags,
                 NotificationRoundnessManager notificationRoundnessManager) {

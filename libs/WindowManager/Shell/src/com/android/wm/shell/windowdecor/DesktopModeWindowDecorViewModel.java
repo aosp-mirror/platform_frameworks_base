@@ -79,6 +79,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
@@ -139,6 +140,8 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -217,6 +220,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private boolean mInImmersiveMode;
     private final String mSysUIPackageName;
     private final AssistContentRequester mAssistContentRequester;
+    private final WindowDecorViewHostSupplier<WindowDecorViewHost> mWindowDecorViewHostSupplier;
 
     private final DisplayChangeController.OnDisplayChangingListener mOnDisplayChangingListener;
     private final ISystemGestureExclusionListener mGestureExclusionListener =
@@ -260,6 +264,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
@@ -289,6 +294,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 desktopImmersiveController,
                 genericLinksParser,
                 assistContentRequester,
+                windowDecorViewHostSupplier,
                 multiInstanceHelper,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
@@ -329,6 +335,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             DesktopImmersiveController desktopImmersiveController,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
@@ -381,6 +388,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
         mActivityOrientationChangeHandler = activityOrientationChangeHandler;
         mAssistContentRequester = assistContentRequester;
+        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         mOnDisplayChangingListener = (displayId, fromRotation, toRotation, displayAreaInfo, t) -> {
             DesktopModeWindowDecoration decoration;
             RunningTaskInfo taskInfo;
@@ -965,8 +973,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             }
             if (mInputManager != null
                     && !Flags.enableAccessibleCustomHeaders()) {
-                // Pilfer so that windows below receive cancellations for this gesture.
-                mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
+                ViewRootImpl viewRootImpl = v.getViewRootImpl();
+                if (viewRootImpl != null) {
+                    // Pilfer so that windows below receive cancellations for this gesture.
+                    mInputManager.pilferPointers(viewRootImpl.getInputToken());
+                }
             }
             if (isUpOrCancel) {
                 // Gesture is finished, reset state.
@@ -1623,6 +1634,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         mRootTaskDisplayAreaOrganizer,
                         mGenericLinksParser,
                         mAssistContentRequester,
+                        mWindowDecorViewHostSupplier,
                         mMultiInstanceHelper,
                         mWindowDecorCaptionHandleRepository,
                         mDesktopModeEventLogger);

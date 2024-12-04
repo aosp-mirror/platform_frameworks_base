@@ -1797,6 +1797,7 @@
   <java-symbol type="bool" name="config_customUserSwitchUi" />
   <java-symbol type="bool" name="config_canRemoveFirstAccount" />
   <java-symbol type="string" name="config_accountTypeToKeepFirstAccount" />
+  <java-symbol type="bool" name="config_allowDockBeforeProvision" />
   <java-symbol type="bool" name="config_deskDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_disableMenuKeyInLockScreen" />
   <java-symbol type="bool" name="config_enableCarDockHomeLaunch" />
@@ -3367,6 +3368,23 @@
   <java-symbol type="string" name="duration_hours_shortest_future" />
   <java-symbol type="string" name="duration_days_shortest_future" />
   <java-symbol type="string" name="duration_years_shortest_future" />
+  <java-symbol type="string" name="duration_minutes_shortest_past" />
+  <java-symbol type="string" name="duration_hours_shortest_past" />
+  <java-symbol type="string" name="duration_days_shortest_past" />
+  <java-symbol type="string" name="duration_years_shortest_past" />
+
+  <java-symbol type="string" name="duration_minutes_medium" />
+  <java-symbol type="string" name="duration_hours_medium" />
+  <java-symbol type="string" name="duration_days_medium" />
+  <java-symbol type="string" name="duration_years_medium" />
+  <java-symbol type="string" name="duration_minutes_medium_future" />
+  <java-symbol type="string" name="duration_hours_medium_future" />
+  <java-symbol type="string" name="duration_days_medium_future" />
+  <java-symbol type="string" name="duration_years_medium_future" />
+  <java-symbol type="string" name="duration_minutes_medium_past" />
+  <java-symbol type="string" name="duration_hours_medium_past" />
+  <java-symbol type="string" name="duration_days_medium_past" />
+  <java-symbol type="string" name="duration_years_medium_past" />
 
   <java-symbol type="string" name="duration_minutes_relative" />
   <java-symbol type="string" name="duration_hours_relative" />
@@ -5856,5 +5874,16 @@
   <java-symbol type="dimen" name="config_motionExpressiveDefaultEffectDamping"/>
   <java-symbol type="dimen" name="config_motionExpressiveSlowSpatialDamping"/>
   <java-symbol type="dimen" name="config_motionExpressiveSlowEffectDamping"/>
+
+  <!-- List of protected packages that require biometric authentication for modification -->
+  <java-symbol type="array" name="config_biometric_protected_package_names" />
+
+  <!-- Material shape spec config tokens -->
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXsmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusSmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusMedium"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusLarge"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXlarge"/>
+
 
 </resources>

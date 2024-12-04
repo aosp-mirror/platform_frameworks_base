@@ -24,11 +24,15 @@ import android.content.ComponentName
 import android.content.applicationContext
 import android.graphics.Bitmap
 import android.os.UserHandle
+import android.os.UserManager
 import android.os.userManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
 import com.android.systemui.Flags.FLAG_COMMUNAL_WIDGET_RESIZING
+import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
@@ -40,11 +44,15 @@ import com.android.systemui.communal.data.db.defaultWidgetPopulation
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.proto.toByteArray
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
+import com.android.systemui.communal.shared.model.SpanValue
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.communal.widgets.widgetConfiguratorFail
 import com.android.systemui.communal.widgets.widgetConfiguratorSuccess
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runCurrent
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.LogBuffer
@@ -52,48 +60,55 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
-    @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
-    @Mock private lateinit var providerInfoA: AppWidgetProviderInfo
-    @Mock private lateinit var providerInfoB: AppWidgetProviderInfo
-    @Mock private lateinit var providerInfoC: AppWidgetProviderInfo
-    @Mock private lateinit var communalWidgetHost: CommunalWidgetHost
-    @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
-    @Mock private lateinit var backupManager: BackupManager
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalWidgetRepositoryLocalImplTest(flags: FlagsParameterization) : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
+    private val appWidgetHost = mock<CommunalAppWidgetHost>()
+    private val providerInfoA = mock<AppWidgetProviderInfo>()
+    private val providerInfoB = mock<AppWidgetProviderInfo>()
+    private val providerInfoC = mock<AppWidgetProviderInfo>()
 
     private val communalHubStateCaptor = argumentCaptor<CommunalHubState>()
     private val componentNameCaptor = argumentCaptor<ComponentName>()
 
-    private lateinit var backupUtils: CommunalBackupUtils
-    private lateinit var logBuffer: LogBuffer
-    private lateinit var fakeWidgets: MutableStateFlow<Map<CommunalItemRank, CommunalWidgetItem>>
-    private lateinit var fakeProviders: MutableStateFlow<Map<Int, AppWidgetProviderInfo?>>
+    private val Kosmos.communalWidgetHost by
+        Kosmos.Fixture {
+            mock<CommunalWidgetHost> { on { appWidgetProviders } doReturn fakeProviders }
+        }
+    private val Kosmos.communalWidgetDao by
+        Kosmos.Fixture { mock<CommunalWidgetDao> { on { getWidgets() } doReturn fakeWidgets } }
 
-    private val kosmos = testKosmos()
-    private val testScope = kosmos.testScope
-    private val packageChangeRepository = kosmos.fakePackageChangeRepository
-    private val userManager = kosmos.userManager
+    private val Kosmos.backupManager by Kosmos.Fixture { mock<BackupManager>() }
+
+    private val Kosmos.backupUtils: CommunalBackupUtils by
+        Kosmos.Fixture { CommunalBackupUtils(applicationContext) }
+
+    private val Kosmos.logBuffer: LogBuffer by
+        Kosmos.Fixture { logcatLogBuffer(name = "CommunalWidgetRepoLocalImplTest") }
+
+    private val Kosmos.fakeWidgets: MutableStateFlow<Map<CommunalItemRank, CommunalWidgetItem>> by
+        Kosmos.Fixture { MutableStateFlow(emptyMap()) }
+
+    private val Kosmos.fakeProviders: MutableStateFlow<Map<Int, AppWidgetProviderInfo?>> by
+        Kosmos.Fixture { MutableStateFlow(emptyMap()) }
 
     private val mainUser = UserHandle(0)
     private val workProfile = UserHandle(10)
@@ -105,48 +120,49 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
             "com.android.fake/WidgetProviderC",
         )
 
-    private lateinit var underTest: CommunalWidgetRepositoryLocalImpl
-
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
-        fakeWidgets = MutableStateFlow(emptyMap())
-        fakeProviders = MutableStateFlow(emptyMap())
-        logBuffer = logcatLogBuffer(name = "CommunalWidgetRepoLocalImplTest")
-        backupUtils = CommunalBackupUtils(kosmos.applicationContext)
-
-        setAppWidgetIds(emptyList())
-
-        overrideResource(R.array.config_communalWidgetAllowlist, fakeAllowlist.toTypedArray())
-
-        whenever(communalWidgetDao.getWidgets()).thenReturn(fakeWidgets)
-        whenever(communalWidgetHost.appWidgetProviders).thenReturn(fakeProviders)
-        whenever(userManager.mainUser).thenReturn(mainUser)
-
-        restoreUser(mainUser)
-
-        underTest =
+    private val Kosmos.underTest by
+        Kosmos.Fixture {
             CommunalWidgetRepositoryLocalImpl(
                 appWidgetHost,
                 testScope.backgroundScope,
-                kosmos.testDispatcher,
+                testDispatcher,
                 communalWidgetHost,
                 communalWidgetDao,
                 logBuffer,
                 backupManager,
                 backupUtils,
-                packageChangeRepository,
+                fakePackageChangeRepository,
                 userManager,
-                kosmos.defaultWidgetPopulation,
+                defaultWidgetPopulation,
             )
+        }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setUp() {
+        kosmos.userManager = mock<UserManager> { on { mainUser } doReturn mainUser }
+        setAppWidgetIds(emptyList())
+        overrideResource(R.array.config_communalWidgetAllowlist, fakeAllowlist.toTypedArray())
+        restoreUser(mainUser)
     }
 
     @Test
     fun communalWidgets_queryWidgetsFromDb() =
-        testScope.runTest {
+        kosmos.runTest {
             val communalItemRankEntry = CommunalItemRank(uid = 1L, rank = 1)
             val communalWidgetItemEntry =
-                CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L, 0, 3)
+                CommunalWidgetItem(
+                    uid = 1L,
+                    widgetId = 1,
+                    componentName = "pk_name/cls_name",
+                    itemId = 1L,
+                    userSerialNumber = 0,
+                    spanY = 3,
+                    spanYNew = 1,
+                )
             fakeWidgets.value = mapOf(communalItemRankEntry to communalWidgetItemEntry)
             fakeProviders.value = mapOf(1 to providerInfoA)
 
@@ -158,7 +174,12 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         appWidgetId = communalWidgetItemEntry.widgetId,
                         providerInfo = providerInfoA,
                         rank = communalItemRankEntry.rank,
-                        spanY = communalWidgetItemEntry.spanY,
+                        spanY =
+                            if (communalResponsiveGrid()) {
+                                communalWidgetItemEntry.spanYNew
+                            } else {
+                                communalWidgetItemEntry.spanY
+                            },
                     )
                 )
 
@@ -168,18 +189,50 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun communalWidgets_widgetsWithoutMatchingProvidersAreSkipped() =
-        testScope.runTest {
+        kosmos.runTest {
             // Set up 4 widgets, but widget 3 and 4 don't have matching providers
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 1L,
+                            widgetId = 1,
+                            componentName = "pk_1/cls_1",
+                            itemId = 1L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 2L,
+                            widgetId = 2,
+                            componentName = "pk_2/cls_2",
+                            itemId = 2L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                     CommunalItemRank(uid = 3L, rank = 3) to
-                        CommunalWidgetItem(uid = 3L, 3, "pk_3/cls_3", 3L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 3L,
+                            widgetId = 3,
+                            componentName = "pk_3/cls_3",
+                            itemId = 3L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                     CommunalItemRank(uid = 4L, rank = 4) to
-                        CommunalWidgetItem(uid = 4L, 4, "pk_4/cls_4", 4L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 4L,
+                            widgetId = 4,
+                            componentName = "pk_4/cls_4",
+                            itemId = 4L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                 )
             fakeProviders.value = mapOf(1 to providerInfoA, 2 to providerInfoB)
 
@@ -191,27 +244,43 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     ),
                 )
         }
 
     @Test
     fun communalWidgets_updatedWhenProvidersUpdate() =
-        testScope.runTest {
+        kosmos.runTest {
             // Set up widgets and providers
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 1L,
+                            widgetId = 1,
+                            componentName = "pk_1/cls_1",
+                            itemId = 1L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 2L,
+                            widgetId = 2,
+                            componentName = "pk_2/cls_2",
+                            itemId = 2L,
+                            userSerialNumber = 0,
+                            spanY = 6,
+                            spanYNew = 2,
+                        ),
                 )
             fakeProviders.value = mapOf(1 to providerInfoA, 2 to providerInfoB)
 
@@ -224,13 +293,13 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 2 else 6,
                     ),
                 )
 
@@ -245,20 +314,20 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         // Verify that provider info updated
                         providerInfo = providerInfoC,
                         rank = 1,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 2 else 6,
                     ),
                 )
         }
 
     @Test
     fun addWidget_allocateId_bindWidget_andAddToDb() =
-        testScope.runTest {
+        kosmos.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val rank = 1
@@ -275,7 +344,8 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
-            verify(communalWidgetDao).addWidget(id, provider, rank, testUserSerialNumber(mainUser))
+            verify(communalWidgetDao)
+                .addWidget(id, provider, rank, testUserSerialNumber(mainUser), SpanValue.Fixed(3))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -283,7 +353,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun addWidget_configurationFails_doNotAddWidgetToDb() =
-        testScope.runTest {
+        kosmos.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val rank = 1
@@ -301,7 +371,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
             verify(communalWidgetDao, never())
-                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt(), anyInt())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt(), any())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -310,7 +380,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun addWidget_configurationThrowsError_doNotAddWidgetToDb() =
-        testScope.runTest {
+        kosmos.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val rank = 1
@@ -330,7 +400,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
             verify(communalWidgetDao, never())
-                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt(), anyInt())
+                .addWidget(anyInt(), any<ComponentName>(), anyInt(), anyInt(), any())
             verify(appWidgetHost).deleteAppWidgetId(id)
 
             // Verify backup not requested
@@ -339,7 +409,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun addWidget_configurationNotRequired_doesNotConfigure_addWidgetToDb() =
-        testScope.runTest {
+        kosmos.runTest {
             val provider = ComponentName("pkg_name", "cls_name")
             val id = 1
             val rank = 1
@@ -356,7 +426,8 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
             runCurrent()
 
             verify(communalWidgetHost).allocateIdAndBindWidget(provider, mainUser)
-            verify(communalWidgetDao).addWidget(id, provider, rank, testUserSerialNumber(mainUser))
+            verify(communalWidgetDao)
+                .addWidget(id, provider, rank, testUserSerialNumber(mainUser), SpanValue.Fixed(3))
 
             // Verify backup requested
             verify(backupManager).dataChanged()
@@ -364,7 +435,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun deleteWidget_deleteFromDbTrue_alsoDeleteFromHost() =
-        testScope.runTest {
+        kosmos.runTest {
             val id = 1
             whenever(communalWidgetDao.deleteWidgetById(eq(id))).thenReturn(true)
             underTest.deleteWidget(id)
@@ -379,7 +450,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun deleteWidget_deleteFromDbFalse_doesNotDeleteFromHost() =
-        testScope.runTest {
+        kosmos.runTest {
             val id = 1
             whenever(communalWidgetDao.deleteWidgetById(eq(id))).thenReturn(false)
             underTest.deleteWidget(id)
@@ -394,7 +465,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun reorderWidgets_queryDb() =
-        testScope.runTest {
+        kosmos.runTest {
             val widgetIdToRankMap = mapOf(104 to 1, 103 to 2, 101 to 3)
             underTest.updateWidgetOrder(widgetIdToRankMap)
             runCurrent()
@@ -407,7 +478,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_deleteStateFileIfRestoreFails() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write a state file that is invalid, and verify it is written
             backupUtils.writeBytesToDisk(byteArrayOf(1, 2, 3, 4, 5, 6))
             assertThat(backupUtils.fileExists()).isTrue()
@@ -422,7 +493,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_deleteStateFileAfterWidgetsRestored() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write a state file, and verify it is written
             backupUtils.writeBytesToDisk(fakeState.toByteArray())
             assertThat(backupUtils.fileExists()).isTrue()
@@ -443,7 +514,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_restoredWidgetsNotRegisteredWithHostAreSkipped() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write fake state to file
             backupUtils.writeBytesToDisk(fakeState.toByteArray())
 
@@ -470,7 +541,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_registeredWidgetsNotRestoredAreRemoved() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write fake state to file
             backupUtils.writeBytesToDisk(fakeState.toByteArray())
 
@@ -504,7 +575,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_onlySomeWidgetsGotNewIds() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write fake state to file
             backupUtils.writeBytesToDisk(fakeState.toByteArray())
 
@@ -536,7 +607,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_undefinedUser_restoredAsMain() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write two widgets to file, both of which have user serial number undefined.
             val fakeState =
                 CommunalHubState().apply {
@@ -584,7 +655,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_workProfileNotRestored_widgetSkipped() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write fake state to file
             backupUtils.writeBytesToDisk(fakeStateWithWorkProfile.toByteArray())
 
@@ -610,7 +681,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun restoreWidgets_workProfileRestored_manuallyBindWidget() =
-        testScope.runTest {
+        kosmos.runTest {
             // Write fake state to file
             backupUtils.writeBytesToDisk(fakeStateWithWorkProfile.toByteArray())
 
@@ -649,7 +720,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                     componentNameCaptor.capture(),
                     eq(2),
                     eq(testUserSerialNumber(workProfile)),
-                    anyInt(),
+                    any(),
                 )
 
             assertThat(componentNameCaptor.firstValue)
@@ -658,13 +729,29 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
     @Test
     fun pendingWidgets() =
-        testScope.runTest {
+        kosmos.runTest {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 1L,
+                            widgetId = 1,
+                            componentName = "pk_1/cls_1",
+                            itemId = 1L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                     CommunalItemRank(uid = 2L, rank = 2) to
-                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L, 0, 3),
+                        CommunalWidgetItem(
+                            uid = 2L,
+                            widgetId = 2,
+                            componentName = "pk_2/cls_2",
+                            itemId = 2L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        ),
                 )
 
             // Widget 1 is installed
@@ -672,7 +759,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
 
             // Widget 2 is pending install
             val fakeIcon = mock<Bitmap>()
-            packageChangeRepository.setInstallSessions(
+            fakePackageChangeRepository.setInstallSessions(
                 listOf(
                     PackageInstallSession(
                         sessionId = 1,
@@ -690,7 +777,7 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     ),
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 2,
@@ -698,23 +785,31 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         componentName = ComponentName("pk_2", "cls_2"),
                         icon = fakeIcon,
                         user = mainUser,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     ),
                 )
         }
 
     @Test
     fun pendingWidgets_pendingWidgetBecomesAvailableAfterInstall() =
-        testScope.runTest {
+        kosmos.runTest {
             fakeWidgets.value =
                 mapOf(
                     CommunalItemRank(uid = 1L, rank = 1) to
-                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L, 0, 3)
+                        CommunalWidgetItem(
+                            uid = 1L,
+                            widgetId = 1,
+                            componentName = "pk_1/cls_1",
+                            itemId = 1L,
+                            userSerialNumber = 0,
+                            spanY = 3,
+                            spanYNew = 1,
+                        )
                 )
 
             // Widget 1 is pending install
             val fakeIcon = mock<Bitmap>()
-            packageChangeRepository.setInstallSessions(
+            fakePackageChangeRepository.setInstallSessions(
                 listOf(
                     PackageInstallSession(
                         sessionId = 1,
@@ -734,12 +829,12 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         componentName = ComponentName("pk_1", "cls_1"),
                         icon = fakeIcon,
                         user = mainUser,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     )
                 )
 
             // Package for widget 1 finished installing
-            packageChangeRepository.setInstallSessions(emptyList())
+            fakePackageChangeRepository.setInstallSessions(emptyList())
 
             // Provider info for widget 1 becomes available
             fakeProviders.value = mapOf(1 to providerInfoA)
@@ -752,15 +847,16 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
-                        spanY = 3,
+                        spanY = if (communalResponsiveGrid()) 1 else 3,
                     )
                 )
         }
 
     @Test
     @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
-    fun updateWidgetSpanY_updatesWidgetInDaoAndRequestsBackup() =
-        testScope.runTest {
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
+    fun updateWidgetSpanY_updatesWidgetInDaoAndRequestsBackup_fixed() =
+        kosmos.runTest {
             val widgetId = 1
             val newSpanY = 6
             val widgetIdToRankMap = emptyMap<Int, Int>()
@@ -768,7 +864,24 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
             underTest.resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
             runCurrent()
 
-            verify(communalWidgetDao).resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
+            verify(communalWidgetDao)
+                .resizeWidget(widgetId, SpanValue.Fixed(newSpanY), widgetIdToRankMap)
+            verify(backupManager).dataChanged()
+        }
+
+    @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING, FLAG_COMMUNAL_RESPONSIVE_GRID)
+    fun updateWidgetSpanY_updatesWidgetInDaoAndRequestsBackup_responsive() =
+        kosmos.runTest {
+            val widgetId = 1
+            val newSpanY = 6
+            val widgetIdToRankMap = emptyMap<Int, Int>()
+
+            underTest.resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
+            runCurrent()
+
+            verify(communalWidgetDao)
+                .resizeWidget(widgetId, SpanValue.Responsive(newSpanY), widgetIdToRankMap)
             verify(backupManager).dataChanged()
         }
 
@@ -784,13 +897,19 @@ class CommunalWidgetRepositoryLocalImplTest : SysuiTestCase() {
     }
 
     private fun restoreUser(user: UserHandle) {
-        whenever(backupManager.getUserForAncestralSerialNumber(user.identifier.toLong()))
+        whenever(kosmos.backupManager.getUserForAncestralSerialNumber(user.identifier.toLong()))
             .thenReturn(user)
-        whenever(userManager.getUserSerialNumber(user.identifier))
+        whenever(kosmos.userManager.getUserSerialNumber(user.identifier))
             .thenReturn(testUserSerialNumber(user))
     }
 
-    private companion object {
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_RESPONSIVE_GRID)
+        }
+
         val PROVIDER_INFO_REQUIRES_CONFIGURATION =
             AppWidgetProviderInfo().apply { configure = ComponentName("test.pkg", "test.cmp") }
         val PROVIDER_INFO_CONFIGURATION_OPTIONAL =

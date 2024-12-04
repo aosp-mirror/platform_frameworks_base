@@ -40,6 +40,7 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.WalletCard;
 import android.service.quicksettings.Tile;
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -142,8 +143,16 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                         InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
 
         mUiHandler.post(
-                () -> mController.startQuickAccessUiIntent(
-                        mActivityStarter, animationController, mSelectedCard != null));
+                () -> {
+                    if (android.service.quickaccesswallet.Flags.launchSelectedCardFromQsTile()
+                            && mSelectedCard != null) {
+                        mController.startWalletCardPendingIntent(
+                                mSelectedCard, mActivityStarter, animationController);
+                    } else {
+                        mController.startQuickAccessUiIntent(
+                                mActivityStarter, animationController, mSelectedCard != null);
+                    }
+                });
     }
 
     @Override
@@ -178,6 +187,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             state.secondaryLabel = null;
             state.sideViewCustomDrawable = null;
         }
+        state.expandedAccessibilityClassName = Button.class.getName();
     }
 
     @Override

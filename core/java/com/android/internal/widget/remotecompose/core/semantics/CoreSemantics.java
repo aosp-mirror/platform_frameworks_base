@@ -48,6 +48,11 @@ public class CoreSemantics extends Operation implements AccessibilityModifier {
     }
 
     @Override
+    public Mode getMode() {
+        return mMode;
+    }
+
+    @Override
     public void write(WireBuffer buffer) {
         buffer.writeInt(mContentDescriptionId);
         buffer.writeByte((mRole != null) ? mRole.ordinal() : -1);
@@ -78,6 +83,10 @@ public class CoreSemantics extends Operation implements AccessibilityModifier {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SEMANTICS");
+        if (mMode != Mode.SET) {
+            builder.append(" ");
+            builder.append(mMode);
+        }
         if (mRole != null) {
             builder.append(" ");
             builder.append(mRole);

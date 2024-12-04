@@ -71,12 +71,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.split.SplitState;
-import com.android.wm.shell.common.transition.TransitionStateHolder;
 import com.android.wm.shell.compatui.letterbox.LetterboxCommandHandler;
-import com.android.wm.shell.compatui.letterbox.LetterboxController;
-import com.android.wm.shell.compatui.letterbox.LetterboxControllerStrategy;
 import com.android.wm.shell.compatui.letterbox.LetterboxTransitionObserver;
-import com.android.wm.shell.compatui.letterbox.MixedLetterboxController;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
@@ -156,6 +152,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
 import com.android.wm.shell.windowdecor.common.viewhost.DefaultWindowDecorViewHostSupplier;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationPromoController;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController;
@@ -182,7 +179,8 @@ import java.util.Optional;
  * <p>This module only defines Shell dependencies for handheld SystemUI implementation. Common
  * dependencies should go into {@link WMShellBaseModule}.
  */
-@Module(includes = {WMShellBaseModule.class, PipModule.class, ShellBackAnimationModule.class})
+@Module(includes = {WMShellBaseModule.class, PipModule.class, ShellBackAnimationModule.class,
+        LetterboxModule.class})
 public abstract class WMShellModule {
 
     //
@@ -304,6 +302,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             FocusTransitionObserver focusTransitionObserver,
+            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel) {
         if (desktopModeWindowDecorViewModel.isPresent()) {
             return desktopModeWindowDecorViewModel.get();
@@ -321,7 +320,8 @@ public abstract class WMShellModule {
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions,
-                focusTransitionObserver);
+                focusTransitionObserver,
+                windowDecorViewHostSupplier);
     }
 
     @WMSingleton
@@ -346,7 +346,7 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
+    static WindowDecorViewHostSupplier<WindowDecorViewHost> provideWindowDecorViewHostSupplier(
             @ShellMainThread @NonNull CoroutineScope mainScope) {
         return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
@@ -911,6 +911,7 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
@@ -930,8 +931,8 @@ public abstract class WMShellModule {
                 displayInsetsController, syncQueue, transitions, desktopTasksController,
                 desktopImmersiveController.get(),
                 rootTaskDisplayAreaOrganizer, interactionJankMonitor, genericLinksParser,
-                assistContentRequester, multiInstanceHelper, desktopTasksLimiter,
-                appHandleEducationController, appToWebEducationController,
+                assistContentRequester, windowDecorViewHostSupplier, multiInstanceHelper,
+                desktopTasksLimiter, appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
                 focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger));
     }
@@ -1329,25 +1330,4 @@ public abstract class WMShellModule {
         return new Object();
     }
 
-    //
-    // App Compat
-    //
-
-    @WMSingleton
-    @Provides
-    static LetterboxTransitionObserver provideLetterboxTransitionObserver(
-            @NonNull ShellInit shellInit,
-            @NonNull Transitions transitions,
-            @NonNull LetterboxController letterboxController,
-            @NonNull TransitionStateHolder transitionStateHolder,
-            @NonNull LetterboxControllerStrategy letterboxControllerStrategy
-    ) {
-        return new LetterboxTransitionObserver(shellInit, transitions, letterboxController,
-                transitionStateHolder, letterboxControllerStrategy);
-    }
-
-    @WMSingleton
-    @Binds
-    abstract LetterboxController bindsLetterboxController(
-            MixedLetterboxController letterboxController);
 }

@@ -14,7 +14,6 @@
 
 package com.android.systemui.plugins.qs;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -22,6 +21,7 @@ import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
@@ -92,6 +92,7 @@ public interface QSTile {
 
     CharSequence getTileLabel();
 
+    @NonNull
     State getState();
 
     default LogMaker populate(LogMaker logMaker) {
@@ -269,6 +270,7 @@ public interface QSTile {
             return sb.append(']');
         }
 
+        @NonNull
         public State copy() {
             State state = new State();
             copyTo(state);
@@ -304,6 +306,7 @@ public interface QSTile {
             return rt;
         }
 
+        @androidx.annotation.NonNull
         @Override
         public State copy() {
             AdapterState state = new AdapterState();
@@ -316,6 +319,7 @@ public interface QSTile {
     class BooleanState extends AdapterState {
         public static final int VERSION = 1;
 
+        @androidx.annotation.NonNull
         @Override
         public State copy() {
             BooleanState state = new BooleanState();

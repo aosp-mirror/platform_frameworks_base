@@ -19,12 +19,15 @@ package com.android.server.display.brightness.clamper;
 import static android.view.Display.STATE_OFF;
 import static android.view.Display.STATE_ON;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -124,16 +127,11 @@ public class BrightnessClamperControllerTest {
 
     @Test
     public void testConstructor_doesNotStartsLightSensorController() {
-        verify(mMockLightSensorController, never()).restart();
-    }
-
-    @Test
-    public void testConstructor_startsLightSensorController() {
         when(mMockModifier.shouldListenToLightSensor()).thenReturn(true);
 
         mClamperController = createBrightnessClamperController();
 
-        verify(mMockLightSensorController).restart();
+        verify(mMockLightSensorController, never()).restart();
     }
 
     @Test
@@ -169,17 +167,40 @@ public class BrightnessClamperControllerTest {
 
     @Test
     public void testOnDisplayChanged_doesNotRestartLightSensor() {
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, 0.1f,
+                false, STATE_ON);
+        reset(mMockLightSensorController);
+
         mClamperController.onDisplayChanged(mMockDisplayDeviceData);
 
         verify(mMockLightSensorController, never()).restart();
+        verify(mMockLightSensorController).stop();
     }
 
     @Test
     public void testOnDisplayChanged_restartsLightSensor() {
         when(mMockModifier.shouldListenToLightSensor()).thenReturn(true);
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, 0.1f,
+                false, STATE_ON);
+        reset(mMockLightSensorController);
+
         mClamperController.onDisplayChanged(mMockDisplayDeviceData);
 
+        verify(mMockLightSensorController, never()).stop();
         verify(mMockLightSensorController).restart();
+    }
+
+    @Test
+    public void testOnDisplayChanged_doesNotRestartLightSensor_screenOff() {
+        when(mMockModifier.shouldListenToLightSensor()).thenReturn(true);
+        mClamperController.clamp(mDisplayBrightnessState, mMockRequest, 0.1f,
+                false, STATE_OFF);
+        reset(mMockLightSensorController);
+
+        mClamperController.onDisplayChanged(mMockDisplayDeviceData);
+
+        verify(mMockLightSensorController, never()).restart();
+        verify(mMockLightSensorController).stop();
     }
 
     @Test
@@ -267,6 +288,24 @@ public class BrightnessClamperControllerTest {
         mTestHandler.flush();
 
         verify(mMockExternalListener).onChanged();
+    }
+
+    @Test
+    public void test_doesNotScheduleRecalculateBeforeStart() {
+        mTestInjector = new TestInjector(List.of()) {
+            @Override
+            List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
+                    Handler handler, BrightnessClamperController.ClamperChangeListener listener,
+                    BrightnessClamperController.DisplayDeviceData displayDeviceData,
+                    float currentBrightness) {
+                listener.onChanged();
+                return super.getModifiers(flags, context, handler, listener, displayDeviceData,
+                        currentBrightness);
+            }
+        };
+        mClamperController = createBrightnessClamperController();
+
+        assertThat(mTestHandler.getPendingMessages()).isEmpty();
     }
 
     private BrightnessClamperController createBrightnessClamperController() {

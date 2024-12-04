@@ -832,20 +832,12 @@ public class AccessibilityWindowManager {
                         != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
             }
 
-            boolean hasWindowIgnore = false;
             if (windowCount > 0) {
-                for (int i = 0; i < windowCount; i++) {
-                    final WindowInfo windowInfo = windows.get(i);
-                    final AccessibilityWindowInfo window;
-                    if (mTrackingWindows) {
-                        window = populateReportedWindowLocked(userId, windowInfo, oldWindowsById);
-                        if (window == null) {
-                            hasWindowIgnore = true;
-                        }
-                    } else {
-                        window = null;
-                    }
-                    if (window != null) {
+                if (mTrackingWindows) {
+                    for (int i = 0; i < windowCount; i++) {
+                        final WindowInfo windowInfo = windows.get(i);
+                        final AccessibilityWindowInfo window =
+                                populateReportedWindowLocked(userId, windowInfo, oldWindowsById);
 
                         // Flip layers in list to be consistent with AccessibilityService#getWindows
                         window.setLayer(windowCount - 1 - window.getLayer());
@@ -870,13 +862,6 @@ public class AccessibilityWindowManager {
                     }
                 }
                 final int accessibilityWindowCount = mWindows.size();
-                // Re-order the window layer of all windows in the windows list because there's
-                // window not been added into the windows list.
-                if (hasWindowIgnore) {
-                    for (int i = 0; i < accessibilityWindowCount; i++) {
-                        mWindows.get(i).setLayer(accessibilityWindowCount - 1 - i);
-                    }
-                }
                 if (isTopFocusedDisplay) {
                     if (mTouchInteractionInProgress && activeWindowGone) {
                         mActiveWindowId = mTopFocusedWindowId;

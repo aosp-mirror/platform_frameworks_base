@@ -24,14 +24,15 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * A supplier of [DefaultWindowDecorViewHost]s. It creates a new one every time one is requested.
  */
-class DefaultWindowDecorViewHostSupplier(@ShellMainThread private val mainScope: CoroutineScope) :
-    WindowDecorViewHostSupplier<DefaultWindowDecorViewHost> {
+class DefaultWindowDecorViewHostSupplier(
+    @ShellMainThread private val mainScope: CoroutineScope
+) : WindowDecorViewHostSupplier<WindowDecorViewHost> {
 
-    override fun acquire(context: Context, display: Display): DefaultWindowDecorViewHost {
+    override fun acquire(context: Context, display: Display): WindowDecorViewHost {
         return DefaultWindowDecorViewHost(context, mainScope, display)
     }
 
-    override fun release(viewHost: DefaultWindowDecorViewHost, t: SurfaceControl.Transaction) {
+    override fun release(viewHost: WindowDecorViewHost, t: SurfaceControl.Transaction) {
         viewHost.release(t)
     }
 }

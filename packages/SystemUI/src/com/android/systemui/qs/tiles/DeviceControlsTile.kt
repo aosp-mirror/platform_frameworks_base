@@ -21,6 +21,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
+import android.widget.Button
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
@@ -163,6 +164,7 @@ constructor(
         } else {
             state.state = Tile.STATE_UNAVAILABLE
         }
+        state.expandedAccessibilityClassName = Button::class.java.name
     }
 
     override fun getMetricsCategory(): Int {

@@ -9,6 +9,7 @@ import android.provider.AlarmClock
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.text.format.DateFormat
+import android.widget.Button
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
@@ -70,7 +71,10 @@ constructor(
     }
 
     override fun newTileState(): QSTile.State {
-        return QSTile.State().apply { handlesLongClick = false }
+        return QSTile.State().apply {
+            handlesLongClick = false
+            expandedAccessibilityClassName = Button::class.java.name
+        }
     }
 
     override fun handleClick(expandable: Expandable?) {

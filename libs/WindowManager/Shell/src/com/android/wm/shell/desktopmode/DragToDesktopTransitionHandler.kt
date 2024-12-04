@@ -19,7 +19,6 @@ import android.content.Intent
 import android.content.Intent.FILL_IN_COMPONENT
 import android.graphics.PointF
 import android.graphics.Rect
-import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.os.SystemProperties
@@ -139,7 +138,11 @@ sealed class DragToDesktopTransitionHandler(
                 taskUser,
             )
         val wct = WindowContainerTransaction()
-        wct.sendPendingIntent(pendingIntent, launchHomeIntent, Bundle())
+        // The app that is being dragged into desktop mode might cause new transitions, make this
+        // launch transient to make sure those transitions can execute in parallel and thus won't
+        // block the end-drag transition.
+        val intentOptions = ActivityOptions.makeBasic().setTransientLaunch()
+        wct.sendPendingIntent(pendingIntent, launchHomeIntent, intentOptions.toBundle())
         val startTransitionToken =
             transitions.startTransition(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP, wct, this)
 

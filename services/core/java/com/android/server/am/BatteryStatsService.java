@@ -1101,6 +1101,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
     private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+        private static final long BATTERY_USAGE_STATS_PER_UID_MAX_STATS_AGE =
+                TimeUnit.HOURS.toMillis(2);
+
         @Override
         public int onPullAtom(int atomTag, List<StatsEvent> data) {
             final BatteryUsageStats bus;
@@ -1168,7 +1171,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                             .setMinConsumedPowerThreshold(minConsumedPowerThreshold);
 
                     if (isBatteryUsageStatsAccumulationSupported()) {
-                        query.accumulated();
+                        query.accumulated()
+                                .setMaxStatsAgeMs(BATTERY_USAGE_STATS_PER_UID_MAX_STATS_AGE);
                     }
 
                     bus = getBatteryUsageStats(List.of(query.build())).get(0);
@@ -1251,12 +1255,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         private static float clampPowerMah(double powerMah, String consumer) {
-            float resultPowerMah = 0;
-            if (powerMah <= Float.MAX_VALUE && powerMah >= Float.MIN_VALUE) {
-                resultPowerMah = (float) powerMah;
-            } else {
-                // Handle overflow appropriately
-                Slog.wtfStack(TAG, consumer + " reported powerMah float overflow: " + powerMah);
+            float resultPowerMah = Double.valueOf(powerMah).floatValue();
+            if (Float.isInfinite(resultPowerMah)) {
+                resultPowerMah = 0;
+                Slog.d(TAG, consumer + " reported powerMah float overflow : " + powerMah);
             }
             return resultPowerMah;
         }
@@ -1361,11 +1363,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             final String powerComponentName = batteryConsumer.getPowerComponentName(componentId);
             final double consumedPowerMah = batteryConsumer.getConsumedPower(key);
-            float powerMah =
+            final float powerMah =
                     clampPowerMah(
-                            consumedPowerMah, "uidConsumer-" + uid + "-" + powerComponentName);
+                            consumedPowerMah, "uid-" + uid + "-" + powerComponentName);
             final long powerComponentDurationMillis = batteryConsumer.getUsageDurationMillis(key);
-
             if (powerMah == 0 && powerComponentDurationMillis == 0) {
                 return true;
             }

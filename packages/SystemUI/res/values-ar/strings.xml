@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"لفتح تطبيق باستخدام تطبيق مصغَّر، عليك إثبات هويتك. يُرجى ملاحظة أنّ أي شخص يمكنه الاطّلاع محتوى التطبيقات المصغَّرة، حتى وإن كان جهازك اللوحي مُقفلاً. بعض التطبيقات المصغّرة قد لا تكون مُصمَّمة لإضافتها إلى شاشة القفل، وقد يكون هذا الإجراء غير آمن."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"حسنًا"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"التطبيقات المصغَّرة"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"لإضافة التطبيقات المصغّرة على شاشة القفل كاختصار، تأكَّد من تفعيلها في الإعدادات."</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"القائمة المنسدلة"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
@@ -1415,7 +1418,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"عناصر التحكّم في النظام"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"تطبيقات النظام"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"تعدُّد المهام"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"التطبيقات المستخدمة مؤخرًا"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"تقسيم الشاشة"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"الإدخال"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"اختصارات التطبيقات"</string>
@@ -1424,14 +1426,20 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"اختصارات لوحة المفاتيح"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"تخصيص اختصارات لوحة المفاتيح"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"هل تريد إزالة هذا الاختصار؟"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"اضغط على مفتاح لتخصيص الاختصار"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"سيؤدي هذا الإجراء إلى حذف الاختصار المخصّص نهائيًا."</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"البحث في الاختصارات"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ما مِن نتائج بحث"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"رمز التصغير"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"‏رمز مفتاح الإجراء (مفتاح Meta)"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"رمز علامة الجمع (+)"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"تخصيص"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"تم"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"رمز التوسيع"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"أو"</string>
@@ -1441,6 +1449,8 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"إعدادات لوحة المفاتيح"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ضبط الاختصار"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"إزالة"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"إلغاء"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"اضغط على مفتاح"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"يتم حاليًا استخدام مجموعة المفاتيح هذه. يُرجى تجربة مفتاح آخر."</string>

@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.db.DefaultWidgetPopulation.SkipReason.RESTORED_FROM_BACKUP
+import com.android.systemui.communal.shared.model.SpanValue
 import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
@@ -117,7 +118,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = defaultWidgets[0],
                     rank = 0,
                     userSerialNumber = 0,
-                    spanY = 3,
+                    spanY = SpanValue.Fixed(3),
                 )
             verify(communalWidgetDao)
                 .addWidget(
@@ -125,7 +126,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = defaultWidgets[1],
                     rank = 1,
                     userSerialNumber = 0,
-                    spanY = 3,
+                    spanY = SpanValue.Fixed(3),
                 )
             verify(communalWidgetDao)
                 .addWidget(
@@ -133,7 +134,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = defaultWidgets[2],
                     rank = 2,
                     userSerialNumber = 0,
-                    spanY = 3,
+                    spanY = SpanValue.Fixed(3),
                 )
         }
 
@@ -155,7 +156,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = any(),
                     rank = anyInt(),
                     userSerialNumber = anyInt(),
-                    spanY = anyInt(),
+                    spanY = any(),
                 )
         }
 }

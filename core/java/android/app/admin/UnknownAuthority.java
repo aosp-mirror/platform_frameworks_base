@@ -74,14 +74,14 @@ public final class UnknownAuthority extends Authority {
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
-        if (o != null && getClass() == o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         UnknownAuthority other = (UnknownAuthority) o;
         return Objects.equals(mName, other.mName);
     }
 
     @Override
     public int hashCode() {
-        return mName.hashCode();
+        return Objects.hashCode(mName);
     }
 
     @Override

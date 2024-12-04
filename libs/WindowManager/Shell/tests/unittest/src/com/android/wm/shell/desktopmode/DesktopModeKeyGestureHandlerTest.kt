@@ -56,6 +56,7 @@ import com.android.window.flags.Flags.FLAG_ENABLE_TASK_RESIZING_KEYBOARD_SHORTCU
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel
@@ -182,6 +183,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
             .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)
             .build()
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+        testExecutor.flushAll()
 
         assertThat(result).isTrue()
         verify(desktopTasksController).moveToNextDisplay(task.taskId)
@@ -204,9 +206,15 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
             .setModifierState(KeyEvent.META_META_ON)
             .build()
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+        testExecutor.flushAll()
 
         assertThat(result).isTrue()
-        assertThat(testExecutor.callbacks.size).isEqualTo(1)
+        verify(desktopModeWindowDecorViewModel).onSnapResize(
+            task.taskId,
+            true,
+            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+            /* fromMenu= */ false
+        )
     }
 
     @Test
@@ -226,9 +234,15 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
             .setModifierState(KeyEvent.META_META_ON)
             .build()
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+        testExecutor.flushAll()
 
         assertThat(result).isTrue()
-        assertThat(testExecutor.callbacks.size).isEqualTo(1)
+        verify(desktopModeWindowDecorViewModel).onSnapResize(
+            task.taskId,
+            false,
+            DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+            /* fromMenu= */ false
+        )
     }
 
     @Test
@@ -248,9 +262,18 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
             .setModifierState(KeyEvent.META_META_ON)
             .build()
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+        testExecutor.flushAll()
 
         assertThat(result).isTrue()
-        assertThat(testExecutor.callbacks.size).isEqualTo(1)
+        verify(desktopTasksController).toggleDesktopTaskSize(
+            task,
+            ToggleTaskSizeInteraction(
+                isMaximized = isTaskMaximized(task, displayController),
+                source = ToggleTaskSizeInteraction.Source.KEYBOARD_SHORTCUT,
+                inputMethod =
+                    DesktopModeEventLogger.Companion.InputMethod.KEYBOARD,
+            ),
+        )
     }
 
     @Test
@@ -270,9 +293,10 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
             .setModifierState(KeyEvent.META_META_ON)
             .build()
         val result = keyGestureEventHandler.handleKeyGestureEvent(event, null)
+        testExecutor.flushAll()
 
         assertThat(result).isTrue()
-        assertThat(testExecutor.callbacks.size).isEqualTo(1)
+        verify(desktopTasksController).minimizeTask(task)
     }
 
     private fun setUpFreeformTask(

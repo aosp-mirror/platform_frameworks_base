@@ -68,6 +68,7 @@ constructor(
                     ContextualEduNotificationViewModel(
                         getEduTitle(it),
                         getEduContent(it),
+                        it.gestureType,
                         it.userId,
                     )
                 } else {

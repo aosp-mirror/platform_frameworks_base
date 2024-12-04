@@ -266,6 +266,8 @@
     <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
     <!-- Width of the expanded bubble bar view shown when the bubble is expanded. -->
     <dimen name="bubble_bar_expanded_view_width">412dp</dimen>
+    <!-- Offset of the expanded view when it starts sliding in as part of the switch animation -->
+    <dimen name="bubble_bar_expanded_view_switch_offset">48dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->

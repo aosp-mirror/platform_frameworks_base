@@ -57,14 +57,14 @@ object TestShortcuts {
         KeyboardShortcutInfo(
             /* label = */ "Shortcut with repeated label",
             /* keycode = */ KeyEvent.KEYCODE_H,
-            /* modifiers = */ KeyEvent.META_META_ON,
+            /* modifiers = */ META_META_ON,
         )
 
     private val shortcutInfoWithRepeatedLabelAlternate =
         KeyboardShortcutInfo(
             /* label = */ shortcutInfoWithRepeatedLabel.label,
             /* keycode = */ KeyEvent.KEYCODE_L,
-            /* modifiers = */ KeyEvent.META_META_ON,
+            /* modifiers = */ META_META_ON,
         )
 
     private val shortcutInfoWithRepeatedLabelSecondAlternate =
@@ -72,6 +72,27 @@ object TestShortcuts {
             /* label = */ shortcutInfoWithRepeatedLabel.label,
             /* keycode = */ KeyEvent.KEYCODE_M,
             /* modifiers = */ KeyEvent.META_SHIFT_ON,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys =
+        KeyboardShortcutInfo(
+            /* label = */ "Shortcuts with diff size of keys",
+            /* keycode = */ KeyEvent.KEYCODE_HOME,
+            /* modifiers = */ 0,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys2 =
+        KeyboardShortcutInfo(
+            /* label = */ ShortcutsWithDiffSizeOfKeys.label,
+            /* keycode = */ KeyEvent.KEYCODE_1,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys3 =
+        KeyboardShortcutInfo(
+            /* label = */ ShortcutsWithDiffSizeOfKeys.label,
+            /* keycode = */ KeyEvent.KEYCODE_2,
+            /* modifiers = */ META_META_ON or META_FUNCTION_ON,
         )
 
     private val shortcutWithGroupedRepeatedLabel =
@@ -105,8 +126,43 @@ object TestShortcuts {
         KeyboardShortcutInfo(
             /* label = */ "Standard shortcut 1",
             /* keycode = */ KeyEvent.KEYCODE_N,
-            /* modifiers = */ KeyEvent.META_META_ON,
+            /* modifiers = */ META_META_ON,
         )
+
+    const val CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL = "Cycle forward through recent apps"
+    const val CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL = "Cycle backward through recent apps"
+
+    private val recentAppsCycleForwardShortcutInfo =
+        KeyboardShortcutInfo(
+            /* label = */ CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL,
+            /* keycode = */ KeyEvent.KEYCODE_N,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val recentAppsCycleBackShortcutInfo =
+        KeyboardShortcutInfo(
+            /* label = */ CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL,
+            /* keycode = */ KeyEvent.KEYCODE_N,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val recentAppsCycleForwardShortcut =
+        shortcut(recentAppsCycleForwardShortcutInfo.label!!.toString()) {
+            command {
+                key(R.drawable.ic_ksh_key_meta)
+                key("N")
+            }
+            isCustomizable = false
+        }
+
+    private val recentAppsCycleBackShortcut =
+        shortcut(recentAppsCycleBackShortcutInfo.label!!.toString()) {
+            command {
+                key(R.drawable.ic_ksh_key_meta)
+                key("N")
+            }
+            isCustomizable = false
+        }
 
     private val standardShortcut1 =
         shortcut(standardShortcutInfo1.label!!.toString()) {
@@ -165,7 +221,7 @@ object TestShortcuts {
         KeyboardShortcutInfo(
             /* label = */ "Shortcut with unsupported modifiers",
             /* keycode = */ KeyEvent.KEYCODE_A,
-            /* modifiers = */ KeyEvent.META_META_ON or KeyEvent.KEYCODE_SPACE,
+            /* modifiers = */ META_META_ON or KeyEvent.KEYCODE_SPACE,
         )
 
     private val groupWithRepeatedShortcutLabels =
@@ -241,6 +297,12 @@ object TestShortcuts {
             listOf(standardShortcut3),
         )
 
+    val recentAppsGroup =
+        KeyboardShortcutGroup(
+            "Recent apps",
+            listOf(recentAppsCycleForwardShortcutInfo, recentAppsCycleBackShortcutInfo),
+        )
+
     private val standardGroup1 =
         KeyboardShortcutGroup(
             "Standard group 1",
@@ -258,6 +320,12 @@ object TestShortcuts {
 
     private val standardSystemAppSubcategoryWithCustomHomeShortcut =
         ShortcutSubCategory("System controls", listOf(customGoHomeShortcut))
+
+    private val recentAppsSubCategory =
+        ShortcutSubCategory(
+            recentAppsGroup.label!!.toString(),
+            listOf(recentAppsCycleForwardShortcut, recentAppsCycleBackShortcut),
+        )
 
     private val standardSubCategory1 =
         ShortcutSubCategory(
@@ -354,6 +422,9 @@ object TestShortcuts {
                 ),
         )
 
+    val multitaskingCategoryWithRecentAppsGroup =
+        ShortcutCategory(type = MultiTasking, subCategories = listOf(recentAppsSubCategory))
+
     val multitaskingGroups = listOf(standardGroup2, standardGroup1)
     val multitaskingCategory =
         ShortcutCategory(
@@ -379,6 +450,16 @@ object TestShortcuts {
             groupWithStandardShortcutInfo,
             groupWithOnlyUnsupportedModifierShortcut,
             groupWithSupportedAndUnsupportedModifierShortcut,
+        )
+
+    val groupWithDifferentSizeOfShortcutKeys =
+        KeyboardShortcutGroup(
+            "Group with different size of shortcut keys",
+            listOf(
+                ShortcutsWithDiffSizeOfKeys3,
+                ShortcutsWithDiffSizeOfKeys,
+                ShortcutsWithDiffSizeOfKeys2,
+            ),
         )
 
     val subCategoriesWithUnsupportedModifiersRemoved =
@@ -408,6 +489,7 @@ object TestShortcuts {
         category: ShortcutCategoryType,
         subcategoryLabel: String,
         shortcutLabel: String,
+        includeInCustomization: Boolean = true,
     ): ShortcutCategory {
         return ShortcutCategory(
             type = category,
@@ -415,13 +497,13 @@ object TestShortcuts {
                 listOf(
                     ShortcutSubCategory(
                         label = subcategoryLabel,
-                        shortcuts = listOf(simpleShortcut(shortcutLabel)),
+                        shortcuts = listOf(simpleShortcut(shortcutLabel, includeInCustomization)),
                     )
                 ),
         )
     }
 
-    private fun simpleShortcut(label: String) =
+    private fun simpleShortcut(label: String, includeInCustomization: Boolean = true) =
         Shortcut(
             label = label,
             commands =
@@ -436,6 +518,7 @@ object TestShortcuts {
                             ),
                     )
                 ),
+            isCustomizable = includeInCustomization,
         )
 
     val customizableInputGestureWithUnknownKeyGestureType =
@@ -662,7 +745,7 @@ object TestShortcuts {
     val standardAddShortcutRequest =
         ShortcutCustomizationRequestInfo.Add(
             label = "Standard shortcut",
-            categoryType = ShortcutCategoryType.System,
+            categoryType = System,
             subCategoryLabel = "Standard subcategory",
         )
 }

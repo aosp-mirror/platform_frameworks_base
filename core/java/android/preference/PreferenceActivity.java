@@ -213,7 +213,10 @@ public abstract class PreferenceActivity extends ListActivity implements
     private int mPreferenceHeaderItemResId = 0;
     private boolean mPreferenceHeaderRemoveEmptyIcon = false;
 
+    private boolean mIsBackCallbackRegistered = false;
     private final OnBackInvokedCallback mOnBackInvokedCallback = this::onBackInvoked;
+    private final FragmentManager.OnBackStackChangedListener mOnBackStackChangedListener =
+            this::updateBackCallbackRegistrationState;
 
     /**
      * The starting request code given out to preference framework.
@@ -706,6 +709,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             }
         }
         updateBackCallbackRegistrationState();
+        getFragmentManager().addOnBackStackChangedListener(mOnBackStackChangedListener);
     }
 
     @Override
@@ -715,17 +719,25 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private void updateBackCallbackRegistrationState() {
         if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)) return;
-        if (mCurHeader != null && mSinglePane && getFragmentManager().getBackStackEntryCount() == 0
-                && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null) {
-            getOnBackInvokedDispatcher()
-                    .registerOnBackInvokedCallback(PRIORITY_DEFAULT, mOnBackInvokedCallback);
-        } else {
+        if ((mCurHeader != null && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null
+                && mSinglePane) || getFragmentManager().getBackStackEntryCount() != 0) {
+            if (!mIsBackCallbackRegistered) {
+                getOnBackInvokedDispatcher()
+                        .registerOnBackInvokedCallback(PRIORITY_DEFAULT, mOnBackInvokedCallback);
+                mIsBackCallbackRegistered = true;
+            }
+        } else if (mIsBackCallbackRegistered) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+            mIsBackCallbackRegistered = false;
         }
     }
 
     private void onBackInvoked() {
-        if (mCurHeader != null && mSinglePane && getFragmentManager().getBackStackEntryCount() == 0
+        if (WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)
+                && getFragmentManager().getBackStackEntryCount() != 0) {
+            getFragmentManager().popBackStackImmediate();
+        } else if (mCurHeader != null && mSinglePane
+                && getFragmentManager().getBackStackEntryCount() == 0
                 && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null) {
             mCurHeader = null;
 
@@ -1012,6 +1024,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     @Override
     protected void onDestroy() {
+        getFragmentManager().removeOnBackStackChangedListener(mOnBackStackChangedListener);
         mHandler.removeMessages(MSG_BIND_PREFERENCES);
         mHandler.removeMessages(MSG_BUILD_HEADERS);
         super.onDestroy();

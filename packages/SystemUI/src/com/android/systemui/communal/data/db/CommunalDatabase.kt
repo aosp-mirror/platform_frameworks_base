@@ -26,9 +26,11 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelperImpl
+import com.android.systemui.communal.shared.model.SpanValue
+import com.android.systemui.communal.shared.model.toResponsive
 import com.android.systemui.res.R
 
-@Database(entities = [CommunalWidgetItem::class, CommunalItemRank::class], version = 4)
+@Database(entities = [CommunalWidgetItem::class, CommunalItemRank::class], version = 5)
 abstract class CommunalDatabase : RoomDatabase() {
     abstract fun communalWidgetDao(): CommunalWidgetDao
 
@@ -59,7 +61,12 @@ abstract class CommunalDatabase : RoomDatabase() {
                             context.resources.getString(R.string.config_communalDatabase),
                         )
                         .also { builder ->
-                            builder.addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                            builder.addMigrations(
+                                MIGRATION_1_2,
+                                MIGRATION_2_3,
+                                MIGRATION_3_4,
+                                MIGRATION_4_5,
+                            )
                             builder.fallbackToDestructiveMigration(dropAllTables = true)
                             callback?.let { callback -> builder.addCallback(callback) }
                         }
@@ -121,6 +128,31 @@ abstract class CommunalDatabase : RoomDatabase() {
                         "ALTER TABLE communal_widget_table " +
                             "ADD COLUMN span_y INTEGER NOT NULL DEFAULT 3"
                     )
+                }
+            }
+
+        /** This migration adds a new spanY column for responsive grid sizing. */
+        @VisibleForTesting
+        val MIGRATION_4_5 =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    Log.i(TAG, "Migrating from version 4 to 5")
+                    db.execSQL(
+                        "ALTER TABLE communal_widget_table " +
+                            "ADD COLUMN span_y_new INTEGER NOT NULL DEFAULT 1"
+                    )
+                    db.query("SELECT item_id, span_y FROM communal_widget_table").use { cursor ->
+                        while (cursor.moveToNext()) {
+                            val id = cursor.getInt(cursor.getColumnIndex("item_id"))
+                            val spanYFixed =
+                                SpanValue.Fixed(cursor.getInt(cursor.getColumnIndex("span_y")))
+                            val spanYResponsive = spanYFixed.toResponsive()
+                            db.execSQL(
+                                "UPDATE communal_widget_table SET span_y_new = " +
+                                    "${spanYResponsive.value} WHERE item_id = $id"
+                            )
+                        }
+                    }
                 }
             }
     }

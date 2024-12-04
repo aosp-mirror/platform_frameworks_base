@@ -530,14 +530,25 @@ test_module_config {
 }
 
 test_module_config {
-    name: "FrameworksCoreTests_internal_os_binder",
+    name: "FrameworksCoreTests_all_binder",
     base: "FrameworksCoreTests",
     test_suites: [
         "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
-    include_filters: ["com.android.internal.os.BinderDeathDispatcherTest"],
+    include_filters: [
+        "android.os.BinderProxyTest",
+        "android.os.BinderDeathRecipientTest",
+        "android.os.BinderFrozenStateChangeNotificationTest",
+        "android.os.BinderProxyCountingTest",
+        "android.os.BinderUncaughtExceptionHandlerTest",
+        "android.os.BinderThreadPriorityTest",
+        "android.os.BinderWorkSourceTest",
+        "android.os.ParcelNullabilityTest",
+        "android.os.ParcelTest",
+        "com.android.internal.os.BinderDeathDispatcherTest",
+    ],
     exclude_annotations: ["com.android.internal.os.SkipPresubmit"],
 }
 

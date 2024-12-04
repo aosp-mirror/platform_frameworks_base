@@ -54,6 +54,7 @@ public final class TestRunningTaskInfoBuilder {
     private final Point mPositionInParent = new Point();
     private boolean mIsVisible = false;
     private boolean mIsTopActivityTransparent = false;
+    private boolean mIsActivityStackTransparent = false;
     private int mNumActivities = 1;
     private long mLastActiveTime;
 
@@ -158,6 +159,12 @@ public final class TestRunningTaskInfoBuilder {
         return this;
     }
 
+    public TestRunningTaskInfoBuilder setActivityStackTransparent(
+            boolean isActivityStackTransparent) {
+        mIsActivityStackTransparent = isActivityStackTransparent;
+        return this;
+    }
+
     public TestRunningTaskInfoBuilder setNumActivities(int numActivities) {
         mNumActivities = numActivities;
         return this;
@@ -187,6 +194,7 @@ public final class TestRunningTaskInfoBuilder {
         info.positionInParent = mPositionInParent;
         info.isVisible = mIsVisible;
         info.isTopActivityTransparent = mIsTopActivityTransparent;
+        info.isActivityStackTransparent = mIsActivityStackTransparent;
         info.numActivities = mNumActivities;
         info.lastActiveTime = mLastActiveTime;
         info.userId = mUserId;

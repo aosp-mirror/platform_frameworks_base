@@ -343,16 +343,6 @@ flag {
 }
 
 flag {
-    name: "dont_write_policy_definition"
-    namespace: "enterprise"
-    description: "Don't write redundant policy-definition-entry tags"
-    bug: "335663055"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "active_admin_cleanup"
     namespace: "enterprise"
     description: "Remove ActiveAdmin from EnforcingAdmin and related cleanups"
@@ -398,6 +388,7 @@ flag {
 
 flag {
   name: "split_create_managed_profile_enabled"
+  is_exported: true
   namespace: "enterprise"
   description: "Split up existing create and provision managed profile API."
   bug: "375382324"

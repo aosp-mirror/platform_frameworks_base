@@ -19,18 +19,18 @@ package com.android.systemui.qs.tiles.impl.airplane.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [AirplaneModeTileModel] to [QSTileState]. */
 class AirplaneModeMapper
 @Inject
-constructor(@Main private val resources: Resources, val theme: Theme) :
+constructor(@ShadeDisplayAware private val resources: Resources, val theme: Theme) :
     QSTileDataToStateMapper<AirplaneModeTileModel> {
 
     override fun map(config: QSTileConfig, data: AirplaneModeTileModel): QSTileState =

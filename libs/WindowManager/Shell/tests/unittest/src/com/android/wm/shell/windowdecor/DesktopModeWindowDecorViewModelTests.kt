@@ -278,7 +278,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForTopTranslucentActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
-            isTopActivityTransparent = true
+            isActivityStackTransparent = true
             isTopActivityNoDisplay = false
             numActivities = 1
         }

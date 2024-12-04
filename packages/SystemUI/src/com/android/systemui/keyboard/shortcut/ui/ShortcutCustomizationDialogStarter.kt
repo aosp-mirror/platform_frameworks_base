@@ -53,15 +53,18 @@ constructor(
 
     override suspend fun onActivated(): Nothing {
         viewModel.shortcutCustomizationUiState.collect { uiState ->
-            val shouldShowAddDialog = uiState is AddShortcutDialog && !uiState.isDialogShowing
-            val shouldShowDeleteDialog = uiState is DeleteShortcutDialog && !uiState.isDialogShowing
-            val shouldShowResetDialog = uiState is ResetShortcutDialog && !uiState.isDialogShowing
-            if (shouldShowDeleteDialog || shouldShowAddDialog || shouldShowResetDialog) {
-                dialog = createDialog().also { it.show() }
-                viewModel.onDialogShown()
-            } else if (uiState is ShortcutCustomizationUiState.Inactive) {
-                dialog?.dismiss()
-                dialog = null
+            when(uiState){
+                is AddShortcutDialog,
+                is DeleteShortcutDialog,
+                is ResetShortcutDialog -> {
+                    if (dialog == null){
+                        dialog = createDialog().also { it.show() }
+                    }
+                }
+                is ShortcutCustomizationUiState.Inactive -> {
+                    dialog?.dismiss()
+                    dialog = null
+                }
             }
         }
         awaitCancellation()

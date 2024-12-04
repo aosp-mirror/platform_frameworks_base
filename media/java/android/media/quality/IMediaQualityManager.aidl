@@ -23,6 +23,7 @@ import android.media.quality.ISoundProfileCallback;
 import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.PictureProfile;
+import android.media.quality.SoundProfileHandle;
 import android.media.quality.SoundProfile;
 
 /**
@@ -36,10 +37,11 @@ interface IMediaQualityManager {
     PictureProfile getPictureProfile(in int type, in String name, int userId);
     List<PictureProfile> getPictureProfilesByPackage(in String packageName, int userId);
     List<PictureProfile> getAvailablePictureProfiles(int userId);
+    boolean setDefaultPictureProfile(in String id, int userId);
     List<String> getPictureProfilePackageNames(int userId);
     List<String> getPictureProfileAllowList(int userId);
     void setPictureProfileAllowList(in List<String> packages, int userId);
-    PictureProfileHandle getPictureProfileHandle(in String id, int userId);
+    List<PictureProfileHandle> getPictureProfileHandle(in String[] id, int userId);
 
     SoundProfile createSoundProfile(in SoundProfile pp, int userId);
     void updateSoundProfile(in String id, in SoundProfile pp, int userId);
@@ -47,9 +49,11 @@ interface IMediaQualityManager {
     SoundProfile getSoundProfile(in int type, in String name, int userId);
     List<SoundProfile> getSoundProfilesByPackage(in String packageName, int userId);
     List<SoundProfile> getAvailableSoundProfiles(int userId);
+    boolean setDefaultSoundProfile(in String id, int userId);
     List<String> getSoundProfilePackageNames(int userId);
     List<String> getSoundProfileAllowList(int userId);
     void setSoundProfileAllowList(in List<String> packages, int userId);
+    List<SoundProfileHandle> getSoundProfileHandle(in String[] id, int userId);
 
     void registerPictureProfileCallback(in IPictureProfileCallback cb);
     void registerSoundProfileCallback(in ISoundProfileCallback cb);

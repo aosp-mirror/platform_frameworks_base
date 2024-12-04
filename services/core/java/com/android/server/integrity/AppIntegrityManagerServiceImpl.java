@@ -93,29 +93,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mHandler = handler;
-
-        IntentFilter integrityVerificationFilter = new IntentFilter();
-        integrityVerificationFilter.addAction(ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
-        try {
-            integrityVerificationFilter.addDataType(PACKAGE_MIME_TYPE);
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            throw new RuntimeException("Mime type malformed: should never happen.", e);
-        }
-
-        mContext.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (!ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION.equals(
-                                intent.getAction())) {
-                            return;
-                        }
-                        mHandler.post(() -> handleIntegrityVerification(intent));
-                    }
-                },
-                integrityVerificationFilter,
-                /* broadcastPermission= */ null,
-                mHandler);
     }
 
     @Override
@@ -156,11 +133,5 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     @Override
     public List<String> getWhitelistedRuleProviders() {
         return Collections.emptyList();
-    }
-
-    private void handleIntegrityVerification(Intent intent) {
-        int verificationId = intent.getIntExtra(EXTRA_VERIFICATION_ID, -1);
-        mPackageManagerInternal.setIntegrityVerificationResult(
-                verificationId, PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
     }
 }

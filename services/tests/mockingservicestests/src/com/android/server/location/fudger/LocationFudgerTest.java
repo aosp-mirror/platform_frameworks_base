@@ -188,8 +188,8 @@ public class LocationFudgerTest {
     }
 
     @Test
-    public void testDensityBasedCoarsening_ifFeatureIsEnabledButNotDefault_cacheIsNotUsed() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+    public void testDensityBasedCoarsening_ifFeatureIsEnabledButNoDefaultValue_cacheIsNotUsed() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
         LocationFudgerCache cache = mock(LocationFudgerCache.class);
         doReturn(false).when(cache).hasDefaultValue();
 

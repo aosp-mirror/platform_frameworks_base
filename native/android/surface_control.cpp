@@ -64,6 +64,8 @@ static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_RGB) ==
               static_cast<int>(android::gui::LutProperties::SamplingKey::RGB));
 static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_MAX_RGB) ==
               static_cast<int>(android::gui::LutProperties::SamplingKey::MAX_RGB));
+static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_CIE_Y) ==
+              static_cast<int>(android::gui::LutProperties::SamplingKey::CIE_Y));
 
 Transaction* ASurfaceTransaction_to_Transaction(ASurfaceTransaction* aSurfaceTransaction) {
     return reinterpret_cast<Transaction*>(aSurfaceTransaction);

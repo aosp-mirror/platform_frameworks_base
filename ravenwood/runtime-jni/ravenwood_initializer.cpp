@@ -140,7 +140,7 @@ static void check_system_property_access(const char* key, bool write) {
     if (gVM != nullptr && gRunnerState != nullptr) {
         JNIEnv* env;
         if (gVM->GetEnv((void**)&env, JNI_VERSION_1_4) >= 0) {
-            ALOGI("%s access to system property '%s'", write ? "Write" : "Read", key);
+            ALOGV("%s access to system property '%s'", write ? "Write" : "Read", key);
             env->CallStaticVoidMethod(gRunnerState, gCheckSystemPropertyAccess,
                                       env->NewStringUTF(key), write ? JNI_TRUE : JNI_FALSE);
             return;
@@ -208,7 +208,7 @@ static const JNINativeMethod sMethods[] = {
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
-    ALOGI("%s: JNI_OnLoad", __FILE__);
+    ALOGV("%s: JNI_OnLoad", __FILE__);
 
     maybeRedirectLog();
 

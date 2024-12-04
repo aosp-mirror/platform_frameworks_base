@@ -601,7 +601,7 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ଏଠାରେ ପ୍ଲେ କରିବା ପାଇଁ ଡିଭାଇସକୁ ସକ୍ରିୟ କରନ୍ତୁ"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ପ୍ଲେ କରିବା ପାଇଁ ଡିଭାଇସକୁ ଅନୁମୋଦନ କରାଯାଇନାହିଁ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ଏଠାରେ ମିଡିଆ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"କନେକ୍ଟ କରାଯାଇଛି"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"କନେକ୍ଟ ହୋଇଛି"</string>
     <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>

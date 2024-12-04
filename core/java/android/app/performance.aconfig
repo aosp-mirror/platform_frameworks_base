@@ -37,6 +37,14 @@ flag {
 
 flag {
      namespace: "system_performance"
+     name: "pic_separate_permission_notifications"
+     is_fixed_read_only: true
+     description: "Seperate PermissionManager notifications from cache udpates"
+     bug: "379699402"
+}
+
+flag {
+     namespace: "system_performance"
      name: "pic_cache_nulls"
      is_fixed_read_only: true
      description: "Cache null returns from binder calls"

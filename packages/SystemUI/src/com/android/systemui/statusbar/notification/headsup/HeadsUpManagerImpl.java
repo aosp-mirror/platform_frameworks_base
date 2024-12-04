@@ -42,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -118,8 +119,7 @@ public class HeadsUpManagerImpl
     protected int mAutoDismissTime;
     protected DelayableExecutor mExecutor;
 
-    @VisibleForTesting
-    public final int mExtensionTime;
+    private final int mExtensionTime;
 
     // TODO(b/328393698) move the topHeadsUpRow logic to an interactor
     private final MutableStateFlow<HeadsUpRowRepository> mTopHeadsUpRow =
@@ -189,7 +189,7 @@ public class HeadsUpManagerImpl
             KeyguardBypassController bypassController,
             GroupMembershipManager groupMembershipManager,
             VisualStabilityProvider visualStabilityProvider,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             @Main Handler handler,
             GlobalSettings globalSettings,
             SystemClock systemClock,
@@ -212,7 +212,8 @@ public class HeadsUpManagerImpl
         mVisualStabilityProvider = visualStabilityProvider;
         Resources resources = context.getResources();
         mMinimumDisplayTime = NotificationThrottleHun.isEnabled()
-                ? 500 : resources.getInteger(R.integer.heads_up_notification_minimum_time);
+                ? resources.getInteger(R.integer.heads_up_notification_minimum_time_with_throttling)
+                : resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mStickyForSomeTimeAutoDismissTime = resources.getInteger(
                 R.integer.sticky_heads_up_notification_time);
         mAutoDismissTime = resources.getInteger(R.integer.heads_up_notification_decay);

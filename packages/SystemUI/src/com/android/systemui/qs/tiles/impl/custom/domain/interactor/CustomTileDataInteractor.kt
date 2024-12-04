@@ -18,7 +18,7 @@ package com.android.systemui.qs.tiles.impl.custom.domain.interactor
 
 import android.os.UserHandle
 import android.service.quicksettings.Tile
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
@@ -28,6 +28,7 @@ import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTilePacka
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +45,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @QSTileScope
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -64,7 +64,7 @@ constructor(
     private val bindingFlow =
         mutableUserFlow
             .flatMapLatest { user ->
-                ConflatedCallbackFlow.conflatedCallbackFlow {
+                conflatedCallbackFlow {
                     serviceInteractor.setUser(user)
 
                     // Wait for the CustomTileInteractor to become initialized first, because
@@ -79,7 +79,7 @@ constructor(
                             defaultsRepository.requestNewDefaults(
                                 user,
                                 tileSpec.componentName,
-                                true
+                                true,
                             )
                         }
                         .launchIn(this)
@@ -99,7 +99,7 @@ constructor(
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<CustomTileDataModel> {
         tileScope.launch { mutableUserFlow.emit(user) }
         return bindingFlow.combine(triggers) { _, _ -> }.flatMapLatest { dataFlow(user) }

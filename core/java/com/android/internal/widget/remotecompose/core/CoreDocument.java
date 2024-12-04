@@ -24,6 +24,8 @@ import com.android.internal.widget.remotecompose.core.operations.FloatExpression
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
+import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -441,11 +444,11 @@ public class CoreDocument {
         mActionListeners.clear();
     }
 
-    public interface ClickCallbacks {
-        void click(int id, @Nullable String metadata);
+    public interface IdActionCallback {
+        void onAction(int id, @Nullable String metadata);
     }
 
-    @NonNull HashSet<ClickCallbacks> mClickListeners = new HashSet<>();
+    @NonNull HashSet<IdActionCallback> mIdActionListeners = new HashSet<>();
     @NonNull HashSet<TouchListener> mTouchListeners = new HashSet<>();
     @NonNull HashSet<ClickAreaRepresentation> mClickAreas = new HashSet<>();
 
@@ -469,6 +472,21 @@ public class CoreDocument {
         float mRight;
         float mBottom;
         @Nullable final String mMetadata;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ClickAreaRepresentation)) return false;
+            ClickAreaRepresentation that = (ClickAreaRepresentation) o;
+            return mId == that.mId
+                    && Objects.equals(mContentDescription, that.mContentDescription)
+                    && Objects.equals(mMetadata, that.mMetadata);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mId, mContentDescription, mMetadata);
+        }
 
         public ClickAreaRepresentation(
                 int id,
@@ -679,6 +697,7 @@ public class CoreDocument {
                     }
                 }
             }
+            op.markNotDirty();
             op.apply(context);
         }
     }
@@ -754,9 +773,13 @@ public class CoreDocument {
             float right,
             float bottom,
             @Nullable String metadata) {
-        mClickAreas.add(
+
+        ClickAreaRepresentation car =
                 new ClickAreaRepresentation(
-                        id, contentDescription, left, top, right, bottom, metadata));
+                        id, contentDescription, left, top, right, bottom, metadata);
+
+        boolean old = mClickAreas.remove(car);
+        mClickAreas.add(car);
     }
 
     /**
@@ -769,12 +792,12 @@ public class CoreDocument {
     }
 
     /**
-     * Add a click listener. This will get called when a click is detected on the document
+     * Add an id action listener. This will get called when e.g. a click is detected on the document
      *
-     * @param callback called when a click area has been hit, passing the click are id and metadata.
+     * @param callback called when an action is executed, passing the id and metadata.
      */
-    public void addClickListener(@NonNull ClickCallbacks callback) {
-        mClickListeners.add(callback);
+    public void addIdActionListener(@NonNull IdActionCallback callback) {
+        mIdActionListeners.add(callback);
     }
 
     /**
@@ -783,8 +806,8 @@ public class CoreDocument {
      * @return set of click listeners
      */
     @NonNull
-    public HashSet<CoreDocument.ClickCallbacks> getClickListeners() {
-        return mClickListeners;
+    public HashSet<IdActionCallback> getIdActionListeners() {
+        return mIdActionListeners;
     }
 
     /**
@@ -813,15 +836,15 @@ public class CoreDocument {
                 warnClickListeners(clickArea);
             }
         }
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(id, "");
+        for (IdActionCallback listener : mIdActionListeners) {
+            listener.onAction(id, "");
         }
     }
 
     /** Warn click listeners when a click area is activated */
     private void warnClickListeners(@NonNull ClickAreaRepresentation clickArea) {
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(clickArea.mId, clickArea.mMetadata);
+        for (IdActionCallback listener : mIdActionListeners) {
+            listener.onAction(clickArea.mId, clickArea.mMetadata);
         }
     }
 
@@ -1067,7 +1090,6 @@ public class CoreDocument {
             mRepaintNext = 1;
         }
         context.mMode = RemoteContext.ContextMode.UNSET;
-        // System.out.println(">>   " + (  System.nanoTime() - time)*1E-6f+" ms");
         if (DEBUG && mRootLayoutComponent != null) {
             System.out.println(mRootLayoutComponent.displayHierarchy());
         }
@@ -1162,5 +1184,31 @@ public class CoreDocument {
     @NonNull
     public List<Operation> getOperations() {
         return mOperations;
+    }
+
+    /** defines if a shader can be run */
+    public interface ShaderControl {
+        boolean isShaderValid(String shader);
+    }
+
+    /**
+     * validate the shaders
+     *
+     * @param context the remote context
+     * @param ctl the call back to allow evaluation of shaders
+     */
+    public void checkShaders(RemoteContext context, ShaderControl ctl) {
+        int count = 0;
+        for (Operation op : mOperations) {
+            if (op instanceof TextData) {
+                op.apply(context);
+            }
+            if (op instanceof ShaderData) {
+                ShaderData sd = (ShaderData) op;
+                int id = sd.getShaderTextId();
+                String str = context.getText(id);
+                sd.enable(ctl.isShaderValid(str));
+            }
+        }
     }
 }

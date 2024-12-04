@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.UserHandle
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.model.UiModeNightTileModel
@@ -40,7 +39,7 @@ class UiModeNightTileDataInteractor
 @Inject
 constructor(
     @ShadeDisplayAware private val context: Context,
-    private val configurationController: ConfigurationController,
+    @ShadeDisplayAware private val configurationController: ConfigurationController,
     private val uiModeManager: UiModeManager,
     private val batteryController: BatteryController,
     private val locationController: LocationController,
@@ -49,7 +48,7 @@ constructor(
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<UiModeNightTileModel> =
         ConflatedCallbackFlow.conflatedCallbackFlow {
             // send initial state
@@ -106,7 +105,7 @@ constructor(
             nightModeCustomType,
             use24HourFormat,
             customNightModeEnd,
-            customNightModeStart
+            customNightModeStart,
         )
     }
 
