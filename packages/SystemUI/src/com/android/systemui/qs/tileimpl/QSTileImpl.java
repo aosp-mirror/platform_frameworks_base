@@ -369,6 +369,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.INITIALIZE);
     }
 
+    @androidx.annotation.NonNull
     public TState getState() {
         return mState;
     }

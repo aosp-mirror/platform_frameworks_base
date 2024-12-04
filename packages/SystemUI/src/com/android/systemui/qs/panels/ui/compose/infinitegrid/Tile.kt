@@ -126,7 +126,7 @@ fun Tile(
     modifier: Modifier = Modifier,
     detailsViewModel: DetailsViewModel?,
 ) {
-    val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
+    val state: QSTile.State by tile.state.collectAsStateWithLifecycle(tile.currentState)
     val currentBounceableInfo by rememberUpdatedState(bounceableInfo)
     val resources = resources()
     val uiState = remember(state, resources) { state.toUiState(resources) }
