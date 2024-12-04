@@ -731,6 +731,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             callback.onBackStarted(backEvent);
             if (mBackTransitionHandler.canHandOffAnimation()) {
                 callback.setHandoffHandler(mHandoffHandler);
+            } else {
+                callback.setHandoffHandler(null);
             }
             mOnBackStartDispatched = true;
         } catch (RemoteException e) {
@@ -1273,14 +1275,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            final boolean isPrepareTransition =
-                    info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
-            if (isPrepareTransition) {
-                if (checkTakeoverFlags()) {
-                    mTakeoverHandler = mTransitions.getHandlerForTakeover(transition, info);
-                }
-                kickStartAnimation();
-            }
             // Both mShellExecutor and Transitions#mMainExecutor are ShellMainThread, so we don't
             // need to post to ShellExecutor when called.
             if (info.getType() == WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION) {
@@ -1308,7 +1302,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     // animation never start, consume directly
                     applyAndFinish(st, ft, finishCallback);
                     return true;
-                } else if (mClosePrepareTransition == null && isPrepareTransition) {
+                } else if (mClosePrepareTransition == null
+                        && info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION) {
                     // Gesture animation was cancelled before prepare transition ready, create
                     // the close prepare transition
                     createClosePrepareTransition();
@@ -1316,6 +1311,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (handlePrepareTransition(info, st, ft, finishCallback)) {
+                if (checkTakeoverFlags()) {
+                    mTakeoverHandler = mTransitions.getHandlerForTakeover(transition, info);
+                }
+                kickStartAnimation();
                 return true;
             }
             return handleCloseTransition(info, st, ft, finishCallback);
