@@ -5900,6 +5900,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (event.getKeyCode() == KEYCODE_POWER && event.getAction() == KeyEvent.ACTION_DOWN) {
             if (overridePowerKeyBehaviorInFocusedWindow()) {
+                if (event.getRepeatCount() > 0) {
+                    return;
+                }
                 if (mGestureLauncherService != null) {
                     mGestureLauncherService.processPowerKeyDown(event);
                 }
@@ -5937,10 +5940,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean detectDoubleTapPower(KeyEvent event) {
-        if (event.getKeyCode() != KEYCODE_POWER || event.getAction() != KeyEvent.ACTION_DOWN) {
-            return false;
-        }
-        if (event.isLongPress()) {
+        if (event.getKeyCode() != KEYCODE_POWER || event.getAction() != KeyEvent.ACTION_DOWN
+                || event.getRepeatCount() != 0) {
             return false;
         }
 

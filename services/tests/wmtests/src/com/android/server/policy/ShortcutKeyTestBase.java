@@ -236,6 +236,10 @@ class ShortcutKeyTestBase {
         sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
     }
 
+    void sendKey(int keyCode, long durationMillis) {
+        sendKeyCombination(new int[]{keyCode}, durationMillis, false, DEFAULT_DISPLAY);
+    }
+
     boolean sendKeyGestureEventStart(int gestureType) {
         return mPhoneWindowManager.sendKeyGestureEvent(
                 new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(

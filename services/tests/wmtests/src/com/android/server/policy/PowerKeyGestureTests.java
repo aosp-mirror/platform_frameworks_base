@@ -124,14 +124,14 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
     public void testPowerLongPress() {
         // Show assistant.
         mPhoneWindowManager.overrideLongPressOnPower(LONG_PRESS_POWER_ASSISTANT);
-        sendKey(KEYCODE_POWER, true);
+        sendKey(KEYCODE_POWER, SingleKeyGestureDetector.sDefaultLongPressTimeout);
         mPhoneWindowManager.assertSearchManagerLaunchAssist();
 
         mPhoneWindowManager.moveTimeForward(POWER_MULTI_PRESS_TIMEOUT_MILLIS);
 
         // Show global actions.
         mPhoneWindowManager.overrideLongPressOnPower(LONG_PRESS_POWER_GLOBAL_ACTIONS);
-        sendKey(KEYCODE_POWER, true);
+        sendKey(KEYCODE_POWER, SingleKeyGestureDetector.sDefaultLongPressTimeout);
         mPhoneWindowManager.assertShowGlobalActionsCalled();
     }
 
