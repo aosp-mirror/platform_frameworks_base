@@ -112,7 +112,6 @@ public final class NetworkSecurityConfig {
         return mHstsEnforced;
     }
 
-    // TODO(b/28746284): add exceptions for user-added certificates and enterprise overrides.
     public boolean isCertificateTransparencyVerificationRequired() {
         return mCertificateTransparencyVerificationRequired;
     }
@@ -192,20 +191,21 @@ public final class NetworkSecurityConfig {
      * @hide
      */
     public static Builder getDefaultBuilder(ApplicationInfo info) {
+        // System certificate store, does not bypass static pins, does not disable CT.
+        CertificatesEntryRef systemRef = new CertificatesEntryRef(
+                SystemCertificateSource.getInstance(), false, false);
         Builder builder = new Builder()
                 .setHstsEnforced(DEFAULT_HSTS_ENFORCED)
-                // System certificate store, does not bypass static pins.
-                .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false));
+                .addCertificatesEntryRef(systemRef);
         final boolean cleartextTrafficPermitted = info.targetSdkVersion < Build.VERSION_CODES.P
                 && !info.isInstantApp();
         builder.setCleartextTrafficPermitted(cleartextTrafficPermitted);
         // Applications targeting N and above must opt in into trusting the user added certificate
         // store.
         if (info.targetSdkVersion <= Build.VERSION_CODES.M && !info.isPrivilegedApp()) {
-            // User certificate store, does not bypass static pins.
+            // User certificate store, does not bypass static pins. CT is disabled.
             builder.addCertificatesEntryRef(
-                    new CertificatesEntryRef(UserCertificateSource.getInstance(), false));
+                    new CertificatesEntryRef(UserCertificateSource.getInstance(), false, true));
         }
         return builder;
     }
@@ -338,6 +338,16 @@ public final class NetworkSecurityConfig {
         private boolean getCertificateTransparencyVerificationRequired() {
             if (mCertificateTransparencyVerificationRequiredSet) {
                 return mCertificateTransparencyVerificationRequired;
+            }
+            // CT verification has not been set explicitly. Before deferring to
+            // the parent, check if any of the CertificatesEntryRef requires it
+            // to be disabled (i.e., user store or inline certificate).
+            if (hasCertificatesEntryRefs()) {
+                for (CertificatesEntryRef ref : getCertificatesEntryRefs()) {
+                    if (ref.disableCT()) {
+                        return false;
+                    }
+                }
             }
             if (mParentBuilder != null) {
                 return mParentBuilder.getCertificateTransparencyVerificationRequired();
