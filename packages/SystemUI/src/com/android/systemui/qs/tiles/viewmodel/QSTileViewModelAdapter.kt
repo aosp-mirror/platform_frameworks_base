@@ -196,8 +196,9 @@ constructor(
         qsTileViewModel.destroy()
     }
 
-    override fun getState(): QSTile.State? =
+    override fun getState(): QSTile.State =
         qsTileViewModel.currentState?.let { mapState(context, it, qsTileViewModel.config) }
+            ?: QSTile.State()
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
 
