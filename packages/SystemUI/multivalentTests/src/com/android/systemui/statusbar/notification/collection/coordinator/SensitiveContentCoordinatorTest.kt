@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
@@ -26,38 +28,40 @@ import android.service.notification.StatusBarNotification
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.keyguardUpdateMonitor
 import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.plugins.statusbar.fakeStatusBarStateController
+import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
-import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
+import com.android.systemui.statusbar.notification.collection.notifPipeline
+import com.android.systemui.statusbar.notification.dynamicPrivacyController
+import com.android.systemui.statusbar.notification.mockDynamicPrivacyController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
+import com.android.systemui.statusbar.policy.mockSensitiveNotificationProtectionController
+import com.android.systemui.statusbar.policy.sensitiveNotificationProtectionController
 import com.android.systemui.testKosmos
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
-import dagger.BindsInstance
-import dagger.Component
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -70,35 +74,27 @@ import org.mockito.Mockito.`when` as whenever
 @RunWith(AndroidJUnit4::class)
 class SensitiveContentCoordinatorTest : SysuiTestCase() {
 
-    val kosmos = testKosmos()
+    val kosmos =
+        testKosmos().apply {
+            // Override some Kosmos objects with mocks or fakes for easier testability
+            dynamicPrivacyController = mockDynamicPrivacyController
+            sensitiveNotificationProtectionController =
+                mockSensitiveNotificationProtectionController
+            statusBarStateController = fakeStatusBarStateController
+        }
 
-    val dynamicPrivacyController: DynamicPrivacyController = mock()
-    val lockscreenUserManager: NotificationLockscreenUserManager = mock()
-    val pipeline: NotifPipeline = mock()
-    val keyguardUpdateMonitor: KeyguardUpdateMonitor = mock()
-    val statusBarStateController: StatusBarStateController = mock()
-    val keyguardStateController: KeyguardStateController = mock()
-    val mSelectedUserInteractor: SelectedUserInteractor = mock()
+    val dynamicPrivacyController: DynamicPrivacyController = kosmos.mockDynamicPrivacyController
+    val lockscreenUserManager: NotificationLockscreenUserManager =
+        kosmos.notificationLockscreenUserManager
+    val pipeline: NotifPipeline = kosmos.notifPipeline
+    val keyguardUpdateMonitor: KeyguardUpdateMonitor = kosmos.keyguardUpdateMonitor
+    val statusBarStateController: SysuiStatusBarStateController =
+        kosmos.fakeStatusBarStateController
     val sensitiveNotificationProtectionController: SensitiveNotificationProtectionController =
-        mock()
-    val deviceEntryInteractor: DeviceEntryInteractor = mock()
-    val sceneInteractor: SceneInteractor = mock()
+        kosmos.mockSensitiveNotificationProtectionController
+    val sceneInteractor: SceneInteractor = kosmos.sceneInteractor
 
-    val coordinator: SensitiveContentCoordinator =
-        DaggerTestSensitiveContentCoordinatorComponent.factory()
-            .create(
-                dynamicPrivacyController,
-                lockscreenUserManager,
-                keyguardUpdateMonitor,
-                statusBarStateController,
-                keyguardStateController,
-                mSelectedUserInteractor,
-                sensitiveNotificationProtectionController,
-                deviceEntryInteractor,
-                sceneInteractor,
-                kosmos.applicationCoroutineScope,
-            )
-            .coordinator
+    val coordinator: SensitiveContentCoordinator by lazy { kosmos.sensitiveContentCoordinator }
 
     @Test
     fun onDynamicPrivacyChanged_invokeInvalidationListener() {
@@ -675,13 +671,13 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         whenever(lockscreenUserManager.isLockscreenPublicMode(1)).thenReturn(true)
         whenever(lockscreenUserManager.userAllowsPrivateNotificationsInPublic(1)).thenReturn(false)
         whenever(dynamicPrivacyController.isDynamicallyUnlocked).thenReturn(true)
-        whenever(statusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD)
         whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(any()))
             .thenReturn(true)
         val entry = fakeNotification(2, true)
         whenever(sensitiveNotificationProtectionController.isSensitiveStateActive).thenReturn(true)
         whenever(sensitiveNotificationProtectionController.shouldProtectNotification(any()))
             .thenReturn(true)
+        statusBarStateController.state = StatusBarState.KEYGUARD
 
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
@@ -731,28 +727,5 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
                 .build()
         )
         return notificationEntry
-    }
-}
-
-@CoordinatorScope
-@Component(modules = [SensitiveContentCoordinatorModule::class])
-interface TestSensitiveContentCoordinatorComponent {
-    val coordinator: SensitiveContentCoordinator
-
-    @Component.Factory
-    interface Factory {
-        fun create(
-            @BindsInstance dynamicPrivacyController: DynamicPrivacyController,
-            @BindsInstance lockscreenUserManager: NotificationLockscreenUserManager,
-            @BindsInstance keyguardUpdateMonitor: KeyguardUpdateMonitor,
-            @BindsInstance statusBarStateController: StatusBarStateController,
-            @BindsInstance keyguardStateController: KeyguardStateController,
-            @BindsInstance selectedUserInteractor: SelectedUserInteractor,
-            @BindsInstance
-            sensitiveNotificationProtectionController: SensitiveNotificationProtectionController,
-            @BindsInstance deviceEntryInteractor: DeviceEntryInteractor,
-            @BindsInstance sceneInteractor: SceneInteractor,
-            @BindsInstance @Application scope: CoroutineScope,
-        ): TestSensitiveContentCoordinatorComponent
     }
 }
