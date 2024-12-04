@@ -2124,7 +2124,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     if (!tf.isOrganizedTaskFragment()) {
                         return;
                     }
-                    tf.resetAdjacentTaskFragment();
+                    tf.clearAdjacentTaskFragments();
                     tf.setCompanionTaskFragment(null /* companionTaskFragment */);
                     tf.setAnimationParams(TaskFragmentAnimationParams.DEFAULT);
                     if (tf.getTopNonFinishingActivity() != null) {

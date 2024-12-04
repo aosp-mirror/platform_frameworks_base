@@ -365,8 +365,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertTrue(outPrevActivities.isEmpty());
         assertTrue(predictable);
         // reset
-        tf1.setAdjacentTaskFragment(null);
-        tf2.setAdjacentTaskFragment(null);
+        tf1.clearAdjacentTaskFragments();
+        tf2.clearAdjacentTaskFragments();
         tf1.setCompanionTaskFragment(null);
         tf2.setCompanionTaskFragment(null);
 
@@ -398,8 +398,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertTrue(predictable);
         // reset
         outPrevActivities.clear();
-        tf2.setAdjacentTaskFragment(null);
-        tf3.setAdjacentTaskFragment(null);
+        tf2.clearAdjacentTaskFragments();
+        tf3.clearAdjacentTaskFragments();
 
         final TaskFragment tf4 = createTaskFragmentWithActivity(task);
         // Stacked + next companion to top => predict for previous activity below companion.
