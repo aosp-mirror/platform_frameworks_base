@@ -432,7 +432,8 @@ class DeferredDisplayUpdater {
                 || !first.thermalRefreshRateThrottling.contentEquals(
                 second.thermalRefreshRateThrottling)
                 || !Objects.equals(first.thermalBrightnessThrottlingDataId,
-                second.thermalBrightnessThrottlingDataId)) {
+                second.thermalBrightnessThrottlingDataId)
+                || first.canHostTasks != second.canHostTasks) {
             diff |= DIFF_NOT_WM_DEFERRABLE;
         }
 
