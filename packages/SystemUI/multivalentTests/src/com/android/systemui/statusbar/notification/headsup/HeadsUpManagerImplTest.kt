@@ -19,6 +19,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Person
 import android.os.Handler
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.testing.TestableLooper
@@ -27,7 +28,10 @@ import android.view.accessibility.accessibilityManager
 import android.view.accessibility.accessibilityManagerWrapper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.uiEventLoggerFake
+import com.android.systemui.SysuiTestCase
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.dump.dumpManager
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
@@ -50,6 +54,8 @@ import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.mockExecutorHandler
 import com.android.systemui.util.kotlin.JavaAdapter
+import com.android.systemui.util.settings.fakeGlobalSettings
+import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Ignore
@@ -68,17 +74,23 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
-class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplOldTest(flags) {
-
-    private val headsUpManagerLogger = mock<HeadsUpManagerLogger>()
+class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
 
     private val groupManager = mock<GroupMembershipManager>()
     private val bgHandler = mock<Handler>()
+    private val headsUpManagerLogger = mock<HeadsUpManagerLogger>()
 
     val statusBarStateController = kosmos.sysuiStatusBarStateController
+    private val globalSettings = kosmos.fakeGlobalSettings
+    private val systemClock = kosmos.fakeSystemClock
+    private val executor = kosmos.fakeExecutor
+    private val uiEventLoggerFake = kosmos.uiEventLoggerFake
     private val javaAdapter: JavaAdapter = JavaAdapter(testScope.backgroundScope)
 
     private lateinit var testHelper: NotificationTestHelper
@@ -113,7 +125,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         avalancheController =
             AvalancheController(
                 kosmos.dumpManager,
-                kosmos.uiEventLoggerFake,
+                uiEventLoggerFake,
                 headsUpManagerLogger,
                 bgHandler,
             )
@@ -131,7 +143,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
                 systemClock,
                 executor,
                 kosmos.accessibilityManagerWrapper,
-                kosmos.uiEventLoggerFake,
+                uiEventLoggerFake,
                 javaAdapter,
                 kosmos.shadeInteractor,
                 avalancheController,
@@ -392,7 +404,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     fun testCanRemoveImmediately_notTopEntry() {
         val earlierEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
         val laterEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 1, mContext)
-        laterEntry.row = mRow
+        laterEntry.row = mock<ExpandableNotificationRow>()
         underTest.showNotification(earlierEntry)
         underTest.showNotification(laterEntry)
 
@@ -618,11 +630,13 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         }
 
     @Test
+    @BrokenWithSceneContainer(381869885) // because `ShadeTestUtil.setShadeExpansion(0f)`
+    // still causes `ShadeInteractor.isAnyExpanded` to emit `true`, when it should emit `false`.
     fun shouldHeadsUpBecomePinned_shadeNotExpanded_true() =
         kosmos.runTest {
             // GIVEN
-            shadeTestUtil.setShadeExpansion(0f)
-            // TODO(b/381869885): Determine why we need both of these ShadeTestUtil calls.
+            // TODO(b/381869885): We should be able to use `ShadeTestUtil.setShadeExpansion(0f)`
+            // instead.
             shadeTestUtil.setLegacyExpandedOrAwaitingInputTransfer(false)
 
             val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -769,6 +783,63 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         assertThat(activeRemoteInput.compareTo(incomingCall)).isGreaterThan(0)
     }
 
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testPinEntry_logsPeek_throttleEnabled() {
+        // Needs full screen intent in order to be pinned
+        val entryToPin =
+            underTest.HeadsUpEntry(
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id= */ 0, mContext)
+            )
+
+        // Note: the standard way to show a notification would be calling showNotification rather
+        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // the notification and then updates it; in order to not log twice, the entry needs
+        // to have a functional ExpandableNotificationRow that can keep track of whether it's
+        // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
+        underTest.onEntryAdded(entryToPin)
+
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
+        assertThat(AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId())
+            .isEqualTo(uiEventLoggerFake.eventId(0))
+        assertThat(HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id)
+            .isEqualTo(uiEventLoggerFake.eventId(1))
+    }
+
+    @Test
+    @DisableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testPinEntry_logsPeek_throttleDisabled() {
+        // Needs full screen intent in order to be pinned
+        val entryToPin =
+            underTest.HeadsUpEntry(
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id= */ 0, mContext)
+            )
+
+        // Note: the standard way to show a notification would be calling showNotification rather
+        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // the notification and then updates it; in order to not log twice, the entry needs
+        // to have a functional ExpandableNotificationRow that can keep track of whether it's
+        // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
+        underTest.onEntryAdded(entryToPin)
+
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id)
+            .isEqualTo(uiEventLoggerFake.eventId(0))
+    }
+
+    @Test
+    fun testSetUserActionMayIndirectlyRemove() {
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(notifEntry)
+
+        assertThat(underTest.canRemoveImmediately(notifEntry.key)).isFalse()
+
+        underTest.setUserActionMayIndirectlyRemove(notifEntry)
+
+        assertThat(underTest.canRemoveImmediately(notifEntry.key)).isTrue()
+    }
+
     private fun createStickyEntry(id: Int): NotificationEntry {
         val notif =
             Notification.Builder(mContext, "")
@@ -787,8 +858,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
         return HeadsUpManagerTestUtil.createEntry(id, notif)
     }
 
-    override fun useAccessibilityTimeout(use: Boolean) {
-        super.useAccessibilityTimeout(use)
+    private fun useAccessibilityTimeout(use: Boolean) {
         if (use) {
             whenever(kosmos.accessibilityManager.getRecommendedTimeoutMillis(any(), any()))
                 .thenReturn(TEST_A11Y_AUTO_DISMISS_TIME)
@@ -800,7 +870,22 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : HeadsUpManagerImplO
     }
 
     companion object {
+        const val TEST_TOUCH_ACCEPTANCE_TIME = 200
+        const val TEST_A11Y_AUTO_DISMISS_TIME = 1000
+        const val TEST_EXTENSION_TIME = 500
+
+        const val TEST_MINIMUM_DISPLAY_TIME = 400
+        const val TEST_AUTO_DISMISS_TIME = 600
+        const val TEST_STICKY_AUTO_DISMISS_TIME = 800
+
+        init {
+            assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME)
+            assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME)
+            assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME)
+        }
+
         @get:Parameters(name = "{0}")
+        @JvmStatic
         val flags: List<FlagsParameterization>
             get() = buildList {
                 addAll(
