@@ -125,7 +125,6 @@ import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ObjectUtils;
@@ -161,7 +160,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
@@ -225,14 +223,6 @@ class UserController implements Handler.Callback {
      * observer when it never calls back.
      */
     private static final int USER_SWITCH_CALLBACKS_TIMEOUT_MS = 5 * 1000;
-
-    /**
-     * Amount of time waited for {@link WindowManagerService#dismissKeyguard} callbacks to be
-     * called after dismissing the keyguard.
-     * Otherwise, we should move on to dismiss the dialog {@link #dismissUserSwitchDialog()}
-     * and report user switch is complete {@link #REPORT_USER_SWITCH_COMPLETE_MSG}.
-     */
-    private static final int DISMISS_KEYGUARD_TIMEOUT_MS = 2 * 1000;
 
     /**
      * Time after last scheduleOnUserCompletedEvent() call at which USER_COMPLETED_EVENT_MSG will be
@@ -2010,7 +2000,7 @@ class UserController implements Handler.Callback {
                 mInjector.getWindowManager().setSwitchingUser(true);
                 // Only lock if the user has a secure keyguard PIN/Pattern/Pwd
                 if (mInjector.getKeyguardManager().isDeviceSecure(userId)) {
-                    // Make sure the device is locked before moving on with the user switch
+                    Slogf.d(TAG, "Locking the device before moving on with the user switch");
                     mInjector.lockDeviceNowAndWaitForKeyguardShown();
                 }
             }
@@ -2640,7 +2630,7 @@ class UserController implements Handler.Callback {
 
         EventLog.writeEvent(EventLogTags.UC_CONTINUE_USER_SWITCH, oldUserId, newUserId);
 
-        // Do the keyguard dismiss and dismiss the user switching dialog later
+        // Dismiss the user switching dialog and complete the user switch
         mHandler.removeMessages(COMPLETE_USER_SWITCH_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(
                 COMPLETE_USER_SWITCH_MSG, oldUserId, newUserId));
@@ -2655,31 +2645,17 @@ class UserController implements Handler.Callback {
 
     @VisibleForTesting
     void completeUserSwitch(int oldUserId, int newUserId) {
-        final boolean isUserSwitchUiEnabled = isUserSwitchUiEnabled();
-        // serialize each conditional step
-        await(
-                // STEP 1 - If there is no challenge set, dismiss the keyguard right away
-                isUserSwitchUiEnabled && !mInjector.getKeyguardManager().isDeviceSecure(newUserId),
-                mInjector::dismissKeyguard,
-                () -> await(
-                        // STEP 2 - If user switch ui was enabled, dismiss user switch dialog
-                        isUserSwitchUiEnabled,
-                        this::dismissUserSwitchDialog,
-                        () -> {
-                            // STEP 3 - Send REPORT_USER_SWITCH_COMPLETE_MSG to broadcast
-                            // ACTION_USER_SWITCHED & call UserSwitchObservers.onUserSwitchComplete
-                            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
-                            mHandler.sendMessage(mHandler.obtainMessage(
-                                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
-                        }
-                ));
-    }
-
-    private void await(boolean condition, Consumer<Runnable> conditionalStep, Runnable nextStep) {
-        if (condition) {
-            conditionalStep.accept(nextStep);
+        final Runnable runnable = () -> {
+            // Send REPORT_USER_SWITCH_COMPLETE_MSG to broadcast ACTION_USER_SWITCHED and call
+            // onUserSwitchComplete on UserSwitchObservers.
+            mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
+            mHandler.sendMessage(mHandler.obtainMessage(
+                    REPORT_USER_SWITCH_COMPLETE_MSG, oldUserId, newUserId));
+        };
+        if (isUserSwitchUiEnabled()) {
+            dismissUserSwitchDialog(runnable);
         } else {
-            nextStep.run();
+            runnable.run();
         }
     }
 
@@ -4127,33 +4103,6 @@ class UserController implements Handler.Callback {
             return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
         }
 
-        protected void dismissKeyguard(Runnable runnable) {
-            final AtomicBoolean isFirst = new AtomicBoolean(true);
-            final Runnable runOnce = () -> {
-                if (isFirst.getAndSet(false)) {
-                    runnable.run();
-                }
-            };
-
-            mHandler.postDelayed(runOnce, DISMISS_KEYGUARD_TIMEOUT_MS);
-            getWindowManager().dismissKeyguard(new IKeyguardDismissCallback.Stub() {
-                @Override
-                public void onDismissError() throws RemoteException {
-                    mHandler.post(runOnce);
-                }
-
-                @Override
-                public void onDismissSucceeded() throws RemoteException {
-                    mHandler.post(runOnce);
-                }
-
-                @Override
-                public void onDismissCancelled() throws RemoteException {
-                    mHandler.post(runOnce);
-                }
-            }, /* message= */ null);
-        }
-
         boolean isHeadlessSystemUserMode() {
             return UserManager.isHeadlessSystemUserMode();
         }
@@ -4178,6 +4127,7 @@ class UserController implements Handler.Callback {
 
         void lockDeviceNowAndWaitForKeyguardShown() {
             if (getWindowManager().isKeyguardLocked()) {
+                Slogf.w(TAG, "Not locking the device since the keyguard is already locked");
                 return;
             }
 

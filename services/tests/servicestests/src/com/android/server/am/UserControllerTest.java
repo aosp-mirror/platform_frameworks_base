@@ -490,29 +490,6 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector, times(0)).dismissKeyguard(any());
-        verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
-        continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false, false);
-        verifySystemUserVisibilityChangesNeverNotified();
-    }
-
-    @Test
-    public void testContinueUserSwitchDismissKeyguard() {
-        when(mInjector.mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(false);
-        mUserController.setInitialConfig(/* userSwitchUiEnabled= */ true,
-                /* maxRunningUsers= */ 3, /* delayUserDataLocking= */ false,
-                /* backgroundUserScheduledStopTimeSecs= */ -1);
-        // Start user -- this will update state of mUserController
-        mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
-        Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
-        assertNotNull(reportMsg);
-        UserState userState = (UserState) reportMsg.obj;
-        int oldUserId = reportMsg.arg1;
-        int newUserId = reportMsg.arg2;
-        mInjector.mHandler.clearAllRecordedMessages();
-        // Verify that continueUserSwitch worked as expected
-        continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector, times(1)).dismissKeyguard(any());
         verify(mInjector, times(1)).dismissUserSwitchingDialog(any());
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false, false);
         verifySystemUserVisibilityChangesNeverNotified();
@@ -1920,11 +1897,6 @@ public class UserControllerTest {
         @Override
         protected IStorageManager getStorageManager() {
             return mStorageManagerMock;
-        }
-
-        @Override
-        protected void dismissKeyguard(Runnable runnable) {
-            runnable.run();
         }
 
         @Override
