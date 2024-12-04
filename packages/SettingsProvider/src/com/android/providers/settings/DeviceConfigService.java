@@ -133,12 +133,7 @@ public final class DeviceConfigService extends Binder {
             }
 
             pw.println("DeviceConfig provider: ");
-            try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
-                DeviceConfig.dump(pfd, pw, /* prefix= */ "  ", args);
-            } catch (IOException e) {
-                pw.print("IOException creating ParcelFileDescriptor: ");
-                pw.println(e);
-            }
+            DeviceConfig.dump(pw, /* prefix= */ "  ", args);
         }
 
         IContentProvider iprovider = mProvider.getIContentProvider();
