@@ -21,6 +21,7 @@ import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.statusbar.notification.domain.interactor.notificationsSoundPolicyInteractor
 import com.android.systemui.volume.dialog.domain.interactor.volumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.ringer.domain.volumeDialogRingerInteractor
 import com.android.systemui.volume.dialog.shared.volumeDialogLogger
@@ -31,7 +32,8 @@ val Kosmos.volumeDialogRingerDrawerViewModel by
             applicationContext = applicationContext,
             backgroundDispatcher = testDispatcher,
             coroutineScope = applicationCoroutineScope,
-            interactor = volumeDialogRingerInteractor,
+            soundPolicyInteractor = notificationsSoundPolicyInteractor,
+            ringerInteractor = volumeDialogRingerInteractor,
             vibrator = vibratorHelper,
             volumeDialogLogger = volumeDialogLogger,
             visibilityInteractor = volumeDialogVisibilityInteractor,
