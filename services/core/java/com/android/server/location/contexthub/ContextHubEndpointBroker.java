@@ -20,7 +20,6 @@ import android.content.Context;
 import android.hardware.contexthub.EndpointInfo;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubMessage;
-import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.hardware.location.IContextHubTransactionCallback;
@@ -81,7 +80,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
-    public int openSession(HubEndpointInfo destination, HubServiceInfo serviceInfo)
+    public int openSession(HubEndpointInfo destination, String serviceDescriptor)
             throws RemoteException {
         ContextHubServiceUtil.checkPermissions(mContext);
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
@@ -89,10 +88,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
         try {
             mContextHubProxy.openEndpointSession(
-                    sessionId,
-                    halEndpointInfo.id,
-                    mHalEndpointInfo.id,
-                    serviceInfo == null ? null : serviceInfo.getServiceDescriptor());
+                    sessionId, halEndpointInfo.id, mHalEndpointInfo.id, serviceDescriptor);
         } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
             Log.e(TAG, "Exception while calling HAL openEndpointSession", e);
             mEndpointManager.returnSessionId(sessionId);
