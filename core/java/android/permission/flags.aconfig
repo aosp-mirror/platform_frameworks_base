@@ -492,3 +492,13 @@ flag {
     description: "This flag is used to enable the role system_vendor_intelligence"
     bug: "377553620"
 }
+
+flag {
+    name: "fine_power_monitor_permission"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Add support for fine-grained PowerMonitor readings"
+    bug: "341941666"
+}
+
