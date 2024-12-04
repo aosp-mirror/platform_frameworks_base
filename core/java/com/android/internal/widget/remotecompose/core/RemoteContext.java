@@ -493,6 +493,9 @@ public abstract class RemoteContext {
 
     public static final int ID_DENSITY = 27;
 
+    /** Defines when the last build was made */
+    public static final int ID_API_LEVEL = 28;
+
     public static final float FLOAT_DENSITY = Utils.asNan(ID_DENSITY);
 
     /** CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600 */
@@ -565,6 +568,9 @@ public abstract class RemoteContext {
 
     /** Ambient light level in SI lux */
     public static final float FLOAT_LIGHT = Utils.asNan(ID_LIGHT);
+
+    /** When was this player built */
+    public static final float FLOAT_API_LEVEL = Utils.asNan(ID_API_LEVEL);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling

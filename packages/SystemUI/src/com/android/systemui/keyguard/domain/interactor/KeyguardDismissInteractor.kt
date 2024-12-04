@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -39,7 +40,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** Encapsulates business logic for requesting the keyguard to dismiss/finish/done. */
@@ -53,8 +53,8 @@ constructor(
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
+    private val alternateBouncerInteractor: AlternateBouncerInteractor,
     trustRepository: TrustRepository,
-    alternateBouncerInteractor: AlternateBouncerInteractor,
     powerInteractor: PowerInteractor,
 ) {
     /*
@@ -151,13 +151,16 @@ constructor(
                     dismissCallbackRegistry.addCallback(callback)
                 }
 
-                // This will either show the bouncer, or dismiss the keyguard if insecure.
-                // We currently need to request showing the primary bouncer in order to start a
-                // transition to PRIMARY_BOUNCER. Once we refactor that so that starting the
-                // transition is what causes the bouncer to show, we can remove this entire method,
-                // and simply ask KeyguardTransitionInteractor to transition to a bouncer state or
-                // dismiss keyguard.
-                primaryBouncerInteractor.show(true)
+                // This will either show the bouncer, or dismiss the keyguard if insecure. We
+                // currently need to request showing the bouncer in order to start a transition to
+                // *_BOUNCER. Once we refactor that so that starting the transition is what causes
+                // the bouncer to show, we can remove this entire method, and simply call
+                // KeyguardDismissTransitionInteractor#startDismissKeyguardTransition.
+                if (alternateBouncerInteractor.canShowAlternateBouncer.value) {
+                    alternateBouncerInteractor.forceShow()
+                } else {
+                    primaryBouncerInteractor.show(true)
+                }
             }
         }
     }

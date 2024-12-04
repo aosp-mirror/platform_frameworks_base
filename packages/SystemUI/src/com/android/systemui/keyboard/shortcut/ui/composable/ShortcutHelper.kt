@@ -565,7 +565,7 @@ private fun SubCategoryContainerDualPane(
                     modifier = Modifier.padding(vertical = 8.dp),
                     searchQuery = searchQuery,
                     shortcut = shortcut,
-                    isCustomizing = isCustomizing,
+                    isCustomizing = isCustomizing && shortcut.isCustomizable,
                     onCustomizationRequested = { requestInfo ->
                         when (requestInfo) {
                             is ShortcutCustomizationRequestInfo.Add ->

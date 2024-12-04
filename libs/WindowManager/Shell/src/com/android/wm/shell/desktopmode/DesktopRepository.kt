@@ -333,7 +333,9 @@ class DesktopRepository(
      */
     private fun addOrMoveFreeformTaskToTop(displayId: Int, taskId: Int) {
         logD("Add or move task to top: display=%d taskId=%d", taskId, displayId)
-        desktopTaskDataByDisplayId[displayId]?.freeformTasksInZOrder?.remove(taskId)
+        desktopTaskDataByDisplayId.forEach { _, value ->
+            value.freeformTasksInZOrder.remove(taskId)
+        }
         desktopTaskDataByDisplayId.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
         // Unminimize the task if it is minimized.
         unminimizeTask(displayId, taskId)

@@ -19334,7 +19334,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!preventIntentRedirect()) return;
         if (intent == null) return;
 
-        if ((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0) {
+        if (((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0)
+                && intent.getExtras() != null && intent.getExtras().hasIntent()) {
             Slog.wtf(TAG,
                     "[IntentRedirect] The intent does not have its nested keys collected as a "
                             + "preparation for creating intent creator tokens. Intent: "

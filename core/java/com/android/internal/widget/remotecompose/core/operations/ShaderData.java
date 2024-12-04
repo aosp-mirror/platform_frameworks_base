@@ -50,6 +50,7 @@ public class ShaderData extends Operation implements VariableSupport {
     @Nullable HashMap<String, float[]> mUniformFloatMap = null;
     @Nullable HashMap<String, int[]> mUniformIntMap;
     @Nullable HashMap<String, Integer> mUniformBitmapMap = null;
+    private boolean mShaderValid = false;
 
     public ShaderData(
             int shaderID,
@@ -358,12 +359,23 @@ public class ShaderData extends Operation implements VariableSupport {
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        context.loadShader(mShaderID, this);
+        if (mShaderValid) {
+            context.loadShader(mShaderID, this);
+        }
     }
 
     @NonNull
     @Override
     public String deepToString(@NonNull String indent) {
         return indent + toString();
+    }
+
+    /**
+     * Enable or disable the shader
+     *
+     * @param shaderValid if true shader can be used
+     */
+    public void enable(boolean shaderValid) {
+        mShaderValid = shaderValid;
     }
 }

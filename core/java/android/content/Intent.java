@@ -6187,7 +6187,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_CHOOSER_MODIFY_SHARE_ACTION},
      * {@link #EXTRA_METADATA_TEXT},
      * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER},
-     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
+     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER},
+     * {@link #EXTRA_EXCLUDE_COMPONENTS}.
      * </p>
      */
     public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
@@ -7855,6 +7856,10 @@ public class Intent implements Parcelable, Cloneable {
      * that can handle it.</p>
      */
     public static final int URI_ALLOW_UNSAFE = 1<<2;
+
+    static {
+        Bundle.intentClass = Intent.class;
+    }
 
     // ---------------------------------------------------------------------
 

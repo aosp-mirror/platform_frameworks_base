@@ -19,6 +19,8 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
+import android.app.Instrumentation;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
 import android.os.UserHandle;
@@ -119,7 +121,7 @@ public final class MessageQueue {
 
     MessageQueue(boolean quitAllowed) {
         initIsProcessAllowedToUseConcurrent();
-        mUseConcurrent = sIsProcessAllowedToUseConcurrent;
+        mUseConcurrent = sIsProcessAllowedToUseConcurrent && !isInstrumenting();
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
     }
@@ -170,6 +172,15 @@ public final class MessageQueue {
         if (sIsProcessAllowedToUseConcurrent && Flags.messageQueueForceLegacy()) {
             sIsProcessAllowedToUseConcurrent = false;
         }
+    }
+
+    private static boolean isInstrumenting() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            return false;
+        }
+        final Instrumentation instrumentation = activityThread.getInstrumentation();
+        return instrumentation != null && instrumentation.isInstrumenting();
     }
 
     @Override

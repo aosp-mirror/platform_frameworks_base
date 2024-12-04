@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të kufizuar. Telefonata e radhës: e pakufizuar!"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e kufizuar!"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e pakufizuar!"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Ky aplikacion nuk është i përputhshëm me modalitetin 16 KB. Kontrolli i drejtvendosjes për APK dështoi. Ky aplikacion do të ekzekutohet duke përdorur modalitetin në përputhje me madhësinë e faqes. Për përputhshmërinë më të mirë, ripërpiloje aplikacionin me mbështetjen e modalitetit 16 KB. Për më shumë informacione, shiko &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Ky aplikacion nuk është i përputhshëm me modalitetin 16 KB. Kontrolli i drejtvendosjes për ELF dështoi. Ky aplikacion do të ekzekutohet duke përdorur modalitetin në përputhje me madhësinë e faqes. Për përputhshmërinë më të mirë, ripërpiloje aplikacionin me mbështetjen e modalitetit 16 KB. Për më shumë informacione, shiko &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Ky aplikacion nuk është i përputhshëm me modalitetin 16 KB. Kontrollet e drejtvendosjes për APK dhe ELF dështuan. Ky aplikacion do të ekzekutohet duke përdorur modalitetin në përputhje me madhësinë e faqes. Për përputhshmërinë më të mirë, ripërpiloje aplikacionin me mbështetjen e modalitetit 16 KB. Për më shumë informacione, shiko &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Shërbimi nuk është përgatitur."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nuk mund ta ndryshosh cilësimin e ID-së së telefonuesit."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Të dhënat u kaluan te <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1161,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"për <xliff:g id="COUNT">%d</xliff:g> orë"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"për <xliff:g id="COUNT">%d</xliff:g> ditë"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"për <xliff:g id="COUNT">%d</xliff:g> vit"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minutë më parë}other{# minuta më parë}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# orë më parë}other{# orë më parë}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ditë më parë}other{# ditë më parë}}"</string>
@@ -1671,7 +1700,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Kufjet"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistemi"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja e Bluetooth-it"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja me Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Ekran wireless"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Transmeto"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Lidhu me pajisjen"</string>

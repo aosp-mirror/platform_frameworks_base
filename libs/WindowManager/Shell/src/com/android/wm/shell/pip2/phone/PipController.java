@@ -20,8 +20,6 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
-
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
@@ -213,7 +211,7 @@ public class PipController implements ConfigurationChangeListener,
                 });
 
         // Allow other outside processes to bind to PiP controller using the key below.
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
+        mShellController.addExternalInterface(IPip.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellController.addConfigurationChangeListener(this);
 

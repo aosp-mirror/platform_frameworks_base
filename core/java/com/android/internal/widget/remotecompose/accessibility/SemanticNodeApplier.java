@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.accessibility;
 
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibilitySemantics;
+
 import java.util.List;
 
 /**
@@ -29,15 +32,13 @@ import java.util.List;
  *
  * @param <N> The type representing information about the node. This could be an Androidx
  *     `AccessibilityNodeInfoCompat`, or potentially a platform `AccessibilityNodeInfo`.
- * @param <C> The type of component in the remote Compose UI.
- * @param <S> The type representing a single semantic property or action.
  */
-public interface SemanticNodeApplier<N, C, S> {
+public interface SemanticNodeApplier<N> {
     void applyComponent(
-            RemoteComposeDocumentAccessibility<C, S> remoteComposeAccessibility,
+            RemoteComposeDocumentAccessibility remoteComposeAccessibility,
             N nodeInfo,
-            C component,
-            List<S> semantics);
+            Component component,
+            List<AccessibilitySemantics> semantics);
 
     String VIRTUAL_VIEW_ID_KEY = "VirtualViewId";
 }

@@ -16,9 +16,7 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.graphics.PixelFormat
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +34,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.ui.binder.UdfpsAccessibilityOverlayBinder
 import com.android.systemui.deviceentry.ui.view.UdfpsAccessibilityOverlay
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
+import com.android.systemui.keyguard.ui.view.AlternateBouncerWindowViewLayoutParams
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
@@ -68,28 +67,6 @@ constructor(
     private val windowManager: Lazy<WindowManager>,
     private val layoutInflater: Lazy<LayoutInflater>,
 ) : CoreStartable {
-    private val layoutParams: WindowManager.LayoutParams
-        get() =
-            WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                        WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-                    PixelFormat.TRANSLUCENT,
-                )
-                .apply {
-                    title = "AlternateBouncerView"
-                    fitInsetsTypes = 0 // overrides default, avoiding status bars during layout
-                    gravity = Gravity.TOP or Gravity.LEFT
-                    layoutInDisplayCutoutMode =
-                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                    privateFlags =
-                        WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
-                            WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
-                    // Avoid announcing window title.
-                    accessibilityTitle = " "
-                }
 
     private var alternateBouncerView: ConstraintLayout? = null
 
@@ -176,7 +153,9 @@ constructor(
                 as ConstraintLayout
 
         Log.d(TAG, "Adding alternate bouncer view")
-        windowManager.get().addView(alternateBouncerView, layoutParams)
+        windowManager
+            .get()
+            .addView(alternateBouncerView, AlternateBouncerWindowViewLayoutParams.layoutParams)
         alternateBouncerView!!.addOnAttachStateChangeListener(onAttachAddBackGestureHandler)
     }
 

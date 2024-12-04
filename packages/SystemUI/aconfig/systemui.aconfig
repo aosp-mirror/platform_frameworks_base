@@ -1801,16 +1801,6 @@ flag {
 }
 
 flag {
-  name: "ensure_enr_views_visibility"
-  namespace: "systemui"
-  description: "Ensures public and private visibilities"
-  bug: "361552380"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "shade_expands_on_status_bar_long_press"
   namespace: "systemui"
   description: "Expands the shade on long press of any status bar"
@@ -1881,4 +1871,18 @@ flag {
     namespace: "systemui"
     description: "Implement the depth push scaling effect on Launcher when users pull down shade."
     bug: "370562309"
+}
+
+flag {
+    name: "spatial_model_app_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on the current app when users pull down shade."
+    bug: "370560660"
+}
+
+flag {
+    name: "expanded_privacy_indicators_on_large_screen"
+    namespace: "systemui"
+    description: "Larger privacy indicators on large screen"
+    bug: "381864715"
 }

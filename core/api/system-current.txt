@@ -1291,6 +1291,7 @@ package android.app {
     method @FlaggedApi("android.app.live_wallpaper_content_handling") @Nullable @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL) public android.app.wallpaper.WallpaperInstance getWallpaperInstance(int);
     method public void setDisplayOffset(android.os.IBinder, int, int);
     method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithCrops(@NonNull java.io.InputStream, @NonNull android.util.SparseArray<android.graphics.Rect>, boolean, int) throws java.io.IOException;
+    method @FlaggedApi("android.app.live_wallpaper_content_handling") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithDescription(@NonNull java.io.InputStream, @NonNull android.app.wallpaper.WallpaperDescription, boolean, int) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponent(android.content.ComponentName);
     method @FlaggedApi("android.app.live_wallpaper_content_handling") @RequiresPermission(allOf={android.Manifest.permission.SET_WALLPAPER_COMPONENT, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public boolean setWallpaperComponentWithDescription(@NonNull android.app.wallpaper.WallpaperDescription, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponentWithFlags(@NonNull android.content.ComponentName, int);
@@ -3302,6 +3303,14 @@ package android.app.usage {
 
 }
 
+package android.app.wallpaper {
+
+  @FlaggedApi("android.app.live_wallpaper_content_handling") public final class WallpaperDescription implements android.os.Parcelable {
+    method @NonNull public android.util.SparseArray<android.graphics.Rect> getCropHints();
+  }
+
+}
+
 package android.app.wallpapereffectsgeneration {
 
   public final class CameraAttributes implements android.os.Parcelable {
@@ -5255,9 +5264,9 @@ package android.hardware.contexthub {
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
-    method public void close();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void close();
     method @Nullable public android.hardware.contexthub.HubServiceInfo getServiceInfo();
-    method @NonNull public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
   }
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSessionResult {
@@ -8127,6 +8136,8 @@ package android.media.quality {
     method @NonNull public java.util.List<android.media.quality.SoundProfile> getSoundProfilesByPackage(@NonNull String);
     method public void setAutoPictureQualityEnabled(boolean);
     method public void setAutoSoundQualityEnabled(boolean);
+    method public boolean setDefaultPictureProfile(@Nullable String);
+    method public boolean setDefaultSoundProfile(@Nullable String);
     method public void setPictureProfileAllowList(@NonNull java.util.List<java.lang.String>);
     method public void setSoundProfileAllowList(@NonNull java.util.List<java.lang.String>);
     method public void setSuperResolutionEnabled(boolean);

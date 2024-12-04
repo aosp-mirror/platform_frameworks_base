@@ -38,6 +38,7 @@ import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomizationInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperExclusions
 import com.android.systemui.keyboard.shortcut.ui.ShortcutCustomizationDialogStarter
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
@@ -80,12 +81,16 @@ var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
 var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
 
+val Kosmos.shortcutHelperExclusions by
+    Kosmos.Fixture { ShortcutHelperExclusions(applicationContext) }
+
 val Kosmos.shortcutCategoriesUtils by
     Kosmos.Fixture {
         ShortcutCategoriesUtils(
             applicationContext,
             backgroundCoroutineContext,
             fakeInputManager.inputManager,
+            shortcutHelperExclusions,
         )
     }
 
@@ -107,9 +112,8 @@ val Kosmos.defaultShortcutCategoriesRepository by
 
 val Kosmos.inputGestureMaps by Kosmos.Fixture { InputGestureMaps(applicationContext) }
 
-val Kosmos.customInputGesturesRepository by Kosmos.Fixture {
-    CustomInputGesturesRepository(userTracker, testDispatcher)
-}
+val Kosmos.customInputGesturesRepository by
+    Kosmos.Fixture { CustomInputGesturesRepository(userTracker, testDispatcher) }
 
 val Kosmos.customShortcutCategoriesRepository by
     Kosmos.Fixture {
@@ -121,7 +125,7 @@ val Kosmos.customShortcutCategoriesRepository by
             applicationContext,
             inputGestureMaps,
             customInputGesturesRepository,
-            fakeInputManager.inputManager
+            fakeInputManager.inputManager,
         )
     }
 

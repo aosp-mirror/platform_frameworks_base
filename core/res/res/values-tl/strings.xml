@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nade-default sa pinaghihigpitan ang Caller ID. Susunod na tawag: hindi pinaghihigpitan"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Naka-default sa hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Pinaghihigpitan"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Naka-default na hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Hindi pinaghihigpitan"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Hindi 16 KB compatible ang app na ito. Hindi pumasa ang alignment check sa APK. Patatakbuhin ang app na ito gamit ang page size compatible mode. Para sa pinakamahusay na compatibility, paki-recompile ang application nang may suporta sa 16 KB. Para sa higit pang impormasyon, tingnan ang &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Hindi 16 KB compatible ang app na ito. Hindi pumasa ang alignment check sa ELF. Patatakbuhin ang app na ito gamit ang page size compatible mode. Para sa pinakamahusay na compatibility, paki-recompile ang application nang may suporta sa 16 KB. Para sa higit pang impormasyon, tingnan ang &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Hindi 16 KB compatible ang app na ito. Hindi pumasa ang mga alignment check sa APK at ELF. Patatakbuhin ang app na ito gamit ang page size compatible mode. Para sa pinakamahusay na compatibility, paki-recompile ang application nang may suporta sa 16 KB. Para sa higit pang impormasyon, tingnan ang &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Hindi naprobisyon ang serbisyo."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Hindi mo mababago ang setting ng caller ID."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Nailipat sa <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ang data"</string>
@@ -1161,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"sa <xliff:g id="COUNT">%d</xliff:g>h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"sa <xliff:g id="COUNT">%d</xliff:g>d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"sa <xliff:g id="COUNT">%d</xliff:g>y"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto ang nakalipas}one{# minuto ang nakalipas}other{# na minuto ang nakalipas}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# oras ang nakalipas}one{# oras ang nakalipas}other{# na oras ang nakalipas}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# araw ang nakalipas}one{# araw ang nakalipas}other{# na araw ang nakalipas}}"</string>

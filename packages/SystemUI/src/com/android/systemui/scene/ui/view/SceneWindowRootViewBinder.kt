@@ -36,15 +36,12 @@ import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.ScreenDecorProvider
-import com.android.systemui.keyguard.ui.composable.AlternateBouncer
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Overlay
@@ -77,7 +74,6 @@ object SceneWindowRootViewBinder {
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
         dataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
         val unsortedSceneByKey: Map<SceneKey, Scene> = scenes.associateBy { scene -> scene.key }
         val sortedSceneByKey: Map<SceneKey, Scene> =
@@ -148,20 +144,10 @@ object SceneWindowRootViewBinder {
                     //  the SceneContainerView. This SharedNotificationContainer should contain NSSL
                     //  due to the NotificationStackScrollLayoutSection (legacy) or
                     //  NotificationSection (scene container) moving it there.
-                    if (SceneContainerFlag.isEnabled) {
-                        (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
-                            sharedNotificationContainer
-                        )
-                        view.addView(sharedNotificationContainer)
-
-                        // TODO(b/358354906): use an overlay for the alternate bouncer
-                        view.addView(
-                            createAlternateBouncerView(
-                                context = view.context,
-                                alternateBouncerDependencies = alternateBouncerDependencies,
-                            )
-                        )
-                    }
+                    (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
+                        sharedNotificationContainer
+                    )
+                    view.addView(sharedNotificationContainer)
 
                     view.setSnapshotBinding { onVisibilityChangedInternal(viewModel.isVisible) }
                     awaitCancellation()
@@ -202,17 +188,6 @@ object SceneWindowRootViewBinder {
                         )
                     }
                 }
-            }
-        }
-    }
-
-    private fun createAlternateBouncerView(
-        context: Context,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
-    ): ComposeView {
-        return ComposeView(context).apply {
-            setContent {
-                AlternateBouncer(alternateBouncerDependencies = alternateBouncerDependencies)
             }
         }
     }

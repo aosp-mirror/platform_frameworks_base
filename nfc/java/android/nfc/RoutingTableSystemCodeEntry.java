@@ -18,6 +18,7 @@ package android.nfc;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.nfc.cardemulation.CardEmulation;
 
 /**
  * Represents a system code entry in current routing table, where system codes are two-byte values
@@ -31,8 +32,9 @@ public class RoutingTableSystemCodeEntry extends NfcRoutingTableEntry {
     private final byte[] mValue;
 
     /** @hide */
-    public RoutingTableSystemCodeEntry(int nfceeId, byte[] value) {
-        super(nfceeId, TYPE_SYSTEM_CODE);
+    public RoutingTableSystemCodeEntry(int nfceeId, byte[] value,
+            @CardEmulation.ProtocolAndTechnologyRoute int routeType) {
+        super(nfceeId, TYPE_SYSTEM_CODE, routeType);
         this.mValue = value;
     }
 

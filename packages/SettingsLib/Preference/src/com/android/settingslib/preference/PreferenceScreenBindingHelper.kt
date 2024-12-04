@@ -19,6 +19,8 @@ package com.android.settingslib.preference
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceGroup
@@ -57,6 +59,9 @@ class PreferenceScreenBindingHelper(
 
     private val preferenceLifecycleContext =
         object : PreferenceLifecycleContext(context) {
+            override val lifecycleScope: LifecycleCoroutineScope
+                get() = fragment.lifecycleScope
+
             override fun <T> findPreference(key: String) =
                 preferenceScreen.findPreference(key) as T?
 
