@@ -5878,4 +5878,12 @@
   <!-- List of protected packages that require biometric authentication for modification -->
   <java-symbol type="array" name="config_biometric_protected_package_names" />
 
+  <!-- Material shape spec config tokens -->
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXsmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusSmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusMedium"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusLarge"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXlarge"/>
+
+
 </resources>
