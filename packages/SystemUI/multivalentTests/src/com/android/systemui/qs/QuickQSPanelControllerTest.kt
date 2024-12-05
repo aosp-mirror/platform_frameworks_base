@@ -34,6 +34,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.leak.RotationUtils
+import javax.inject.Provider
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -45,9 +46,8 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -108,6 +108,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @After
     fun tearDown() {
         controller.onViewDetached()
+        controller.destroy()
     }
 
     @Test
@@ -184,7 +185,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             dumpManager,
             ResourcesSplitShadeStateController(),
             longPressEffectProvider,
-            mediaCarouselInteractor
+            mediaCarouselInteractor,
         ) {
 
         private var rotation = RotationUtils.ROTATION_NONE

@@ -1460,9 +1460,12 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
-    private void testAttentionModeThemeOverlay(boolean modeNight) throws RemoteException {
+    // Test the attention mode overlay with all the possible attention modes and the initial night
+    // mode state. Also tests if the attention mode is turned off when the night mode is toggled by
+    // the user.
+    private void testAttentionModeThemeOverlay(boolean initialNightMode) throws RemoteException {
         //setup
-        if (modeNight) {
+        if (initialNightMode) {
             mService.setNightMode(MODE_NIGHT_YES);
             assertTrue(mUiManagerService.getConfiguration().isNightModeActive());
         } else {
@@ -1472,21 +1475,29 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
         // attention modes with expected night modes
         Map<Integer, Boolean> modes = Map.of(
-                MODE_ATTENTION_THEME_OVERLAY_OFF, modeNight,
+                MODE_ATTENTION_THEME_OVERLAY_OFF, initialNightMode,
                 MODE_ATTENTION_THEME_OVERLAY_DAY, false,
                 MODE_ATTENTION_THEME_OVERLAY_NIGHT, true
         );
 
         // test
-        for (int aMode : modes.keySet()) {
+        for (int attentionMode : modes.keySet()) {
             try {
-                mService.setAttentionModeThemeOverlay(aMode);
+                mService.setAttentionModeThemeOverlay(attentionMode);
 
                 int appliedAMode = mService.getAttentionModeThemeOverlay();
-                boolean nMode = modes.get(aMode);
+                boolean expectedNightMode = modes.get(attentionMode);
 
-                assertEquals(aMode, appliedAMode);
-                assertEquals(isNightModeActivated(), nMode);
+                assertEquals(attentionMode, appliedAMode);
+                assertEquals(expectedNightMode, isNightModeActivated());
+
+                // If attentionMode is active, flip the night mode and assets
+                // the attention mode is disabled
+                if (attentionMode != MODE_ATTENTION_THEME_OVERLAY_OFF) {
+                    mService.setNightModeActivated(!expectedNightMode);
+                    assertEquals(MODE_ATTENTION_THEME_OVERLAY_OFF,
+                            mService.getAttentionModeThemeOverlay());
+                }
             } catch (RemoteException e) {
                 fail("Error communicating with server: " + e.getMessage());
             }

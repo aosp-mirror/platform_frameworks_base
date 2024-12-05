@@ -66,6 +66,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -141,6 +142,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -163,10 +165,12 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.Flags
+import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -186,11 +190,12 @@ import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -205,6 +210,7 @@ fun CommunalHub(
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
+    sceneScope: SceneScope? = null,
 ) {
     val communalContent by
         viewModel.communalContent.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -414,6 +420,7 @@ fun CommunalHub(
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
                             widgetSection = widgetSection,
+                            sceneScope = sceneScope,
                         )
                     }
                 }
@@ -687,7 +694,12 @@ private fun ResizableItemFrameWrapper(
             onResize = onResize,
             minHeightPx = minHeightPx,
             maxHeightPx = maxHeightPx,
-            resizeMultiple = CommunalContentSize.HALF.span,
+            resizeMultiple =
+                if (communalResponsiveGrid()) {
+                    1
+                } else {
+                    CommunalContentSize.FixedSize.HALF.span
+                },
         ) {
             content(Modifier)
         }
@@ -695,14 +707,22 @@ private fun ResizableItemFrameWrapper(
 }
 
 @Composable
-fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): WidgetSizeInfo {
+fun calculateWidgetSize(
+    cellHeight: Dp?,
+    availableHeight: Dp?,
+    item: CommunalContentModel,
+    isResizable: Boolean,
+): WidgetSizeInfo {
     val density = LocalDensity.current
+
+    val minHeight = cellHeight ?: CommunalContentSize.FixedSize.HALF.dp()
+    val maxHeight = availableHeight ?: CommunalContentSize.FixedSize.FULL.dp()
 
     return if (isResizable && item is CommunalContentModel.WidgetContent.Widget) {
         with(density) {
             val minHeightPx =
                 (min(item.providerInfo.minResizeHeight, item.providerInfo.minHeight)
-                    .coerceAtLeast(CommunalContentSize.HALF.dp().toPx().roundToInt()))
+                    .coerceAtLeast(minHeight.roundToPx()))
 
             val maxHeightPx =
                 (if (item.providerInfo.maxResizeHeight > 0) {
@@ -710,12 +730,43 @@ fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): Widge
                     } else {
                         Int.MAX_VALUE
                     })
-                    .coerceIn(minHeightPx, CommunalContentSize.FULL.dp().toPx().roundToInt())
+                    .coerceIn(minHeightPx, maxHeight.roundToPx())
 
             WidgetSizeInfo(minHeightPx, maxHeightPx)
         }
     } else {
         WidgetSizeInfo(0, 0)
+    }
+}
+
+@Composable
+private fun HorizontalGridWrapper(
+    contentPadding: PaddingValues,
+    gridState: LazyGridState,
+    modifier: Modifier = Modifier,
+    content: LazyGridScope.(sizeInfo: SizeInfo?) -> Unit,
+) {
+    if (communalResponsiveGrid()) {
+        ResponsiveLazyHorizontalGrid(
+            cellAspectRatio = 1.5f,
+            modifier = modifier,
+            state = gridState,
+            minContentPadding = contentPadding,
+            minHorizontalArrangement = Dimensions.ItemSpacing,
+            minVerticalArrangement = Dimensions.ItemSpacing,
+            content = content,
+        )
+    } else {
+        LazyHorizontalGrid(
+            modifier = modifier,
+            state = gridState,
+            rows = GridCells.Fixed(CommunalContentSize.FixedSize.FULL.span),
+            contentPadding = contentPadding,
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+        ) {
+            content(null)
+        }
     }
 }
 
@@ -735,6 +786,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
+    sceneScope: SceneScope?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -771,28 +823,32 @@ private fun BoxScope.CommunalHubLazyGrid(
         // Since the grid has its own listener for in-grid drag events, we use a separate element
         // for android drag events.
         Box(Modifier.fillMaxSize().dragAndDropTarget(dragAndDropTargetState)) {}
+    } else if (communalResponsiveGrid()) {
+        gridModifier = gridModifier.fillMaxSize()
     } else {
         gridModifier = gridModifier.height(hubDimensions.GridHeight)
     }
 
-    val itemArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing)
-    LazyHorizontalGrid(
+    HorizontalGridWrapper(
         modifier = gridModifier,
-        state = gridState,
-        rows = GridCells.Fixed(CommunalContentSize.FULL.span),
+        gridState = gridState,
         contentPadding = contentPadding,
-        horizontalArrangement = itemArrangement,
-        verticalArrangement = itemArrangement,
-    ) {
+    ) { sizeInfo ->
         itemsIndexed(
             items = list,
             key = { _, item -> item.key },
             contentType = { _, item -> item.key },
-            span = { _, item -> GridItemSpan(item.size.span) },
+            span = { _, item -> GridItemSpan(item.getSpanOrMax(sizeInfo?.gridSize?.height)) },
         ) { index, item ->
-            val size = SizeF(Dimensions.CardWidth.value, item.size.dp().value)
+            val currentItemSpan = item.getSpanOrMax(sizeInfo?.gridSize?.height)
+            val dpSize =
+                if (sizeInfo != null) {
+                    DpSize(sizeInfo.cellSize.width, sizeInfo.calculateHeight(currentItemSpan))
+                } else {
+                    DpSize(Dimensions.CardWidth, (item.size as CommunalContentSize.FixedSize).dp())
+                }
+            val size = SizeF(dpSize.width.value, dpSize.height.value)
             val selected = item.key == selectedKey.value
-            val dpSize = DpSize(size.width.dp, size.height.dp)
             val isResizable =
                 if (item is CommunalContentModel.WidgetContent.Widget) {
                     item.providerInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL != 0
@@ -802,12 +858,11 @@ private fun BoxScope.CommunalHubLazyGrid(
 
             val resizeableItemFrameViewModel =
                 rememberViewModel(
-                    key = item.size.span,
+                    key = currentItemSpan,
                     traceName = "ResizeableItemFrame.viewModel.$index",
                 ) {
                     ResizeableItemFrameViewModel()
                 }
-
             if (viewModel.isEditMode && dragDropState != null) {
                 val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by
@@ -816,13 +871,23 @@ private fun BoxScope.CommunalHubLazyGrid(
                         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                         label = "Widget resizing outline alpha",
                     )
-                val widgetSizeInfo = calculateWidgetSize(item, isResizable)
+
+                val widgetSizeInfo =
+                    calculateWidgetSize(
+                        cellHeight = sizeInfo?.cellSize?.height,
+                        availableHeight = sizeInfo?.availableHeight,
+                        item = item,
+                        isResizable = isResizable,
+                    )
                 ResizableItemFrameWrapper(
                     key = item.key,
-                    currentSpan = GridItemSpan(item.size.span),
+                    currentSpan = GridItemSpan(currentItemSpan),
                     gridState = gridState,
                     gridContentPadding = contentPadding,
-                    verticalArrangement = itemArrangement,
+                    verticalArrangement =
+                        Arrangement.spacedBy(
+                            sizeInfo?.verticalArrangement ?: Dimensions.ItemSpacing
+                        ),
                     enabled = selected,
                     alpha = { outlineAlpha },
                     modifier =
@@ -872,6 +937,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     interactionHandler = interactionHandler,
                     widgetSection = widgetSection,
                     resizeableItemFrameViewModel = resizeableItemFrameViewModel,
+                    sceneScope = sceneScope,
                 )
             }
         }
@@ -896,11 +962,17 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val titleForEmptyStateCTA = stringResource(R.string.title_for_empty_state_cta)
             Text(
-                text = stringResource(R.string.title_for_empty_state_cta),
+                text = titleForEmptyStateCTA,
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
-                color = colors.secondary,
+                color = colors.primary,
+                modifier =
+                    Modifier.focusable().semantics(mergeDescendants = true) {
+                        contentDescription = titleForEmptyStateCTA
+                        heading()
+                    },
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(
@@ -1096,6 +1168,7 @@ private fun CommunalContent(
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
     resizeableItemFrameViewModel: ResizeableItemFrameViewModel,
+    sceneScope: SceneScope? = null,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -1119,7 +1192,7 @@ private fun CommunalContent(
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
-        is CommunalContentModel.Umo -> Umo(viewModel, modifier)
+        is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
     }
 }
 
@@ -1530,7 +1603,25 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
+private fun Umo(
+    viewModel: BaseCommunalViewModel,
+    sceneScope: SceneScope?,
+    modifier: Modifier = Modifier,
+) {
+    if (SceneContainerFlag.isEnabled && sceneScope != null) {
+        sceneScope.MediaCarousel(
+            modifier = modifier.fillMaxSize(),
+            isVisible = true,
+            mediaHost = viewModel.mediaHost,
+            carouselController = viewModel.mediaCarouselController,
+        )
+    } else {
+        UmoLegacy(viewModel, modifier)
+    }
+}
+
+@Composable
+private fun UmoLegacy(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
         modifier =
             modifier.pointerInput(Unit) {
@@ -1654,11 +1745,11 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
     }
 }
 
-private fun CommunalContentSize.dp(): Dp {
+private fun CommunalContentSize.FixedSize.dp(): Dp {
     return when (this) {
-        CommunalContentSize.FULL -> Dimensions.CardHeightFull
-        CommunalContentSize.HALF -> Dimensions.CardHeightHalf
-        CommunalContentSize.THIRD -> Dimensions.CardHeightThird
+        CommunalContentSize.FixedSize.FULL -> Dimensions.CardHeightFull
+        CommunalContentSize.FixedSize.HALF -> Dimensions.CardHeightHalf
+        CommunalContentSize.FixedSize.THIRD -> Dimensions.CardHeightThird
     }
 }
 
@@ -1677,7 +1768,10 @@ class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
         get() {
             val result =
-                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (
+                    communalResponsiveGrid() ||
+                        config.orientation == Configuration.ORIENTATION_LANDSCAPE
+                ) {
                     114.dp
                 } else {
                     val windowMetrics =
@@ -1697,7 +1791,7 @@ class Dimensions(val context: Context, val config: Configuration) {
             get() = 530.adjustedDp
 
         val ItemSpacing
-            get() = 50.adjustedDp
+            get() = if (communalResponsiveGrid()) 32.adjustedDp else 50.adjustedDp
 
         val CardHeightHalf
             get() = (CardHeightFull - ItemSpacing) / 2
@@ -1738,6 +1832,13 @@ class Dimensions(val context: Context, val config: Configuration) {
 }
 
 data class WidgetSizeInfo(val minHeightPx: Int, val maxHeightPx: Int)
+
+private fun CommunalContentModel.getSpanOrMax(maxSpan: Int?) =
+    if (maxSpan != null) {
+        size.span.coerceAtMost(maxSpan)
+    } else {
+        size.span
+    }
 
 private object Colors {
     val DisabledColorFilter by lazy { disabledColorMatrix() }

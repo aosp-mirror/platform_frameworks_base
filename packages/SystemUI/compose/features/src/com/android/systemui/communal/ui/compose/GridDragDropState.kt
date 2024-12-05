@@ -94,7 +94,7 @@ internal constructor(
     private val scope: CoroutineScope,
     private val updateDragPositionForRemove: (draggingBoundingBox: IntRect) -> Boolean,
 ) {
-    var draggingItemKey by mutableStateOf<Any?>(null)
+    var draggingItemKey by mutableStateOf<String?>(null)
         private set
 
     var isDraggingToRemove by mutableStateOf(false)
@@ -138,7 +138,7 @@ internal constructor(
             // before content padding from the initial pointer position
             .firstItemAtOffset(normalizedOffset - contentOffset)
             ?.apply {
-                draggingItemKey = key
+                draggingItemKey = key as String
                 draggingItemInitialOffset = this.offset.toOffset()
                 return true
             }
@@ -179,11 +179,18 @@ internal constructor(
         val targetItem =
             if (communalWidgetResizing()) {
                 state.layoutInfo.visibleItemsInfo.findLast { item ->
+                    val lastVisibleItemIndex = state.layoutInfo.visibleItemsInfo.last().index
                     val itemBoundingBox = IntRect(item.offset, item.size)
                     draggingItemKey != item.key &&
                         contentListState.isItemEditable(item.index) &&
                         (draggingBoundingBox.contains(itemBoundingBox.center) ||
-                            itemBoundingBox.contains(draggingBoundingBox.center))
+                            itemBoundingBox.contains(draggingBoundingBox.center)) &&
+                        // If we swap with the last visible item, and that item doesn't fit
+                        // in the gap created by moving the current item, then the current item
+                        // will get placed after the last visible item. In this case, it gets
+                        // placed outside of the viewport. We avoid this here, so the user
+                        // has to scroll first before the swap can happen.
+                        (item.index != lastVisibleItemIndex || item.span <= draggingItem.span)
                 }
             } else {
                 state.layoutInfo.visibleItemsInfo
@@ -277,7 +284,9 @@ fun Modifier.dragContainer(
                             contentOffset,
                         )
                     ) {
-                        viewModel.onReorderWidgetStart()
+                        // draggingItemKey is guaranteed to be non-null here because it is set in
+                        // onDragStart()
+                        viewModel.onReorderWidgetStart(dragDropState.draggingItemKey!!)
                     }
                 },
                 onDragEnd = {

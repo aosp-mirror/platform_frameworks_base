@@ -18,12 +18,10 @@ package android.os;
 
 import static org.junit.Assert.assertThrows;
 
-import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
-import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -34,16 +32,11 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = WorkDuration.class)
+@DisabledOnRavenwood(blockedBy = WorkDuration.class)
 public class WorkDurationUnitTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     // Required for RequiresFlagsEnabled and RequiresFlagsDisabled annotations to take effect.
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood()
-            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
-            : DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {

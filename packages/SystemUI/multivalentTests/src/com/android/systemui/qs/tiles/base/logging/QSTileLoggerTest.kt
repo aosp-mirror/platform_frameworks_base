@@ -115,7 +115,7 @@ class QSTileLoggerTest : SysuiTestCase() {
         underTest.logUserActionPipeline(
             TileSpec.create("test_spec"),
             QSTileUserAction.Click(null),
-            QSTileState.build({ Icon.Resource(0, ContentDescription.Resource(0)) }, "") {},
+            QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {},
             "test_data",
         )
 
@@ -141,7 +141,7 @@ class QSTileLoggerTest : SysuiTestCase() {
     fun testLogStateUpdate() {
         underTest.logStateUpdate(
             TileSpec.create("test_spec"),
-            QSTileState.build({ Icon.Resource(0, ContentDescription.Resource(0)) }, "") {},
+            QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {},
             "test_data",
         )
 
@@ -162,18 +162,14 @@ class QSTileLoggerTest : SysuiTestCase() {
 
     @Test
     fun testLogForceUpdate() {
-        underTest.logForceUpdate(
-            TileSpec.create("test_spec"),
-        )
+        underTest.logForceUpdate(TileSpec.create("test_spec"))
 
         assertThat(logBuffer.getStringBuffer()).contains("tile data force update")
     }
 
     @Test
     fun testLogInitialUpdate() {
-        underTest.logInitialRequest(
-            TileSpec.create("test_spec"),
-        )
+        underTest.logInitialRequest(TileSpec.create("test_spec"))
 
         assertThat(logBuffer.getStringBuffer()).contains("tile data initial update")
     }

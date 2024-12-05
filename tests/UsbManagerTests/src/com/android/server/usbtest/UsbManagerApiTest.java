@@ -18,16 +18,20 @@ package com.android.server.usbtest;
 
 import android.content.Context;
 import android.hardware.usb.UsbManager;
+import android.hardware.usb.flags.Flags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.Ignore;
+import com.android.server.usblib.UsbManagerTestLib;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.android.server.usblib.UsbManagerTestLib;
 
 /**
  * Unit tests for {@link android.hardware.usb.UsbManager}.
@@ -41,6 +45,9 @@ public class UsbManagerApiTest {
     private final UsbManagerTestLib mUsbManagerTestLib =
             new UsbManagerTestLib(mContext = InstrumentationRegistry.getContext());
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
     /**
      * Verify NO SecurityException
      * Go through System Server
@@ -92,4 +99,23 @@ public class UsbManagerApiTest {
     public void testUsbApi_SetCurrentFunctions_shouldMatched() {
         mUsbManagerTestLib.testSetCurrentFunctions_shouldMatched();
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_ACCESSORY_STREAM_API)
+    public void testUsbApi_closesParcelFileDescriptorAfterAllStreamsClosed() {
+        mUsbManagerTestLib.testParcelFileDescriptorClosedWhenAllOpenStreamsAreClosed();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_ACCESSORY_STREAM_API)
+    public void testUsbApi_callingOpenAccessoryInputStreamTwiceThrowsException() {
+        mUsbManagerTestLib.testOnlyOneOpenInputStreamAllowed();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_ACCESSORY_STREAM_API)
+    public void testUsbApi_callingOpenAccessoryOutputStreamTwiceThrowsException() {
+        mUsbManagerTestLib.testOnlyOneOpenOutputStreamAllowed();
+    }
+
 }

@@ -112,6 +112,14 @@ abstract class AbstractVibratorStep extends Step {
     }
 
     protected void stopVibrating() {
+        if (conductor.isInSession) {
+            if (VibrationThread.DEBUG) {
+                Slog.d(VibrationThread.TAG,
+                        "Vibration in session, skipping request to turn off vibrator "
+                                + getVibratorId());
+            }
+            return;
+        }
         if (VibrationThread.DEBUG) {
             Slog.d(VibrationThread.TAG,
                     "Turning off vibrator " + getVibratorId());

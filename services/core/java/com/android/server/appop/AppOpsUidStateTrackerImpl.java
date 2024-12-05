@@ -31,7 +31,6 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
-import static android.app.AppOpsManager.OP_TAKE_AUDIO_FOCUS;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_NONEXISTENT;
@@ -177,8 +176,6 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             case OP_RECORD_AUDIO:
             case OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO:
                 return PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-            case OP_TAKE_AUDIO_FOCUS:
-                return PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
             default:
                 return PROCESS_CAPABILITY_NONE;
         }

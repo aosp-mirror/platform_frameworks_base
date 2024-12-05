@@ -37,6 +37,7 @@ import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.icuMessageFormat
 import javax.inject.Inject
 import javax.inject.Named
@@ -112,7 +113,7 @@ class FooterActionsViewModel(
     class Factory
     @Inject
     constructor(
-        @Application private val context: Context,
+        @ShadeDisplayAware  private val context: Context,
         private val falsingManager: FalsingManager,
         private val footerActionsInteractor: FooterActionsInteractor,
         private val globalActionsDialogLiteProvider: Provider<GlobalActionsDialogLite>,
@@ -175,7 +176,7 @@ class FooterActionsViewModel(
 }
 
 fun FooterActionsViewModel(
-    @Application appContext: Context,
+    @ShadeDisplayAware appContext: Context,
     footerActionsInteractor: FooterActionsInteractor,
     falsingManager: FalsingManager,
     globalActionsDialogLite: GlobalActionsDialogLite,

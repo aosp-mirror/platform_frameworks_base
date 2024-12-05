@@ -759,7 +759,9 @@ public class BubbleData {
                 if (b != null) {
                     b.stopInflation();
                 }
-                mLogger.logOverflowRemove(b, reason);
+                if (!mPositioner.isShowingInBubbleBar()) {
+                    mLogger.logStackOverflowRemove(b, reason);
+                }
                 mOverflowBubbles.remove(b);
                 mStateChange.bubbleRemoved(b, reason);
                 mStateChange.removedOverflowBubble = b;
@@ -802,6 +804,27 @@ public class BubbleData {
             setNewSelectedIndex(indexToRemove);
         }
         maybeSendDeleteIntent(reason, bubbleToRemove);
+
+        if (mPositioner.isShowingInBubbleBar()) {
+            logBubbleBarBubbleRemoved(bubbleToRemove, reason);
+        }
+    }
+
+    private void logBubbleBarBubbleRemoved(Bubble bubble, @DismissReason int reason) {
+        switch (reason) {
+            case Bubbles.DISMISS_NOTIF_CANCEL:
+                mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_REMOVED_CANCELED);
+                break;
+            case Bubbles.DISMISS_TASK_FINISHED:
+                mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_ACTIVITY_FINISH);
+                break;
+            case Bubbles.DISMISS_BLOCKED:
+            case Bubbles.DISMISS_NO_LONGER_BUBBLE:
+                mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_REMOVED_BLOCKED);
+                break;
+            default:
+                // skip logging other events
+        }
     }
 
     private void setNewSelectedIndex(int indexOfSelected) {
@@ -862,7 +885,7 @@ public class BubbleData {
             return;
         }
         ProtoLog.d(WM_SHELL_BUBBLES, "overflowBubble=%s", bubble.getKey());
-        mLogger.logOverflowAdd(bubble, reason);
+        mLogger.logOverflowAdd(bubble, mPositioner.isShowingInBubbleBar(), reason);
         if (mOverflowBubbles.isEmpty()) {
             mStateChange.showOverflowChanged = true;
         }
@@ -875,7 +898,10 @@ public class BubbleData {
             Bubble oldest = mOverflowBubbles.get(mOverflowBubbles.size() - 1);
             ProtoLog.d(WM_SHELL_BUBBLES, "overflow full, remove=%s", oldest.getKey());
             mStateChange.bubbleRemoved(oldest, Bubbles.DISMISS_OVERFLOW_MAX_REACHED);
-            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
+            if (!mPositioner.isShowingInBubbleBar()) {
+                // Only logged for bubbles in stack view
+                mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
+            }
             mOverflowBubbles.remove(oldest);
             mStateChange.removedOverflowBubble = oldest;
         }

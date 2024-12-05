@@ -83,9 +83,6 @@ constructor(
                     interactionState == TileInteractionState.LONG_CLICKED &&
                         animationState == TileAnimationState.ACTIVITY_LAUNCH ->
                         TileHapticsState.LONG_PRESS
-                    interactionState == TileInteractionState.LONG_CLICKED &&
-                        !tileViewModel.currentState.handlesLongClick ->
-                        TileHapticsState.FAILED_LONGPRESS
                     else -> TileHapticsState.NO_HAPTICS
                 }
             }
@@ -102,7 +99,6 @@ constructor(
                         TileHapticsState.TOGGLE_ON -> MSDLToken.SWITCH_ON
                         TileHapticsState.TOGGLE_OFF -> MSDLToken.SWITCH_OFF
                         TileHapticsState.LONG_PRESS -> MSDLToken.LONG_PRESS
-                        TileHapticsState.FAILED_LONGPRESS -> MSDLToken.FAILURE
                         TileHapticsState.NO_HAPTICS -> null
                     }
                 tokenToPlay?.let {
@@ -154,7 +150,6 @@ constructor(
         TOGGLE_ON,
         TOGGLE_OFF,
         LONG_PRESS,
-        FAILED_LONGPRESS,
         NO_HAPTICS,
     }
 

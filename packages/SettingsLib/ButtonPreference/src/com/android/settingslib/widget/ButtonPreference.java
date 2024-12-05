@@ -37,7 +37,7 @@ import com.google.android.material.button.MaterialButton;
 /**
  * A preference handled a button
  */
-public class ButtonPreference extends Preference {
+public class ButtonPreference extends Preference implements GroupSectionDividerMixin {
 
     enum ButtonStyle {
         FILLED_NORMAL(0, 0, R.layout.settingslib_expressive_button_filled),

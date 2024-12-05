@@ -79,8 +79,8 @@ object QuickSettings {
         val MediaLandscapeTopOffset = ValueKey("MediaLandscapeTopOffset")
 
         object MediaOffset {
-            // Brightness + padding
-            val InQS = 92.dp
+            // Brightness
+            val InQS = 60.dp
             val Default = 0.dp
 
             @Composable

@@ -30,13 +30,14 @@ import java.util.function.Supplier
 /** Animates the task surface moving from its current drag position to its pre-drag position. */
 class ReturnToDragStartAnimator(
     private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
-    private val interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor: InteractionJankMonitor,
 ) {
     private var boundsAnimator: Animator? = null
     private lateinit var taskRepositionAnimationListener: OnTaskRepositionAnimationListener
 
-    constructor(interactionJankMonitor: InteractionJankMonitor) :
-            this(Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
+    constructor(
+        interactionJankMonitor: InteractionJankMonitor
+    ) : this(Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
 
     /** Sets a listener for the start and end of the reposition animation. */
     fun setTaskRepositionAnimationListener(listener: OnTaskRepositionAnimationListener) {
@@ -65,7 +66,7 @@ class ReturnToDragStartAnimator(
                                 .setPosition(
                                     taskSurface,
                                     startBounds.left.toFloat(),
-                                    startBounds.top.toFloat()
+                                    startBounds.top.toFloat(),
                                 )
                                 .show(taskSurface)
                                 .apply()
@@ -77,7 +78,7 @@ class ReturnToDragStartAnimator(
                                 .setPosition(
                                     taskSurface,
                                     endBounds.left.toFloat(),
-                                    endBounds.top.toFloat()
+                                    endBounds.top.toFloat(),
                                 )
                                 .show(taskSurface)
                                 .apply()
@@ -85,7 +86,7 @@ class ReturnToDragStartAnimator(
                             boundsAnimator = null
                             doOnEnd?.invoke()
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
-                        }
+                        },
                     )
                     addUpdateListener { anim ->
                         val rect = anim.animatedValue as Rect

@@ -71,6 +71,7 @@ import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wifitrackerlib.WifiEntry;
@@ -190,7 +191,7 @@ public class InternetDialogDelegate implements
 
     @AssistedInject
     public InternetDialogDelegate(
-            Context context,
+            @ShadeDisplayAware Context context,
             InternetDialogManager internetDialogManager,
             InternetDialogController internetDialogController,
             @Assisted(CAN_CONFIG_MOBILE_DATA) boolean canConfigMobileData,

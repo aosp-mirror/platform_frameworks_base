@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.Resources;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
@@ -75,6 +76,9 @@ public class AutomaticBrightnessStrategyTest {
 
     @Mock
     private DisplayManagerFlags mDisplayManagerFlags;
+
+    @Mock
+    private Resources mMockResources;
 
     private BrightnessConfiguration mBrightnessConfiguration;
     private float mDefaultScreenAutoBrightnessAdjustment;
@@ -378,7 +382,8 @@ public class AutomaticBrightnessStrategyTest {
 
         reset(mAutomaticBrightnessController);
         when(mAutomaticBrightnessController.isInIdleMode()).thenReturn(false);
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
         policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
 
         // Validate interaction when automaticBrightnessController is in non-idle mode, display

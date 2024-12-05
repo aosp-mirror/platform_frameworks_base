@@ -76,9 +76,11 @@ public class DimmerAnimationHelper {
             return mDimmingContainer != null && mDimmingContainer == other.mDimmingContainer;
         }
 
-        void inheritPropertiesFromAnimation(@NonNull AnimationSpec anim) {
-            mAlpha = anim.mCurrentAlpha;
-            mBlurRadius = anim.mCurrentBlur;
+        void inheritPropertiesFromAnimation(@Nullable AnimationSpec anim) {
+            if (anim != null) {
+                mAlpha = anim.mCurrentAlpha;
+                mBlurRadius = anim.mCurrentBlur;
+            }
         }
 
         @Override
@@ -92,11 +94,13 @@ public class DimmerAnimationHelper {
     private final Change mRequestedProperties = new Change();
     private AnimationSpec mAlphaAnimationSpec;
 
+    private final SurfaceAnimationRunner mSurfaceAnimationRunner;
     private final AnimationAdapterFactory mAnimationAdapterFactory;
     private AnimationAdapter mLocalAnimationAdapter;
 
-    DimmerAnimationHelper(AnimationAdapterFactory animationFactory) {
+    DimmerAnimationHelper(WindowContainer<?> host, AnimationAdapterFactory animationFactory) {
         mAnimationAdapterFactory = animationFactory;
+        mSurfaceAnimationRunner = host.mWmService.mSurfaceAnimationRunner;
     }
 
     void setExitParameters() {
@@ -160,6 +164,7 @@ public class DimmerAnimationHelper {
         }
 
         if (!startProperties.hasSameVisualProperties(mRequestedProperties)) {
+            EventLogTags.writeWmDimCancelAnim(dim.mDimSurface.getLayerId(), "new target values");
             stopCurrentAnimation(dim.mDimSurface);
 
             if (dim.mSkipAnimation
@@ -189,13 +194,15 @@ public class DimmerAnimationHelper {
         ProtoLog.v(WM_DEBUG_DIMMER, "Starting animation on %s", dim);
         mAlphaAnimationSpec = getRequestedAnimationSpec(from, to);
         mLocalAnimationAdapter = mAnimationAdapterFactory.get(mAlphaAnimationSpec,
-                dim.mHostContainer.mWmService.mSurfaceAnimationRunner);
+                mSurfaceAnimationRunner);
 
         float targetAlpha = to.mAlpha;
+        EventLogTags.writeWmDimAnimate(dim.mDimSurface.getLayerId(), targetAlpha, to.mBlurRadius);
 
         mLocalAnimationAdapter.startAnimation(dim.mDimSurface, t,
                 ANIMATION_TYPE_DIMMER, /* finishCallback */ (type, animator) -> {
                     synchronized (dim.mHostContainer.mWmService.mGlobalLock) {
+                        EventLogTags.writeWmDimFinishAnim(dim.mDimSurface.getLayerId());
                         SurfaceControl.Transaction finishTransaction =
                                 dim.mHostContainer.getSyncTransaction();
                         setCurrentAlphaBlur(dim, finishTransaction);
@@ -208,18 +215,12 @@ public class DimmerAnimationHelper {
                 });
     }
 
-    private boolean isAnimating() {
-        return mAlphaAnimationSpec != null;
-    }
-
     void stopCurrentAnimation(@NonNull SurfaceControl surface) {
-        if (mLocalAnimationAdapter != null && isAnimating()) {
-            // Save the current animation progress and cancel the animation
-            mCurrentProperties.inheritPropertiesFromAnimation(mAlphaAnimationSpec);
-            mLocalAnimationAdapter.onAnimationCancelled(surface);
-            mLocalAnimationAdapter = null;
-            mAlphaAnimationSpec = null;
-        }
+        // (If animating) save the current animation progress and cancel the animation
+        mCurrentProperties.inheritPropertiesFromAnimation(mAlphaAnimationSpec);
+        mSurfaceAnimationRunner.onAnimationCancelled(surface);
+        mLocalAnimationAdapter = null;
+        mAlphaAnimationSpec = null;
     }
 
     @NonNull

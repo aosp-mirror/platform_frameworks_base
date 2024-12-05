@@ -30,14 +30,10 @@ import com.android.systemui.media.controls.util.MediaSmartspaceLogger
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_SEEN_EVENT
 import com.android.systemui.media.controls.util.SmallHash
-import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.time.SystemClock
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.util.Locale
 import java.util.TreeMap
 import javax.inject.Inject
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,36 +45,8 @@ class MediaFilterRepository
 constructor(
     @Application private val applicationContext: Context,
     private val systemClock: SystemClock,
-    private val configurationController: ConfigurationController,
     private val smartspaceLogger: MediaSmartspaceLogger,
 ) {
-
-    val onAnyMediaConfigurationChange: Flow<Unit> = conflatedCallbackFlow {
-        val callback =
-            object : ConfigurationController.ConfigurationListener {
-                override fun onDensityOrFontScaleChanged() {
-                    trySend(Unit)
-                }
-
-                override fun onThemeChanged() {
-                    trySend(Unit)
-                }
-
-                override fun onUiModeChanged() {
-                    trySend(Unit)
-                }
-
-                override fun onLocaleListChanged() {
-                    if (locale != applicationContext.resources.configuration.locales.get(0)) {
-                        locale = applicationContext.resources.configuration.locales.get(0)
-                        trySend(Unit)
-                    }
-                }
-            }
-        configurationController.addCallback(callback)
-        trySend(Unit)
-        awaitClose { configurationController.removeCallback(callback) }
-    }
 
     /** Instance id of media control that recommendations card reactivated. */
     private val _reactivatedId: MutableStateFlow<InstanceId?> = MutableStateFlow(null)
@@ -190,7 +158,7 @@ constructor(
 
     fun addMediaDataLoadingState(
         mediaDataLoadingModel: MediaDataLoadingModel,
-        isUpdate: Boolean = true
+        isUpdate: Boolean = true,
     ) {
         val sortedMap = TreeMap<MediaSortKeyModel, MediaCommonModel>(comparator)
         sortedMap.putAll(
@@ -395,7 +363,7 @@ constructor(
                     logSmarspaceRecommendationCardUserEvent(
                         SMARTSPACE_CARD_SEEN_EVENT,
                         surface,
-                        visibleIndex
+                        visibleIndex,
                     )
                 }
             }
@@ -409,7 +377,7 @@ constructor(
         interactedSubCardRank: Int = 0,
         interactedSubCardCardinality: Int = 0,
         instanceId: InstanceId? = null,
-        isRec: Boolean = false
+        isRec: Boolean = false,
     ) {
         _currentMedia.value.forEachIndexed { index, mediaCommonModel ->
             when (mediaCommonModel) {
@@ -423,7 +391,7 @@ constructor(
                                 surface,
                                 mediaCommonModel.mediaLoadedModel.isSsReactivated,
                                 interactedSubCardRank,
-                                interactedSubCardCardinality
+                                interactedSubCardCardinality,
                             )
                         }
                         return
@@ -437,7 +405,7 @@ constructor(
                                 surface,
                                 index,
                                 interactedSubCardRank,
-                                interactedSubCardCardinality
+                                interactedSubCardCardinality,
                             )
                         }
                         return
@@ -459,14 +427,14 @@ constructor(
                             SMARTSPACE_CARD_DISMISS_EVENT,
                             surface,
                             mediaCommonModel.mediaLoadedModel.isSsReactivated,
-                            isSwipeToDismiss = true
+                            isSwipeToDismiss = true,
                         )
                     is MediaCommonModel.MediaRecommendations ->
                         logSmarspaceRecommendationCardUserEvent(
                             SMARTSPACE_CARD_DISMISS_EVENT,
                             surface,
                             index,
-                            isSwipeToDismiss = true
+                            isSwipeToDismiss = true,
                         )
                 }
             }
@@ -513,7 +481,7 @@ constructor(
         isReactivated: Boolean,
         interactedSubCardRank: Int = 0,
         interactedSubCardCardinality: Int = 0,
-        isSwipeToDismiss: Boolean = false
+        isSwipeToDismiss: Boolean = false,
     ) {
         _selectedUserEntries.value[instanceId]?.let {
             smartspaceLogger.logSmartspaceCardUIEvent(
@@ -537,7 +505,7 @@ constructor(
         index: Int,
         interactedSubCardRank: Int = 0,
         interactedSubCardCardinality: Int = 0,
-        isSwipeToDismiss: Boolean = false
+        isSwipeToDismiss: Boolean = false,
     ) {
         smartspaceLogger.logSmartspaceCardUIEvent(
             eventId,

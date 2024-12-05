@@ -1854,6 +1854,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         assertPackageMatchesCallingUid(callingPackage);
 
+        mAmInternal.addCreatorToken(intent, callingPackage);
+
         final ActivityOptions activityOptions = ActivityOptions.makeBasic();
         activityOptions.setLaunchTaskId(taskId);
         // Pass in the system UID to allow setting launch taskId with MANAGE_GAME_ACTIVITY.
@@ -3792,6 +3794,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             r.setPictureInPictureParams(params);
             enterPipTransition.setPipActivity(r);
             r.mAutoEnteringPip = isAutoEnter;
+
+            if (r.getTaskFragment() != null && r.getTaskFragment().isEmbeddedWithBoundsOverride()
+                    && enterPipTransition != null) {
+                enterPipTransition.addFlag(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+            }
+
             getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
                 getTransitionController().requestStartTransition(enterPipTransition,
                         r.getTask(), null /* remoteTransition */, null /* displayChange */);
@@ -3910,6 +3918,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean supportsLocalVoiceInteraction() {
         return LocalServices.getService(VoiceInteractionManagerInternal.class)
                 .supportsLocalVoiceInteraction();
+    }
+
+    @Override
+    public void requestOpenInBrowserEducation(IBinder appToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
+            if (r != null) {
+                r.requestOpenInBrowserEducation();
+            }
+        }
     }
 
     @Override

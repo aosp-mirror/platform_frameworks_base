@@ -189,6 +189,11 @@ public final class Choreographer {
     @UnsupportedAppUsage
     private long mLastFrameTimeNanos;
 
+    // Keeps track of the last scheduled frame time without additional offsets
+    // added from buffer stuffing recovery. Used to compare timing of vsyncs to
+    // determine idle state.
+    private long mLastNoOffsetFrameTimeNanos;
+
     /** DO NOT USE since this will not updated when screen refresh changes. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
             publicAlternatives = "Use {@link android.view.Display#getRefreshRate} instead")
@@ -202,6 +207,50 @@ public final class Choreographer {
             new DisplayEventReceiver.VsyncEventData();
     private final FrameData mFrameData = new FrameData();
     private volatile boolean mInDoFrameCallback = false;
+
+    private static class BufferStuffingData {
+        enum RecoveryAction {
+            // No recovery
+            NONE,
+            // Recovery has started, adds a negative offset
+            OFFSET,
+            // Recovery has started, delays a frame to return buffer count
+            // back toward threshold.
+            DELAY_FRAME
+        }
+        // The maximum number of times frames will be delayed per buffer stuffing event.
+        // Since buffer stuffing can persist for several consecutive frames following the
+        // initial missed frame, we want to adjust the timeline with enough frame delays and
+        // offsets to return the queued buffer count back to threshold.
+        public static final int MAX_FRAME_DELAYS = 3;
+
+        // Whether buffer stuffing recovery has begun. Recovery can only end
+        // when events are idle.
+        public boolean isRecovering = false;
+
+        // The number of frames delayed so far during recovery. Used to compare with
+        // MAX_FRAME_DELAYS to safeguard against excessive frame delays during recovery.
+        // Also used as unique cookie for tracing.
+        public int numberFrameDelays = 0;
+
+        // The number of additional frame delays scheduled during recovery to wait for the next
+        // vsync. These are scheduled when frame times appear to go backward or frames are
+        // being skipped due to FPSDivisor.
+        public int numberWaitsForNextVsync = 0;
+
+        /**
+         * After buffer stuffing recovery has ended with a detected idle state, the
+         * recovery data trackers can be reset in preparation for any future
+         * stuffing events.
+         */
+        public void reset() {
+            isRecovering = false;
+            numberFrameDelays = 0;
+            numberWaitsForNextVsync = 0;
+        }
+    }
+
+    private final BufferStuffingData mBufferStuffingData = new BufferStuffingData();
 
     /**
      * Contains information about the current frame for jank-tracking,
@@ -850,13 +899,99 @@ public final class Choreographer {
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
+    // Conducts logic for beginning or ending buffer stuffing recovery.
+    // Returns an enum for the recovery action that should be taken in doFrame().
+    BufferStuffingData.RecoveryAction checkBufferStuffingRecovery(long frameTimeNanos,
+            DisplayEventReceiver.VsyncEventData vsyncEventData) {
+        // Canned animations can recover from buffer stuffing whenever more
+        // than 2 buffers are queued.
+        if (vsyncEventData.numberQueuedBuffers > 2) {
+            mBufferStuffingData.isRecovering = true;
+            // Intentional frame delay that can happen at most MAX_FRAME_DELAYS times per
+            // buffer stuffing event until the buffer count returns to threshold. The
+            // delayed frames are compensated for by the negative offsets added to the
+            // animation timestamps.
+            if (mBufferStuffingData.numberFrameDelays < mBufferStuffingData.MAX_FRAME_DELAYS) {
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.asyncTraceForTrackBegin(
+                            Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery", "Thread "
+                            + android.os.Process.myTid() + ", recover frame #"
+                            + mBufferStuffingData.numberFrameDelays,
+                            mBufferStuffingData.numberFrameDelays);
+                }
+                mBufferStuffingData.numberFrameDelays++;
+                scheduleVsyncLocked();
+                return BufferStuffingData.RecoveryAction.DELAY_FRAME;
+            }
+        }
+
+        if (mBufferStuffingData.isRecovering) {
+            // Includes an additional expected frame delay from the natural scheduling
+            // of the next vsync event.
+            int totalFrameDelays = mBufferStuffingData.numberFrameDelays
+                    + mBufferStuffingData.numberWaitsForNextVsync + 1;
+            long vsyncsSinceLastCallback = mLastFrameIntervalNanos > 0
+                    ? (frameTimeNanos - mLastNoOffsetFrameTimeNanos) / mLastFrameIntervalNanos : 0;
+
+            // Detected idle state due to a longer inactive period since the last vsync callback
+            // than the total expected number of vsync frame delays. End buffer stuffing recovery.
+            // There are no frames to animate and offsets no longer need to be added
+            // since the idle state gives the animation a chance to catch up.
+            if (vsyncsSinceLastCallback > totalFrameDelays) {
+                if (DEBUG_JANK) {
+                    Log.d(TAG, "End buffer stuffing recovery");
+                }
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    for (int i = 0; i < mBufferStuffingData.numberFrameDelays; i++) {
+                        Trace.asyncTraceForTrackEnd(
+                                Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery", i);
+                    }
+                }
+                mBufferStuffingData.reset();
+
+            } else {
+                if (DEBUG_JANK) {
+                    Log.d(TAG, "Adjust animation timeline with a negative offset");
+                }
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.instantForTrack(
+                            Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery",
+                            "Negative offset added to animation");
+                }
+                return BufferStuffingData.RecoveryAction.OFFSET;
+            }
+        }
+        return BufferStuffingData.RecoveryAction.NONE;
+    }
+
     void doFrame(long frameTimeNanos, int frame,
             DisplayEventReceiver.VsyncEventData vsyncEventData) {
         final long startNanos;
         final long frameIntervalNanos = vsyncEventData.frameInterval;
         boolean resynced = false;
+        long offsetFrameTimeNanos = frameTimeNanos;
+
+        // Evaluate if buffer stuffing recovery needs to start or end, and
+        // what actions need to be taken for recovery.
+        switch (checkBufferStuffingRecovery(frameTimeNanos, vsyncEventData)) {
+            case NONE:
+                // Without buffer stuffing recovery, offsetFrameTimeNanos is
+                // synonymous with frameTimeNanos.
+                break;
+            case OFFSET:
+                // Add animation offset. Used to update frame timeline with
+                // offset before jitter is calculated.
+                offsetFrameTimeNanos = frameTimeNanos - frameIntervalNanos;
+                break;
+            case DELAY_FRAME:
+                // Intentional frame delay to help restore queued buffer count to threshold.
+                return;
+            default:
+                break;
+        }
+
         try {
-            FrameTimeline timeline = mFrameData.update(frameTimeNanos, vsyncEventData);
+            FrameTimeline timeline = mFrameData.update(offsetFrameTimeNanos, vsyncEventData);
             if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                 Trace.traceBegin(
                         Trace.TRACE_TAG_VIEW, "Choreographer#doFrame " + timeline.mVsyncId);
@@ -867,15 +1002,18 @@ public final class Choreographer {
                     traceMessage("Frame not scheduled");
                     return; // no work to do
                 }
+                mLastNoOffsetFrameTimeNanos = frameTimeNanos;
 
                 if (DEBUG_JANK && mDebugPrintNextFrameTimeDelta) {
                     mDebugPrintNextFrameTimeDelta = false;
                     Log.d(TAG, "Frame time delta: "
-                            + ((frameTimeNanos - mLastFrameTimeNanos) * 0.000001f) + " ms");
+                            + ((offsetFrameTimeNanos - mLastFrameTimeNanos) * 0.000001f) + " ms");
                 }
 
-                long intendedFrameTimeNanos = frameTimeNanos;
+                long intendedFrameTimeNanos = offsetFrameTimeNanos;
                 startNanos = System.nanoTime();
+                // Calculating jitter involves using the original frame time without
+                // adjustments from buffer stuffing
                 final long jitterNanos = startNanos - frameTimeNanos;
                 if (jitterNanos >= frameIntervalNanos) {
                     frameTimeNanos = startNanos;
@@ -899,6 +1037,13 @@ public final class Choreographer {
                                     + " ms in the past.");
                         }
                     }
+                    if (mBufferStuffingData.isRecovering) {
+                        frameTimeNanos -= frameIntervalNanos;
+                        if (DEBUG_JANK) {
+                            Log.d(TAG, "Adjusted animation timeline with a negative offset after"
+                                    + " jitter calculation");
+                        }
+                    }
                     timeline = mFrameData.update(
                             frameTimeNanos, mDisplayEventReceiver, jitterNanos);
                     resynced = true;
@@ -910,6 +1055,9 @@ public final class Choreographer {
                                 + "previously skipped frame.  Waiting for next vsync.");
                     }
                     traceMessage("Frame time goes backward");
+                    if (mBufferStuffingData.isRecovering) {
+                        mBufferStuffingData.numberWaitsForNextVsync++;
+                    }
                     scheduleVsyncLocked();
                     return;
                 }
@@ -918,6 +1066,9 @@ public final class Choreographer {
                     long timeSinceVsync = frameTimeNanos - mLastFrameTimeNanos;
                     if (timeSinceVsync < (frameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
                         traceMessage("Frame skipped due to FPSDivisor");
+                        if (mBufferStuffingData.isRecovering) {
+                            mBufferStuffingData.numberWaitsForNextVsync++;
+                        }
                         scheduleVsyncLocked();
                         return;
                     }

@@ -242,6 +242,9 @@ interface IActivityTaskManager {
 
     boolean supportsLocalVoiceInteraction();
 
+    // Requests the "Open in browser" education to be shown
+    void requestOpenInBrowserEducation(IBinder appToken);
+
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();
 

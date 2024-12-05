@@ -54,6 +54,7 @@ import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -138,7 +139,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         }
 
         static JankInfo createFromSurfaceControlCallback(SurfaceControl.JankData jankStat) {
-            return new JankInfo(jankStat.frameVsyncId).update(jankStat);
+            return new JankInfo(jankStat.getVsyncId()).update(jankStat);
         }
 
         private JankInfo(long frameVsyncId) {
@@ -153,10 +154,10 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
 
         private JankInfo update(SurfaceControl.JankData jankStat) {
             this.surfaceControlCallbackFired = true;
-            this.jankType = jankStat.jankType;
-            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.frameIntervalNs);
+            this.jankType = jankStat.getJankType();
+            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.getFrameIntervalNanos());
             if (Flags.useSfFrameDuration()) {
-                this.totalDurationNanos = jankStat.actualAppFrameTimeNs;
+                this.totalDurationNanos = jankStat.getActualAppFrameTimeNanos();
             }
             return this;
         }
@@ -448,7 +449,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     }
 
     @Override
-    public void onJankDataAvailable(SurfaceControl.JankData[] jankData) {
+    public void onJankDataAvailable(List<SurfaceControl.JankData> jankData) {
         postCallback(() -> {
             try {
                 Trace.beginSection("FrameTracker#onJankDataAvailable");
@@ -457,14 +458,14 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 }
 
                 for (SurfaceControl.JankData jankStat : jankData) {
-                    if (!isInRange(jankStat.frameVsyncId)) {
+                    if (!isInRange(jankStat.getVsyncId())) {
                         continue;
                     }
-                    JankInfo info = findJankInfo(jankStat.frameVsyncId);
+                    JankInfo info = findJankInfo(jankStat.getVsyncId());
                     if (info != null) {
                         info.update(jankStat);
                     } else {
-                        mJankInfos.put((int) jankStat.frameVsyncId,
+                        mJankInfos.put((int) jankStat.getVsyncId(),
                                 JankInfo.createFromSurfaceControlCallback(jankStat));
                     }
                 }
@@ -684,14 +685,6 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         }
     }
 
-    ThreadedRendererWrapper getThreadedRenderer() {
-        return mRendererWrapper;
-    }
-
-    ViewRootWrapper getViewRoot() {
-        return mViewRoot;
-    }
-
     private boolean shouldTriggerPerfetto(int missedFramesCount, int maxFrameTimeNanos) {
         boolean overMissedFramesThreshold = mTraceThresholdMissedFrames != -1
                 && missedFramesCount >= mTraceThresholdMissedFrames;
@@ -832,7 +825,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         /** adds the jank listener to the given surface */
         public SurfaceControl.OnJankDataListenerRegistration addJankStatsListener(
                 SurfaceControl.OnJankDataListener listener, SurfaceControl surfaceControl) {
-            return surfaceControl.addJankDataListener(listener);
+            return surfaceControl.addOnJankDataListener(listener);
         }
     }
 

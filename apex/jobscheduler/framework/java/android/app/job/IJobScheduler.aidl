@@ -20,6 +20,7 @@ import android.app.job.IUserVisibleJobObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.app.job.PendingJobReasonsInfo;
 import android.content.pm.ParceledListSlice;
 import java.util.Map;
 
@@ -39,6 +40,8 @@ interface IJobScheduler {
     ParceledListSlice<JobInfo> getAllPendingJobsInNamespace(String namespace);
     JobInfo getPendingJob(String namespace, int jobId);
     int getPendingJobReason(String namespace, int jobId);
+    int[] getPendingJobReasons(String namespace, int jobId);
+    List<PendingJobReasonsInfo> getPendingJobReasonsHistory(String namespace, int jobId);
     boolean canRunUserInitiatedJobs(String packageName);
     boolean hasRunUserInitiatedJobsPermission(String packageName, int userId);
     List<JobInfo> getStartedJobs();

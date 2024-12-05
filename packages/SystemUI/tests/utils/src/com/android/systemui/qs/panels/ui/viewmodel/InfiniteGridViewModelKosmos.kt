@@ -25,7 +25,7 @@ val Kosmos.infiniteGridViewModelFactory by
             override fun create(): InfiniteGridViewModel {
                 return InfiniteGridViewModel(
                     dynamicIconTilesViewModelFactory,
-                    qsColumnsViewModel,
+                    qsColumnsViewModelFactory,
                     tileSquishinessViewModel,
                     qsResetDialogDelegateKosmos,
                 )

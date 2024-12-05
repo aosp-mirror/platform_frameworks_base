@@ -39,6 +39,7 @@ import java.util.Set;
  * @hide
  */
 @SystemApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CompatChanges {
     private static final ChangeIdStateCache QUERY_CACHE = new ChangeIdStateCache();
 

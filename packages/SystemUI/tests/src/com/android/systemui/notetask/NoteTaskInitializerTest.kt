@@ -181,11 +181,9 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
-    fun handlesShortcut_metaCtrlN() {
+    fun handlesShortcut_keyGestureTypeOpenNotes() {
         val gestureEvent =
             KeyGestureEvent.Builder()
-                .setKeycodes(intArrayOf(KeyEvent.KEYCODE_N))
-                .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)
                 .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES)
                 .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
                 .build()

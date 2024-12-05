@@ -76,10 +76,10 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
             floor(spans.toDouble() / resizeMultiple).toInt() * resizeMultiple
 
         val maxSpans: Int
-            get() = roundDownToMultiple(getSpansForPx(maxHeightPx))
+            get() = roundDownToMultiple(getSpansForPx(maxHeightPx)).coerceAtLeast(currentSpan)
 
         val minSpans: Int
-            get() = roundDownToMultiple(getSpansForPx(minHeightPx))
+            get() = roundDownToMultiple(getSpansForPx(minHeightPx)).coerceAtMost(currentSpan)
     }
 
     /** Check if widget can expanded based on current drag states */

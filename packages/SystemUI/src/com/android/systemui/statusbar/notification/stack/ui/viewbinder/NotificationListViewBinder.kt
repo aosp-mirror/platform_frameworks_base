@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.TraceUtils.traceAsync
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.nano.MetricsProto
 import com.android.systemui.common.ui.ConfigurationState
@@ -30,6 +31,7 @@ import com.android.systemui.lifecycle.repeatWhenAttachedToWindow
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
@@ -70,7 +72,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationStackScrollLayout] to its [view model][NotificationListViewModel]. */
 class NotificationListViewBinder
@@ -78,7 +79,7 @@ class NotificationListViewBinder
 constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val hiderTracker: DisplaySwitchNotificationsHiderTracker,
-    private val configuration: ConfigurationState,
+    @ShadeDisplayAware private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
     private val hunBinder: HeadsUpNotificationViewBinder,
     private val loggerOptional: Optional<NotificationStatsLogger>,

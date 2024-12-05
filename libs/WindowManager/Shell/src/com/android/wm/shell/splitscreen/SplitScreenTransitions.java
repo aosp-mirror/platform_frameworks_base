@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
+import static com.android.wm.shell.Flags.enableFlexibleSplit;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
 import static com.android.wm.shell.shared.animation.Interpolators.ALPHA_IN;
@@ -55,6 +56,9 @@ import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /** Manages transition animations for split-screen. */
@@ -268,22 +272,21 @@ class SplitScreenTransitions {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback,
-            @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot,
-            @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
+            @NonNull Map<WindowContainerToken, SplitDecorManager> rootDecorMap) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "playResizeAnimation: transition=%d", info.getDebugId());
         initTransition(transition, finishTransaction, finishCallback);
 
+        Set<WindowContainerToken> rootDecorKeys = rootDecorMap.keySet();
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
-            if (mainRoot.equals(change.getContainer()) || sideRoot.equals(change.getContainer())) {
+            if (rootDecorKeys.contains(change.getContainer())) {
                 final SurfaceControl leash = change.getLeash();
                 startTransaction.setPosition(leash, change.getEndAbsBounds().left,
                         change.getEndAbsBounds().top);
                 startTransaction.setWindowCrop(leash, change.getEndAbsBounds().width(),
                         change.getEndAbsBounds().height());
 
-                SplitDecorManager decor = mainRoot.equals(change.getContainer())
-                        ? mainDecor : sideDecor;
+                SplitDecorManager decor = rootDecorMap.get(change.getContainer());
 
                 // This is to ensure onFinished be called after all animations ended.
                 ValueAnimator va = new ValueAnimator();
@@ -433,15 +436,22 @@ class SplitScreenTransitions {
             Transitions.TransitionHandler handler,
             @Nullable TransitionConsumedCallback consumedCallback,
             @Nullable TransitionFinishedCallback finishCallback,
-            @NonNull SplitDecorManager mainDecor, @NonNull SplitDecorManager sideDecor) {
+            @Nullable SplitDecorManager mainDecor, @Nullable SplitDecorManager sideDecor,
+            @Nullable List<SplitDecorManager> decorManagers) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "  splitTransition deduced Resize split screen.");
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "setResizeTransition: hasPendingResize=%b",
                 mPendingResize != null);
         if (mPendingResize != null) {
             mPendingResize.cancel(null);
-            mainDecor.cancelRunningAnimations();
-            sideDecor.cancelRunningAnimations();
+            if (enableFlexibleSplit()) {
+                for (SplitDecorManager stage : decorManagers) {
+                    stage.cancelRunningAnimations();
+                }
+            } else {
+                mainDecor.cancelRunningAnimations();
+                sideDecor.cancelRunningAnimations();
+            }
             mAnimations.clear();
             onFinish(null /* wct */);
         }

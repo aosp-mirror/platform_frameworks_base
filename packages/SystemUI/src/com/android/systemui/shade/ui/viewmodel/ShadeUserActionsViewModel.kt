@@ -17,7 +17,6 @@
 package com.android.systemui.shade.ui.viewmodel
 
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -58,7 +57,7 @@ constructor(
                 buildMap<UserAction, UserActionResult> {
                     if (!isCustomizerShowing) {
                         set(
-                            Swipe(SwipeDirection.Up),
+                            Swipe.Up,
                             UserActionResult(
                                 backScene,
                                 ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
@@ -69,7 +68,7 @@ constructor(
                     // TODO(b/330200163) Add an else to be able to collapse the shade while
                     // customizing
                     if (shadeMode is ShadeMode.Single) {
-                        set(Swipe(SwipeDirection.Down), UserActionResult(Scenes.QuickSettings))
+                        set(Swipe.Down, UserActionResult(Scenes.QuickSettings))
                     }
                 }
             }

@@ -19,8 +19,10 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.Flags.keyguardTransitionForceFinishOnScreenOff
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -30,6 +32,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.UNDEFINED
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
@@ -59,7 +63,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -70,6 +73,7 @@ constructor(
     @Application val scope: CoroutineScope,
     private val repository: KeyguardTransitionRepository,
     private val sceneInteractor: SceneInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
     private val transitionMap = mutableMapOf<Edge.StateToState, MutableSharedFlow<TransitionStep>>()
 
@@ -188,6 +192,18 @@ constructor(
                     }
                 }
         }
+
+        if (keyguardTransitionForceFinishOnScreenOff()) {
+            /**
+             * If the screen is turning off, finish the current transition immediately. Further
+             * frames won't be visible anyway.
+             */
+            scope.launch {
+                powerInteractor.screenPowerState
+                    .filter { it == ScreenPowerState.SCREEN_TURNING_OFF }
+                    .collect { repository.forceFinishCurrentTransition() }
+            }
+        }
     }
 
     fun transition(edge: Edge, edgeWithoutSceneContainer: Edge? = null): Flow<TransitionStep> {
@@ -240,6 +256,16 @@ constructor(
             val isTransitioningBetweenDesiredScenes =
                 sceneInteractor.transitionState.value.isTransitioning(fromScene, toScene)
 
+            // When in STL A -> B settles in A we can't do the same in KTF as KTF requires us to
+            // start B -> A to get back to A. [LockscreenSceneTransitionInteractor] will emit these
+            // steps but because STL is Idle(A) at this point (and never even started a B -> A in
+            // the first place) [isTransitioningBetweenDesiredScenes] will not be satisfied. We need
+            // this condition to not filter out the STARTED and FINISHED step of the "artificially"
+            // reversed B -> A transition.
+            val belongsToInstantReversedTransition =
+                sceneInteractor.transitionState.value.isIdle(toScene) &&
+                    sceneTransitionPair.value.previousValue.isTransitioning(toScene, fromScene)
+
             // We can't compare the terminal step with the current sceneTransition because
             // a) STL has no guarantee that it will settle in Idle() when finished/canceled
             // b) Comparing to Idle(toScene) would make any other FINISHED step settling in
@@ -251,7 +277,8 @@ constructor(
 
             return@filter isTransitioningBetweenLockscreenStates ||
                 isTransitioningBetweenDesiredScenes ||
-                terminalStepBelongsToPreviousTransition
+                terminalStepBelongsToPreviousTransition ||
+                belongsToInstantReversedTransition
         }
     }
 

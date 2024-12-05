@@ -64,6 +64,7 @@ class SnapshotPersistQueue {
     private boolean mStarted;
     private final Object mLock = new Object();
     private final UserManagerInternal mUserManagerInternal;
+    private boolean mShutdown;
 
     SnapshotPersistQueue() {
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -101,6 +102,46 @@ class SnapshotPersistQueue {
         }
     }
 
+    /**
+     * Prepare to enqueue all visible task snapshots because of shutdown.
+     */
+    void prepareShutdown() {
+        synchronized (mLock) {
+            mShutdown = true;
+        }
+    }
+
+    private boolean isQueueEmpty() {
+        synchronized (mLock) {
+            return mWriteQueue.isEmpty() || mQueueIdling || mPaused;
+        }
+    }
+
+    void waitFlush(long timeout) {
+        if (timeout <= 0) {
+            return;
+        }
+        final long endTime = System.currentTimeMillis() + timeout;
+        while (true) {
+            if (!isQueueEmpty()) {
+                long timeRemaining = endTime - System.currentTimeMillis();
+                if (timeRemaining > 0) {
+                    synchronized (mLock) {
+                        try {
+                            mLock.wait(timeRemaining);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                } else {
+                    Slog.w(TAG, "Snapshot Persist Queue flush timed out");
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
     @VisibleForTesting
     void waitForQueueEmpty() {
         while (true) {
@@ -128,7 +169,9 @@ class SnapshotPersistQueue {
             mWriteQueue.addLast(item);
         }
         item.onQueuedLocked();
-        ensureStoreQueueDepthLocked();
+        if (!mShutdown) {
+            ensureStoreQueueDepthLocked();
+        }
         if (!mPaused) {
             mLock.notifyAll();
         }
@@ -193,12 +236,17 @@ class SnapshotPersistQueue {
                     if (isReadyToWrite) {
                         next.write();
                     }
-                    SystemClock.sleep(DELAY_MS);
+                    if (!mShutdown) {
+                        SystemClock.sleep(DELAY_MS);
+                    }
                 }
                 synchronized (mLock) {
                     final boolean writeQueueEmpty = mWriteQueue.isEmpty();
                     if (!writeQueueEmpty && !mPaused) {
                         continue;
+                    }
+                    if (mShutdown && writeQueueEmpty) {
+                        mLock.notifyAll();
                     }
                     try {
                         mQueueIdling = writeQueueEmpty;

@@ -20,7 +20,7 @@ import android.view.View
 import androidx.core.animation.Interpolator
 import androidx.core.animation.ValueAnimator
 import com.android.app.animation.InterpolatorsAndroidX
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 
 /**
  * A controller that keeps track of multiple sources applying alpha value changes to a view. It will
@@ -75,7 +75,7 @@ constructor(private val view: View, private val initialAlpha: Float = 1f) {
 
     private fun applyAlphaToView() {
         val minAlpha = getMinAlpha()
-        if (!StatusBarSimpleFragment.isEnabled) {
+        if (!StatusBarRootModernization.isEnabled) {
             view.visibility = if (minAlpha != 0f) View.VISIBLE else View.INVISIBLE
             view.alpha = minAlpha
         }

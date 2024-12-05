@@ -92,10 +92,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
 
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -110,10 +107,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             )
             setDeviceEntered(true)
 
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -128,10 +122,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             )
             kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(false)
 
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -147,10 +138,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             )
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -167,10 +155,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             runCurrent()
             sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Up)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(SceneFamilies.Home)
             assertThat(homeScene).isEqualTo(Scenes.Gone)
         }
@@ -182,8 +167,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.transitionKey)
-                .isEqualTo(ToSplitShade)
+            assertThat(actions?.get(Swipe.Up)?.transitionKey).isEqualTo(ToSplitShade)
         }
 
     @Test
@@ -193,7 +177,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
-            assertThat(actions?.get(Swipe(SwipeDirection.Up))?.transitionKey).isNull()
+            assertThat(actions?.get(Swipe.Up)?.transitionKey).isNull()
         }
 
     @Test
@@ -202,10 +186,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             kosmos.shadeStartable.start()
             val actions by collectLastValue(underTest.actions)
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Down)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
                 .isNull()
         }
 
@@ -215,10 +196,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             kosmos.shadeStartable.start()
             val actions by collectLastValue(underTest.actions)
-            assertThat(
-                    (actions?.get(Swipe(SwipeDirection.Down)) as? UserActionResult.ChangeScene)
-                        ?.toScene
-                )
+            assertThat((actions?.get(Swipe.Down) as? UserActionResult.ChangeScene)?.toScene)
                 .isEqualTo(Scenes.QuickSettings)
         }
 

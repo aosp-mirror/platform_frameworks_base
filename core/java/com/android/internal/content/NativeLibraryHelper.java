@@ -26,6 +26,7 @@ import static android.system.OsConstants.S_IXGRP;
 import static android.system.OsConstants.S_IXOTH;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
@@ -176,6 +177,13 @@ public class NativeLibraryHelper {
 
     private native static int nativeCopyNativeBinaries(long handle, String sharedLibraryPath,
             String abiToCopy, boolean extractNativeLibs, boolean debuggable);
+
+    private static native int nativeCheckAlignment(
+            long handle,
+            String sharedLibraryPath,
+            String abi,
+            boolean extractNativeLibs,
+            boolean debuggable);
 
     private static long sumNativeBinaries(Handle handle, String abi) {
         long sum = 0;
@@ -430,6 +438,51 @@ public class NativeLibraryHelper {
             Slog.e(TAG, "Copying native libraries failed", e);
             return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
         }
+    }
+
+    /**
+     * Checks alignment of APK and native libraries for 16KB device
+     *
+     * @param handle APK file to scan for native libraries
+     * @param libraryRoot directory for libraries
+     * @param abiOverride abiOverride for package
+     * @return {@link Modes from ApplicationInfo.PageSizeAppCompat} if successful or error code
+     *     which suggests undefined mode
+     */
+    @ApplicationInfo.PageSizeAppCompatFlags
+    public static int checkAlignmentForCompatMode(
+            Handle handle,
+            String libraryRoot,
+            boolean nativeLibraryRootRequiresIsa,
+            String abiOverride) {
+        // Keep the code below in sync with copyNativeBinariesForSupportedAbi
+        int abi = findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
+        if (abi < 0) {
+            return ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_ERROR;
+        }
+
+        final String supportedAbi = Build.SUPPORTED_64_BIT_ABIS[abi];
+        final String instructionSet = VMRuntime.getInstructionSet(supportedAbi);
+        String subDir = libraryRoot;
+        if (nativeLibraryRootRequiresIsa) {
+            subDir += "/" + instructionSet;
+        }
+
+        int mode = ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
+        for (long apkHandle : handle.apkHandles) {
+            int res =
+                    nativeCheckAlignment(
+                            apkHandle,
+                            subDir,
+                            Build.SUPPORTED_64_BIT_ABIS[abi],
+                            handle.extractNativeLibs,
+                            handle.debuggable);
+            if (res == ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_ERROR) {
+                return res;
+            }
+            mode |= res;
+        }
+        return mode;
     }
 
     public static long sumNativeBinariesWithOverride(Handle handle, String abiOverride)

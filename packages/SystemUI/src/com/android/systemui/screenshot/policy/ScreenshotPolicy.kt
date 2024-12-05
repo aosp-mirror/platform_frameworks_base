@@ -20,18 +20,16 @@ import android.app.ActivityTaskManager.RootTaskInfo
 import android.app.WindowConfiguration
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.content.ComponentName
+import android.graphics.Rect
 import android.os.UserHandle
 import android.util.Log
 import com.android.systemui.screenshot.data.model.DisplayContentModel
-import com.android.systemui.screenshot.data.model.ProfileType
 import com.android.systemui.screenshot.data.model.ProfileType.PRIVATE
 import com.android.systemui.screenshot.data.model.ProfileType.WORK
 import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.android.systemui.screenshot.policy.CaptureType.FullScreen
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
-import com.android.systemui.screenshot.policy.CaptureType.RootTask
 import javax.inject.Inject
 
 private const val TAG = "ScreenshotPolicy"
@@ -39,7 +37,7 @@ private const val TAG = "ScreenshotPolicy"
 /** Determines what to capture and which user owns the output. */
 class ScreenshotPolicy @Inject constructor(private val profileTypes: ProfileTypeRepository) {
     /**
-     * Apply the policy to the content, resulting in [CaptureParameters].
+     * Apply the policy to the content, resulting in [LegacyCaptureParameters].
      *
      * @param content the content of the display
      * @param defaultComponent the component associated with the screenshot by default
@@ -53,7 +51,7 @@ class ScreenshotPolicy @Inject constructor(private val profileTypes: ProfileType
         val defaultFullScreen by lazy {
             CaptureParameters(
                 type = FullScreen(displayId = content.displayId),
-                component = defaultComponent,
+                contentTask = TaskReference(-1, defaultComponent, defaultOwner, Rect()),
                 owner = defaultOwner,
             )
         }
@@ -70,32 +68,47 @@ class ScreenshotPolicy @Inject constructor(private val profileTypes: ProfileType
             } ?: return defaultFullScreen
 
         Log.d(TAG, "topRootTask: $topRootTask")
-        val rootTaskOwners = topRootTask.childTaskUserIds.distinct()
 
-        // Special case: Only WORK in top root task which is full-screen or maximized freeform
+        // When:
+        // * there is one or more child task
+        // * all owned by the same user
+        // * this user is a work profile
+        // * the root task is fullscreen or freeform-maximized
+        //
+        // Then:
+        // the result will be a task snapshot instead of a full screen capture. If there is more
+        // than one child task, the root task will be snapshot to include any/all child tasks. This
+        // is intended to cover split-screen mode.
+        val rootTaskOwners = topRootTask.childTaskUserIds.distinct()
         if (
             rootTaskOwners.size == 1 &&
                 profileTypes.getProfileType(rootTaskOwners.single()) == WORK &&
                 (topRootTask.isFullScreen() || topRootTask.isMaximizedFreeform())
         ) {
+            val topChildTask = topRootTask.childTasksTopDown().first()
+
+            // If there is more than one task, capture the parent to include both.
             val type =
                 if (topRootTask.childTaskCount() > 1) {
-                    RootTask(
-                        parentTaskId = topRootTask.taskId,
-                        taskBounds = topRootTask.bounds,
-                        childTaskIds = topRootTask.childTasksTopDown().map { it.id }.toList(),
-                    )
+                    IsolatedTask(taskId = topRootTask.taskId, taskBounds = topRootTask.bounds)
                 } else {
-                    IsolatedTask(
-                        taskId = topRootTask.childTasksTopDown().first().id,
-                        taskBounds = topRootTask.bounds,
-                    )
+                    // Otherwise capture the single task, and use its bounds.
+                    IsolatedTask(taskId = topChildTask.id, taskBounds = topChildTask.bounds)
                 }
-            // Capture the RootTask (and all children)
+
+            // The content task (the focus of the screenshot) must represent a single task
+            // containing an activity, so always reference the top child task here. The owner
+            // of the screenshot here is always the same as well.
             return CaptureParameters(
                 type = type,
-                component = topRootTask.topActivity,
-                owner = UserHandle.of(rootTaskOwners.single()),
+                contentTask =
+                    TaskReference(
+                        taskId = topChildTask.id,
+                        component = topRootTask.topActivity ?: defaultComponent,
+                        owner = UserHandle.of(topChildTask.userId),
+                        bounds = topChildTask.bounds,
+                    ),
+                owner = UserHandle.of(topChildTask.userId),
             )
         }
 
@@ -105,26 +118,36 @@ class ScreenshotPolicy @Inject constructor(private val profileTypes: ProfileType
         val visibleChildTasks =
             content.rootTasks.filter { it.isVisible }.flatMap { it.childTasksTopDown() }
 
+        // Don't target a PIP window as the screenshot "content", it should only be used
+        // to determine ownership (above).
+        val contentTask =
+            content.rootTasks
+                .filter {
+                    it.isVisible && it.windowingMode != WindowConfiguration.WINDOWING_MODE_PINNED
+                }
+                .flatMap { it.childTasksTopDown() }
+                .first()
+
         val allVisibleProfileTypes =
             visibleChildTasks
                 .map { it.userId }
                 .distinct()
                 .associate { profileTypes.getProfileType(it) to UserHandle.of(it) }
 
-        // If any visible content belongs to the private profile user -> private profile
-        // otherwise the personal user (including partial screen work content).
-        val ownerHandle =
-            allVisibleProfileTypes[PRIVATE]
-                ?: allVisibleProfileTypes[ProfileType.NONE]
-                ?: defaultOwner
-
-        // Attribute to the component of top-most task owned by this user (or fallback to default)
-        val topComponent =
-            visibleChildTasks.firstOrNull { it.userId == ownerHandle.identifier }?.componentName
+        // If any task is visible and owned by a PRIVATE profile user, the screenshot is assigned
+        // to that user. Work profile has been handled above so it is not considered here. Fallback
+        // to the default user which is the primary "current" user ('aka' personal "profile").
+        val ownerHandle = allVisibleProfileTypes[PRIVATE] ?: defaultOwner
 
         return CaptureParameters(
             type = FullScreen(content.displayId),
-            component = topComponent ?: topRootTask.topActivity ?: defaultComponent,
+            contentTask =
+                TaskReference(
+                    taskId = contentTask.id,
+                    component = contentTask.componentName,
+                    owner = UserHandle.of(contentTask.userId),
+                    bounds = contentTask.bounds,
+                ),
             owner = ownerHandle,
         )
     }

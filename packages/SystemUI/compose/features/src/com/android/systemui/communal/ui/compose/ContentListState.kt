@@ -59,7 +59,14 @@ internal constructor(
     private val onAddWidget: (componentName: ComponentName, user: UserHandle, rank: Int) -> Unit,
     private val onDeleteWidget: (id: Int, componentName: ComponentName, rank: Int) -> Unit,
     private val onReorderWidgets: (widgetIdToRankMap: Map<Int, Int>) -> Unit,
-    private val onResizeWidget: (id: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) -> Unit,
+    private val onResizeWidget:
+        (
+            id: Int,
+            spanY: Int,
+            widgetIdToRankMap: Map<Int, Int>,
+            componentName: ComponentName,
+            rank: Int,
+        ) -> Unit,
 ) {
     var list = communalContent.toMutableStateList()
         private set
@@ -105,7 +112,9 @@ internal constructor(
             } else {
                 emptyMap()
             }
-        onResizeWidget(item.appWidgetId, newSpan, widgetIdToRankMap)
+        val componentName = item.componentName
+        val rank = item.rank
+        onResizeWidget(item.appWidgetId, newSpan, widgetIdToRankMap, componentName, rank)
     }
 
     /**

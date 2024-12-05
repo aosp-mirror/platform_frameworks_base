@@ -31,15 +31,17 @@ class DozeTransitionListener @Inject constructor() :
     override fun transitionTo(oldState: DozeMachine.State, newState: DozeMachine.State) {
         this.oldState = oldState
         this.newState = newState
-        callbacks.forEach { it.onDozeTransition(oldState, newState) }
+
+        val cbs = synchronized(this) { callbacks.toSet() }
+        cbs.forEach { it.onDozeTransition(oldState, newState) }
     }
 
     override fun addCallback(callback: DozeTransitionCallback) {
-        callbacks.add(callback)
+        synchronized(this) { callbacks.add(callback) }
     }
 
     override fun removeCallback(callback: DozeTransitionCallback) {
-        callbacks.remove(callback)
+        synchronized(this) { callbacks.remove(callback) }
     }
 }
 

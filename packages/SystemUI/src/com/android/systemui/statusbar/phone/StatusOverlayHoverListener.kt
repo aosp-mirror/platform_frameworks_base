@@ -28,10 +28,13 @@ import androidx.annotation.ColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore
+import com.android.systemui.statusbar.data.repository.SysuiDarkIconDispatcherStore
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
@@ -40,14 +43,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 class StatusOverlayHoverListenerFactory
 @Inject
 constructor(
     @Main private val resources: Resources,
     private val configurationController: ConfigurationController,
-    private val darkIconDispatcher: SysuiDarkIconDispatcher,
+    private val darkIconDispatcherStore: SysuiDarkIconDispatcherStore,
+    private val statusBarConfigurationControllerStore: StatusBarConfigurationControllerStore,
 ) {
 
     /** Creates listener always using the same light color for overlay */
@@ -63,7 +66,7 @@ constructor(
      * Creates listener using [DarkIconDispatcher] to determine light or dark color of the overlay
      */
     fun createDarkAwareListener(view: View) =
-        createDarkAwareListener(view, darkIconDispatcher.darkChangeFlow())
+        createDarkAwareListener(view, view.darkIconDispatcher.darkChangeFlow())
 
     /**
      * Creates listener using [DarkIconDispatcher] to determine light or dark color of the overlay
@@ -78,7 +81,7 @@ constructor(
     ) =
         createDarkAwareListener(
             view,
-            darkIconDispatcher.darkChangeFlow(),
+            view.darkIconDispatcher.darkChangeFlow(),
             leftHoverMargin,
             rightHoverMargin,
             topHoverMargin,
@@ -92,8 +95,8 @@ constructor(
     fun createDarkAwareListener(view: View, darkFlow: StateFlow<DarkChange>) =
         StatusOverlayHoverListener(
             view,
-            configurationController,
-            resources,
+            view.statusBarConfigurationController,
+            view.resources,
             darkFlow.map { toHoverTheme(view, it) },
         )
 
@@ -107,14 +110,20 @@ constructor(
     ) =
         StatusOverlayHoverListener(
             view,
-            configurationController,
-            resources,
+            view.statusBarConfigurationController,
+            view.resources,
             darkFlow.map { toHoverTheme(view, it) },
             leftHoverMargin,
             rightHoverMargin,
             topHoverMargin,
             bottomHoverMargin,
         )
+
+    private val View.statusBarConfigurationController
+        get() = statusBarConfigurationControllerStore.forDisplay(context.displayId)
+
+    private val View.darkIconDispatcher
+        get() = darkIconDispatcherStore.forDisplay(context.displayId)
 
     private fun toHoverTheme(view: View, darkChange: DarkChange): HoverTheme {
         val calculatedTint = DarkIconDispatcher.getTint(darkChange.areas, view, darkChange.tint)

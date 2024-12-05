@@ -33,9 +33,10 @@ import com.android.server.ServiceThread;
 
 public class BackgroundInstallControlCallbackHelper {
 
-    @VisibleForTesting static final String FLAGGED_PACKAGE_NAME_KEY = "packageName";
-    @VisibleForTesting static final String FLAGGED_USER_ID_KEY = "userId";
-    @VisibleForTesting static final String INSTALL_EVENT_TYPE_KEY = "installEventType";
+    public static final String FLAGGED_PACKAGE_NAME_KEY = "packageName";
+    public static final String FLAGGED_USER_ID_KEY = "userId";
+    public static final String INSTALL_EVENT_TYPE_KEY = "installEventType";
+
     private static final String TAG = "BackgroundInstallControlCallbackHelper";
 
     private final Handler mHandler;

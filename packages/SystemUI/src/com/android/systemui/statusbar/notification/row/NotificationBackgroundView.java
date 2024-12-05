@@ -21,7 +21,9 @@ import static com.android.systemui.util.ColorUtilKt.hexColorString;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -36,6 +38,7 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.notification.shared.NotificationAddXOnHoverToDismiss;
 import com.android.systemui.util.DrawableDumpKt;
 
 import java.io.PrintWriter;
@@ -44,7 +47,8 @@ import java.util.Arrays;
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
  */
-public class NotificationBackgroundView extends View implements Dumpable {
+public class NotificationBackgroundView extends View implements Dumpable,
+        ExpandableNotificationRow.DismissButtonTargetVisibilityListener {
 
     private final boolean mDontModifyCorners;
     private Drawable mBackground;
@@ -66,6 +70,11 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private final ColorStateList mLightColoredStatefulColors;
     private final ColorStateList mDarkColoredStatefulColors;
     private final int mNormalColor;
+    private final int convexR = 9;
+    private final int concaveR = 22;
+
+    // True only if the dismiss button is visible.
+    private boolean mDrawDismissButtonCutout = false;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -80,6 +89,18 @@ public class NotificationBackgroundView extends View implements Dumpable {
     }
 
     @Override
+    public void onTargetVisibilityChanged(boolean targetVisible) {
+        if (NotificationAddXOnHoverToDismiss.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+
+        if (mDrawDismissButtonCutout != targetVisible) {
+            mDrawDismissButtonCutout = targetVisible;
+            invalidate();
+        }
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         if (mClipTopAmount + mClipBottomAmount < getActualHeight() || mExpandAnimationRunning) {
             canvas.save();
@@ -87,12 +108,87 @@ public class NotificationBackgroundView extends View implements Dumpable {
                 canvas.clipRect(0, mClipTopAmount, getWidth(),
                         getActualHeight() - mClipBottomAmount);
             }
-            draw(canvas, mBackground);
+
+            if (!NotificationAddXOnHoverToDismiss.isEnabled()) {
+                draw(canvas, mBackground);
+                canvas.restore();
+                return;
+            }
+
+            Rect backgroundBounds = null;
+            if (mBackground != null || mDrawDismissButtonCutout) {
+                backgroundBounds = calculateBackgroundBounds();
+            }
+
+            if (mDrawDismissButtonCutout) {
+                canvas.clipPath(calculateDismissButtonCutoutPath(backgroundBounds));
+            }
+
+            if (mBackground != null) {
+                mBackground.setBounds(backgroundBounds);
+                mBackground.draw(canvas);
+            }
+
             canvas.restore();
         }
     }
 
+    private Path calculateDismissButtonCutoutPath(Rect backgroundBounds) {
+        // TODO(b/365585705): Adapt to RTL after the UX design is finalized.
+
+        NotificationAddXOnHoverToDismiss.isUnexpectedlyInLegacyMode();
+
+        Path path = new Path();
+
+        final int left = backgroundBounds.left;
+        final int right = backgroundBounds.right;
+        final int top = backgroundBounds.top;
+        final int bottom = backgroundBounds.bottom;
+
+        // Generate the path clockwise from the left-top corner.
+        path.moveTo(left, top);
+        path.lineTo(right - 2 * convexR - concaveR, top);
+        path.quadTo(right - convexR - concaveR, top, right - convexR - concaveR,
+                top + convexR);
+        path.quadTo(right - convexR - concaveR, top + convexR + concaveR, right - convexR,
+                top + convexR + concaveR);
+        path.quadTo(right, top + convexR + concaveR, right, top + 2 * convexR + concaveR);
+        path.lineTo(right, bottom);
+        path.lineTo(left, bottom);
+        path.lineTo(left, top);
+
+        return path;
+    }
+
+    private Rect calculateBackgroundBounds() {
+        NotificationAddXOnHoverToDismiss.isUnexpectedlyInLegacyMode();
+
+        int top = 0;
+        int bottom = getActualHeight();
+        if (mBottomIsRounded
+                && mBottomAmountClips
+                && !mExpandAnimationRunning) {
+            bottom -= mClipBottomAmount;
+        }
+        final boolean isRtl = isLayoutRtl();
+        final int width = getWidth();
+        final int actualWidth = getActualWidth();
+
+        int left = isRtl ? width - actualWidth : 0;
+        int right = isRtl ? width : actualWidth;
+
+        if (mExpandAnimationRunning) {
+            // Horizontally center this background view inside of the container
+            left = (int) ((width - actualWidth) / 2.0f);
+            right = (int) (left + actualWidth);
+        }
+
+        return new Rect(left, top, right, bottom);
+    }
+
     private void draw(Canvas canvas, Drawable drawable) {
+        NotificationAddXOnHoverToDismiss.assertInLegacyMode();
+
         if (drawable != null) {
             int top = 0;
             int bottom = getActualHeight();

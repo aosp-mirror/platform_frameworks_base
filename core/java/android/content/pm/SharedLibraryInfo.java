@@ -105,6 +105,8 @@ public final class SharedLibraryInfo implements Parcelable {
     private final List<VersionedPackage> mOptionalDependentPackages;
     private List<SharedLibraryInfo> mDependencies;
 
+    private final List<String> mCertDigests;
+
     /**
      * Creates a new instance.
      *
@@ -134,6 +136,7 @@ public final class SharedLibraryInfo implements Parcelable {
         mDependencies = dependencies;
         mIsNative = isNative;
         mOptionalDependentPackages = null;
+        mCertDigests = null;
     }
 
     /**
@@ -165,6 +168,7 @@ public final class SharedLibraryInfo implements Parcelable {
         mDeclaringPackage = declaringPackage;
         mDependencies = dependencies;
         mIsNative = isNative;
+        mCertDigests = null;
 
         var allDependents = allDependentPackages.first;
         var usesLibOptional = allDependentPackages.second;
@@ -206,6 +210,7 @@ public final class SharedLibraryInfo implements Parcelable {
         mIsNative = parcel.readBoolean();
         mOptionalDependentPackages = parcel.readParcelableList(new ArrayList<>(),
                 VersionedPackage.class.getClassLoader(), VersionedPackage.class);
+        mCertDigests = parcel.createStringArrayList();
     }
 
     /**
@@ -214,6 +219,7 @@ public final class SharedLibraryInfo implements Parcelable {
      * @param versionMajor
      */
     public SharedLibraryInfo(String name, long versionMajor, int type) {
+        //TODO: change to this(name, versionMajor, type, /* certDigest= */null); after flag removal
         mPath = null;
         mPackageName = null;
         mName = name;
@@ -224,6 +230,29 @@ public final class SharedLibraryInfo implements Parcelable {
         mDependencies = null;
         mIsNative = false;
         mOptionalDependentPackages = null;
+        mCertDigests = null;
+    }
+
+    /**
+     * @hide
+     * @param name The lib name.
+     * @param versionMajor The lib major version.
+     * @param type The type of shared library.
+     * @param certDigests The list of certificate digests for this shared library.
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+    public SharedLibraryInfo(String name, long versionMajor, int type, List<String> certDigests) {
+        mPath = null;
+        mPackageName = null;
+        mName = name;
+        mVersion = versionMajor;
+        mType = type;
+        mDeclaringPackage = null;
+        mDependentPackages = null;
+        mDependencies = null;
+        mIsNative = false;
+        mOptionalDependentPackages = null;
+        mCertDigests = certDigests;
     }
 
     /**
@@ -433,6 +462,19 @@ public final class SharedLibraryInfo implements Parcelable {
         return mOptionalDependentPackages;
     }
 
+    /**
+     * Gets the list of certificate digests for the shared library.
+     *
+     * @return The list of certificate digests
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+    public @NonNull List<String> getCertDigests() {
+        if (mCertDigests == null) {
+            return Collections.emptyList();
+        }
+        return mCertDigests;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -463,6 +505,7 @@ public final class SharedLibraryInfo implements Parcelable {
         parcel.writeTypedList(mDependencies);
         parcel.writeBoolean(mIsNative);
         parcel.writeParcelableList(mOptionalDependentPackages, flags);
+        parcel.writeStringList(mCertDigests);
     }
 
     private static String typeToString(int type) {

@@ -68,7 +68,7 @@ static void releaseLayout(jlong ptr) {
 static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int count,
     int contextStart, int contextCount, minikin::Bidi bidiFlags,
     const Paint& paint, const Typeface* typeface) {
-
+    const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(&paint, typeface);
 
     minikin::Layout layout = MinikinUtils::doLayout(&paint, bidiFlags, typeface,
@@ -86,7 +86,7 @@ static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int cou
         overallDescent = std::max(overallDescent, extent.descent);
     }
 
-    if (text_feature::typeface_redesign()) {
+    if (text_feature::typeface_redesign_readonly()) {
         uint32_t runCount = layout.getFontRunCount();
 
         std::unordered_map<minikin::FakedFont, uint32_t, FakedFontKey> fakedToFontIds;
@@ -103,8 +103,16 @@ static jlong shapeTextRun(const uint16_t* text, int textSize, int start, int cou
                 fontId = it->second;  // We've seen it.
             } else {
                 fontId = fonts.size();  // This is new to us. Create new one.
-                std::shared_ptr<minikin::Font> font = std::make_shared<minikin::Font>(
-                        fakedFont.font, fakedFont.fakery.variationSettings());
+                std::shared_ptr<minikin::Font> font;
+                if (resolvedFace->fIsVariationInstance) {
+                    // The optimization for target SDK 35 or before because the variation instance
+                    // is already created and no runtime variation resolution happens on such
+                    // environment.
+                    font = fakedFont.font;
+                } else {
+                    font = std::make_shared<minikin::Font>(fakedFont.font,
+                                                           fakedFont.fakery.variationSettings());
+                }
                 fonts.push_back(reinterpret_cast<jlong>(new FontWrapper(std::move(font))));
                 fakedToFontIds.insert(std::make_pair(fakedFont, fontId));
             }
@@ -229,7 +237,7 @@ float findValueFromVariationSettings(const minikin::FontFakery& fakery, minikin:
 // CriticalNative
 static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    if (text_feature::typeface_redesign()) {
+    if (text_feature::typeface_redesign_readonly()) {
         float value =
                 findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_wght);
         return std::isnan(value) ? NO_OVERRIDE : value;
@@ -241,7 +249,7 @@ static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlon
 // CriticalNative
 static jfloat TextShaper_Result_getItalicOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    if (text_feature::typeface_redesign()) {
+    if (text_feature::typeface_redesign_readonly()) {
         float value =
                 findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_ital);
         return std::isnan(value) ? NO_OVERRIDE : value;

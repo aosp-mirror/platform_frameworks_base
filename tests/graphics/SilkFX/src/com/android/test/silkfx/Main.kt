@@ -72,6 +72,7 @@ class Main : Activity() {
         super.onCreate(savedInstanceState)
 
         val list = ExpandableListView(this)
+        list.setFitsSystemWindows(true)
 
         setContentView(list)
 

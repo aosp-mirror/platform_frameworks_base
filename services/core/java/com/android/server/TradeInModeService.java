@@ -110,6 +110,8 @@ public final class TradeInModeService extends SystemService {
                     stopTradeInMode();
                 } else {
                     watchForSetupCompletion();
+                    watchForNetworkChange();
+                    watchForAccountsCreated();
                 }
             }
         }

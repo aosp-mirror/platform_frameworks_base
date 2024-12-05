@@ -125,18 +125,18 @@
     <string name="select_text" msgid="5139083974039906583">"선택"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"스크린샷"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"브라우저에서 열기"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"앱에서 열기"</string>
     <string name="new_window_text" msgid="6318648868380652280">"새 창"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"창 관리"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"가로세로 비율 변경"</string>
     <string name="close_text" msgid="4986518933445178928">"닫기"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"메뉴 닫기"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"메뉴 열기"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"화면 최대화"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"화면 분할"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"크기 조절"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"앱을 여기로 이동할 수 없음"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_button_text (559492223133829481) -->
-    <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_restore_button_text (4900114367354709257) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"몰입형"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"복원"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"최대화하기"</string>
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"복원"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"왼쪽으로 맞추기"</string>
@@ -146,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"앱에서"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"브라우저에서"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"확인"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"이 브라우저에서 앱을 빠르게 여세요."</string>
 </resources>

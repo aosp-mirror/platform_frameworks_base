@@ -41,7 +41,6 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -50,8 +49,6 @@ import android.system.StructStat;
 import android.util.CloseGuard;
 import android.util.Log;
 import android.util.Slog;
-
-import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.system.VMRuntime;
 
@@ -1254,13 +1251,8 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    @RavenwoodReplace
     private static boolean isAtLeastQ() {
         return (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q);
-    }
-
-    private static boolean isAtLeastQ$ravenwood() {
-        return RavenwoodEnvironment.workaround().isTargetSdkAtLeastQ();
     }
 
     private static int ifAtLeastQ(int value) {

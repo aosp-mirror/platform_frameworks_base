@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.icon
 
 import android.app.Notification
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.contentDescForNotification
@@ -26,19 +25,19 @@ import javax.inject.Inject
 
 /** Testable wrapper around Context. */
 class IconBuilder @Inject constructor(private val context: Context) {
-    fun createIconView(entry: NotificationEntry): StatusBarIconView {
+    @JvmOverloads
+    fun createIconView(
+        entry: NotificationEntry,
+        context: Context = this.context,
+    ): StatusBarIconView {
         return StatusBarIconView(
             context,
             "${entry.sbn.packageName}/0x${Integer.toHexString(entry.sbn.id)}",
-            entry.sbn
+            entry.sbn,
         )
     }
 
     fun getIconContentDescription(n: Notification): CharSequence {
         return contentDescForNotification(context, n)
-    }
-
-    fun getAppIcon(n: Notification): Drawable {
-        return n.loadHeaderAppIcon(context)
     }
 }

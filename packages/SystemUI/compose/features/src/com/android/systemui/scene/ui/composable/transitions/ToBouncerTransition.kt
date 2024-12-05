@@ -28,8 +28,9 @@ private const val TO_BOUNCER_SWIPE_DISTANCE_FRACTION = 0.5f
 fun TransitionBuilder.toBouncerTransition() {
     spec = tween(durationMillis = 500)
 
-    distance = UserActionDistance { fromSceneSize, _ ->
-        fromSceneSize.height * TO_BOUNCER_SWIPE_DISTANCE_FRACTION
+    distance = UserActionDistance { fromContent, _, _ ->
+        val fromContentSize = checkNotNull(fromContent.targetSize())
+        fromContentSize.height * TO_BOUNCER_SWIPE_DISTANCE_FRACTION
     }
 
     translate(Bouncer.Elements.Content, y = 300.dp)

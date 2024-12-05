@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -146,6 +147,29 @@ class SystemRequestObserverTest {
         systemRequestObserver.requestDisplayModes(mockToken, DISPLAY_ID, null)
 
         verify(mockToken).unlinkToDeath(any(), eq(0))
+    }
+
+    @Test
+    fun testTokenUnlinkToDeath_noVotes() {
+        val systemRequestObserver = SystemRequestObserver(storage)
+
+        systemRequestObserver.requestDisplayModes(mockToken, DISPLAY_ID, null)
+
+        verify(mockToken, never()).unlinkToDeath(any(), eq(0))
+    }
+
+    @Test
+    fun testTokenUnlinkToDeath_removedVotes() {
+        val systemRequestObserver = SystemRequestObserver(storage)
+        val requestedModes = intArrayOf(1, 2, 3)
+
+        systemRequestObserver.requestDisplayModes(mockToken, DISPLAY_ID, requestedModes)
+        systemRequestObserver.requestDisplayModes(mockToken, DISPLAY_ID, null)
+        clearInvocations(mockToken)
+
+        systemRequestObserver.requestDisplayModes(mockToken, DISPLAY_ID, null)
+
+        verify(mockToken, never()).unlinkToDeath(any(), eq(0))
     }
 
     @Test

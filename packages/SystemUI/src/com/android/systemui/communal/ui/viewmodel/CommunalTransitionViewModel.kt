@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransit
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -60,7 +62,7 @@ constructor(
     glanceableHubToDreamTransitionViewModel: GlanceableHubToDreamingTransitionViewModel,
     communalInteractor: CommunalInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
     /**
      * Snaps to [CommunalScenes.Communal], showing the glanceable hub immediately without any
@@ -89,7 +91,7 @@ constructor(
         keyguardTransitionInteractor
             .transition(
                 edge = Edge.create(from = Scenes.Communal),
-                edgeWithoutSceneContainer = Edge.create(from = KeyguardState.GLANCEABLE_HUB)
+                edgeWithoutSceneContainer = Edge.create(from = KeyguardState.GLANCEABLE_HUB),
             )
             .filter {
                 it.to == KeyguardState.OCCLUDED &&
@@ -114,21 +116,24 @@ constructor(
                     // from
                     // the hub, then pressing power twice to go back to the lock screen.
                     communalSceneInteractor.isCommunalVisible,
-                    merge(
-                            lockscreenToGlanceableHubTransitionViewModel.showUmo,
-                            glanceableHubToLockscreenTransitionViewModel.showUmo,
-                            dreamToGlanceableHubTransitionViewModel.showUmo,
-                            glanceableHubToDreamTransitionViewModel.showUmo,
-                            showUmoFromOccludedToGlanceableHub,
-                            showUmoFromGlanceableHubToOccluded,
-                        )
-                        .onStart { emit(false) }
-                )
+                    // TODO(b/378942852): polish UMO transitions when scene container is enabled
+                    if (SceneContainerFlag.isEnabled) flowOf(true)
+                    else
+                        merge(
+                                lockscreenToGlanceableHubTransitionViewModel.showUmo,
+                                glanceableHubToLockscreenTransitionViewModel.showUmo,
+                                dreamToGlanceableHubTransitionViewModel.showUmo,
+                                glanceableHubToDreamTransitionViewModel.showUmo,
+                                showUmoFromOccludedToGlanceableHub,
+                                showUmoFromGlanceableHubToOccluded,
+                            )
+                            .onStart { emit(false) },
+                ),
             )
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = false,
             )
 
     /** Whether to show communal when exiting the occluded state. */
@@ -145,8 +150,7 @@ constructor(
     val recentsBackgroundColor: Flow<Color?> =
         combine(showCommunalFromOccluded, communalColors.backgroundColor) {
             showCommunalFromOccluded,
-            backgroundColor,
-            ->
+            backgroundColor ->
             if (showCommunalFromOccluded) {
                 backgroundColor
             } else {

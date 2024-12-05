@@ -330,6 +330,36 @@ public class FrameworkParsingPackageUtils {
     }
 
     /**
+     * Check if a package is compatible with this platform with regards to its
+     * its minSdkVersionFull.
+     *
+     * @param minSdkVersionFullString    A string representation of a major.minor version,
+     *                                   e.g. "12.34"
+     * @param platformMinSdkVersionFull The major and minor version of the platform, i.e. the value
+     *                                  of Build.VERSION.SDK_INT_FULL
+     * @param input                     A ParseInput object to report success or failure
+     */
+    public static ParseResult<Void> verifyMinSdkVersionFull(@NonNull String minSdkVersionFullString,
+            int platformMinSdkVersionFull, @NonNull ParseInput input) {
+        int minSdkVersionFull;
+        try {
+            minSdkVersionFull = Build.parseFullVersion(minSdkVersionFullString);
+        } catch (IllegalStateException e) {
+            return input.error(PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                    e.getMessage());
+        }
+        if (minSdkVersionFull <= platformMinSdkVersionFull) {
+            return input.success(null);
+        }
+        return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK,
+                "Requires newer sdk version "
+                + Build.fullVersionToString(minSdkVersionFull)
+                + " (current version is "
+                + Build.fullVersionToString(platformMinSdkVersionFull)
+                + ")");
+    }
+
+    /**
      * Computes the targetSdkVersion to use at runtime. If the package is not compatible with this
      * platform, populates {@code outError[0]} with an error message.
      * <p>

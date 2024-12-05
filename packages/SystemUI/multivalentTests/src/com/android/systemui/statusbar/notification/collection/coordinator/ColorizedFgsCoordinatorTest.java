@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
@@ -24,12 +25,18 @@ import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,11 +45,14 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -134,6 +144,60 @@ public class ColorizedFgsCoordinatorTest extends SysuiTestCase {
 
         // THEN the entry is NOT in the fgs section
         assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
+    public void testIncludePromotedOngoingInSection_flagEnabled() {
+        // GIVEN the notification has FLAG_PROMOTED_ONGOING
+        mEntryBuilder.setFlag(mContext, FLAG_PROMOTED_ONGOING, true);
+
+        // THEN the entry is in the fgs section
+        assertTrue(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    @DisableFlags(PromotedNotificationUi.FLAG_NAME)
+    public void testDiscludePromotedOngoingInSection_flagDisabled() {
+        // GIVEN the notification has FLAG_PROMOTED_ONGOING
+        mEntryBuilder.setFlag(mContext, FLAG_PROMOTED_ONGOING, true);
+
+        // THEN the entry is NOT in the fgs section
+        assertFalse(mFgsSection.isInSection(mEntryBuilder.build()));
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
+    public void promoterSelectsPromotedOngoing_flagEnabled() {
+        ArgumentCaptor<NotifPromoter> captor = ArgumentCaptor.forClass(NotifPromoter.class);
+        verify(mNotifPipeline).addPromoter(captor.capture());
+        NotifPromoter promoter = captor.getValue();
+
+        // GIVEN the notification has FLAG_PROMOTED_ONGOING
+        mEntryBuilder.setFlag(mContext, FLAG_PROMOTED_ONGOING, true);
+
+        // THEN the entry is promoted to top level
+        assertTrue(promoter.shouldPromoteToTopLevel(mEntryBuilder.build()));
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
+    public void promoterIgnoresNonPromotedOngoing_flagEnabled() {
+        ArgumentCaptor<NotifPromoter> captor = ArgumentCaptor.forClass(NotifPromoter.class);
+        verify(mNotifPipeline).addPromoter(captor.capture());
+        NotifPromoter promoter = captor.getValue();
+
+        // GIVEN the notification does not have FLAG_PROMOTED_ONGOING
+        mEntryBuilder.setFlag(mContext, FLAG_PROMOTED_ONGOING, false);
+
+        // THEN the entry is NOT promoted to top level
+        assertFalse(promoter.shouldPromoteToTopLevel(mEntryBuilder.build()));
+    }
+
+    @Test
+    @DisableFlags(PromotedNotificationUi.FLAG_NAME)
+    public void noPromoterAdded_flagDisabled() {
+        verify(mNotifPipeline, never()).addPromoter(any());
     }
 
     private Notification.CallStyle makeCallStyle() {

@@ -81,6 +81,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadHardwareStateNotificationsEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_SYSTEM_GESTURES),
+                        (reason) -> updateTouchpadSystemGesturesEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
                         (reason) -> updateShowTouches()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_LOCATION),
@@ -117,7 +119,10 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_STROKE_STYLE),
                         (reason) -> updatePointerStrokeStyleFromSettings()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SCALE),
-                        (reason) -> updatePointerScaleFromSettings()));
+                        (reason) -> updatePointerScaleFromSettings()),
+                Map.entry(Settings.System.getUriFor(
+                                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION),
+                        (reason) -> updateTouchpadThreeFingerTapShortcutEnabled()));
     }
 
     /**
@@ -203,6 +208,15 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadRightClickZoneEnabled() {
         mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
+    }
+
+    private void updateTouchpadThreeFingerTapShortcutEnabled() {
+        mNative.setTouchpadThreeFingerTapShortcutEnabled(
+                InputSettings.useTouchpadThreeFingerTapShortcut(mContext));
+    }
+
+    private void updateTouchpadSystemGesturesEnabled() {
+        mNative.setTouchpadSystemGesturesEnabled(InputSettings.useTouchpadSystemGestures(mContext));
     }
 
     private void updateShowTouches() {

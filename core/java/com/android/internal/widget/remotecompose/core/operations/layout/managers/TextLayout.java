@@ -18,6 +18,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -31,11 +34,13 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Text component, referencing a text id */
-public class TextLayout extends LayoutManager implements ComponentStartOperation, VariableSupport {
+public class TextLayout extends LayoutManager
+        implements ComponentStartOperation, VariableSupport, AccessibleComponent {
 
     private static final boolean DEBUG = false;
     private int mTextId = -1;
@@ -44,23 +49,36 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     private int mFontStyle = 0;
     private float mFontWeight = 400f;
     private int mFontFamilyId = -1;
+    private int mTextAlign = -1;
 
     private int mType = -1;
     private float mTextX;
     private float mTextY;
+    private float mTextW = -1;
+    private float mTextH = -1;
 
-    private String mCachedString = "";
+    @Nullable private String mCachedString = "";
+
+    @Nullable
+    @Override
+    public Integer getTextId() {
+        return mTextId;
+    }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (mTextId != -1) {
             context.listensTo(mTextId, this);
         }
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
-        mCachedString = context.getText(mTextId);
+    public void updateVariables(@NonNull RemoteContext context) {
+        String cachedString = context.getText(mTextId);
+        if (cachedString != null && cachedString.equalsIgnoreCase(mCachedString)) {
+            return;
+        }
+        mCachedString = cachedString;
         if (mType == -1) {
             if (mFontFamilyId != -1) {
                 String fontFamily = context.getText(mFontFamilyId);
@@ -80,12 +98,20 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                 mType = 0;
             }
         }
-        mNeedsMeasure = true;
-        needsRepaint();
+        mTextW = -1;
+        mTextH = -1;
+
+        if (mHorizontalScrollDelegate != null) {
+            mHorizontalScrollDelegate.reset();
+        }
+        if (mVerticalScrollDelegate != null) {
+            mVerticalScrollDelegate.reset();
+        }
+        invalidateMeasure();
     }
 
     public TextLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -97,7 +123,8 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
             float fontSize,
             int fontStyle,
             float fontWeight,
-            int fontFamilyId) {
+            int fontFamilyId,
+            int textAlign) {
         super(parent, componentId, animationId, x, y, width, height);
         mTextId = textId;
         mColor = color;
@@ -105,10 +132,11 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         mFontStyle = fontStyle;
         mFontWeight = fontWeight;
         mFontFamilyId = fontFamilyId;
+        mTextAlign = textAlign;
     }
 
     public TextLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int textId,
@@ -116,7 +144,8 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
             float fontSize,
             int fontStyle,
             float fontWeight,
-            int fontFamilyId) {
+            int fontFamilyId,
+            int textAlign) {
         this(
                 parent,
                 componentId,
@@ -130,13 +159,14 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                 fontSize,
                 fontStyle,
                 fontWeight,
-                fontFamilyId);
+                fontFamilyId,
+                textAlign);
     }
 
-    public PaintBundle mPaint = new PaintBundle();
+    @NonNull public PaintBundle mPaint = new PaintBundle();
 
     @Override
-    public void paintingComponent(PaintContext context) {
+    public void paintingComponent(@NonNull PaintContext context) {
         context.save();
         context.translate(mX, mY);
         mComponentModifiers.paint(context);
@@ -154,8 +184,23 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         mPaint.setTextSize(mFontSize);
         mPaint.setTextStyle(mType, (int) mFontWeight, mFontStyle == 1);
         context.applyPaint(mPaint);
+        if (mCachedString == null) {
+            return;
+        }
         int length = mCachedString.length();
-        context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+        if (mTextW > mWidth) {
+            context.save();
+            context.clipRect(
+                    mPaddingLeft,
+                    mPaddingTop,
+                    mWidth - mPaddingLeft - mPaddingRight,
+                    mHeight - mPaddingTop - mPaddingBottom);
+            context.translate(getScrollX(), getScrollY());
+            context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+            context.restore();
+        } else {
+            context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
+        }
         if (DEBUG) {
             mPaint.setStyle(PaintBundle.STYLE_FILL_AND_STROKE);
             mPaint.setColor(1f, 1F, 1F, 1F);
@@ -176,6 +221,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         context.restore();
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "TEXT_LAYOUT ["
@@ -194,13 +240,14 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                 + mVisibility;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "TEXT_LAYOUT";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent,
                 getSerializedName()
@@ -228,7 +275,13 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
 
     @Override
     public void computeWrapSize(
-            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
+            @NonNull PaintContext context,
+            float maxWidth,
+            float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
+            @NonNull MeasurePass measure,
+            @NonNull Size size) {
         context.savePaint();
         mPaint.reset();
         mPaint.setTextSize(mFontSize);
@@ -236,26 +289,52 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         context.applyPaint(mPaint);
         float[] bounds = new float[4];
         int flags = PaintContext.TEXT_MEASURE_FONT_HEIGHT;
+        if (mCachedString == null) {
+            return;
+        }
         context.getTextBounds(mTextId, 0, mCachedString.length(), flags, bounds);
         context.restorePaint();
         float w = bounds[2] - bounds[0];
         float h = bounds[3] - bounds[1];
-        size.setWidth(w);
+        size.setWidth(Math.min(maxWidth, w));
         mTextX = -bounds[0];
-        size.setHeight(h);
+        size.setHeight(Math.min(maxHeight, h));
         mTextY = -bounds[1];
+        mTextW = w;
+        mTextH = h;
     }
 
+    @Override
+    public float intrinsicHeight(@Nullable RemoteContext context) {
+        return mTextH;
+    }
+
+    @Override
+    public float intrinsicWidth(@Nullable RemoteContext context) {
+        return mTextW;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "TextLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_TEXT;
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int componentId,
             int animationId,
             int textId,
@@ -263,7 +342,8 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
             float fontSize,
             int fontStyle,
             float fontWeight,
-            int fontFamilyId) {
+            int fontFamilyId,
+            int textAlign) {
         buffer.start(id());
         buffer.writeInt(componentId);
         buffer.writeInt(animationId);
@@ -273,9 +353,16 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         buffer.writeInt(fontStyle);
         buffer.writeFloat(fontWeight);
         buffer.writeInt(fontFamilyId);
+        buffer.writeInt(textAlign);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         int textId = buffer.readInt();
@@ -284,6 +371,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         int fontStyle = buffer.readInt();
         float fontWeight = buffer.readFloat();
         int fontFamilyId = buffer.readInt();
+        int textAlign = buffer.readInt();
         operations.add(
                 new TextLayout(
                         null,
@@ -294,10 +382,16 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                         fontSize,
                         fontStyle,
                         fontWeight,
-                        fontFamilyId));
+                        fontFamilyId,
+                        textAlign));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Text layout implementation.\n\n")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
@@ -313,7 +407,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mComponentId,
@@ -323,6 +417,7 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                 mFontSize,
                 mFontStyle,
                 mFontWeight,
-                mFontFamilyId);
+                mFontFamilyId,
+                mTextAlign);
     }
 }

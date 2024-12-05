@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.operations.Utils.floatToString;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -50,14 +52,14 @@ public class DrawTweenPath extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mOutTween = Float.isNaN(mTween) ? context.getFloat(Utils.idFromNan(mTween)) : mTween;
         mOutStart = Float.isNaN(mStart) ? context.getFloat(Utils.idFromNan(mStart)) : mStart;
         mOutStop = Float.isNaN(mStop) ? context.getFloat(Utils.idFromNan(mStop)) : mStop;
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mTween)) {
             context.listensTo(Utils.idFromNan(mTween), this);
         }
@@ -70,10 +72,11 @@ public class DrawTweenPath extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mPath1Id, mPath2Id, mTween, mStart, mStop);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DrawTweenPath "
@@ -89,7 +92,13 @@ public class DrawTweenPath extends PaintOperation implements VariableSupport {
                 + floatToString(mStop, mOutStop);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int path1Id = buffer.readInt();
         int path2Id = buffer.readInt();
         float tween = buffer.readFloat();
@@ -99,16 +108,32 @@ public class DrawTweenPath extends PaintOperation implements VariableSupport {
         operations.add(op);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "DrawTweenPath";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.DRAW_TWEEN_PATH;
     }
 
     public static void apply(
-            WireBuffer buffer, int path1Id, int path2Id, float tween, float start, float stop) {
+            @NonNull WireBuffer buffer,
+            int path1Id,
+            int path2Id,
+            float tween,
+            float start,
+            float stop) {
         buffer.start(OP_CODE);
         buffer.writeInt(path1Id);
         buffer.writeInt(path2Id);
@@ -117,7 +142,12 @@ public class DrawTweenPath extends PaintOperation implements VariableSupport {
         buffer.writeFloat(stop);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw text along path object")
                 .field(DocumentedOperation.INT, "pathId1", "id of path 1")
@@ -128,7 +158,7 @@ public class DrawTweenPath extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawTweenPath(mPath1Id, mPath2Id, mOutTween, mOutStart, mOutStop);
     }
 }

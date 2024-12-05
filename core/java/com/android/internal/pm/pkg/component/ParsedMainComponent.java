@@ -45,4 +45,9 @@ public interface ParsedMainComponent extends ParsedComponent {
 
     @Nullable
     String getSplitName();
+
+    /**
+     * Returns the intent matching flags.
+     */
+    int getIntentMatchingFlags();
 }

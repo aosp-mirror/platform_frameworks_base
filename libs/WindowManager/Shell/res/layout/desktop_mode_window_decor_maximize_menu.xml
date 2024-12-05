@@ -113,7 +113,7 @@
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="41dp"
                     android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                    android:layout_marginRight="4dp"
+                    android:layout_marginEnd="4dp"
                     android:background="@drawable/desktop_mode_maximize_menu_button_background"
                     android:importantForAccessibility="yes"
                     android:contentDescription="@string/desktop_mode_maximize_menu_snap_left_button_text"

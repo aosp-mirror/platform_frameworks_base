@@ -24,9 +24,10 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.DesktopTasksController
-import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.transition.Transitions
@@ -36,6 +37,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -50,7 +52,8 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
     private val syncQueueMock: SyncTransactionQueue = mock()
     private val transitionsMock: Transitions = mock()
     private val shellTaskOrganizerMock: ShellTaskOrganizer = mock()
-    private val desktopRepository: DesktopRepository = mock()
+    private val userRepositories: DesktopUserRepositories = mock()
+    private val desktopModeEventLogger: DesktopModeEventLogger = mock()
     private val toggleResizeDesktopTaskTransitionHandlerMock:
         ToggleResizeDesktopTaskTransitionHandler =
         mock()
@@ -72,7 +75,8 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
                 shellTaskOrganizerMock,
                 toggleResizeDesktopTaskTransitionHandlerMock,
                 returnToDragStartAnimatorMock,
-                desktopRepository,
+                userRepositories,
+                desktopModeEventLogger,
             )
         whenever(contextMock.createContextAsUser(any(), any())).thenReturn(contextMock)
     }
@@ -126,7 +130,8 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
         )
         desktopTilingDecorViewModel.moveTaskToFrontIfTiled(task1)
 
-        verify(desktopTilingDecoration, times(1)).moveTiledPairToFront(any())
+        verify(desktopTilingDecoration, times(1))
+            .moveTiledPairToFront(any(), isTaskFocused = eq(true))
     }
 
     @Test
@@ -145,7 +150,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
     }
 
     @Test
-    fun userChange_starting_allTilingSessionsShouldBeDestroyed() {
+    fun onUserChange_allTilingSessionsShouldBeDestroyed() {
         desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
             1,
             desktopTilingDecoration,
@@ -157,7 +162,29 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
 
         desktopTilingDecorViewModel.onUserChange()
 
-        verify(desktopTilingDecoration, times(2)).onUserChange()
+        verify(desktopTilingDecoration, times(2)).resetTilingSession()
+    }
+
+    @Test
+    fun displayOrientationChange_tilingForDisplayShouldBeDestroyed() {
+        desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
+            1,
+            desktopTilingDecoration,
+        )
+        desktopTilingDecorViewModel.tilingTransitionHandlerByDisplayId.put(
+            2,
+            desktopTilingDecoration,
+        )
+
+        desktopTilingDecorViewModel.onDisplayChange(1, 1, 2, null, null)
+
+        verify(desktopTilingDecoration, times(1)).resetTilingSession()
+        verify(displayControllerMock, times(1))
+            .addDisplayChangingController(eq(desktopTilingDecorViewModel))
+
+        desktopTilingDecorViewModel.onDisplayChange(1, 1, 3, null, null)
+        // No extra calls after 180 degree change.
+        verify(desktopTilingDecoration, times(1)).resetTilingSession()
     }
 
     companion object {

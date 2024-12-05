@@ -49,9 +49,10 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.RingerModeLiveData
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.concurrency.FakeThreadFactory
+import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.time.fakeSystemClock
 import com.android.systemui.volume.data.repository.audioRepository
-import com.android.systemui.volume.domain.interactor.audioSharingInteractor
+import com.android.systemui.volume.domain.interactor.FakeAudioSharingInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -76,6 +77,9 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
     private val kosmos: Kosmos = testKosmos()
     private val audioManager: AudioManager = mock {}
     private val callbacks: VolumeDialogController.Callbacks = mock {}
+    private val javaAdapter: JavaAdapter = JavaAdapter(kosmos.testScope)
+    private val fakeAudioSharingInteractor: FakeAudioSharingInteractor =
+        FakeAudioSharingInteractor()
 
     private lateinit var threadFactory: FakeThreadFactory
     private lateinit var underTest: VolumeDialogControllerImpl
@@ -87,6 +91,8 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
             threadFactory =
                 FakeThreadFactory(FakeExecutor(fakeSystemClock)).apply { setLooper(looper) }
             broadcastDispatcherContext = testableContext
+            fakeAudioSharingInteractor.setAudioSharingVolumeBarAvailable(true)
+
             underTest =
                 VolumeDialogControllerImpl(
                         applicationContext,
@@ -108,7 +114,8 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
                         activityManager,
                         mock { on { userContext }.thenReturn(applicationContext) },
                         dumpManager,
-                        audioSharingInteractor,
+                        fakeAudioSharingInteractor,
+                        javaAdapter,
                         mock {},
                     )
                     .apply {
@@ -129,6 +136,7 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
                     },
                 )
                 testableLooper.processAllMessages()
+                testScheduler.advanceUntilIdle()
 
                 verify(callbacks) { 1 * { onStateChanged(any()) } }
             }
@@ -163,6 +171,7 @@ class VolumeDialogControllerImplTestKt : SysuiTestCase() {
                 emitVolumeChange(AudioManager.STREAM_SYSTEM, AudioManager.FLAG_SHOW_UI)
                 runCurrent()
                 TestableLooper.get(this@VolumeDialogControllerImplTestKt).processAllMessages()
+                testScheduler.advanceUntilIdle()
 
                 verify(callbacks) { 1 * { onShowRequested(any(), any(), any()) } }
             }

@@ -17,6 +17,7 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import android.app.StatusBarManager.SESSION_KEYGUARD
+import com.android.app.tracing.coroutines.asyncTraced as async
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
@@ -39,9 +40,9 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.asyncTraced as async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -65,7 +66,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val sessionTracker: SessionTracker,
     sceneBackInteractor: SceneBackInteractor,
-    private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
 ) {
     private val _onIncorrectBouncerInput = MutableSharedFlow<Unit>()
     val onIncorrectBouncerInput: SharedFlow<Unit> = _onIncorrectBouncerInput

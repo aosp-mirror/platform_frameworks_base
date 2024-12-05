@@ -47,20 +47,14 @@ class CommunalMetricsLoggerTest : SysuiTestCase() {
 
     @Test
     fun logAddWidget_componentNotLoggable_doNotLog() {
-        underTest.logAddWidget(
-            componentName = "com.green.package/my_test_widget",
-            rank = 1,
-        )
+        underTest.logAddWidget(componentName = "com.green.package/my_test_widget", rank = 1)
         verify(statsLogProxy, never())
-            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt())
+            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt(), anyInt())
     }
 
     @Test
     fun logAddWidget_componentLoggable_logAddEvent() {
-        underTest.logAddWidget(
-            componentName = "com.blue.package/my_test_widget",
-            rank = 1,
-        )
+        underTest.logAddWidget(componentName = "com.blue.package/my_test_widget", rank = 1)
         verify(statsLogProxy)
             .writeCommunalHubWidgetEventReported(
                 SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__ADD,
@@ -71,20 +65,14 @@ class CommunalMetricsLoggerTest : SysuiTestCase() {
 
     @Test
     fun logRemoveWidget_componentNotLoggable_doNotLog() {
-        underTest.logRemoveWidget(
-            componentName = "com.yellow.package/my_test_widget",
-            rank = 2,
-        )
+        underTest.logRemoveWidget(componentName = "com.yellow.package/my_test_widget", rank = 2)
         verify(statsLogProxy, never())
-            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt())
+            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt(), anyInt())
     }
 
     @Test
     fun logRemoveWidget_componentLoggable_logRemoveEvent() {
-        underTest.logRemoveWidget(
-            componentName = "com.red.package/my_test_widget",
-            rank = 2,
-        )
+        underTest.logRemoveWidget(componentName = "com.red.package/my_test_widget", rank = 2)
         verify(statsLogProxy)
             .writeCommunalHubWidgetEventReported(
                 SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__REMOVE,
@@ -95,20 +83,14 @@ class CommunalMetricsLoggerTest : SysuiTestCase() {
 
     @Test
     fun logTapWidget_componentNotLoggable_doNotLog() {
-        underTest.logTapWidget(
-            componentName = "com.yellow.package/my_test_widget",
-            rank = 2,
-        )
+        underTest.logTapWidget(componentName = "com.yellow.package/my_test_widget", rank = 2)
         verify(statsLogProxy, never())
-            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt())
+            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt(), anyInt())
     }
 
     @Test
     fun logTapWidget_componentLoggable_logRemoveEvent() {
-        underTest.logTapWidget(
-            componentName = "com.red.package/my_test_widget",
-            rank = 2,
-        )
+        underTest.logTapWidget(componentName = "com.red.package/my_test_widget", rank = 2)
         verify(statsLogProxy)
             .writeCommunalHubWidgetEventReported(
                 SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__TAP,
@@ -139,5 +121,44 @@ class CommunalMetricsLoggerTest : SysuiTestCase() {
                 widgetCount = 4,
             )
         assertThat(statsEvents).hasSize(1)
+    }
+
+    @Test
+    fun logResizeWidget_componentNotLoggable_doNotLog() {
+        underTest.logResizeWidget(
+            componentName = "com.green.package/my_test_widget",
+            rank = 1,
+            spanY = 2,
+        )
+        verify(statsLogProxy, never())
+            .writeCommunalHubWidgetEventReported(anyInt(), any(), anyInt(), anyInt())
+    }
+
+    @Test
+    fun logResizeWidget_componentLoggable_logResizeEvent() {
+        underTest.logResizeWidget(
+            componentName = "com.blue.package/my_test_widget",
+            rank = 1,
+            spanY = 2,
+        )
+        verify(statsLogProxy)
+            .writeCommunalHubWidgetEventReported(
+                SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__RESIZE,
+                "com.blue.package/my_test_widget",
+                rank = 1,
+                spanY = 2,
+            )
+    }
+
+    @Test
+    fun logResizeWidget_defaultSpanY_usesDefaultValue() {
+        underTest.logResizeWidget(componentName = "com.blue.package/my_test_widget", rank = 1)
+        verify(statsLogProxy)
+            .writeCommunalHubWidgetEventReported(
+                SysUiStatsLog.COMMUNAL_HUB_WIDGET_EVENT_REPORTED__ACTION__RESIZE,
+                "com.blue.package/my_test_widget",
+                rank = 1,
+                spanY = 0,
+            )
     }
 }

@@ -46,8 +46,9 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 DemotingTestWithoutBugDetector.ISSUE,
                 TestFunctionNameViolationDetector.ISSUE,
                 MissingApacheLicenseDetector.ISSUE,
+                ShadeDisplayAwareDetector.ISSUE,
                 RegisterContentObserverSyncViaSettingsProxyDetector.SYNC_WARNING,
-                RegisterContentObserverViaContentResolverDetector.CONTENT_RESOLVER_ERROR
+                RegisterContentObserverViaContentResolverDetector.CONTENT_RESOLVER_ERROR,
             )
 
     override val api: Int
@@ -60,6 +61,6 @@ class SystemUIIssueRegistry : IssueRegistry() {
         Vendor(
             vendorName = "Android",
             feedbackUrl = "http://b/issues/new?component=78010",
-            contact = "jernej@google.com"
+            contact = "jernej@google.com",
         )
 }

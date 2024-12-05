@@ -19,21 +19,19 @@ package com.android.systemui.qs.tiles.impl.airplane.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [AirplaneModeTileModel] to [QSTileState]. */
 class AirplaneModeMapper
 @Inject
-constructor(
-    @Main private val resources: Resources,
-    val theme: Theme,
-) : QSTileDataToStateMapper<AirplaneModeTileModel> {
+constructor(@ShadeDisplayAware private val resources: Resources, val theme: Theme) :
+    QSTileDataToStateMapper<AirplaneModeTileModel> {
 
     override fun map(config: QSTileConfig, data: AirplaneModeTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -43,16 +41,7 @@ constructor(
                 } else {
                     R.drawable.qs_airplane_icon_off
                 }
-
-            icon = {
-                Icon.Loaded(
-                    resources.getDrawable(
-                        iconRes!!,
-                        theme,
-                    ),
-                    contentDescription = null
-                )
-            }
+            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 secondaryLabel = resources.getStringArray(R.array.tile_states_airplane)[2]
@@ -62,9 +51,6 @@ constructor(
             }
             contentDescription = label
             supportedActions =
-                setOf(
-                    QSTileState.UserAction.CLICK,
-                    QSTileState.UserAction.LONG_CLICK,
-                )
+                setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
         }
 }

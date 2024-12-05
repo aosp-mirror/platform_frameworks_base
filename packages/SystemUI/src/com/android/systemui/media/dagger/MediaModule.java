@@ -27,16 +27,11 @@ import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager;
 import com.android.systemui.media.controls.ui.view.MediaHost;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
-import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
-import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogBuffer;
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogBuffer;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -131,17 +126,5 @@ public interface MediaModule {
     @MediaTttReceiverLogBuffer
     static LogBuffer provideMediaTttReceiverLogBuffer(LogBufferFactory factory) {
         return factory.create("MediaTttReceiver", 20);
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
-            MediaTttFlags mediaTttFlags,
-            Lazy<MediaTttCommandLineHelper> helperLazy) {
-        if (!mediaTttFlags.isMediaTttEnabled()) {
-            return Optional.empty();
-        }
-        return Optional.of(helperLazy.get());
     }
 }

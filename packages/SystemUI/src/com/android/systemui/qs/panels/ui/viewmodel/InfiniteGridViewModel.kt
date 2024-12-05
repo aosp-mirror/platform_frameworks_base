@@ -24,7 +24,7 @@ class InfiniteGridViewModel
 @AssistedInject
 constructor(
     val dynamicIconTilesViewModelFactory: DynamicIconTilesViewModel.Factory,
-    val gridSizeViewModel: QSColumnsViewModel,
+    val columnsWithMediaViewModelFactory: QSColumnsViewModel.Factory,
     val squishinessViewModel: TileSquishinessViewModel,
     private val resetDialogDelegate: QSResetDialogDelegate,
 ) {

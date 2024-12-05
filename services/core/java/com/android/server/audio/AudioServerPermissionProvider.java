@@ -24,8 +24,10 @@ import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_MEDIA_OUTPUT;
 import static android.Manifest.permission.CAPTURE_TUNER_AUDIO_INPUT;
 import static android.Manifest.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT;
+import static android.Manifest.permission.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION;
 import static android.Manifest.permission.MODIFY_AUDIO_ROUTING;
 import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS;
+import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
 import static android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS;
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -37,7 +39,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IntArray;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.media.permission.INativePermissionController;
@@ -82,6 +83,10 @@ public class AudioServerPermissionProvider {
         MONITORED_PERMS[PermissionEnum.CAPTURE_VOICE_COMMUNICATION_OUTPUT] =
                 CAPTURE_VOICE_COMMUNICATION_OUTPUT;
         MONITORED_PERMS[PermissionEnum.BLUETOOTH_CONNECT] = BLUETOOTH_CONNECT;
+        MONITORED_PERMS[PermissionEnum.BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION] =
+                BYPASS_CONCURRENT_RECORD_AUDIO_RESTRICTION;
+        MONITORED_PERMS[PermissionEnum.MODIFY_AUDIO_SETTINGS_PRIVILEGED] =
+                MODIFY_AUDIO_SETTINGS_PRIVILEGED;
     }
 
     private final Object mLock = new Object();

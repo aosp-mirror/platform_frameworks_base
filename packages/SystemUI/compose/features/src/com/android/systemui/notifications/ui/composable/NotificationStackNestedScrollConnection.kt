@@ -18,7 +18,9 @@ package com.android.systemui.notifications.ui.composable
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -30,6 +32,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceAtLeast
+import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController
 import kotlin.math.max
@@ -46,32 +49,35 @@ fun Modifier.stackVerticalOverscroll(
     val screenHeight =
         with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
     val overscrollOffset = remember { Animatable(0f) }
-    val stackNestedScrollConnection = remember {
-        NotificationStackNestedScrollConnection(
-            stackOffset = { overscrollOffset.value },
-            canScrollForward = canScrollForward,
-            onScroll = { offsetAvailable ->
-                coroutineScope.launch {
-                    val maxProgress = screenHeight * 0.2f
-                    val tilt = 3f
-                    var offset =
-                        overscrollOffset.value +
-                            maxProgress * tanh(x = offsetAvailable / (maxProgress * tilt))
-                    offset = max(offset, -1f * maxProgress)
-                    overscrollOffset.snapTo(offset)
-                }
-            },
-            onStop = { velocityAvailable ->
-                coroutineScope.launch {
-                    overscrollOffset.animateTo(
-                        targetValue = 0f,
-                        initialVelocity = velocityAvailable,
-                        animationSpec = tween(),
-                    )
-                }
-            },
-        )
-    }
+    val flingBehavior = ScrollableDefaults.flingBehavior()
+    val stackNestedScrollConnection =
+        remember(flingBehavior) {
+            NotificationStackNestedScrollConnection(
+                stackOffset = { overscrollOffset.value },
+                canScrollForward = canScrollForward,
+                onScroll = { offsetAvailable ->
+                    coroutineScope.launch {
+                        val maxProgress = screenHeight * 0.2f
+                        val tilt = 3f
+                        var offset =
+                            overscrollOffset.value +
+                                maxProgress * tanh(x = offsetAvailable / (maxProgress * tilt))
+                        offset = max(offset, -1f * maxProgress)
+                        overscrollOffset.snapTo(offset)
+                    }
+                },
+                onStop = { velocityAvailable ->
+                    coroutineScope.launch {
+                        overscrollOffset.animateTo(
+                            targetValue = 0f,
+                            initialVelocity = velocityAvailable,
+                            animationSpec = tween(),
+                        )
+                    }
+                },
+                flingBehavior = flingBehavior,
+            )
+        }
 
     return this.then(
         Modifier.nestedScroll(stackNestedScrollConnection).offset {
@@ -86,6 +92,7 @@ fun NotificationStackNestedScrollConnection(
     onStart: (Float) -> Unit = {},
     onScroll: (Float) -> Unit,
     onStop: (Float) -> Unit = {},
+    flingBehavior: FlingBehavior,
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
@@ -106,8 +113,9 @@ fun NotificationStackNestedScrollConnection(
                     return consumed
                 }
 
-                override suspend fun onStop(initialVelocity: Float): Float {
-                    onStop(initialVelocity)
+                override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
+                    val consumedByScroll = flingToScroll(initialVelocity, flingBehavior)
+                    onStop(initialVelocity - consumedByScroll)
                     return initialVelocity
                 }
 

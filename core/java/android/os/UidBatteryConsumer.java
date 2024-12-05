@@ -210,12 +210,6 @@ public final class UidBatteryConsumer extends BatteryConsumer {
             serializer.attribute(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE,
                     packageWithHighestDrain);
         }
-        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND,
-                getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND));
-        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND,
-                getTimeInProcessStateMs(PROCESS_STATE_BACKGROUND));
-        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND_SERVICE,
-                getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE));
         mPowerComponents.writeToXml(serializer);
         serializer.endTag(null, BatteryUsageStats.XML_TAG_UID);
     }
@@ -235,13 +229,6 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
         consumerBuilder.setPackageWithHighestDrain(
                 parser.getAttributeValue(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE));
-        consumerBuilder.setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND,
-                parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND));
-        consumerBuilder.setTimeInProcessStateMs(PROCESS_STATE_BACKGROUND,
-                parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND));
-        consumerBuilder.setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE,
-                parser.getAttributeLong(null,
-                        BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND_SERVICE));
         while (!(eventType == XmlPullParser.END_TAG
                 && parser.getName().equals(BatteryUsageStats.XML_TAG_UID))
                 && eventType != XmlPullParser.END_DOCUMENT) {
@@ -335,7 +322,11 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         /**
          * Sets the duration, in milliseconds, that this UID was active in a particular process
          * state, such as foreground service.
+         *
+         * @deprecated time in process is now derived from the
+         * {@link BatteryConsumer#POWER_COMPONENT_BASE} duration
          */
+        @Deprecated
         @NonNull
         public Builder setTimeInProcessStateMs(@ProcessState int state, long timeInProcessStateMs) {
             Key key = getKey(POWER_COMPONENT_BASE, state);

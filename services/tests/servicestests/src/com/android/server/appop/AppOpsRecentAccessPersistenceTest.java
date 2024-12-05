@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
 import android.os.FileUtils;
@@ -69,6 +70,7 @@ public class AppOpsRecentAccessPersistenceTest {
 
     @Before
     public void setUp() {
+        PropertyInvalidatedCache.disableForTestMode();
         when(mAppOpCheckingService.addAppOpsModeChangedListener(any())).thenReturn(true);
         LocalServices.addService(AppOpsCheckingServiceInterface.class, mAppOpCheckingService);
 

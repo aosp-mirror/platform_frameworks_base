@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** The Locale data collector for per-app language. */
-public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollectorBase {
+public class AppLocaleCollector implements LocaleCollectorBase {
     private static final String TAG = AppLocaleCollector.class.getSimpleName();
     private final Context mContext;
     private final String mAppPackageName;
@@ -167,8 +167,8 @@ public class AppLocaleCollector implements LocalePickerWithRegion.LocaleCollecto
     }
 
     @Override
-    public HashSet<String> getIgnoredLocaleList(boolean translatedOnly) {
-        HashSet<String> langTagsToIgnore = new HashSet<>();
+    public Set<String> getIgnoredLocaleList(boolean translatedOnly) {
+        Set<String> langTagsToIgnore = new HashSet<>();
 
         if (mAppCurrentLocale != null) {
             langTagsToIgnore.add(mAppCurrentLocale.getLocale().toLanguageTag());

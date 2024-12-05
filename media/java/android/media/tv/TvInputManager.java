@@ -27,6 +27,7 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
@@ -760,6 +761,7 @@ public final class TvInputManager {
      * @hide
      */
     public static final int UNKNOWN_CLIENT_PID = -1;
+
     /**
      * An unknown state of the client userId gets from the TvInputManager. Client gets this value
      * when query through {@link #getClientUserId(String sessionId)} fails.
@@ -2526,9 +2528,10 @@ public final class TvInputManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    @SystemApi
     @FlaggedApi(Flags.FLAG_KIDS_MODE_TVDB_SHARING)
-    public int getClientUserId(@NonNull String sessionId) {
+    @RequiresPermission(android.Manifest.permission.SINGLE_USER_TIS_ACCESS)
+    public @UserIdInt int getClientUserId(@NonNull String sessionId) {
         return getClientUserIdInternal(sessionId);
     }
 

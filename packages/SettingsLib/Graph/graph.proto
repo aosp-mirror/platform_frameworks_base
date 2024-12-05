@@ -74,6 +74,13 @@ message PreferenceProto {
   optional ActionTarget action_target = 12;
   // Preference value (if present, it means `persistent` is true).
   optional PreferenceValueProto value = 13;
+  // Intent to show and locate the preference (might have highlight animation on
+  // the preference).
+  optional IntentProto launch_intent = 14;
+  // Descriptor of the preference value.
+  optional PreferenceValueDescriptorProto value_descriptor = 15;
+  // Indicate how sensitive of the preference.
+  optional int32 sensitivity_level = 16;
 
   // Target of an Intent
   message ActionTarget {
@@ -100,7 +107,26 @@ message TextProto {
 message PreferenceValueProto {
   oneof value {
     bool boolean_value = 1;
+    int32 int_value = 2;
   }
+}
+
+// Proto of preference value descriptor.
+message PreferenceValueDescriptorProto {
+  oneof type {
+    bool boolean_type = 1;
+    RangeValueProto range_value = 2;
+  }
+}
+
+// Proto of preference value that is between a range.
+message RangeValueProto {
+  // The lower bound (inclusive) of the range.
+  optional int32 min = 1;
+  // The upper bound (inclusive) of the range.
+  optional int32 max = 2;
+  // The increment step within the range. 0 means unset, which implies step size is 1.
+  optional int32 step = 3;
 }
 
 // Proto of android.content.Intent

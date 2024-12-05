@@ -23,7 +23,6 @@ import static com.android.wm.shell.onehanded.OneHandedState.STATE_ACTIVE;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_ENTERING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_EXITING;
 import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_ONE_HANDED;
 
 import android.annotation.BinderThread;
 import android.content.ComponentName;
@@ -298,7 +297,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mShellController.addConfigurationChangeListener(this);
         mShellController.addKeyguardChangeListener(this);
         mShellController.addUserChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_ONE_HANDED,
+        mShellController.addExternalInterface(IOneHanded.DESCRIPTOR,
                 this::createExternalInterface, this);
     }
 

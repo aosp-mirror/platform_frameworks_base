@@ -21,14 +21,11 @@ import static android.view.SurfaceControl.RefreshRateRange.FLOAT_TOLERANCE;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.hardware.display.DisplayManager;
@@ -36,7 +33,6 @@ import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display.Mode;
 import android.view.Surface;
-import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import androidx.test.filters.SmallTest;
@@ -105,6 +101,8 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), LOW_REFRESH_RATE);
         mDisplayInfo.supportedModes = new Mode[] { hiMode, midMode };
         mDisplayInfo.appsSupportedModes = new Mode[] { hiMode, midMode, lowMode };
+        mDisplayInfo.supportedRefreshRates = new float[] {HI_REFRESH_RATE, MID_REFRESH_RATE,
+                LOW_REFRESH_RATE};
         mDisplayInfo.defaultModeId = HI_MODE_ID;
         mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
     }
@@ -274,7 +272,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
     }
 
     @Test
-    public void testAnimatingAppOverridePreferredModeId() {
+    public void testInsetsAnimationAppOverridePreferredModeId() {
         final WindowState overrideWindow = createWindow("overrideWindow");
         overrideWindow.mAttrs.packageName = "com.android.test";
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
@@ -285,37 +283,16 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
 
-        if (explicitRefreshRateHints()) {
-            return;
-        }
-        overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
-                overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
-        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
+        overrideWindow.notifyInsetsAnimationRunningStateChanged(true);
+        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
         assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
         assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
-
-        // Use default mode if it is animating by shell transition.
-        overrideWindow.mActivityRecord.mSurfaceAnimator.cancelAnimation();
-        registerTestTransitionPlayer();
-        final Transition transition = overrideWindow.mTransitionController.createTransition(
-                WindowManager.TRANSIT_OPEN);
-        transition.collect(overrideWindow.mActivityRecord);
-        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
-
-        // If there will be display size change when switching from preferred mode to default mode,
-        // then keep the current preferred mode during animating.
-        mDisplayInfo = spy(mDisplayInfo);
-        final Mode defaultMode = new Mode(4321 /* width */, 1234 /* height */, LOW_REFRESH_RATE);
-        doReturn(defaultMode).when(mDisplayInfo).getDefaultMode();
-        mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
-        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
     }
 
     @Test
-    public void testAnimatingAppOverridePreferredRefreshRate() {
+    public void testInsetsAnimationAppOverridePreferredRefreshRate() {
         final WindowState overrideWindow = createWindow("overrideWindow");
         overrideWindow.mAttrs.packageName = "com.android.test";
         overrideWindow.mAttrs.preferredRefreshRate = LOW_REFRESH_RATE;
@@ -326,42 +303,12 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
 
-        if (explicitRefreshRateHints()) {
-            return;
-        }
-        overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
-                overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
+        overrideWindow.notifyInsetsAnimationRunningStateChanged(true);
         assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
         assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
         assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
-    }
-
-    @Test
-    public void testAnimatingDenylist() {
-        final WindowState window = createWindow("overrideWindow");
-        window.mAttrs.packageName = "com.android.test";
-        parcelLayoutParams(window);
-        when(mDenylist.isDenylisted("com.android.test")).thenReturn(true);
-        assertEquals(0, mPolicy.getPreferredModeId(window));
-        assertTrue(mPolicy.updateFrameRateVote(window));
-        assertEquals(FRAME_RATE_VOTE_DENY_LIST, window.mFrameRateVote);
-        assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
-        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
-
-        if (explicitRefreshRateHints()) {
-            return;
-        }
-        window.mActivityRecord.mSurfaceAnimator.startAnimation(
-                window.getPendingTransaction(), mock(AnimationAdapter.class),
-                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
-        assertEquals(0, mPolicy.getPreferredModeId(window));
-        assertTrue(mPolicy.updateFrameRateVote(window));
-        assertEquals(FRAME_RATE_VOTE_NONE, window.mFrameRateVote);
-        assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
-        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
     }
 
     @Test

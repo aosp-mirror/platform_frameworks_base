@@ -18,21 +18,32 @@ package com.android.systemui.media.controls.util
 
 import android.content.Context
 import android.media.session.MediaController
-import android.media.session.MediaSession
 import android.media.session.MediaSession.Token
+import android.os.Looper
+import androidx.media3.session.MediaController as Media3Controller
+import androidx.media3.session.SessionToken
 
 class FakeMediaControllerFactory(context: Context) : MediaControllerFactory(context) {
 
     private val mediaControllersForToken = mutableMapOf<Token, MediaController>()
+    private var media3Controller: Media3Controller? = null
 
-    override fun create(token: MediaSession.Token): android.media.session.MediaController {
+    override fun create(token: Token): MediaController {
         if (token !in mediaControllersForToken) {
             super.create(token)
         }
         return mediaControllersForToken[token]!!
     }
 
+    override suspend fun create(token: SessionToken, looper: Looper): Media3Controller {
+        return media3Controller ?: super.create(token, looper)
+    }
+
     fun setControllerForToken(token: Token, mediaController: MediaController) {
         mediaControllersForToken[token] = mediaController
+    }
+
+    fun setMedia3Controller(mediaController: Media3Controller) {
+        media3Controller = mediaController
     }
 }

@@ -27,7 +27,16 @@ import android.os.Parcelable;
 
 import java.util.Objects;
 
-/** A request to execute an app function. */
+/**
+ * A request to execute an app function.
+ *
+ * <p>The {@link ExecuteAppFunctionRequest#getParameters()} contains the parameters for the function
+ * to be executed in a GenericDocument. Structured classes defined in the AppFunction SDK can be
+ * converted into GenericDocuments.
+ *
+ * <p>The {@link ExecuteAppFunctionRequest#getExtras()} provides any extra metadata for the request.
+ * Structured APIs can be exposed in the SDK by packing and unpacking this Bundle.
+ */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public final class ExecuteAppFunctionRequest implements Parcelable {
     @NonNull
@@ -111,8 +120,8 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
      * Returns the function parameters. The key is the parameter name, and the value is the
      * parameter value.
      *
-     * <p>The bundle may have missing parameters. Developers are advised to implement defensive
-     * handling measures.
+     * <p>The {@link GenericDocument} may have missing parameters. Developers are advised to
+     * implement defensive handling measures.
      *
      * @see AppFunctionManager on how to determine the expected parameters.
      */
@@ -125,6 +134,16 @@ public final class ExecuteAppFunctionRequest implements Parcelable {
     @NonNull
     public Bundle getExtras() {
         return mExtras;
+    }
+
+    /**
+     * Returns the size of the request in bytes.
+     *
+     * @hide
+     */
+    public int getRequestDataSize() {
+        return mTargetPackageName.getBytes().length + mFunctionIdentifier.getBytes().length
+                + mParameters.getDataSize() + mExtras.getSize();
     }
 
     @Override

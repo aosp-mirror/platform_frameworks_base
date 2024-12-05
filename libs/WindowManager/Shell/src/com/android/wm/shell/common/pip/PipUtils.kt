@@ -44,7 +44,8 @@ object PipUtils {
     private const val TAG = "PipUtils"
 
     // Minimum difference between two floats (e.g. aspect ratios) to consider them not equal.
-    private const val EPSILON = 1e-7
+    // TODO b/377530560: Restore epsilon once a long term fix is merged for non-config-at-end issue.
+    private const val EPSILON = 0.05f
 
     /**
      * @return the ComponentName and user id of the top non-SystemUI activity in the pinned stack.

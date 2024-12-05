@@ -814,6 +814,11 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private void showUdfpsOverlay(@NonNull UdfpsControllerOverlay overlay) {
         mExecution.assertIsMainThread();
 
+        if (mOverlay != null) {
+            Log.d(TAG, "showUdfpsOverlay | the overlay is already showing");
+            return;
+        }
+
         mOverlay = overlay;
         final int requestReason = overlay.getRequestReason();
         if (requestReason == REASON_AUTH_KEYGUARD
@@ -823,7 +828,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             return;
         }
         if (overlay.show(this, mOverlayParams)) {
-            Log.v(TAG, "showUdfpsOverlay | adding window reason=" + requestReason);
+            Log.d(TAG, "showUdfpsOverlay | adding window reason=" + requestReason);
             mOnFingerDown = false;
             mAttemptedToDismissKeyguard = false;
             mOrientationListener.enable();
@@ -832,7 +837,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         overlay.getRequestId(), mSensorProps.sensorId);
             }
         } else {
-            Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
+            Log.d(TAG, "showUdfpsOverlay | the overlay is already showing");
         }
     }
 

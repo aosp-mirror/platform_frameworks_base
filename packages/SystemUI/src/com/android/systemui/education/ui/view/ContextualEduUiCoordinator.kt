@@ -27,7 +27,13 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.view.accessibility.AccessibilityManager
 import androidx.core.app.NotificationCompat
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
+import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
+import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.contextualeducation.GestureType.HOME
+import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.education.ui.viewmodel.ContextualEduNotificationViewModel
@@ -36,10 +42,13 @@ import com.android.systemui.education.ui.viewmodel.ContextualEduViewModel
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_KEY
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEY
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEYBOARD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A class to show contextual education on UI based on the edu produced from
@@ -59,6 +68,8 @@ constructor(
         private const val CHANNEL_ID = "ContextualEduNotificationChannel"
         private const val TAG = "ContextualEduUiCoordinator"
         private const val NOTIFICATION_ID = 1000
+        private const val TUTORIAL_ACTION: String = "com.android.systemui.action.TOUCHPAD_TUTORIAL"
+        private const val SYSTEMUI_PACKAGE_NAME: String = "com.android.systemui"
     }
 
     @Inject
@@ -107,6 +118,7 @@ constructor(
     }
 
     private fun showDialog(model: ContextualEduToastViewModel) {
+        dialog?.dismiss()
         dialog = createDialog(model)
         dialog?.show()
     }
@@ -124,7 +136,7 @@ constructor(
                 .setSmallIcon(R.drawable.ic_settings)
                 .setContentTitle(model.title)
                 .setContentText(model.message)
-                .setContentIntent(createPendingIntent())
+                .setContentIntent(createPendingIntent(model.gestureType))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .addExtras(extras)
@@ -137,21 +149,37 @@ constructor(
         )
     }
 
-    private fun createPendingIntent(): PendingIntent {
+    private fun createPendingIntent(gestureType: GestureType): PendingIntent {
         val intent =
-            Intent(context, KeyboardTouchpadTutorialActivity::class.java).apply {
-                addCategory(Intent.CATEGORY_DEFAULT)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                putExtra(
-                    INTENT_TUTORIAL_ENTRY_POINT_KEY,
-                    INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU,
-                )
+            when (gestureType) {
+                BACK -> createKeyboardTouchpadTutorialIntent(INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK)
+                HOME -> createKeyboardTouchpadTutorialIntent(INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME)
+                ALL_APPS -> createKeyboardTouchpadTutorialIntent(INTENT_TUTORIAL_SCOPE_KEYBOARD)
+                OVERVIEW -> createTouchpadTutorialIntent()
             }
+
         return PendingIntent.getActivity(
             context,
             /* requestCode= */ 0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE,
+            // FLAG_UPDATE_CURRENT to avoid caching of intent extras and always use latest values
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
+    }
+
+    private fun createKeyboardTouchpadTutorialIntent(tutorialType: String): Intent {
+        return Intent(context, KeyboardTouchpadTutorialActivity::class.java).apply {
+            addCategory(Intent.CATEGORY_DEFAULT)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            putExtra(INTENT_TUTORIAL_SCOPE_KEY, tutorialType)
+            putExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY, INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU)
+        }
+    }
+
+    private fun createTouchpadTutorialIntent(): Intent {
+        return Intent(TUTORIAL_ACTION).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            setPackage(SYSTEMUI_PACKAGE_NAME)
+        }
     }
 }

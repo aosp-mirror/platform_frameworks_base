@@ -62,6 +62,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
@@ -70,8 +71,16 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.SensorProperties;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.face.FaceManager;
+import android.hardware.face.FaceSensorProperties;
+import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.fingerprint.FingerprintManager;
+import android.hardware.fingerprint.FingerprintSensorProperties;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.hardware.keymaster.HardwareAuthenticatorType;
 import android.os.Binder;
 import android.os.Handler;
@@ -84,6 +93,7 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.provider.Settings;
 import android.security.GateKeeper;
 import android.security.KeyStoreAuthorization;
 import android.service.gatekeeper.IGateKeeperService;
@@ -93,6 +103,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -111,6 +122,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -144,6 +156,27 @@ public class BiometricServiceTest {
 
     private static final int SENSOR_ID_FINGERPRINT = 0;
     private static final int SENSOR_ID_FACE = 1;
+    private final ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback.Stub>
+            mFingerprintAuthenticatorRegisteredCallbackCaptor = ArgumentCaptor.forClass(
+            IFingerprintAuthenticatorsRegisteredCallback.Stub.class);
+    private final ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback.Stub>
+            mFaceAuthenticatorRegisteredCallbackCaptor = ArgumentCaptor.forClass(
+            IFaceAuthenticatorsRegisteredCallback.Stub.class);
+    private final ArgumentCaptor<BiometricStateListener> mBiometricStateListenerArgumentCaptor =
+            ArgumentCaptor.forClass(BiometricStateListener.class);
+    private final List<FingerprintSensorPropertiesInternal>
+            mFingerprintSensorPropertiesInternals = List.of(
+                    new FingerprintSensorPropertiesInternal(SENSOR_ID_FINGERPRINT,
+                            SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                            List.of(), FingerprintSensorProperties.TYPE_UNKNOWN,
+                            true /* resetLockoutRequiresHardwareAuthToken */));
+    private final List<FaceSensorPropertiesInternal>
+            mFaceSensorPropertiesInternals = List.of(
+                    new FaceSensorPropertiesInternal(SENSOR_ID_FACE,
+                            SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
+                            List.of(), FaceSensorProperties.TYPE_UNKNOWN,
+                            false /* supportsFaceDetection */, false /* supportsSelfIllumination */,
+                            false /* resetLockoutRequiresChallenge */));
 
     private BiometricService mBiometricService;
 
@@ -192,6 +225,10 @@ public class BiometricServiceTest {
 
     @Mock
     private BiometricNotificationLogger mNotificationLogger;
+    @Mock
+    private FingerprintManager mFingerprintManager;
+    @Mock
+    private FaceManager mFaceManager;
 
     BiometricContextProvider mBiometricContextProvider;
 
@@ -1973,6 +2010,59 @@ public class BiometricServiceTest {
         assertEquals(expectedResult, result);
         verify(mKeyStoreAuthorization).getLastAuthTime(eq(secureUserId),
                 eq(hardwareAuthenticators));
+    }
+
+    @Test
+    public void testMandatoryBiometricsValue_whenParentProfileEnabled() throws RemoteException {
+        final Context context = ApplicationProvider.getApplicationContext();
+        final int profileParentId = context.getContentResolver().getUserId();
+        final int userId = profileParentId + 1;
+        final BiometricService.SettingObserver settingObserver =
+                new BiometricService.SettingObserver(
+                        context, mBiometricHandlerProvider.getBiometricCallbackHandler(),
+                        new ArrayList<>(), mUserManager, mFingerprintManager, mFaceManager);
+
+        verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
+                mFingerprintAuthenticatorRegisteredCallbackCaptor.capture());
+        verify(mFaceManager).addAuthenticatorsRegisteredCallback(
+                mFaceAuthenticatorRegisteredCallbackCaptor.capture());
+
+        mFingerprintAuthenticatorRegisteredCallbackCaptor.getValue().onAllAuthenticatorsRegistered(
+                mFingerprintSensorPropertiesInternals);
+        mFaceAuthenticatorRegisteredCallbackCaptor.getValue().onAllAuthenticatorsRegistered(
+                mFaceSensorPropertiesInternals);
+
+        verify(mFingerprintManager).registerBiometricStateListener(
+                mBiometricStateListenerArgumentCaptor.capture());
+
+        mBiometricStateListenerArgumentCaptor.getValue().onEnrollmentsChanged(userId,
+                SENSOR_ID_FINGERPRINT, true /* hasEnrollments */);
+
+        verify(mFaceManager).registerBiometricStateListener(
+                mBiometricStateListenerArgumentCaptor.capture());
+
+        mBiometricStateListenerArgumentCaptor.getValue().onEnrollmentsChanged(userId,
+                SENSOR_ID_FACE, true /* hasEnrollments */);
+
+        when(mUserManager.getProfileParent(userId)).thenReturn(new UserInfo(profileParentId,
+                "", 0));
+        when(mUserManager.getEnabledProfileIds(profileParentId)).thenReturn(new int[]{userId});
+
+        //Disable Identity Check for profile user
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.MANDATORY_BIOMETRICS, 0, userId);
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED, 0,
+                userId);
+        //Enable Identity Check for parent user
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.MANDATORY_BIOMETRICS, 1, profileParentId);
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED, 1,
+                profileParentId);
+
+        assertTrue(settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
+                userId));
     }
 
     // Helper methods

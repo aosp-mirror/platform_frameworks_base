@@ -138,7 +138,8 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerInternal;
+import com.android.server.LocalManagerRegistry;
+import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerLocal;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -5851,10 +5852,10 @@ public class ComputerEngine implements Computer {
         if (isHotword) {
             return true;
         }
-        OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
-                mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
-        return onDeviceIntelligenceManagerInternal != null
-                && uid == onDeviceIntelligenceManagerInternal.getInferenceServiceUid();
+        OnDeviceIntelligenceManagerLocal onDeviceIntelligenceManagerLocal =
+                LocalManagerRegistry.getManager(OnDeviceIntelligenceManagerLocal.class);
+        return onDeviceIntelligenceManagerLocal != null
+                && uid == onDeviceIntelligenceManagerLocal.getInferenceServiceUid();
     }
 
     @Nullable

@@ -25,6 +25,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
@@ -43,7 +44,7 @@ import javax.inject.Inject
 class KeyguardUnfoldTransition
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val keyguardRootView: KeyguardRootView,
     private val shadeWindowView: NotificationShadeWindowView,
     statusBarStateController: StatusBarStateController,
