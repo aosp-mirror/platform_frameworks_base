@@ -8373,6 +8373,11 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Deprecated
     public boolean nvResetConfig(int resetType) {
+        if (Flags.cleanupCdma()) {
+            if (resetType != 1) {  // 1: reload NV reset (reboot modem)
+                return false;
+            }
+        }
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -8413,6 +8418,9 @@ public class TelephonyManager {
     @SystemApi
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public boolean resetRadioConfig() {
+        if (Flags.cleanupCdma()) {
+            return false;
+        }
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
