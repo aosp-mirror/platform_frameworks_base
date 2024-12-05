@@ -24,13 +24,14 @@ import android.app.NotificationManager
 import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.service.notification.StatusBarNotification
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.plugins.statusbar.fakeStatusBarStateController
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -57,22 +58,24 @@ import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionCont
 import com.android.systemui.statusbar.policy.mockSensitiveNotificationProtectionController
 import com.android.systemui.statusbar.policy.sensitiveNotificationProtectionController
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class SensitiveContentCoordinatorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class SensitiveContentCoordinatorTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     val kosmos =
         testKosmos().apply {
@@ -95,6 +98,18 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     val sceneInteractor: SceneInteractor = kosmos.sceneInteractor
 
     val coordinator: SensitiveContentCoordinator by lazy { kosmos.sensitiveContentCoordinator }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Test
     fun onDynamicPrivacyChanged_invokeInvalidationListener() {
@@ -139,7 +154,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     fun screenshareSecretFilter_flagDisabled_filterNoAdded() {
         coordinator.attach(pipeline)
 
-        verify(pipeline, never()).addFinalizeFilter(any(NotifFilter::class.java))
+        verify(pipeline, never()).addFinalizeFilter(any())
     }
 
     @Test
