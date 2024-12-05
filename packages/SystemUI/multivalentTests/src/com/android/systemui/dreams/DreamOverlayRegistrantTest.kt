@@ -29,8 +29,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
 import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.shared.condition.Monitor
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.withArgCaptor
 import kotlin.test.Test
 import org.junit.Before
@@ -48,6 +51,8 @@ import org.mockito.kotlin.whenever
 @TestableLooper.RunWithLooper
 @RunWith(AndroidJUnit4::class)
 class DreamOverlayRegistrantTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private val context = mock<Context>()
 
     private val packageManager = mock<PackageManager>()
@@ -73,6 +78,7 @@ class DreamOverlayRegistrantTest : SysuiTestCase() {
                 monitor,
                 packageManager,
                 dreamManager,
+                kosmos.communalSettingsInteractor,
                 logBuffer,
             )
 
@@ -117,7 +123,7 @@ class DreamOverlayRegistrantTest : SysuiTestCase() {
 
     /** Verify overlay registered when enabled in manifest. */
     @Test
-    @DisableFlags(Flags.FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @DisableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
     fun testRegisteredWhenEnabledWithManifest() {
         serviceInfo.enabled = true
         start()
@@ -127,8 +133,10 @@ class DreamOverlayRegistrantTest : SysuiTestCase() {
 
     /** Verify overlay registered for mobile hub with flag. */
     @Test
-    @EnableFlags(Flags.FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @EnableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
     fun testRegisteredForMobileHub() {
+        kosmos.setCommunalV2ConfigEnabled(true)
+
         start()
 
         verify(dreamManager).registerDreamOverlayService(componentName)
@@ -139,7 +147,7 @@ class DreamOverlayRegistrantTest : SysuiTestCase() {
      * enabled.
      */
     @Test
-    @DisableFlags(Flags.FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @DisableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
     fun testDisabledForMobileWithoutMobileHub() {
         start()
 
@@ -154,8 +162,9 @@ class DreamOverlayRegistrantTest : SysuiTestCase() {
 
     /** Ensure service unregistered when component is disabled at runtime. */
     @Test
-    @EnableFlags(Flags.FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @EnableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
     fun testUnregisteredWhenComponentDisabled() {
+        kosmos.setCommunalV2ConfigEnabled(true)
         start()
         verify(dreamManager).registerDreamOverlayService(componentName)
         clearInvocations(dreamManager)

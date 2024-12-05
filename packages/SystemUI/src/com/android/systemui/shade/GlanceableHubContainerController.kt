@@ -41,11 +41,11 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Flags
-import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -83,6 +83,7 @@ class GlanceableHubContainerController
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val communalViewModel: CommunalViewModel,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -514,7 +515,7 @@ constructor(
         val touchOnUmo = keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt())
         val touchOnSmartspace =
             lockscreenSmartspaceController.isWithinSmartspaceBounds(ev.x.toInt(), ev.y.toInt())
-        val glanceableHubV2 = communalHubOnMobile()
+        val glanceableHubV2 = communalSettingsInteractor.isV2FlagEnabled()
         if (
             !hubShowing &&
                 (touchOnNotifications || touchOnUmo || touchOnSmartspace || glanceableHubV2)

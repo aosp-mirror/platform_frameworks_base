@@ -43,7 +43,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
-import com.android.systemui.Flags.FLAG_COMMUNAL_HUB_ON_MOBILE
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
@@ -55,7 +55,9 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
@@ -262,6 +264,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
                 mKeyguardUpdateMonitor,
                 mScrimManager,
                 mCommunalInteractor,
+                kosmos.communalSettingsInteractor,
                 kosmos.sceneInteractor,
                 mSystemDialogsCloser,
                 mUiEventLogger,
@@ -1283,7 +1286,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         environmentComponents.verifyNoMoreInteractions()
     }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun testAmbientTouchHandlersRegistration_registerHideComplicationAndCommunal() {
         val client = client
@@ -1303,9 +1306,11 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
             .containsExactly(mHideComplicationTouchHandler, mCommunalTouchHandler)
     }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun testAmbientTouchHandlersRegistration_v2_registerOnlyHideComplication() {
+        kosmos.setCommunalV2ConfigEnabled(true)
+
         val client = client
 
         // Inform the overlay service of dream starting.
