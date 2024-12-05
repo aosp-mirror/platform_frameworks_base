@@ -363,8 +363,15 @@ class DesktopTasksController(
         }
 
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
-        requireNotNull(tdaInfo) {
-            "This method can only be called with the ID of a display having non-null DisplayArea."
+        // A non-organized display (e.g., non-trusted virtual displays used in CTS) doesn't have
+        // TDA.
+        if (tdaInfo == null) {
+            logW(
+                "forceEnterDesktop cannot find DisplayAreaInfo for displayId=%d. This could happen" +
+                    " when the display is a non-trusted virtual display.",
+                displayId,
+            )
+            return false
         }
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val isFreeformDisplay = tdaWindowingMode == WINDOWING_MODE_FREEFORM
