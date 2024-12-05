@@ -248,7 +248,7 @@ constructor(
         PlatformTheme(isDarkTheme = true) {
             ProvideShortcutHelperIndication(interactionsConfig = interactionsConfig()) {
                 AnimatedVisibility(
-                    visible = viewModel.isQsVisible,
+                    visible = viewModel.isQsVisibleAndAnyShadeExpanded,
                     modifier =
                         Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
                             // Clipping before translation to match QSContainerImpl.onDraw
