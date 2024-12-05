@@ -188,7 +188,7 @@ object SystemFeaturesGenerator {
                         ?: throw IllegalArgumentException(
                             "Invalid feature version input for $name: ${featureArgs[1]}"
                         )
-                FeatureInfo(name, featureArgs[1].toInt(), readonly = true)
+                FeatureInfo(name, featureVersion, readonly = true)
             }
         }
     }

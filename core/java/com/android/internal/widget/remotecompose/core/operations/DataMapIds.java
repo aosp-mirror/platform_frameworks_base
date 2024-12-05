@@ -18,6 +18,9 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.UTF8;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -28,11 +31,11 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.DataM
 import java.util.List;
 
 /** This is a map of strings to type & Id */
-public class DataMapIds implements Operation {
+public class DataMapIds extends Operation {
     private static final int OP_CODE = Operations.ID_MAP;
     private static final String CLASS_NAME = "DataMapIds";
     int mId;
-    DataMap mDataMap;
+    final DataMap mDataMap;
 
     private static final int MAX_MAP = 2000;
 
@@ -42,6 +45,7 @@ public class DataMapIds implements Operation {
     public static final byte TYPE_LONG = 3;
     public static final byte TYPE_BOOLEAN = 4;
 
+    @NonNull
     private String typeString(byte type) {
         switch (type) {
             case TYPE_STRING:
@@ -58,16 +62,17 @@ public class DataMapIds implements Operation {
         return "?";
     }
 
-    public DataMapIds(int id, String[] names, byte[] types, int[] ids) {
+    public DataMapIds(int id, @NonNull String[] names, @NonNull byte[] types, @NonNull int[] ids) {
         mId = id;
         mDataMap = new DataMap(names, types, ids);
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mDataMap.mNames, mDataMap.mTypes, mDataMap.mIds);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("DataMapIds[" + Utils.idString(mId) + "] ");
@@ -84,7 +89,12 @@ public class DataMapIds implements Operation {
         return builder.toString();
     }
 
-    public static void apply(WireBuffer buffer, int id, String[] names, byte[] type, int[] ids) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int id,
+            @NonNull String[] names,
+            @Nullable byte[] type, // todo: can we make this not nullable?
+            @NonNull int[] ids) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(names.length);
@@ -95,7 +105,13 @@ public class DataMapIds implements Operation {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         if (len > MAX_MAP) {
@@ -113,7 +129,12 @@ public class DataMapIds implements Operation {
         operations.add(data);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Encode a collection of name id pairs")
                 .field(INT, "id", "id the array")
@@ -122,13 +143,14 @@ public class DataMapIds implements Operation {
                 .field(UTF8, "id[0]", "length", "path encoded as floats");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.putDataMap(mId, mDataMap);
     }
 }

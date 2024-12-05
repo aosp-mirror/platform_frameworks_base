@@ -66,6 +66,7 @@ import android.view.WindowManager;
 import android.window.BackAnimationAdapter;
 import android.window.BackMotionEvent;
 import android.window.BackNavigationInfo;
+import android.window.IBackAnimationHandoffHandler;
 import android.window.IOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedCallbackInfo;
@@ -779,6 +780,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
             @Override
             public void setTriggerBack(boolean triggerBack) {
+            }
+
+            @Override
+            public void setHandoffHandler(IBackAnimationHandoffHandler unused) {
             }
         };
     }

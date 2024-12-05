@@ -1490,7 +1490,12 @@ public abstract class NotificationListenerService extends Service {
                 Log.w(TAG, "onNotificationPosted: Error receiving StatusBarNotification");
                 return;
             }
+            onNotificationPostedFull(sbn, update);
+        }
 
+        @Override
+        public void onNotificationPostedFull(StatusBarNotification sbn,
+                NotificationRankingUpdate update) {
             try {
                 // convert icon metadata to legacy format for older clients
                 createLegacyIconExtras(sbn.getNotification());
@@ -1518,7 +1523,6 @@ public abstract class NotificationListenerService extends Service {
                             mRankingMap).sendToTarget();
                 }
             }
-
         }
 
         @Override
@@ -1531,6 +1535,12 @@ public abstract class NotificationListenerService extends Service {
                 Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification", e);
                 return;
             }
+            onNotificationRemovedFull(sbn, update, stats, reason);
+        }
+
+        @Override
+        public void onNotificationRemovedFull(StatusBarNotification sbn,
+                NotificationRankingUpdate update, NotificationStats stats, int reason) {
             if (sbn == null) {
                 Log.w(TAG, "onNotificationRemoved: Error receiving StatusBarNotification");
                 return;
@@ -1592,6 +1602,14 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
+        public void onNotificationEnqueuedWithChannelFull(
+                StatusBarNotification sbn, NotificationChannel channel,
+                NotificationRankingUpdate update)
+                throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
         public void onNotificationsSeen(List<String> keys)
                 throws RemoteException {
             // no-op in the listener
@@ -1616,6 +1634,13 @@ public abstract class NotificationListenerService extends Service {
         @Override
         public void onNotificationSnoozedUntilContext(
                 IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId)
+                throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationSnoozedUntilContextFull(
+                StatusBarNotification sbn, String snoozeCriterionId)
                 throws RemoteException {
             // no-op in the listener
         }
@@ -1688,8 +1713,6 @@ public abstract class NotificationListenerService extends Service {
                 Bundle feedback) {
             // no-op in the listener
         }
-
-
     }
 
     /**
@@ -2340,7 +2363,6 @@ public abstract class NotificationListenerService extends Service {
         // -- parcelable interface --
 
         private RankingMap(Parcel in) {
-            final ClassLoader cl = getClass().getClassLoader();
             final int count = in.readInt();
             mOrderedKeys.ensureCapacity(count);
             mRankings.ensureCapacity(count);

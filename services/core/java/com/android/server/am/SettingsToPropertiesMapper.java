@@ -42,6 +42,7 @@ import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
 import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 import static com.android.aconfig_new_storage.Flags.supportClearLocalOverridesImmediately;
+import static com.android.aconfig_new_storage.Flags.enableAconfigdFromMainline;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -139,12 +140,20 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "tv_os",
+        "aaos_carframework_triage",
+        "aaos_performance_triage",
+        "aaos_user_triage",
+        "aaos_window_triage",
+        "aaos_audio_triage",
+        "aaos_power_triage",
+        "aaos_storage_triage",
         "aaos_sdv",
+        "aaos_vac_triage",
         "accessibility",
         "android_core_networking",
         "android_health_services",
         "android_sdk",
-        "android_stylus",
         "aoc",
         "app_widgets",
         "arc_next",
@@ -209,6 +218,7 @@ public class SettingsToPropertiesMapper {
         "pixel_continuity",
         "pixel_perf",
         "pixel_sensors",
+        "pixel_state_server",
         "pixel_system_sw_video",
         "pixel_video_sw",
         "pixel_watch",
@@ -220,6 +230,7 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "psap_ai",
         "ravenwood",
         "resource_manager",
         "responsible_apis",
@@ -255,6 +266,7 @@ public class SettingsToPropertiesMapper {
         "wear_systems",
         "wear_sysui",
         "wear_system_managed_surfaces",
+        "wear_watchfaces",
         "window_surfaces",
         "windowing_frontend",
         "xr",
@@ -453,15 +465,38 @@ public class SettingsToPropertiesMapper {
      * @param requests: request proto output stream
      * @return aconfigd socket return as proto input stream
      */
-    static ProtoInputStream sendAconfigdRequests(ProtoOutputStream requests) {
+    static void sendAconfigdRequests(ProtoOutputStream requests) {
+        ProtoInputStream returns = sendAconfigdRequests("aconfigd_system", requests);
+        try {
+          parseAndLogAconfigdReturn(returns);
+        } catch (IOException ioe) {
+          logErr("failed to parse aconfigd return", ioe);
+        }
+        if (enableAconfigdFromMainline()) {
+            returns = sendAconfigdRequests("aconfigd_mainline", requests);
+            try {
+              parseAndLogAconfigdReturn(returns);
+            } catch (IOException ioe) {
+              logErr("failed to parse aconfigd return", ioe);
+            }
+        }
+    }
+
+    /**
+     * apply flag local override in aconfig new storage
+     * @param socketName: the socket to send to
+     * @param requests: request proto output stream
+     * @return aconfigd socket return as proto input stream
+     */
+    static ProtoInputStream sendAconfigdRequests(String socketName, ProtoOutputStream requests) {
         // connect to aconfigd socket
         LocalSocket client = new LocalSocket();
-        try{
+        try {
             client.connect(new LocalSocketAddress(
-                "aconfigd", LocalSocketAddress.Namespace.RESERVED));
-            Slog.d(TAG, "connected to aconfigd socket");
+                socketName, LocalSocketAddress.Namespace.RESERVED));
+            Slog.d(TAG, "connected to " + socketName + " socket");
         } catch (IOException ioe) {
-            logErr("failed to connect to aconfigd socket", ioe);
+            logErr("failed to connect to " + socketName + " socket", ioe);
             return null;
         }
 
@@ -480,9 +515,9 @@ public class SettingsToPropertiesMapper {
             byte[] requests_bytes = requests.getBytes();
             outputStream.writeInt(requests_bytes.length);
             outputStream.write(requests_bytes, 0, requests_bytes.length);
-            Slog.d(TAG, "flag override requests sent to aconfigd");
+            Slog.d(TAG, "flag override requests sent to " + socketName);
         } catch (IOException ioe) {
-            logErr("failed to send requests to aconfigd", ioe);
+            logErr("failed to send requests to " + socketName, ioe);
             return null;
         }
 
@@ -490,10 +525,10 @@ public class SettingsToPropertiesMapper {
         try {
             int num_bytes = inputStream.readInt();
             ProtoInputStream returns = new ProtoInputStream(inputStream);
-            Slog.d(TAG, "received " + num_bytes + " bytes back from aconfigd");
+            Slog.d(TAG, "received " + num_bytes + " bytes back from " + socketName);
             return returns;
         } catch (IOException ioe) {
-            logErr("failed to read requests return from aconfigd", ioe);
+            logErr("failed to read requests return from " + socketName, ioe);
             return null;
         }
     }
@@ -528,9 +563,8 @@ public class SettingsToPropertiesMapper {
      * @param packageName the package of the flag
      * @param flagName the name of the flag
      * @param immediate if true, clear immediately; otherwise, clear on next reboot
-     *
-     * @hide
      */
+    @VisibleForTesting
     public static void writeFlagOverrideRemovalRequest(
         ProtoOutputStream proto, String packageName, String flagName, boolean immediate) {
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
@@ -586,7 +620,8 @@ public class SettingsToPropertiesMapper {
      * apply flag local override in aconfig new storage
      * @param props
      */
-    static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
+    @VisibleForTesting
+    public static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
         int num_requests = 0;
         ProtoOutputStream requests = new ProtoOutputStream();
         for (String flagName : props.getKeyset()) {
@@ -634,15 +669,8 @@ public class SettingsToPropertiesMapper {
           return;
         }
 
-        // send requests to aconfigd and obtain the return byte buffer
-        ProtoInputStream returns = sendAconfigdRequests(requests);
-
-        // deserialize back using proto input stream
-        try {
-          parseAndLogAconfigdReturn(returns);
-        } catch (IOException ioe) {
-            logErr("failed to parse aconfigd return", ioe);
-        }
+        // send requests to aconfigd
+        sendAconfigdRequests(requests);
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
@@ -752,15 +780,8 @@ public class SettingsToPropertiesMapper {
           return;
         }
 
-        // send requests to aconfigd and obtain the return
-        ProtoInputStream returns = sendAconfigdRequests(requests);
-
-        // deserialize back using proto input stream
-        try {
-            parseAndLogAconfigdReturn(returns);
-        } catch (IOException ioe) {
-            logErr("failed to parse aconfigd return", ioe);
-        }
+        // send requests to aconfigd
+        sendAconfigdRequests(requests);
     }
 
     /**

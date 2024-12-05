@@ -63,6 +63,7 @@ public class BackProgressAnimatorTest {
     @Before
     public void setUp() throws Exception {
         mTargetProgressCalled = new CountDownLatch(1);
+        mTargetProgress = 0.5f;
         mMainThreadHandler = new Handler(Looper.getMainLooper());
         final BackMotionEvent backEvent = backMotionEventFrom(0, 0);
         mMainThreadHandler.post(

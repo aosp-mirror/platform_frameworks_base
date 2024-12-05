@@ -19,9 +19,9 @@ package android.hardware.camera2;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
-import android.hardware.camera2.impl.ExtensionKey;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.DeviceStateSensorOrientationMap;
@@ -560,7 +560,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * on a particular SessionConfiguration.</p>
      *
      * @return List of CameraCharacteristic keys containing characterisitics specific to a session
-     * configuration. If {@link #INFO_SESSION_CONFIGURATION_QUERY_VERSION} is
+     * configuration. If {@link #INFO_SESSION_CONFIGURATION_QUERY_VERSION} is at least
      * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, then this list will only contain
      * CONTROL_ZOOM_RATIO_RANGE and SCALER_AVAILABLE_MAX_DIGITAL_ZOOM
      *
@@ -1434,6 +1434,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
     public static final Key<android.util.Range<Float>> CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE =
             new Key<android.util.Range<Float>>("android.control.lowLightBoostInfoLuminanceRange", new TypeReference<android.util.Range<Float>>() {{ }});
+
+    /**
+     * <p>List of auto-exposure priority modes for {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode}
+     * that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for
+     * {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} for this camera device.
+     * If no AE priority modes are available for a device, this will only list OFF.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_PRIORITY_MODES =
+            new Key<int[]>("android.control.aeAvailablePriorityModes", int[].class);
 
     /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
@@ -5241,6 +5259,32 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>All of the above configurations can be set up with a SessionConfiguration. The list of
      * OutputConfiguration contains the stream configurations and DYNAMIC_RANGE_PROFILE, and
      * the AE_TARGET_FPS_RANGE and VIDEO_STABILIZATION_MODE are set as session parameters.</p>
+     * <p>When set to BAKLAVA, the additional stream combinations below are verified
+     * by the compliance tests:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th style="text-align: center;">Target 1</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Target 2</th>
+     * <th style="text-align: center;">Size</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * </tr>
+     * </tbody>
+     * </table>
      * <p>This key is available on all devices.</p>
      */
     @PublicKey
@@ -6127,6 +6171,66 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_STALL_DURATIONS_MAXIMUM_RESOLUTION =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>Color space used for shared session configuration for all the output targets
+     * when camera is opened in shared mode. This should be one of the values specified in
+     * availableColorSpaceProfilesMap.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #SHARED_SESSION_COLOR_SPACE_UNSPECIFIED UNSPECIFIED}</li>
+     *   <li>{@link #SHARED_SESSION_COLOR_SPACE_SRGB SRGB}</li>
+     *   <li>{@link #SHARED_SESSION_COLOR_SPACE_DISPLAY_P3 DISPLAY_P3}</li>
+     *   <li>{@link #SHARED_SESSION_COLOR_SPACE_BT2020_HLG BT2020_HLG}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #SHARED_SESSION_COLOR_SPACE_UNSPECIFIED
+     * @see #SHARED_SESSION_COLOR_SPACE_SRGB
+     * @see #SHARED_SESSION_COLOR_SPACE_DISPLAY_P3
+     * @see #SHARED_SESSION_COLOR_SPACE_BT2020_HLG
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final Key<Integer> SHARED_SESSION_COLOR_SPACE =
+            new Key<Integer>("android.sharedSession.colorSpace", int.class);
+
+    /**
+     * <p>List of shared output configurations that this camera device supports when
+     * camera is opened in shared mode. Array contains following entries for each supported
+     * shared configuration:
+     * 1) surface type
+     * 2) width
+     * 3) height
+     * 4) format
+     * 5) mirrorMode
+     * 6) useReadoutTimestamp
+     * 7) timestampBase
+     * 8) dataspace
+     * 9) usage
+     * 10) streamUsecase
+     * 11) physical camera id len
+     * 12) physical camera id as UTF-8 null terminated string.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final Key<long[]> SHARED_SESSION_OUTPUT_CONFIGURATIONS =
+            new Key<long[]>("android.sharedSession.outputConfigurations", long[].class);
+
+    /**
+     * <p>The available stream configurations that this camera device supports for
+     * shared capture session when camera is opened in shared mode. Android camera framework
+     * will generate this tag if the camera device can be opened in shared mode.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @SyntheticKey
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final Key<android.hardware.camera2.params.SharedSessionConfiguration> SHARED_SESSION_CONFIGURATION =
+            new Key<android.hardware.camera2.params.SharedSessionConfiguration>("android.sharedSession.configuration", android.hardware.camera2.params.SharedSessionConfiguration.class);
 
 
     /**

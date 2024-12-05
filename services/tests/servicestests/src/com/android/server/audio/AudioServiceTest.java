@@ -16,6 +16,7 @@
 package com.android.server.audio;
 
 import static android.media.AudioDeviceInfo.TYPE_BUILTIN_MIC;
+import static android.media.AudioManager.GET_DEVICES_INPUTS;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +35,9 @@ import android.media.AudioSystem;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.UserHandle;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.EnableFlags;
+import android.util.IntArray;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -80,12 +83,15 @@ public class AudioServiceTest {
 
     private static boolean sLooperPrepared = false;
 
+    private TestLooper mTestLooper;
+
     @Before
     public void setUp() throws Exception {
         if (!sLooperPrepared) {
             Looper.prepare();
             sLooperPrepared = true;
         }
+        mTestLooper = new TestLooper();
         mContext = InstrumentationRegistry.getTargetContext();
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSettingsAdapter = new NoOpSettingsAdapter();
@@ -93,8 +99,11 @@ public class AudioServiceTest {
         when(mMockAppOpsManager.noteOp(anyInt(), anyInt(), anyString(), anyString(), anyString()))
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSpySystemServer,
-                mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy, null,
-                mMockAppOpsManager, mMockPermissionEnforcer, mMockPermissionProvider, r -> r.run());
+                mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy,
+                mTestLooper.getLooper(), mMockAppOpsManager, mMockPermissionEnforcer,
+                mMockPermissionProvider, r -> r.run());
+
+        mTestLooper.dispatchAll();
     }
 
     /**
@@ -114,7 +123,7 @@ public class AudioServiceTest {
             Assert.assertEquals("mic mute reporting wrong value",
                     muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired
-            Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+            mTestLooper.dispatchAll();
             verify(mSpySystemServer, times(1))
                     .sendMicrophoneMuteChangedIntent();
             reset(mSpySystemServer);
@@ -139,7 +148,7 @@ public class AudioServiceTest {
             Assert.assertEquals("mic mute reporting wrong value",
                     !muted, mAudioService.isMicrophoneMuted());
             // verify the intent for mic mute changed is supposed to be fired
-            Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+            mTestLooper.dispatchAll();
             verify(mSpySystemServer, times(1))
                     .sendMicrophoneMuteChangedIntent();
             reset(mSpySystemServer);
@@ -150,8 +159,7 @@ public class AudioServiceTest {
     public void testRingNotifAlias() throws Exception {
         Log.i(TAG, "running testRingNotifAlias");
         Assert.assertNotNull(mAudioService);
-        // TODO add initialization message that can be caught here instead of sleeping
-        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS); // wait for full AudioService initialization
+        mTestLooper.dispatchAll(); // wait for full AudioService initialization
 
         // test with aliasing RING and NOTIFICATION
         mAudioService.setNotifAliasRingForTest(true);
@@ -162,7 +170,7 @@ public class AudioServiceTest {
         mAudioService.setStreamVolume(AudioSystem.STREAM_NOTIFICATION,
                 ringVol, 0, "bla");
         mAudioService.setStreamVolume(AudioSystem.STREAM_RING, ringMaxVol, 0, "bla");
-        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+        mTestLooper.dispatchAll();
         Assert.assertEquals(ringMaxVol,
                 mAudioService.getStreamVolume(AudioSystem.STREAM_NOTIFICATION));
 
@@ -216,7 +224,19 @@ public class AudioServiceTest {
     public void testInputGainIndex() throws Exception {
         Log.i(TAG, "running testInputGainIndex");
         Assert.assertNotNull(mAudioService);
-        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS); // wait for full AudioService initialization
+
+        IntArray internalDeviceTypes = new IntArray();
+        int status = AudioSystem.getSupportedDeviceTypes(GET_DEVICES_INPUTS, internalDeviceTypes);
+        if (status != AudioSystem.SUCCESS) {
+            Log.e(TAG, "AudioSystem.getSupportedDeviceTypes(GET_DEVICES_INPUTS) failed. status:"
+                    + status);
+        }
+
+        // Make sure TYPE_BUILTIN_MIC, aka DEVICE_IN_BUILTIN_MIC in terms of internal device type,
+        // is supported.
+        if (!internalDeviceTypes.contains(AudioSystem.DEVICE_IN_BUILTIN_MIC)) {
+            return;
+        }
 
         AudioDeviceAttributes ada =
                 new AudioDeviceAttributes(
@@ -229,6 +249,8 @@ public class AudioServiceTest {
 
         int inputGainIndex = 20;
         mAudioService.setInputGainIndex(ada, inputGainIndex);
+        mTestLooper.dispatchAll();
+
         Assert.assertEquals(
                 "input gain index reporting wrong value",
                 inputGainIndex,

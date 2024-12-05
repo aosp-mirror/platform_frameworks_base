@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
-import android.hardware.camera2.impl.ExtensionKey;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.utils.TypeReference;
@@ -808,7 +807,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * application's selected exposure time, sensor sensitivity,
      * and frame duration ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
      * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
-     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If one of the FLASH modes
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is
+     * enabled, the relevant priority CaptureRequest settings will not be overridden.
+     * See {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} for more details. If one of the FLASH modes
      * is selected, the camera device's flash unit controls are
      * also overridden.</p>
      * <p>The FLASH modes are only available if the camera device
@@ -842,6 +843,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#FLASH_MODE
@@ -2915,6 +2917,85 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.lowLightBoostState", int.class);
 
     /**
+     * <p>Whether the application uses {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}
+     * to control zoom levels.</p>
+     * <p>If set to AUTO, the camera device detects which capture request key the application uses
+     * to do zoom, {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}. If
+     * the application doesn't set android.scaler.zoomRatio or sets it to 1.0 in the capture
+     * request, the effective zoom level is reflected in {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} in capture
+     * results. If {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} is set to values other than 1.0, the effective
+     * zoom level is reflected in {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}. AUTO is the default value
+     * for this control, and also the behavior of the OS before Android version
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA BAKLAVA}.</p>
+     * <p>If set to ZOOM_RATIO, the application explicitly specifies zoom level be controlled
+     * by {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, and the effective zoom level is reflected in
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in capture results. This addresses an ambiguity with AUTO,
+     * with which the camera device cannot know if the application is using cropRegion or
+     * zoomRatio at 1.0x.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_ZOOM_METHOD_AUTO AUTO}</li>
+     *   <li>{@link #CONTROL_ZOOM_METHOD_ZOOM_RATIO ZOOM_RATIO}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_ZOOM_METHOD_AUTO
+     * @see #CONTROL_ZOOM_METHOD_ZOOM_RATIO
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_ZOOM_METHOD)
+    public static final Key<Integer> CONTROL_ZOOM_METHOD =
+            new Key<Integer>("android.control.zoomMethod", int.class);
+
+    /**
+     * <p>Turn on AE priority mode.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is
+     * AUTO and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to one of its
+     * ON modes, with the exception of ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
+     * <p>When a priority mode is enabled, the camera device's
+     * auto-exposure routine will maintain the application's
+     * selected parameters relevant to the priority mode while overriding
+     * the remaining exposure parameters
+     * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}, {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). For example, if
+     * SENSOR_SENSITIVITY_PRIORITY mode is enabled, the camera device will
+     * maintain the application-selected {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}
+     * while adjusting {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}
+     * and {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}. The overridden fields for a
+     * given capture will be available in its CaptureResult.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_OFF OFF}</li>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY SENSOR_SENSITIVITY_PRIORITY}</li>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY SENSOR_EXPOSURE_TIME_PRIORITY}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see #CONTROL_AE_PRIORITY_MODE_OFF
+     * @see #CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY
+     * @see #CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final Key<Integer> CONTROL_AE_PRIORITY_MODE =
+            new Key<Integer>("android.control.aePriorityMode", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -4199,7 +4280,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * duration exposed to the nearest possible value (rather than expose longer).
      * The final exposure time used will be available in the output capture result.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
-     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * OFF; otherwise the auto-exposure algorithm will override this value. However, in the
+     * case that {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is set to SENSOR_EXPOSURE_TIME_PRIORITY, this
+     * control will be effective and not controlled by the auto-exposure algorithm.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</p>
@@ -4209,6 +4292,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
@@ -4317,7 +4401,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * value. The final sensitivity used will be available in the
      * output capture result.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
-     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * OFF; otherwise the auto-exposure algorithm will override this value. However, in the
+     * case that {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is set to SENSOR_SENSITIVITY_PRIORITY, this
+     * control will be effective and not controlled by the auto-exposure algorithm.</p>
      * <p>Note that for devices supporting postRawSensitivityBoost, the total sensitivity applied
      * to the final processed image is the combination of {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} and
      * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost}. In case the application uses the sensor
@@ -4333,6 +4419,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
@@ -6015,6 +6102,38 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<Integer> EXTENSION_STRENGTH =
             new Key<Integer>("android.extension.strength", int.class);
+
+    /**
+     * <p>Indicates when to activate Night Mode Camera Extension for high-quality
+     * still captures in low-light conditions.</p>
+     * <p>Provides awareness to the application when the current scene can benefit from using a
+     * Night Mode Camera Extension to take a high-quality photo.</p>
+     * <p>Support for this capture result can be queried via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
+     * <p>If the device supports this capability then it will also support
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_NIGHT NIGHT}
+     * and will be available in both
+     * {@link android.hardware.camera2.CameraCaptureSession sessions} and
+     * {@link android.hardware.camera2.CameraExtensionSession sessions}.</p>
+     * <p>The value will be {@code UNKNOWN} in the following auto exposure modes: ON_AUTO_FLASH,
+     * ON_ALWAYS_FLASH, ON_AUTO_FLASH_REDEYE, or ON_EXTERNAL_FLASH.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN UNKNOWN}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_OFF OFF}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_ON ON}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_OFF
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_ON
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NIGHT_MODE_INDICATOR)
+    public static final Key<Integer> EXTENSION_NIGHT_MODE_INDICATOR =
+            new Key<Integer>("android.extension.nightModeIndicator", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

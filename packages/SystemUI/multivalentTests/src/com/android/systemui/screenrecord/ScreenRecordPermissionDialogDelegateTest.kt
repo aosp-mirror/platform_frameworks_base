@@ -18,7 +18,10 @@ package com.android.systemui.screenrecord
 
 import android.content.Intent
 import android.hardware.display.DisplayManager
+import android.hardware.display.VirtualDisplay
+import android.hardware.display.VirtualDisplayConfig
 import android.os.UserHandle
+import android.platform.test.annotations.RequiresFlagsEnabled
 import android.testing.TestableLooper
 import android.view.View
 import android.widget.Spinner
@@ -42,6 +45,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import junit.framework.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
@@ -222,6 +226,34 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
 
         verify(mediaProjectionMetricsLogger, never())
             .notifyProjectionRequestCancelled(TEST_HOST_UID)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(
+        com.android.media.projection.flags.Flags
+            .FLAG_MEDIA_PROJECTION_CONNECTED_DISPLAY_NO_VIRTUAL_DEVICE
+    )
+    fun doNotShowVirtualDisplayInDialog() {
+        val displayManager = context.getSystemService(DisplayManager::class.java)!!
+        var virtualDisplay: VirtualDisplay? = null
+        try {
+            virtualDisplay =
+                displayManager.createVirtualDisplay(
+                    VirtualDisplayConfig.Builder("virtual display", 1, 1, 160).build()
+                )
+            showDialog()
+            val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_options)
+            val adapter = spinner.adapter
+            val virtualDisplayAvailable =
+                (0 until adapter.count)
+                    .mapNotNull { adapter.getItem(it) as? String }
+                    .any { it.contains("virtual display", ignoreCase = true) }
+            assertWithMessage("A Virtual Display was shown in the list of display to record")
+                .that(virtualDisplayAvailable)
+                .isFalse()
+        } finally {
+            virtualDisplay?.release()
+        }
     }
 
     private fun showDialog() {

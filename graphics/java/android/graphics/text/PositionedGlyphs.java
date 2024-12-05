@@ -133,7 +133,7 @@ public final class PositionedGlyphs {
     @NonNull
     public Font getFont(@IntRange(from = 0) int index) {
         Preconditions.checkArgumentInRange(index, 0, glyphCount() - 1, "index");
-        if (Flags.typefaceRedesign()) {
+        if (Flags.typefaceRedesignReadonly()) {
             return mFonts.get(nGetFontId(mLayoutPtr, index));
         }
         return mFonts.get(index);
@@ -252,7 +252,7 @@ public final class PositionedGlyphs {
         mXOffset = xOffset;
         mYOffset = yOffset;
 
-        if (Flags.typefaceRedesign()) {
+        if (Flags.typefaceRedesignReadonly()) {
             int fontCount = nGetFontCount(layoutPtr);
             mFonts = new ArrayList<>(fontCount);
             for (int i = 0; i < fontCount; ++i) {

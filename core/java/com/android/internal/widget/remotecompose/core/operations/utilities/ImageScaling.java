@@ -15,6 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.NonNull;
+
+import com.android.internal.widget.remotecompose.core.operations.Utils;
+
 /** Implement the scaling logic for Compose Image or ImageView */
 public class ImageScaling {
 
@@ -97,6 +101,7 @@ public class ImageScaling {
         adjustDrawToType();
     }
 
+    @NonNull
     static String str(float v) {
         String s = "  " + (int) v;
         return s.substring(s.length() - 3);
@@ -106,7 +111,7 @@ public class ImageScaling {
         String s = str;
         s += str(left) + ", " + str(top) + ", " + str(right) + ", " + str(bottom) + ", ";
         s += " [" + str(right - left) + " x " + str(bottom - top) + "]";
-        System.out.println(s);
+        Utils.log(s);
     }
 
     /** This adjust destnation on the DrawBitMapInt to support all contentScale types */
@@ -125,7 +130,7 @@ public class ImageScaling {
             print("test rc ", mSrcLeft, mSrcTop, mSrcRight, mSrcBottom);
             print("test dst ", mDstLeft, mDstTop, mDstRight, mDstBottom);
         }
-
+        if (sh == 0 || sw == 0) return;
         switch (mScaleType) {
             case SCALE_NONE:
                 dh = sh;
@@ -210,6 +215,7 @@ public class ImageScaling {
         }
     }
 
+    @NonNull
     public static String typeToString(int type) {
         String[] typeString = {
             "none",

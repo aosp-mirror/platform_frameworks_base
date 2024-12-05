@@ -33,7 +33,7 @@ include_re=""
 exclude_re=""
 smoke_exclude_re=""
 dry_run=""
-while getopts "sx:f:d" opt; do
+while getopts "sx:f:dtb" opt; do
 case "$opt" in
     s)
         # Remove slow tests.
@@ -50,6 +50,14 @@ case "$opt" in
     d)
         # Dry run
         dry_run="echo"
+        ;;
+    t)
+        # Redirect log to terminal
+        export RAVENWOOD_LOG_OUT=$(tty)
+        ;;
+    b)
+        # Build only
+        ATEST=m
         ;;
     '?')
         exit 1
@@ -96,11 +104,16 @@ done
 
 # Calculate the removed tests.
 
-diff="$(diff  <(echo "${all_tests[@]}" | tr ' ' '\n') <(echo "${targets[@]}" | tr ' ' '\n') )"
+diff="$(diff  <(echo "${all_tests[@]}" | tr ' ' '\n') <(echo "${targets[@]}" | tr ' ' '\n') | grep -v [0-9] )"
 
 if [[ "$diff" != "" ]]; then
     echo "Excluded tests:"
     echo "$diff"
 fi
 
-$dry_run ${ATEST:-atest} "${targets[@]}"
+run() {
+    echo "Running: ${@}"
+    "${@}"
+}
+
+run $dry_run ${ATEST:-atest} "${targets[@]}"

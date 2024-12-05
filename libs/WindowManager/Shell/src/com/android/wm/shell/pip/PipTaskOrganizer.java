@@ -17,6 +17,7 @@
 package com.android.wm.shell.pip;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -25,6 +26,8 @@ import static android.util.RotationUtils.rotateBounds;
 
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
+import static com.android.wm.shell.desktopmode.DesktopModeUtils.calculateInitialBounds;
+import static com.android.wm.shell.desktopmode.DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
 import static com.android.wm.shell.pip.PipAnimationController.FRACTION_START;
@@ -67,6 +70,7 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.window.DisplayAreaInfo;
 import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -74,7 +78,9 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ScreenshotUtils;
@@ -87,6 +93,8 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
@@ -145,6 +153,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     @Nullable private final PipPerfHintController mPipPerfHintController;
+    private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    private final DisplayController mDisplayController;
     protected final ShellTaskOrganizer mTaskOrganizer;
     protected final ShellExecutor mMainExecutor;
 
@@ -388,6 +399,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             @NonNull DisplayController displayController,
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
@@ -414,6 +427,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
         mSplitScreenOptional = splitScreenOptional;
         mPipPerfHintController = pipPerfHintControllerOptional.orElse(null);
+        mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+        mDisplayController = displayController;
         mTaskOrganizer = shellTaskOrganizer;
         mMainExecutor = mainExecutor;
 
@@ -741,8 +757,38 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /** Returns the bounds to restore to when exiting PIP mode. */
+    // TODO(b/377581840): Instead of manually tracking bounds, use bounds from Core.
     public Rect getExitDestinationBounds() {
+        if (isPipExitingToDesktopMode()) {
+            // If we are exiting PiP while device is in Desktop mode:
+            // 1) If PiP was entered via Desktop minimize (e.g. via minimize button), restore to the
+            //    previous freeform bounds that is saved in DesktopRepository.
+            // 2) If PiP was entered through other means (e.g. user swipe up), exit to initial
+            //    freeform bounds. Note that this case has a flicker at the moment (b/379984108).
+            Rect freeformBounds = getCurrentRepo().removeBoundsBeforeMinimize(
+                    mTaskInfo.taskId);
+            return freeformBounds != null
+                    ? freeformBounds
+                    : calculateInitialBounds(
+                            mDisplayController.getDisplayLayout(mTaskInfo.displayId),
+                            mTaskInfo,
+                            DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
+        }
         return mPipBoundsState.getDisplayBounds();
+    }
+
+    /** Returns whether PiP is exiting while we're in desktop mode. */
+    // TODO(b/377581840): Update this check to include non-minimized cases, e.g. split to PiP etc.
+    private boolean isPipExitingToDesktopMode() {
+        DesktopRepository currentRepo = getCurrentRepo();
+        return Flags.enableDesktopWindowingPip() && currentRepo != null
+                && (currentRepo.getVisibleTaskCount(mTaskInfo.displayId) > 0
+                    || isDisplayInFreeform());
+    }
+
+    private DesktopRepository getCurrentRepo() {
+        return mDesktopUserRepositoriesOptional.map(DesktopUserRepositories::getCurrent).orElse(
+                null);
     }
 
     private void exitLaunchIntoPipTask(WindowContainerTransaction wct) {
@@ -1803,12 +1849,35 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 == SPLIT_POSITION_TOP_OR_LEFT;
     }
 
+    private boolean isDisplayInFreeform() {
+        final DisplayAreaInfo tdaInfo = mRootTaskDisplayAreaOrganizer.getDisplayAreaInfo(
+                mTaskInfo.displayId);
+        if (tdaInfo != null) {
+            return tdaInfo.configuration.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM;
+        }
+        return false;
+    }
+
     /**
      * The windowing mode to restore to when resizing out of PIP direction. Defaults to undefined
      * and can be overridden to restore to an alternate windowing mode.
      */
     public int getOutPipWindowingMode() {
-        // By default, simply reset the windowing mode to undefined.
+        // If we are exiting PiP while the device is in Desktop mode (the task should expand to
+        // freeform windowing mode):
+        // 1) If the display windowing mode is freeform, set windowing mode to undefined so it will
+        //    resolve the windowing mode to the display's windowing mode.
+        // 2) If the display windowing mode is not freeform, set windowing mode to freeform.
+        if (isPipExitingToDesktopMode()) {
+            if (isDisplayInFreeform()) {
+                return WINDOWING_MODE_UNDEFINED;
+            } else {
+                return WINDOWING_MODE_FREEFORM;
+            }
+        }
+
+        // By default, or if the task is going to fullscreen, reset the windowing mode to undefined.
         return WINDOWING_MODE_UNDEFINED;
     }
 
@@ -1838,9 +1907,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 ? mPipBoundsState.getBounds() : currentBounds;
         final boolean existingAnimatorRunning = mPipAnimationController.getCurrentAnimator() != null
                 && mPipAnimationController.getCurrentAnimator().isRunning();
+        // For resize animation, we always animate the whole PIP task bounds.
         final PipAnimationController.PipTransitionAnimator<?> animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseBounds, currentBounds, destinationBounds,
-                        sourceHintRect, direction, startingAngle, rotationDelta);
+                        sourceHintRect, direction, startingAngle, rotationDelta,
+                        true /* alwaysAnimateTaskBounds */);
         animator.setTransitionDirection(direction)
                 .setPipTransactionHandler(mPipTransactionHandler)
                 .setDuration(durationMs);

@@ -1771,10 +1771,12 @@ public final class MediaRouter2 {
     }
 
     /**
-     * A class to control media routing session in media route provider. For example,
-     * selecting/deselecting/transferring to routes of a session can be done through this. Instances
-     * are created when {@link TransferCallback#onTransfer(RoutingController, RoutingController)} is
-     * called, which is invoked after {@link #transferTo(MediaRoute2Info)} is called.
+     * Controls a media routing session.
+     *
+     * <p>Routing controllers wrap a {@link RoutingSessionInfo}, taking care of mapping route ids to
+     * {@link MediaRoute2Info} instances. You can still access the underlying session using {@link
+     * #getRoutingSessionInfo()}, but keep in mind it can be changed by other threads. Changes to
+     * the routing session are notified via {@link ControllerCallback}.
      */
     public class RoutingController {
         private final Object mControllerLock = new Object();
@@ -1836,7 +1838,9 @@ public final class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of currently selected routes
+         * Returns the unmodifiable list of currently selected routes
+         *
+         * @see RoutingSessionInfo#getSelectedRoutes()
          */
         @NonNull
         public List<MediaRoute2Info> getSelectedRoutes() {
@@ -1848,7 +1852,9 @@ public final class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of selectable routes for the session.
+         * Returns the unmodifiable list of selectable routes for the session.
+         *
+         * @see RoutingSessionInfo#getSelectableRoutes()
          */
         @NonNull
         public List<MediaRoute2Info> getSelectableRoutes() {
@@ -1860,7 +1866,9 @@ public final class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of deselectable routes for the session.
+         * Returns the unmodifiable list of deselectable routes for the session.
+         *
+         * @see RoutingSessionInfo#getDeselectableRoutes()
          */
         @NonNull
         public List<MediaRoute2Info> getDeselectableRoutes() {

@@ -100,7 +100,7 @@ public class UserAspectRatioSettingsLayout extends LinearLayout {
 
     private void setViewVisibility(@IdRes int resId, boolean show) {
         final View view = findViewById(resId);
-        int visibility = show ? View.VISIBLE : View.INVISIBLE;
+        int visibility = show ? View.VISIBLE : View.GONE;
         if (view.getVisibility() == visibility) {
             return;
         }
@@ -171,7 +171,7 @@ public class UserAspectRatioSettingsLayout extends LinearLayout {
         fadeOut.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                view.setVisibility(View.INVISIBLE);
+                view.setVisibility(View.GONE);
             }
         });
         fadeOut.start();

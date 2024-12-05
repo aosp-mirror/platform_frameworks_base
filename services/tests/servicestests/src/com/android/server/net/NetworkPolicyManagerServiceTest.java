@@ -2158,13 +2158,11 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainEnabled() throws Exception {
         verify(mNetworkManager).setFirewallChainEnabled(FIREWALL_CHAIN_BACKGROUND, true);
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     @RequiresFlagsDisabled(Flags.FLAG_USE_DIFFERENT_DELAYS_FOR_BACKGROUND_CHAIN)
     public void testBackgroundChainOnProcStateChangeSameDelay() throws Exception {
         // initialization calls setFirewallChainEnabled, so we want to reset the invocations.
@@ -2194,10 +2192,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled({
-            Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE,
-            Flags.FLAG_USE_DIFFERENT_DELAYS_FOR_BACKGROUND_CHAIN
-    })
+    @RequiresFlagsEnabled(Flags.FLAG_USE_DIFFERENT_DELAYS_FOR_BACKGROUND_CHAIN)
     public void testBackgroundChainOnProcStateChangeDifferentDelays() throws Exception {
         // The app will be blocked when there is no prior proc-state.
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
@@ -2247,7 +2242,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnAllowlistChange() throws Exception {
         // initialization calls setFirewallChainEnabled, so we want to reset the invocations.
         clearInvocations(mNetworkManager);
@@ -2285,7 +2279,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnTempAllowlistChange() throws Exception {
         // initialization calls setFirewallChainEnabled, so we want to reset the invocations.
         clearInvocations(mNetworkManager);
@@ -2387,7 +2380,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersProcStateChanges() throws Exception {
         int testProcStateSeq = 0;
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
@@ -2450,7 +2442,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersStaleChanges() throws Exception {
         final int testProcStateSeq = 51;
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
@@ -2470,7 +2461,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersCapabilityChanges() throws Exception {
         int testProcStateSeq = 0;
         try (SyncBarrier b = new SyncBarrier(mService.mUidEventHandler)) {
@@ -2559,7 +2549,6 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testObsoleteHandleUidChanged() throws Exception {
         callAndWaitOnUidGone(UID_A);
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));

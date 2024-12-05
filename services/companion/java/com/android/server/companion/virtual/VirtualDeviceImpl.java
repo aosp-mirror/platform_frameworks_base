@@ -312,6 +312,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
         }
 
+        @Override
+        public void onSecureWindowHidden(int displayId) {
+            if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                try {
+                    mActivityListener.onSecureWindowHidden(displayId);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
+                }
+            }
+        }
+
         /**
          * Intercepts intent when matching any of the IntentFilter of any interceptor. Returns true
          * if the intent matches any filter notifying the DisplayPolicyController to abort the

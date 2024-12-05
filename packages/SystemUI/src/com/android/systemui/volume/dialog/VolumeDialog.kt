@@ -18,25 +18,64 @@ package com.android.systemui.volume.dialog
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.PixelFormat
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import com.android.app.tracing.coroutines.coroutineScopeTraced
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import com.android.systemui.volume.Events
+import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
-import com.android.systemui.volume.dialog.ui.binder.VolumeDialogViewBinder
 import javax.inject.Inject
+import kotlinx.coroutines.awaitCancellation
 
 class VolumeDialog
 @Inject
 constructor(
     @Application context: Context,
-    private val viewBinder: VolumeDialogViewBinder,
+    private val componentFactory: VolumeDialogComponent.Factory,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
-) : Dialog(context) {
+) : Dialog(context, R.style.Theme_SystemUI_Dialog_Volume) {
+
+    init {
+        with(window!!) {
+            addFlags(
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+            )
+            addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+
+            setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+            setWindowAnimations(-1)
+            setFormat(PixelFormat.TRANSLUCENT)
+
+            attributes =
+                attributes.apply {
+                    title = "VolumeDialog" // Not the same as Window#setTitle
+                }
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+        setCanceledOnTouchOutside(true)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewBinder.bind(this)
+        setContentView(R.layout.volume_dialog)
+        requireViewById<View>(R.id.volume_dialog_root).repeatWhenAttached {
+            coroutineScopeTraced("[Volume]dialog") {
+                val component = componentFactory.create(this)
+                with(component.volumeDialogViewBinder()) { bind(this@VolumeDialog) }
+
+                awaitCancellation()
+            }
+        }
     }
 
     /**

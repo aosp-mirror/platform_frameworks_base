@@ -18,6 +18,7 @@
 package android.window;
 
 import android.window.BackMotionEvent;
+import android.window.IBackAnimationHandoffHandler;
 
 /**
  * Interface that wraps a {@link OnBackInvokedCallback} object, to be stored in window manager
@@ -61,4 +62,9 @@ oneway interface IOnBackInvokedCallback {
      * Sets whether the back gesture is past the trigger threshold.
      */
     void setTriggerBack(in boolean triggerBack);
+
+   /**
+    * Sets a {@link IBackAnimationHandoffHandler} that can be used to hand off the back animation.
+    */
+    void setHandoffHandler(in IBackAnimationHandoffHandler handoffHandler);
 }

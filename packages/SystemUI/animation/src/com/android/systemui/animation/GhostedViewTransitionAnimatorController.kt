@@ -67,6 +67,12 @@ constructor(
 
     /** The [CujType] associated to this return animation. */
     private val returnCujType: Int? = null,
+
+    /**
+     * Whether this controller should be invalidated after its first use, and whenever [ghostedView]
+     * is detached.
+     */
+    private val isEphemeral: Boolean = false,
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),
 ) : ActivityTransitionAnimator.Controller {
@@ -119,6 +125,19 @@ constructor(
                 returnCujType
             }
 
+    /**
+     * Used to automatically clean up the internal state once [ghostedView] is detached from the
+     * hierarchy.
+     */
+    private val detachListener =
+        object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {}
+
+            override fun onViewDetachedFromWindow(v: View) {
+                onDispose()
+            }
+        }
+
     init {
         // Make sure the View we launch from implements LaunchableView to avoid visibility issues.
         if (ghostedView !is LaunchableView) {
@@ -155,6 +174,16 @@ constructor(
         }
 
         background = findBackground(ghostedView)
+
+        if (TransitionAnimator.returnAnimationsEnabled() && isEphemeral) {
+            ghostedView.addOnAttachStateChangeListener(detachListener)
+        }
+    }
+
+    override fun onDispose() {
+        if (TransitionAnimator.returnAnimationsEnabled()) {
+            ghostedView.removeOnAttachStateChangeListener(detachListener)
+        }
     }
 
     /**
@@ -164,7 +193,7 @@ constructor(
     protected open fun setBackgroundCornerRadius(
         background: Drawable,
         topCornerRadius: Float,
-        bottomCornerRadius: Float
+        bottomCornerRadius: Float,
     ) {
         // By default, we rely on WrappedDrawable to set/restore the background radii before/after
         // each draw.
@@ -195,7 +224,7 @@ constructor(
         val state =
             TransitionAnimator.State(
                 topCornerRadius = getCurrentTopCornerRadius(),
-                bottomCornerRadius = getCurrentBottomCornerRadius()
+                bottomCornerRadius = getCurrentBottomCornerRadius(),
             )
         fillGhostedViewState(state)
         return state
@@ -269,7 +298,7 @@ constructor(
     override fun onTransitionAnimationProgress(
         state: TransitionAnimator.State,
         progress: Float,
-        linearProgress: Float
+        linearProgress: Float,
     ) {
         val ghostView = this.ghostView ?: return
         val backgroundView = this.backgroundView!!
@@ -317,11 +346,11 @@ constructor(
             scale,
             scale,
             ghostedViewState.centerX - transitionContainerLocation[0],
-            ghostedViewState.centerY - transitionContainerLocation[1]
+            ghostedViewState.centerY - transitionContainerLocation[1],
         )
         ghostViewMatrix.postTranslate(
             (leftChange + rightChange) / 2f,
-            (topChange + bottomChange) / 2f
+            (topChange + bottomChange) / 2f,
         )
         ghostView.animationMatrix = ghostViewMatrix
 
@@ -462,7 +491,7 @@ constructor(
         private fun updateRadii(
             radii: FloatArray,
             topCornerRadius: Float,
-            bottomCornerRadius: Float
+            bottomCornerRadius: Float,
         ) {
             radii[0] = topCornerRadius
             radii[1] = topCornerRadius

@@ -355,6 +355,7 @@ cc_defaults {
         "jni/AnimatedImageDrawable.cpp",
         "jni/Bitmap.cpp",
         "jni/BitmapRegionDecoder.cpp",
+        "jni/RuntimeXfermode.cpp",
         "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",

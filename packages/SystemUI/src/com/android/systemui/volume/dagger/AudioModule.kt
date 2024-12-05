@@ -86,7 +86,10 @@ interface AudioModule {
             @Background coroutineContext: CoroutineContext,
             volumeLogger: VolumeLogger,
         ): AudioSharingRepository =
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 AudioSharingRepositoryImpl(
                     contentResolver,
                     localBluetoothManager,

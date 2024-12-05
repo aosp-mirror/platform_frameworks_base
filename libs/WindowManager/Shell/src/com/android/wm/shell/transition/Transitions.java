@@ -41,7 +41,6 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived;
 import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.window.flags.Flags.migratePredictiveBackTransition;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 
@@ -202,6 +201,12 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     /** Transition type to minimize a task. */
     public static final int TRANSIT_MINIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 20;
+
+    /** Transition to start the recents transition */
+    public static final int TRANSIT_START_RECENTS_TRANSITION = TRANSIT_FIRST_CUSTOM + 21;
+
+    /** Transition to end the recents transition */
+    public static final int TRANSIT_END_RECENTS_TRANSITION = TRANSIT_FIRST_CUSTOM + 22;
 
     /** Transition type for desktop mode transitions. */
     public static final int TRANSIT_DESKTOP_MODE_TYPES =
@@ -367,7 +372,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mOrganizer.shareTransactionQueue();
         }
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
+        mShellController.addExternalInterface(IShellTransitions.DESCRIPTOR,
                 this::createExternalInterface, this);
 
         ContentResolver resolver = mContext.getContentResolver();
@@ -1875,6 +1880,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             case TRANSIT_SPLIT_PASSTHROUGH -> "SPLIT_PASSTHROUGH";
             case TRANSIT_CLEANUP_PIP_EXIT -> "CLEANUP_PIP_EXIT";
             case TRANSIT_MINIMIZE -> "MINIMIZE";
+            case TRANSIT_START_RECENTS_TRANSITION -> "START_RECENTS_TRANSITION";
+            case TRANSIT_END_RECENTS_TRANSITION -> "END_RECENTS_TRANSITION";
             default -> "";
         };
         return typeStr + "(FIRST_CUSTOM+" + (transitType - TRANSIT_FIRST_CUSTOM) + ")";

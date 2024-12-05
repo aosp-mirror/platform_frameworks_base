@@ -573,7 +573,7 @@ public class PhonePipMenuController implements PipMenuController,
             @PipTransitionState.TransitionState int newState, Bundle extra) {
         switch (newState) {
             case PipTransitionState.ENTERED_PIP:
-                attach(mPipTransitionState.mPinnedTaskLeash);
+                attach(mPipTransitionState.getPinnedTaskLeash());
                 break;
             case PipTransitionState.EXITED_PIP:
                 detach();

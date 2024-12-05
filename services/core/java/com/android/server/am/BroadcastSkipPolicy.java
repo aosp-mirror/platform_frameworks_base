@@ -19,7 +19,6 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.am.ActivityManagerService.checkComponentPermission;
 import static com.android.server.am.BroadcastQueue.TAG;
-import static com.android.server.am.Flags.usePermissionManagerForBroadcastDeliveryCheck;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -289,33 +288,16 @@ public class BroadcastSkipPolicy {
 
         if (info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermissions != null && r.requiredPermissions.length > 0) {
-            final AttributionSource[] attributionSources;
-            if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                attributionSources = createAttributionSourcesForResolveInfo(info);
-            } else {
-                attributionSources = null;
-            }
+            final AttributionSource[] attributionSources =
+                    createAttributionSourcesForResolveInfo(info);
             for (int i = 0; i < r.requiredPermissions.length; i++) {
                 String requiredPermission = r.requiredPermissions[i];
-                try {
-                    if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                        perm = hasPermissionForDataDelivery(
-                                requiredPermission,
-                                "Broadcast delivered to " + info.activityInfo.name,
-                                attributionSources)
-                                        ? PackageManager.PERMISSION_GRANTED
-                                        : PackageManager.PERMISSION_DENIED;
-                    } else {
-                        perm = AppGlobals.getPackageManager()
-                                .checkPermission(
-                                        requiredPermission,
-                                        info.activityInfo.applicationInfo.packageName,
-                                        UserHandle
-                                                .getUserId(info.activityInfo.applicationInfo.uid));
-                    }
-                } catch (RemoteException e) {
-                    perm = PackageManager.PERMISSION_DENIED;
-                }
+                perm = hasPermissionForDataDelivery(
+                        requiredPermission,
+                        "Broadcast delivered to " + info.activityInfo.name,
+                        attributionSources)
+                                ? PackageManager.PERMISSION_GRANTED
+                                : PackageManager.PERMISSION_DENIED;
                 if (perm != PackageManager.PERMISSION_GRANTED) {
                     return "Permission Denial: receiving "
                             + r.intent + " to "
@@ -323,15 +305,6 @@ public class BroadcastSkipPolicy {
                             + " requires " + requiredPermission
                             + " due to sender " + r.callerPackage
                             + " (uid " + r.callingUid + ")";
-                }
-                if (!usePermissionManagerForBroadcastDeliveryCheck()) {
-                    int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
-                    if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp) {
-                        if (!noteOpForManifestReceiver(appOp, r, info, component)) {
-                            return "Skipping delivery to " + info.activityInfo.packageName
-                                    + " due to required appop " + appOp;
-                        }
-                    }
                 }
             }
         }
@@ -452,35 +425,20 @@ public class BroadcastSkipPolicy {
 
         // Check that the receiver has the required permission(s) to receive this broadcast.
         if (r.requiredPermissions != null && r.requiredPermissions.length > 0) {
-            final AttributionSource attributionSource;
-            if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                attributionSource =
-                        new AttributionSource.Builder(filter.receiverList.uid)
-                                .setPid(filter.receiverList.pid)
-                                .setPackageName(filter.packageName)
-                                .setAttributionTag(filter.featureId)
-                                .build();
-            } else {
-                attributionSource = null;
-            }
+            final AttributionSource attributionSource =
+                    new AttributionSource.Builder(filter.receiverList.uid)
+                            .setPid(filter.receiverList.pid)
+                            .setPackageName(filter.packageName)
+                            .setAttributionTag(filter.featureId)
+                            .build();
             for (int i = 0; i < r.requiredPermissions.length; i++) {
                 String requiredPermission = r.requiredPermissions[i];
-                final int perm;
-                if (usePermissionManagerForBroadcastDeliveryCheck()) {
-                    perm = hasPermissionForDataDelivery(
-                            requiredPermission,
-                            "Broadcast delivered to registered receiver " + filter.receiverId,
-                            attributionSource)
-                                    ? PackageManager.PERMISSION_GRANTED
-                                    : PackageManager.PERMISSION_DENIED;
-                } else {
-                    perm = checkComponentPermission(
-                            requiredPermission,
-                            filter.receiverList.pid,
-                            filter.receiverList.uid,
-                            -1 /* owningUid */,
-                            true /* exported */);
-                }
+                final int perm = hasPermissionForDataDelivery(
+                        requiredPermission,
+                        "Broadcast delivered to registered receiver " + filter.receiverId,
+                        attributionSource)
+                                ? PackageManager.PERMISSION_GRANTED
+                                : PackageManager.PERMISSION_DENIED;
                 if (perm != PackageManager.PERMISSION_GRANTED) {
                     return "Permission Denial: receiving "
                             + r.intent.toString()
@@ -490,24 +448,6 @@ public class BroadcastSkipPolicy {
                             + " requires " + requiredPermission
                             + " due to sender " + r.callerPackage
                             + " (uid " + r.callingUid + ")";
-                }
-                if (!usePermissionManagerForBroadcastDeliveryCheck()) {
-                    int appOp = AppOpsManager.permissionToOpCode(requiredPermission);
-                    if (appOp != AppOpsManager.OP_NONE && appOp != r.appOp
-                            && mService.getAppOpsManager().noteOpNoThrow(appOp,
-                            filter.receiverList.uid, filter.packageName, filter.featureId,
-                            "Broadcast delivered to registered receiver " + filter.receiverId)
-                            != AppOpsManager.MODE_ALLOWED) {
-                        return "Appop Denial: receiving "
-                                + r.intent.toString()
-                                + " to " + filter.receiverList.app
-                                + " (pid=" + filter.receiverList.pid
-                                + ", uid=" + filter.receiverList.uid + ")"
-                                + " requires appop " + AppOpsManager.permissionToOp(
-                                requiredPermission)
-                                + " due to sender " + r.callerPackage
-                                + " (uid " + r.callingUid + ")";
-                    }
                 }
             }
         }

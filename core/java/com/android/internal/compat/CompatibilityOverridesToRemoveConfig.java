@@ -30,6 +30,7 @@ import java.util.Set;
  * <p>This class is separate from CompatibilityOverrideConfig since we only need change IDs.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CompatibilityOverridesToRemoveConfig implements Parcelable {
     public final Set<Long> changeIds;
 

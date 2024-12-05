@@ -880,7 +880,8 @@ public class PackageArchiver {
                 PackageInstaller.STATUS_PENDING_USER_ACTION);
         broadcastIntent.putExtra(Intent.EXTRA_INTENT, dialogIntent);
         broadcastIntent.putExtra(Intent.EXTRA_USER, user);
-        sendIntent(statusReceiver, packageName, /* message= */ "", broadcastIntent);
+        mPm.mHandler.post(
+            () -> sendIntent(statusReceiver, packageName, /* message= */ "", broadcastIntent));
     }
 
     private void verifyUninstallPermissions() {

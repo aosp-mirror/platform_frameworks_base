@@ -321,7 +321,7 @@ interface IActivityManager {
     oneway void removeContentProvider(in IBinder connection, boolean stable);
     @UnsupportedAppUsage
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
-    void unbindFinished(in IBinder token, in Intent service, boolean doRebind);
+    void unbindFinished(in IBinder token, in Intent service);
     @UnsupportedAppUsage
     void setProcessImportant(in IBinder token, int pid, boolean isForeground, String reason);
     void setServiceForeground(in ComponentName className, in IBinder token,
@@ -358,7 +358,7 @@ interface IActivityManager {
     @UnsupportedAppUsage
     void resumeAppSwitches();
     boolean bindBackupAgent(in String packageName, int backupRestoreMode, int targetUserId,
-            int backupDestination);
+            int backupDestination, boolean useRestrictedMode);
     void backupAgentCreated(in String packageName, in IBinder agent, int userId);
     void unbindBackupAgent(in ApplicationInfo appInfo);
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
@@ -864,7 +864,8 @@ interface IActivityManager {
 
     /**
      * Suppress or reenable the rate limit on foreground service notification deferral.
-     * This is for use within CTS and is protected by android.permission.WRITE_DEVICE_CONFIG.
+     * This is for use within CTS and is protected by android.permission.WRITE_DEVICE_CONFIG
+     * and WRITE_ALLOWLISTED_DEVICE_CONFIG.
      *
      * @param enable false to suppress rate-limit policy; true to reenable it.
      */
@@ -1027,4 +1028,14 @@ interface IActivityManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DEVICE_POWER)")
     void noteAppRestrictionEnabled(in String packageName, int uid, int restrictionType,
             boolean enabled, int reason, in String subReason, int source, long threshold);
+
+    /**
+     * Creates and returns a new IntentCreatorToken that keeps the creatorUid and refreshes key
+     * fields of the intent passed in.
+     *
+     * @param intent The intent with key fields out of sync of the IntentCreatorToken it contains.
+     * @hide
+     */
+    @EnforcePermission("INTERACT_ACROSS_USERS_FULL")
+    IBinder refreshIntentCreatorToken(in Intent intent);
 }

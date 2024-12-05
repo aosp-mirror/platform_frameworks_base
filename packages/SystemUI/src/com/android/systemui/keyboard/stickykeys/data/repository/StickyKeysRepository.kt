@@ -52,6 +52,7 @@ class StickyKeysRepositoryImpl
 constructor(
     private val inputManager: InputManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    // TODO: b/377244768 - Change to inject SecureSettingsRepository
     secureSettingsRepository: UserAwareSecureSettingsRepository,
     private val stickyKeysLogger: StickyKeysLogger,
 ) : StickyKeysRepository {

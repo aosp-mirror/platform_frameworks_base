@@ -16,7 +16,10 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
+
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1681,6 +1684,26 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * Internal API of getRoutedDevices(). We should not call flag APIs internally.
+     */
+    private @NonNull List<AudioDeviceInfo> getRoutedDevicesInternal() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        final int[] deviceIds = native_getRoutedDeviceIds();
+        if (deviceIds == null || deviceIds.length == 0) {
+            return audioDeviceInfos;
+        }
+
+        for (int i = 0; i < deviceIds.length; i++) {
+            AudioDeviceInfo audioDeviceInfo = AudioManager.getDeviceForPortId(deviceIds[i],
+                    AudioManager.GET_DEVICES_INPUTS);
+            if (audioDeviceInfo != null) {
+                audioDeviceInfos.add(audioDeviceInfo);
+            }
+        }
+        return audioDeviceInfos;
+    }
+
+    /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this MediaRecorder
      * Note: The query is only valid if the MediaRecorder is currently recording.
      * If the recorder is not recording, the returned device can be null or correspond to previously
@@ -1688,11 +1711,24 @@ public class MediaRecorder implements AudioRouting,
      */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
-        int deviceId = native_getRoutedDeviceId();
-        if (deviceId == 0) {
+        final List<AudioDeviceInfo> audioDeviceInfos = getRoutedDevicesInternal();
+        if (audioDeviceInfos.isEmpty()) {
             return null;
         }
-        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_INPUTS);
+        return audioDeviceInfos.get(0);
+    }
+
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * MediaRecorder.
+     * Note: The query is only valid if the MediaRecorder is currently recording.
+     * If the recorder is not recording, the returned devices can be empty or correspond to
+     * previously selected devices when the recorder was last active.
+     */
+    @Override
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        return getRoutedDevicesInternal();
     }
 
     /*
@@ -1752,7 +1788,7 @@ public class MediaRecorder implements AudioRouting,
     }
 
     private native final boolean native_setInputDevice(int deviceId);
-    private native final int native_getRoutedDeviceId();
+    private native int[] native_getRoutedDeviceIds();
     private native final void native_enableDeviceCallback(boolean enabled);
 
     //--------------------------------------------------------------------------

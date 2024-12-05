@@ -166,7 +166,7 @@ public class RescueParty {
     /** Register the Rescue Party observer as a Package Watchdog health observer */
     public static void registerHealthObserver(Context context) {
         PackageWatchdog.getInstance(context).registerHealthObserver(
-                RescuePartyObserver.getInstance(context));
+                RescuePartyObserver.getInstance(context), null);
     }
 
     private static boolean isDisabled() {
@@ -387,7 +387,7 @@ public class RescueParty {
             callingPackageList.addAll(callingPackages);
             Slog.i(TAG, "Starting to observe: " + callingPackageList + ", updated namespace: "
                     + updatedNamespace);
-            PackageWatchdog.getInstance(context).startObservingHealth(
+            PackageWatchdog.getInstance(context).startExplicitHealthCheck(
                     rescuePartyObserver,
                     callingPackageList,
                     DEFAULT_OBSERVING_DURATION_MS);
@@ -859,7 +859,7 @@ public class RescueParty {
         }
 
         @Override
-        public boolean execute(@Nullable VersionedPackage failedPackage,
+        public boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
                 @FailureReasons int failureReason, int mitigationCount) {
             if (isDisabled()) {
                 return false;
@@ -927,7 +927,7 @@ public class RescueParty {
         }
 
         @Override
-        public boolean executeBootLoopMitigation(int mitigationCount) {
+        public boolean onExecuteBootLoopMitigation(int mitigationCount) {
             if (isDisabled()) {
                 return false;
             }

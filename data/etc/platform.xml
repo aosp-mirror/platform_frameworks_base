@@ -213,6 +213,8 @@
     <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="gpu_service" />
     <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="keystore" />
 
+    <assign-permission name="android.permission.DYNAMIC_INSTRUMENTATION" uid="uprobestats" />
+
     <split-permission name="android.permission.ACCESS_FINE_LOCATION">
         <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
     </split-permission>
@@ -270,6 +272,16 @@
     <split-permission name="android.permission.BODY_SENSORS"
                       targetSdk="33">
         <new-permission name="android.permission.BODY_SENSORS_BACKGROUND" />
+    </split-permission>
+    <split-permission name="android.permission.BODY_SENSORS"
+                      featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"
+                      targetSdk="36">
+        <new-permission name="android.permission.health.READ_HEART_RATE" />
+    </split-permission>
+    <split-permission name="android.permission.BODY_SENSORS_BACKGROUND"
+                      featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"
+                      targetSdk="36">
+        <new-permission name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
     </split-permission>
     <split-permission name="android.permission.READ_EXTERNAL_STORAGE"
                       targetSdk="33">

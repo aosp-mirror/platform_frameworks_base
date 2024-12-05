@@ -49,6 +49,7 @@ import android.content.ComponentName;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.BinderProxy;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1089,8 +1090,13 @@ public final class TransitionInfo implements Parcelable {
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder();
-            sb.append('{'); sb.append(mContainer);
-            sb.append(" m="); sb.append(modeToString(mMode));
+            sb.append('{');
+            if (mContainer != null && !(mContainer.asBinder() instanceof BinderProxy)) {
+                // Only log the token if it is not a binder proxy and has additional container info
+                sb.append(mContainer);
+                sb.append(" ");
+            }
+            sb.append("m="); sb.append(modeToString(mMode));
             sb.append(" f="); sb.append(flagsToString(mFlags));
             if (mParent != null) {
                 sb.append(" p="); sb.append(mParent);

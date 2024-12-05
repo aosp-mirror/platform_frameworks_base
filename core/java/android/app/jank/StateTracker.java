@@ -180,7 +180,11 @@ public class StateTracker {
         }
     }
 
-    private String getStateKey(String widgetCategory, String widgetId, String widgetState) {
+    /**
+     * Returns a concatenated string of the inputs. This key can be used to retrieve both pending
+     * stats and the state that was used to create the pending stat.
+     */
+    public String getStateKey(String widgetCategory, String widgetId, String widgetState) {
         return widgetCategory + widgetId + widgetState;
     }
 

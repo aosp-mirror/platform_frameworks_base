@@ -176,6 +176,30 @@ class GroupedTaskInfoTest : ShellTestCase() {
         assertThat(recentTaskInfoParcel.minimizedTaskIds).isEqualTo(arrayOf(2).toIntArray())
     }
 
+    @Test
+    fun testGetTaskById_singleTasks() {
+        val task1 = createTaskInfo(id = 1234)
+
+        val taskInfo = GroupedTaskInfo.forFullscreenTasks(task1)
+
+        assertThat(taskInfo.getTaskById(1234)).isEqualTo(task1)
+        assertThat(taskInfo.containsTask(1234)).isTrue()
+    }
+
+    @Test
+    fun testGetTaskById_multipleTasks() {
+        val task1 = createTaskInfo(id = 1)
+        val task2 = createTaskInfo(id = 2)
+        val splitBounds = SplitBounds(Rect(), Rect(), 1, 2, SNAP_TO_2_50_50)
+
+        val taskInfo = GroupedTaskInfo.forSplitTasks(task1, task2, splitBounds)
+
+        assertThat(taskInfo.getTaskById(1)).isEqualTo(task1)
+        assertThat(taskInfo.getTaskById(2)).isEqualTo(task2)
+        assertThat(taskInfo.containsTask(1)).isTrue()
+        assertThat(taskInfo.containsTask(2)).isTrue()
+    }
+
     private fun createTaskInfo(id: Int) = ActivityManager.RecentTaskInfo().apply {
         taskId = id
         token = WindowContainerToken(mock(IWindowContainerToken::class.java))

@@ -119,9 +119,16 @@ class PreAuthInfo {
                 == BiometricManager.Authenticators.IDENTITY_CHECK;
         boolean isMandatoryBiometricsAuthentication = false;
 
+        final int effectiveUserId;
+        if (Flags.effectiveUserBp()) {
+            effectiveUserId = userManager.getCredentialOwnerProfile(userId);
+        } else {
+            effectiveUserId = userId;
+        }
+
         if (dropCredentialFallback(promptInfo.getAuthenticators(),
                 settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
-                        userId), trustManager)) {
+                        effectiveUserId), trustManager)) {
             isMandatoryBiometricsAuthentication = true;
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
             if (promptInfo.getNegativeButtonText() == null) {
@@ -144,13 +151,6 @@ class PreAuthInfo {
 
         final List<BiometricSensor> eligibleSensors = new ArrayList<>();
         final List<Pair<BiometricSensor, Integer>> ineligibleSensors = new ArrayList<>();
-
-        final int effectiveUserId;
-        if (Flags.effectiveUserBp()) {
-            effectiveUserId = userManager.getCredentialOwnerProfile(userId);
-        } else {
-            effectiveUserId = userId;
-        }
 
         if (biometricRequested) {
             for (BiometricSensor sensor : sensors) {
@@ -226,10 +226,6 @@ class PreAuthInfo {
             return BIOMETRIC_NO_HARDWARE;
         }
 
-        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
-            return BIOMETRIC_HARDWARE_NOT_DETECTED;
-        }
-
         final boolean wasStrongEnough =
                 Utils.isAtLeastStrength(sensor.oemStrength, requestedStrength);
         final boolean isStrongEnough =
@@ -239,6 +235,10 @@ class PreAuthInfo {
             return BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;
         } else if (!wasStrongEnough) {
             return BIOMETRIC_INSUFFICIENT_STRENGTH;
+        }
+
+        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
+            return BIOMETRIC_HARDWARE_NOT_DETECTED;
         }
 
         try {

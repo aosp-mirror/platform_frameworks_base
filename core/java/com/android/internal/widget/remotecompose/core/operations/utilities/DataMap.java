@@ -15,18 +15,20 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
-public class DataMap {
-    public String[] mNames;
-    public int[] mIds;
-    public byte[] mTypes;
+import android.annotation.NonNull;
 
-    public DataMap(String[] names, byte[] types, int[] ids) {
+public class DataMap {
+    @NonNull public final String[] mNames;
+    @NonNull public final int[] mIds;
+    @NonNull public final byte[] mTypes;
+
+    public DataMap(@NonNull String[] names, @NonNull byte[] types, @NonNull int[] ids) {
         mNames = names;
         mTypes = types;
         mIds = ids;
     }
 
-    public int getPos(String str) {
+    public int getPos(@NonNull String str) {
         for (int i = 0; i < mNames.length; i++) {
             String name = mNames[i];
             if (str.equals(name)) {

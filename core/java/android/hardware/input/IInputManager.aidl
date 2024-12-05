@@ -266,19 +266,21 @@ interface IInputManager {
     @PermissionManuallyEnforced
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
-    int addCustomInputGesture(in AidlInputGestureData data);
+    int addCustomInputGesture(int userId, in AidlInputGestureData data);
 
     @PermissionManuallyEnforced
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
-    int removeCustomInputGesture(in AidlInputGestureData data);
+    int removeCustomInputGesture(int userId, in AidlInputGestureData data);
 
     @PermissionManuallyEnforced
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
-    void removeAllCustomInputGestures();
+    void removeAllCustomInputGestures(int userId, int tag);
 
-    AidlInputGestureData[] getCustomInputGestures();
+    AidlInputGestureData[] getCustomInputGestures(int userId, int tag);
 
     AidlInputGestureData[] getAppLaunchBookmarks();
+
+    void resetLockedModifierState();
 }

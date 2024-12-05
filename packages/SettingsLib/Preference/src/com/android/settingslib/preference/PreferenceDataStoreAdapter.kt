@@ -20,7 +20,7 @@ import androidx.preference.PreferenceDataStore
 import com.android.settingslib.datastore.KeyValueStore
 
 /** Adapter to translate [KeyValueStore] into [PreferenceDataStore]. */
-class PreferenceDataStoreAdapter(private val keyValueStore: KeyValueStore) : PreferenceDataStore() {
+class PreferenceDataStoreAdapter(val keyValueStore: KeyValueStore) : PreferenceDataStore() {
 
     override fun getBoolean(key: String, defValue: Boolean): Boolean =
         keyValueStore.getValue(key, Boolean::class.javaObjectType) ?: defValue

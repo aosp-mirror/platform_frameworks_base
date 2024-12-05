@@ -182,21 +182,6 @@ java_device_for_host {
     visibility: [":__subpackages__"],
 }
 
-// Separated out from ravenwood-junit-impl since it needs to compile
-// against `module_current`
-java_library {
-    name: "ravenwood-junit-impl-flag",
-    srcs: [
-        "junit-flag-src/**/*.java",
-    ],
-    sdk_version: "module_current",
-    libs: [
-        "junit",
-        "flag-junit",
-    ],
-    visibility: ["//visibility:public"],
-}
-
 // Carefully compiles against only module_current to support tests that
 // want to verify they're unbundled.  The "impl" library above is what
 // ships inside the Ravenwood environment to actually drive any API
@@ -279,14 +264,15 @@ cc_defaults {
     shared_libs: [
         "liblog",
     ],
+    visibility: ["//visibility:private"],
 }
 
 // We need this as a separate library because we need to overload the
 // sysprop symbols before libbase is loaded into the process
 cc_library_host_shared {
-    name: "libravenwood_sysprop",
+    name: "libravenwood_initializer",
     defaults: ["ravenwood_jni_defaults"],
-    srcs: ["runtime-jni/ravenwood_sysprop.cpp"],
+    srcs: ["runtime-jni/ravenwood_initializer.cpp"],
 }
 
 cc_library_host_shared {
@@ -301,7 +287,6 @@ cc_library_host_shared {
         "libutils",
         "libcutils",
     ],
-    visibility: ["//frameworks/base"],
 }
 
 // For collecting the *stats.csv files in a known directory under out/host/linux-x86/testcases/.
@@ -368,6 +353,7 @@ filegroup {
         ":ravenwood-empty-res",
         ":framework-platform-compat-config",
         ":services-platform-compat-config",
+        "texts/ravenwood-build.prop",
     ],
     device_first_srcs: [
         ":apex_icu.dat",
@@ -650,7 +636,6 @@ android_ravenwood_libgroup {
         "flag-junit",
         "ravenwood-framework",
         "ravenwood-junit-impl",
-        "ravenwood-junit-impl-flag",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
 
@@ -659,7 +644,7 @@ android_ravenwood_libgroup {
     ],
     jni_libs: [
         // Libraries has to be loaded in the following order
-        "libravenwood_sysprop",
+        "libravenwood_initializer",
         "libravenwood_runtime",
         "libandroid_runtime",
     ],

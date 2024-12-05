@@ -139,7 +139,7 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
         }
 
         static JankInfo createFromSurfaceControlCallback(SurfaceControl.JankData jankStat) {
-            return new JankInfo(jankStat.frameVsyncId).update(jankStat);
+            return new JankInfo(jankStat.getVsyncId()).update(jankStat);
         }
 
         private JankInfo(long frameVsyncId) {
@@ -154,10 +154,10 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
 
         private JankInfo update(SurfaceControl.JankData jankStat) {
             this.surfaceControlCallbackFired = true;
-            this.jankType = jankStat.jankType;
-            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.frameIntervalNs);
+            this.jankType = jankStat.getJankType();
+            this.refreshRate = DisplayRefreshRate.getRefreshRate(jankStat.getFrameIntervalNanos());
             if (Flags.useSfFrameDuration()) {
-                this.totalDurationNanos = jankStat.actualAppFrameTimeNs;
+                this.totalDurationNanos = jankStat.getActualAppFrameTimeNanos();
             }
             return this;
         }
@@ -458,14 +458,14 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                 }
 
                 for (SurfaceControl.JankData jankStat : jankData) {
-                    if (!isInRange(jankStat.frameVsyncId)) {
+                    if (!isInRange(jankStat.getVsyncId())) {
                         continue;
                     }
-                    JankInfo info = findJankInfo(jankStat.frameVsyncId);
+                    JankInfo info = findJankInfo(jankStat.getVsyncId());
                     if (info != null) {
                         info.update(jankStat);
                     } else {
-                        mJankInfos.put((int) jankStat.frameVsyncId,
+                        mJankInfos.put((int) jankStat.getVsyncId(),
                                 JankInfo.createFromSurfaceControlCallback(jankStat));
                     }
                 }
@@ -683,14 +683,6 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
                     missedAppFramesCount,
                     maxSuccessiveMissedFramesCount);
         }
-    }
-
-    ThreadedRendererWrapper getThreadedRenderer() {
-        return mRendererWrapper;
-    }
-
-    ViewRootWrapper getViewRoot() {
-        return mViewRoot;
     }
 
     private boolean shouldTriggerPerfetto(int missedFramesCount, int maxFrameTimeNanos) {

@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.settings;
 
+import static com.android.systemui.util.settings.JavaAdapter.newCoroutineScope;
+
 import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.annotation.NonNull;
@@ -25,6 +27,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +37,7 @@ import java.util.Map;
 public class FakeGlobalSettings implements GlobalSettings {
     private final Map<String, String> mValues = new HashMap<>();
     private final Map<String, List<ContentObserver>> mContentObserversAllUsers = new HashMap<>();
-    private final CoroutineDispatcher mDispatcher;
+    private final CoroutineScope mSettingsScope;
 
     public static final Uri CONTENT_URI = Uri.parse("content://settings/fake_global");
 
@@ -44,11 +47,15 @@ public class FakeGlobalSettings implements GlobalSettings {
      */
     @Deprecated
     public FakeGlobalSettings() {
-        mDispatcher = StandardTestDispatcher(/* scheduler = */ null, /* name = */ null);
+        CoroutineDispatcher dispatcher = StandardTestDispatcher(
+                /* scheduler = */ null,
+                /* name = */ null
+        );
+        mSettingsScope = newCoroutineScope(dispatcher);
     }
 
     public FakeGlobalSettings(CoroutineDispatcher dispatcher) {
-        mDispatcher = dispatcher;
+        mSettingsScope = newCoroutineScope(dispatcher);
     }
 
     @NonNull
@@ -61,8 +68,8 @@ public class FakeGlobalSettings implements GlobalSettings {
 
     @NonNull
     @Override
-    public CoroutineDispatcher getBackgroundDispatcher() {
-        return mDispatcher;
+    public CoroutineScope getSettingsScope() {
+        return mSettingsScope;
     }
 
     @Override

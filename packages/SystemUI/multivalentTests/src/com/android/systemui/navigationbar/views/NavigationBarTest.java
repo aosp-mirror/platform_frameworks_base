@@ -90,6 +90,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavBarHelper;
 import com.android.systemui.navigationbar.NavigationBarController;
@@ -116,8 +117,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.data.repository.LightBarControllerStore;
-import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.AutoHideControllerStore;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
@@ -148,6 +148,7 @@ import java.util.concurrent.Executor;
 @SmallTest
 public class NavigationBarTest extends SysuiTestCase {
     private static final int EXTERNAL_DISPLAY_ID = 2;
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
 
     private NavigationBar mNavigationBar;
     private NavigationBar mExternalDisplayNavigationBar;
@@ -209,11 +210,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private LightBarController mLightBarController;
     @Mock
-    private LightBarControllerStore mLightBarControllerStore;
-    @Mock
-    private AutoHideController mAutoHideController;
-    @Mock
-    private AutoHideController.Factory mAutoHideControllerFactory;
+    private LightBarController.Factory mLightBarcontrollerFactory;
     @Mock
     private WindowManager mWindowManager;
     @Mock
@@ -248,6 +245,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
     private TaskStackChangeListeners mTaskStackChangeListeners =
             TaskStackChangeListeners.getTestInstance();
+    private final AutoHideControllerStore mAutoHideControllerStore =
+            mKosmos.getAutoHideControllerStore();
 
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
@@ -258,8 +257,7 @@ public class NavigationBarTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mLightBarControllerStore.forDisplay(anyInt())).thenReturn(mLightBarController);
-        when(mAutoHideControllerFactory.create(any(Context.class))).thenReturn(mAutoHideController);
+        when(mLightBarcontrollerFactory.create(any(Context.class))).thenReturn(mLightBarController);
         when(mNavigationBarView.getHomeButton()).thenReturn(mHomeButton);
         when(mNavigationBarView.getRecentsButton()).thenReturn(mRecentsButton);
         when(mNavigationBarView.getAccessibilityButton()).thenReturn(mAccessibilityButton);
@@ -650,9 +648,9 @@ public class NavigationBarTest extends SysuiTestCase {
                 mFakeExecutor,
                 mUiEventLogger,
                 mNavBarHelper,
-                mLightBarControllerStore,
-                mAutoHideController,
-                mAutoHideControllerFactory,
+                mLightBarController,
+                mLightBarcontrollerFactory,
+                mAutoHideControllerStore,
                 Optional.of(mTelecomManager),
                 mInputMethodManager,
                 mDeadZone,

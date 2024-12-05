@@ -35,6 +35,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.hasParent
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -403,5 +404,41 @@ class MovableElementTest {
         // there by using the size information from SceneA.
         rule.waitForIdle()
         rule.onNodeWithTag(fooParentInOverlayTag).assertSizeIsEqualTo(fooSize)
+    }
+
+    @Test
+    fun movableElementInOverlayShouldBeComposed() {
+        val fooKey = MovableElementKey("foo", contents = setOf(OverlayA))
+        val fooContentTag = "fooContentTag"
+
+        @Composable
+        fun ContentScope.MovableFoo(modifier: Modifier = Modifier) {
+            MovableElement(fooKey, modifier) {
+                content { Box(Modifier.testTag(fooContentTag).size(100.dp)) }
+            }
+        }
+
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutState(
+                    initialScene = SceneA,
+                    initialOverlays = setOf(OverlayA),
+                )
+            }
+
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    scene(SceneA) { Box(Modifier.fillMaxSize()) }
+                    overlay(OverlayA) { MovableFoo() }
+                    overlay(OverlayB) { Box(Modifier.size(50.dp)) }
+                }
+            }
+
+        rule.onNode(hasTestTag(fooContentTag)).assertIsDisplayed().assertSizeIsEqualTo(100.dp)
+
+        // Show overlay B. This shouldn't have any impact on Foo that should still be composed in A.
+        scope.launch { state.startTransition(transition(SceneA, OverlayB)) }
+        rule.onNode(hasTestTag(fooContentTag)).assertIsDisplayed().assertSizeIsEqualTo(100.dp)
     }
 }

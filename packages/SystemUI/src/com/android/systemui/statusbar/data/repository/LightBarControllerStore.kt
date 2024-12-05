@@ -44,6 +44,7 @@ constructor(
     private val factory: LightBarControllerImpl.Factory,
     private val displayScopeRepository: DisplayScopeRepository,
     private val statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
+    private val darkIconDispatcherStore: DarkIconDispatcherStore,
 ) :
     LightBarControllerStore,
     PerDisplayStoreImpl<LightBarController>(backgroundApplicationScope, displayRepository) {
@@ -53,6 +54,7 @@ constructor(
             .create(
                 displayId,
                 displayScopeRepository.scopeForDisplay(displayId),
+                darkIconDispatcherStore.forDisplay(displayId),
                 statusBarModeRepositoryStore.forDisplay(displayId),
             )
             .also { it.start() }

@@ -56,7 +56,7 @@ import libcore.util.NativeAllocationRegistry;
  * @hide
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("LongArrayMultiStateCounter_host")
+@RavenwoodRedirectionClass("LongArrayMultiStateCounter_ravenwood")
 public final class LongArrayMultiStateCounter implements Parcelable {
     private static volatile NativeAllocationRegistry sRegistry;
     private final int mStateCount;

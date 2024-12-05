@@ -19,6 +19,7 @@ package androidx.window.extensions.area;
 import static android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
@@ -104,6 +105,30 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @GuardedBy("mLock")
     private int mLastReportedRearDisplayPresentationStatus;
 
+    @VisibleForTesting
+    static int getRdmV1Identifier(List<DeviceState> currentSupportedDeviceStates) {
+        for (int i = 0; i < currentSupportedDeviceStates.size(); i++) {
+            DeviceState state = currentSupportedDeviceStates.get(i);
+            if (state.hasProperty(PROPERTY_FEATURE_REAR_DISPLAY)
+                    && !state.hasProperty(PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT)) {
+                return state.getIdentifier();
+            }
+        }
+        return INVALID_DEVICE_STATE_IDENTIFIER;
+    }
+
+    @VisibleForTesting
+    static int getRdmV2Identifier(List<DeviceState> currentSupportedDeviceStates) {
+        for (int i = 0; i < currentSupportedDeviceStates.size(); i++) {
+            DeviceState state = currentSupportedDeviceStates.get(i);
+            if (state.hasProperties(PROPERTY_FEATURE_REAR_DISPLAY,
+                    PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT)) {
+                return state.getIdentifier();
+            }
+        }
+        return INVALID_DEVICE_STATE_IDENTIFIER;
+    }
+
     public WindowAreaComponentImpl(@NonNull Context context) {
         mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
         mDisplayManager = context.getSystemService(DisplayManager.class);
@@ -112,12 +137,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         mCurrentSupportedDeviceStates = mDeviceStateManager.getSupportedDeviceStates();
 
         if (Flags.deviceStatePropertyMigration()) {
-            for (int i = 0; i < mCurrentSupportedDeviceStates.size(); i++) {
-                DeviceState state = mCurrentSupportedDeviceStates.get(i);
-                if (state.hasProperty(PROPERTY_FEATURE_REAR_DISPLAY)) {
-                    mRearDisplayState = state.getIdentifier();
-                    break;
-                }
+            if (Flags.deviceStateRdmV2()) {
+                mRearDisplayState = getRdmV2Identifier(mCurrentSupportedDeviceStates);
+            } else {
+                mRearDisplayState = getRdmV1Identifier(mCurrentSupportedDeviceStates);
             }
         } else {
             mFoldedDeviceStates = context.getResources().getIntArray(

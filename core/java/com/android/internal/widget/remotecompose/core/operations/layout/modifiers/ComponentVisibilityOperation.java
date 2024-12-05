@@ -17,7 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
-import com.android.internal.widget.remotecompose.core.CoreDocument;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -32,54 +34,68 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Allows setting visibility on a component */
-public class ComponentVisibilityOperation
+public class ComponentVisibilityOperation extends Operation
         implements ModifierOperation, VariableSupport, DecoratorComponent {
     private static final int OP_CODE = Operations.MODIFIER_VISIBILITY;
 
     int mVisibilityId;
-    Component.Visibility mVisibility = Component.Visibility.VISIBLE;
+    @NonNull Component.Visibility mVisibility = Component.Visibility.VISIBLE;
     private LayoutComponent mParent;
 
     public ComponentVisibilityOperation(int id) {
         mVisibilityId = id;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ComponentVisibilityOperation(" + mVisibilityId + ")";
     }
 
+    @NonNull
     public String serializedName() {
         return "COMPONENT_VISIBILITY";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(indent, serializedName() + " = " + mVisibilityId);
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void write(WireBuffer buffer) {}
+    public void write(@NonNull WireBuffer buffer) {}
 
-    public static void apply(WireBuffer buffer, int valueId) {
+    public static void apply(@NonNull WireBuffer buffer, int valueId) {
         buffer.start(OP_CODE);
         buffer.writeInt(valueId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int valueId = buffer.readInt();
         operations.add(new ComponentVisibilityOperation(valueId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ComponentVisibility")
                 .description(
                         "This operation allows setting a component"
@@ -88,12 +104,12 @@ public class ComponentVisibilityOperation
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         context.listensTo(mVisibilityId, this);
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         int visibility = context.getInteger(mVisibilityId);
         if (visibility == Component.Visibility.VISIBLE.ordinal()) {
             mVisibility = Component.Visibility.VISIBLE;
@@ -109,14 +125,11 @@ public class ComponentVisibilityOperation
         }
     }
 
-    public void setParent(LayoutComponent parent) {
+    public void setParent(@Nullable LayoutComponent parent) {
         mParent = parent;
     }
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {}
-
-    @Override
-    public void onClick(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {}
+    public void layout(
+            @NonNull RemoteContext context, Component component, float width, float height) {}
 }

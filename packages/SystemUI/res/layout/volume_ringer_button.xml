@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 <FrameLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
@@ -25,6 +26,7 @@
         android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
         android:contentDescription="@string/volume_ringer_mode"
         android:gravity="center"
+        android:tint="?androidprv:attr/materialColorOnSurface"
         android:src="@drawable/volume_ringer_item_bg"
         android:background="@drawable/volume_ringer_item_bg"/>
 

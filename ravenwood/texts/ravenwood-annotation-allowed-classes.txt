@@ -15,7 +15,9 @@ com.android.internal.os.BatteryStatsHistory
 com.android.internal.os.BatteryStatsHistoryIterator
 com.android.internal.os.Clock
 com.android.internal.os.LongArrayMultiStateCounter
+com.android.internal.os.LongArrayMultiStateCounter_ravenwood
 com.android.internal.os.LongMultiStateCounter
+com.android.internal.os.LongMultiStateCounter_ravenwood
 com.android.internal.os.MonotonicClock
 com.android.internal.os.PowerProfile
 com.android.internal.os.PowerStats
@@ -143,6 +145,7 @@ android.os.LocaleList
 android.os.Looper
 android.os.Message
 android.os.MessageQueue
+android.os.MessageQueue_ravenwood
 android.os.PackageTagsList
 android.os.Parcel
 android.os.ParcelFileDescriptor
@@ -235,6 +238,7 @@ android.database.Cursor
 android.database.CursorIndexOutOfBoundsException
 android.database.CursorJoiner
 android.database.CursorWindow
+android.database.CursorWindow_ravenwood
 android.database.CursorWrapper
 android.database.DataSetObservable
 android.database.DataSetObserver
@@ -365,3 +369,8 @@ com.android.server.utils.TimingsTraceAndSlog
 
 android.os.IpcDataCache
 android.app.PropertyInvalidatedCache
+
+android.app.compat.*
+com.android.server.compat.*
+com.android.internal.compat.*
+android.app.AppCompatCallbacks

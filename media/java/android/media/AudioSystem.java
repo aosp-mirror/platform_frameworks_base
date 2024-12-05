@@ -559,6 +559,30 @@ public class AudioSystem
                 return "AUDIO_FORMAT_MPEGH_SUB_LC_L3";
             case /* AUDIO_FORMAT_MPEGH_SUB_LC_L4   */ 0x2C000024:
                 return "AUDIO_FORMAT_MPEGH_SUB_LC_L4";
+            case /* AUDIO_FORMAT_IAMF_SIMPLE_OPUS */  0x34010001:
+                return "AUDIO_FORMAT_IAMF_SIMPLE_OPUS";
+            case /* AUDIO_FORMAT_IAMF_SIMPLE_AAC */   0x34010002:
+                return "AUDIO_FORMAT_IAMF_SIMPLE_AAC";
+            case /* AUDIO_FORMAT_IAMF_SIMPLE_FLAC */  0x34010004:
+                return "AUDIO_FORMAT_IAMF_SIMPLE_FLAC";
+            case /* AUDIO_FORMAT_IAMF_SIMPLE_PCM */   0x34010008:
+                return "AUDIO_FORMAT_IAMF_SIMPLE_PCM";
+            case /* AUDIO_FORMAT_IAMF_BASE_OPUS */    0x34020001:
+                return "AUDIO_FORMAT_IAMF_BASE_OPUS";
+            case /* AUDIO_FORMAT_IAMF_BASE_AAC */     0x34020002:
+                return "AUDIO_FORMAT_IAMF_BASE_AAC";
+            case /* AUDIO_FORMAT_IAMF_BASE_FLAC */    0x34020004:
+                return "AUDIO_FORMAT_IAMF_BASE_FLAC";
+            case /* AUDIO_FORMAT_IAMF_BASE_PCM */     0x34020008:
+                return "AUDIO_FORMAT_IAMF_BASE_PCM";
+            case /* AUDIO_FORMAT_IAMF_BASE_ENHANCED_OPUS */ 0x34040001:
+                return "AUDIO_FORMAT_IAMF_BASE_ENHANCED_OPUS";
+            case /* AUDIO_FORMAT_IAMF_BASE_ENHANCED_AAC */  0x34040002:
+                return "AUDIO_FORMAT_IAMF_BASE_ENHANCED_AAC";
+            case /* AUDIO_FORMAT_IAMF_BASE_ENHANCED_FLAC */ 0x34040004:
+                return "AUDIO_FORMAT_IAMF_BASE_ENHANCED_FLAC";
+            case /* AUDIO_FORMAT_IAMF_BASE_ENHANCED_PCM */  0x34040008:
+                return "AUDIO_FORMAT_IAMF_BASE_ENHANCED_PCM";
             default:
                 return "AUDIO_FORMAT_(" + audioFormat + ")";
         }

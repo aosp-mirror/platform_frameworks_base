@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.Notification.COLOR_INVALID;
 
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.text.TextUtils;
@@ -71,6 +72,25 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
     public TextView getTextView() {
         return mTextView;
+    }
+
+    /**
+     * Get layout resource for this view based on {@param isConversation}.
+     */
+    public static int getLayoutResource(boolean isConversation) {
+        if (Flags.notificationsRedesignTemplates()) {
+            if (isConversation) {
+                return R.layout.notification_2025_hybrid_conversation;
+            } else {
+                return R.layout.notification_2025_hybrid;
+            }
+        } else {
+            if (isConversation) {
+                return R.layout.hybrid_conversation_notification;
+            } else {
+                return R.layout.hybrid_notification;
+            }
+        }
     }
 
     @Override

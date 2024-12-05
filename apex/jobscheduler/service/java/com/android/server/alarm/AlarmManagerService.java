@@ -282,7 +282,6 @@ public class AlarmManagerService extends SystemService {
 
     private final Injector mInjector;
     int mBroadcastRefCount = 0;
-    boolean mUseFrozenStateToDropListenerAlarms;
     MetricsHelper mMetricsHelper;
     PowerManager.WakeLock mWakeLock;
     SparseIntArray mAlarmsPerUid = new SparseIntArray();
@@ -1784,40 +1783,37 @@ public class AlarmManagerService extends SystemService {
         mMetricsHelper = new MetricsHelper(getContext(), mLock);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
-        mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
         mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms()
                 && UserManager.supportsMultipleUsers();
         if (mStartUserBeforeScheduledAlarms) {
             mUserWakeupStore = new UserWakeupStore();
             mUserWakeupStore.init();
         }
-        if (mUseFrozenStateToDropListenerAlarms) {
-            final ActivityManager.UidFrozenStateChangedCallback callback = (uids, frozenStates) -> {
-                final int size = frozenStates.length;
-                if (uids.length != size) {
-                    Slog.wtf(TAG, "Got different length arrays in frozen state callback!"
-                            + " uids.length: " + uids.length + " frozenStates.length: " + size);
-                    // Cannot process received data in any meaningful way.
-                    return;
+        final ActivityManager.UidFrozenStateChangedCallback callback = (uids, frozenStates) -> {
+            final int size = frozenStates.length;
+            if (uids.length != size) {
+                Slog.wtf(TAG, "Got different length arrays in frozen state callback!"
+                        + " uids.length: " + uids.length + " frozenStates.length: " + size);
+                // Cannot process received data in any meaningful way.
+                return;
+            }
+            final IntArray affectedUids = new IntArray();
+            for (int i = 0; i < size; i++) {
+                if (frozenStates[i] != UID_FROZEN_STATE_FROZEN) {
+                    continue;
                 }
-                final IntArray affectedUids = new IntArray();
-                for (int i = 0; i < size; i++) {
-                    if (frozenStates[i] != UID_FROZEN_STATE_FROZEN) {
-                        continue;
-                    }
-                    if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED,
-                            uids[i])) {
-                        continue;
-                    }
-                    affectedUids.add(uids[i]);
+                if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED,
+                        uids[i])) {
+                    continue;
                 }
-                if (affectedUids.size() > 0) {
-                    removeExactListenerAlarms(affectedUids.toArray());
-                }
-            };
-            final ActivityManager am = getContext().getSystemService(ActivityManager.class);
-            am.registerUidFrozenStateChangedCallback(new HandlerExecutor(mHandler), callback);
-        }
+                affectedUids.add(uids[i]);
+            }
+            if (affectedUids.size() > 0) {
+                removeExactListenerAlarms(affectedUids.toArray());
+            }
+        };
+        final ActivityManager am = getContext().getSystemService(ActivityManager.class);
+        am.registerUidFrozenStateChangedCallback(new HandlerExecutor(mHandler), callback);
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
             @Override
@@ -2994,13 +2990,10 @@ public class AlarmManagerService extends SystemService {
 
             pw.println("Feature Flags:");
             pw.increaseIndent();
-            pw.print(Flags.FLAG_USE_FROZEN_STATE_TO_DROP_LISTENER_ALARMS,
-                    mUseFrozenStateToDropListenerAlarms);
-            pw.println();
             pw.print(Flags.FLAG_START_USER_BEFORE_SCHEDULED_ALARMS,
                     Flags.startUserBeforeScheduledAlarms());
-            pw.decreaseIndent();
             pw.println();
+            pw.decreaseIndent();
             pw.println();
 
             pw.println("App Standby Parole: " + mAppStandbyParole);
@@ -5144,38 +5137,6 @@ public class AlarmManagerService extends SystemService {
         public void removeAlarmsForUid(int uid) {
             synchronized (mLock) {
                 removeForStoppedLocked(uid);
-            }
-        }
-
-        @Override
-        public void handleUidCachedChanged(int uid, boolean cached) {
-            if (mUseFrozenStateToDropListenerAlarms) {
-                // Use ActivityManager#UidFrozenStateChangedCallback instead.
-                return;
-            }
-            if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, uid)) {
-                return;
-            }
-            // Apps can quickly get frozen after being cached, breaking the exactness guarantee on
-            // listener alarms. So going forward, the contract of exact listener alarms explicitly
-            // states that they will be removed as soon as the app goes out of lifecycle. We still
-            // allow a short grace period for quick shuffling of proc-states that may happen
-            // unexpectedly when switching between different lifecycles and is generally hard for
-            // apps to avoid.
-
-            final long delay;
-            synchronized (mLock) {
-                delay = mConstants.CACHED_LISTENER_REMOVAL_DELAY;
-            }
-            final Integer uidObj = uid;
-
-            if (cached && !mHandler.hasEqualMessages(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED,
-                    uidObj)) {
-                mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED, uidObj),
-                        delay);
-            } else {
-                mHandler.removeEqualMessages(REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED, uidObj);
             }
         }
     };

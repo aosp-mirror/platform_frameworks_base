@@ -27,8 +27,9 @@ val Kosmos.quickQuickSettingsViewModelFactory by
             override fun create(): QuickQuickSettingsViewModel {
                 return QuickQuickSettingsViewModel(
                     currentTilesInteractor,
-                    qsColumnsViewModel,
+                    qsColumnsViewModelFactory,
                     quickQuickSettingsRowInteractor,
+                    mediaInRowInLandscapeViewModelFactory,
                     tileSquishinessViewModel,
                     iconTilesViewModel,
                     tileHapticsViewModelFactoryProvider,

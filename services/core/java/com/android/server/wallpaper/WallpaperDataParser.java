@@ -194,12 +194,8 @@ public class WallpaperDataParser {
                 wallpaper.cropHint.set(0, 0, 0, 0);
                 wpdData.mPadding.set(0, 0, 0, 0);
                 wallpaper.name = "";
-                if (liveWallpaperContentHandling()) {
-                    wallpaper.setDescription(new WallpaperDescription.Builder().setComponent(
-                            mImageWallpaper).build());
-                } else {
-                    wallpaper.setComponent(mImageWallpaper);
-                }
+                // TODO (b/379936272) Find a safe value for wallpaper component. mImageComponent
+                // does not work at least on some platforms.
             } else {
                 if (wallpaper.wallpaperId <= 0) {
                     wallpaper.wallpaperId = makeWallpaperIdLocked();

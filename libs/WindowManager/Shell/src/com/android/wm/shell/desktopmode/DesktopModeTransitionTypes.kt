@@ -43,7 +43,7 @@ object DesktopModeTransitionTypes {
                 TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON,
                 TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW,
                 TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT,
-                TRANSIT_ENTER_DESKTOP_FROM_UNKNOWN
+                TRANSIT_ENTER_DESKTOP_FROM_UNKNOWN,
             )
     }
 
@@ -73,7 +73,7 @@ object DesktopModeTransitionTypes {
                 TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG,
                 TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON,
                 TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT,
-                TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN
+                TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN,
             )
     }
 

@@ -548,6 +548,7 @@ public final class PhantomProcessList {
      */
     void setProcessGroupForPhantomProcessOfApp(final ProcessRecord app, final int group) {
         synchronized (mLock) {
+            lookForPhantomProcessesLocked(app);
             final SparseArray<PhantomProcessRecord> array = getPhantomProcessOfAppLocked(app);
             if (array == null) {
                 return;

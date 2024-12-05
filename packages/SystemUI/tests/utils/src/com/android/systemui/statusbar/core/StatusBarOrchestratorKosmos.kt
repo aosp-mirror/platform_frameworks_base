@@ -29,10 +29,12 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.shade.mockNotificationShadeWindowViewController
 import com.android.systemui.shade.mockShadeSurface
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
+import com.android.systemui.statusbar.data.repository.lightBarControllerStore
 import com.android.systemui.statusbar.data.repository.privacyDotWindowControllerStore
 import com.android.systemui.statusbar.data.repository.statusBarModeRepository
 import com.android.systemui.statusbar.mockNotificationRemoteInputManager
 import com.android.systemui.statusbar.phone.mockAutoHideController
+import com.android.systemui.statusbar.phone.multiDisplayAutoHideControllerStore
 import com.android.systemui.statusbar.window.data.repository.fakeStatusBarWindowStatePerDisplayRepository
 import com.android.systemui.statusbar.window.data.repository.statusBarWindowStateRepositoryStore
 import com.android.systemui.statusbar.window.fakeStatusBarWindowController
@@ -48,9 +50,10 @@ val Kosmos.statusBarOrchestrator by
             fakeStatusBarModePerDisplayRepository,
             fakeStatusBarInitializer,
             fakeStatusBarWindowController,
+            applicationCoroutineScope.coroutineContext,
+            mockAutoHideController,
             mockDemoModeController,
             mockPluginDependencyProvider,
-            mockAutoHideController,
             mockNotificationRemoteInputManager,
             { mockNotificationShadeWindowViewController },
             mockShadeSurface,
@@ -78,6 +81,8 @@ val Kosmos.multiDisplayStatusBarStarter by
             statusBarInitializerStore,
             statusBarWindowControllerStore,
             statusBarInitializerStore,
+            multiDisplayAutoHideControllerStore,
             privacyDotWindowControllerStore,
+            lightBarControllerStore,
         )
     }

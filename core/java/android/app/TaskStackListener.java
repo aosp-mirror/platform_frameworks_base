@@ -198,6 +198,10 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    public void onRecentTaskRemovedForAddTask(int taskId) {
+    }
+
+    @Override
     public void onTaskFocusChanged(int taskId, boolean focused) {
     }
 

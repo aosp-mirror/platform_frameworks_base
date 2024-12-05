@@ -1312,7 +1312,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         selfAccess, singleReceiverFromDatasource, attributedOp,
                         proxyAttributionFlags, proxiedAttributionFlags, attributionChainId);
 
-                if (opMode != AppOpsManager.MODE_ALLOWED) {
+                if (startDataDelivery && opMode != AppOpsManager.MODE_ALLOWED) {
                     // Current failed the perm check, so if we are part-way through an attr chain,
                     // we need to clean up the already started proxy op higher up the chain.  Note,
                     // proxy ops are verified two by two, which means we have to clear the 2nd next
@@ -1326,7 +1326,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         finishDataDelivery(context, attributedOp,
                                 cutAttrSourceState, fromDatasource);
                     }
-                    if (opMode == AppOpsManager.MODE_ERRORED) {
+                }
+
+                switch (opMode) {
+                    case AppOpsManager.MODE_ERRORED: {
                         if (permission.equals(Manifest.permission.BLUETOOTH_CONNECT)) {
                             Slog.e(LOG_TAG, "BLUETOOTH_CONNECT permission hard denied as op"
                                     + " mode is MODE_ERRORED. Permission check was requested for: "
@@ -1334,7 +1337,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                     + current);
                         }
                         return PermissionChecker.PERMISSION_HARD_DENIED;
-                    } else {
+                    }
+                    case AppOpsManager.MODE_IGNORED: {
                         return PermissionChecker.PERMISSION_SOFT_DENIED;
                     }
                 }

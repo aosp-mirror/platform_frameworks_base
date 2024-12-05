@@ -61,13 +61,13 @@ class InputGestureManagerTests {
         assertEquals(InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS, result)
         assertEquals(
             listOf(customGesture),
-            inputGestureManager.getCustomInputGestures(USER_ID)
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
         )
 
         inputGestureManager.removeCustomInputGesture(USER_ID, customGesture)
         assertEquals(
             listOf<InputGestureData>(),
-            inputGestureManager.getCustomInputGestures(USER_ID)
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
         )
     }
 
@@ -86,7 +86,7 @@ class InputGestureManagerTests {
         assertEquals(InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST, result)
         assertEquals(
             listOf<InputGestureData>(),
-            inputGestureManager.getCustomInputGestures(USER_ID)
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
         )
     }
 
@@ -115,7 +115,7 @@ class InputGestureManagerTests {
         assertEquals(InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS, result)
         assertEquals(
             listOf(customGesture),
-            inputGestureManager.getCustomInputGestures(USER_ID)
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
         )
     }
 
@@ -144,13 +144,67 @@ class InputGestureManagerTests {
 
         assertEquals(
             listOf(customGesture, customGesture2),
-            inputGestureManager.getCustomInputGestures(USER_ID)
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
         )
 
-        inputGestureManager.removeAllCustomInputGestures(USER_ID)
+        inputGestureManager.removeAllCustomInputGestures(USER_ID, /* filter = */null)
         assertEquals(
             listOf<InputGestureData>(),
-            inputGestureManager.getCustomInputGestures(USER_ID)
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
+        )
+    }
+
+    @Test
+    fun filteringBasedOnTouchpadOrKeyGestures() {
+        val customKeyGesture = InputGestureData.Builder()
+            .setTrigger(
+                InputGestureData.createKeyTrigger(
+                    KeyEvent.KEYCODE_H,
+                    KeyEvent.META_META_ON
+                )
+            )
+            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+            .build()
+        inputGestureManager.addCustomInputGesture(USER_ID, customKeyGesture)
+        val customTouchpadGesture = InputGestureData.Builder()
+            .setTrigger(
+                InputGestureData.createTouchpadTrigger(
+                    InputGestureData.TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP
+                )
+            )
+            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_BACK)
+            .build()
+        inputGestureManager.addCustomInputGesture(USER_ID, customTouchpadGesture)
+
+        assertEquals(
+            listOf(customTouchpadGesture, customKeyGesture),
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
+        )
+        assertEquals(
+            listOf(customKeyGesture),
+            inputGestureManager.getCustomInputGestures(USER_ID, InputGestureData.Filter.KEY)
+        )
+        assertEquals(
+            listOf(customTouchpadGesture),
+            inputGestureManager.getCustomInputGestures(
+                USER_ID,
+                InputGestureData.Filter.TOUCHPAD
+            )
+        )
+
+        inputGestureManager.removeAllCustomInputGestures(USER_ID, InputGestureData.Filter.KEY)
+        assertEquals(
+            listOf(customTouchpadGesture),
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
+        )
+
+        inputGestureManager.removeAllCustomInputGestures(
+            USER_ID,
+            InputGestureData.Filter.TOUCHPAD
+        )
+        assertEquals(
+            listOf<InputGestureData>(),
+            inputGestureManager.getCustomInputGestures(USER_ID, /* filter = */null)
         )
     }
 }

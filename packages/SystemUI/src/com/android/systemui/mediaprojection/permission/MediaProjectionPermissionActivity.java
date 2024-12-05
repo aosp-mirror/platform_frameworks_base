@@ -57,7 +57,6 @@ import android.view.Display;
 import android.view.Window;
 
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.MediaProjectionServiceHelper;
 import com.android.systemui.mediaprojection.MediaProjectionUtils;
@@ -187,11 +186,9 @@ public class MediaProjectionPermissionActivity extends Activity {
             return;
         }
 
-        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            if (showScreenCaptureDisabledDialogIfNeeded()) {
-                finishAsCancelled();
-                return;
-            }
+        if (showScreenCaptureDisabledDialogIfNeeded()) {
+            finishAsCancelled();
+            return;
         }
 
         final String appName = extractAppName(aInfo, packageManager);

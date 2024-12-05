@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /** Interface to a paint object For more details see Android Paint */
 public interface PaintChanges {
 
@@ -135,7 +138,7 @@ public interface PaintChanges {
      * Set a linear gradient fill
      *
      * @param colorsArray
-     * @param stopsArray
+     * @param stopsArray // todo: standardize naming
      * @param startX
      * @param startY
      * @param endX
@@ -143,8 +146,8 @@ public interface PaintChanges {
      * @param tileMode
      */
     void setLinearGradient(
-            int[] colorsArray,
-            float[] stopsArray,
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
             float startX,
             float startY,
             float endX,
@@ -155,15 +158,15 @@ public interface PaintChanges {
      * Set a radial gradient fill
      *
      * @param colorsArray
-     * @param stopsArray
+     * @param stopsArray // todo: standardize naming
      * @param centerX
      * @param centerY
      * @param radius
      * @param tileMode
      */
     void setRadialGradient(
-            int[] colorsArray,
-            float[] stopsArray,
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
             float centerX,
             float centerY,
             float radius,
@@ -173,11 +176,12 @@ public interface PaintChanges {
      * Set a sweep gradient fill
      *
      * @param colorsArray
-     * @param stopsArray
+     * @param stopsArray // todo: standardize naming to either "positions" or "stops"
      * @param centerX
      * @param centerY
      */
-    void setSweepGradient(int[] colorsArray, float[] stopsArray, float centerX, float centerY);
+    void setSweepGradient(
+            @NonNull int[] colorsArray, @Nullable float[] stopsArray, float centerX, float centerY);
 
     /**
      * Set Color filter mod

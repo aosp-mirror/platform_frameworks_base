@@ -706,6 +706,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
+                final Task task = win.getTask();
+                if (task != null) {
+                    task.dispatchTaskInfoChangedIfNeeded(/* forced= */ true);
+                }
             } else {
                 EmbeddedWindowController.EmbeddedWindow embeddedWindow = null;
                 if (android.view.inputmethod.Flags.refactorInsetsController()) {
@@ -1005,6 +1009,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             } else {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_NOTIFY_IME_VISIBILITY_CHANGED_FROM_CLIENT);
+            }
+        }
+    }
+
+    @Override
+    public void notifyInsetsAnimationRunningStateChanged(IWindow window, boolean running) {
+        synchronized (mService.mGlobalLock) {
+            final WindowState win = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (win != null) {
+                win.notifyInsetsAnimationRunningStateChanged(running);
             }
         }
     }

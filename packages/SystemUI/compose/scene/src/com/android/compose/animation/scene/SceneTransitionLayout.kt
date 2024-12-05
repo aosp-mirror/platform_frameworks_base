@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
@@ -68,7 +69,7 @@ fun SceneTransitionLayout(
         swipeDetector,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
-        builder,
+        builder = builder,
     )
 }
 
@@ -261,8 +262,21 @@ interface BaseContentScope : ElementStateScope {
      * lists keep a constant size during transitions even if its elements are growing/shrinking.
      */
     fun Modifier.noResizeDuringTransitions(): Modifier
+
+    /**
+     * A [NestedSceneTransitionLayout] will share its elements with its ancestor STLs therefore
+     * enabling sharedElement transitions between them.
+     */
+    // TODO(b/380070506): Add more parameters when default params are supported in Kotlin 2.0.21
+    @Composable
+    fun NestedSceneTransitionLayout(
+        state: SceneTransitionLayoutState,
+        modifier: Modifier,
+        builder: SceneTransitionLayoutScope.() -> Unit,
+    )
 }
 
+@Deprecated("Use ContentScope instead", ReplaceWith("ContentScope"))
 typealias SceneScope = ContentScope
 
 @Stable
@@ -405,7 +419,8 @@ data object Back : UserAction() {
 }
 
 /** The user swiped on the container. */
-data class Swipe(
+data class Swipe
+private constructor(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
     val pointersType: PointerType? = null,
@@ -418,6 +433,42 @@ data class Swipe(
         val Down = Swipe(SwipeDirection.Down)
         val Start = Swipe(SwipeDirection.Start)
         val End = Swipe(SwipeDirection.End)
+
+        fun Left(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Left, pointerCount, pointersType, fromSource)
+
+        fun Up(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Up, pointerCount, pointersType, fromSource)
+
+        fun Right(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Right, pointerCount, pointersType, fromSource)
+
+        fun Down(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Down, pointerCount, pointersType, fromSource)
+
+        fun Start(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.Start, pointerCount, pointersType, fromSource)
+
+        fun End(
+            pointerCount: Int = 1,
+            pointersType: PointerType? = null,
+            fromSource: SwipeSource? = null,
+        ) = Swipe(SwipeDirection.End, pointerCount, pointersType, fromSource)
     }
 
     override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {
@@ -503,12 +554,6 @@ sealed class UserActionResult(
      * bigger than 100% when the user released their finger. `
      */
     open val requiresFullDistanceSwipe: Boolean,
-
-    /**
-     * Whether swiping back in the opposite direction past the origin point of the swipe can replace
-     * the action with the action for the opposite direction.
-     */
-    open val isIrreversible: Boolean = false,
 ) {
     internal abstract fun toContent(currentScene: SceneKey): ContentKey
 
@@ -518,7 +563,6 @@ sealed class UserActionResult(
         val toScene: SceneKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
-        override val isIrreversible: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = toScene
     }
@@ -528,7 +572,6 @@ sealed class UserActionResult(
         val overlay: OverlayKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
-        override val isIrreversible: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = overlay
     }
@@ -571,14 +614,7 @@ sealed class UserActionResult(
              * the user released their finger.
              */
             requiresFullDistanceSwipe: Boolean = false,
-
-            /**
-             * Whether swiping back in the opposite direction past the origin point of the swipe can
-             * replace the action with the action for the opposite direction.
-             */
-            isIrreversible: Boolean = false,
-        ): UserActionResult =
-            ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe, isIrreversible)
+        ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
 
         /** A [UserActionResult] that shows [toOverlay]. */
         operator fun invoke(
@@ -600,8 +636,8 @@ sealed class UserActionResult(
 
 fun interface UserActionDistance {
     /**
-     * Return the **absolute** distance of the user action given the size of the scene we are
-     * animating from and the [orientation].
+     * Return the **absolute** distance of the user action when going from [fromContent] to
+     * [toContent] in the given [orientation].
      *
      * Note: This function will be called for each drag event until it returns a value > 0f. This
      * for instance allows you to return 0f or a negative value until the first layout pass of a
@@ -609,7 +645,8 @@ fun interface UserActionDistance {
      * transitioning to when computing this absolute distance.
      */
     fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float
 }
@@ -619,7 +656,8 @@ interface UserActionDistanceScope : Density, ElementStateScope
 /** The user action has a fixed [absoluteDistance]. */
 class FixedDistance(private val distance: Dp) : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float = distance.toPx()
 }
@@ -638,6 +676,9 @@ internal fun SceneTransitionLayoutForTesting(
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
+    sharedElementMap: MutableMap<ElementKey, Element> = remember { mutableMapOf() },
+    ancestorContentKeys: List<ContentKey> = emptyList(),
+    lookaheadScope: LookaheadScope? = null,
     builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
@@ -652,6 +693,9 @@ internal fun SceneTransitionLayoutForTesting(
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
                 animationScope = animationScope,
+                elements = sharedElementMap,
+                ancestorContentKeys = ancestorContentKeys,
+                lookaheadScope = lookaheadScope,
             )
             .also { onLayoutImpl?.invoke(it) }
     }
@@ -665,6 +709,24 @@ internal fun SceneTransitionLayoutForTesting(
             error(
                 "This SceneTransitionLayout was bound to a different SceneTransitionLayoutState" +
                     " that was used when creating it, which is not supported"
+            )
+        }
+        if (layoutImpl.elements != sharedElementMap) {
+            error(
+                "This SceneTransitionLayout was bound to a different elements map that was used " +
+                    "when creating it, which is not supported"
+            )
+        }
+        if (layoutImpl.ancestorContentKeys != ancestorContentKeys) {
+            error(
+                "This SceneTransitionLayout was bound to a different ancestorContents that was " +
+                    "used when creating it, which is not supported"
+            )
+        }
+        if (lookaheadScope != null && layoutImpl.lookaheadScope != lookaheadScope) {
+            error(
+                "This SceneTransitionLayout was bound to a different lookaheadScope that was " +
+                    "used when creating it, which is not supported"
             )
         }
 

@@ -16,6 +16,7 @@
 
 package com.android.server.appwidget;
 
+import static android.appwidget.flags.Flags.checkRemoteViewsUriPermission;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.appwidget.flags.Flags.remoteViewsProto;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
@@ -62,6 +63,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.FilterComparison;
@@ -150,6 +152,8 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.WidgetBackupProvider;
+import com.android.server.uri.GrantUri;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -187,11 +191,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Simple flag to enable/disable debug logging.
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
-    // String constants for XML schema migration related to changes in keyguard package.
-    private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
-    private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
-    private static final int KEYGUARD_HOST_ID = 0x4b455947;
-
     // Filename for app widgets state persisted on disk.
     private static final String STATE_FILENAME = "appwidgets.xml";
 
@@ -211,6 +210,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final int UNKNOWN_USER_ID = -10;
 
     // Version of XML schema for app widgets. Bump if the stored widgets need to be upgraded.
+    // Version 1 introduced in 2014 - Android 5.0
     private static final int CURRENT_VERSION = 1;
 
     // Every widget update request is associated which an increasing sequence number. This is
@@ -330,6 +330,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     // Handler to the background thread that saves states to disk.
     private Handler mSaveStateHandler;
+
+    private Handler mAlarmHandler;
     // Handler to the background thread that saves generated previews to disk. All operations that
     // modify saved previews must be run on this Handler.
     private Handler mSavePreviewsHandler;
@@ -373,6 +375,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (removeAppWidgetServiceIoFromCriticalPath()) {
             mSaveStateHandler = new Handler(BackgroundThread.get().getLooper(),
                     this::handleSaveMessage);
+            mAlarmHandler = new Handler(BackgroundThread.get().getLooper());
         } else {
             mSaveStateHandler = BackgroundThread.getHandler();
         }
@@ -611,7 +614,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     // ... and see if these are hosts we've been awaiting.
                     // NOTE: We are backing up and restoring only the owner.
                     // TODO: http://b/22388012
-                    if (newPackageAdded && userId == UserHandle.USER_SYSTEM) {
+                    UserHandle mainUser = mUserManager.getMainUser();
+                    if (newPackageAdded && mainUser != null && userId == mainUser.getIdentifier()) {
                         final int uid = getUidForPackage(pkgName, userId);
                         if (uid >= 0 ) {
                             resolveHostUidLocked(pkgName, uid);
@@ -2551,6 +2555,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         // Make sure the package runs under the caller uid.
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
+        // Make sure RemoteViews do not contain URIs that the caller cannot access.
+        if (checkRemoteViewsUriPermission()) {
+            checkRemoteViewsUris(views);
+        }
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
@@ -2568,6 +2576,39 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
         }
+    }
+
+    /**
+     * Checks that all of the Uris in the given RemoteViews are accessible to the caller.
+     */
+    private void checkRemoteViewsUris(RemoteViews views) {
+        UriGrantsManagerInternal uriGrantsManager = LocalServices.getService(
+                UriGrantsManagerInternal.class);
+        int callingUid = Binder.getCallingUid();
+        int callingUser = UserHandle.getCallingUserId();
+        views.visitUris(uri -> {
+            switch (uri.getScheme()) {
+                // Check that content:// URIs are accessible to the caller.
+                case ContentResolver.SCHEME_CONTENT:
+                    boolean canAccessUri = uriGrantsManager.checkUriPermission(
+                            GrantUri.resolve(callingUser, uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION), callingUid,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            /* isFullAccessForContentUri= */ true);
+                    if (!canAccessUri) {
+                        throw new SecurityException(
+                                "Provider uid " + callingUid + " cannot access URI " + uri);
+                    }
+                    break;
+                // android.resource:// URIs are always allowed.
+                case ContentResolver.SCHEME_ANDROID_RESOURCE:
+                    break;
+                // file:// and any other schemes are disallowed.
+                case ContentResolver.SCHEME_FILE:
+                default:
+                    throw new SecurityException("Disallowed URI " + uri + " in RemoteViews.");
+            }
+        });
     }
 
     /**
@@ -2701,10 +2742,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         if (provider.broadcast != null) {
             final PendingIntent broadcast = provider.broadcast;
-            mSaveStateHandler.post(() -> {
-                    mAlarmManager.cancel(broadcast);
-                    broadcast.cancel();
-            });
+            Runnable cancelRunnable = () -> {
+                mAlarmManager.cancel(broadcast);
+                broadcast.cancel();
+            };
+            if (removeAppWidgetServiceIoFromCriticalPath()) {
+                mAlarmHandler.post(cancelRunnable);
+            } else {
+                mSaveStateHandler.post(cancelRunnable);
+            }
             provider.broadcast = null;
         }
     }
@@ -3384,10 +3430,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // invariant and established the PendingIntent safely.
                 final long period = Math.max(info.updatePeriodMillis, MIN_UPDATE_PERIOD);
                 final PendingIntent broadcast = provider.broadcast;
-                mSaveStateHandler.post(() ->
+
+                Runnable repeatRunnable = () -> {
                     mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + period, period, broadcast)
-                );
+                            SystemClock.elapsedRealtime() + period, period, broadcast);
+                };
+                if (removeAppWidgetServiceIoFromCriticalPath()) {
+                    mAlarmHandler.post(repeatRunnable);
+                } else {
+                    mSaveStateHandler.post(repeatRunnable);
+                }
             }
         }
     }
@@ -4428,19 +4480,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         int version = fromVersion;
 
-        // Update 1: keyguard moved from package "android" to "com.android.keyguard"
+        // Update 1: From version 0 to 1, was used from Android 4 to Android 5. It updated the
+        // location of the keyguard widget database. No modern device will have db version 0.
         if (version == 0) {
-            HostId oldHostId = new HostId(Process.myUid(),
-                    KEYGUARD_HOST_ID, OLD_KEYGUARD_HOST_PACKAGE);
-
-            Host host = lookupHostLocked(oldHostId);
-            if (host != null) {
-                final int uid = getUidForPackage(NEW_KEYGUARD_HOST_PACKAGE,
-                        UserHandle.USER_SYSTEM);
-                if (uid >= 0) {
-                    host.id = new HostId(uid, KEYGUARD_HOST_ID, NEW_KEYGUARD_HOST_PACKAGE);
-                }
-            }
+            Slog.e(TAG, "Found widget database with version 0, this should not be possible,"
+                    + " forcing upgrade to version 1");
 
             version = 1;
         }
@@ -4450,24 +4494,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static File getStateFile(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME);
-    }
-
     private static AtomicFile getSavedStateFile(int userId) {
-        File dir = Environment.getUserSystemDirectory(userId);
-        File settingsFile = getStateFile(userId);
-        if (!settingsFile.exists() && userId == UserHandle.USER_SYSTEM) {
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            // Migrate old data
-            File oldFile = new File("/data/system/" + STATE_FILENAME);
-            // Method doesn't throw an exception on failure. Ignore any errors
-            // in moving the file (like non-existence)
-            oldFile.renameTo(settingsFile);
-        }
-        return new AtomicFile(settingsFile);
+        return new AtomicFile(new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME));
     }
 
     void onUserStopped(int userId) {

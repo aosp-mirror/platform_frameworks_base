@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.row
 
 import android.annotation.SuppressLint
+import android.app.Flags
 import android.app.Notification
 import android.content.Context
 import android.content.ContextWrapper
@@ -46,6 +47,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED
 import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_EXPANDED
 import com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP
@@ -95,6 +98,7 @@ constructor(
     private val smartReplyStateInflater: SmartReplyStateInflater,
     private val notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
     private val headsUpStyleProvider: HeadsUpStyleProvider,
+    private val promotedNotificationContentExtractor: PromotedNotificationContentExtractor,
     private val logger: NotificationRowContentBinderLogger,
 ) : NotificationRowContentBinder {
 
@@ -147,6 +151,7 @@ constructor(
                 /* isMediaFlagEnabled = */ smartReplyStateInflater,
                 notifLayoutInflaterFactoryProvider,
                 headsUpStyleProvider,
+                promotedNotificationContentExtractor,
                 logger,
             )
         if (inflateSynchronously) {
@@ -166,6 +171,7 @@ constructor(
         builder: Notification.Builder,
         packageContext: Context,
         smartRepliesInflater: SmartReplyStateInflater,
+        promotedNotificationContentExtractor: PromotedNotificationContentExtractor,
     ): InflationProgress {
         val systemUIContext = row.context
         val result =
@@ -182,6 +188,7 @@ constructor(
                 notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
                 headsUpStyleProvider = headsUpStyleProvider,
                 conversationProcessor = conversationProcessor,
+                promotedNotificationContentExtractor = promotedNotificationContentExtractor,
                 logger = logger,
             )
         inflateSmartReplyViews(
@@ -372,6 +379,7 @@ constructor(
         private val smartRepliesInflater: SmartReplyStateInflater,
         private val notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
         private val headsUpStyleProvider: HeadsUpStyleProvider,
+        private val promotedNotificationContentExtractor: PromotedNotificationContentExtractor,
         private val logger: NotificationRowContentBinderLogger,
     ) : AsyncTask<Void, Void, Result<InflationProgress>>(), InflationCallback, InflationTask {
         private val context: Context
@@ -442,6 +450,7 @@ constructor(
                     notifLayoutInflaterFactoryProvider = notifLayoutInflaterFactoryProvider,
                     headsUpStyleProvider = headsUpStyleProvider,
                     conversationProcessor = conversationProcessor,
+                    promotedNotificationContentExtractor = promotedNotificationContentExtractor,
                     logger = logger,
                 )
             logger.logAsyncTaskProgress(
@@ -582,6 +591,7 @@ constructor(
         @VisibleForTesting val packageContext: Context,
         val remoteViews: NewRemoteViews,
         val contentModel: NotificationContentModel,
+        val extractedPromotedNotificationContentModel: PromotedNotificationContentModel?,
     ) {
 
         var inflatedContentView: View? = null
@@ -670,8 +680,23 @@ constructor(
             notifLayoutInflaterFactoryProvider: NotifLayoutInflaterFactory.Provider,
             headsUpStyleProvider: HeadsUpStyleProvider,
             conversationProcessor: ConversationNotificationProcessor,
+            promotedNotificationContentExtractor: PromotedNotificationContentExtractor,
             logger: NotificationRowContentBinderLogger,
         ): InflationProgress {
+            val promoted =
+                if (PromotedNotificationContentModel.featureFlagEnabled()) {
+                    logger.logAsyncTaskProgress(entry, "extracting promoted notification content")
+                    val extracted =
+                        promotedNotificationContentExtractor.extractContent(entry, builder)
+                    logger.logAsyncTaskProgress(
+                        entry,
+                        "extracted promoted notification content: {extracted}",
+                    )
+                    extracted
+                } else {
+                    null
+                }
+
             // process conversations and extract the messaging style
             val messagingStyle =
                 if (entry.ranking.isConversation) {
@@ -734,6 +759,7 @@ constructor(
                 packageContext = packageContext,
                 remoteViews = remoteViews,
                 contentModel = contentModel,
+                extractedPromotedNotificationContentModel = promoted,
             )
         }
 
@@ -833,6 +859,15 @@ constructor(
             }
             public?.let {
                 it.layoutInflaterFactory = provider.provide(row, FLAG_CONTENT_VIEW_PUBLIC)
+            }
+            if (android.app.Flags.notificationsRedesignAppIcons()) {
+                normalGroupHeader?.let {
+                    it.layoutInflaterFactory = provider.provide(row, FLAG_GROUP_SUMMARY_HEADER)
+                }
+                minimizedGroupHeader?.let {
+                    it.layoutInflaterFactory =
+                        provider.provide(row, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER)
+                }
             }
             return this
         }
@@ -1384,6 +1419,11 @@ constructor(
             logger.logAsyncTaskProgress(entry, "finishing")
 
             entry.setContentModel(result.contentModel)
+            if (PromotedNotificationContentModel.featureFlagEnabled()) {
+                entry.promotedNotificationContentModel =
+                    result.extractedPromotedNotificationContentModel
+            }
+
             result.inflatedSmartReplyState?.let { row.privateLayout.setInflatedSmartReplyState(it) }
 
             setContentViewsFromRemoteViews(

@@ -2122,7 +2122,7 @@ public class CachedAppOptimizer {
                     Slog.d(TAG_AM,
                             "Performing native compaction for pid=" + pid
                                     + " type=" + compactProfile.name());
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactNative");
                     try {
                         mProcessDependencies.performCompaction(compactProfile, pid);
                     } catch (Exception e) {

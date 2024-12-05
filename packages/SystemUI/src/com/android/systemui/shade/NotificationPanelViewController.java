@@ -172,6 +172,7 @@ import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirr
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -186,13 +187,15 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -217,17 +220,15 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Compile;
@@ -298,7 +299,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      * The minimum scale to "squish" the Shade and associated elements down to, for Back gesture
      */
     public static final float SHADE_BACK_ANIM_MIN_SCALE = 0.9f;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final ShadeTouchableRegionManager mShadeTouchableRegionManager;
     private final Resources mResources;
     private final KeyguardStateController mKeyguardStateController;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -695,7 +696,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             ShadeLogger shadeLogger,
             @ShadeDisplayAware ConfigurationController configurationController,
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilder,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ShadeTouchableRegionManager shadeTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -840,7 +841,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mVibratorHelper = vibratorHelper;
         mMSDLPlayer = msdlPlayer;
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
-        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mShadeTouchableRegionManager = shadeTouchableRegionManager;
         mSystemClock = systemClock;
         mKeyguardMediaController = keyguardMediaController;
         mMetricsLogger = metricsLogger;
@@ -1551,7 +1552,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private Rect calculateGestureExclusionRect() {
         Rect exclusionRect = null;
-        Region touchableRegion = mStatusBarTouchableRegionManager.calculateTouchableRegion();
+        Region touchableRegion = mShadeTouchableRegionManager.calculateTouchableRegion();
         if (isFullyCollapsed() && touchableRegion != null) {
             // Note: The manager also calculates the non-pinned touchable region
             exclusionRect = touchableRegion.getBounds();
@@ -2053,9 +2054,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         if (mQsController.getExpanded()) {
             mQsController.flingQs(0, FLING_COLLAPSE);
-        } else if (mBarState == KEYGUARD) {
-            mLockscreenShadeTransitionController.goToLockedShade(
-                    /* expandedView= */null, /* needsQSAnimation= */false);
         } else {
             expand(true /* animate */);
         }
@@ -2272,7 +2270,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     float getDisplayDensity() {
-        return mCentralSurfaces.getDisplayDensity();
+        if (ShadeWindowGoesAround.isEnabled()) {
+            return mView.getContext().getResources().getConfiguration().densityDpi;
+        } else {
+            return mCentralSurfaces.getDisplayDensity();
+        }
     }
 
     /** Return whether a touch is near the gesture handle at the bottom of screen */
@@ -3112,12 +3114,21 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (isTracking()) {
             onTrackingStopped(true);
         }
-        if (isExpanded() && mBarState != KEYGUARD && !mQsController.getExpanded()) {
-            mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
-            expandToQs();
-        } else {
-            mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
-            expandToNotifications();
+        if (!mQsController.getExpanded()) {
+            performHapticFeedback(HapticFeedbackConstants.GESTURE_START);
+            if (isExpanded() && mBarState != KEYGUARD) {
+                mShadeLog.d("Status Bar was long pressed. Expanding to QS.");
+                mQsController.flingQs(0, FLING_EXPAND);
+            } else {
+                if (mBarState == KEYGUARD) {
+                    mShadeLog.d("Lockscreen Status Bar was long pressed. Expanding to Notifications.");
+                    mLockscreenShadeTransitionController.goToLockedShade(
+                            /* expandedView= */null, /* needsQSAnimation= */true);
+                } else {
+                    mShadeLog.d("Status Bar was long pressed. Expanding to Notifications.");
+                    expandToNotifications();
+                }
+            }
         }
     }
 
@@ -3824,7 +3835,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     /* screenOnFromTouch=*/ getWakefulness().isAwakeFromTapOrGesture());
             // Log collapse gesture if on lock screen.
             if (!expand && onKeyguard) {
-                float displayDensity = mCentralSurfaces.getDisplayDensity();
+                float displayDensity = getDisplayDensity();
                 int heightDp = (int) Math.abs((y - mInitialExpandY) / displayDensity);
                 int velocityDp = (int) Math.abs(vel / displayDensity);
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_UNLOCK, heightDp, velocityDp);

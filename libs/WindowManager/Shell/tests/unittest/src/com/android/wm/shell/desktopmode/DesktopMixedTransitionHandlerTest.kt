@@ -21,6 +21,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WindowingMode
+import android.content.Intent
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
@@ -31,9 +32,14 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TransitionType
+import android.window.IWindowContainerToken
 import android.window.TransitionInfo
+import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE
@@ -46,6 +52,7 @@ import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler.PendingMix
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -56,6 +63,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
@@ -77,29 +85,47 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
 
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
-    @Mock lateinit var transitions: Transitions
-    @Mock lateinit var desktopRepository: DesktopRepository
-    @Mock lateinit var freeformTaskTransitionHandler: FreeformTaskTransitionHandler
-    @Mock lateinit var closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler
-    @Mock lateinit var desktopImmersiveController: DesktopImmersiveController
-    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
-    @Mock lateinit var mockHandler: Handler
-    @Mock lateinit var closingTaskLeash: SurfaceControl
-    @Mock lateinit var shellInit: ShellInit
-    @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+    @Mock
+    lateinit var transitions: Transitions
+    @Mock
+    lateinit var userRepositories: DesktopUserRepositories
+    @Mock
+    lateinit var freeformTaskTransitionHandler: FreeformTaskTransitionHandler
+    @Mock
+    lateinit var closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler
+    @Mock
+    lateinit var desktopBackNavigationTransitionHandler: DesktopBackNavigationTransitionHandler
+    @Mock
+    lateinit var desktopImmersiveController: DesktopImmersiveController
+    @Mock
+    lateinit var interactionJankMonitor: InteractionJankMonitor
+    @Mock
+    lateinit var mockHandler: Handler
+    @Mock
+    lateinit var closingTaskLeash: SurfaceControl
+    @Mock
+    lateinit var shellInit: ShellInit
+    @Mock
+    lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+    @Mock
+    private lateinit var desktopRepository: DesktopRepository
 
     private lateinit var mixedHandler: DesktopMixedTransitionHandler
 
+
     @Before
     fun setUp() {
+        whenever(userRepositories.current).thenReturn(desktopRepository)
+        whenever(userRepositories.getProfile(Mockito.anyInt())).thenReturn(desktopRepository)
         mixedHandler =
             DesktopMixedTransitionHandler(
                 context,
                 transitions,
-                desktopRepository,
+                userRepositories,
                 freeformTaskTransitionHandler,
                 closeDesktopTaskTransitionHandler,
                 desktopImmersiveController,
+                desktopBackNavigationTransitionHandler,
                 interactionJankMonitor,
                 mockHandler,
                 shellInit,
@@ -129,7 +155,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS)
+    @DisableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX)
     fun startRemoveTransition_callsFreeformTaskTransitionHandler() {
         val wct = WindowContainerTransaction()
         whenever(freeformTaskTransitionHandler.startRemoveTransition(wct))
@@ -141,7 +169,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX)
     fun startRemoveTransition_startsCloseTransition() {
         val wct = WindowContainerTransaction()
         whenever(transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, mixedHandler))
@@ -161,7 +191,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     fun startAnimation_withoutClosingDesktopTask_returnsFalse() {
         val transition = mock<IBinder>()
         val transitionInfo =
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 changeMode = TRANSIT_OPEN,
                 task = createTask(WINDOWING_MODE_FREEFORM)
             )
@@ -180,12 +210,13 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX)
     fun startAnimation_withClosingDesktopTask_callsCloseTaskHandler() {
         val wct = WindowContainerTransaction()
         val transition = mock<IBinder>()
-        val transitionInfo = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
-        whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(2)
+        val transitionInfo = createCloseTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
         whenever(
                 closeDesktopTaskTransitionHandler.startAnimation(any(), any(), any(), any(), any())
             )
@@ -208,12 +239,14 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX)
     fun startAnimation_withClosingLastDesktopTask_dispatchesTransition() {
         val wct = WindowContainerTransaction()
         val transition = mock<IBinder>()
-        val transitionInfo = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
-        whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(1)
+        val transitionInfo = createCloseTransitionInfo(
+            task = createTask(WINDOWING_MODE_FREEFORM), withWallpaper = true)
         whenever(transitions.dispatchTransition(any(), any(), any(), any(), any(), any()))
             .thenReturn(mock())
         whenever(transitions.startTransition(WindowManager.TRANSIT_CLOSE, wct, mixedHandler))
@@ -249,7 +282,8 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     @Test
     @DisableFlags(
         Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP,
-        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun startLaunchTransition_immersiveAndAppLaunchFlagsDisabled_doesNotUseMixedHandler() {
         val wct = WindowContainerTransaction()
         val task = createTask(WINDOWING_MODE_FREEFORM)
@@ -285,7 +319,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun startLaunchTransition_desktopAppLaunchEnabled_usesMixedHandler() {
         val wct = WindowContainerTransaction()
         val task = createTask(WINDOWING_MODE_FREEFORM)
@@ -321,7 +357,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         val otherChange = createChange(createTask(WINDOWING_MODE_FREEFORM))
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange, otherChange)
             ),
@@ -361,7 +397,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         val immersiveChange = createChange(immersiveTask)
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange, immersiveChange)
             ),
@@ -384,7 +420,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun startAndAnimateLaunchTransition_noMinimizeChange_doesNotReparentMinimizeChange() {
         val wct = WindowContainerTransaction()
         val launchingTask = createTask(WINDOWING_MODE_FREEFORM)
@@ -401,7 +439,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         )
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange)
             ),
@@ -414,7 +452,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun startAndAnimateLaunchTransition_withMinimizeChange_reparentsMinimizeChange() {
         val wct = WindowContainerTransaction()
         val launchingTask = createTask(WINDOWING_MODE_FREEFORM)
@@ -433,7 +473,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         )
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange, minimizeChange)
             ),
@@ -446,7 +486,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun startAnimation_pendingTransition_noLaunchChange_returnsFalse() {
         val wct = WindowContainerTransaction()
         val launchingTask = createTask(WINDOWING_MODE_FREEFORM)
@@ -465,7 +507,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
 
         val started = mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(nonLaunchTaskChange)
             ),
@@ -477,7 +519,75 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun startLaunchTransition_unknownLaunchingTask_animates() {
+        val wct = WindowContainerTransaction()
+        val task = createTask(WINDOWING_MODE_FREEFORM)
+        val transition = Binder()
+        whenever(transitions.startTransition(eq(TRANSIT_OPEN), eq(wct), anyOrNull()))
+            .thenReturn(transition)
+        whenever(transitions.dispatchTransition(eq(transition), any(), any(), any(), any(), any()))
+            .thenReturn(mock())
+
+        mixedHandler.startLaunchTransition(
+            transitionType = TRANSIT_OPEN,
+            wct = wct,
+            taskId = null,
+        )
+
+        val started = mixedHandler.startAnimation(
+            transition,
+            createCloseTransitionInfo(
+                TRANSIT_OPEN,
+                listOf(createChange(task, mode = TRANSIT_OPEN))
+            ),
+            StubTransaction(),
+            StubTransaction(),
+        ) { }
+
+        assertThat(started).isEqualTo(true)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun startLaunchTransition_unknownLaunchingTaskOverImmersive_animatesImmersiveChange() {
+        val wct = WindowContainerTransaction()
+        val immersiveTask = createTask(WINDOWING_MODE_FREEFORM)
+        val openingTask = createTask(WINDOWING_MODE_FREEFORM)
+        val transition = Binder()
+        whenever(transitions.startTransition(eq(TRANSIT_OPEN), eq(wct), anyOrNull()))
+            .thenReturn(transition)
+        whenever(transitions.dispatchTransition(eq(transition), any(), any(), any(), any(), any()))
+            .thenReturn(mock())
+
+        mixedHandler.startLaunchTransition(
+            transitionType = TRANSIT_OPEN,
+            wct = wct,
+            taskId = null,
+            exitingImmersiveTask = immersiveTask.taskId,
+        )
+
+        val immersiveChange = createChange(immersiveTask, mode = TRANSIT_CHANGE)
+        val openingChange = createChange(openingTask, mode = TRANSIT_OPEN)
+        val started = mixedHandler.startAnimation(
+            transition,
+            createCloseTransitionInfo(
+                TRANSIT_OPEN,
+                listOf(immersiveChange, openingChange)
+            ),
+            StubTransaction(),
+            StubTransaction(),
+        ) { }
+
+        assertThat(started).isEqualTo(true)
+        verify(desktopImmersiveController)
+            .animateResizeChange(eq(immersiveChange), any(), any(), any())
+    }
+
+    @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun addPendingAndAnimateLaunchTransition_noMinimizeChange_doesNotReparentMinimizeChange() {
         val wct = WindowContainerTransaction()
         val launchingTask = createTask(WINDOWING_MODE_FREEFORM)
@@ -496,7 +606,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         )
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange)
             ),
@@ -509,7 +619,9 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS)
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS,
+        Flags.FLAG_ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX)
     fun addPendingAndAnimateLaunchTransition_withMinimizeChange_reparentsMinimizeChange() {
         val wct = WindowContainerTransaction()
         val launchingTask = createTask(WINDOWING_MODE_FREEFORM)
@@ -530,7 +642,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         )
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange, minimizeChange)
             ),
@@ -560,7 +672,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         val launchTaskChange = createChange(launchingTask)
         mixedHandler.startAnimation(
             transition,
-            createTransitionInfo(
+            createCloseTransitionInfo(
                 TRANSIT_OPEN,
                 listOf(launchTaskChange)
             ),
@@ -595,12 +707,93 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
         assertThat(mixedHandler.pendingMixedTransitions).isEmpty()
     }
 
-    private fun createTransitionInfo(
-        type: Int = WindowManager.TRANSIT_CLOSE,
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    fun startAnimation_withMinimizingDesktopTask_callsBackNavigationHandler() {
+        val minimizingTask = createTask(WINDOWING_MODE_FREEFORM)
+        val transition = Binder()
+        whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(2)
+        whenever(
+            desktopBackNavigationTransitionHandler.startAnimation(any(), any(), any(), any(), any())
+        )
+            .thenReturn(true)
+        mixedHandler.addPendingMixedTransition(
+            PendingMixedTransition.Minimize(
+                transition = transition,
+                minimizingTask = minimizingTask.taskId,
+                isLastTask = false,
+            )
+        )
+
+        val minimizingTaskChange = createChange(minimizingTask)
+        val started = mixedHandler.startAnimation(
+            transition = transition,
+            info =
+                createCloseTransitionInfo(
+                TRANSIT_TO_BACK,
+                listOf(minimizingTaskChange)
+            ),
+            startTransaction = mock(),
+            finishTransaction = mock(),
+            finishCallback = {}
+        )
+
+        assertTrue("Should delegate animation to back navigation transition handler", started)
+        verify(desktopBackNavigationTransitionHandler)
+            .startAnimation(
+                eq(transition),
+                argThat { info -> info.changes.contains(minimizingTaskChange) },
+                any(), any(), any())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    fun startAnimation_withMinimizingLastDesktopTask_dispatchesTransition() {
+        val minimizingTask = createTask(WINDOWING_MODE_FREEFORM)
+        val transition = Binder()
+        whenever(desktopRepository.getExpandedTaskCount(any())).thenReturn(2)
+        whenever(
+            desktopBackNavigationTransitionHandler.startAnimation(any(), any(), any(), any(), any())
+        )
+            .thenReturn(true)
+        mixedHandler.addPendingMixedTransition(
+            PendingMixedTransition.Minimize(
+                transition = transition,
+                minimizingTask = minimizingTask.taskId,
+                isLastTask = true,
+            )
+        )
+
+        val minimizingTaskChange = createChange(minimizingTask)
+        mixedHandler.startAnimation(
+            transition = transition,
+            info =
+            createCloseTransitionInfo(
+                TRANSIT_TO_BACK,
+                listOf(minimizingTaskChange)
+            ),
+            startTransaction = mock(),
+            finishTransaction = mock(),
+            finishCallback = {}
+        )
+
+        verify(transitions)
+            .dispatchTransition(
+                eq(transition),
+                argThat { info -> info.changes.contains(minimizingTaskChange) },
+                any(),
+                any(),
+                any(),
+                eq(mixedHandler)
+            )
+    }
+
+    private fun createCloseTransitionInfo(
         changeMode: Int = WindowManager.TRANSIT_CLOSE,
-        task: RunningTaskInfo
+        task: RunningTaskInfo,
+        withWallpaper: Boolean = false,
     ): TransitionInfo =
-        TransitionInfo(type, 0 /* flags */).apply {
+        TransitionInfo(WindowManager.TRANSIT_CLOSE, 0 /* flags */).apply {
             addChange(
                 TransitionInfo.Change(mock(), closingTaskLeash).apply {
                     mode = changeMode
@@ -608,18 +801,31 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
                     taskInfo = task
                 }
             )
+            if (withWallpaper) {
+                addChange(
+                    TransitionInfo.Change(/* container= */ mock(), /* leash= */ mock()).apply {
+                        mode = WindowManager.TRANSIT_CLOSE
+                        parent = null
+                        taskInfo = createWallpaperTask()
+                    }
+                )
+            }
         }
 
-    private fun createTransitionInfo(
+    private fun createCloseTransitionInfo(
         @TransitionType type: Int,
         changes: List<TransitionInfo.Change> = emptyList()
     ): TransitionInfo = TransitionInfo(type, /* flags= */ 0).apply {
         changes.forEach { change -> addChange(change) }
     }
 
-    private fun createChange(task: RunningTaskInfo): TransitionInfo.Change =
+    private fun createChange(
+        task: RunningTaskInfo,
+        @TransitionInfo.TransitionMode mode: Int = TRANSIT_NONE
+    ): TransitionInfo.Change =
         TransitionInfo.Change(task.token, SurfaceControl()).apply {
             taskInfo = task
+            setMode(mode)
         }
 
     private fun createTask(@WindowingMode windowingMode: Int): RunningTaskInfo =
@@ -627,4 +833,13 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
             .setActivityType(ACTIVITY_TYPE_STANDARD)
             .setWindowingMode(windowingMode)
             .build()
+
+    private fun createWallpaperTask() =
+        RunningTaskInfo().apply {
+            token = WindowContainerToken(mock<IWindowContainerToken>())
+            baseIntent =
+                Intent().apply {
+                    component = DesktopWallpaperActivity.wallpaperActivityComponent
+                }
+        }
 }

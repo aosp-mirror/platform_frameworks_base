@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.provider.flags.Flags.stageFlagsForBuild;
 import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
@@ -81,8 +82,6 @@ import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
-import android.content.integrity.AppIntegrityManager;
-import android.content.integrity.IAppIntegrityManager;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayManager;
 import android.content.pm.ApplicationInfo;
@@ -163,6 +162,7 @@ import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.nearby.NearbyFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializer;
+import android.net.ConnectivityFrameworkInitializerBaklava;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.INetworkPolicyManager;
 import android.net.IPacProxyManager;
@@ -173,7 +173,6 @@ import android.net.NetworkWatchlistManager;
 import android.net.PacProxyManager;
 import android.net.TetheringManager;
 import android.net.VpnManager;
-import android.net.vcn.VcnFrameworkInitializer;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
@@ -190,6 +189,7 @@ import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
+import android.os.IHintManager;
 import android.os.IPowerManager;
 import android.os.IPowerStatsService;
 import android.os.IRecoverySystem;
@@ -215,6 +215,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.os.flagging.ConfigInfrastructureFrameworkInitializer;
 import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
@@ -238,6 +239,10 @@ import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionService;
 import android.security.attestationverification.AttestationVerificationManager;
 import android.security.attestationverification.IAttestationVerificationManagerService;
+import android.security.authenticationpolicy.AuthenticationPolicyManager;
+import android.security.authenticationpolicy.IAuthenticationPolicyService;
+import android.security.intrusiondetection.IIntrusionDetectionService;
+import android.security.intrusiondetection.IntrusionDetectionManager;
 import android.security.keystore.KeyStoreManager;
 import android.service.oemlock.IOemLockService;
 import android.service.oemlock.OemLockManager;
@@ -1020,6 +1025,25 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.AUTHENTICATION_POLICY_SERVICE,
+                AuthenticationPolicyManager.class,
+                new CachedServiceFetcher<AuthenticationPolicyManager>() {
+                    @Override
+                    public AuthenticationPolicyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.secureLockdown()) {
+                            throw new ServiceNotFoundException(
+                                    Context.AUTHENTICATION_POLICY_SERVICE);
+                        }
+
+                        final IBinder binder = ServiceManager.getServiceOrThrow(
+                                Context.AUTHENTICATION_POLICY_SERVICE);
+                        final IAuthenticationPolicyService service =
+                                IAuthenticationPolicyService.Stub.asInterface(binder);
+                        return new AuthenticationPolicyManager(ctx.getOuterContext(), service);
+                    }
+                });
+
         registerService(Context.TV_INTERACTIVE_APP_SERVICE, TvInteractiveAppManager.class,
                 new CachedServiceFetcher<TvInteractiveAppManager>() {
             @Override
@@ -1195,8 +1219,10 @@ public final class SystemServiceRegistry {
             public SystemHealthManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder batteryStats = ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME);
                 IBinder powerStats = ServiceManager.getService(Context.POWER_STATS_SERVICE);
+                IBinder perfHint = ServiceManager.getService(Context.PERFORMANCE_HINT_SERVICE);
                 return new SystemHealthManager(IBatteryStats.Stub.asInterface(batteryStats),
-                        IPowerStatsService.Stub.asInterface(powerStats));
+                        IPowerStatsService.Stub.asInterface(powerStats),
+                        IHintManager.Stub.asInterface(perfHint));
             }});
 
         registerService(Context.CONTEXTHUB_SERVICE, ContextHubManager.class,
@@ -1553,16 +1579,6 @@ public final class SystemServiceRegistry {
                         return new AttestationVerificationManager(ctx.getOuterContext(),
                                 IAttestationVerificationManagerService.Stub.asInterface(b));
                     }});
-
-        //CHECKSTYLE:ON IndentationCheck
-        registerService(Context.APP_INTEGRITY_SERVICE, AppIntegrityManager.class,
-                new CachedServiceFetcher<AppIntegrityManager>() {
-                    @Override
-                    public AppIntegrityManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        IBinder b = ServiceManager.getServiceOrThrow(Context.APP_INTEGRITY_SERVICE);
-                        return new AppIntegrityManager(IAppIntegrityManager.Stub.asInterface(b));
-                    }});
         registerService(Context.APP_HIBERNATION_SERVICE, AppHibernationManager.class,
                 new CachedServiceFetcher<AppHibernationManager>() {
                     @Override
@@ -1790,6 +1806,23 @@ public final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.INTRUSION_DETECTION_SERVICE, IntrusionDetectionManager.class,
+                new CachedServiceFetcher<IntrusionDetectionManager>() {
+                    @Override
+                    public IntrusionDetectionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.security.Flags.aflApi()) {
+                            throw new ServiceNotFoundException(
+                                    "Intrusion Detection is not supported");
+                        }
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.INTRUSION_DETECTION_SERVICE);
+                        IIntrusionDetectionService service =
+                                IIntrusionDetectionService.Stub.asInterface(b);
+                        return new IntrusionDetectionManager(service);
+                    }
+                });
+
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
@@ -1818,7 +1851,11 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
-            VcnFrameworkInitializer.registerServiceWrappers();
+            ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();
+
+            if (stageFlagsForBuild()) {
+                ConfigInfrastructureFrameworkInitializer.registerServiceWrappers();
+            }
 
             if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
                 ProviderFrameworkInitializer.registerServiceWrappers();

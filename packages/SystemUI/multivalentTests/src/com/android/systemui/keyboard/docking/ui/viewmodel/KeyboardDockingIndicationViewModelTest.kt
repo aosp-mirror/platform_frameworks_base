@@ -24,7 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
 import com.android.systemui.keyboard.docking.domain.interactor.KeyboardDockingIndicationInteractor
 import com.google.common.truth.Truth.assertThat
@@ -59,7 +59,7 @@ class KeyboardDockingIndicationViewModelTest : SysuiTestCase() {
 
         val keyboardDockingIndicationInteractor =
             KeyboardDockingIndicationInteractor(keyboardRepository)
-        val configurationInteractor = ConfigurationInteractor(configurationRepository)
+        val configurationInteractor = ConfigurationInteractorImpl(configurationRepository)
 
         underTest =
             KeyboardDockingIndicationViewModel(
@@ -67,7 +67,7 @@ class KeyboardDockingIndicationViewModelTest : SysuiTestCase() {
                 context,
                 keyboardDockingIndicationInteractor,
                 configurationInteractor,
-                testScope.backgroundScope
+                testScope.backgroundScope,
             )
     }
 

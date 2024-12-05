@@ -84,6 +84,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
@@ -1310,7 +1311,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Do not reset the default (current) IME when it is a 3rd-party IME
         String selectedMethodId = bindingController.getSelectedMethodId();
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (selectedMethodId != null
+        if (selectedMethodId != null && settings.getMethodMap().get(selectedMethodId) != null
                 && !settings.getMethodMap().get(selectedMethodId).isSystem()) {
             return;
         }
@@ -6883,6 +6884,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     return;
                 }
                 mImms.mHwController.setNotTouchable(notTouchable);
+            }
+        }
+
+        @BinderThread
+        @Override
+        public void setHandwritingTouchableRegion(Region region) {
+            synchronized (ImfLock.class) {
+                mImms.mHwController.setHandwritingTouchableRegion(region);
             }
         }
 

@@ -24,6 +24,11 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QQS
+import com.android.systemui.media.controls.ui.controller.MediaLocation
+import com.android.systemui.media.controls.ui.controller.mediaHostStatesManager
+import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragment
 import com.android.systemui.qs.panels.domain.interactor.qsPreferencesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -67,6 +72,7 @@ class QuickQuickSettingsViewModelTest : SysuiTestCase() {
                 4,
             )
             fakeConfigurationRepository.onConfigurationChange()
+            usingMediaInComposeFragment = true
         }
 
     private val underTest =
@@ -145,6 +151,33 @@ class QuickQuickSettingsViewModelTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun mediaVisibleInLandscape_doubleRows_halfColumns() =
+        with(kosmos) {
+            testScope.runTest {
+                setRows(1)
+                assertThat(underTest.columns).isEqualTo(4)
+                // All tiles in 4 columns (but we only show the first 3 tiles)
+                // [1] [2] [3 3]
+                // [4] [5 5]
+                // [6 6] [7] [8]
+                // [9 9]
+
+                runCurrent()
+                assertThat(underTest.tileViewModels.map { it.tile.spec }).isEqualTo(tiles.take(3))
+
+                makeMediaVisible(LOCATION_QQS, visible = true)
+                setConfigurationForMediaInRow(mediaInRow = true)
+                runCurrent()
+
+                assertThat(underTest.columns).isEqualTo(2)
+                // Tiles in 4 columns
+                // [1] [2]
+                // [3 3]
+                assertThat(underTest.tileViewModels.map { it.tile.spec }).isEqualTo(tiles.take(3))
+            }
+        }
+
     private fun Kosmos.setTiles(tiles: List<TileSpec>) {
         currentTilesInteractor.setTiles(tiles)
     }
@@ -163,5 +196,12 @@ class QuickQuickSettingsViewModelTest : SysuiTestCase() {
     private companion object {
         const val PREFIX_SMALL = "small"
         const val PREFIX_LARGE = "large"
+
+        private fun Kosmos.makeMediaVisible(@MediaLocation location: Int, visible: Boolean) {
+            mediaHostStatesManager.updateHostState(
+                location,
+                MediaHost.MediaHostStateHolder().apply { this.visible = visible },
+            )
+        }
     }
 }

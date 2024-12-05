@@ -99,9 +99,10 @@ import java.util.concurrent.CompletableFuture;
 final class DevicePolicyEngine {
     static final String TAG = "DevicePolicyEngine";
 
-    // TODO(b/281701062): reference role name from role manager once its exposed.
     static final String DEVICE_LOCK_CONTROLLER_ROLE =
             "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
+
+    static final String SYSTEM_SUPERVISION_ROLE = "android.app.role.SYSTEM_SUPERVISION";
 
     private static final String CELLULAR_2G_USER_RESTRICTION_ID =
             DevicePolicyIdentifiers.getIdentifierForUserRestriction(
@@ -151,19 +152,20 @@ final class DevicePolicyEngine {
         mAdminPolicySize = new SparseArray<>();
     }
 
-    private void maybeForceEnforcementRefreshLocked(@NonNull PolicyDefinition<?> policyDefinition) {
+    private void forceEnforcementRefreshIfUserRestrictionLocked(
+            @NonNull PolicyDefinition<?> policyDefinition) {
         try {
-            if (shouldForceEnforcementRefresh(policyDefinition)) {
+            if (isUserRestrictionPolicy(policyDefinition)) {
                 // This is okay because it's only true for user restrictions which are all <Boolean>
                 forceEnforcementRefreshLocked((PolicyDefinition<Boolean>) policyDefinition);
             }
         } catch (Throwable e) {
             // Catch any possible exceptions just to be on the safe side
-            Log.e(TAG, "Exception throw during maybeForceEnforcementRefreshLocked", e);
+            Log.e(TAG, "Exception thrown during forceEnforcementRefreshIfUserRestrictionLocked", e);
         }
     }
 
-    private boolean shouldForceEnforcementRefresh(@NonNull PolicyDefinition<?> policyDefinition) {
+    private boolean isUserRestrictionPolicy(@NonNull PolicyDefinition<?> policyDefinition) {
         // These are all "not nullable" but for the purposes of maximum safety for a lightly tested
         // change we check here
         if (policyDefinition == null) {
@@ -256,7 +258,7 @@ final class DevicePolicyEngine {
             // No need to notify admins as no new policy is actually enforced, we're just filling in
             // the data structures.
             if (!skipEnforcePolicy) {
-                maybeForceEnforcementRefreshLocked(policyDefinition);
+                forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
                 if (policyChanged) {
                     onLocalPolicyChangedLocked(policyDefinition, enforcingAdmin, userId);
                 }
@@ -346,7 +348,7 @@ final class DevicePolicyEngine {
         Objects.requireNonNull(enforcingAdmin);
 
         synchronized (mLock) {
-            maybeForceEnforcementRefreshLocked(policyDefinition);
+            forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
             if (!hasLocalPolicyLocked(policyDefinition, userId)) {
                 return;
             }
@@ -516,7 +518,7 @@ final class DevicePolicyEngine {
             // No need to notify admins as no new policy is actually enforced, we're just filling in
             // the data structures.
             if (!skipEnforcePolicy) {
-                maybeForceEnforcementRefreshLocked(policyDefinition);
+                forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
                 if (policyChanged) {
                     onGlobalPolicyChangedLocked(policyDefinition, enforcingAdmin);
                 }
@@ -569,7 +571,7 @@ final class DevicePolicyEngine {
 
             boolean policyChanged = policyState.removePolicy(enforcingAdmin);
 
-            maybeForceEnforcementRefreshLocked(policyDefinition);
+            forceEnforcementRefreshIfUserRestrictionLocked(policyDefinition);
             if (policyChanged) {
                 onGlobalPolicyChangedLocked(policyDefinition, enforcingAdmin);
             }
@@ -1235,6 +1237,8 @@ final class DevicePolicyEngine {
                 }
             }
             for (EnforcingAdmin admin : admins) {
+                // No need to make changes to system enforcing admins.
+                if (admin.isSystemAuthority()) break;
                 if (updatedPackage == null || updatedPackage.equals(admin.getPackageName())) {
                     if (!isPackageInstalled(admin.getPackageName(), userId)) {
                         Slogf.i(TAG, String.format(

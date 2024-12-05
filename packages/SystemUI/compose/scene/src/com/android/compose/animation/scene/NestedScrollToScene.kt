@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -69,32 +68,28 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
 }
 
 internal fun Modifier.nestedScrollToScene(
-    layoutImpl: SceneTransitionLayoutImpl,
-    orientation: Orientation,
+    draggableHandler: DraggableHandlerImpl,
     topOrLeftBehavior: NestedScrollBehavior,
     bottomOrRightBehavior: NestedScrollBehavior,
     isExternalOverscrollGesture: () -> Boolean,
 ) =
     this then
         NestedScrollToSceneElement(
-            layoutImpl = layoutImpl,
-            orientation = orientation,
+            draggableHandler = draggableHandler,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
 private data class NestedScrollToSceneElement(
-    private val layoutImpl: SceneTransitionLayoutImpl,
-    private val orientation: Orientation,
+    private val draggableHandler: DraggableHandlerImpl,
     private val topOrLeftBehavior: NestedScrollBehavior,
     private val bottomOrRightBehavior: NestedScrollBehavior,
     private val isExternalOverscrollGesture: () -> Boolean,
 ) : ModifierNodeElement<NestedScrollToSceneNode>() {
     override fun create() =
         NestedScrollToSceneNode(
-            layoutImpl = layoutImpl,
-            orientation = orientation,
+            draggableHandler = draggableHandler,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
@@ -102,8 +97,7 @@ private data class NestedScrollToSceneElement(
 
     override fun update(node: NestedScrollToSceneNode) {
         node.update(
-            layoutImpl = layoutImpl,
-            orientation = orientation,
+            draggableHandler = draggableHandler,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
@@ -112,16 +106,14 @@ private data class NestedScrollToSceneElement(
 
     override fun InspectorInfo.inspectableProperties() {
         name = "nestedScrollToScene"
-        properties["layoutImpl"] = layoutImpl
-        properties["orientation"] = orientation
+        properties["draggableHandler"] = draggableHandler
         properties["topOrLeftBehavior"] = topOrLeftBehavior
         properties["bottomOrRightBehavior"] = bottomOrRightBehavior
     }
 }
 
 private class NestedScrollToSceneNode(
-    private var layoutImpl: SceneTransitionLayoutImpl,
-    private var orientation: Orientation,
+    private var draggableHandler: DraggableHandlerImpl,
     private var topOrLeftBehavior: NestedScrollBehavior,
     private var bottomOrRightBehavior: NestedScrollBehavior,
     private var isExternalOverscrollGesture: () -> Boolean,
@@ -129,12 +121,8 @@ private class NestedScrollToSceneNode(
     private var scrollBehaviorOwner: ScrollBehaviorOwner? = null
 
     private fun findScrollBehaviorOwner(): ScrollBehaviorOwner? {
-        var behaviorOwner = scrollBehaviorOwner
-        if (behaviorOwner == null) {
-            behaviorOwner = findScrollBehaviorOwner(layoutImpl.draggableHandler(orientation))
-            scrollBehaviorOwner = behaviorOwner
-        }
-        return behaviorOwner
+        return scrollBehaviorOwner
+            ?: findScrollBehaviorOwner(draggableHandler).also { scrollBehaviorOwner = it }
     }
 
     private val updateScrollBehaviorsConnection =
@@ -177,14 +165,12 @@ private class NestedScrollToSceneNode(
     }
 
     fun update(
-        layoutImpl: SceneTransitionLayoutImpl,
-        orientation: Orientation,
+        draggableHandler: DraggableHandlerImpl,
         topOrLeftBehavior: NestedScrollBehavior,
         bottomOrRightBehavior: NestedScrollBehavior,
         isExternalOverscrollGesture: () -> Boolean,
     ) {
-        this.layoutImpl = layoutImpl
-        this.orientation = orientation
+        this.draggableHandler = draggableHandler
         this.topOrLeftBehavior = topOrLeftBehavior
         this.bottomOrRightBehavior = bottomOrRightBehavior
         this.isExternalOverscrollGesture = isExternalOverscrollGesture

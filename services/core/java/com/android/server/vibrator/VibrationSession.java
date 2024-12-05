@@ -25,7 +25,11 @@ import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents a generic vibration session that plays one or more vibration requests.
@@ -38,6 +42,16 @@ import java.util.Objects;
  * </ol>
  */
 interface VibrationSession {
+
+    // Used to generate globally unique session ids.
+    AtomicInteger sNextSessionId = new AtomicInteger(1); // 0 = no callback
+
+    static long nextSessionId() {
+        return sNextSessionId.getAndIncrement();
+    }
+
+    /** Returns the session id. */
+    long getSessionId();
 
     /** Returns the session creation time from {@link android.os.SystemClock#uptimeMillis()}. */
     long getCreateUptimeMillis();
@@ -103,6 +117,14 @@ interface VibrationSession {
      * its playback might have one or more interactions with the vibrator hardware.
      */
     void notifySyncedVibratorsCallback(long vibrationId);
+
+    /**
+     * Notify vibrator manager have completed the vibration session.
+     *
+     * <p>This will be called by the vibrator manager hardware callback indicating the session
+     * is complete, either because it was ended or cancelled by the service or the vendor.
+     */
+    void notifySessionCallback();
 
     /**
      * Session status with reference to values from vibratormanagerservice.proto for logging.
@@ -211,6 +233,17 @@ interface VibrationSession {
      * objects, such as {@link IBinder}.
      */
     interface DebugInfo {
+
+        DateTimeFormatter DEBUG_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+        DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+                "MM-dd HH:mm:ss.SSS");
+
+        static String formatTime(long timeInMillis, boolean includeDate) {
+            return (includeDate ? DEBUG_DATE_TIME_FORMATTER : DEBUG_TIME_FORMATTER)
+                    // Ensure timezone is retrieved at formatting time
+                    .withZone(ZoneId.systemDefault())
+                    .format(Instant.ofEpochMilli(timeInMillis));
+        }
 
         /** Return the vibration session status. */
         Status getStatus();

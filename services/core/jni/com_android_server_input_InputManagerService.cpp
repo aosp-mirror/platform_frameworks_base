@@ -68,6 +68,7 @@
 #include <map>
 #include <vector>
 
+#include "android_hardware_display_DisplayTopology.h"
 #include "android_hardware_display_DisplayViewport.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_hardware_input_InputWindowHandle.h"
@@ -210,6 +211,7 @@ static struct {
     jfieldID lightTypePlayerId;
     jfieldID lightTypeKeyboardBacklight;
     jfieldID lightTypeKeyboardMicMute;
+    jfieldID lightTypeKeyboardVolumeMute;
     jfieldID lightCapabilityBrightness;
     jfieldID lightCapabilityColorRgb;
 } gLightClassInfo;
@@ -320,6 +322,8 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
+    void setDisplayTopology(JNIEnv* env, jobject topologyGraph);
+
     base::Result<std::unique_ptr<InputChannel>> createInputChannel(const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(ui::LogicalDisplayId displayId,
                                                                    const std::string& name,
@@ -347,6 +351,7 @@ public:
     void setShouldNotifyTouchpadHardwareState(bool enabled);
     void setTouchpadRightClickZoneEnabled(bool enabled);
     void setTouchpadThreeFingerTapShortcutEnabled(bool enabled);
+    void setTouchpadSystemGesturesEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
     void setNonInteractiveDisplays(const std::set<ui::LogicalDisplayId>& displayIds);
@@ -360,7 +365,7 @@ public:
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
-    FloatPoint getMouseCursorPosition(ui::LogicalDisplayId displayId);
+    vec2 getMouseCursorPosition(ui::LogicalDisplayId displayId);
     void setStylusPointerIconEnabled(bool enabled);
     void setInputMethodConnectionIsActive(bool isActive);
     void setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping);
@@ -439,7 +444,7 @@ public:
     std::shared_ptr<PointerControllerInterface> createPointerController(
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
-                                       const FloatPoint& position) override;
+                                       const vec2& position) override;
     void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
@@ -516,6 +521,9 @@ private:
         // True to use three-finger tap as a customizable shortcut; false to use it as a
         // middle-click.
         bool touchpadThreeFingerTapShortcutEnabled{false};
+
+        // True to enable system gestures (three- and four-finger swipes) on touchpads.
+        bool touchpadSystemGesturesEnabled{true};
 
         // True if a pointer icon should be shown for stylus pointers.
         bool stylusPointerIconEnabled{false};
@@ -633,6 +641,11 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     mInputManager->getChoreographer().setDisplayViewports(viewports);
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::setDisplayTopology(JNIEnv* env, jobject topologyGraph) {
+    android_hardware_display_DisplayTopologyGraph_toNative(env, topologyGraph);
+    // TODO(b/367661489): Use the topology
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
@@ -789,6 +802,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->touchpadRightClickZoneEnabled = mLocked.touchpadRightClickZoneEnabled;
         outConfig->touchpadThreeFingerTapShortcutEnabled =
                 mLocked.touchpadThreeFingerTapShortcutEnabled;
+        outConfig->touchpadSystemGesturesEnabled = mLocked.touchpadSystemGesturesEnabled;
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
 
@@ -865,7 +879,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerCon
 }
 
 void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId pointerDisplayId,
-                                                       const FloatPoint& position) {
+                                                       const vec2& position) {
     // Notify the Reader so that devices can be reconfigured.
     { // acquire lock
         std::scoped_lock _l(mLock);
@@ -1527,6 +1541,22 @@ void NativeInputManager::setTouchpadThreeFingerTapShortcutEnabled(bool enabled) 
             InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
+void NativeInputManager::setTouchpadSystemGesturesEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.touchpadSystemGesturesEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting touchpad system gestures enabled to %s.", toString(enabled));
+        mLocked.touchpadSystemGesturesEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
+}
+
 void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
     bool refresh = false;
 
@@ -2001,7 +2031,7 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
             InputReaderConfiguration::Change::STYLUS_BUTTON_REPORTING);
 }
 
-FloatPoint NativeInputManager::getMouseCursorPosition(ui::LogicalDisplayId displayId) {
+vec2 NativeInputManager::getMouseCursorPosition(ui::LogicalDisplayId displayId) {
     return mInputManager->getChoreographer().getMouseCursorPosition(displayId);
 }
 
@@ -2068,6 +2098,12 @@ static void nativeSetDisplayViewports(JNIEnv* env, jobject nativeImplObj,
                                       jobjectArray viewportObjArray) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->setDisplayViewports(env, viewportObjArray);
+}
+
+static void nativeSetDisplayTopology(JNIEnv* env, jobject nativeImplObj,
+                                     jobject displayTopologyObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setDisplayTopology(env, displayTopologyObj);
 }
 
 static jint nativeGetScanCodeState(JNIEnv* env, jobject nativeImplObj, jint deviceId,
@@ -2329,6 +2365,12 @@ static void nativeToggleCapsLock(JNIEnv* env, jobject nativeImplObj, jint device
     im->getInputManager()->getReader().toggleCapsLockState(deviceId);
 }
 
+static void resetLockedModifierState(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->getInputManager()->getReader().resetLockedModifierState();
+}
+
 static void nativeDisplayRemoved(JNIEnv* env, jobject nativeImplObj, jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
@@ -2472,6 +2514,13 @@ static void nativeSetTouchpadRightClickZoneEnabled(JNIEnv* env, jobject nativeIm
 static void nativeSetTouchpadThreeFingerTapShortcutEnabled(JNIEnv* env, jobject nativeImplObj,
                                                            jboolean enabled) {
     getNativeInputManager(env, nativeImplObj)->setTouchpadThreeFingerTapShortcutEnabled(enabled);
+}
+
+static void nativeSetTouchpadSystemGesturesEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                   jboolean enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+
+    im->setTouchpadSystemGesturesEnabled(enabled);
 }
 
 static void nativeSetShowTouches(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
@@ -2630,6 +2679,9 @@ static jobject nativeGetLights(JNIEnv* env, jobject nativeImplObj, jint deviceId
         } else if (lightInfo.type == InputDeviceLightType::KEYBOARD_MIC_MUTE) {
             jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
                                              gLightClassInfo.lightTypeKeyboardMicMute);
+        } else if (lightInfo.type == InputDeviceLightType::KEYBOARD_VOLUME_MUTE) {
+            jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
+                                             gLightClassInfo.lightTypeKeyboardVolumeMute);
         } else {
             ALOGW("Unknown light type %s", ftl::enum_string(lightInfo.type).c_str());
             continue;
@@ -3110,6 +3162,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"start", "()V", (void*)nativeStart},
         {"setDisplayViewports", "([Landroid/hardware/display/DisplayViewport;)V",
          (void*)nativeSetDisplayViewports},
+        {"setDisplayTopology", "(Landroid/hardware/display/DisplayTopologyGraph;)V",
+         (void*)nativeSetDisplayTopology},
         {"getScanCodeState", "(III)I", (void*)nativeGetScanCodeState},
         {"getKeyCodeState", "(III)I", (void*)nativeGetKeyCodeState},
         {"getSwitchState", "(III)I", (void*)nativeGetSwitchState},
@@ -3130,6 +3184,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"verifyInputEvent", "(Landroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
          (void*)nativeVerifyInputEvent},
         {"toggleCapsLock", "(I)V", (void*)nativeToggleCapsLock},
+        {"resetLockedModifierState", "()V", (void*)resetLockedModifierState},
         {"displayRemoved", "(I)V", (void*)nativeDisplayRemoved},
         {"setFocusedApplication", "(ILandroid/view/InputApplicationHandle;)V",
          (void*)nativeSetFocusedApplication},
@@ -3158,6 +3213,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
         {"setTouchpadThreeFingerTapShortcutEnabled", "(Z)V",
          (void*)nativeSetTouchpadThreeFingerTapShortcutEnabled},
+        {"setTouchpadSystemGesturesEnabled", "(Z)V", (void*)nativeSetTouchpadSystemGesturesEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
         {"setNonInteractiveDisplays", "([I)V", (void*)nativeSetNonInteractiveDisplays},
         {"reloadCalibration", "()V", (void*)nativeReloadCalibration},
@@ -3420,6 +3476,8 @@ int register_android_server_InputManager(JNIEnv* env) {
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_KEYBOARD_BACKLIGHT", "I");
     gLightClassInfo.lightTypeKeyboardMicMute =
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_KEYBOARD_MIC_MUTE", "I");
+    gLightClassInfo.lightTypeKeyboardVolumeMute =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_KEYBOARD_VOLUME_MUTE", "I");
     gLightClassInfo.lightCapabilityBrightness =
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_CAPABILITY_BRIGHTNESS", "I");
     gLightClassInfo.lightCapabilityColorRgb =

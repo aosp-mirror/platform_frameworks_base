@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.shared.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
 
 val Kosmos.collapsedStatusBarInteractor: CollapsedStatusBarInteractor by
-    Kosmos.Fixture { CollapsedStatusBarInteractor(fakeDisableFlagsRepository) }
+    Kosmos.Fixture { CollapsedStatusBarInteractor(disableFlagsInteractor) }

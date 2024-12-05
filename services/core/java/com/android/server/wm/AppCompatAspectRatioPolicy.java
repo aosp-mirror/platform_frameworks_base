@@ -70,15 +70,8 @@ class AppCompatAspectRatioPolicy {
         mAppCompatAspectRatioState.reset();
     }
 
-    float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
+    private float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
             @NonNull Rect parentBounds) {
-        // If in camera compat mode, aspect ratio from the camera compat policy has priority over
-        // default letterbox aspect ratio.
-        if (AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(
-                mActivityRecord)) {
-            return AppCompatCameraPolicy.getCameraCompatAspectRatio(mActivityRecord);
-        }
-
         final float letterboxAspectRatioOverride =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides()
                         .getFixedOrientationLetterboxAspectRatio(newParentConfig);
@@ -120,7 +113,16 @@ class AppCompatAspectRatioPolicy {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMinAspectRatio();
         }
+
         final ActivityInfo info = mActivityRecord.info;
+
+        // If in camera compat mode, aspect ratio from the camera compat policy has priority over
+        // the default aspect ratio.
+        if (AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(mActivityRecord)) {
+            return Math.max(AppCompatCameraPolicy.getCameraCompatMinAspectRatio(mActivityRecord),
+                    info.getMinAspectRatio());
+        }
+
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides();
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {

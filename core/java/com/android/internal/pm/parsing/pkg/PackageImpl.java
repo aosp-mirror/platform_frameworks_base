@@ -392,6 +392,10 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private int memtagMode;
     @ApplicationInfo.NativeHeapZeroInitialized
     private int nativeHeapZeroInitialized;
+
+    @ApplicationInfo.PageSizeAppCompatFlags private int mPageSizeAppCompatFlags =
+            ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED;
+
     @Nullable
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForBoolean.class)
     private Boolean requestRawExternalStorageAccess;
@@ -409,6 +413,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private long mLongVersionCode;
     private int mLocaleConfigRes;
     private boolean mAllowCrossUidActivitySwitchFromBelow;
+
+    @Nullable
+    private int[] mAlternateLauncherIconResIds;
+    @Nullable
+    private int[] mAlternateLauncherLabelResIds;
 
     private List<AndroidPackageSplit> mSplits;
 
@@ -874,6 +883,18 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         return adoptPermissions;
     }
 
+    @Nullable
+    @Override
+    public int[] getAlternateLauncherIconResIds() {
+        return mAlternateLauncherIconResIds;
+    }
+
+    @Nullable
+    @Override
+    public int[] getAlternateLauncherLabelResIds() {
+        return mAlternateLauncherLabelResIds;
+    }
+
     @NonNull
     @Override
     public List<ParsedApexSystemService> getApexSystemServices() {
@@ -1099,6 +1120,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Override
     public int getNativeHeapZeroInitialized() {
         return nativeHeapZeroInitialized;
+    }
+
+    @ApplicationInfo.PageSizeAppCompatFlags
+    @Override
+    public int getPageSizeAppCompatFlags() {
+        return mPageSizeAppCompatFlags;
     }
 
     @Override
@@ -1888,6 +1915,19 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public PackageImpl setAlternateLauncherIconResIds(@Nullable int[] alternateLauncherIconResIds) {
+        this.mAlternateLauncherIconResIds = alternateLauncherIconResIds;
+        return this;
+    }
+
+    @Override
+    public PackageImpl setAlternateLauncherLabelResIds(
+            @Nullable int[] alternateLauncherLabelResIds) {
+        this.mAlternateLauncherLabelResIds = alternateLauncherLabelResIds;
+        return this;
+    }
+
+    @Override
     public PackageImpl setTaskReparentingAllowed(boolean value) {
         return setBoolean(Booleans.ALLOW_TASK_REPARENTING, value);
     }
@@ -2187,6 +2227,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     public PackageImpl setNativeHeapZeroInitialized(
             @ApplicationInfo.NativeHeapZeroInitialized int value) {
         nativeHeapZeroInitialized = value;
+        return this;
+    }
+
+    @Override
+    public PackageImpl setPageSizeAppCompatFlags(@ApplicationInfo.PageSizeAppCompatFlags int flag) {
+        mPageSizeAppCompatFlags = flag;
         return this;
     }
 
@@ -2673,6 +2719,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
             appInfo.setKnownActivityEmbeddingCerts(mKnownActivityEmbeddingCerts);
         }
         appInfo.allowCrossUidActivitySwitchFromBelow = mAllowCrossUidActivitySwitchFromBelow;
+        appInfo.setPageSizeAppCompatFlags(mPageSizeAppCompatFlags);
 
         return appInfo;
     }
@@ -3273,6 +3320,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         dest.writeLong(this.mBooleans2);
         dest.writeBoolean(this.mAllowCrossUidActivitySwitchFromBelow);
         dest.writeInt(this.mIntentMatchingFlags);
+        dest.writeIntArray(this.mAlternateLauncherIconResIds);
+        dest.writeIntArray(this.mAlternateLauncherLabelResIds);
+        dest.writeInt(this.mPageSizeAppCompatFlags);
     }
 
     private void writeFeatureFlagState(@NonNull Parcel dest) {
@@ -3465,6 +3515,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         this.mBooleans2 = in.readLong();
         this.mAllowCrossUidActivitySwitchFromBelow = in.readBoolean();
         this.mIntentMatchingFlags = in.readInt();
+        this.mAlternateLauncherIconResIds = in.createIntArray();
+        this.mAlternateLauncherLabelResIds = in.createIntArray();
+        this.mPageSizeAppCompatFlags = in.readInt();
 
         assignDerivedFields();
         assignDerivedFields2();

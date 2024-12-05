@@ -32,6 +32,8 @@ class FakeHomeStatusBarViewBinder : HomeStatusBarViewBinder {
     override fun bind(
         view: View,
         viewModel: HomeStatusBarViewModel,
+        systemEventChipAnimateIn: ((View) -> Unit)?,
+        systemEventChipAnimateOut: ((View) -> Unit)?,
         listener: StatusBarVisibilityChangeListener,
     ) {
         this.listener = listener

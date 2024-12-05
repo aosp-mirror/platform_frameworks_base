@@ -125,13 +125,15 @@
     <string name="select_text" msgid="5139083974039906583">"Odaberite"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Snimka zaslona"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Otvori u pregledniku"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Otvori u aplikaciji"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Novi prozor"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Upravljanje prozorima"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Promijeni omjer slike"</string>
     <string name="close_text" msgid="4986518933445178928">"Zatvorite"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Zatvorite izbornik"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Otvaranje izbornika"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimalno povećaj zaslon"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Izradi snimku zaslona"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Promijeni veličinu"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Aplikacija se ne može premjestiti ovdje"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Interaktivno"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Vrati"</string>
@@ -144,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"U aplikaciji"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"U pregledniku"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"U redu"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Ovdje brzo otvorite aplikacije u pregledniku"</string>
 </resources>

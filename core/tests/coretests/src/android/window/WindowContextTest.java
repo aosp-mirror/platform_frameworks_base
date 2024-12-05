@@ -29,6 +29,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
 import android.app.EmptyActivity;
@@ -60,6 +65,8 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.frameworks.coretests.R;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,8 +95,20 @@ public class WindowContextTest {
     private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
     private final WindowContext mWindowContext = createWindowContext();
     private final IWindowManager mWms = WindowManagerGlobal.getWindowManagerService();
+    private WindowTokenClientController mOriginalWindowTokenClientController;
 
     private static final int TIMEOUT_IN_SECONDS = 4;
+
+    @Before
+    public void setUp() {
+        // Keeping the original to set it back after each test, in case they applied any override.
+        mOriginalWindowTokenClientController = WindowTokenClientController.getInstance();
+    }
+
+    @After
+    public void tearDown() {
+        WindowTokenClientController.overrideForTesting(mOriginalWindowTokenClientController);
+    }
 
     @Test
     public void testCreateWindowContextWindowManagerAttachClientToken() {
@@ -318,6 +337,20 @@ public class WindowContextTest {
         } finally {
             wrapper.unregisterComponentCallbacks(listener);
         }
+    }
+
+    @Test
+    public void updateDisplay_wasAttached_detachThenAttachedPropagatedToTokenController() {
+        final WindowTokenClientController mockWindowTokenClientController =
+                mock(WindowTokenClientController.class);
+        WindowTokenClientController.overrideForTesting(mockWindowTokenClientController);
+
+        mWindowContext.updateDisplay(DEFAULT_DISPLAY + 1);
+
+        verify(mockWindowTokenClientController).detachIfNeeded(any());
+        verify(mockWindowTokenClientController).attachToDisplayArea(any(),
+                anyInt(), /* displayId= */ eq(DEFAULT_DISPLAY + 1),
+                any());
     }
 
     private WindowContext createWindowContext() {

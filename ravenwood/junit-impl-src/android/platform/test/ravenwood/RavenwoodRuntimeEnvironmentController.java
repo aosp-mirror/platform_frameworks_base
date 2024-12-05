@@ -16,57 +16,74 @@
 
 package android.platform.test.ravenwood;
 
+import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.os.UserHandle.SYSTEM;
 import static android.platform.test.ravenwood.RavenwoodSystemServer.ANDROID_PACKAGE_NAME;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_EMPTY_RESOURCES_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
-import static com.android.ravenwood.common.RavenwoodCommonUtils.getRavenwoodRuntimePath;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.parseNullableInt;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.withDefault;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppCompatCallbacks;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
 import android.app.UiAutomation;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process_ravenwood;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig_host;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
+import android.util.Log_ravenwood;
+import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.hoststubgen.hosthelper.HostTestUtils;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.RuntimeInit;
 import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.RavenwoodRuntimeState;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
-import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
+import com.android.server.compat.PlatformCompat;
 
+import org.junit.internal.management.ManagementFactory;
 import org.junit.runner.Description;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -76,20 +93,20 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
- * Responsible for initializing and de-initializing the environment, according to a
- * {@link RavenwoodConfig}.
+ * Responsible for initializing and the environment.
  */
 public class RavenwoodRuntimeEnvironmentController {
-    private static final String TAG = "RavenwoodRuntimeEnvironmentController";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     private RavenwoodRuntimeEnvironmentController() {
     }
 
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
-    private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
+    private static final String LIBRAVENWOOD_INITIALIZER_NAME = "ravenwood_initializer";
     private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
-    private static final String RAVENWOOD_BUILD_PROP =
-            getRavenwoodRuntimePath() + "ravenwood-data/build.prop";
+
+    private static final String ANDROID_LOG_TAGS = "ANDROID_LOG_TAGS";
+    private static final String RAVENWOOD_ANDROID_LOG_TAGS = "RAVENWOOD_" + ANDROID_LOG_TAGS;
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
@@ -104,8 +121,6 @@ public class RavenwoodRuntimeEnvironmentController {
             Executors.newScheduledThreadPool(1);
 
     private static ScheduledFuture<?> sPendingTimeout;
-
-    private static long sOriginalIdentityToken = -1;
 
     /**
      * When enabled, attempt to detect uncaught exceptions from background threads.
@@ -139,50 +154,107 @@ public class RavenwoodRuntimeEnvironmentController {
         return res;
     }
 
-    private static RavenwoodAwareTestRunner sRunner;
-    private static RavenwoodSystemProperties sProps;
+    /** Map from path -> resources. */
+    private static final HashMap<File, Resources> sCachedResources = new HashMap<>();
+    private static Set<String> sAdoptedPermissions = Collections.emptySet();
+
+    private static final Object sInitializationLock = new Object();
+
+    @GuardedBy("sInitializationLock")
     private static boolean sInitialized = false;
+
+    @GuardedBy("sInitializationLock")
+    private static Throwable sExceptionFromGlobalInit;
+
+    private static final int DEFAULT_TARGET_SDK_LEVEL = VERSION_CODES.CUR_DEVELOPMENT;
+    private static final String DEFAULT_PACKAGE_NAME = "com.android.ravenwoodtests.defaultname";
+
+    private static final int sMyPid = new Random().nextInt(100, 32768);
+    private static int sTargetSdkLevel;
+    private static String sTestPackageName;
+    private static String sTargetPackageName;
+    private static Instrumentation sInstrumentation;
+    private static final long sCallingIdentity =
+            packBinderIdentityToken(false, FIRST_APPLICATION_UID, sMyPid);
 
     /**
      * Initialize the global environment.
      */
     public static void globalInitOnce() {
-        if (sInitialized) {
-            return;
+        synchronized (sInitializationLock) {
+            if (!sInitialized) {
+                // globalInitOnce() is called from class initializer, which cause
+                // this method to be called recursively,
+                sInitialized = true;
+
+                // This is the first call.
+                try {
+                    globalInitInner();
+                } catch (Throwable th) {
+                    Log.e(TAG, "globalInit() failed", th);
+
+                    sExceptionFromGlobalInit = th;
+                    SneakyThrow.sneakyThrow(th);
+                }
+            } else {
+                // Subsequent calls. If the first call threw, just throw the same error, to prevent
+                // the test from running.
+                if (sExceptionFromGlobalInit != null) {
+                    Log.e(TAG, "globalInit() failed re-throwing the same exception",
+                            sExceptionFromGlobalInit);
+
+                    SneakyThrow.sneakyThrow(sExceptionFromGlobalInit);
+                }
+            }
         }
-        sInitialized = true;
+    }
+
+    private static void globalInitInner() throws IOException {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "globalInit() called here...", new RuntimeException("NOT A CRASH"));
+        }
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
+        }
+
+        // Some process-wide initialization:
+        // - maybe redirect stdout/stderr
+        // - override native system property functions
+        var lib = RavenwoodCommonUtils.getJniLibraryPath(LIBRAVENWOOD_INITIALIZER_NAME);
+        System.load(lib);
+        RavenwoodRuntimeNative.reloadNativeLibrary(lib);
+
+        // Redirect stdout/stdin to the Log API.
+        RuntimeInit.redirectLogStreams();
+
+        dumpCommandLineArgs();
 
         // We haven't initialized liblog yet, so directly write to System.out here.
-        RavenwoodCommonUtils.log(TAG, "globalInit()");
-
-        // Load libravenwood_sysprop first
-        var libProp = RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_SYSPROP_NAME);
-        System.load(libProp);
-        RavenwoodRuntimeNative.reloadNativeLibrary(libProp);
+        RavenwoodCommonUtils.log(TAG, "globalInitInner()");
 
         // Make sure libravenwood_runtime is loaded.
         System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
 
-        // Do the basic set up for the android sysprops.
-        RavenwoodSystemProperties.initialize(RAVENWOOD_BUILD_PROP);
-        setSystemProperties(null);
+        Log_ravenwood.setLogLevels(getLogTags());
+        Log_ravenwood.onRavenwoodRuntimeNativeReady();
 
+        // Do the basic set up for the android sysprops.
+        RavenwoodSystemProperties.initialize();
+
+        // Enable all log levels for native logging, until we'll have a way to change the native
+        // side log level at runtime.
         // Do this after loading RAVENWOOD_NATIVE_RUNTIME_NAME (which backs Os.setenv()),
         // before loadFrameworkNativeCode() (which uses $ANDROID_LOG_TAGS).
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
-            try {
-                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
-            } catch (ErrnoException e) {
-                throw new RuntimeException(e);
-            }
+        // This would also prevent libbase from crashing the process (b/381112373) because
+        // the string format it accepts is very limited.
+        try {
+            Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+        } catch (ErrnoException e) {
+            throw new RuntimeException(e);
         }
 
         // Make sure libandroid_runtime is loaded.
         RavenwoodNativeLoader.loadFrameworkNativeCode();
-
-        // Redirect stdout/stdin to liblog.
-        RuntimeInit.redirectLogStreams();
 
         // Touch some references early to ensure they're <clinit>'ed
         Objects.requireNonNull(Build.TYPE);
@@ -193,62 +265,35 @@ public class RavenwoodRuntimeEnvironmentController {
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
 
+        loadRavenwoodProperties();
+
         assertMockitoVersion();
-    }
 
-    /**
-     * Initialize the environment.
-     */
-    public static void init(RavenwoodAwareTestRunner runner) {
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            Log.v(TAG, "init() called here: " + runner, new RuntimeException("STACKTRACE"));
-        }
-        if (sRunner == runner) {
-            return;
-        }
-        if (sRunner != null) {
-            reset();
-        }
-        sRunner = runner;
-        try {
-            initInner(runner.mState.getConfig());
-        } catch (Exception th) {
-            Log.e(TAG, "init() failed", th);
-            reset();
-            SneakyThrow.sneakyThrow(th);
-        }
-    }
+        Log.i(TAG, "TargetPackageName=" + sTargetPackageName);
+        Log.i(TAG, "TestPackageName=" + sTestPackageName);
+        Log.i(TAG, "TargetSdkLevel=" + sTargetSdkLevel);
 
-    private static void initInner(RavenwoodConfig config) throws IOException {
-        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
-            maybeThrowPendingUncaughtException(false);
-            Thread.setDefaultUncaughtExceptionHandler(sUncaughtExceptionHandler);
-        }
-
-        RavenwoodRuntimeState.sUid = config.mUid;
-        RavenwoodRuntimeState.sPid = config.mPid;
-        RavenwoodRuntimeState.sTargetSdkLevel = config.mTargetSdkLevel;
-        sOriginalIdentityToken = Binder.clearCallingIdentity();
-        reinit();
-        setSystemProperties(config.mSystemProperties);
+        RavenwoodRuntimeState.sUid = FIRST_APPLICATION_UID;
+        RavenwoodRuntimeState.sPid = sMyPid;
+        RavenwoodRuntimeState.sTargetSdkLevel = sTargetSdkLevel;
 
         ServiceManager.init$ravenwood();
         LocalServices.removeAllServicesForTest();
 
-        ActivityManager.init$ravenwood(config.mCurrentUser);
+        ActivityManager.init$ravenwood(SYSTEM.getIdentifier());
 
         final var main = new HandlerThread(MAIN_THREAD_NAME);
         main.start();
         Looper.setMainLooperForTest(main.getLooper());
 
         final boolean isSelfInstrumenting =
-                Objects.equals(config.mTestPackageName, config.mTargetPackageName);
+                Objects.equals(sTestPackageName, sTargetPackageName);
 
         // This will load the resources from the apk set to `resource_apk` in the build file.
         // This is supposed to be the "target app"'s resources.
         final Supplier<Resources> targetResourcesLoader = () -> {
             var file = new File(RAVENWOOD_RESOURCE_APK);
-            return config.mState.loadResources(file.exists() ? file : null);
+            return loadResources(file.exists() ? file : null);
         };
 
         // Set up test context's (== instrumentation context's) resources.
@@ -259,18 +304,17 @@ public class RavenwoodRuntimeEnvironmentController {
         } else {
             instResourcesLoader = () -> {
                 var file = new File(RAVENWOOD_INST_RESOURCE_APK);
-                return config.mState.loadResources(file.exists() ? file : null);
+                return loadResources(file.exists() ? file : null);
             };
         }
 
         var instContext = new RavenwoodContext(
-                config.mTestPackageName, main, instResourcesLoader);
+                sTestPackageName, main, instResourcesLoader);
         var targetContext = new RavenwoodContext(
-                config.mTargetPackageName, main, targetResourcesLoader);
+                sTargetPackageName, main, targetResourcesLoader);
 
         // Set up app context.
-        var appContext = new RavenwoodContext(
-                config.mTargetPackageName, main, targetResourcesLoader);
+        var appContext = new RavenwoodContext(sTargetPackageName, main, targetResourcesLoader);
         appContext.setApplicationContext(appContext);
         if (isSelfInstrumenting) {
             instContext.setApplicationContext(appContext);
@@ -279,91 +323,141 @@ public class RavenwoodRuntimeEnvironmentController {
             // When instrumenting into another APK, the test context doesn't have an app context.
             targetContext.setApplicationContext(appContext);
         }
-        config.mInstContext = instContext;
-        config.mTargetContext = targetContext;
 
-        final Supplier<Resources> systemResourcesLoader = () -> config.mState.loadResources(null);
+        final Supplier<Resources> systemResourcesLoader = () -> loadResources(null);
 
-        config.mState.mSystemServerContext =
+        var systemServerContext =
                 new RavenwoodContext(ANDROID_PACKAGE_NAME, main, systemResourcesLoader);
 
-        // Prepare other fields.
-        config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(instContext, targetContext, createMockUiAutomation());
-        InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
+        sInstrumentation = new Instrumentation();
+        sInstrumentation.basicInit(instContext, targetContext, null);
+        InstrumentationRegistry.registerInstance(sInstrumentation, Bundle.EMPTY);
 
-        RavenwoodSystemServer.init(config);
+        RavenwoodSystemServer.init(systemServerContext);
+
+        initializeCompatIds();
+    }
+
+    /**
+     * Get log tags from environmental variable.
+     */
+    @Nullable
+    private static String getLogTags() {
+        var logTags = System.getenv(RAVENWOOD_ANDROID_LOG_TAGS);
+        if (logTags == null) {
+            logTags = System.getenv(ANDROID_LOG_TAGS);
+        }
+        return logTags;
+    }
+
+    private static void loadRavenwoodProperties() {
+        var props = RavenwoodSystemProperties.readProperties("ravenwood.properties");
+
+        sTargetSdkLevel = withDefault(
+                parseNullableInt(props.get("targetSdkVersionInt")), DEFAULT_TARGET_SDK_LEVEL);
+        sTargetPackageName = withDefault(props.get("packageName"), DEFAULT_PACKAGE_NAME);
+        sTestPackageName = withDefault(props.get("instPackageName"), sTargetPackageName);
+
+        // TODO(b/377765941) Read them from the manifest too?
+    }
+
+    /**
+     * Partially reset and initialize before each test class invocation
+     */
+    public static void initForRunner() {
+        var targetContext = sInstrumentation.getTargetContext();
+        var instContext = sInstrumentation.getContext();
+        // We need to recreate the mock UiAutomation for each test class, because sometimes tests
+        // will call Mockito.framework().clearInlineMocks() after execution.
+        sInstrumentation.basicInit(instContext, targetContext, createMockUiAutomation());
+
+        // Reset some global state
+        Process_ravenwood.reset();
+        DeviceConfig_host.reset();
+        Binder.restoreCallingIdentity(sCallingIdentity);
+
+        SystemProperties.clearChangeCallbacksForTest();
 
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout = sTimeoutExecutor.schedule(
                     RavenwoodRuntimeEnvironmentController::dumpStacks,
                     TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
         }
+        if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
+            maybeThrowPendingUncaughtException(false);
+        }
     }
 
     /**
-     * Partially re-initialize after each test method invocation
+     * Partially reset and initialize before each test method invocation
      */
-    public static void reinit() {
-        var config = sRunner.mState.getConfig();
-        Binder.restoreCallingIdentity(packBinderIdentityToken(false, config.mUid, config.mPid));
+    public static void initForMethod() {
+        // TODO(b/375272444): this is a hacky workaround to ensure binder identity
+        Binder.restoreCallingIdentity(sCallingIdentity);
+    }
+
+    private static void initializeCompatIds() {
+        // Set up compat-IDs for the app side.
+        // TODO: Inside the system server, all the compat-IDs should be enabled,
+        // Due to the `AppCompatCallbacks.install(new long[0], new long[0])` call in
+        // SystemServer.
+
+        // Compat framework only uses the package name and the target SDK level.
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.packageName = sTargetPackageName;
+        appInfo.targetSdkVersion = sTargetSdkLevel;
+
+        PlatformCompat platformCompat = null;
+        try {
+            platformCompat = (PlatformCompat) ServiceManager.getServiceOrThrow(
+                    Context.PLATFORM_COMPAT_SERVICE);
+        } catch (ServiceNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        var disabledChanges = platformCompat.getDisabledChanges(appInfo);
+        var loggableChanges = platformCompat.getLoggableChanges(appInfo);
+
+        AppCompatCallbacks.install(disabledChanges, loggableChanges);
     }
 
     /**
-     * De-initialize.
+     * Load {@link Resources} from an APK, with cache.
      */
-    public static void reset() {
-        if (RAVENWOOD_VERBOSE_LOGGING) {
-            Log.v(TAG, "reset() called here", new RuntimeException("STACKTRACE"));
+    private static Resources loadResources(@Nullable File apkPath) {
+        var cached = sCachedResources.get(apkPath);
+        if (cached != null) {
+            return cached;
         }
-        if (sRunner == null) {
-            throw new RavenwoodRuntimeException("Internal error: reset() already called");
-        }
-        var config = sRunner.mState.getConfig();
-        sRunner = null;
 
+        var fileToLoad = apkPath != null ? apkPath : new File(RAVENWOOD_EMPTY_RESOURCES_APK);
+
+        assertTrue("File " + fileToLoad + " doesn't exist.", fileToLoad.isFile());
+
+        final String path = fileToLoad.getAbsolutePath();
+        final var emptyPaths = new String[0];
+
+        ResourcesManager.getInstance().initializeApplicationPaths(path, emptyPaths);
+
+        final var ret = ResourcesManager.getInstance().getResources(null, path,
+                emptyPaths, emptyPaths, emptyPaths,
+                emptyPaths, null, null,
+                new DisplayAdjustments().getCompatibilityInfo(),
+                RavenwoodRuntimeEnvironmentController.class.getClassLoader(), null);
+
+        assertNotNull(ret);
+
+        sCachedResources.put(apkPath, ret);
+        return ret;
+    }
+
+    /**
+     * A callback when a test class finishes its execution, mostly only for debugging.
+     */
+    public static void exitTestClass() {
         if (ENABLE_TIMEOUT_STACKS) {
             sPendingTimeout.cancel(false);
         }
-
-        RavenwoodSystemServer.reset(config);
-
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
-        config.mInstrumentation = null;
-        if (config.mInstContext != null) {
-            ((RavenwoodContext) config.mInstContext).cleanUp();
-            config.mInstContext = null;
-        }
-        if (config.mTargetContext != null) {
-            ((RavenwoodContext) config.mTargetContext).cleanUp();
-            config.mTargetContext = null;
-        }
-        if (config.mState.mSystemServerContext != null) {
-            config.mState.mSystemServerContext.cleanUp();
-        }
-
-        Looper.getMainLooper().quit();
-        Looper.clearMainLooperForTest();
-
-        ActivityManager.reset$ravenwood();
-
-        LocalServices.removeAllServicesForTest();
-        ServiceManager.reset$ravenwood();
-
-        setSystemProperties(null);
-        if (sOriginalIdentityToken != -1) {
-            Binder.restoreCallingIdentity(sOriginalIdentityToken);
-        }
-        RavenwoodRuntimeState.reset();
-        Process_ravenwood.reset();
-        DeviceConfig_host.reset();
-
-        try {
-            ResourcesManager.setInstance(null); // Better structure needed.
-        } catch (Exception e) {
-            // AOSP-CHANGE: AOSP doesn't support resources yet.
-        }
-
         if (ENABLE_UNCAUGHT_EXCEPTION_DETECTION) {
             maybeThrowPendingUncaughtException(true);
         }
@@ -408,19 +502,6 @@ public class RavenwoodRuntimeEnvironmentController {
         }
     }
 
-    /**
-     * Set the current configuration to the actual SystemProperties.
-     */
-    private static void setSystemProperties(@Nullable RavenwoodSystemProperties systemProperties) {
-        SystemProperties.clearChangeCallbacksForTest();
-        RavenwoodRuntimeNative.clearSystemProperties();
-        if (systemProperties == null) systemProperties = new RavenwoodSystemProperties();
-        sProps = new RavenwoodSystemProperties(systemProperties, true);
-        for (var entry : systemProperties.getValues().entrySet()) {
-            RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
-        }
-    }
-
     private static final String MOCKITO_ERROR = "FATAL: Unsupported Mockito detected!"
             + " Your test or its dependencies use one of the \"mockito-target-*\""
             + " modules as static library, which is unusable on host side."
@@ -445,37 +526,42 @@ public class RavenwoodRuntimeEnvironmentController {
 
     // TODO: use the real UiAutomation class instead of a mock
     private static UiAutomation createMockUiAutomation() {
-        final Set[] adoptedPermission = { Collections.emptySet() };
+        sAdoptedPermissions = Collections.emptySet();
         var mock = mock(UiAutomation.class, inv -> {
             HostTestUtils.onThrowMethodCalled();
             return null;
         });
         doAnswer(inv -> {
-            adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
+            sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
             return null;
         }).when(mock).adoptShellPermissionIdentity();
         doAnswer(inv -> {
             if (inv.getArgument(0) == null) {
-                adoptedPermission[0] = UiAutomation.ALL_PERMISSIONS;
+                sAdoptedPermissions = UiAutomation.ALL_PERMISSIONS;
             } else {
-                adoptedPermission[0] = Set.of(inv.getArguments());
+                sAdoptedPermissions = (Set) Set.of(inv.getArguments());
             }
             return null;
         }).when(mock).adoptShellPermissionIdentity(any());
         doAnswer(inv -> {
-            adoptedPermission[0] = Collections.emptySet();
+            sAdoptedPermissions = Collections.emptySet();
             return null;
         }).when(mock).dropShellPermissionIdentity();
-        doAnswer(inv -> adoptedPermission[0]).when(mock).getAdoptedShellPermissions();
+        doAnswer(inv -> sAdoptedPermissions).when(mock).getAdoptedShellPermissions();
         return mock;
     }
 
-    @SuppressWarnings("unused")  // Called from native code (ravenwood_sysprop.cpp)
-    private static void checkSystemPropertyAccess(String key, boolean write) {
-        boolean result = write ? sProps.isKeyWritable(key) : sProps.isKeyReadable(key);
-        if (!result) {
-            throw new IllegalArgumentException((write ? "Write" : "Read")
-                    + " access to system property '" + key + "' denied via RavenwoodConfig");
+    private static void dumpCommandLineArgs() {
+        Log.v(TAG, "JVM arguments:");
+
+        // Note, we use the wrapper in JUnit4, not the actual class (
+        // java.lang.management.ManagementFactory), because we can't see the later at the build
+        // because this source file is compiled for the device target, where ManagementFactory
+        // doesn't exist.
+        var args = ManagementFactory.getRuntimeMXBean().getInputArguments();
+
+        for (var arg : args) {
+            Log.v(TAG, "  " + arg);
         }
     }
 }

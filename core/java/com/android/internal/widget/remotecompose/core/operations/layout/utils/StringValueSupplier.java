@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.utils;
 
+import android.annotation.NonNull;
+
 /** Basic interface for a lambda (used for logging) */
 public interface StringValueSupplier {
     /**
@@ -22,5 +24,6 @@ public interface StringValueSupplier {
      *
      * @return a string
      */
+    @NonNull
     String getString();
 }

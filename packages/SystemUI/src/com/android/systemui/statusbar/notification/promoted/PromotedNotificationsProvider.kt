@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.promoted
 import android.app.Notification.FLAG_PROMOTED_ONGOING
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import javax.inject.Inject
 
 /** A provider for making decisions on which notifications should be promoted. */
@@ -30,7 +31,7 @@ interface PromotedNotificationsProvider {
 @SysUISingleton
 open class PromotedNotificationsProviderImpl @Inject constructor() : PromotedNotificationsProvider {
     override fun shouldPromote(entry: NotificationEntry): Boolean {
-        if (!PromotedNotificationUi.isEnabled) {
+        if (!PromotedNotificationContentModel.featureFlagEnabled()) {
             return false
         }
         return (entry.sbn.notification.flags and FLAG_PROMOTED_ONGOING) != 0

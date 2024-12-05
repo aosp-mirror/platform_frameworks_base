@@ -23,16 +23,22 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.Ref
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.util.lerp
 import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.compose.LottieAnimation
@@ -44,6 +50,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
+import com.android.systemui.res.R
 
 @Composable
 fun TutorialAnimation(
@@ -93,13 +100,23 @@ private fun EducationAnimation(
     animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(educationAnimationId))
+    var isPlaying by remember { mutableStateOf(true) }
     val progress by
-        animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
+        animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever,
+            isPlaying = isPlaying,
+            restartOnPlay = false,
+        )
+    val animationDescription = stringResource(R.string.tutorial_animation_content_description)
     LottieAnimation(
         composition = composition,
         progress = { progress },
         dynamicProperties = animationProperties,
-        modifier = Modifier.fillMaxSize(),
+        modifier =
+            Modifier.fillMaxSize()
+                .clickable { isPlaying = !isPlaying }
+                .semantics { contentDescription = animationDescription },
     )
 }
 

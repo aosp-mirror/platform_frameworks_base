@@ -31,6 +31,7 @@ import android.app.PictureInPictureUiState;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -38,6 +39,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
@@ -47,7 +49,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipMenuController;
-import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.DefaultMixedHandler;
@@ -93,7 +94,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                         mPipOrganizer.fadeOutAndRemoveOverlay(mPipOrganizer.mPipOverlay,
                                 null /* callback */, true /* withStartDelay*/);
                     }
-                    onFinishResize(taskInfo, animator.getDestinationBounds(), direction, tx);
+                    onFinishResize(taskInfo, animator.getDestinationBounds(),
+                            animator.getLeashOffset(), direction, tx);
                     sendOnPipTransitionFinished(direction);
                 }
 
@@ -113,9 +115,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
      * Called when transition is about to finish. This is usually for performing tasks such as
      * applying WindowContainerTransaction to finalize the PiP bounds and send to the framework.
      */
-    public void onFinishResize(TaskInfo taskInfo, Rect destinationBounds,
-            @PipAnimationController.TransitionDirection int direction,
-            SurfaceControl.Transaction tx) {
+    public void onFinishResize(@NonNull TaskInfo taskInfo, @NonNull Rect destinationBounds,
+            @NonNull Point leashOffset, @PipAnimationController.TransitionDirection int direction,
+            @NonNull SurfaceControl.Transaction tx) {
     }
 
     /**
@@ -311,11 +313,27 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         return false;
     }
 
+    /**
+     * @return a change representing a config-at-end activity for a given parent.
+     */
+    @Nullable
+    public TransitionInfo.Change getDeferConfigActivityChange(TransitionInfo info,
+            @android.annotation.NonNull WindowContainerToken parent) {
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (change.getTaskInfo() == null
+                    && change.hasFlags(TransitionInfo.FLAG_CONFIG_AT_END)
+                    && change.getParent() != null && change.getParent().equals(parent)) {
+                return change;
+            }
+        }
+        return null;
+    }
+
+
     /** Whether a particular package is same as current pip package. */
-    public boolean isPackageActiveInPip(String packageName) {
-        final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
-        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
-                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
+    public boolean isPackageActiveInPip(@Nullable String packageName) {
+        // No-op, to be handled differently in PIP1 and PIP2
+        return false;
     }
 
     /** Add PiP-related changes to `outWCT` for the given request. */

@@ -5,6 +5,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.repository.UserRepository
 import dagger.Binds
@@ -41,6 +42,8 @@ interface DeviceEntryRepository {
      * the lockscreen.
      */
     val isBypassEnabled: StateFlow<Boolean>
+
+    val deviceUnlockStatus: MutableStateFlow<DeviceUnlockStatus>
 
     /**
      * Whether the lockscreen is enabled for the current user. This is `true` whenever the user has
@@ -83,6 +86,9 @@ constructor(
                 SharingStarted.Eagerly,
                 initialValue = keyguardBypassController.bypassEnabled,
             )
+
+    override val deviceUnlockStatus =
+        MutableStateFlow(DeviceUnlockStatus(isUnlocked = false, deviceUnlockSource = null))
 
     override suspend fun isLockscreenEnabled(): Boolean {
         return withContext(backgroundDispatcher) {

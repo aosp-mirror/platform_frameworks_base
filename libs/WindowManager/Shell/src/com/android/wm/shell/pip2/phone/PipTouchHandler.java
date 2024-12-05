@@ -363,12 +363,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mMotionHelper.synchronizePinnedStackBounds();
         reloadResources();
 
-        /*
-        if (mPipTaskOrganizer.isInPip()) {
+        if (mPipTransitionState.isInPip()) {
             // Recreate the dismiss target for the new orientation.
             mPipDismissTargetHandler.createOrUpdateDismissTarget();
         }
-         */
     }
 
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
@@ -875,7 +873,7 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
             mMovementWithinDismiss = touchState.getDownTouchPosition().y
                     >= mPipBoundsState.getMovementBounds().bottom;
             mMotionHelper.setSpringingToTouch(false);
-            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.mPinnedTaskLeash);
+            mPipDismissTargetHandler.setTaskLeash(mPipTransitionState.getPinnedTaskLeash());
 
             // If the menu is still visible then just poke the menu
             // so that it will timeout after the user stops touching it

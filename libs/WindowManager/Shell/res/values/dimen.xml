@@ -266,6 +266,8 @@
     <dimen name="bubble_bar_expanded_view_handle_height">4dp</dimen>
     <!-- Width of the expanded bubble bar view shown when the bubble is expanded. -->
     <dimen name="bubble_bar_expanded_view_width">412dp</dimen>
+    <!-- Offset of the expanded view when it starts sliding in as part of the switch animation -->
+    <dimen name="bubble_bar_expanded_view_switch_offset">48dp</dimen>
     <!-- Minimum width of the bubble bar manage menu. -->
     <dimen name="bubble_bar_manage_menu_min_width">200dp</dimen>
     <!-- Size of the dismiss icon in the bubble bar manage menu. -->
@@ -504,17 +506,15 @@
     <dimen name="desktop_mode_maximize_menu_buttons_fill_radius">4dp</dimen>
     <!-- The padding between the outline and fill of the maximize menu snap and maximize buttons. -->
     <dimen name="desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding">4dp</dimen>
-    <!-- The padding between the outline and fill of the maximize menu snap and maximize buttons. -->
-    <dimen name="desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding_bottom">8dp</dimen>
     <!-- The vertical padding between the outline and fill of the maximize menu restore button. -->
     <dimen name="desktop_mode_maximize_menu_restore_button_fill_vertical_padding">13dp</dimen>
     <!-- The horizontal padding between the outline and fill of the maximize menu restore button. -->
-    <dimen name="desktop_mode_maximize_menu_restore_button_fill_horizontal_padding">21dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_restore_button_fill_horizontal_padding">15dp</dimen>
     <!-- The padding between the outline and fill of the maximize menu immersive button. -->
-    <dimen name="desktop_mode_maximize_menu_immersive_button_fill_padding">4dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_immersive_button_fill_padding">0dp</dimen>
 
     <!-- The corner radius of the maximize menu. -->
-    <dimen name="desktop_mode_maximize_menu_corner_radius">8dp</dimen>
+    <dimen name="desktop_mode_maximize_menu_corner_radius">16dp</dimen>
 
     <!-- The radius of the Maximize menu shadow. -->
     <dimen name="desktop_mode_maximize_menu_shadow_radius">8dp</dimen>
@@ -661,4 +661,7 @@
     <dimen name="desktop_windowing_education_promo_height">352dp</dimen>
     <!-- The corner radius of the desktop windowing education promo. -->
     <dimen name="desktop_windowing_education_promo_corner_radius">28dp</dimen>
+
+    <!-- The corner radius of freeform tasks in desktop windowing. -->
+    <dimen name="desktop_windowing_freeform_rounded_corner_radius">16dp</dimen>
 </resources>

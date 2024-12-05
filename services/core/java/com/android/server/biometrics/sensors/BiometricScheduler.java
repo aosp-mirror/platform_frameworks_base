@@ -677,10 +677,11 @@ public class BiometricScheduler<T, U> {
      * Start the timeout for the watchdog.
      */
     public void startWatchdog() {
-        if (mCurrentOperation == null) {
+        final BiometricSchedulerOperation operation = mCurrentOperation;
+        if (operation == null) {
+            Slog.e(TAG, "Current operation is null,no need to start watchdog");
             return;
         }
-        final BiometricSchedulerOperation operation = mCurrentOperation;
         mHandler.postDelayed(() -> {
             if (operation == mCurrentOperation && !operation.isFinished()) {
                 Counter.logIncrement("biometric.value_scheduler_watchdog_triggered_count");

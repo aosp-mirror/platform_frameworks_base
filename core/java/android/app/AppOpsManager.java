@@ -262,6 +262,24 @@ public class AppOpsManager {
 
     private static final Object sLock = new Object();
 
+    // A map that records noted times for each op.
+    private final ArrayMap<NotedOp, Integer> mPendingNotedOps = new ArrayMap<>();
+    private final HandlerThread mHandlerThread;
+    private final Handler mHandler;
+    private static final int NOTE_OP_BATCHING_DELAY_MILLIS = 1000;
+
+    private boolean isNoteOpBatchingSupported() {
+        // If noteOp is called from system server no IPC is made, hence we don't need batching.
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            return false;
+        }
+        return Flags.noteOpBatchingEnabled();
+    }
+
+    private final Object mBatchedNoteOpLock = new Object();
+    @GuardedBy("mBatchedNoteOpLock")
+    private boolean mIsBatchedNoteOpCallScheduled = false;
+
     /** Current {@link OnOpNotedCallback}. Change via {@link #setOnOpNotedCallback} */
     @GuardedBy("sLock")
     private static @Nullable OnOpNotedCallback sOnOpNotedCallback;
@@ -1614,9 +1632,29 @@ public class AppOpsManager {
     /** @hide Access to read skin temperature. */
     public static final int OP_READ_SKIN_TEMPERATURE = AppOpEnums.APP_OP_READ_SKIN_TEMPERATURE;
 
+    /**
+     * Allows an app to range with nearby devices using any ranging technology available.
+     *
+     * @hide
+     */
+    public static final int OP_RANGING = AppOpEnums.APP_OP_RANGING;
+
+    /** @hide Access to read oxygen saturation. */
+    public static final int OP_READ_OXYGEN_SATURATION = AppOpEnums.APP_OP_READ_OXYGEN_SATURATION;
+
+    /** @hide Access to write system preferences. */
+    public static final int OP_WRITE_SYSTEM_PREFERENCES =
+            AppOpEnums.APP_OP_WRITE_SYSTEM_PREFERENCES;
+
+    /** @hide Access to audio playback and control APIs. */
+    public static final int OP_CONTROL_AUDIO = AppOpEnums.APP_OP_CONTROL_AUDIO;
+
+    /** @hide Similar to {@link OP_CONTROL_AUDIO}, but doesn't require capabilities. */
+    public static final int OP_CONTROL_AUDIO_PARTIAL = AppOpEnums.APP_OP_CONTROL_AUDIO_PARTIAL;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 151;
+    public static final int _NUM_OP = 156;
 
     /**
      * All app ops represented as strings.
@@ -1771,6 +1809,11 @@ public class AppOpsManager {
             OPSTR_RECEIVE_SENSITIVE_NOTIFICATIONS,
             OPSTR_READ_HEART_RATE,
             OPSTR_READ_SKIN_TEMPERATURE,
+            OPSTR_RANGING,
+            OPSTR_READ_OXYGEN_SATURATION,
+            OPSTR_WRITE_SYSTEM_PREFERENCES,
+            OPSTR_CONTROL_AUDIO,
+            OPSTR_CONTROL_AUDIO_PARTIAL,
     })
     public @interface AppOpString {}
 
@@ -2513,10 +2556,29 @@ public class AppOpsManager {
     @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
     public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
 
+    /** @hide Access to read oxygen saturation. */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
+    public static final String OPSTR_READ_OXYGEN_SATURATION = "android:read_oxygen_saturation";
+
     /** @hide Access to read skin temperature. */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_PLATFORM_SKIN_TEMPERATURE_ENABLED)
+    @FlaggedApi(Flags.FLAG_REPLACE_BODY_SENSOR_PERMISSION_ENABLED)
     public static final String OPSTR_READ_SKIN_TEMPERATURE = "android:read_skin_temperature";
+
+    /** @hide Access to ranging */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_RANGING_PERMISSION_ENABLED)
+    public static final String OPSTR_RANGING = "android:ranging";
+
+    /** @hide Access to system preferences write services */
+    public static final String OPSTR_WRITE_SYSTEM_PREFERENCES = "android:write_system_preferences";
+
+    /** @hide Access to audio playback and control APIs */
+    public static final String OPSTR_CONTROL_AUDIO = "android:control_audio";
+
+    /** @hide Access to a audio playback and control APIs without capability requirements */
+    public static final String OPSTR_CONTROL_AUDIO_PARTIAL = "android:control_audio_partial";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -2589,11 +2651,13 @@ public class AppOpsManager {
             OP_BLUETOOTH_ADVERTISE,
             OP_UWB_RANGING,
             OP_NEARBY_WIFI_DEVICES,
+            Flags.rangingPermissionEnabled() ? OP_RANGING : OP_NONE,
             // Notifications
             OP_POST_NOTIFICATION,
             // Health
             Flags.replaceBodySensorPermissionEnabled() ? OP_READ_HEART_RATE : OP_NONE,
-            Flags.platformSkinTemperatureEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_SKIN_TEMPERATURE : OP_NONE,
+            Flags.replaceBodySensorPermissionEnabled() ? OP_READ_OXYGEN_SATURATION : OP_NONE,
     };
 
     /**
@@ -2632,6 +2696,7 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
+            OP_WRITE_SYSTEM_PREFERENCES,
     };
 
     @SuppressWarnings("FlaggedApi")
@@ -3108,9 +3173,26 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_READ_SKIN_TEMPERATURE, OPSTR_READ_SKIN_TEMPERATURE,
             "READ_SKIN_TEMPERATURE").setPermission(
-                Flags.platformSkinTemperatureEnabled()
+                Flags.replaceBodySensorPermissionEnabled()
                     ? HealthPermissions.READ_SKIN_TEMPERATURE : null)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RANGING, OPSTR_RANGING, "RANGING")
+            .setPermission(Flags.rangingPermissionEnabled()?
+                Manifest.permission.RANGING : null)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_READ_OXYGEN_SATURATION, OPSTR_READ_OXYGEN_SATURATION,
+            "READ_OXYGEN_SATURATION").setPermission(
+                Flags.replaceBodySensorPermissionEnabled()
+                    ? HealthPermissions.READ_OXYGEN_SATURATION : null)
+            .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_WRITE_SYSTEM_PREFERENCES, OPSTR_WRITE_SYSTEM_PREFERENCES,
+            "WRITE_SYSTEM_PREFERENCES").setPermission(
+                     com.android.settingslib.flags.Flags.writeSystemPreferencePermissionEnabled()
+                     ? Manifest.permission.WRITE_SYSTEM_PREFERENCES : null).build(),
+        new AppOpInfo.Builder(OP_CONTROL_AUDIO, OPSTR_CONTROL_AUDIO,
+                "CONTROL_AUDIO").setDefaultMode(AppOpsManager.MODE_FOREGROUND).build(),
+        new AppOpInfo.Builder(OP_CONTROL_AUDIO_PARTIAL, OPSTR_CONTROL_AUDIO_PARTIAL,
+                "CONTROL_AUDIO_PARTIAL").setDefaultMode(AppOpsManager.MODE_FOREGROUND).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -3522,7 +3604,7 @@ public class AppOpsManager {
         /** Attribution tag of the proxy that noted the op */
         private @Nullable String mAttributionTag;
         /** Persistent device Id of the proxy that noted the op */
-        private @Nullable String mDeviceId;
+        private @NonNull String mDeviceId;
 
         /**
          * Reinit existing object with new state.
@@ -3535,7 +3617,7 @@ public class AppOpsManager {
          * @hide
          */
         public void reinit(@IntRange(from = 0) int uid, @Nullable String packageName,
-                @Nullable String attributionTag, @Nullable String deviceId) {
+                @Nullable String attributionTag, @NonNull String deviceId) {
             mUid = Preconditions.checkArgumentNonnegative(uid);
             mPackageName = packageName;
             mAttributionTag = attributionTag;
@@ -3598,7 +3680,8 @@ public class AppOpsManager {
                     "from", 0);
             this.mPackageName = packageName;
             this.mAttributionTag = attributionTag;
-            this.mDeviceId = deviceId;
+            this.mDeviceId = deviceId == null ? VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+                    : deviceId;
         }
         /**
          * Copy constructor
@@ -3641,7 +3724,7 @@ public class AppOpsManager {
          * Persistent device Id of the proxy that noted the op
          */
         @FlaggedApi(Flags.FLAG_DEVICE_ID_IN_OP_PROXY_INFO_ENABLED)
-        public @Nullable String getDeviceId() { return mDeviceId; }
+        public @NonNull String getDeviceId() { return mDeviceId; }
 
         @Override
         @DataClass.Generated.Member
@@ -3652,12 +3735,12 @@ public class AppOpsManager {
             byte flg = 0;
             if (mPackageName != null) flg |= 0x2;
             if (mAttributionTag != null) flg |= 0x4;
-            if (mDeviceId != null) flg |= 0x8;
+            flg |= 0x8;
             dest.writeByte(flg);
             dest.writeInt(mUid);
             if (mPackageName != null) dest.writeString(mPackageName);
             if (mAttributionTag != null) dest.writeString(mAttributionTag);
-            if (mDeviceId != null) dest.writeString(mDeviceId);
+            dest.writeString(mDeviceId);
         }
 
         @Override
@@ -3675,7 +3758,8 @@ public class AppOpsManager {
             int uid = in.readInt();
             String packageName = (flg & 0x2) == 0 ? null : in.readString();
             String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
-            String deviceId = (flg & 0x8) == 0 ? null : in.readString();
+            String deviceId = (flg & 0x8) == 0 ? VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT
+                    : in.readString();
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
@@ -7400,6 +7484,135 @@ public class AppOpsManager {
     }
 
     /**
+     * A NotedOp is an app op grouped in noteOp API and sent to the system server in a batch
+     *
+     * @hide
+     */
+    public static final class NotedOp implements Parcelable {
+        private final @IntRange(from = 0, to = _NUM_OP - 1) int mOp;
+        private final @IntRange(from = 0) int mUid;
+        private final @Nullable String mPackageName;
+        private final @Nullable String mAttributionTag;
+        private final int mVirtualDeviceId;
+        private final @Nullable String mMessage;
+        private final boolean mShouldCollectAsyncNotedOp;
+        private final boolean mShouldCollectMessage;
+
+        public NotedOp(int op, int uid, @Nullable String packageName,
+                @Nullable String attributionTag, int virtualDeviceId, @Nullable String message,
+                boolean shouldCollectAsyncNotedOp, boolean shouldCollectMessage) {
+            mOp = op;
+            mUid = uid;
+            mPackageName = packageName;
+            mAttributionTag = attributionTag;
+            mVirtualDeviceId = virtualDeviceId;
+            mMessage = message;
+            mShouldCollectAsyncNotedOp = shouldCollectAsyncNotedOp;
+            mShouldCollectMessage = shouldCollectMessage;
+        }
+
+        NotedOp(Parcel source) {
+            mOp = source.readInt();
+            mUid = source.readInt();
+            mPackageName = source.readString();
+            mAttributionTag = source.readString();
+            mVirtualDeviceId = source.readInt();
+            mMessage = source.readString();
+            mShouldCollectAsyncNotedOp = source.readBoolean();
+            mShouldCollectMessage = source.readBoolean();
+        }
+
+        public int getOp() {
+            return mOp;
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        public @Nullable String getPackageName() {
+            return mPackageName;
+        }
+
+        public @Nullable String getAttributionTag() {
+            return mAttributionTag;
+        }
+
+        public int getVirtualDeviceId() {
+            return mVirtualDeviceId;
+        }
+
+        public @Nullable String getMessage() {
+            return mMessage;
+        }
+
+        public boolean getShouldCollectAsyncNotedOp() {
+            return mShouldCollectAsyncNotedOp;
+        }
+
+        public boolean getShouldCollectMessage() {
+            return mShouldCollectMessage;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mOp);
+            dest.writeInt(mUid);
+            dest.writeString(mPackageName);
+            dest.writeString(mAttributionTag);
+            dest.writeInt(mVirtualDeviceId);
+            dest.writeString(mMessage);
+            dest.writeBoolean(mShouldCollectAsyncNotedOp);
+            dest.writeBoolean(mShouldCollectMessage);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NotedOp that = (NotedOp) o;
+            return mOp == that.mOp && mUid == that.mUid && Objects.equals(mPackageName,
+                    that.mPackageName) && Objects.equals(mAttributionTag, that.mAttributionTag)
+                    && mVirtualDeviceId == that.mVirtualDeviceId && Objects.equals(mMessage,
+                    that.mMessage) && Objects.equals(mShouldCollectAsyncNotedOp,
+                    that.mShouldCollectAsyncNotedOp) && Objects.equals(mShouldCollectMessage,
+                    that.mShouldCollectMessage);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mOp, mUid, mPackageName, mAttributionTag, mVirtualDeviceId,
+                    mMessage, mShouldCollectAsyncNotedOp, mShouldCollectMessage);
+        }
+
+        @Override
+        public String toString() {
+            return "NotedOp{" + "mOp=" + mOp + ", mUid=" + mUid + ", mPackageName=" + mPackageName
+                    + ", mAttributionTag=" + mAttributionTag + ", mVirtualDeviceId="
+                    + mVirtualDeviceId + ", mMessage=" + mMessage + ", mShouldCollectAsyncNotedOp="
+                    + mShouldCollectAsyncNotedOp + ", mShouldCollectMessage="
+                    + mShouldCollectMessage + "}";
+        }
+
+
+        public static final @NonNull Creator<NotedOp> CREATOR =
+                new Creator<>() {
+                    @Override public NotedOp createFromParcel(Parcel source) {
+                        return new NotedOp(source);
+                    }
+
+                    @Override public NotedOp[] newArray(int size) {
+                        return new NotedOp[size];
+                    }
+                };
+    }
+
+    /**
      * Computes the sum of the counts for the given flags in between the begin and
      * end UID states.
      *
@@ -7913,6 +8126,9 @@ public class AppOpsManager {
     AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
+        mHandlerThread = new HandlerThread("AppOpsManager");
+        mHandlerThread.start();
+        mHandler = mHandlerThread.getThreadHandler();
 
         if (mContext != null) {
             final PackageManager pm = mContext.getPackageManager();
@@ -8870,12 +9086,21 @@ public class AppOpsManager {
     }
 
     /**
-     * Do a quick check for whether an application might be able to perform an operation.
-     * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
-     * String, String)} or {@link #startOp(String, int, String, String, String)} for your actual
-     * security checks. This function can just be used for a quick check to see if an operation has
-     * been disabled for the application, as an early reject of some work.  This does not modify the
-     * time stamp or other data about the operation.
+     * Check whether an application might be able to perform an operation.
+     * <p>
+     * For platform versions before {@link android.os.Build.VERSION_CODES#BAKLAVA}, this is
+     * <em>not</em> a security check; you must use {@link #noteOp(String, int, String, String,
+     * String)} or {@link #startOp(String, int, String, String, String)} for your actual security
+     * checks. This function can just be used for a quick check to see if an operation has been
+     * disabled for the application, as an early reject of some work.
+     * <p>
+     * For platform versions equal to or after {@link android.os.Build.VERSION_CODES#BAKLAVA}, this
+     * is no longer an unsafe check, and it does the same security check as {@link #noteOp(String,
+     * int, String, String, String)} and {@link #startOp(String, int, String, String, String)}.
+     * However, it's preferred to use {@link #checkOp(String, int, String)}, since the word "unsafe"
+     * in the name of this API is no longer accurate.
+     * <p>
+     * This API does not modify the time stamp or other data about the operation.
      *
      * @param op The operation to check.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
@@ -8884,31 +9109,108 @@ public class AppOpsManager {
      * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
      * causing the app to crash).
      * @throws SecurityException If the app has been configured to crash on this op.
+     *
+     * @deprecated Use {@link #checkOp(String, int, String)}
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOp(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOp(strOpToOp(op), uid, packageName);
     }
 
     /**
-     * @deprecated Renamed to {@link #unsafeCheckOp(String, int, String)}.
+     * Check whether an application can perform an operation.
+     * <p>
+     * For platform versions before {@link android.os.Build.VERSION_CODES#BAKLAVA}, this is
+     * <em>not</em> a security check; you must use {@link #noteOp(String, int, String, String,
+     * String)} or {@link #startOp(String, int, String, String, String)} for your actual security
+     * checks. This function can just be used for a quick check to see if an operation has been
+     * disabled for the application, as an early reject of some work.
+     * <p>
+     * For platform versions equal to or after {@link android.os.Build.VERSION_CODES#BAKLAVA}, it
+     * does the same security check as {@link #noteOp(String, int, String, String, String)} and
+     * {@link #startOp(String, int, String, String, String)}, and should be preferred to use.
+     * <p>
+     * This API does not modify the time stamp or other data about the operation.
+     *
+     * @param op The operation to check. One of the OPSTR_* constants.
+     * @param uid The uid of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
      */
-    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int checkOp(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOp(strOpToOp(op), uid, packageName);
     }
 
     /**
-     * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
-     * returns {@link #MODE_ERRORED}.
+     * Like {@link #unsafeCheckOp(String, int, String)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     *
+     * @deprecated Use {@link #checkOpNoThrow(String, int, String)}
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOpNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOpNoThrow(strOpToOp(op), uid, packageName);
     }
 
     /**
-     * @deprecated Renamed to {@link #unsafeCheckOpNoThrow(String, int, String)}.
+     * Check whether an application can perform an operation. It does the same security check as
+     * {@link #noteOp(String, int, String, String, String)} and {@link #startOp(String, int, String,
+     * String, String)}, but does not modify the time stamp or other data about the operation.
+     *
+     * @param op The operation to check. One of the OPSTR_* constants.
+     * @param uid The uid of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} of the
+     *                      calling context or {@code null} for default attribution
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
+     * if it is not allowed and should be silently ignored (without causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
      */
-    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
+    public int checkOp(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        int mode = checkOpNoThrow(strOpToOp(op), uid, packageName, attributionTag,
+                Context.DEVICE_ID_DEFAULT);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException(buildSecurityExceptionMsg(strOpToOp(op), uid, packageName));
+        }
+        return mode;
+    }
+
+    /**
+     * Like {@link #checkOp(String, int, String, String)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
+    public int checkOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        return checkOpNoThrow(strOpToOp(op), uid, packageName, attributionTag,
+                Context.DEVICE_ID_DEFAULT);
+    }
+
+    /**
+     * Like {@link #checkOp(String, int, String, String)} but returns the <em>raw</em> mode
+     * associated with the op. Does not throw a security exception, does not translate
+     * {@link #MODE_FOREGROUND}.
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
+    public int checkOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag) {
+        return checkOpRawNoThrow(strOpToOp(op), uid, packageName, attributionTag,
+                Context.DEVICE_ID_DEFAULT);
+    }
+
+    /**
+     * Like {@link #checkOp(String, int, String)} but instead of throwing a
+     * {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int checkOpNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         return checkOpNoThrow(strOpToOp(op), uid, packageName);
     }
@@ -8916,16 +9218,23 @@ public class AppOpsManager {
     /**
      * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     *
+     * @deprecated Use {@link #checkOpRawNoThrow(String, int, String, String)} instead
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOpRaw(@NonNull String op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(op, uid, packageName);
     }
 
     /**
-     * Like {@link #unsafeCheckOpNoThrow(String, int, String)} but returns the <em>raw</em>
-     * mode associated with the op. Does not throw a security exception, does not translate
-     * {@link #MODE_FOREGROUND}.
+     * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     *
+     * @deprecated Use {@link #checkOpRawNoThrow(String, int, String, String)} instead
      */
+    @Deprecated
+    @FlaggedApi(android.permission.flags.Flags.FLAG_CHECK_OP_OVERLOAD_API_ENABLED)
     public int unsafeCheckOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(strOpToOp(op), uid, packageName);
     }
@@ -8936,8 +9245,9 @@ public class AppOpsManager {
      * @hide
      */
     public int unsafeCheckOpRawNoThrow(int op, @NonNull AttributionSource attributionSource) {
-        return unsafeCheckOpRawNoThrow(op, attributionSource.getUid(),
-                attributionSource.getPackageName(), attributionSource.getDeviceId());
+        return checkOpRawNoThrow(op, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getAttributionTag(),
+                attributionSource.getDeviceId());
     }
 
     /**
@@ -8958,20 +9268,20 @@ public class AppOpsManager {
      * @hide
      */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
-        return unsafeCheckOpRawNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
+        return checkOpRawNoThrow(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT);
     }
 
-    private int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName,
-            int virtualDeviceId) {
+    private int checkOpRawNoThrow(int op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, int virtualDeviceId) {
         try {
             int mode;
             if (isAppOpModeCachingEnabled(op)) {
                 mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, null,
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, attributionTag,
                                 "unsafeCheckOpRawNoThrow"));
             } else {
                 mode = mService.checkOperationRawForDevice(
-                        op, uid, packageName, null, virtualDeviceId);
+                        op, uid, packageName, attributionTag, virtualDeviceId);
             }
             return mode;
         } catch (RemoteException e) {
@@ -9155,15 +9465,74 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp;
-            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
-                syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
-                        collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
-            } else {
-                syncOp = mService.noteOperationForDevice(op, uid, packageName, attributionTag,
-                    virtualDeviceId, collectionMode == COLLECT_ASYNC, message,
-                    shouldCollectMessage);
+            SyncNotedAppOp syncOp = null;
+            boolean skipBinderCall = false;
+            if (isNoteOpBatchingSupported()) {
+                int mode = sAppOpModeCache.query(
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, attributionTag,
+                                "noteOpNoThrow"));
+                // For FOREGROUND mode, we still need to make a binder call to the system service
+                // to translate it to ALLOWED or IGNORED. So no batching is needed.
+                if (mode != MODE_FOREGROUND) {
+                    synchronized (mBatchedNoteOpLock) {
+                        NotedOp notedOp = new NotedOp(op, uid, packageName, attributionTag,
+                                virtualDeviceId, message, collectionMode == COLLECT_ASYNC,
+                                shouldCollectMessage);
+
+                        // Batch same noteOp calls and send them with their counters to the system
+                        // service asynchronously. The time window for batching is specified in
+                        // NOTE_OP_BATCHING_DELAY_MILLIS. Always allow the first noteOp call to go
+                        // through binder API. Accumulate subsequent same noteOp calls during the
+                        // time window in mPendingNotedOps.
+                        if (!mPendingNotedOps.containsKey(notedOp)) {
+                            mPendingNotedOps.put(notedOp, 0);
+                        } else {
+                            skipBinderCall = true;
+                            mPendingNotedOps.merge(notedOp, 1, Integer::sum);
+                        }
+
+                        if (!mIsBatchedNoteOpCallScheduled) {
+                            mHandler.postDelayed(() -> {
+                                ArrayMap<NotedOp, Integer> pendingNotedOpsCopy;
+                                synchronized(mBatchedNoteOpLock) {
+                                    mIsBatchedNoteOpCallScheduled = false;
+                                    pendingNotedOpsCopy =
+                                            new ArrayMap<NotedOp, Integer>(mPendingNotedOps);
+                                    mPendingNotedOps.clear();
+                                }
+                                for (int i = pendingNotedOpsCopy.size() - 1; i >= 0; i--) {
+                                    if (pendingNotedOpsCopy.valueAt(i) == 0) {
+                                        pendingNotedOpsCopy.removeAt(i);
+                                    }
+                                }
+                                if (!pendingNotedOpsCopy.isEmpty()) {
+                                    try {
+                                        mService.noteOperationsInBatch(pendingNotedOpsCopy);
+                                    } catch (RemoteException e) {
+                                        throw e.rethrowFromSystemServer();
+                                    }
+                                }
+                            }, NOTE_OP_BATCHING_DELAY_MILLIS);
+
+                            mIsBatchedNoteOpCallScheduled = true;
+                        }
+                    }
+
+                    syncOp = new SyncNotedAppOp(mode, op, attributionTag, packageName);
+                }
             }
+
+            if (!skipBinderCall) {
+                if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                    syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
+                            collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
+                } else {
+                    syncOp = mService.noteOperationForDevice(op, uid, packageName, attributionTag,
+                            virtualDeviceId, collectionMode == COLLECT_ASYNC, message,
+                            shouldCollectMessage);
+                }
+            }
+
             if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
                     collectNotedOpForSelf(syncOp);
@@ -9370,10 +9739,12 @@ public class AppOpsManager {
     }
 
     /**
-     * Do a quick check for whether an application might be able to perform an operation.
-     * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
-     * String, String)} or {@link #startOp(int, int, String, boolean, String, String)} for your
-     * actual security checks, which also ensure that the given uid and package name are consistent.
+     * Check whether an application can perform an operation.
+     * <p>
+     * For platform versions before {@link android.os.Build.VERSION_CODES#BAKLAVA}, this is
+     * <em>not</em> a security check; you must use {@link #noteOp(String, int, String, String,
+     * String)} or {@link #startOp(int, int, String, boolean, String, String)} for your actual
+     * security checks, which also ensure that the given uid and package name are consistent.
      * This function can just be used for a quick check to see if an operation has been disabled for
      * the application, as an early reject of some work.  This does not modify the time stamp or
      * other data about the operation.
@@ -9389,6 +9760,13 @@ public class AppOpsManager {
      *     as {@link #MODE_ALLOWED}.</li>
      * </ul>
      *
+     * <p>
+     * For platform versions equal to or after {@link android.os.Build.VERSION_CODES#BAKLAVA}, it
+     * does the same security check as {@link #noteOp(String, int, String, String, String)} and
+     * {@link #startOp(String, int, String, String, String)}.
+     * <p>
+     * This API does not modify the time stamp or other data about the operation.
+     *
      * @param op The operation to check.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
@@ -9400,29 +9778,11 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
-        try {
-            int mode;
-            if (isAppOpModeCachingEnabled(op)) {
-                mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, Context.DEVICE_ID_DEFAULT, null,
-                                "checkOp"));
-                if (mode == MODE_FOREGROUND) {
-                    // We only cache raw mode. If the mode is FOREGROUND, we need another binder
-                    // call to fetch translated value based on the process state.
-                    mode = mService.checkOperationForDevice(op, uid, packageName,
-                            Context.DEVICE_ID_DEFAULT);
-                }
-            } else {
-                mode = mService.checkOperationForDevice(op, uid, packageName,
-                        Context.DEVICE_ID_DEFAULT);
-            }
-            if (mode == MODE_ERRORED) {
-                throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
-            }
-            return mode;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        int mode = checkOpNoThrow(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT);
+        if (mode == MODE_ERRORED) {
+            throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
+        return mode;
     }
 
     /**
@@ -9435,7 +9795,7 @@ public class AppOpsManager {
      */
     public int checkOpNoThrow(int op, AttributionSource attributionSource) {
         return checkOpNoThrow(op, attributionSource.getUid(), attributionSource.getPackageName(),
-                attributionSource.getDeviceId());
+                attributionSource.getAttributionTag(), attributionSource.getDeviceId());
     }
 
     /**
@@ -9448,23 +9808,26 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOpNoThrow(int op, int uid, String packageName) {
-        return checkOpNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
+        return checkOpNoThrow(op, uid, packageName, null, Context.DEVICE_ID_DEFAULT);
     }
 
-    private int checkOpNoThrow(int op, int uid, String packageName, int virtualDeviceId) {
+    private int checkOpNoThrow(int op, int uid, String packageName, @Nullable String attributionTag,
+            int virtualDeviceId) {
         try {
             int mode;
             if (isAppOpModeCachingEnabled(op)) {
                 mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, null,
+                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, attributionTag,
                                 "checkOpNoThrow"));
                 if (mode == MODE_FOREGROUND) {
                     // We only cache raw mode. If the mode is FOREGROUND, we need another binder
                     // call to fetch translated value based on the process state.
-                    mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
+                    mode = mService.checkOperationForDevice(op, uid, packageName, attributionTag,
+                            virtualDeviceId);
                 }
             } else {
-                mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
+                mode = mService.checkOperationForDevice(op, uid, packageName, attributionTag,
+                        virtualDeviceId);
             }
             return mode;
         } catch (RemoteException e) {

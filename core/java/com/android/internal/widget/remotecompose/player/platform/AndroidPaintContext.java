@@ -15,6 +15,7 @@
  */
 package com.android.internal.widget.remotecompose.player.platform;
 
+import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
@@ -26,6 +27,8 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.RenderEffect;
+import android.graphics.RenderNode;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
@@ -51,6 +54,8 @@ public class AndroidPaintContext extends PaintContext {
     List<Paint> mPaintList = new ArrayList<>();
     Canvas mCanvas;
     Rect mTmpRect = new Rect(); // use in calculation of bounds
+    RenderNode mNode = null;
+    Canvas mPreviousCanvas = null;
 
     public AndroidPaintContext(RemoteContext context, Canvas canvas) {
         super(context);
@@ -119,6 +124,53 @@ public class AndroidPaintContext extends PaintContext {
     @Override
     public void scale(float scaleX, float scaleY) {
         mCanvas.scale(scaleX, scaleY);
+    }
+
+    @Override
+    public void startGraphicsLayer(int w, int h) {
+        mNode = new RenderNode("layer");
+        mNode.setPosition(0, 0, w, h);
+        mPreviousCanvas = mCanvas;
+        mCanvas = mNode.beginRecording();
+    }
+
+    @Override
+    public void setGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            int renderEffectId) {
+        if (mNode == null) {
+            return;
+        }
+        mNode.setScaleX(scaleX);
+        mNode.setScaleY(scaleY);
+        mNode.setRotationX(rotationX);
+        mNode.setRotationY(rotationY);
+        mNode.setRotationZ(rotationZ);
+        mNode.setPivotX(transformOriginX * mNode.getWidth());
+        mNode.setPivotY(transformOriginY * mNode.getHeight());
+        mNode.setAlpha(alpha);
+        if (renderEffectId == 1) {
+
+            RenderEffect effect = RenderEffect.createBlurEffect(8f, 8f, Shader.TileMode.CLAMP);
+            mNode.setRenderEffect(effect);
+        }
+    }
+
+    @Override
+    public void endGraphicsLayer() {
+        mNode.endRecording();
+        mCanvas = mPreviousCanvas;
+        mCanvas.drawRenderNode(mNode);
+        // node.discardDisplayList();
+        mNode = null;
     }
 
     @Override
@@ -196,9 +248,9 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void getTextBounds(int textId, int start, int end, int flags, float[] bounds) {
+    public void getTextBounds(int textId, int start, int end, int flags, @NonNull float[] bounds) {
         String str = getText(textId);
-        if (end == -1) {
+        if (end == -1 || end > str.length()) {
             end = str.length();
         }
 
@@ -241,6 +293,8 @@ public class AndroidPaintContext extends PaintContext {
             if (start != 0) {
                 textToPaint = textToPaint.substring(start);
             }
+        } else if (end > textToPaint.length()) {
+            textToPaint = textToPaint.substring(start);
         } else {
             textToPaint = textToPaint.substring(start, end);
         }
@@ -367,7 +421,7 @@ public class AndroidPaintContext extends PaintContext {
      * @param paintData the list change to the paint
      */
     @Override
-    public void applyPaint(PaintBundle paintData) {
+    public void applyPaint(@NonNull PaintBundle paintData) {
         paintData.applyPaintChange(
                 (PaintContext) this,
                 new PaintChanges() {
@@ -451,6 +505,9 @@ public class AndroidPaintContext extends PaintContext {
                             return;
                         }
                         ShaderData data = getShaderData(shaderId);
+                        if (data == null) {
+                            return;
+                        }
                         RuntimeShader shader = new RuntimeShader(getText(data.getShaderTextId()));
                         String[] names = data.getUniformFloatNames();
                         for (int i = 0; i < names.length; i++) {
@@ -475,6 +532,7 @@ public class AndroidPaintContext extends PaintContext {
                     @Override
                     public void setImageFilterQuality(int quality) {
                         Utils.log(" quality =" + quality);
+                        mPaint.setFilterBitmap(quality == 1);
                     }
 
                     @Override
@@ -523,8 +581,8 @@ public class AndroidPaintContext extends PaintContext {
 
                     @Override
                     public void setLinearGradient(
-                            int[] colors,
-                            float[] stops,
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
                             float startX,
                             float startY,
                             float endX,
@@ -543,8 +601,8 @@ public class AndroidPaintContext extends PaintContext {
 
                     @Override
                     public void setRadialGradient(
-                            int[] colors,
-                            float[] stops,
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
                             float centerX,
                             float centerY,
                             float radius,
@@ -561,7 +619,10 @@ public class AndroidPaintContext extends PaintContext {
 
                     @Override
                     public void setSweepGradient(
-                            int[] colors, float[] stops, float centerX, float centerY) {
+                            @NonNull int[] colors,
+                            @NonNull float[] stops,
+                            float centerX,
+                            float centerY) {
                         mPaint.setShader(new SweepGradient(centerX, centerY, colors, stops));
                     }
 
@@ -654,20 +715,32 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
+    public void tweenPath(int out, int path1, int path2, float tween) {
+        float[] p = getPathArray(path1, path2, tween);
+        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
+        androidContext.mRemoteComposeState.putPathData(out, p);
+    }
+
+    @Override
     public void reset() {
         mPaint.reset();
     }
 
     private Path getPath(int path1Id, int path2Id, float tween, float start, float end) {
+        return getPath(getPathArray(path1Id, path2Id, tween), start, end);
+    }
+
+    private float[] getPathArray(int path1Id, int path2Id, float tween) {
+        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
         if (tween == 0.0f) {
-            return getPath(path1Id, start, end);
+            return androidContext.mRemoteComposeState.getPathData(path1Id);
         }
         if (tween == 1.0f) {
-            return getPath(path2Id, start, end);
+            return androidContext.mRemoteComposeState.getPathData(path2Id);
         }
-        AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
-        float[] data1 = (float[]) androidContext.mRemoteComposeState.getFromId(path1Id);
-        float[] data2 = (float[]) androidContext.mRemoteComposeState.getFromId(path2Id);
+
+        float[] data1 = androidContext.mRemoteComposeState.getPathData(path1Id);
+        float[] data2 = androidContext.mRemoteComposeState.getPathData(path2Id);
         float[] tmp = new float[data2.length];
         for (int i = 0; i < tmp.length; i++) {
             if (Float.isNaN(data1[i]) || Float.isNaN(data2[i])) {
@@ -676,6 +749,10 @@ public class AndroidPaintContext extends PaintContext {
                 tmp[i] = (data2[i] - data1[i]) * tween + data1[i];
             }
         }
+        return tmp;
+    }
+
+    private Path getPath(float[] tmp, float start, float end) {
         Path path = new Path();
         FloatsToPath.genPath(path, tmp, start, end);
         return path;
@@ -683,11 +760,17 @@ public class AndroidPaintContext extends PaintContext {
 
     private Path getPath(int id, float start, float end) {
         AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
-        Path path = new Path();
-        if (androidContext.mRemoteComposeState.containsId(id)) {
-            float[] data = (float[]) androidContext.mRemoteComposeState.getFromId(id);
-            FloatsToPath.genPath(path, data, start, end);
+        Path p = (Path) androidContext.mRemoteComposeState.getPath(id);
+        if (p != null) {
+            return p;
         }
+        Path path = new Path();
+        float[] pathData = androidContext.mRemoteComposeState.getPathData(id);
+        if (pathData != null) {
+            FloatsToPath.genPath(path, pathData, start, end);
+            androidContext.mRemoteComposeState.putPath(id, path);
+        }
+
         return path;
     }
 

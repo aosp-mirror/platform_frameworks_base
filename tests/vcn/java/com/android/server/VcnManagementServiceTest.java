@@ -70,7 +70,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Uri;
-import android.net.vcn.Flags;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
@@ -78,6 +77,8 @@ import android.net.vcn.VcnConfigTest;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
+import android.net.vcn.util.PersistableBundleUtils;
+import android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
@@ -100,8 +101,6 @@ import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
-import com.android.server.vcn.util.PersistableBundleUtils;
-import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -293,8 +292,6 @@ public class VcnManagementServiceTest {
         doReturn(Collections.singleton(TRANSPORT_WIFI))
                 .when(mMockDeps)
                 .getRestrictedTransports(any(), any(), any());
-
-        mSetFlagsRule.enableFlags(Flags.FLAG_FIX_CONFIG_GARBAGE_COLLECTION);
     }
 
 

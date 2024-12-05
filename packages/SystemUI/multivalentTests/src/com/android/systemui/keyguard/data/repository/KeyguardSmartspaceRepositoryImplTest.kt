@@ -50,7 +50,6 @@ class KeyguardSmartspaceRepositoryImplTest : SysuiTestCase() {
         fakeSettings.userId = fakeUserTracker.userId
         underTest =
             KeyguardSmartspaceRepositoryImpl(
-                context = context,
                 secureSettings = fakeSettings,
                 userTracker = fakeUserTracker,
                 applicationScope = scope.backgroundScope,

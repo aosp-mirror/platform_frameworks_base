@@ -156,8 +156,7 @@ class InputManagerServiceTests {
                 }
 
                 override fun getKeyboardBacklightController(
-                    nativeService: NativeInputManagerService?,
-                    dataStore: PersistentDataStore?
+                    nativeService: NativeInputManagerService?
                 ): InputManagerService.KeyboardBacklightControllerInterface {
                     return kbdController
                 }
@@ -216,6 +215,7 @@ class InputManagerServiceTests {
         verify(native).setShouldNotifyTouchpadHardwareState(anyBoolean())
         verify(native).setTouchpadRightClickZoneEnabled(anyBoolean())
         verify(native).setTouchpadThreeFingerTapShortcutEnabled(anyBoolean())
+        verify(native).setTouchpadSystemGesturesEnabled(anyBoolean())
         verify(native).setShowTouches(anyBoolean())
         verify(native).setMotionClassifierEnabled(anyBoolean())
         verify(native).setMaximumObscuringOpacityForTouch(anyFloat())

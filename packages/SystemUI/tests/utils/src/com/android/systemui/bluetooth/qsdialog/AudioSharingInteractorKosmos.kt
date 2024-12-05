@@ -16,12 +16,14 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 
 val Kosmos.audioSharingInteractor: AudioSharingInteractor by
     Kosmos.Fixture {
         AudioSharingInteractorImpl(
+            applicationContext,
             localBluetoothManager,
             bluetoothTileDialogAudioSharingRepository,
             testDispatcher,

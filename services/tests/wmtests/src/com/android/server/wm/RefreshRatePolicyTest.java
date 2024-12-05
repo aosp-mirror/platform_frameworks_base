@@ -101,6 +101,8 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), LOW_REFRESH_RATE);
         mDisplayInfo.supportedModes = new Mode[] { hiMode, midMode };
         mDisplayInfo.appsSupportedModes = new Mode[] { hiMode, midMode, lowMode };
+        mDisplayInfo.supportedRefreshRates = new float[] {HI_REFRESH_RATE, MID_REFRESH_RATE,
+                LOW_REFRESH_RATE};
         mDisplayInfo.defaultModeId = HI_MODE_ID;
         mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
     }
@@ -267,6 +269,46 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(LOW_REFRESH_RATE,
                 mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testInsetsAnimationAppOverridePreferredModeId() {
+        final WindowState overrideWindow = createWindow("overrideWindow");
+        overrideWindow.mAttrs.packageName = "com.android.test";
+        overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
+        parcelLayoutParams(overrideWindow);
+        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_LOW_EXACT, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+
+        overrideWindow.notifyInsetsAnimationRunningStateChanged(true);
+        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testInsetsAnimationAppOverridePreferredRefreshRate() {
+        final WindowState overrideWindow = createWindow("overrideWindow");
+        overrideWindow.mAttrs.packageName = "com.android.test";
+        overrideWindow.mAttrs.preferredRefreshRate = LOW_REFRESH_RATE;
+        parcelLayoutParams(overrideWindow);
+        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_LOW_PREFERRED, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+
+        overrideWindow.notifyInsetsAnimationRunningStateChanged(true);
+        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
+        assertTrue(mPolicy.updateFrameRateVote(overrideWindow));
+        assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
+        assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+        assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
     }
 
     @Test

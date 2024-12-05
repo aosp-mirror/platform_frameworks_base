@@ -17,6 +17,7 @@
 package com.android.internal.vibrator.persistence;
 
 import static com.android.internal.vibrator.persistence.XmlConstants.ATTRIBUTE_DELAY_MS;
+import static com.android.internal.vibrator.persistence.XmlConstants.ATTRIBUTE_DELAY_TYPE;
 import static com.android.internal.vibrator.persistence.XmlConstants.ATTRIBUTE_NAME;
 import static com.android.internal.vibrator.persistence.XmlConstants.ATTRIBUTE_SCALE;
 import static com.android.internal.vibrator.persistence.XmlConstants.NAMESPACE;
@@ -25,9 +26,11 @@ import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PRIMITI
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrimitiveSegment;
 
 import com.android.internal.vibrator.persistence.SerializedComposedEffect.SerializedSegment;
+import com.android.internal.vibrator.persistence.XmlConstants.PrimitiveDelayType;
 import com.android.internal.vibrator.persistence.XmlConstants.PrimitiveEffectName;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -46,17 +49,26 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
     private final PrimitiveEffectName mPrimitiveName;
     private final float mPrimitiveScale;
     private final int mPrimitiveDelayMs;
+    @Nullable
+    private final PrimitiveDelayType mDelayType;
 
-    SerializedCompositionPrimitive(PrimitiveEffectName primitiveName, float scale, int delayMs) {
+    SerializedCompositionPrimitive(PrimitiveEffectName primitiveName, float scale, int delayMs,
+            @Nullable PrimitiveDelayType delayType) {
         mPrimitiveName = primitiveName;
         mPrimitiveScale = scale;
         mPrimitiveDelayMs = delayMs;
+        mDelayType = delayType;
     }
 
     @Override
     public void deserializeIntoComposition(@NonNull VibrationEffect.Composition composition) {
-        composition.addPrimitive(mPrimitiveName.getPrimitiveId(), mPrimitiveScale,
-                mPrimitiveDelayMs);
+        if (Flags.primitiveCompositionAbsoluteDelay() && mDelayType != null) {
+            composition.addPrimitive(mPrimitiveName.getPrimitiveId(), mPrimitiveScale,
+                    mPrimitiveDelayMs, mDelayType.getDelayType());
+        } else {
+            composition.addPrimitive(mPrimitiveName.getPrimitiveId(), mPrimitiveScale,
+                    mPrimitiveDelayMs);
+        }
     }
 
     @Override
@@ -72,6 +84,12 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
             serializer.attributeInt(NAMESPACE, ATTRIBUTE_DELAY_MS, mPrimitiveDelayMs);
         }
 
+        if (Flags.primitiveCompositionAbsoluteDelay() && mDelayType != null) {
+            if (mDelayType.getDelayType() != PrimitiveSegment.DEFAULT_DELAY_TYPE) {
+                serializer.attribute(NAMESPACE, ATTRIBUTE_DELAY_TYPE, mDelayType.toString());
+            }
+        }
+
         serializer.endTag(NAMESPACE, TAG_PRIMITIVE_EFFECT);
     }
 
@@ -81,6 +99,7 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
                 + "name=" + mPrimitiveName
                 + ", scale=" + mPrimitiveScale
                 + ", delayMs=" + mPrimitiveDelayMs
+                + ", delayType=" + mDelayType
                 + '}';
     }
 
@@ -91,8 +110,14 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
         static SerializedCompositionPrimitive parseNext(@NonNull TypedXmlPullParser parser)
                 throws XmlParserException, IOException {
             XmlValidator.checkStartTag(parser, TAG_PRIMITIVE_EFFECT);
-            XmlValidator.checkTagHasNoUnexpectedAttributes(parser,
-                    ATTRIBUTE_NAME, ATTRIBUTE_DELAY_MS, ATTRIBUTE_SCALE);
+
+            if (Flags.primitiveCompositionAbsoluteDelay()) {
+                XmlValidator.checkTagHasNoUnexpectedAttributes(parser,
+                        ATTRIBUTE_NAME, ATTRIBUTE_DELAY_MS, ATTRIBUTE_SCALE, ATTRIBUTE_DELAY_TYPE);
+            } else {
+                XmlValidator.checkTagHasNoUnexpectedAttributes(parser,
+                        ATTRIBUTE_NAME, ATTRIBUTE_DELAY_MS, ATTRIBUTE_SCALE);
+            }
 
             PrimitiveEffectName primitiveName = parsePrimitiveName(
                     parser.getAttributeValue(NAMESPACE, ATTRIBUTE_NAME));
@@ -100,11 +125,13 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
                     parser, ATTRIBUTE_SCALE, 0, 1, PrimitiveSegment.DEFAULT_SCALE);
             int delayMs = XmlReader.readAttributeIntNonNegative(
                     parser, ATTRIBUTE_DELAY_MS, PrimitiveSegment.DEFAULT_DELAY_MILLIS);
+            PrimitiveDelayType delayType = parseDelayType(
+                    parser.getAttributeValue(NAMESPACE, ATTRIBUTE_DELAY_TYPE));
 
             // Consume tag
             XmlReader.readEndTag(parser);
 
-            return new SerializedCompositionPrimitive(primitiveName, scale, delayMs);
+            return new SerializedCompositionPrimitive(primitiveName, scale, delayMs, delayType);
         }
 
         @NonNull
@@ -118,6 +145,22 @@ final class SerializedCompositionPrimitive implements SerializedSegment {
                 throw new XmlParserException("Unexpected primitive effect name " + name);
             }
             return effectName;
+        }
+
+        @Nullable
+        private static PrimitiveDelayType parseDelayType(@Nullable String name)
+                throws XmlParserException {
+            if (name == null) {
+                return null;
+            }
+            if (!Flags.primitiveCompositionAbsoluteDelay()) {
+                throw new XmlParserException("Unexpected primitive delay type " + name);
+            }
+            PrimitiveDelayType delayType = PrimitiveDelayType.findByName(name);
+            if (delayType == null) {
+                throw new XmlParserException("Unexpected primitive delay type " + name);
+            }
+            return delayType;
         }
     }
 }

@@ -87,9 +87,9 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
-                    false, // Defaults to false.
+                    false // Defaults to false.
                 ),
-                canWake
+                canWake,
             )
 
             repository.setKeyguardEnabled(false)
@@ -100,33 +100,26 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                     false, // Default to false.
                     true, // True now that keyguard service is disabled
                 ),
-                canWake
+                canWake,
             )
 
             repository.setKeyguardEnabled(true)
             runCurrent()
 
-            assertEquals(
-                listOf(
-                    false,
-                    true,
-                    false,
-                ),
-                canWake
-            )
+            assertEquals(listOf(false, true, false), canWake)
         }
 
     @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
-    fun testCanWakeDirectlyToGone_lockscreenDisabledThenEnabled() =
+    fun testCanWakeDirectlyToGone_lockscreenDisabledThenEnabled_onlyAfterWakefulnessChange() =
         testScope.runTest {
             val canWake by collectValues(underTest.canWakeDirectlyToGone)
 
             assertEquals(
                 listOf(
-                    false, // Defaults to false.
+                    false // Defaults to false.
                 ),
-                canWake
+                canWake,
             )
 
             whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
@@ -136,9 +129,9 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                 listOf(
                     // Still false - isLockScreenDisabled only causes canWakeDirectlyToGone to
                     // update on the next wake/sleep event.
-                    false,
+                    false
                 ),
-                canWake
+                canWake,
             )
 
             kosmos.powerInteractor.setAsleepForTest()
@@ -150,7 +143,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                     // True since we slept after setting isLockScreenDisabled=true
                     true,
                 ),
-                canWake
+                canWake,
             )
 
             kosmos.powerInteractor.setAwakeForTest()
@@ -159,25 +152,75 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
             kosmos.powerInteractor.setAsleepForTest()
             runCurrent()
 
-            assertEquals(
-                listOf(
-                    false,
-                    true,
-                ),
-                canWake
-            )
+            assertEquals(listOf(false, true), canWake)
 
             whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
             kosmos.powerInteractor.setAwakeForTest()
+            runCurrent()
+
+            assertEquals(listOf(false, true, false), canWake)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testCanWakeDirectlyToGone_lockscreenDisabledThenEnabled_lockNowEvent() =
+        testScope.runTest {
+            val canWake by collectValues(underTest.canWakeDirectlyToGone)
+
+            assertEquals(
+                listOf(
+                    false // Defaults to false.
+                ),
+                canWake,
+            )
+
+            whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    // Still false - isLockScreenDisabled only causes canWakeDirectlyToGone to
+                    // update on the next wakefulness or lockNow event.
+                    false
+                ),
+                canWake,
+            )
+
+            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    false,
+                    // True when lockNow() called after setting isLockScreenDisabled=true
+                    true,
+                ),
+                canWake,
+            )
+
+            whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    false,
+                    // Still true since no lockNow() calls made.
+                    true,
+                ),
+                canWake,
+            )
+
+            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
             runCurrent()
 
             assertEquals(
                 listOf(
                     false,
                     true,
+                    // False again after the lockNow() call.
                     false,
                 ),
-                canWake
+                canWake,
             )
         }
 
@@ -189,9 +232,9 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
-                    false, // Defaults to false.
+                    false // Defaults to false.
                 ),
-                canWake
+                canWake,
             )
 
             repository.setBiometricUnlockState(BiometricUnlockMode.WAKE_AND_UNLOCK)
@@ -213,9 +256,9 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
-                    false, // Defaults to false.
+                    false // Defaults to false.
                 ),
-                canWake
+                canWake,
             )
 
             repository.setCanIgnoreAuthAndReturnToGone(true)
@@ -237,9 +280,9 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
-                    false, // Defaults to false.
+                    false // Defaults to false.
                 ),
-                canWake
+                canWake,
             )
 
             whenever(kosmos.devicePolicyManager.getMaximumTimeToLock(eq(null), anyInt()))
@@ -257,13 +300,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertEquals(
-                listOf(
-                    false,
-                    true,
-                ),
-                canWake
-            )
+            assertEquals(listOf(false, true), canWake)
 
             verify(kosmos.alarmManager)
                 .setExactAndAllowWhileIdle(
@@ -281,9 +318,9 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
-                    false, // Defaults to false.
+                    false // Defaults to false.
                 ),
-                canWake
+                canWake,
             )
 
             whenever(kosmos.devicePolicyManager.getMaximumTimeToLock(eq(null), anyInt()))
@@ -312,7 +349,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                     // Timed out, so we can ignore auth/return to GONE.
                     true,
                 ),
-                canWake
+                canWake,
             )
 
             verify(kosmos.alarmManager)
@@ -338,7 +375,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                     // alarm in flight that should be canceled.
                     false,
                 ),
-                canWake
+                canWake,
             )
 
             kosmos.powerInteractor.setAsleepForTest(
@@ -354,25 +391,17 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                     // Back to sleep.
                     true,
                 ),
-                canWake
+                canWake,
             )
 
             // Simulate the first sleep's alarm coming in.
             lastRegisteredBroadcastReceiver?.onReceive(
                 kosmos.mockedContext,
-                Intent("com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD")
+                Intent("com.android.internal.policy.impl.PhoneWindowManager.DELAYED_KEYGUARD"),
             )
             runCurrent()
 
             // It should not have any effect.
-            assertEquals(
-                listOf(
-                    false,
-                    true,
-                    false,
-                    true,
-                ),
-                canWake
-            )
+            assertEquals(listOf(false, true, false, true), canWake)
         }
 }

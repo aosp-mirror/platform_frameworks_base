@@ -27,4 +27,13 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+  is_exported: true
+}
+
+flag {
+  name: "x509_extensions_certificate_transparency"
+  is_exported: true
+  namespace: "network_security"
+  description: "Flag to use checkServerTrusted to verify SCTs in OCSP and TLS Data"
+  bug: "319829948"
 }

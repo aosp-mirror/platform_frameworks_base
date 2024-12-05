@@ -58,6 +58,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DeviceConfig;
 import android.stats.storage.StorageEnums;
+import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -355,7 +356,8 @@ public final class BroadcastHelper {
             @Nullable int[] userIds,
             @Nullable int[] instantUserIds,
             @Nullable SparseArray<int[]> broadcastAllowList,
-            @NonNull AndroidPackage pkg) {
+            @NonNull AndroidPackage pkg,
+            @NonNull String[] sharedUidPackages) {
         final boolean isForWholeApp = componentNames.contains(packageName);
         if (isForWholeApp || !android.content.pm.Flags.reduceBroadcastsForComponentStateChanges()) {
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp, componentNames,
@@ -374,20 +376,36 @@ public final class BroadcastHelper {
         exportedComponentNames.removeAll(notExportedComponentNames);
 
         if (!notExportedComponentNames.isEmpty()) {
-            // Limit sending of the PACKAGE_CHANGED broadcast to only the system and the
-            // application itself when the component is not exported.
+            // Limit sending of the PACKAGE_CHANGED broadcast to only the system, the application
+            // itself and applications with the same UID when the component is not exported.
 
             // First, send the PACKAGE_CHANGED broadcast to the system.
-            sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
-                    notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
-                    broadcastAllowList, "android" /* targetPackageName */,
-                    new String[]{PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED});
+            if (!TextUtils.equals(packageName, "android")) {
+                sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
+                        notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
+                        broadcastAllowList, "android" /* targetPackageName */,
+                        new String[]{
+                                PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED});
+            }
 
             // Second, send the PACKAGE_CHANGED broadcast to the application itself.
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                     notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
                     broadcastAllowList, packageName /* targetPackageName */,
                     null /* requiredPermissions */);
+
+            // Third, send the PACKAGE_CHANGED broadcast to the applications with the same UID.
+            for (int i = 0; i < sharedUidPackages.length; i++) {
+                final String sharedPackage = sharedUidPackages[i];
+                if (TextUtils.equals(packageName, sharedPackage)) {
+                    continue;
+                }
+                sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
+                        notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
+                        broadcastAllowList, sharedPackage /* targetPackageName */,
+                        null /* requiredPermissions */);
+            }
+
         }
 
         if (!exportedComponentNames.isEmpty()) {
@@ -936,7 +954,8 @@ public final class BroadcastHelper {
                 isInstantApp ? null : snapshot.getVisibilityAllowLists(packageName, userIds);
         mHandler.post(() -> sendPackageChangedBroadcastInternal(
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
-                instantUserIds, broadcastAllowList, setting.getPkg()));
+                instantUserIds, broadcastAllowList, setting.getPkg(),
+                snapshot.getSharedUserPackagesForPackage(packageName, userId)));
         mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
                 packageUid, reason, userIds, instantUserIds, broadcastAllowList, mHandler);
     }

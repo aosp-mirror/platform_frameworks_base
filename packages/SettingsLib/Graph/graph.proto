@@ -79,6 +79,8 @@ message PreferenceProto {
   optional IntentProto launch_intent = 14;
   // Descriptor of the preference value.
   optional PreferenceValueDescriptorProto value_descriptor = 15;
+  // Indicate how sensitive of the preference.
+  optional int32 sensitivity_level = 16;
 
   // Target of an Intent
   message ActionTarget {

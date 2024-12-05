@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.wm.shell.R;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.shared.animation.Interpolators;
 
@@ -49,6 +50,9 @@ public class PipResizeAnimator extends ValueAnimator {
     @Nullable
     private Runnable mAnimationEndCallback;
     private RectEvaluator mRectEvaluator;
+
+    private final int mCornerRadius;
+    private final int mShadowRadius;
 
     // Bounds relative to which scaling/cropping must be done.
     private final Rect mBaseBounds = new Rect();
@@ -74,7 +78,8 @@ public class PipResizeAnimator extends ValueAnimator {
                 mAnimationStartCallback.run();
             }
             if (mStartTx != null) {
-                setBoundsAndRotation(mStartTx, mLeash, mBaseBounds, mStartBounds, mDelta);
+                setBoundsAndRotation(mStartTx, mLeash, mBaseBounds, mStartBounds, mDelta,
+                        mCornerRadius, mShadowRadius);
                 mStartTx.apply();
             }
         }
@@ -83,7 +88,8 @@ public class PipResizeAnimator extends ValueAnimator {
         public void onAnimationEnd(Animator animation) {
             super.onAnimationEnd(animation);
             if (mFinishTx != null) {
-                setBoundsAndRotation(mFinishTx, mLeash, mBaseBounds, mEndBounds, 0f);
+                setBoundsAndRotation(mFinishTx, mLeash, mBaseBounds, mEndBounds, 0f,
+                        mCornerRadius, mShadowRadius);
             }
             if (mAnimationEndCallback != null) {
                 mAnimationEndCallback.run();
@@ -99,7 +105,8 @@ public class PipResizeAnimator extends ValueAnimator {
                             mSurfaceControlTransactionFactory.getTransaction();
                     final float fraction = getAnimatedFraction();
                     final float degrees = (1.0f - fraction) * mDelta;
-                    setBoundsAndRotation(tx, mLeash, mBaseBounds, mAnimatedRect, degrees);
+                    setBoundsAndRotation(tx, mLeash, mBaseBounds, mAnimatedRect, degrees,
+                            mCornerRadius, mShadowRadius);
                     tx.apply();
                 }
             };
@@ -128,6 +135,9 @@ public class PipResizeAnimator extends ValueAnimator {
 
         mRectEvaluator = new RectEvaluator(mAnimatedRect);
 
+        mCornerRadius = mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        mShadowRadius = mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius);
+
         setObjectValues(startBounds, endBounds);
         setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         addListener(mAnimatorListener);
@@ -152,7 +162,7 @@ public class PipResizeAnimator extends ValueAnimator {
      * @param degrees degrees of rotation - counter-clockwise is positive by convention.
      */
     private static void setBoundsAndRotation(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect baseBounds, Rect targetBounds, float degrees) {
+            Rect baseBounds, Rect targetBounds, float degrees, int cornerRadius, int shadowRadius) {
         Matrix transformTensor = new Matrix();
         final float[] mMatrixTmp = new float[9];
         final float scaleX = (float) targetBounds.width() / baseBounds.width();
@@ -162,7 +172,9 @@ public class PipResizeAnimator extends ValueAnimator {
         transformTensor.postTranslate(targetBounds.left, targetBounds.top);
         transformTensor.postRotate(degrees, targetBounds.centerX(), targetBounds.centerY());
 
-        tx.setMatrix(leash, transformTensor, mMatrixTmp);
+        tx.setMatrix(leash, transformTensor, mMatrixTmp)
+                .setCornerRadius(leash, cornerRadius)
+                .setShadowRadius(leash, shadowRadius);
     }
 
     @VisibleForTesting

@@ -516,27 +516,11 @@ public class OomAdjuster {
         mLogger = new OomAdjusterDebugLogger(this, mService.mConstants);
 
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
-            final int pid = msg.arg1;
-            final int group = msg.arg2;
-            if (pid == ActivityManagerService.MY_PID) {
-                // Skip setting the process group for system_server, keep it as default.
-                return true;
-            }
-            final boolean traceEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            if (traceEnabled) {
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setProcessGroup "
-                        + msg.obj + " to " + group);
-            }
-            try {
-                android.os.Process.setProcessGroup(pid, group);
-            } catch (Exception e) {
-                if (DEBUG_ALL) {
-                    Slog.w(TAG, "Failed setting process group of " + pid + " to " + group, e);
-                }
-            } finally {
-                if (traceEnabled) {
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                }
+            final int group = msg.what;
+            final ProcessRecord app = (ProcessRecord) msg.obj;
+            setProcessGroup(app.getPid(), group, app.processName);
+            if (Flags.phantomProcessesFix()) {
+                mService.mPhantomProcessList.setProcessGroupForPhantomProcessOfApp(app, group);
             }
             return true;
         });
@@ -547,8 +531,31 @@ public class OomAdjuster {
     }
 
     void setProcessGroup(int pid, int group, String processName) {
+        if (pid == ActivityManagerService.MY_PID) {
+            // Skip setting the process group for system_server, keep it as default.
+            return;
+        }
+        final boolean traceEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        if (traceEnabled) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setProcessGroup "
+                    + processName + " to " + group);
+        }
+        try {
+            android.os.Process.setProcessGroup(pid, group);
+        } catch (Exception e) {
+            if (DEBUG_ALL) {
+                Slog.w(TAG, "Failed setting process group of " + pid + " to " + group, e);
+            }
+        } finally {
+            if (traceEnabled) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            }
+        }
+    }
+
+    void setAppAndChildProcessGroup(ProcessRecord app, int group) {
         mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
-                0 /* unused */, pid, group, processName));
+                group, app));
     }
 
     void initSettings() {
@@ -1369,9 +1376,11 @@ public class OomAdjuster {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
             if (!app.isKilledByAm() && app.getThread() != null) {
-                // We don't need to apply the update for the process which didn't get computed
-                if (state.getCompletedAdjSeq() == mAdjSeq) {
-                    applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason, true);
+                if (!Flags.fixApplyOomadjOrder()) {
+                    // We don't need to apply the update for the process which didn't get computed
+                    if (state.getCompletedAdjSeq() == mAdjSeq) {
+                        applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason, true);
+                    }
                 }
 
                 if (app.isPendingFinishAttach()) {
@@ -1469,6 +1478,19 @@ public class OomAdjuster {
                 if (state.getCurProcState() >= ActivityManager.PROCESS_STATE_HOME
                         && !app.isKilledByAm()) {
                     numTrimming++;
+                }
+            }
+        }
+
+        if (Flags.fixApplyOomadjOrder()) {
+            // We need to apply the update starting from the least recently used.
+            // Otherwise, they won't be in the correct LRU order in LMKD.
+            for (int i = 0; i < numLru; i++) {
+                ProcessRecord app = lruList.get(i);
+                // We don't need to apply the update for the process which didn't get computed
+                if (!app.isKilledByAm() && app.getThread() != null
+                        && app.mState.getCompletedAdjSeq() == mAdjSeq) {
+                    applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason, true);
                 }
             }
         }
@@ -3590,8 +3612,7 @@ public class OomAdjuster {
                     processGroup = THREAD_GROUP_DEFAULT;
                     break;
             }
-            setProcessGroup(app.getPid(), processGroup, app.processName);
-            mService.mPhantomProcessList.setProcessGroupForPhantomProcessOfApp(app, processGroup);
+            setAppAndChildProcessGroup(app, processGroup);
             try {
                 final int renderThreadTid = app.getRenderThreadTid();
                 if (curSchedGroup == SCHED_GROUP_TOP_APP) {

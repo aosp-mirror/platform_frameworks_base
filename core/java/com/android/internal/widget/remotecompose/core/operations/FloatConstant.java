@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -27,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import java.util.List;
 
 /** Operation to deal with Text data */
-public class FloatConstant implements com.android.internal.widget.remotecompose.core.Operation {
+public class FloatConstant extends Operation {
     private static final int OP_CODE = Operations.DATA_FLOAT;
     private static final String CLASS_NAME = "FloatConstant";
     public int mTextId;
@@ -39,19 +41,31 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mTextId, mValue);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "FloatConstant[" + mTextId + "] = " + mValue;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -63,20 +77,31 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
      * @param id the id
      * @param value the value of the float
      */
-    public static void apply(WireBuffer buffer, int id, float value) {
+    public static void apply(@NonNull WireBuffer buffer, int id, float value) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeFloat(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
 
         float value = buffer.readFloat();
         operations.add(new FloatConstant(textId, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A float and its associated id")
                 .field(DocumentedOperation.INT, "id", "id of float")
@@ -84,12 +109,13 @@ public class FloatConstant implements com.android.internal.widget.remotecompose.
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.loadFloat(mTextId, mValue);
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

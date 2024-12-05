@@ -173,3 +173,19 @@ flag {
     description: "Share wallet role routing priority with associated services"
     bug: "366243361"
 }
+
+flag {
+    name: "nfc_set_service_enabled_for_category_other"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable set service enabled for category other"
+    bug: "338157113"
+}
+
+flag {
+    name: "nfc_check_tag_intent_preference"
+    is_exported: true
+    namespace: "nfc"
+    description: "App can check its tag intent preference status"
+    bug: "335916336"
+}

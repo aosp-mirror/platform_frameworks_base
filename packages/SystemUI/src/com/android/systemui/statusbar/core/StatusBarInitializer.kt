@@ -112,12 +112,12 @@ constructor(
     }
 
     override fun initializeStatusBar() {
-        StatusBarSimpleFragment.assertInLegacyMode()
+        StatusBarRootModernization.assertInLegacyMode()
         doStart()
     }
 
     private fun doStart() {
-        if (StatusBarSimpleFragment.isEnabled) doComposeStart() else doLegacyStart()
+        if (StatusBarRootModernization.isEnabled) doComposeStart() else doLegacyStart()
     }
 
     /**

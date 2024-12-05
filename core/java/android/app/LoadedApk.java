@@ -1660,7 +1660,6 @@ public final class LoadedApk {
                         }
                         RuntimeException ex = new IllegalArgumentException(
                                 "Originally unregistered here:");
-                        ex.fillInStackTrace();
                         rd.setUnregisterLocation(ex);
                         holder.put(r, rd);
                     }
@@ -1860,7 +1859,6 @@ public final class LoadedApk {
             mInstrumentation = instrumentation;
             mRegistered = registered;
             mLocation = new IntentReceiverLeaked(null);
-            mLocation.fillInStackTrace();
         }
 
         void validate(Context context, Handler activityThread) {
@@ -2000,7 +1998,6 @@ public final class LoadedApk {
                         }
                         RuntimeException ex = new IllegalArgumentException(
                                 "Originally unbound here:");
-                        ex.fillInStackTrace();
                         sd.setUnbindLocation(ex);
                         holder.put(c, sd);
                     }
@@ -2076,7 +2073,6 @@ public final class LoadedApk {
             mActivityThread = activityThread;
             mActivityExecutor = null;
             mLocation = new ServiceConnectionLeaked(null);
-            mLocation.fillInStackTrace();
             mFlags = flags;
         }
 
@@ -2088,7 +2084,6 @@ public final class LoadedApk {
             mActivityThread = null;
             mActivityExecutor = activityExecutor;
             mLocation = new ServiceConnectionLeaked(null);
-            mLocation.fillInStackTrace();
             mFlags = flags;
         }
 

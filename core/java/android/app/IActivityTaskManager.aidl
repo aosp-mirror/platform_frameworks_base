@@ -242,8 +242,8 @@ interface IActivityTaskManager {
 
     boolean supportsLocalVoiceInteraction();
 
-    // Sets whether system educational dialogs should be limited
-    void setLimitSystemEducationDialogs(IBinder appToken, boolean limitSystemEducationDialogs);
+    // Requests the "Open in browser" education to be shown
+    void requestOpenInBrowserEducation(IBinder appToken);
 
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();

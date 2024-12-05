@@ -27,6 +27,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.battery.BatteryMeterView
+import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -38,7 +39,9 @@ import com.android.systemui.shade.ShadeExpandsOnStatusBarLongPress
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.StatusBarLongPressGestureDetector
+import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.policy.Clock
@@ -51,6 +54,7 @@ import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.view.ViewUtil
+import dagger.Lazy
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
@@ -78,6 +82,7 @@ private constructor(
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
     private val darkIconDispatcher: DarkIconDispatcher,
     private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
+    private val lazyStatusBarShadeDisplayPolicy: Lazy<StatusBarTouchShadeDisplayPolicy>,
 ) : ViewController<PhoneStatusBarView>(view) {
 
     private lateinit var battery: BatteryMeterView
@@ -225,6 +230,9 @@ private constructor(
                 !upOrCancel || shadeController.isExpandedVisible,
             )
         }
+        if (ShadeWindowGoesAround.isEnabled && event.action == MotionEvent.ACTION_DOWN) {
+            lazyStatusBarShadeDisplayPolicy.get().onStatusBarTouched(context.displayId)
+        }
     }
 
     private fun addDarkReceivers() {
@@ -341,8 +349,9 @@ private constructor(
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
-        private val darkIconDispatcher: DarkIconDispatcher,
+        @DisplaySpecific private val darkIconDispatcher: DarkIconDispatcher,
         private val statusBarContentInsetsProviderStore: StatusBarContentInsetsProviderStore,
+        private val lazyStatusBarShadeDisplayPolicy: Lazy<StatusBarTouchShadeDisplayPolicy>,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
@@ -370,6 +379,7 @@ private constructor(
                 statusOverlayHoverListenerFactory,
                 darkIconDispatcher,
                 statusBarContentInsetsProviderStore.defaultDisplay,
+                lazyStatusBarShadeDisplayPolicy,
             )
         }
     }

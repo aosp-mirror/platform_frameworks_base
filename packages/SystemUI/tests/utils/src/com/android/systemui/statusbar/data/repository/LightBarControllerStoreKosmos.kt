@@ -27,8 +27,13 @@ val Kosmos.lightBarControllerStoreImpl by
         LightBarControllerStoreImpl(
             backgroundApplicationScope = applicationCoroutineScope,
             displayRepository = displayRepository,
-            factory = { _, _, _ -> mock() },
+            factory = { _, _, _, _ -> mock() },
             displayScopeRepository = displayScopeRepository,
             statusBarModeRepositoryStore = statusBarModeRepository,
+            darkIconDispatcherStore = darkIconDispatcherStore,
         )
     }
+
+val Kosmos.fakeLightBarControllerStore by Kosmos.Fixture { FakeLightBarControllerStore() }
+
+var Kosmos.lightBarControllerStore by Kosmos.Fixture { fakeLightBarControllerStore }

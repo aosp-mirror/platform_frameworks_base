@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -362,7 +363,7 @@ public class PackageWatchdog {
      * it will resume observing any packages requested from a previous boot.
      * @hide
      */
-    public void registerHealthObserver(PackageHealthObserver observer) {
+    public void registerHealthObserver(PackageHealthObserver observer, Executor ignoredExecutor) {
         synchronized (mLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -383,7 +384,7 @@ public class PackageWatchdog {
      *
      * <p>If monitoring a package supporting explicit health check, at the end of the monitoring
      * duration if {@link #onHealthCheckPassed} was never called,
-     * {@link PackageHealthObserver#execute} will be called as if the package failed.
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} will be called as if the package failed.
      *
      * <p>If {@code observer} is already monitoring a package in {@code packageNames},
      * the monitoring window of that package will be reset to {@code durationMs} and the health
@@ -396,7 +397,7 @@ public class PackageWatchdog {
      * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      * @hide
      */
-    public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
+    public void startExplicitHealthCheck(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
         if (packageNames.isEmpty()) {
             Slog.wtf(TAG, "No packages to observe, " + observer.getUniqueIdentifier());
@@ -445,7 +446,7 @@ public class PackageWatchdog {
             }
 
             // Register observer in case not already registered
-            registerHealthObserver(observer);
+            registerHealthObserver(observer, null);
 
             // Sync after we add the new packages to the observers. We may have received packges
             // requiring an earlier schedule than we are currently scheduled for.
@@ -477,7 +478,7 @@ public class PackageWatchdog {
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
-    public void onPackageFailure(@NonNull List<VersionedPackage> packages,
+    public void notifyPackageFailure(@NonNull List<VersionedPackage> packages,
             @FailureReasons int failureReason) {
         if (packages == null) {
             Slog.w(TAG, "Could not resolve a list of failing packages");
@@ -488,7 +489,7 @@ public class PackageWatchdog {
             if (Flags.recoverabilityDetection()) {
                 if (now >= mLastMitigation
                         && (now - mLastMitigation) < getMitigationWindowMs()) {
-                    Slog.i(TAG, "Skipping onPackageFailure mitigation");
+                    Slog.i(TAG, "Skipping notifyPackageFailure mitigation");
                     return;
                 }
             }
@@ -515,7 +516,7 @@ public class PackageWatchdog {
                             ObserverInternal observer = mAllObservers.valueAt(oIndex);
                             PackageHealthObserver registeredObserver = observer.registeredObserver;
                             if (registeredObserver != null
-                                    && observer.onPackageFailureLocked(
+                                    && observer.notifyPackageFailureLocked(
                                     versionedPackage.getPackageName())) {
                                 MonitoredPackage p = observer.getMonitoredPackage(
                                         versionedPackage.getPackageName());
@@ -546,8 +547,8 @@ public class PackageWatchdog {
                                 maybeExecute(currentObserverToNotify, versionedPackage,
                                         failureReason, currentObserverImpact, mitigationCount);
                             } else {
-                                currentObserverToNotify.execute(versionedPackage,
-                                        failureReason, mitigationCount);
+                                currentObserverToNotify.onExecuteHealthCheckMitigation(
+                                        versionedPackage, failureReason, mitigationCount);
                             }
                         }
                     }
@@ -582,7 +583,8 @@ public class PackageWatchdog {
                 maybeExecute(currentObserverToNotify, failingPackage, failureReason,
                         currentObserverImpact, /*mitigationCount=*/ 1);
             } else {
-                currentObserverToNotify.execute(failingPackage,  failureReason, 1);
+                currentObserverToNotify.onExecuteHealthCheckMitigation(failingPackage,
+                        failureReason, 1);
             }
         }
     }
@@ -596,7 +598,8 @@ public class PackageWatchdog {
             synchronized (mLock) {
                 mLastMitigation = mSystemClock.uptimeMillis();
             }
-            currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
+            currentObserverToNotify.onExecuteHealthCheckMitigation(versionedPackage, failureReason,
+                    mitigationCount);
         }
     }
 
@@ -658,12 +661,12 @@ public class PackageWatchdog {
                         currentObserverInternal.setBootMitigationCount(
                                 currentObserverMitigationCount);
                         saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
-                        currentObserverToNotify.executeBootLoopMitigation(
+                        currentObserverToNotify.onExecuteBootLoopMitigation(
                                 currentObserverMitigationCount);
                     } else {
                         mBootThreshold.setMitigationCount(mitigationCount);
                         mBootThreshold.saveMitigationCountToMetadata();
-                        currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
+                        currentObserverToNotify.onExecuteBootLoopMitigation(mitigationCount);
                     }
                 }
             }
@@ -712,7 +715,7 @@ public class PackageWatchdog {
         // Check if native watchdog reported a crash
         if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
             // We rollback all available low impact rollbacks when crash is unattributable
-            onPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
+            notifyPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
         } else {
@@ -749,7 +752,8 @@ public class PackageWatchdog {
         return mPackagesExemptFromImpactLevelThreshold;
     }
 
-    /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}.
+    /** Possible severity values of the user impact of a
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation}.
      * @hide
      */
     @Retention(SOURCE)
@@ -797,7 +801,7 @@ public class PackageWatchdog {
          *
          *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
-         * to the user on {@link #execute}
+         * to the user on {@link #onExecuteHealthCheckMitigation}
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
@@ -814,7 +818,7 @@ public class PackageWatchdog {
          *                        (including this time).
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
-        boolean execute(@Nullable VersionedPackage versionedPackage,
+        boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage versionedPackage,
                 @FailureReasons int failureReason, int mitigationCount);
 
 
@@ -834,7 +838,7 @@ public class PackageWatchdog {
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
          */
-        default boolean executeBootLoopMitigation(int mitigationCount) {
+        default boolean onExecuteBootLoopMitigation(int mitigationCount) {
             return false;
         }
 
@@ -858,7 +862,7 @@ public class PackageWatchdog {
          * otherwise
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
-         * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
+         * it has not explicitly asked to watch the package with {@link #startExplicitHealthCheck}.
          */
         default boolean mayObservePackage(@NonNull String packageName) {
             return false;
@@ -923,7 +927,7 @@ public class PackageWatchdog {
      * effectively behave as if the explicit health check hasn't passed for {@code packageName}.
      *
      * <p> {@code packageName} can still be considered failed if reported by
-     * {@link #onPackageFailureLocked} before the package expires.
+     * {@link #notifyPackageFailureLocked} before the package expires.
      *
      * <p> Triggered by components outside the system server when they are fully functional after an
      * update.
@@ -1115,7 +1119,7 @@ public class PackageWatchdog {
                         if (versionedPkg != null) {
                             Slog.i(TAG,
                                     "Explicit health check failed for package " + versionedPkg);
-                            registeredObserver.execute(versionedPkg,
+                            registeredObserver.onExecuteHealthCheckMitigation(versionedPkg,
                                     PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK, 1);
                         }
                     }
@@ -1250,7 +1254,7 @@ public class PackageWatchdog {
                         return;
                     }
                     final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
-                    onPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+                    notifyPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
                 });
     }
 
@@ -1464,7 +1468,7 @@ public class PackageWatchdog {
          * @hide
          */
         @GuardedBy("mLock")
-        public boolean onPackageFailureLocked(String packageName) {
+        public boolean notifyPackageFailureLocked(String packageName) {
             if (getMonitoredPackage(packageName) == null && registeredObserver.isPersistent()
                     && registeredObserver.mayObservePackage(packageName)) {
                 putMonitoredPackage(sPackageWatchdog.newMonitoredPackage(

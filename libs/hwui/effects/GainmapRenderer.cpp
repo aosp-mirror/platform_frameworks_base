@@ -73,7 +73,9 @@ void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkR
 #ifdef __ANDROID__
     auto destColorspace = c->imageInfo().refColorSpace();
     float targetSdrHdrRatio = getTargetHdrSdrRatio(destColorspace.get());
-    if (targetSdrHdrRatio > 1.f && gainmapImage) {
+    const bool baseImageHdr = gainmapInfo.fBaseImageType == SkGainmapInfo::BaseImageType::kHDR;
+    if (gainmapImage && ((baseImageHdr && targetSdrHdrRatio < gainmapInfo.fDisplayRatioHdr) ||
+                         (!baseImageHdr && targetSdrHdrRatio > gainmapInfo.fDisplayRatioSdr))) {
         SkPaint gainmapPaint = *paint;
         float sX = gainmapImage->width() / (float)image->width();
         float sY = gainmapImage->height() / (float)image->height();
@@ -183,7 +185,10 @@ private:
                 baseImage->colorSpace() ? baseImage->refColorSpace() : SkColorSpace::MakeSRGB();
 
         // Determine the color space in which the gainmap math is to be applied.
-        sk_sp<SkColorSpace> gainmapMathColorSpace = baseColorSpace->makeLinearGamma();
+        sk_sp<SkColorSpace> gainmapMathColorSpace =
+                mGainmapInfo.fGainmapMathColorSpace
+                        ? mGainmapInfo.fGainmapMathColorSpace->makeLinearGamma()
+                        : baseColorSpace->makeLinearGamma();
 
         // Create a color filter to transform from the base image's color space to the color space
         // in which the gainmap is to be applied.
@@ -265,6 +270,10 @@ private:
                 } else {
                     W = 1.f;
                 }
+            }
+
+            if (mGainmapInfo.fBaseImageType == SkGainmapInfo::BaseImageType::kHDR) {
+                W -= 1.f;
             }
             mBuilder.uniform("W") = W;
             uniforms = mBuilder.uniforms();

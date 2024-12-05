@@ -47,12 +47,14 @@ interface INfcCardEmulation
     boolean unsetPreferredService();
     boolean supportsAidPrefixRegistration();
     ApduServiceInfo getPreferredPaymentService(int userHandle);
-    boolean setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
+    int setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
     boolean isDefaultPaymentRegistered();
 
     void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);
     void recoverRoutingTable(int userHandle);
     boolean isEuiccSupported();
+    int getDefaultNfcSubscriptionId(in String pkg);
+    int setDefaultNfcSubscriptionId(int subscriptionId, in String pkg);
     void setAutoChangeStatus(boolean state);
     boolean isAutoChangeEnabled();
     List<String> getRoutingStatus();

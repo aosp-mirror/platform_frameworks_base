@@ -26,10 +26,10 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
@@ -76,7 +76,7 @@ class PulseExpansionHandlerTest : SysuiTestCase() {
                 falsingManager,
                 shadeInteractor,
                 lockscreenShadeTransitionController,
-                dumpManager
+                dumpManager,
             )
     }
 

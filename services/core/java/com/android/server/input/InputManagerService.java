@@ -19,6 +19,7 @@ package com.android.server.input;
 import static android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
 import static android.content.PermissionChecker.PERMISSION_GRANTED;
 import static android.content.PermissionChecker.PID_UNKNOWN;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -50,6 +51,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
@@ -64,6 +66,7 @@ import android.hardware.input.IKeyboardBacklightListener;
 import android.hardware.input.IStickyModifierStateListener;
 import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
+import android.hardware.input.InputGestureData;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.input.InputSettings;
@@ -135,6 +138,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
@@ -178,6 +182,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
     private static final int MSG_CURRENT_USER_CHANGED = 4;
+    private static final int MSG_SYSTEM_READY = 5;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -192,7 +197,6 @@ public class InputManagerService extends IInputManager.Stub
     private DisplayManagerInternal mDisplayManagerInternal;
 
     private WindowManagerInternal mWindowManagerInternal;
-    private PackageManagerInternal mPackageManagerInternal;
 
     private final File mDoubleTouchGestureEnableFile;
 
@@ -349,6 +353,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
+    // Manages storage and retrieval of input data.
+    private final InputDataStore mInputDataStore;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -469,11 +476,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         KeyboardBacklightControllerInterface getKeyboardBacklightController(
-                NativeInputManagerService nativeService, PersistentDataStore dataStore) {
-            return InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
-                    ? new KeyboardBacklightController(mContext, nativeService, dataStore,
-                    mLooper, mUEventManager)
-                    : new KeyboardBacklightControllerInterface() {};
+                NativeInputManagerService nativeService) {
+            return new KeyboardBacklightController(mContext, nativeService, mLooper,
+                    mUEventManager);
         }
     }
 
@@ -498,9 +503,11 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
-        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative, mDataStore);
+        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative);
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
+        mInputDataStore = new InputDataStore();
+        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper(),
+                mInputDataStore);
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -564,6 +571,14 @@ public class InputManagerService extends IInputManager.Stub
         Watchdog.getInstance().addMonitor(this);
     }
 
+    private void onBootPhase(int phase) {
+        // On ActivityManager thread, shift to handler to avoid blocking other system services in
+        // this boot phase.
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
+        }
+    }
+
     // TODO(BT) Pass in parameter for bluetooth system
     public void systemRunning() {
         if (DEBUG) {
@@ -572,7 +587,6 @@ public class InputManagerService extends IInputManager.Stub
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mSettingsObserver.registerAndUpdate();
 
@@ -622,9 +636,10 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
-        mKeyGestureController.systemRunning();
-
-        initKeyGestures();
+        if (useKeyGestureEventHandler()) {
+            mKeyGestureController.systemRunning();
+            initKeyGestures();
+        }
     }
 
     private void reloadDeviceAliases() {
@@ -644,6 +659,10 @@ public class InputManagerService extends IInputManager.Stub
         // Attempt to update the default pointer display when the viewports change.
         // Take care to not make calls to window manager while holding internal locks.
         mNative.setPointerDisplayId(mWindowManagerCallbacks.getPointerDisplayId());
+    }
+
+    private void setDisplayTopologyInternal(DisplayTopology topology) {
+        mNative.setDisplayTopology(topology.getGraph());
     }
 
     /**
@@ -2314,7 +2333,8 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private void notifyTouchpadThreeFingerTap() {
-        mKeyGestureController.handleTouchpadThreeFingerTap();
+        mKeyGestureController.handleTouchpadGesture(
+                InputGestureData.TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP);
     }
 
     // Native callback.
@@ -2606,9 +2626,6 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void initKeyGestures() {
-        if (!useKeyGestureEventHandler()) {
-            return;
-        }
         InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
         im.registerKeyGestureEventHandler(new InputManager.KeyGestureEventHandler() {
             @Override
@@ -2937,10 +2954,11 @@ public class InputManagerService extends IInputManager.Stub
     private void enforceManageKeyGesturePermission() {
         // TODO(b/361567988): Use @EnforcePermission to enforce permission once flag guarding the
         //  permission is rolled out
-        if (mSystemReady) {
-            String systemUIPackage = mContext.getString(R.string.config_systemUi);
-            int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
-                    .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
+        String systemUIPackage = mContext.getString(R.string.config_systemUi);
+        PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        if (pm != null) {
+            int systemUIAppId = UserHandle.getAppId(
+                    pm.getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
                             UserHandle.USER_SYSTEM));
             if (UserHandle.getCallingAppId() == systemUIAppId) {
                 return;
@@ -2995,40 +3013,54 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
-    public int addCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+    public int addCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(inputGestureData);
-        return mKeyGestureController.addCustomInputGesture(UserHandle.getCallingUserId(),
-                inputGestureData);
+        return mKeyGestureController.addCustomInputGesture(userId, inputGestureData);
     }
 
     @Override
     @PermissionManuallyEnforced
-    public int removeCustomInputGesture(@NonNull AidlInputGestureData inputGestureData) {
+    public int removeCustomInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
 
         Objects.requireNonNull(inputGestureData);
-        return mKeyGestureController.removeCustomInputGesture(UserHandle.getCallingUserId(),
-                inputGestureData);
+        return mKeyGestureController.removeCustomInputGesture(userId, inputGestureData);
     }
 
     @Override
     @PermissionManuallyEnforced
-    public void removeAllCustomInputGestures() {
+    public void removeAllCustomInputGestures(@UserIdInt int userId, int tag) {
         enforceManageKeyGesturePermission();
 
-        mKeyGestureController.removeAllCustomInputGestures(UserHandle.getCallingUserId());
+        mKeyGestureController.removeAllCustomInputGestures(userId, InputGestureData.Filter.of(tag));
     }
 
     @Override
-    public AidlInputGestureData[] getCustomInputGestures() {
-        return mKeyGestureController.getCustomInputGestures(UserHandle.getCallingUserId());
+    public AidlInputGestureData[] getCustomInputGestures(@UserIdInt int userId, int tag) {
+        return mKeyGestureController.getCustomInputGestures(userId,
+                InputGestureData.Filter.of(tag));
     }
 
     @Override
     public AidlInputGestureData[] getAppLaunchBookmarks() {
         return mKeyGestureController.getAppLaunchBookmarks();
+    }
+
+    @Override
+    public void resetLockedModifierState() {
+        mNative.resetLockedModifierState();
+    }
+
+    private void onUserSwitching(@NonNull SystemService.TargetUser from,
+            @NonNull SystemService.TargetUser to) {
+        if (DEBUG) {
+            Slog.d(TAG, "onUserSwitching from=" + from + " to=" + to);
+        }
+        mHandler.obtainMessage(MSG_CURRENT_USER_CHANGED, to.getUserIdentifier()).sendToTarget();
     }
 
     private void handleCurrentUserChanged(@UserIdInt int userId) {
@@ -3206,6 +3238,9 @@ public class InputManagerService extends IInputManager.Stub
                     break;
                 case MSG_CURRENT_USER_CHANGED:
                     handleCurrentUserChanged((int) msg.obj);
+                    break;
+                case MSG_SYSTEM_READY:
+                    systemRunning();
                     break;
             }
         }
@@ -3391,10 +3426,48 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
+    /**
+     * {@link SystemService} used to publish and manage the lifecycle of {@link InputManagerService}
+     */
+    public static final class Lifecycle extends SystemService {
+
+        private final InputManagerService mService;
+
+        public Lifecycle(@NonNull Context context) {
+            super(context);
+            mService = new InputManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.INPUT_SERVICE, mService,
+                    /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            mService.onBootPhase(phase);
+        }
+
+        @Override
+        public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+            mService.onUserSwitching(from, to);
+        }
+
+        public InputManagerService getService() {
+            return mService;
+        }
+    }
+
     private final class LocalService extends InputManagerInternal {
         @Override
         public void setDisplayViewports(List<DisplayViewport> viewports) {
             setDisplayViewportsInternal(viewports);
+        }
+
+        @Override
+        public void setDisplayTopology(DisplayTopology topology) {
+            setDisplayTopologyInternal(topology);
         }
 
         @Override

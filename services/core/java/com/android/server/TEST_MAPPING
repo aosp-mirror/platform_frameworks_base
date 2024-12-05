@@ -176,6 +176,10 @@
                     "include-filter": "com.android.server.wm.BackgroundActivityStart*"
                 }
             ]
+        },
+        {
+            "name": "FrameworksMockingServicesTests_service_batteryServiceTest",
+            "file_patterns": ["BatteryService\\.java"]
         }
    ]
 }

@@ -105,6 +105,7 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
@@ -1423,6 +1424,31 @@ public class MockingOomAdjusterTests {
         updateOomAdj(client, app);
 
         assertEquals(PERCEPTIBLE_LOW_APP_ADJ, app.mState.getSetAdj());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_Service_NotPerceptible_AboveClient() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        ProcessRecord service = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        bindService(app, client, null, null, Context.BIND_NOT_PERCEPTIBLE, mock(IBinder.class));
+        bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
+        mProcessStateController.setRunningRemoteAnimation(client, true);
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
+        setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(client, app, service);
+
+        final int expectedAdj;
+        if (Flags.addModifyRawOomAdjServiceLevel()) {
+            expectedAdj = SERVICE_ADJ;
+        } else {
+            expectedAdj = CACHED_APP_MIN_ADJ;
+        }
+        assertEquals(expectedAdj, app.mState.getSetAdj());
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2906,7 +2932,7 @@ public class MockingOomAdjusterTests {
         // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
         // verify that its OOM adjustment level is unaffected.
         bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         assertTrue(app.mServices.hasAboveClient());
 
         updateOomAdj(app);
@@ -2928,7 +2954,7 @@ public class MockingOomAdjusterTests {
         // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
         // verify that its OOM adjustment level is unaffected.
         bindService(app, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         assertFalse(app.mServices.hasAboveClient());
 
         updateOomAdj(app);
@@ -2983,7 +3009,7 @@ public class MockingOomAdjusterTests {
 
         // Since sr.app is null, this service cannot be in the same process as the
         // client so we expect the BIND_ABOVE_CLIENT adjustment to take effect.
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         updateOomAdj(app);
         assertTrue(app.mServices.hasAboveClient());
         assertNotEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
@@ -3235,6 +3261,24 @@ public class MockingOomAdjusterTests {
                 "cch-empty");
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_FIX_APPLY_OOMADJ_ORDER)
+    public void testUpdateOomAdj_ApplyOomAdjInCorrectOrder() {
+        final int numberOfApps = 5;
+        final ProcessRecord[] apps = new ProcessRecord[numberOfApps];
+        for (int i = 0; i < numberOfApps; i++) {
+            apps[i] = spy(makeDefaultProcessRecord(MOCKAPP_PID + i, MOCKAPP_UID + i,
+                    MOCKAPP_PROCESSNAME + i, MOCKAPP_PACKAGENAME + i, true));
+        }
+        updateOomAdj(apps);
+        for (int i = 1; i < numberOfApps; i++) {
+            final int pre = mInjector.mSetOomAdjAppliedAt.get(apps[i - 1].mPid);
+            final int cur = mInjector.mSetOomAdjAppliedAt.get(apps[i].mPid);
+            assertTrue("setOomAdj is called in wrong order", pre < cur);
+        }
+    }
+
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
             String packageName, boolean hasShownUi) {
         return new ProcessRecordBuilder(pid, uid, processName, packageName).setHasShownUi(
@@ -3306,7 +3350,7 @@ public class MockingOomAdjusterTests {
         if (Flags.pushGlobalStateToOomadjuster()) {
             mProcessStateController.setBackupTarget(app, app.userId);
         } else {
-            BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0);
+            BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0, true);
             backupTarget.app = app;
             doReturn(backupTarget).when(mService.mBackupTargets).get(anyInt());
         }
@@ -3564,9 +3608,16 @@ public class MockingOomAdjusterTests {
         long mTimeOffsetMillis = 0;
         private SparseIntArray mLastSetOomAdj = new SparseIntArray();
 
+        // A sequence number that increases every time setOomAdj is called
+        int mLastAppliedAt = 0;
+        // Holds the last sequence number setOomAdj is called for a pid
+        private SparseIntArray mSetOomAdjAppliedAt = new SparseIntArray();
+
         void reset() {
             mTimeOffsetMillis = 0;
             mLastSetOomAdj.clear();
+            mLastAppliedAt = 0;
+            mSetOomAdjAppliedAt.clear();
         }
 
         void jumpUptimeAheadTo(long uptimeMillis) {
@@ -3591,6 +3642,7 @@ public class MockingOomAdjusterTests {
                 final int pid = proc.getPid();
                 if (pid <= 0) continue;
                 mLastSetOomAdj.put(pid, proc.mState.getCurAdj());
+                mSetOomAdjAppliedAt.put(pid, mLastAppliedAt++);
             }
         }
 
@@ -3598,6 +3650,7 @@ public class MockingOomAdjusterTests {
         void setOomAdj(int pid, int uid, int adj) {
             if (pid <= 0) return;
             mLastSetOomAdj.put(pid, adj);
+            mSetOomAdjAppliedAt.put(pid, mLastAppliedAt++);
         }
 
         @Override

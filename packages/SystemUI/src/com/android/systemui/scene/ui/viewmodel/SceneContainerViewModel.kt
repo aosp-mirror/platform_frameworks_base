@@ -280,6 +280,16 @@ constructor(
         }
     }
 
+    /**
+     * Returns a filtered version of [unfiltered], without action-result entries that would navigate
+     * to disabled scenes.
+     */
+    fun filteredUserActions(
+        unfiltered: Flow<Map<UserAction, UserActionResult>>
+    ): Flow<Map<UserAction, UserActionResult>> {
+        return sceneInteractor.filteredUserActions(unfiltered)
+    }
+
     /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
     interface MotionEventHandler {
         /** Notifies that a [MotionEvent] has occurred. */

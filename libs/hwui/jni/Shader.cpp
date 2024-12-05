@@ -1,7 +1,9 @@
 #include <vector>
 
+#include "ColorFilter.h"
 #include "Gainmap.h"
 #include "GraphicsJNI.h"
+#include "RuntimeEffectUtils.h"
 #include "SkBitmap.h"
 #include "SkBlendMode.h"
 #include "SkColor.h"
@@ -280,50 +282,6 @@ static inline int ThrowIAEFmt(JNIEnv* env, const char* fmt, ...) {
     return ret;
 }
 
-static bool isIntUniformType(const SkRuntimeEffect::Uniform::Type& type) {
-    switch (type) {
-        case SkRuntimeEffect::Uniform::Type::kFloat:
-        case SkRuntimeEffect::Uniform::Type::kFloat2:
-        case SkRuntimeEffect::Uniform::Type::kFloat3:
-        case SkRuntimeEffect::Uniform::Type::kFloat4:
-        case SkRuntimeEffect::Uniform::Type::kFloat2x2:
-        case SkRuntimeEffect::Uniform::Type::kFloat3x3:
-        case SkRuntimeEffect::Uniform::Type::kFloat4x4:
-            return false;
-        case SkRuntimeEffect::Uniform::Type::kInt:
-        case SkRuntimeEffect::Uniform::Type::kInt2:
-        case SkRuntimeEffect::Uniform::Type::kInt3:
-        case SkRuntimeEffect::Uniform::Type::kInt4:
-            return true;
-    }
-}
-
-static void UpdateFloatUniforms(JNIEnv* env, SkRuntimeShaderBuilder* builder,
-                                const char* uniformName, const float values[], int count,
-                                bool isColor) {
-    SkRuntimeShaderBuilder::BuilderUniform uniform = builder->uniform(uniformName);
-    if (uniform.fVar == nullptr) {
-        ThrowIAEFmt(env, "unable to find uniform named %s", uniformName);
-    } else if (isColor != ((uniform.fVar->flags & SkRuntimeEffect::Uniform::kColor_Flag) != 0)) {
-        if (isColor) {
-            jniThrowExceptionFmt(
-                    env, "java/lang/IllegalArgumentException",
-                    "attempting to set a color uniform using the non-color specific APIs: %s %x",
-                    uniformName, uniform.fVar->flags);
-        } else {
-            ThrowIAEFmt(env,
-                        "attempting to set a non-color uniform using the setColorUniform APIs: %s",
-                        uniformName);
-        }
-    } else if (isIntUniformType(uniform.fVar->type)) {
-        ThrowIAEFmt(env, "attempting to set a int uniform using the setUniform APIs: %s",
-                    uniformName);
-    } else if (!uniform.set<float>(values, count)) {
-        ThrowIAEFmt(env, "mismatch in byte size for uniform [expected: %zu actual: %zu]",
-                    uniform.fVar->sizeInBytes(), sizeof(float) * count);
-    }
-}
-
 static void RuntimeShader_updateFloatUniforms(JNIEnv* env, jobject, jlong shaderBuilder,
                                               jstring jUniformName, jfloat value1, jfloat value2,
                                               jfloat value3, jfloat value4, jint count) {
@@ -340,20 +298,6 @@ static void RuntimeShader_updateFloatArrayUniforms(JNIEnv* env, jobject, jlong s
     ScopedUtfChars name(env, jUniformName);
     AutoJavaFloatArray autoValues(env, jvalues, 0, kRO_JNIAccess);
     UpdateFloatUniforms(env, builder, name.c_str(), autoValues.ptr(), autoValues.length(), isColor);
-}
-
-static void UpdateIntUniforms(JNIEnv* env, SkRuntimeShaderBuilder* builder, const char* uniformName,
-                              const int values[], int count) {
-    SkRuntimeShaderBuilder::BuilderUniform uniform = builder->uniform(uniformName);
-    if (uniform.fVar == nullptr) {
-        ThrowIAEFmt(env, "unable to find uniform named %s", uniformName);
-    } else if (!isIntUniformType(uniform.fVar->type)) {
-        ThrowIAEFmt(env, "attempting to set a non-int uniform using the setIntUniform APIs: %s",
-                    uniformName);
-    } else if (!uniform.set<int>(values, count)) {
-        ThrowIAEFmt(env, "mismatch in byte size for uniform [expected: %zu actual: %zu]",
-                    uniform.fVar->sizeInBytes(), sizeof(float) * count);
-    }
 }
 
 static void RuntimeShader_updateIntUniforms(JNIEnv* env, jobject, jlong shaderBuilder,
@@ -386,6 +330,24 @@ static void RuntimeShader_updateShader(JNIEnv* env, jobject, jlong shaderBuilder
     }
 
     builder->child(name.c_str()) = sk_ref_sp(shader);
+}
+
+static void RuntimeShader_updateColorFilter(JNIEnv* env, jobject, jlong shaderBuilder,
+                                            jstring jUniformName, jlong colorFilterHandle) {
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
+    ScopedUtfChars name(env, jUniformName);
+    auto* childEffect = reinterpret_cast<ColorFilter*>(colorFilterHandle);
+
+    UpdateChild(env, builder, name.c_str(), childEffect->getInstance().release());
+}
+
+static void RuntimeShader_updateChild(JNIEnv* env, jobject, jlong shaderBuilder,
+                                      jstring jUniformName, jlong childHandle) {
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
+    ScopedUtfChars name(env, jUniformName);
+    auto* childEffect = reinterpret_cast<SkFlattenable*>(childHandle);
+
+    UpdateChild(env, builder, name.c_str(), childEffect);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -428,6 +390,9 @@ static const JNINativeMethod gRuntimeShaderMethods[] = {
         {"nativeUpdateUniforms", "(JLjava/lang/String;IIIII)V",
          (void*)RuntimeShader_updateIntUniforms},
         {"nativeUpdateShader", "(JLjava/lang/String;J)V", (void*)RuntimeShader_updateShader},
+        {"nativeUpdateColorFilter", "(JLjava/lang/String;J)V",
+         (void*)RuntimeShader_updateColorFilter},
+        {"nativeUpdateChild", "(JLjava/lang/String;J)V", (void*)RuntimeShader_updateChild},
 };
 
 int register_android_graphics_Shader(JNIEnv* env)

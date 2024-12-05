@@ -28,7 +28,10 @@ import android.tools.flicker.rules.ArtifactSaverRule
 import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.flicker.rules.LaunchAppRule
 import android.tools.flicker.rules.RemoveAllTasksButHomeRule
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import java.io.IOException
 import org.junit.rules.RuleChain
 
 object Utils {
@@ -51,5 +54,18 @@ object Utils {
             )
             .around(PressHomeRule())
             .around(EnsureDeviceSettingsRule())
+    }
+
+    /**
+     * Resets the frozen recent tasks list (ie. commits the quickswitch to the current task and
+     * reorders the current task to the end of the recents list).
+     */
+    fun resetFreezeRecentTaskList() {
+        try {
+            UiDevice.getInstance(instrumentation)
+                .executeShellCommand("wm reset-freeze-recent-tasks")
+        } catch (e: IOException) {
+            Log.e("TestUtils", "Failed to reset frozen recent tasks list", e)
+        }
     }
 }

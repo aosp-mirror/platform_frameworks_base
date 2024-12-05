@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.ui.binder
 
-import android.content.Context
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
@@ -26,33 +25,27 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
 
 /** Binder for the small clock view, large clock view and smartspace. */
 object KeyguardPreviewSmartspaceViewBinder {
 
     @JvmStatic
     fun bind(
-        previewContext: Context,
         smartspace: View,
-        splitShadePreview: Boolean,
         viewModel: KeyguardPreviewSmartspaceViewModel,
+        clockPreviewConfig: ClockPreviewConfig,
     ) {
         smartspace.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch("$TAG#viewModel.selectedClockSize") {
-                    viewModel.selectedClockSize.collect {
+                    viewModel.previewingClockSize.collect {
                         val topPadding =
                             when (it) {
                                 ClockSizeSetting.DYNAMIC ->
-                                    viewModel.getLargeClockSmartspaceTopPadding(
-                                        splitShadePreview,
-                                        previewContext,
-                                    )
+                                    viewModel.getLargeClockSmartspaceTopPadding(clockPreviewConfig)
                                 ClockSizeSetting.SMALL ->
-                                    viewModel.getSmallClockSmartspaceTopPadding(
-                                        splitShadePreview,
-                                        previewContext,
-                                    )
+                                    viewModel.getSmallClockSmartspaceTopPadding(clockPreviewConfig)
                             }
                         smartspace.setTopPadding(topPadding)
                     }

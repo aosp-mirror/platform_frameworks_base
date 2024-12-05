@@ -17,7 +17,9 @@
 package android.platform.test.ravenwood;
 
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.hardware.SerialManager;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.ravenwood.example.BlueManager;
 import android.ravenwood.example.RedManager;
@@ -27,9 +29,11 @@ import android.util.ArraySet;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.compat.PlatformCompat;
+import com.android.server.compat.PlatformCompatNative;
 import com.android.server.utils.TimingsTraceAndSlog;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
 public class RavenwoodSystemServer {
@@ -64,19 +68,24 @@ public class RavenwoodSystemServer {
     private static TimingsTraceAndSlog sTimings;
     private static SystemServiceManager sServiceManager;
 
-    public static void init(RavenwoodConfig config) {
-        // Avoid overhead if no services required
-        if (config.mServicesRequired.isEmpty()) return;
+    public static void init(Context systemServerContext) {
+        // Always start PlatformCompat, regardless of the requested services.
+        // PlatformCompat is not really a SystemService, so it won't receive boot phases / etc.
+        // This initialization code is copied from SystemServer.java.
+        PlatformCompat platformCompat = new PlatformCompat(systemServerContext);
+        ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
+        ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
+                new PlatformCompatNative(platformCompat));
 
         sStartedServices = new ArraySet<>();
         sTimings = new TimingsTraceAndSlog();
-        sServiceManager = new SystemServiceManager(config.mState.mSystemServerContext);
+        sServiceManager = new SystemServiceManager(systemServerContext);
         sServiceManager.setStartInfo(false,
                 SystemClock.elapsedRealtime(),
                 SystemClock.uptimeMillis());
         LocalServices.addService(SystemServiceManager.class, sServiceManager);
 
-        startServices(config.mServicesRequired);
+        startServices(sKnownServices.keySet());
         sServiceManager.sealStartedServices();
 
         // TODO: expand to include additional boot phases when relevant
@@ -84,7 +93,7 @@ public class RavenwoodSystemServer {
         sServiceManager.startBootPhase(sTimings, SystemService.PHASE_BOOT_COMPLETED);
     }
 
-    public static void reset(RavenwoodConfig config) {
+    public static void reset() {
         // TODO: consider introducing shutdown boot phases
 
         LocalServices.removeServiceForTest(SystemServiceManager.class);
@@ -93,7 +102,7 @@ public class RavenwoodSystemServer {
         sStartedServices = null;
     }
 
-    private static void startServices(List<Class<?>> serviceClasses) {
+    private static void startServices(Collection<Class<?>> serviceClasses) {
         for (Class<?> serviceClass : serviceClasses) {
             // Quietly ignore duplicate requests if service already started
             if (sStartedServices.contains(serviceClass)) continue;

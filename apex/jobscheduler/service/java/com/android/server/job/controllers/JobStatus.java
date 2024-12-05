@@ -32,6 +32,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobWorkItem;
+import android.app.job.PendingJobReasonsInfo;
 import android.app.job.UserVisibleJobSummary;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -39,6 +40,7 @@ import android.net.Network;
 import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.text.format.DateFormat;
@@ -64,6 +66,7 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobServerProtoEnums;
 import com.android.server.job.JobStatusDumpProto;
 import com.android.server.job.JobStatusShortInfoProto;
+import com.android.server.job.restrictions.JobRestriction;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -72,6 +75,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -312,6 +316,12 @@ public final class JobStatus {
     private final int numFailures;
 
     /**
+     * How many times this job has stopped due to {@link
+     * JobParameters#STOP_REASON_TIMEOUT_ABANDONED}.
+     */
+    private final int mNumAbandonedFailures;
+
+    /**
      * The number of times JobScheduler has forced this job to stop due to reasons mostly outside
      * of the app's control.
      */
@@ -515,6 +525,10 @@ public final class JobStatus {
     private final long[] mConstraintUpdatedTimesElapsed = new long[NUM_CONSTRAINT_CHANGE_HISTORY];
     private final int[] mConstraintStatusHistory = new int[NUM_CONSTRAINT_CHANGE_HISTORY];
 
+    private final List<PendingJobReasonsInfo> mPendingJobReasonsHistory = new ArrayList<>();
+    private static final int PENDING_JOB_HISTORY_RETURN_LIMIT = 10;
+    private static final int PENDING_JOB_HISTORY_TRIM_THRESHOLD = 25;
+
     /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
      * being observed.
@@ -597,6 +611,8 @@ public final class JobStatus {
      * @param tag A string associated with the job for debugging/logging purposes.
      * @param numFailures Count of how many times this job has requested a reschedule because
      *     its work was not yet finished.
+     * @param mNumAbandonedFailures Count of how many times this job has requested a reschedule
+     *     because it was abandoned.
      * @param numSystemStops Count of how many times JobScheduler has forced this job to stop due to
      *     factors mostly out of the app's control.
      * @param earliestRunTimeElapsedMillis Milestone: earliest point in time at which the job
@@ -609,7 +625,7 @@ public final class JobStatus {
      */
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, int standbyBucket, @Nullable String namespace, String tag,
-            int numFailures, int numSystemStops,
+            int numFailures, int mNumAbandonedFailures, int numSystemStops,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime, long cumulativeExecutionTimeMs,
             int internalFlags,
@@ -669,6 +685,7 @@ public final class JobStatus {
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
+        this.mNumAbandonedFailures = mNumAbandonedFailures;
         mNumSystemStops = numSystemStops;
 
         int requiredConstraints = job.getConstraintFlags();
@@ -742,7 +759,8 @@ public final class JobStatus {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
                 jobStatus.getStandbyBucket(), jobStatus.getNamespace(),
-                jobStatus.getSourceTag(), jobStatus.getNumFailures(), jobStatus.getNumSystemStops(),
+                jobStatus.getSourceTag(), jobStatus.getNumFailures(),
+                jobStatus.getNumAbandonedFailures(), jobStatus.getNumSystemStops(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
                 jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
                 jobStatus.getCumulativeExecutionTimeMs(),
@@ -779,6 +797,7 @@ public final class JobStatus {
         this(job, callingUid, sourcePkgName, sourceUserId,
                 standbyBucket, namespace,
                 sourceTag, /* numFailures */ 0, /* numSystemStops */ 0,
+                /* mNumAbandonedFailures */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
                 innerFlags, dynamicConstraints);
@@ -798,13 +817,15 @@ public final class JobStatus {
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling,
             long newEarliestRuntimeElapsedMillis,
-            long newLatestRuntimeElapsedMillis, int numFailures, int numSystemStops,
+            long newLatestRuntimeElapsedMillis, int numFailures,
+            int mNumAbandonedFailures, int numSystemStops,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             long cumulativeExecutionTimeMs) {
         this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getStandbyBucket(), rescheduling.getNamespace(),
-                rescheduling.getSourceTag(), numFailures, numSystemStops,
+                rescheduling.getSourceTag(), numFailures,
+                mNumAbandonedFailures, numSystemStops,
                 newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
                 lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTimeMs,
@@ -843,7 +864,8 @@ public final class JobStatus {
         int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
                 sourceUserId, elapsedNow);
         return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
-                standbyBucket, namespace, tag, /* numFailures */ 0, /* numSystemStops */ 0,
+                standbyBucket, namespace, tag, /* numFailures */ 0,
+                /* mNumAbandonedFailures */ 0, /* numSystemStops */ 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
                 /* cumulativeExecutionTime */ 0,
@@ -1135,6 +1157,13 @@ public final class JobStatus {
      */
     public int getNumFailures() {
         return numFailures;
+    }
+
+    /**
+     * Returns the number of times the job stopped previously for STOP_REASON_TIMEOUT_ABANDONED.
+     */
+    public int getNumAbandonedFailures() {
+        return mNumAbandonedFailures;
     }
 
     /**
@@ -1992,6 +2021,16 @@ public final class JobStatus {
             mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
         }
 
+        final int unsatisfiedConstraints = ~satisfiedConstraints
+                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+        populatePendingJobReasonsHistoryMap(isReady, nowElapsed, unsatisfiedConstraints);
+        final int historySize = mPendingJobReasonsHistory.size();
+        if (historySize >= PENDING_JOB_HISTORY_TRIM_THRESHOLD) {
+            // Ensure trimming doesn't occur too often - max history we currently return is 10
+            mPendingJobReasonsHistory.subList(0, historySize - PENDING_JOB_HISTORY_RETURN_LIMIT)
+                                     .clear();
+        }
+
         return true;
     }
 
@@ -2066,14 +2105,10 @@ public final class JobStatus {
         }
     }
 
-    /**
-     * This will return all potential reasons why the job is pending.
-     */
     @NonNull
-    public int[] getPendingJobReasons() {
+    public ArrayList<Integer> constraintsToPendingJobReasons(int unsatisfiedConstraints) {
         final ArrayList<Integer> reasons = new ArrayList<>();
-        final int unsatisfiedConstraints = ~satisfiedConstraints
-                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+
         if ((CONSTRAINT_BACKGROUND_NOT_RESTRICTED & unsatisfiedConstraints) != 0) {
             // The BACKGROUND_NOT_RESTRICTED constraint could be unsatisfied either because
             // the app is background restricted, or because we're restricting background work
@@ -2159,6 +2194,27 @@ public final class JobStatus {
             }
         }
 
+        return reasons;
+    }
+
+    /**
+     * This will return all potential reasons why the job is pending.
+     */
+    @NonNull
+    public int[] getPendingJobReasons(@Nullable JobRestriction restriction) {
+        final int unsatisfiedConstraints = ~satisfiedConstraints
+                & (requiredConstraints | mDynamicConstraints | IMPLICIT_CONSTRAINTS);
+        final ArrayList<Integer> reasons = constraintsToPendingJobReasons(unsatisfiedConstraints);
+
+        if (restriction != null) {
+            // Currently only ThermalStatusRestriction extends the JobRestriction class and
+            // returns PENDING_JOB_REASON_DEVICE_STATE if the job is restricted because of thermal.
+            @JobScheduler.PendingJobReason final int reason = restriction.getPendingReason();
+            if (!reasons.contains(reason)) {
+                reasons.addLast(reason);
+            }
+        }
+
         if (reasons.isEmpty()) {
             if (getEffectiveStandbyBucket() == NEVER_INDEX) {
                 Slog.wtf(TAG, "App in NEVER bucket querying pending job reason");
@@ -2176,6 +2232,55 @@ public final class JobStatus {
             reasonsArr[i] = reasons.get(i);
         }
         return reasonsArr;
+    }
+
+    private void populatePendingJobReasonsHistoryMap(boolean isReady,
+            long constraintTimestamp, int unsatisfiedConstraints) {
+        final long constraintTimestampEpoch = // system_boot_time + constraint_satisfied_time
+                (System.currentTimeMillis() - SystemClock.elapsedRealtime()) + constraintTimestamp;
+
+        if (isReady) {
+            // Job is ready to execute. At this point, if the job doesn't execute, it might be
+            // because of the app itself; if not, note it as undefined (documented in javadoc).
+            mPendingJobReasonsHistory.addLast(
+                    new PendingJobReasonsInfo(
+                            constraintTimestampEpoch,
+                            new int[] { serviceProcessName != null
+                                            ? JobScheduler.PENDING_JOB_REASON_APP
+                                            : JobScheduler.PENDING_JOB_REASON_UNDEFINED }));
+            return;
+        }
+
+        final ArrayList<Integer> reasons = constraintsToPendingJobReasons(unsatisfiedConstraints);
+        if (reasons.isEmpty()) {
+            // If the job is not waiting on any constraints to be met, note it as undefined.
+            reasons.add(JobScheduler.PENDING_JOB_REASON_UNDEFINED);
+        }
+
+        final int[] reasonsArr = new int[reasons.size()];
+        for (int i = 0; i < reasonsArr.length; i++) {
+            reasonsArr[i] = reasons.get(i);
+        }
+        mPendingJobReasonsHistory.addLast(
+                new PendingJobReasonsInfo(constraintTimestampEpoch, reasonsArr));
+    }
+
+    /**
+     * Returns the last {@link #PENDING_JOB_HISTORY_RETURN_LIMIT} constraint changes.
+     */
+    @NonNull
+    public List<PendingJobReasonsInfo> getPendingJobReasonsHistory() {
+        final List<PendingJobReasonsInfo> returnList =
+                new ArrayList<>(PENDING_JOB_HISTORY_RETURN_LIMIT);
+        final int historySize = mPendingJobReasonsHistory.size();
+        if (historySize != 0) {
+            returnList.addAll(
+                    mPendingJobReasonsHistory.subList(
+                            Math.max(0, historySize - PENDING_JOB_HISTORY_RETURN_LIMIT),
+                            historySize));
+        }
+
+        return returnList;
     }
 
     /** @return whether or not the @param constraint is satisfied */

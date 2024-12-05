@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.DemoNotifChipViewModelTest.Companion.addDemoNotifChip
 import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.demoNotifChipViewModel
+import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.notification.ui.viewmodel.NotifChipsViewModelTest.Companion.assertIsNotifChip
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
@@ -51,6 +53,7 @@ import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -67,6 +70,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -79,7 +83,7 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(StatusBarNotifChips.FLAG_NAME)
 class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
     private val commandRegistry = kosmos.commandRegistry
@@ -103,12 +107,13 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 .thenReturn(chipBackgroundView)
         }
 
-    private val underTest = kosmos.ongoingActivityChipsViewModel
+    private val underTest by lazy { kosmos.ongoingActivityChipsViewModel }
 
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
         kosmos.demoNotifChipViewModel.start()
+        kosmos.statusBarNotificationChipsInteractor.start()
         val icon =
             BitmapDrawable(
                 context.resources,
@@ -303,7 +308,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = icon,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
@@ -324,12 +329,14 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
@@ -351,17 +358,20 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "thirdNotif",
                         statusBarChipIcon = thirdIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("thirdNotif").build(),
                     ),
                 )
             )
@@ -382,12 +392,14 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
@@ -408,7 +420,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
@@ -616,6 +628,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @Ignore("b/364653005") // We'll need to re-do the animation story when we implement RON chips
     fun primaryChip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording

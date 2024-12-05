@@ -163,6 +163,20 @@ public:
             filter->updateChild(env, name.c_str(), child);
         }
     }
+
+    static void RuntimeColorFilter_updateInputColorFilter(JNIEnv* env, jobject,
+                                                          jlong colorFilterPtr, jstring childName,
+                                                          jlong childFilterPtr) {
+        auto* filter = reinterpret_cast<RuntimeColorFilter*>(colorFilterPtr);
+        ScopedUtfChars name(env, childName);
+        auto* child = reinterpret_cast<ColorFilter*>(childFilterPtr);
+        if (filter && child) {
+            auto childInput = child->getInstance();
+            if (childInput) {
+                filter->updateChild(env, name.c_str(), childInput.release());
+            }
+        }
+    }
 };
 
 static const JNINativeMethod colorfilter_methods[] = {
@@ -193,7 +207,9 @@ static const JNINativeMethod runtime_color_filter_methods[] = {
         {"nativeUpdateUniforms", "(JLjava/lang/String;IIIII)V",
          (void*)ColorFilterGlue::RuntimeColorFilter_updateUniformsInts},
         {"nativeUpdateChild", "(JLjava/lang/String;J)V",
-         (void*)ColorFilterGlue::RuntimeColorFilter_updateChild}};
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateChild},
+        {"nativeUpdateInputColorFilter", "(JLjava/lang/String;J)V",
+         (void*)ColorFilterGlue::RuntimeColorFilter_updateInputColorFilter}};
 
 int register_android_graphics_ColorFilter(JNIEnv* env) {
     android::RegisterMethodsOrDie(env, "android/graphics/ColorFilter", colorfilter_methods,

@@ -70,13 +70,13 @@ import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SUPPRESSED_OLD_WHEN
 import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.FakeEventLog
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.settings.FakeSettings
@@ -109,7 +109,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
                     override fun isTagLoggable(tagName: String, level: LogLevel): Boolean = true
                 },
-            systrace = false
+            systrace = false,
         )
 
     private val leakCheck = LeakCheckedTest.SysuiLeakCheck()
@@ -162,10 +162,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     @Before
     fun setUp() {
         val userId = ActivityManager.getCurrentUser()
-        val user = UserInfo(userId, "Current user", /* flags = */ 0)
+        val user = UserInfo(userId, "Current user", /* flags= */ 0)
 
         deviceProvisionedController.currentUser = userId
-        userTracker.set(listOf(user), /* currentUserIndex = */ 0)
+        userTracker.set(listOf(user), /* currentUserIndex= */ 0)
         systemSettings = FakeSettings()
         whenever(bubbles.canShowBubbleNotification()).thenReturn(true)
         whenever(settingsInteractor.isCooldownEnabled).thenReturn(MutableStateFlow(true))
@@ -491,7 +491,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     private fun withPeekAndPulseEntry(
         extendEntry: EntryBuilder.() -> Unit,
-        block: (NotificationEntry) -> Unit
+        block: (NotificationEntry) -> Unit,
     ) {
         ensurePeekState()
         block(buildPeekEntry(extendEntry))
@@ -540,10 +540,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
     fun testShouldNotHeadsUp_silentNotification() {
         withPeekAndPulseEntry({
-                                  isGrouped = false
-                                  isGroupSummary = false
-                                  isSilent = true
-                              }) {
+            isGrouped = false
+            isGroupSummary = false
+            isSilent = true
+        }) {
             assertShouldNotHeadsUp(it)
             assertNoEventsLogged()
         }
@@ -553,10 +553,10 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     @EnableFlags(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
     fun testShouldHeadsUp_silentNotificationFalse() {
         withPeekAndPulseEntry({
-                                  isGrouped = false
-                                  isGroupSummary = false
-                                  isSilent = false
-                              }) {
+            isGrouped = false
+            isGroupSummary = false
+            isSilent = false
+        }) {
             assertShouldHeadsUp(it)
             assertNoEventsLogged()
         }
@@ -697,7 +697,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         forEachFsiState {
             assertShouldNotFsi(
                 buildFsiEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_FULL_SCREEN_INTENT },
-                expectWouldInterruptWithoutDnd = true
+                expectWouldInterruptWithoutDnd = true,
             )
             assertNoEventsLogged()
         }
@@ -719,7 +719,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     suppressedVisualEffects = SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                     importance = IMPORTANCE_DEFAULT
                 },
-                expectWouldInterruptWithoutDnd = false
+                expectWouldInterruptWithoutDnd = false,
             )
             assertNoEventsLogged()
         }
@@ -754,7 +754,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertUiEventLogged(
             FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
             entry.sbn.uid,
-            entry.sbn.packageName
+            entry.sbn.packageName,
         )
         assertSystemEventLogged("231322873", entry.sbn.uid, "groupAlertBehavior")
     }
@@ -813,7 +813,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertUiEventLogged(
             FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA,
             entry.sbn.uid,
-            entry.sbn.packageName
+            entry.sbn.packageName,
         )
         assertSystemEventLogged("274759612", entry.sbn.uid, "bubbleMetadata")
     }
@@ -960,7 +960,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         var keyguardIsShowing: Boolean = false,
         var keyguardIsOccluded: Boolean = false,
         var deviceProvisioned: Boolean = true,
-        var currentUserSetup: Boolean = true
+        var currentUserSetup: Boolean = true,
     )
 
     protected fun setState(state: State): Unit =
@@ -1131,7 +1131,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     protected fun withLegacySuppressor(
         suppressor: NotificationInterruptSuppressor,
-        block: () -> Unit
+        block: () -> Unit,
     ) {
         provider.addLegacySuppressor(suppressor)
         block()
@@ -1166,7 +1166,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
     protected fun assertShouldNotFsi(
         entry: NotificationEntry,
-        expectWouldInterruptWithoutDnd: Boolean? = null
+        expectWouldInterruptWithoutDnd: Boolean? = null,
     ) =
         provider.makeUnloggedFullScreenIntentDecision(entry).let {
             provider.logFullScreenIntentDecision(it)
@@ -1175,7 +1175,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 assertEquals(
                     "unexpected wouldInterruptWithoutDnd for FSI: ${it.logReason}",
                     expectWouldInterruptWithoutDnd,
-                    it.wouldInterruptWithoutDnd
+                    it.wouldInterruptWithoutDnd,
                 )
             }
         }
@@ -1227,9 +1227,9 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                             context,
                             /* requestCode = */ 0,
                             Intent().setPackage(context.packageName),
-                            FLAG_MUTABLE
+                            FLAG_MUTABLE,
                         ),
-                        Icon.createWithResource(context.resources, R.drawable.android)
+                        Icon.createWithResource(context.resources, R.drawable.android),
                     )
                 }
 
@@ -1272,7 +1272,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     }
 
                     if (hasFsi) {
-                        nb.setFullScreenIntent(mock(), /* highPriority = */ true)
+                        nb.setFullScreenIntent(mock(), /* highPriority= */ true)
                     }
                 }
                 .build()

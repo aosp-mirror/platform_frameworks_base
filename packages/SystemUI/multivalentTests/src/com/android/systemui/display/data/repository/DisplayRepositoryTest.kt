@@ -540,7 +540,8 @@ class DisplayRepositoryTest : SysuiTestCase() {
             .registerDisplayListener(
                 connectedDisplayListener.capture(),
                 eq(testHandler),
-                eq(DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED),
+                eq(0),
+                eq(DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED),
             )
         return flowValue
     }
