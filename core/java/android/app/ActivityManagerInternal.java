@@ -44,6 +44,8 @@ import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
 import android.util.ArraySet;
 import android.util.Pair;
 
@@ -1350,6 +1352,14 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void killApplicationSync(String pkgName, int appId, int userId,
             String reason, int exitInfoReason);
+
+    /**
+     * Queries the offset data for a given method on a process.
+     * @hide
+     */
+    public abstract void getExecutableMethodFileOffsets(@NonNull String processName,
+            int pid, int uid, @NonNull MethodDescriptor methodDescriptor,
+            @NonNull IOffsetCallback callback);
 
     /**
      * Add a creator token for all embedded intents (stored as extra) of the given intent.

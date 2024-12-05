@@ -16,19 +16,13 @@
 
 package android.os.instrumentation;
 
-import android.os.instrumentation.IOffsetCallback;
-import android.os.instrumentation.MethodDescriptor;
-import android.os.instrumentation.TargetProcess;
+import android.os.instrumentation.ExecutableMethodFileOffsets;
 
 /**
- * System private API for managing the dynamic attachment of instrumentation.
+ * System private API for providing dynamic instrumentation offset results.
  *
  * {@hide}
  */
-interface IDynamicInstrumentationManager {
-    /** Provides ART metadata about the described compiled method within the target process */
-    @PermissionManuallyEnforced
-    void getExecutableMethodFileOffsets(
-            in TargetProcess targetProcess, in MethodDescriptor methodDescriptor,
-            in IOffsetCallback callback);
+oneway interface IOffsetCallback {
+    void onResult(in @nullable ExecutableMethodFileOffsets offsets);
 }
