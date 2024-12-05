@@ -22,6 +22,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.detailsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.quickQuickSettingsViewModelFactory
 import com.android.systemui.qs.panels.ui.viewmodel.tileGridViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.toolbar.toolbarViewModelFactory
 
 val Kosmos.quickSettingsContainerViewModelFactory by
     Kosmos.Fixture {
@@ -36,6 +37,7 @@ val Kosmos.quickSettingsContainerViewModelFactory by
                     tileGridViewModel,
                     editModeViewModel,
                     detailsViewModel,
+                    toolbarViewModelFactory,
                 )
             }
         }

@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
+import com.android.systemui.haptics.msdl.tileHapticsViewModelFactoryProvider
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.panels.ui.viewmodel.detailsViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridViewModelFactory
 
-var Kosmos.gridLayoutTypeRepository by Kosmos.Fixture { GridLayoutTypeRepository() }
+val Kosmos.infiniteGridLayout by
+    Kosmos.Fixture {
+        InfiniteGridLayout(
+            detailsViewModel,
+            iconTilesViewModel,
+            infiniteGridViewModelFactory,
+            tileHapticsViewModelFactoryProvider,
+        )
+    }

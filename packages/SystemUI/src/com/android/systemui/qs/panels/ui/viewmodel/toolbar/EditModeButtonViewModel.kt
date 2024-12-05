@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.qs.panels.ui.viewmodel.toolbar
 
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 

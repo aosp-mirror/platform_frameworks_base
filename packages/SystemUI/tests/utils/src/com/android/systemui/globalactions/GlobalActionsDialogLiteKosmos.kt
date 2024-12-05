@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.globalactions
 
 import com.android.systemui.kosmos.Kosmos
+import org.mockito.kotlin.mock
 
-var Kosmos.gridLayoutTypeRepository by Kosmos.Fixture { GridLayoutTypeRepository() }
+/** Provides a mock */
+val Kosmos.globalActionsDialogLite: GlobalActionsDialogLite by Kosmos.Fixture { mock() }
