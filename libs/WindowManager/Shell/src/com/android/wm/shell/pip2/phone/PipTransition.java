@@ -55,6 +55,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -728,6 +729,10 @@ public class PipTransition extends PipTransitionController implements
             if (cutoutInsets != null
                     && getFixedRotationDelta(info, pipTaskChange) == ROTATION_90) {
                 adjustedSourceRectHint.offset(cutoutInsets.left, cutoutInsets.top);
+            }
+            if (Flags.enableDesktopWindowingPip()) {
+                adjustedSourceRectHint.offset(-pipActivityChange.getStartAbsBounds().left,
+                        -pipActivityChange.getStartAbsBounds().top);
             }
         } else {
             // For non-valid app provided src-rect-hint, calculate one to crop into during
