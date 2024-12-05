@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -25,7 +28,7 @@ import java.util.List;
 
 /** Base class for draw commands the take 6 floats */
 public abstract class DrawBase6 extends PaintOperation implements VariableSupport {
-    protected String mName = "DrawRectBase";
+    @NonNull protected String mName = "DrawRectBase";
     float mV1;
     float mV2;
     float mV3;
@@ -56,7 +59,7 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mV1 = Float.isNaN(mValue1) ? context.getFloat(Utils.idFromNan(mValue1)) : mValue1;
         mV2 = Float.isNaN(mValue2) ? context.getFloat(Utils.idFromNan(mValue2)) : mValue2;
         mV3 = Float.isNaN(mValue3) ? context.getFloat(Utils.idFromNan(mValue3)) : mValue3;
@@ -66,7 +69,7 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mValue1)) {
             context.listensTo(Utils.idFromNan(mValue1), this);
         }
@@ -88,13 +91,14 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         write(buffer, mV1, mV2, mV3, mV4, mV5, mV6);
     }
 
     protected abstract void write(
-            WireBuffer buffer, float v1, float v2, float v3, float v4, float v5, float v6);
+            @NonNull WireBuffer buffer, float v1, float v2, float v3, float v4, float v5, float v6);
 
+    @NonNull
     @Override
     public String toString() {
         return mName
@@ -112,7 +116,8 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
         DrawBase6 create(float v1, float v2, float v3, float v4, float v5, float v6);
     }
 
-    public static void read(Maker build, WireBuffer buffer, List<Operation> operations) {
+    public static void read(
+            @NonNull Maker build, @NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float sv1 = buffer.readFloat();
         float sv2 = buffer.readFloat();
         float sv3 = buffer.readFloat();
@@ -135,10 +140,17 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
      * @param v6
      * @return
      */
+    @Nullable
     public Operation construct(float v1, float v2, float v3, float v4, float v5, float v6) {
         return null;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "DrawBase6";
     }

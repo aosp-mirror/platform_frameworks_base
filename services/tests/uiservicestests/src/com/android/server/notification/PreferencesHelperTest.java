@@ -108,6 +108,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.ZenBypassingApp;
 import android.content.AttributionSource;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -255,6 +256,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
+                android.app.Flags.FLAG_API_RICH_ONGOING,
                 FLAG_NOTIFICATION_CLASSIFICATION, FLAG_MODES_UI);
     }
 
@@ -2617,6 +2619,72 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel3.setBypassDnd(false);
         assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
                 uid).getList().size());
+    }
+
+    @Test
+    public void getPackagesBypassingDnd_noChannelsBypassing() throws Exception {
+        assertThat(mHelper.getPackagesBypassingDnd(UserHandle.getUserId(UID_N_MR1))).isEmpty();
+    }
+
+    @Test
+    public void getPackagesBypassingDnd_oneChannelBypassing_deleted() {
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel1.setDeleted(true);
+        // has DND access, so can set bypassDnd attribute
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true,
+                /*has DND access*/ true, UID_N_MR1, false);
+
+        assertThat(mHelper.getPackagesBypassingDnd(UserHandle.getUserId(UID_N_MR1))).isEmpty();
+    }
+
+    @Test
+    public void getPackagesBypassingDnd_oneChannelBypassing_groupBlocked() {
+        int uid = UID_N_MR1;
+        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(true);
+        channel1.setGroup(ncg.getId());
+        mHelper.createNotificationChannelGroup(PKG_N_MR1, uid, ncg,  /* fromTargetApp */ true,
+                uid, false);
+        mHelper.createNotificationChannel(PKG_N_MR1, uid, channel1, true, /*has DND access*/ true,
+                uid, false);
+        ncg.setBlocked(true);
+
+        assertThat(mHelper.getPackagesBypassingDnd(UserHandle.getUserId(uid))).isEmpty();
+    }
+
+    @Test
+    public void getPackagesBypassingDnd_multipleApps() {
+        List<ZenBypassingApp> expected = ImmutableList.of(
+                new ZenBypassingApp(PKG_O, true), new ZenBypassingApp(PKG_P, false));
+
+        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel2 = new NotificationChannel("id2", "name2",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel3 = new NotificationChannel("id3", "name3",
+                NotificationManager.IMPORTANCE_MAX);
+        NotificationChannel channel4 = new NotificationChannel("id4", "name3",
+                NotificationManager.IMPORTANCE_MAX);
+        channel1.setBypassDnd(false);
+        channel2.setBypassDnd(true);
+        channel3.setBypassDnd(true);
+        channel4.setBypassDnd(false);
+        // has DND access, so can set bypassDnd attribute
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1, true,
+                /*has DND access*/ true, UID_N_MR1, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, true,
+                UID_O, false);
+        mHelper.createNotificationChannel(PKG_P, UID_P, channel3, true, true,
+                UID_P, false);
+        mHelper.createNotificationChannel(PKG_P, UID_P, channel4, true, true,
+                UID_P, false);
+
+        assertThat(mHelper.getPackagesBypassingDnd(UserHandle.getUserId(UID_O)))
+                .containsExactlyElementsIn(expected);
     }
 
     @Test
@@ -6444,9 +6512,18 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    @DisableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
     public void testNoAppHasPermissionToPromoteByDefault() {
         mHelper.setShowBadge(PKG_P, UID_P, true);
         assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_API_RICH_ONGOING,
+            android.app.Flags.FLAG_UI_RICH_ONGOING})
+    public void testAllAppsHavePermissionToPromoteByDefault() {
+        mHelper.setShowBadge(PKG_P, UID_P, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
     }
 
     @Test

@@ -110,7 +110,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         mTwoPhaseRollbackEnabledFile = new File(dataDir, "two-phase-rollback-enabled");
-        PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
+        PackageWatchdog.getInstance(mContext).registerHealthObserver(this, null);
         mApexManager = apexManager;
 
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
@@ -158,7 +158,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 // Note: For non-native crashes the rollback-all step has higher impact
                 impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
             } else if (getAvailableRollback(failedPackage) != null) {
-                // Rollback is available, we may get a callback into #execute
+                // Rollback is available, we may get a callback into #onExecuteHealthCheckMitigation
                 impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
             } else if (anyRollbackAvailable) {
                 // If any rollbacks are available, we will commit them
@@ -175,7 +175,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean execute(@Nullable VersionedPackage failedPackage,
+    public boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
             @FailureReasons int rollbackReason, int mitigationCount) {
         Slog.i(TAG, "Executing remediation."
                 + " failedPackage: "
@@ -229,7 +229,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean executeBootLoopMitigation(int mitigationCount) {
+    public boolean onExecuteBootLoopMitigation(int mitigationCount) {
         if (Flags.recoverabilityDetection()) {
             List<RollbackInfo> availableRollbacks = getAvailableRollbacks();
 
@@ -284,7 +284,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     @AnyThread
     @NonNull
     public void startObservingHealth(@NonNull List<String> packages, @NonNull long durationMs) {
-        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
+        PackageWatchdog.getInstance(mContext).startExplicitHealthCheck(this, packages, durationMs);
     }
 
     @AnyThread

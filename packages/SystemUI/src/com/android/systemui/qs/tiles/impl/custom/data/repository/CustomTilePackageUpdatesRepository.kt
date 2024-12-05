@@ -28,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -51,7 +52,7 @@ class CustomTilePackageUpdatesRepositoryImpl
 @Inject
 constructor(
     private val tileSpec: TileSpec.CustomTileSpec,
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     @QSTileScope private val tileScope: CoroutineScope,
     @Background private val backgroundCoroutineContext: CoroutineContext,
 ) : CustomTilePackageUpdatesRepository {

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.back;
 
-import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.window.BackEvent.EDGE_RIGHT;
@@ -43,10 +42,8 @@ import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
-import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.VelocityTracker;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.window.BackEvent;
@@ -132,9 +129,8 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private final SpringForce mPostCommitFlingSpring = new SpringForce(SPRING_SCALE)
             .setStiffness(FLING_SPRING_STIFFNESS)
             .setDampingRatio(1f);
-    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
+    private final ProgressVelocityTracker mVelocityTracker = new ProgressVelocityTracker();
     private float mGestureProgress = 0f;
-    private long mDownTime = 0L;
 
     @Inject
     public CrossTaskBackAnimation(Context context, BackAnimationBackground background,
@@ -316,8 +312,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         mClosingCurrentRect.setEmpty();
         mInitialTouchPos.set(0, 0);
         mGestureProgress = 0;
-        mDownTime = 0;
-        mVelocityTracker.clear();
+        mVelocityTracker.resetTracking();
 
         if (mFinishCallback != null) {
             try {
@@ -333,22 +328,13 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private void onGestureProgress(@NonNull BackEvent backEvent) {
         if (!mBackInProgress) {
             mBackInProgress = true;
-            mDownTime = backEvent.getFrameTimeMillis();
         }
         float progress = backEvent.getProgress();
         mTouchPos.set(backEvent.getTouchX(), backEvent.getTouchY());
         float interpolatedProgress = getInterpolatedProgress(progress);
         if (predictiveBackTimestampApi()) {
-            mVelocityTracker.addMovement(
-                    MotionEvent.obtain(
-                            /* downTime */ mDownTime,
-                            /* eventTime */ backEvent.getFrameTimeMillis(),
-                            /* action */ ACTION_MOVE,
-                            /* x */ interpolatedProgress * SPRING_SCALE,
-                            /* y */ 0f,
-                            /* metaState */ 0
-                    )
-            );
+            mVelocityTracker.addPosition(backEvent.getFrameTimeMillis(),
+                    interpolatedProgress * SPRING_SCALE);
         }
         updateGestureBackProgress(interpolatedProgress, backEvent);
     }
@@ -362,9 +348,8 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         if (predictiveBackTimestampApi()) {
             // kick off spring animation with the current velocity from the pre-commit phase, this
             // affects the scaling of the closing and/or opening task during post-commit
-            mVelocityTracker.computeCurrentVelocity(1000);
             float startVelocity = mGestureProgress < 0.1f
-                    ? -DEFAULT_FLING_VELOCITY : -mVelocityTracker.getXVelocity();
+                    ? -DEFAULT_FLING_VELOCITY : -mVelocityTracker.calculateVelocity();
             SpringAnimation flingAnimation =
                     new SpringAnimation(mPostCommitFlingScale, SPRING_SCALE)
                     .setStartVelocity(Math.max(-MAX_FLING_VELOCITY, Math.min(0f, startVelocity)))

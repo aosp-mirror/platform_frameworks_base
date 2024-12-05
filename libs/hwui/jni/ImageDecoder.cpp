@@ -37,6 +37,7 @@
 #include <hwui/Bitmap.h>
 #include <hwui/ImageDecoder.h>
 #include <sys/stat.h>
+#include <utils/StatsUtils.h>
 
 #include "Bitmap.h"
 #include "BitmapFactory.h"
@@ -485,6 +486,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                         hwBitmap->setGainmap(std::move(gm));
                     }
                 }
+                uirenderer::logBitmapDecode(*hwBitmap);
                 return bitmap::createBitmap(env, hwBitmap.release(), bitmapCreateFlags,
                                             ninePatchChunk, ninePatchInsets);
             }
@@ -498,6 +500,8 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 
         nativeBitmap->setImmutable();
     }
+
+    uirenderer::logBitmapDecode(*nativeBitmap);
     return bitmap::createBitmap(env, nativeBitmap.release(), bitmapCreateFlags, ninePatchChunk,
                                 ninePatchInsets);
 }

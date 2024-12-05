@@ -155,6 +155,30 @@ class VolumeDialogSlidersInteractorTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun activeStreamChanges_showBoth() {
+        with(kosmos) {
+            testScope.runTest {
+                runCurrent()
+                fakeVolumeDialogController.updateState {
+                    activeStream = AudioManager.STREAM_SYSTEM
+                    states.put(AudioManager.STREAM_MUSIC, buildStreamState())
+                    states.put(AudioManager.STREAM_SYSTEM, buildStreamState())
+                }
+                val slidersModel by collectLastValue(underTest.sliders)
+                runCurrent()
+
+                fakeVolumeDialogController.updateState { activeStream = AudioManager.STREAM_MUSIC }
+                runCurrent()
+
+                assertThat(slidersModel!!.slider)
+                    .isEqualTo(VolumeDialogSliderType.Stream(AudioManager.STREAM_MUSIC))
+                assertThat(slidersModel!!.floatingSliders)
+                    .containsExactly(VolumeDialogSliderType.Stream(AudioManager.STREAM_SYSTEM))
+            }
+        }
+    }
+
     private fun buildStreamState(
         build: VolumeDialogController.StreamState.() -> Unit = {}
     ): VolumeDialogController.StreamState {

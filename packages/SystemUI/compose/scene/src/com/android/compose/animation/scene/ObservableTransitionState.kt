@@ -233,6 +233,12 @@ sealed interface ObservableTransitionState {
             (to == null || this.toContent == to)
     }
 
+    fun isTransitioningSets(from: Set<ContentKey>? = null, to: Set<ContentKey>? = null): Boolean {
+        return this is Transition &&
+            (from == null || from.contains(this.fromContent)) &&
+            (to == null || to.contains(this.toContent))
+    }
+
     /** Whether we are transitioning from [content] to [other], or from [other] to [content]. */
     fun isTransitioningBetween(content: ContentKey, other: ContentKey): Boolean {
         return isTransitioning(from = content, to = other) ||

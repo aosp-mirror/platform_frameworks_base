@@ -101,13 +101,13 @@ public final class InputMethodSubtypeSwitchingControllerTest {
                 TEST_SETTING_ACTIVITY_NAME, subtypes, TEST_IS_DEFAULT_RES_ID,
                 TEST_FORCE_DEFAULT, supportsSwitchingToNextInputMethod, TEST_IS_VR_IME);
         if (subtypes == null) {
-            items.add(new ImeSubtypeListItem(imeName, null /* variableName */, imi,
-                    NOT_A_SUBTYPE_INDEX, null, SYSTEM_LOCALE));
+            items.add(new ImeSubtypeListItem(imeName, null /* subtypeName */, null /* layoutName */,
+                    imi, NOT_A_SUBTYPE_INDEX, null, SYSTEM_LOCALE));
         } else {
             for (int i = 0; i < subtypes.size(); ++i) {
                 final String subtypeLocale = subtypeLocales.get(i);
-                items.add(new ImeSubtypeListItem(imeName, subtypeLocale, imi, i, subtypeLocale,
-                        SYSTEM_LOCALE));
+                items.add(new ImeSubtypeListItem(imeName, subtypeLocale, null /* layoutName */,
+                        imi, i, subtypeLocale, SYSTEM_LOCALE));
             }
         }
     }
@@ -138,8 +138,8 @@ public final class InputMethodSubtypeSwitchingControllerTest {
         final InputMethodInfo imi = new InputMethodInfo(ri, TEST_IS_AUX_IME,
                 TEST_SETTING_ACTIVITY_NAME, subtypes, TEST_IS_DEFAULT_RES_ID,
                 TEST_FORCE_DEFAULT, true /* supportsSwitchingToNextInputMethod */, TEST_IS_VR_IME);
-        return new ImeSubtypeListItem(imeName, subtypeName, imi, subtypeIndex, subtypeLocale,
-                SYSTEM_LOCALE);
+        return new ImeSubtypeListItem(imeName, subtypeName, null /* layoutName */, imi,
+                subtypeIndex, subtypeLocale, SYSTEM_LOCALE);
     }
 
     @NonNull

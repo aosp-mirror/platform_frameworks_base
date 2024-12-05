@@ -17,35 +17,34 @@
 package com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor
 
 import android.app.Dialog
+import android.media.projection.StopReason
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.ScreenRecordRepositoryImpl
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -54,24 +53,11 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val keyguardInteractor = kosmos.keyguardInteractor
     private val dialogTransitionAnimator = mock<DialogTransitionAnimator>()
-    private val featureFlags = kosmos.featureFlagsClassic
-    private val activityStarter = kosmos.activityStarter
     private val keyguardDismissUtil = mock<KeyguardDismissUtil>()
     private val panelInteractor = mock<PanelInteractor>()
     private val dialog = mock<Dialog>()
     private val recordingController =
-        mock<RecordingController> {
-            whenever(
-                    createScreenRecordDialog(
-                        eq(context),
-                        eq(featureFlags),
-                        eq(dialogTransitionAnimator),
-                        eq(activityStarter),
-                        any()
-                    )
-                )
-                .thenReturn(dialog)
-        }
+        mock<RecordingController> { on { createScreenRecordDialog(any()) } doReturn dialog }
 
     private val screenRecordRepository =
         ScreenRecordRepositoryImpl(
@@ -81,7 +67,6 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
 
     private val underTest =
         ScreenRecordTileUserActionInteractor(
-            context,
             testScope.testScheduler,
             testScope.testScheduler,
             screenRecordRepository,
@@ -91,8 +76,6 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
             dialogTransitionAnimator,
             panelInteractor,
             mock<MediaProjectionMetricsLogger>(),
-            featureFlags,
-            activityStarter,
         )
 
     @Test
@@ -110,7 +93,7 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
 
         underTest.handleInput(QSTileInputTestKtx.click(recordingModel))
 
-        verify(recordingController).stopRecording()
+        verify(recordingController).stopRecording(eq(StopReason.STOP_QS_TILE))
     }
 
     @Test
@@ -120,22 +103,16 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
         underTest.handleInput(QSTileInputTestKtx.click(recordingModel))
         val onStartRecordingClickedCaptor = argumentCaptor<Runnable>()
         verify(recordingController)
-            .createScreenRecordDialog(
-                eq(context),
-                eq(featureFlags),
-                eq(dialogTransitionAnimator),
-                eq(activityStarter),
-                onStartRecordingClickedCaptor.capture()
-            )
+            .createScreenRecordDialog(onStartRecordingClickedCaptor.capture())
 
         val onDismissActionCaptor = argumentCaptor<OnDismissAction>()
         verify(keyguardDismissUtil)
             .executeWhenUnlocked(onDismissActionCaptor.capture(), eq(false), eq(true))
-        onDismissActionCaptor.value.onDismiss()
+        onDismissActionCaptor.lastValue.onDismiss()
         verify(dialog).show() // because the view was null
 
         // When starting the recording, we collapse the shade and disable the dialog animation.
-        onStartRecordingClickedCaptor.value.run()
+        onStartRecordingClickedCaptor.lastValue.run()
         verify(dialogTransitionAnimator).disableAllCurrentDialogsExitAnimations()
         verify(panelInteractor).collapsePanels()
     }
@@ -145,9 +122,9 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
      */
     @Test
     fun handleClickFromView_whenDoingNothing_whenKeyguardNotShowing_showDialogFromView() = runTest {
-        val expandable = mock<Expandable>()
         val controller = mock<DialogTransitionAnimator.Controller>()
-        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
+        val expandable =
+            mock<Expandable> { on { dialogTransitionController(any()) } doReturn controller }
 
         kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
 
@@ -158,18 +135,12 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
         )
         val onStartRecordingClickedCaptor = argumentCaptor<Runnable>()
         verify(recordingController)
-            .createScreenRecordDialog(
-                eq(context),
-                eq(featureFlags),
-                eq(dialogTransitionAnimator),
-                eq(activityStarter),
-                onStartRecordingClickedCaptor.capture()
-            )
+            .createScreenRecordDialog(onStartRecordingClickedCaptor.capture())
 
         val onDismissActionCaptor = argumentCaptor<OnDismissAction>()
         verify(keyguardDismissUtil)
             .executeWhenUnlocked(onDismissActionCaptor.capture(), eq(false), eq(true))
-        onDismissActionCaptor.value.onDismiss()
+        onDismissActionCaptor.lastValue.onDismiss()
         verify(dialogTransitionAnimator).show(eq(dialog), eq(controller), eq(true))
     }
 }

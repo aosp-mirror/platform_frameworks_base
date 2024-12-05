@@ -55,6 +55,8 @@ java_library {
         "SystemUICommon",
         "SystemUILogLib",
         "androidx.annotation_annotation",
+        "androidx.compose.ui_ui",
+        "androidx.compose.runtime_runtime",
     ],
 }
 

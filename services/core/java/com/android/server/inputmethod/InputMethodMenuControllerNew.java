@@ -238,8 +238,8 @@ final class InputMethodMenuControllerNew {
                 prevImeId = imeId;
             }
 
-            menuItems.add(new SubtypeItem(item.mImeName, item.mSubtypeName, item.mImi,
-                    item.mSubtypeIndex));
+            menuItems.add(new SubtypeItem(item.mImeName, item.mSubtypeName, item.mLayoutName,
+                    item.mImi, item.mSubtypeIndex));
         }
 
         return menuItems;
@@ -348,6 +348,13 @@ final class InputMethodMenuControllerNew {
         @Nullable
         final CharSequence mSubtypeName;
 
+        /**
+         * The name of the subtype's layout, or {@code null} if this item doesn't have a subtype,
+         * or doesn't specify a layout.
+         */
+        @Nullable
+        private final CharSequence mLayoutName;
+
         /** The info of the input method. */
         @NonNull
         final InputMethodInfo mImi;
@@ -360,10 +367,11 @@ final class InputMethodMenuControllerNew {
         final int mSubtypeIndex;
 
         SubtypeItem(@NonNull CharSequence imeName, @Nullable CharSequence subtypeName,
-                @NonNull InputMethodInfo imi,
+                @Nullable CharSequence layoutName, @NonNull InputMethodInfo imi,
                 @IntRange(from = NOT_A_SUBTYPE_INDEX) int subtypeIndex) {
             mImeName = imeName;
             mSubtypeName = subtypeName;
+            mLayoutName = layoutName;
             mImi = imi;
             mSubtypeIndex = subtypeIndex;
         }
@@ -521,6 +529,9 @@ final class InputMethodMenuControllerNew {
             /** The name of the item. */
             @NonNull
             private final TextView mName;
+            /** The layout name. */
+            @NonNull
+            private final TextView mLayout;
             /** Indicator for the selected status of the item. */
             @NonNull
             private final ImageView mCheckmark;
@@ -536,6 +547,7 @@ final class InputMethodMenuControllerNew {
 
                 mContainer = itemView;
                 mName = itemView.requireViewById(com.android.internal.R.id.text);
+                mLayout = itemView.requireViewById(com.android.internal.R.id.text2);
                 mCheckmark = itemView.requireViewById(com.android.internal.R.id.image);
 
                 mContainer.setOnClickListener((v) -> {
@@ -563,6 +575,9 @@ final class InputMethodMenuControllerNew {
                 // Trigger the ellipsize marquee behaviour by selecting the name.
                 mName.setSelected(isSelected);
                 mName.setText(name);
+                mLayout.setText(item.mLayoutName);
+                mLayout.setVisibility(
+                        !TextUtils.isEmpty(item.mLayoutName) ? View.VISIBLE : View.GONE);
                 mCheckmark.setVisibility(isSelected ? View.VISIBLE : View.GONE);
             }
         }

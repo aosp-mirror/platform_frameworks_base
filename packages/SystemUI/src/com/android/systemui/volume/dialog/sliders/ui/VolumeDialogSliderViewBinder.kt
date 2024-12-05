@@ -20,60 +20,43 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.awaitAnimation
 import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlin.math.roundToInt
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 private const val PROGRESS_CHANGE_ANIMATION_DURATION_MS = 80L
 
+@VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
-@AssistedInject
+@Inject
 constructor(
-    @Assisted private val viewModelProvider: () -> VolumeDialogSliderViewModel,
+    private val viewModel: VolumeDialogSliderViewModel,
     private val jankListenerFactory: JankListenerFactory,
 ) {
 
-    fun bind(view: View) {
-        with(view) {
-            val sliderView: Slider =
-                requireViewById<Slider>(R.id.volume_dialog_slider).apply {
-                    labelBehavior = LabelFormatter.LABEL_GONE
-                }
-            repeatWhenAttached {
-                viewModel(
-                    traceName = "VolumeDialogSliderViewBinder",
-                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelProvider() },
-                ) { viewModel ->
-                    sliderView.addOnChangeListener { _, value, fromUser ->
-                        viewModel.setStreamVolume(value.roundToInt(), fromUser)
-                    }
-
-                    viewModel.model.onEach { it.bindToSlider(sliderView) }.launchIn(this)
-
-                    awaitCancellation()
-                }
+    fun CoroutineScope.bind(view: View) {
+        val sliderView: Slider =
+            view.requireViewById<Slider>(R.id.volume_dialog_slider).apply {
+                labelBehavior = LabelFormatter.LABEL_GONE
             }
+        sliderView.addOnChangeListener { _, value, fromUser ->
+            viewModel.setStreamVolume(value.roundToInt(), fromUser)
         }
+
+        viewModel.model.onEach { it.bindToSlider(sliderView) }.launchIn(this)
     }
 
     private suspend fun VolumeDialogStreamModel.bindToSlider(slider: Slider) {
-        slider.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY -> }
         with(slider) {
             valueFrom = levelMin.toFloat()
             valueTo = levelMax.toFloat()
@@ -84,15 +67,6 @@ constructor(
                 jankListenerFactory.update(this, PROGRESS_CHANGE_ANIMATION_DURATION_MS),
             )
         }
-    }
-
-    @AssistedFactory
-    @VolumeDialogScope
-    interface Factory {
-
-        fun create(
-            viewModelProvider: () -> VolumeDialogSliderViewModel
-        ): VolumeDialogSliderViewBinder
     }
 }
 

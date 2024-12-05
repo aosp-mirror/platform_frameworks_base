@@ -96,6 +96,7 @@ interface IVirtualDevice {
     boolean canCreateMirrorDisplays();
 
     /*
+    /*
      * Turns off all trusted non-mirror displays of the virtual device.
      */
     void goToSleep();

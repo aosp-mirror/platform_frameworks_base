@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import static com.android.server.devicepolicy.DevicePolicyManagerService.LOG_TAG;
 
 import android.annotation.Nullable;
+import android.app.admin.flags.Flags;
 import android.content.pm.PackageManagerInternal;
 import android.util.ArraySet;
 
@@ -64,7 +65,7 @@ public class PackageSuspender {
     /**
      * Suspend packages that are requested by a single admin
      *
-     * @return a list of packages that the admin has requested to suspend but could not be
+     * @return an array of packages that the admin has requested to suspend but could not be
      * suspended, due to DPM and PackageManager exemption list.
      *
      */
@@ -87,7 +88,7 @@ public class PackageSuspender {
     /**
      * Suspend packages considering the exemption list.
      *
-     * @return the list of packages that couldn't be suspended, either due to the exemption list,
+     * @return the set of packages that couldn't be suspended, either due to the exemption list,
      * or due to failures from PackageManagerInternal itself.
      */
     private Set<String> suspendWithExemption(Set<String> packages) {
@@ -112,15 +113,15 @@ public class PackageSuspender {
     /**
      * Unsuspend packages that are requested by a single admin
      *
-     * @return a list of packages that the admin has requested to unsuspend but could not be
-     * unsuspended, due to other amdin's policy or PackageManager restriction.
+     * @return an array of packages that the admin has requested to unsuspend but could not be
+     * unsuspended, due to other admin's policy or PackageManager restriction.
      *
      */
     public String[] unsuspend(Set<String> packages) {
-        // Unlike suspend(), when unsuspending, call PackageManager with the delta of resolved
-        // suspended packages list and not what the admin has requested. This is because some
-        // packages might still be subject to another admin's suspension request.
-        Set<String> packagesToUnsuspend = new ArraySet<>(mSuspendedPackageBefore);
+        // Unlike suspend(), when unsuspending, take suspension by other admins into account: only
+        // packages not suspended by other admins are passed to PackageManager.
+        Set<String> packagesToUnsuspend = new ArraySet<>(
+                Flags.unsuspendNotSuspended() ? packages : mSuspendedPackageBefore);
         packagesToUnsuspend.removeAll(mSuspendedPackageAfter);
 
         // To calculate the result (which packages are not unsuspended), start with packages that
@@ -139,7 +140,7 @@ public class PackageSuspender {
     /**
      * Unsuspend packages considering the exemption list.
      *
-     * @return the list of packages that couldn't be unsuspended, either due to the exemption list,
+     * @return the set of packages that couldn't be unsuspended, either due to the exemption list,
      * or due to failures from PackageManagerInternal itself.
      */
     private Set<String> unsuspendWithExemption(Set<String> packages) {

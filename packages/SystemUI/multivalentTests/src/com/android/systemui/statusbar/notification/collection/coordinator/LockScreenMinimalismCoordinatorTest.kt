@@ -21,7 +21,6 @@ import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.platform.test.annotations.EnableFlags
-import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -43,6 +42,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.domain.interactor.lockScreenNotificationMinimalismSetting
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.testKosmos
@@ -394,7 +394,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
             assertThatTopUnseenKey().isEqualTo(solo1.key)
 
             // TEST: even being pinned doesn't take effect immediately
-            hunRepo1.isPinned.value = true
+            hunRepo1.pinnedStatus.value = PinnedStatus.PinnedBySystem
             testScheduler.advanceTimeBy(0.5.seconds)
             onBeforeTransformGroupsListener.onBeforeTransformGroups(listEntryList)
             assertThatTopUnseenKey().isEqualTo(solo1.key)
@@ -406,8 +406,8 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
 
             // TEST: repeat; being heads up and pinned for 1 second triggers seen
             kosmos.headsUpNotificationRepository.orderedHeadsUpRows.value = listOf(hunRepo2)
-            hunRepo1.isPinned.value = false
-            hunRepo2.isPinned.value = true
+            hunRepo1.pinnedStatus.value = PinnedStatus.NotPinned
+            hunRepo2.pinnedStatus.value = PinnedStatus.PinnedBySystem
             testScheduler.advanceTimeBy(1.seconds)
             onBeforeTransformGroupsListener.onBeforeTransformGroups(listEntryList)
             assertThatTopUnseenKey().isEqualTo(null)

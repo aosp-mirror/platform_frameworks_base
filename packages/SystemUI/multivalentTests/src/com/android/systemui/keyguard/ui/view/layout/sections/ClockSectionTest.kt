@@ -69,7 +69,9 @@ class ClockSectionTest : SysuiTestCase() {
         get() =
             kosmos.fakeSystemBarUtilsProxy.getStatusBarHeight() +
                 context.resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top) +
-                context.resources.getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
+                context.resources.getDimensionPixelSize(
+                    customR.dimen.keyguard_smartspace_top_offset
+                )
 
     private val LARGE_CLOCK_TOP
         get() =

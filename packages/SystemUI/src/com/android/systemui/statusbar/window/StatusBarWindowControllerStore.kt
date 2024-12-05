@@ -70,6 +70,10 @@ constructor(
         )
     }
 
+    override suspend fun onDisplayRemovalAction(instance: StatusBarWindowController) {
+        instance.stop()
+    }
+
     override val instanceClass = StatusBarWindowController::class.java
 }
 

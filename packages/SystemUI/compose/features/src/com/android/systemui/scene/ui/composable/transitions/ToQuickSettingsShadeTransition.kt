@@ -33,7 +33,10 @@ fun TransitionBuilder.toQuickSettingsShadeTransition(durationScale: Double = 1.0
             stiffness = Spring.StiffnessMediumLow,
             visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,
         )
-    distance = UserActionDistance { fromSceneSize, _ -> fromSceneSize.height.toFloat() * 2 / 3f }
+    distance = UserActionDistance { fromContent, _, _ ->
+        val fromContentSize = checkNotNull(fromContent.targetSize())
+        fromContentSize.height.toFloat() * 2 / 3f
+    }
 
     translate(OverlayShade.Elements.Panel, Edge.Top)
 

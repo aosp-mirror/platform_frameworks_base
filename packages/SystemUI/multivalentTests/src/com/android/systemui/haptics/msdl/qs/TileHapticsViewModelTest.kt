@@ -119,22 +119,6 @@ class TileHapticsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun onLongClick_whenTileDoesNotHandleLongClick_playsFailureHaptics() =
-        testScope.runTest {
-            // WHEN the tile is long-clicked but the tile does not handle a long-click
-            val state = QSTile.State().apply { handlesLongClick = false }
-            qsTile.changeState(state)
-            underTest.setTileInteractionState(
-                TileHapticsViewModel.TileInteractionState.LONG_CLICKED
-            )
-            runCurrent()
-
-            // THEN the failure token plays
-            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.FAILURE)
-            assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
-        }
-
-    @Test
     fun whenLaunchingFromClick_doesNotPlayHaptics() =
         testScope.runTest {
             // WHEN the tile is clicked and its action state changes accordingly

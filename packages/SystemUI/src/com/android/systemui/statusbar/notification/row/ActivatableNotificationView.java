@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.util.DumpUtilsKt;
@@ -407,12 +406,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
         mAppearAnimator = ValueAnimator.ofFloat(mAppearAnimationFraction,
                 targetValue);
-        if (NotificationsImprovedHunAnimation.isEnabled()
-                || NotificationHeadsUpCycling.isEnabled()) {
-            mAppearAnimator.setInterpolator(mCurrentAppearInterpolator);
-        } else {
-            mAppearAnimator.setInterpolator(Interpolators.LINEAR);
-        }
+        mAppearAnimator.setInterpolator(mCurrentAppearInterpolator);
         mAppearAnimator.setDuration(
                 (long) (duration * Math.abs(mAppearAnimationFraction - targetValue)));
         mAppearAnimator.addUpdateListener(animation -> {
@@ -531,10 +525,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * @param clipSide Which side if view we want to clip from
      */
     private void updateAppearRect(ClipSide clipSide) {
-        float interpolatedFraction =
-                NotificationsImprovedHunAnimation.isEnabled()
-                        || NotificationHeadsUpCycling.isEnabled() ? mAppearAnimationFraction
-                        : mCurrentAppearInterpolator.getInterpolation(mAppearAnimationFraction);
+        float interpolatedFraction = mAppearAnimationFraction;
         mAppearAnimationTranslation = (1.0f - interpolatedFraction) * mAnimationTranslationY;
         final int fullHeight = getActualHeight();
         float height = fullHeight * interpolatedFraction;
@@ -564,14 +555,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void updateAppearRect() {
         updateAppearRect(ClipSide.BOTTOM);
-    }
-
-    private float getInterpolatedAppearAnimationFraction() {
-
-        if (mAppearAnimationFraction >= 0) {
-            return mCurrentAppearInterpolator.getInterpolation(mAppearAnimationFraction);
-        }
-        return 1.0f;
     }
 
     private void updateAppearAnimationAlpha() {
@@ -641,26 +624,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void applyRoundnessAndInvalidate() {
         applyBackgroundRoundness(getTopCornerRadius(), getBottomCornerRadius());
         super.applyRoundnessAndInvalidate();
-    }
-
-    @Override
-    public float getTopCornerRadius() {
-        if (NotificationsImprovedHunAnimation.isEnabled()) {
-            return super.getTopCornerRadius();
-        }
-
-        float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getTopCornerRadius(), fraction);
-    }
-
-    @Override
-    public float getBottomCornerRadius() {
-        if (NotificationsImprovedHunAnimation.isEnabled()) {
-            return super.getBottomCornerRadius();
-        }
-
-        float fraction = getInterpolatedAppearAnimationFraction();
-        return MathUtils.lerp(0, super.getBottomCornerRadius(), fraction);
     }
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {

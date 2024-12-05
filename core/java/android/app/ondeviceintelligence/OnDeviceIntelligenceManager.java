@@ -17,9 +17,11 @@
 package android.app.ondeviceintelligence;
 
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE;
+import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -502,11 +504,10 @@ public final class OnDeviceIntelligenceManager {
      *
      * @param startTimeEpochMillis epoch millis used to filter the InferenceInfo events.
      * @return InferenceInfo events since the passed in startTimeEpochMillis.
-     *
-     * @hide
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) {
+    @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+    public @NonNull List<InferenceInfo> getLatestInferenceInfo(@CurrentTimeMillisLong long startTimeEpochMillis) {
         try {
             return mService.getLatestInferenceInfo(startTimeEpochMillis);
         } catch (RemoteException e) {

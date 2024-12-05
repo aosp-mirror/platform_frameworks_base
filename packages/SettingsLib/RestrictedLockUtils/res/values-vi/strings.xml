@@ -19,4 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="enabled_by_admin" msgid="6630472777476410137">"Do quản trị viên bật"</string>
     <string name="disabled_by_admin" msgid="4023569940620832713">"Quản trị viên đã vô hiệu hóa chế độ này"</string>
+    <string name="enabled_by_advanced_protection" msgid="6236917660829422499">"Được bật bởi chế độ Bảo vệ nâng cao"</string>
+    <string name="disabled_by_advanced_protection" msgid="369596009193239632">"Bị tắt bởi chế độ Bảo vệ nâng cao"</string>
 </resources>

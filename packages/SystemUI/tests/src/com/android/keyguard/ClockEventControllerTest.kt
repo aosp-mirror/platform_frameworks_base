@@ -24,7 +24,6 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_ACTIVE
 import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_INACTIVE
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
@@ -56,6 +55,7 @@ import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ZenModeController
@@ -90,6 +90,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.clearInvocations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -104,9 +105,9 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     private val mainExecutor = ImmediateExecutor()
     private lateinit var repository: FakeKeyguardRepository
-    private val messageBuffer = LogcatOnlyMessageBuffer(LogLevel.DEBUG)
-    private val clockBuffers = ClockMessageBuffers(messageBuffer, messageBuffer, messageBuffer)
+    private val clockBuffers = ClockMessageBuffers(LogcatOnlyMessageBuffer(LogLevel.DEBUG))
     private lateinit var underTest: ClockEventController
+    private lateinit var dndModeId: String
 
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var batteryController: BatteryController
@@ -128,6 +129,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var largeClockEvents: ClockFaceEvents
     @Mock private lateinit var parentView: View
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    @Mock private lateinit var userTracker: UserTracker
 
     @Mock private lateinit var zenModeController: ZenModeController
     private var zenModeControllerCallback: ZenModeController.Callback? = null
@@ -153,7 +155,9 @@ class ClockEventControllerTest : SysuiTestCase() {
             .thenReturn(ClockFaceConfig(tickRate = ClockTickRate.PER_MINUTE))
         whenever(smallClockController.theme).thenReturn(ThemeConfig(true, null))
         whenever(largeClockController.theme).thenReturn(ThemeConfig(true, null))
+        whenever(userTracker.userId).thenReturn(1)
 
+        dndModeId = MANUAL_DND_INACTIVE.id
         zenModeRepository.addMode(MANUAL_DND_INACTIVE)
 
         repository = FakeKeyguardRepository()
@@ -177,6 +181,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 withDeps.featureFlags,
                 zenModeController,
                 kosmos.zenModeInteractor,
+                userTracker,
             )
         underTest.clock = clock
 
@@ -525,15 +530,16 @@ class ClockEventControllerTest : SysuiTestCase() {
         testScope.runTest {
             underTest.listenForDnd(testScope.backgroundScope)
 
-            zenModeRepository.replaceMode(MANUAL_DND_INACTIVE.id, MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(dndModeId)
             runCurrent()
 
             verify(events)
                 .onZenDataChanged(
                     eq(ZenData(ZenMode.IMPORTANT_INTERRUPTIONS, R.string::dnd_is_on.name))
                 )
+            clearInvocations(events)
 
-            zenModeRepository.replaceMode(MANUAL_DND_ACTIVE.id, MANUAL_DND_INACTIVE)
+            zenModeRepository.deactivateMode(dndModeId)
             runCurrent()
 
             verify(events).onZenDataChanged(eq(ZenData(ZenMode.OFF, R.string::dnd_is_off.name)))

@@ -21,6 +21,7 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.display.DeviceProductInfo;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -31,6 +32,7 @@ import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
@@ -82,6 +84,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // lost.
     private Handler mDelayedPopupOnActiveSourceLostHandler;
 
+    private boolean mIsActiveSourceLostPopupLaunched;
+
     // Determines what action should be taken upon receiving Routing Control messages.
     @VisibleForTesting
     protected HdmiProperties.playback_device_action_on_routing_control_values
@@ -96,6 +100,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         mDelayedStandbyOnActiveSourceLostHandler = new Handler(service.getServiceLooper());
         mDelayedPopupOnActiveSourceLostHandler = new Handler(service.getServiceLooper());
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
+        mIsActiveSourceLostPopupLaunched = false;
     }
 
     @Override
@@ -273,13 +278,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private class DelayedStandbyOnActiveSourceLostRunnable implements Runnable {
         @Override
         public void run() {
-            if (mService.getPowerManagerInternal().wasDeviceIdleFor(
-                    STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS)) {
+            if (!isActiveSource()) {
                 mService.standby();
-            } else {
-                mService.setAndBroadcastActiveSource(mService.getPhysicalAddress(),
-                        getDeviceInfo().getDeviceType(), Constants.ADDR_TV,
-                        "DelayedActiveSourceLostStandbyRunnable");
+                mIsActiveSourceLostPopupLaunched = false;
             }
         }
     }
@@ -288,6 +289,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     void dismissUiOnActiveSourceStatusRecovered() {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI);
+        mIsActiveSourceLostPopupLaunched = false;
         mService.sendBroadcastAsUser(intent);
     }
 
@@ -521,6 +523,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                     )));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivityAsUser(intent, context.getUser());
+            mIsActiveSourceLostPopupLaunched = true;
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "Unable to start HdmiCecActiveSourceLostActivity");
         } finally {
@@ -736,6 +739,14 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
             return Constants.ADDR_AUDIO_SYSTEM;
         }
         return Constants.ADDR_TV;
+    }
+
+    boolean isActiveSourceLostPopupLaunched() {
+        return mIsActiveSourceLostPopupLaunched;
+    }
+
+    void setIsActiveSourceLostPopupLaunched(boolean isActiveSourceLostPopupLaunched) {
+        mIsActiveSourceLostPopupLaunched = isActiveSourceLostPopupLaunched;
     }
 
     @Override

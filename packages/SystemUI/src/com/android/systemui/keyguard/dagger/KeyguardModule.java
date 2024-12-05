@@ -62,12 +62,14 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
+import com.android.systemui.keyguard.ui.view.AlternateBouncerWindowViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModelModule;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -126,7 +128,7 @@ public interface KeyguardModule {
     @Provides
     @SysUISingleton
     static KeyguardViewMediator newKeyguardViewMediator(
-            Context context,
+            @ShadeDisplayAware Context context,
             UiEventLogger uiEventLogger,
             SessionTracker sessionTracker,
             UserTracker userTracker,
@@ -247,4 +249,10 @@ public interface KeyguardModule {
     @IntoMap
     @ClassKey(KeyguardUpdateMonitor.class)
     CoreStartable bindsKeyguardUpdateMonitor(KeyguardUpdateMonitor keyguardUpdateMonitor);
+
+    /***/
+    @Binds
+    @IntoMap
+    @ClassKey(AlternateBouncerWindowViewBinder.class)
+    CoreStartable bindsAlternateBouncerWindowViewBinder(AlternateBouncerWindowViewBinder binder);
 }

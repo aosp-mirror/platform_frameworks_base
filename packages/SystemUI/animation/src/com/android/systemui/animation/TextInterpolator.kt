@@ -28,11 +28,7 @@ import com.android.internal.graphics.ColorUtils
 import java.lang.Math.max
 
 /** Provide text style linear interpolation for plain text. */
-class TextInterpolator(
-    layout: Layout,
-    var typefaceCache: TypefaceVariantCache,
-    numberOfAnimationSteps: Int? = null,
-) {
+class TextInterpolator(layout: Layout, var typefaceCache: TypefaceVariantCache) {
     /**
      * Returns base paint used for interpolation.
      *
@@ -66,7 +62,7 @@ class TextInterpolator(
         val start: Int, // inclusive
         val end: Int, // exclusive
         var baseFont: Font,
-        var targetFont: Font
+        var targetFont: Font,
     ) {
         val length: Int
             get() = end - start
@@ -79,14 +75,14 @@ class TextInterpolator(
         val baseY: FloatArray, // same length as glyphIds
         val targetX: FloatArray, // same length as glyphIds
         val targetY: FloatArray, // same length as glyphIds
-        val fontRuns: List<FontRun>
+        val fontRuns: List<FontRun>,
     )
 
     /** A class represents text layout of a single line. */
     private class Line(val runs: List<Run>)
 
     private var lines = listOf<Line>()
-    private val fontInterpolator = FontInterpolator(numberOfAnimationSteps)
+    private val fontInterpolator = FontInterpolator(typefaceCache.fontCache)
 
     // Recycling object for glyph drawing and tweaking.
     private val tmpPaint = TextPaint()
@@ -343,12 +339,16 @@ class TextInterpolator(
     private class MutablePositionedGlyph : TextAnimator.PositionedGlyph() {
         override var runStart: Int = 0
             public set
+
         override var runLength: Int = 0
             public set
+
         override var glyphIndex: Int = 0
             public set
+
         override lateinit var font: Font
             public set
+
         override var glyphId: Int = 0
             public set
     }
@@ -401,7 +401,7 @@ class TextInterpolator(
                     0,
                     i - prevStart,
                     font,
-                    tmpPaintForGlyph
+                    tmpPaintForGlyph,
                 )
                 prevStart = i
                 arrayIndex = 0
@@ -418,13 +418,13 @@ class TextInterpolator(
             0,
             run.end - prevStart,
             font,
-            tmpPaintForGlyph
+            tmpPaintForGlyph,
         )
     }
 
     private fun updatePositionsAndFonts(
         layoutResult: List<List<PositionedGlyphs>>,
-        updateBase: Boolean
+        updateBase: Boolean,
     ) {
         // Update target positions with newly calculated text layout.
         check(layoutResult.size == lines.size) { "The new layout result has different line count." }
@@ -507,7 +507,7 @@ class TextInterpolator(
                 lineStart,
                 count,
                 layout.textDirectionHeuristic,
-                paint
+                paint,
             ) { _, _, glyphs, _ ->
                 runs.add(glyphs)
             }

@@ -30,6 +30,8 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.createSwipeAnimation
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -141,8 +143,9 @@ internal suspend fun <T : ContentKey> animateProgress(
     progress: Flow<Float>,
     commitSpec: AnimationSpec<Float>?,
     cancelSpec: AnimationSpec<Float>?,
+    animationScope: CoroutineScope? = null,
 ) {
-    fun animateOffset(targetContent: T, spec: AnimationSpec<Float>?) {
+    suspend fun animateOffset(targetContent: T, spec: AnimationSpec<Float>?) {
         if (state.transitionState != animation.contentTransition || animation.isAnimatingOffset()) {
             return
         }
@@ -176,12 +179,20 @@ internal suspend fun <T : ContentKey> animateProgress(
         }
 
         // Start the transition.
-        state.startTransition(animation.contentTransition)
+        animationScope?.launch { startTransition(state, animation, collectionJob) }
+            ?: startTransition(state, animation, collectionJob)
+    }
+}
 
-        // The transition is done. Cancel the collection in case the transition was finished because
-        // it was interrupted by another transition.
-        if (collectionJob.isActive) {
-            collectionJob.cancel()
-        }
+private suspend fun <T : ContentKey> startTransition(
+    state: MutableSceneTransitionLayoutStateImpl,
+    animation: SwipeAnimation<T>,
+    progressCollectionJob: Job,
+) {
+    state.startTransition(animation.contentTransition)
+    // The transition is done. Cancel the collection in case the transition was finished
+    // because it was interrupted by another transition.
+    if (progressCollectionJob.isActive) {
+        progressCollectionJob.cancel()
     }
 }

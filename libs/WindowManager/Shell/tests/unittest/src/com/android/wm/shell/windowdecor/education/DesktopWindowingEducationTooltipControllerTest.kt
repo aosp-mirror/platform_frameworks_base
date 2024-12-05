@@ -285,7 +285,7 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
       onEducationClickAction: () -> Unit = {},
       onDismissAction: () -> Unit = {}
   ) =
-      DesktopWindowingEducationTooltipController.EducationViewConfig(
+      DesktopWindowingEducationTooltipController.TooltipEducationViewConfig(
           tooltipViewLayout = tooltipViewLayout,
           tooltipColorScheme = tooltipColorScheme,
           tooltipViewGlobalCoordinates = tooltipViewGlobalCoordinates,

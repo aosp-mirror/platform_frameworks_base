@@ -32,7 +32,8 @@ import java.util.Optional
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -125,14 +126,11 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
             )
 
         underTest =
-            HomeControlsKeyguardQuickAffordanceConfig(
-                context = context,
-                component = component,
-            )
+            HomeControlsKeyguardQuickAffordanceConfig(context = context, component = component)
     }
 
     @Test
-    fun state() = runBlockingTest {
+    fun state() = runTest(UnconfinedTestDispatcher()) {
         whenever(component.isEnabled()).thenReturn(isFeatureEnabled)
         whenever(controlsController.getFavorites())
             .thenReturn(

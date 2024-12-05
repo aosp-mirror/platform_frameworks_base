@@ -27,11 +27,8 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 
 /** Creates the state of the current selected tile that is remembered across compositions. */
 @Composable
-fun rememberSelectionState(
-    onResize: (TileSpec) -> Unit,
-    onResizeEnd: (TileSpec) -> Unit,
-): MutableSelectionState {
-    return remember { MutableSelectionState(onResize, onResizeEnd) }
+fun rememberSelectionState(): MutableSelectionState {
+    return remember { MutableSelectionState() }
 }
 
 /**
@@ -41,18 +38,11 @@ fun rememberSelectionState(
 data class Selection(val tileSpec: TileSpec, val manual: Boolean)
 
 /** Holds the state of the current selection. */
-class MutableSelectionState(
-    val onResize: (TileSpec) -> Unit,
-    private val onResizeEnd: (TileSpec) -> Unit,
-) {
+class MutableSelectionState {
     private var _selection = mutableStateOf<Selection?>(null)
-    private var _resizingState = mutableStateOf<ResizingState?>(null)
 
     /** The [Selection] if a tile is selected, null if not. */
     val selection by _selection
-
-    /** The [ResizingState] of the selected tile is currently being resized, null if not. */
-    val resizingState by _resizingState
 
     fun select(tileSpec: TileSpec, manual: Boolean) {
         _selection.value = Selection(tileSpec, manual)
@@ -60,28 +50,6 @@ class MutableSelectionState(
 
     fun unSelect() {
         _selection.value = null
-        onResizingDragEnd()
-    }
-
-    fun onResizingDrag(offset: Float) {
-        _resizingState.value?.onDrag(offset)
-    }
-
-    fun onResizingDragStart(tileWidths: TileWidths) {
-        _selection.value?.let {
-            _resizingState.value = ResizingState(tileWidths) { onResize(it.tileSpec) }
-        }
-    }
-
-    fun onResizingDragEnd() {
-        _resizingState.value = null
-        _selection.value?.let {
-            onResizeEnd(it.tileSpec)
-
-            // Mark the selection as automatic in case the tile ends up moving to a different
-            // row with its new size.
-            _selection.value = it.copy(manual = false)
-        }
     }
 }
 

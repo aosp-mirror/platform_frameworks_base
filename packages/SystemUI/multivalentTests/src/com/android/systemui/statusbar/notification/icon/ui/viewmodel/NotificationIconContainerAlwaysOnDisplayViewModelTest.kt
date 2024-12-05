@@ -18,12 +18,13 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import android.content.res.mainResources
 import android.platform.test.annotations.DisableFlags
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -51,17 +52,20 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class NotificationIconContainerAlwaysOnDisplayViewModelTest(flags: FlagsParameterization) :
+    SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, value = false) }
         }
 
-    val underTest =
+    val underTest by lazy {
         NotificationIconContainerAlwaysOnDisplayViewModel(
             kosmos.testDispatcher,
             kosmos.alwaysOnDisplayNotificationIconsInteractor,
@@ -70,10 +74,23 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             kosmos.mainResources,
             kosmos.shadeInteractor,
         )
+    }
     val testScope = kosmos.testScope
     val keyguardRepository = kosmos.fakeKeyguardRepository
     val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     val powerRepository = kosmos.fakePowerRepository
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setup() {

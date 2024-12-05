@@ -47,7 +47,7 @@ class SharedNotificationContainerInteractor
 constructor(
     @ShadeDisplayAware private val context: Context,
     private val splitShadeStateController: Lazy<SplitShadeStateController>,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     keyguardInteractor: KeyguardInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,

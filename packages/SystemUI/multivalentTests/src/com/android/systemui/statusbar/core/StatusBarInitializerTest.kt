@@ -23,14 +23,16 @@ import android.platform.test.annotations.EnableFlags
 import android.view.ViewGroup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import org.junit.Assert.assertThrows
@@ -45,12 +47,14 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class StatusBarInitializerTest : SysuiTestCase() {
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val windowController = mock(StatusBarWindowController::class.java)
     private val windowControllerStore = mock(StatusBarWindowControllerStore::class.java)
     private val transaction = mock(FragmentTransaction::class.java)
     private val fragmentManager = mock(FragmentManager::class.java)
     private val fragmentHostManager = mock(FragmentHostManager::class.java)
     private val backgroundView = mock(ViewGroup::class.java)
+    private val statusBarModePerDisplayRepository = kosmos.fakeStatusBarModePerDisplayRepository
 
     @Before
     fun setup() {
@@ -72,24 +76,25 @@ class StatusBarInitializerTest : SysuiTestCase() {
             statusBarRootFactory = mock(StatusBarRootFactory::class.java),
             componentFactory = mock(HomeStatusBarComponent.Factory::class.java),
             creationListeners = setOf(),
+            statusBarModePerDisplayRepository = statusBarModePerDisplayRepository,
         )
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun simpleFragment_startsFromCoreStartable() {
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
+    fun flagOn_startsFromCoreStartable() {
         underTest.start()
         assertThat(underTest.initialized).isTrue()
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun simpleFragment_throwsIfInitializeIsCalled() {
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
+    fun flagOn_throwsIfInitializeIsCalled() {
         assertThrows(IllegalStateException::class.java) { underTest.initializeStatusBar() }
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    fun simpleFragment_flagEnabled_doesNotCreateFragment() {
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
+    fun flagOn_flagEnabled_doesNotCreateFragment() {
         underTest.start()
 
         verify(fragmentManager, never()).beginTransaction()
@@ -97,14 +102,14 @@ class StatusBarInitializerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    @DisableFlags(StatusBarRootModernization.FLAG_NAME)
     fun flagOff_startCalled_stillInitializes() {
         underTest.start()
         assertThat(underTest.initialized).isTrue()
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    @DisableFlags(StatusBarRootModernization.FLAG_NAME)
     fun flagOff_doesNotThrowIfInitializeIsCalled() {
         underTest.initializeStatusBar()
         assertThat(underTest.initialized).isTrue()

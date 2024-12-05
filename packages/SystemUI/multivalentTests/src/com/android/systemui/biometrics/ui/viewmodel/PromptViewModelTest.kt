@@ -28,7 +28,6 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.hardware.biometrics.BiometricFingerprintConstants
-import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
@@ -37,6 +36,7 @@ import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
+import android.os.UserHandle
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.HapticFeedbackConstants
@@ -98,13 +98,14 @@ import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
 private const val USER_ID = 4
+private const val WORK_USER_ID = 100
 private const val REQUEST_ID = 4L
 private const val CHALLENGE = 2L
 private const val DELAY = 1000L
-private const val OP_PACKAGE_NAME_WITH_APP_LOGO = "biometric.testapp"
-private const val OP_PACKAGE_NAME_NO_ICON = "biometric.testapp.noicon"
-private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 private const val OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO = "should.use.activiy.logo"
+private const val OP_PACKAGE_NAME_WITH_APP_LOGO = "biometric.testapp"
+private const val OP_PACKAGE_NAME_NO_LOGO_INFO = "biometric.testapp.nologoinfo"
+private const val OP_PACKAGE_NAME_CAN_NOT_BE_FOUND = "can.not.be.found"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -121,13 +122,15 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     private val defaultLogoIconFromAppInfo = context.getDrawable(R.drawable.ic_android)
     private val defaultLogoIconFromActivityInfo = context.getDrawable(R.drawable.ic_add)
+    private val defaultLogoIconWithBadge = context.getDrawable(R.drawable.ic_alarm)
     private val logoResFromApp = R.drawable.ic_cake
     private val logoDrawableFromAppRes = context.getDrawable(logoResFromApp)
     private val logoBitmapFromApp = Bitmap.createBitmap(400, 400, Bitmap.Config.RGB_565)
     private val defaultLogoDescriptionFromAppInfo = "Test Android App"
     private val defaultLogoDescriptionFromActivityInfo = "Test Coke App"
+    private val defaultLogoDescriptionWithBadge = "Work app"
     private val logoDescriptionFromApp = "Test Cake App"
-    private val packageNameForLogoWithOverrides = "should.use.overridden.logo"
+
     private val authInteractionProperties = AuthInteractionProperties()
 
     /** Prompt panel size padding */
@@ -163,7 +166,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             naturalDisplayWidth = 1000,
             naturalDisplayHeight = 3000,
             scaleFactor = 1f,
-            rotation = if (isLandscape) Surface.ROTATION_90 else Surface.ROTATION_0
+            rotation = if (isLandscape) Surface.ROTATION_90 else Surface.ROTATION_0,
         )
 
     private lateinit var promptContentView: PromptContentView
@@ -174,59 +177,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Before
     fun setup() {
-        // Set up default logo info and app customized info
-        whenever(kosmos.packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_ICON), anyInt()))
-            .thenReturn(applicationInfoNoIconOrDescription)
-        whenever(
-                kosmos.packageManager.getApplicationInfo(
-                    eq(OP_PACKAGE_NAME_WITH_APP_LOGO),
-                    anyInt()
-                )
-            )
-            .thenReturn(applicationInfoWithIconAndDescription)
-        whenever(
-                kosmos.packageManager.getApplicationInfo(
-                    eq(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO),
-                    anyInt()
-                )
-            )
-            .thenReturn(applicationInfoWithIconAndDescription)
-        whenever(
-                kosmos.packageManager.getApplicationInfo(
-                    eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND),
-                    anyInt()
-                )
-            )
-            .thenThrow(NameNotFoundException())
-
-        whenever(kosmos.packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
-        whenever(kosmos.iconProvider.getIcon(activityInfo))
-            .thenReturn(defaultLogoIconFromActivityInfo)
-        whenever(activityInfo.loadLabel(kosmos.packageManager))
-            .thenReturn(defaultLogoDescriptionFromActivityInfo)
-
-        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoWithIconAndDescription))
-            .thenReturn(defaultLogoIconFromAppInfo)
-        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoWithIconAndDescription))
-            .thenReturn(defaultLogoDescriptionFromAppInfo)
-        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoNoIconOrDescription))
-            .thenReturn(null)
-        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoNoIconOrDescription))
-            .thenReturn("")
-        whenever(kosmos.packageManager.getUserBadgedIcon(any(), any())).then { it.getArgument(0) }
-        whenever(kosmos.packageManager.getUserBadgedLabel(any(), any())).then { it.getArgument(0) }
-
-        context.setMockPackageManager(kosmos.packageManager)
-        overrideResource(logoResFromApp, logoDrawableFromAppRes)
-        overrideResource(
-            R.array.config_useActivityLogoForBiometricPrompt,
-            arrayOf(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO)
-        )
-
+        setupLogo()
         overrideResource(R.dimen.biometric_dialog_fingerprint_icon_width, mockFingerprintIconWidth)
         overrideResource(
             R.dimen.biometric_dialog_fingerprint_icon_height,
-            mockFingerprintIconHeight
+            mockFingerprintIconHeight,
         )
         overrideResource(R.dimen.biometric_dialog_face_icon_size, mockFaceIconSize)
 
@@ -243,7 +198,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 it.sensorType.toSensorType(),
                 it.allLocations.associateBy { sensorLocationInternal ->
                     sensorLocationInternal.displayId
-                }
+                },
             )
         }
 
@@ -263,6 +218,74 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 .setDescription("test")
                 .setMoreOptionsButtonListener(kosmos.fakeExecutor) { _, _ -> }
                 .build()
+    }
+
+    private fun setupLogo() {
+        // Set up app customized logo
+        overrideResource(logoResFromApp, logoDrawableFromAppRes)
+
+        // Set up when activity info should be used
+        overrideResource(
+            R.array.config_useActivityLogoForBiometricPrompt,
+            arrayOf(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO),
+        )
+        whenever(kosmos.packageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo)
+        whenever(kosmos.iconProvider.getIcon(activityInfo))
+            .thenReturn(defaultLogoIconFromActivityInfo)
+        whenever(activityInfo.loadLabel(kosmos.packageManager))
+            .thenReturn(defaultLogoDescriptionFromActivityInfo)
+
+        // Set up when application info should be used for default logo
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_WITH_APP_LOGO),
+                    anyInt(),
+                )
+            )
+            .thenReturn(applicationInfoWithIconAndDescription)
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO),
+                    anyInt(),
+                )
+            )
+            .thenReturn(applicationInfoWithIconAndDescription)
+        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoWithIconAndDescription))
+            .thenReturn(defaultLogoIconFromAppInfo)
+        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoWithIconAndDescription))
+            .thenReturn(defaultLogoDescriptionFromAppInfo)
+
+        // Set up when package name cannot but found
+        whenever(
+                kosmos.packageManager.getApplicationInfo(
+                    eq(OP_PACKAGE_NAME_CAN_NOT_BE_FOUND),
+                    anyInt(),
+                )
+            )
+            .thenThrow(NameNotFoundException())
+
+        // Set up when no default logo from application info
+        whenever(
+                kosmos.packageManager.getApplicationInfo(eq(OP_PACKAGE_NAME_NO_LOGO_INFO), anyInt())
+            )
+            .thenReturn(applicationInfoNoIconOrDescription)
+        whenever(kosmos.packageManager.getApplicationIcon(applicationInfoNoIconOrDescription))
+            .thenReturn(null)
+        whenever(kosmos.packageManager.getApplicationLabel(applicationInfoNoIconOrDescription))
+            .thenReturn("")
+
+        // Set up work badge
+        whenever(kosmos.packageManager.getUserBadgedIcon(any(), eq(UserHandle.of(USER_ID)))).then {
+            it.getArgument(0)
+        }
+        whenever(kosmos.packageManager.getUserBadgedLabel(any(), eq(UserHandle.of(USER_ID)))).then {
+            it.getArgument(0)
+        }
+        whenever(kosmos.packageManager.getUserBadgedIcon(any(), eq(UserHandle.of(WORK_USER_ID))))
+            .then { defaultLogoIconWithBadge }
+        whenever(kosmos.packageManager.getUserBadgedLabel(any(), eq(UserHandle.of(WORK_USER_ID))))
+            .then { defaultLogoDescriptionWithBadge }
+        context.setMockPackageManager(kosmos.packageManager)
     }
 
     @Test
@@ -441,7 +464,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
-                    dismissAfterDelay = DELAY
+                    dismissAfterDelay = DELAY,
                 )
 
                 // SFPS test cases
@@ -513,7 +536,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
                     dismissAfterDelay = DELAY,
-                    "TEST"
+                    "TEST",
                 )
 
                 if (testCase.isFingerprintOnly) {
@@ -558,7 +581,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
-                    dismissAfterDelay = DELAY
+                    dismissAfterDelay = DELAY,
                 )
 
                 if (testCase.isFaceOnly) {
@@ -598,7 +621,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
-                    dismissAfterDelay = DELAY
+                    dismissAfterDelay = DELAY,
                 )
 
                 kosmos.promptViewModel.confirmAuthenticated()
@@ -701,7 +724,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     .isEqualTo(
                         Pair(
                             expectedUdfpsOverlayParams.sensorBounds.width(),
-                            expectedUdfpsOverlayParams.sensorBounds.height()
+                            expectedUdfpsOverlayParams.sensorBounds.height(),
                         )
                     )
             } else {
@@ -834,7 +857,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                 kosmos.promptViewModel.showAuthenticated(
                     modality = testCase.authenticatedModality,
-                    dismissAfterDelay = DELAY
+                    dismissAfterDelay = DELAY,
                 )
 
                 kosmos.displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_0)
@@ -907,10 +930,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 }
             )
 
-        assertButtonsVisible(
-            cancel = expectConfirmation,
-            confirm = expectConfirmation,
-        )
+        assertButtonsVisible(cancel = expectConfirmation, confirm = expectConfirmation)
     }
 
     @Test
@@ -1158,10 +1178,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         testScheduler.runCurrent()
         assertThat(messages)
-            .containsExactly(
-                PromptMessage.Empty,
-                PromptMessage.Error(expectedErrorMessage),
-            )
+            .containsExactly(PromptMessage.Empty, PromptMessage.Error(expectedErrorMessage))
             .inOrder()
 
         testScheduler.advanceUntilIdle()
@@ -1221,10 +1238,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         if (expectConfirmation) {
             assertThat(size).isEqualTo(PromptSize.MEDIUM)
-            assertButtonsVisible(
-                cancel = true,
-                confirm = true,
-            )
+            assertButtonsVisible(cancel = true, confirm = true)
 
             kosmos.promptViewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
@@ -1251,10 +1265,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         if (expectConfirmation) {
             assertThat(size).isEqualTo(PromptSize.MEDIUM)
-            assertButtonsVisible(
-                cancel = true,
-                confirm = true,
-            )
+            assertButtonsVisible(cancel = true, confirm = true)
 
             if (testCase.modalities.hasSfps) {
                 kosmos.promptViewModel.showAuthenticated(BiometricModality.Fingerprint, 0)
@@ -1290,10 +1301,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         if (expectConfirmation) {
             if (testCase.isFaceOnly) {
                 assertThat(size).isEqualTo(PromptSize.MEDIUM)
-                assertButtonsVisible(
-                    cancel = true,
-                    confirm = true,
-                )
+                assertButtonsVisible(cancel = true, confirm = true)
 
                 kosmos.promptViewModel.confirmAuthenticated()
             } else if (testCase.isCoex) {
@@ -1323,10 +1331,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
         if (expectConfirmation) {
             assertThat(size).isEqualTo(PromptSize.MEDIUM)
-            assertButtonsVisible(
-                cancel = true,
-                confirm = true,
-            )
+            assertButtonsVisible(cancel = true, confirm = true)
 
             kosmos.promptViewModel.confirmAuthenticated()
             assertThat(message).isEqualTo(PromptMessage.Empty)
@@ -1398,10 +1403,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         assertThat(authenticating).isFalse()
         assertThat(authenticated?.isAuthenticated).isTrue()
         assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
-        assertButtonsVisible(
-            cancel = expectConfirmation,
-            confirm = expectConfirmation,
-        )
+        assertButtonsVisible(cancel = expectConfirmation, confirm = expectConfirmation)
     }
 
     @Test
@@ -1421,7 +1423,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                 errorMessage,
                 messageAfterError = helpMessage,
                 authenticateAfterError = false,
-                failedModality = testCase.authenticatedModality
+                failedModality = testCase.authenticatedModality,
             )
         }
 
@@ -1472,7 +1474,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         kosmos.promptViewModel.onAnnounceAccessibilityHint(
             obtainMotionEvent(MotionEvent.ACTION_HOVER_ENTER),
-            true
+            true,
         )
 
         if (testCase.modalities.hasUdfps) {
@@ -1497,14 +1499,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         kosmos.promptViewModel.onAnnounceAccessibilityHint(
             obtainMotionEvent(MotionEvent.ACTION_HOVER_ENTER),
-            true
+            true,
         )
 
         assertThat(hint.isNullOrBlank()).isTrue()
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionOverriddenByVerticalListContentView() =
         runGenericTest(description = "test description", contentView = promptContentView) {
             val contentView by collectLastValue(kosmos.promptViewModel.contentView)
@@ -1515,11 +1516,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
         runGenericTest(
             description = "test description",
-            contentView = promptContentViewWithMoreOptionsButton
+            contentView = promptContentViewWithMoreOptionsButton,
         ) {
             val contentView by collectLastValue(kosmos.promptViewModel.contentView)
             val description by collectLastValue(kosmos.promptViewModel.description)
@@ -1529,7 +1529,6 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun descriptionWithoutContentView() =
         runGenericTest(description = "test description") {
             val contentView by collectLastValue(kosmos.promptViewModel.contentView)
@@ -1540,49 +1539,61 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logo_nullIfPkgNameNotFound() =
         runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
             assertThat(logoInfo).isNotNull()
             assertThat(logoInfo!!.first).isNull()
+            assertThat(logoInfo!!.second).isEqualTo("")
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    fun logo_defaultIsNull() =
+        runGenericTest(packageName = OP_PACKAGE_NAME_NO_LOGO_INFO) {
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isNull()
+            assertThat(logoInfo!!.second).isEqualTo("")
+        }
+
+    @Test
     fun logo_defaultFromActivityInfo() =
         runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
 
+            assertThat(logoInfo).isNotNull()
             // 1. PM.getApplicationInfo(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) is set to return
             // applicationInfoWithIconAndDescription with "defaultLogoIconFromAppInfo",
             // 2. iconProvider.getIcon(activityInfo) is set to return
             // "defaultLogoIconFromActivityInfo"
             // For the apps with OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO, 2 should be called instead of 1
-            assertThat(logoInfo).isNotNull()
             assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconFromActivityInfo)
+            // 1. PM.getApplicationInfo(OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) is set to return
+            // applicationInfoWithIconAndDescription with "defaultLogoDescriptionFromAppInfo",
+            // 2. activityInfo.loadLabel() is set to return defaultLogoDescriptionFromActivityInfo
+            // For the apps with OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO, 2 should be called instead of 1
+            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromActivityInfo)
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logo_defaultIsNull() =
-        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
-            assertThat(logoInfo).isNotNull()
-            assertThat(logoInfo!!.first).isNull()
-        }
-
-    @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logo_default() = runGenericTest {
+    fun logo_defaultFromApplicationInfo() = runGenericTest {
         val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
         assertThat(logoInfo).isNotNull()
         assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconFromAppInfo)
+        assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
     }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logo_resSetByApp() =
+    fun logo_defaultWithWorkBadge() =
+        runGenericTest(userId = WORK_USER_ID) {
+            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
+            assertThat(logoInfo).isNotNull()
+            assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconWithBadge)
+            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionWithBadge)
+        }
+
+    @Test
+    fun logoRes_setByApp() =
         runGenericTest(logoRes = logoResFromApp) {
             val expectedBitmap = context.getDrawable(logoResFromApp).toBitmap()
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1591,50 +1602,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logo_bitmapSetByApp() =
+    fun logoBitmap_setByApp() =
         runGenericTest(logoBitmap = logoBitmapFromApp) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
             assertThat((logoInfo!!.first as BitmapDrawable).bitmap).isEqualTo(logoBitmapFromApp)
         }
 
     @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logoDescription_emptyIfPkgNameNotFound() =
-        runGenericTest(packageName = OP_PACKAGE_NAME_CAN_NOT_BE_FOUND) {
-            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
-            assertThat(logoInfo!!.second).isEqualTo("")
-        }
-
-    @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logoDescription_defaultFromActivityInfo() =
-        runGenericTest(packageName = OP_PACKAGE_NAME_WITH_ACTIVITY_LOGO) {
-            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
-            // 1. PM.getApplicationInfo(packageNameForLogoWithOverrides) is set to return
-            // applicationInfoWithIconAndDescription with defaultLogoDescription,
-            // 2. activityInfo.loadLabel() is set to return defaultLogoDescriptionWithOverrides
-            // For the apps with packageNameForLogoWithOverrides, 2 should be called instead of 1
-            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromActivityInfo)
-        }
-
-    @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logoDescription_defaultIsEmpty() =
-        runGenericTest(packageName = OP_PACKAGE_NAME_NO_ICON) {
-            val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
-            assertThat(logoInfo!!.second).isEqualTo("")
-        }
-
-    @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    fun logoDescription_default() = runGenericTest {
-        val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
-        assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
-    }
-
-    @Test
-    @EnableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     fun logoDescription_setByApp() =
         runGenericTest(logoDescription = logoDescriptionFromApp) {
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
@@ -1802,6 +1776,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         logoBitmap: Bitmap? = null,
         logoDescription: String? = null,
         packageName: String = OP_PACKAGE_NAME_WITH_APP_LOGO,
+        userId: Int = USER_ID,
         block: suspend TestScope.() -> Unit,
     ) {
         val topActivity = ComponentName(packageName, "test app")
@@ -1821,12 +1796,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             logoBitmapFromApp = if (logoRes != 0) logoDrawableFromAppRes.toBitmap() else logoBitmap,
             logoDescriptionFromApp = logoDescription,
             packageName = packageName,
+            userId = userId,
         )
 
         kosmos.biometricStatusRepository.setFingerprintAcquiredStatus(
             AcquiredFingerprintAuthenticationStatus(
                 AuthenticationReason.BiometricPromptAuthentication,
-                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN
+                BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN,
             )
         )
 
@@ -1893,7 +1869,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON,
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -1903,7 +1879,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON,
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -1913,7 +1889,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+                                sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -1932,7 +1908,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON,
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -1958,7 +1934,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON
+                                sensorType = FingerprintSensorProperties.TYPE_POWER_BUTTON,
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -1969,7 +1945,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     fingerprint =
                         fingerprintSensorPropertiesInternal(
                                 strong = true,
-                                sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+                                sensorType = FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
                             )
                             .first(),
                     authenticatedModality = BiometricModality.Fingerprint,
@@ -2046,6 +2022,7 @@ private fun PromptSelectorInteractor.initializePrompt(
     logoBitmapFromApp: Bitmap? = null,
     logoDescriptionFromApp: String? = null,
     packageName: String = OP_PACKAGE_NAME_WITH_APP_LOGO,
+    userId: Int = USER_ID,
 ) {
     val info =
         PromptInfo().apply {
@@ -2064,7 +2041,7 @@ private fun PromptSelectorInteractor.initializePrompt(
 
     setPrompt(
         info,
-        USER_ID,
+        userId,
         REQUEST_ID,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
         CHALLENGE,

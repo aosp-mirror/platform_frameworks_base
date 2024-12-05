@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -324,6 +326,23 @@ public class LogicalDisplayTest {
         // Content is too tall, should have occupy the whole screen - but it won't because of
         // anisotropy correction
         assertEquals(new Point(0, 0), mLogicalDisplay.getDisplayPosition());
+    }
+
+    @Test
+    public void testBrightnessConfigurationFromDisplayDevice() {
+        mDisplayDeviceInfo.brightnessMinimum = 0.12f;
+        mDisplayDeviceInfo.brightnessDim = 0.34f;
+        mDisplayDeviceInfo.brightnessDefault = 0.56f;
+        mDisplayDeviceInfo.brightnessMaximum = 0.78f;
+
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
+        mLogicalDisplay.updateLocked(mDeviceRepo, mSyntheticModeManager);
+
+        DisplayInfo info = mLogicalDisplay.getDisplayInfoLocked();
+        assertThat(info.brightnessMinimum).isEqualTo(0.12f);
+        assertThat(info.brightnessDim).isEqualTo(0.34f);
+        assertThat(info.brightnessDefault).isEqualTo(0.56f);
+        assertThat(info.brightnessMaximum).isEqualTo(0.78f);
     }
 
     @Test

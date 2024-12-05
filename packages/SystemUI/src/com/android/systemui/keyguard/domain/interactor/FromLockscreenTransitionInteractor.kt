@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -40,17 +39,19 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.sample
-import java.util.UUID
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import java.util.UUID
+import javax.inject.Inject
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class FromLockscreenTransitionInteractor
@@ -257,6 +258,19 @@ constructor(
                     }
                 }
             }
+        }
+
+        // Ensure that transitionId is nulled out if external signals cause a PRIMARY_BOUNCER
+        // transition to be canceled.
+        scope.launch {
+            transitionInteractor.transitions
+                .filter {
+                    it.transitionState == TransitionState.CANCELED &&
+                        it.to == KeyguardState.PRIMARY_BOUNCER
+                }
+                .collect {
+                    transitionId = null
+                }
         }
     }
 

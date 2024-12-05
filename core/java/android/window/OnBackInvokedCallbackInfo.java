@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_UNDEFINED;
+
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,19 +31,23 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
     private final IOnBackInvokedCallback mCallback;
     private @OnBackInvokedDispatcher.Priority int mPriority;
     private final boolean mIsAnimationCallback;
+    private final @SystemOverrideOnBackInvokedCallback.OverrideBehavior int mOverrideBehavior;
 
     public OnBackInvokedCallbackInfo(@NonNull IOnBackInvokedCallback callback,
             int priority,
-            boolean isAnimationCallback) {
+            boolean isAnimationCallback,
+            int overrideBehavior) {
         mCallback = callback;
         mPriority = priority;
         mIsAnimationCallback = isAnimationCallback;
+        mOverrideBehavior = overrideBehavior;
     }
 
     private OnBackInvokedCallbackInfo(@NonNull Parcel in) {
         mCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
         mPriority = in.readInt();
         mIsAnimationCallback = in.readBoolean();
+        mOverrideBehavior = in.readInt();
     }
 
     @Override
@@ -54,6 +60,7 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
         dest.writeStrongInterface(mCallback);
         dest.writeInt(mPriority);
         dest.writeBoolean(mIsAnimationCallback);
+        dest.writeInt(mOverrideBehavior);
     }
 
     public static final Creator<OnBackInvokedCallbackInfo> CREATOR =
@@ -70,7 +77,8 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
             };
 
     public boolean isSystemCallback() {
-        return mPriority == OnBackInvokedDispatcher.PRIORITY_SYSTEM;
+        return mPriority == OnBackInvokedDispatcher.PRIORITY_SYSTEM
+                || mOverrideBehavior != OVERRIDE_UNDEFINED;
     }
 
     @NonNull
@@ -87,12 +95,18 @@ public final class OnBackInvokedCallbackInfo implements Parcelable {
         return mIsAnimationCallback;
     }
 
+    @SystemOverrideOnBackInvokedCallback.OverrideBehavior
+    public int getOverrideBehavior() {
+        return mOverrideBehavior;
+    }
+
     @Override
     public String toString() {
         return "OnBackInvokedCallbackInfo{"
                 + "mCallback=" + mCallback
                 + ", mPriority=" + mPriority
                 + ", mIsAnimationCallback=" + mIsAnimationCallback
+                + ", mOverrideBehavior=" + mOverrideBehavior
                 + '}';
     }
 }

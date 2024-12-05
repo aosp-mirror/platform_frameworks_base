@@ -607,7 +607,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 )
             )
             .thenReturn(token)
-        handler.startDragToDesktopTransition(task.taskId, dragAnimator)
+        handler.startDragToDesktopTransition(task, dragAnimator)
         return token
     }
 
@@ -661,6 +661,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         return TestRunningTaskInfoBuilder()
             .setActivityType(if (isHome) ACTIVITY_TYPE_HOME else ACTIVITY_TYPE_STANDARD)
             .setWindowingMode(windowingMode)
+            .setUserId(mContext.userId)
             .build()
             .also {
                 whenever(splitScreenController.isTaskInSplitScreen(it.taskId))

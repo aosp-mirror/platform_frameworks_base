@@ -16,10 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
@@ -33,7 +32,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.AppCompatUtils.isChangeEnabled;
 
 import android.annotation.NonNull;
-import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 
 import com.android.server.wm.utils.OptPropFactory;
 import com.android.window.flags.Flags;
@@ -165,13 +163,15 @@ class AppCompatCameraOverrides {
      *
      * <p>The treatment is enabled when the following conditions are met:
      * <ul>
-     * <li>Property gating the camera compatibility free-form treatment is enabled.
-     * <li>Activity isn't opted out by the device manufacturer with override.
+     * <li>Feature flag gating the camera compatibility free-form treatment is enabled.
+     * <li>Activity is opted-in using per-app override, or the treatment is enabled for all apps.
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return Flags.enableCameraCompatForDesktopWindowing() && !isChangeEnabled(mActivityRecord,
-                OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
+        return Flags.enableCameraCompatForDesktopWindowing() && (isChangeEnabled(mActivityRecord,
+                OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT)
+                || mActivityRecord.mWmService.mAppCompatConfiguration
+                    .isCameraCompatFreeformWindowingTreatmentEnabled());
     }
 
     boolean isOverrideOrientationOnlyForCameraEnabled() {
@@ -202,22 +202,10 @@ class AppCompatCameraOverrides {
                 && !mActivityRecord.shouldCreateAppCompatDisplayInsets();
     }
 
-    @FreeformCameraCompatMode
-    int getFreeformCameraCompatMode() {
-        return mAppCompatCameraOverridesState.mFreeformCameraCompatMode;
-    }
-
-    void setFreeformCameraCompatMode(@FreeformCameraCompatMode int freeformCameraCompatMode) {
-        mAppCompatCameraOverridesState.mFreeformCameraCompatMode = freeformCameraCompatMode;
-    }
-
     static class AppCompatCameraOverridesState {
         // Whether activity "refresh" was requested but not finished in
         // ActivityRecord#activityResumedLocked following the camera compat force rotation in
         // DisplayRotationCompatPolicy.
         private boolean mIsRefreshRequested;
-
-        @FreeformCameraCompatMode
-        private int mFreeformCameraCompatMode = CAMERA_COMPAT_FREEFORM_NONE;
     }
 }

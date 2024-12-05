@@ -20,12 +20,12 @@ import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.util.SparseArray
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.res.R
 import com.android.systemui.retail.data.repository.RetailModeRepository
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -92,7 +92,7 @@ interface TileSpecRepository {
 class TileSpecSettingsRepository
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val logger: QSPipelineLogger,
     private val retailModeRepository: RetailModeRepository,
     private val userTileSpecRepositoryFactory: UserTileSpecRepository.Factory,

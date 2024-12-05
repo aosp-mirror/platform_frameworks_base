@@ -52,10 +52,10 @@
     <string name="accessibility_split_right" msgid="8441001008181296837">"Dividir para a direita"</string>
     <string name="accessibility_split_top" msgid="2789329702027147146">"Dividir para cima"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"Dividir para baixo"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Como usar o modo uma mão"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Como usar o modo para uma mão"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Para sair, deslize de baixo para cima na tela ou toque em qualquer lugar acima do app"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar o modo uma mão"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Sair do modo uma mão"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Iniciar o modo para uma mão"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Sair do modo para uma mão"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Configurações de balões do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"Menu flutuante"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"Devolver à pilha"</string>
@@ -125,18 +125,18 @@
     <string name="select_text" msgid="5139083974039906583">"Selecionar"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Captura de tela"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Abrir no navegador"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Abrir no app"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nova janela"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Gerenciar janelas"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Mudar a proporção"</string>
     <string name="close_text" msgid="4986518933445178928">"Fechar"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Fechar menu"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Abrir o menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Ampliar tela"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Ajustar tela"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Redimensionar"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Não é possível mover o app para cá"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_button_text (559492223133829481) -->
-    <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_restore_button_text (4900114367354709257) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Imersivo"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Restaurar"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maximizar"</string>
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Restaurar"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Ajustar à esquerda"</string>
@@ -146,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"No app"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"No navegador"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"OK"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Abra apps no navegador rapidamente aqui"</string>
 </resources>

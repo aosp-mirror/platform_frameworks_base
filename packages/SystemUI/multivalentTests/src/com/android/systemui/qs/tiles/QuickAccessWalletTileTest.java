@@ -46,6 +46,9 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.service.quickaccesswallet.Flags;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -65,6 +68,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -93,6 +97,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private static final String CARD_DESCRIPTION = "•••• 1234";
     private static final Icon CARD_IMAGE =
             Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888));
+    private static final Icon INVALID_CARD_IMAGE =
+            Icon.createWithContentUri("content://media/external/images/media");
     private static final int PRIMARY_USER_ID = 0;
     private static final int SECONDARY_USER_ID = 10;
 
@@ -219,6 +225,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
     public void testHandleClick_startQuickAccessUiIntent_noCard() {
         setUpWalletCard(/* hasCard= */ false);
 
@@ -232,6 +239,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
     public void testHandleClick_startQuickAccessUiIntent_hasCard() {
         setUpWalletCard(/* hasCard= */ true);
 
@@ -242,6 +250,34 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 eq(mActivityStarter),
                 eq(null),
                 /* hasCard= */ eq(true));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
+    public void testHandleClick_startCardIntent_noCard() {
+        setUpWalletCard(/* hasCard= */ false);
+
+        mTile.handleClick(/* view= */ null);
+        mTestableLooper.processAllMessages();
+
+        verify(mController).startQuickAccessUiIntent(
+                eq(mActivityStarter),
+                eq(null),
+                /* hasCard= */ eq(false));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_LAUNCH_SELECTED_CARD_FROM_QS_TILE})
+    public void testHandleClick_startCardIntent_hasCard() {
+        setUpWalletCard(/* hasCard= */ true);
+
+        mTile.handleClick(null /* view */);
+        mTestableLooper.processAllMessages();
+
+        verify(mController).startWalletCardPendingIntent(
+                any(),
+                eq(mActivityStarter),
+                eq(null));
     }
 
     @Test
@@ -259,7 +295,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleUpdateState_updateLabelAndIcon_noIconFromApi() {
         when(mQuickAccessWalletClient.getTileIcon()).thenReturn(null);
         QSTile.State state = new QSTile.State();
-        QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
+        QSTile.Icon icon = createExpectedIcon(R.drawable.ic_wallet_lockscreen);
 
         mTile.handleUpdateState(state, null);
 
@@ -444,6 +480,14 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     }
 
     @Test
+    public void testQueryCards_invalidDrawable_noSideViewDrawable() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        setUpInvalidWalletCard(/* hasCard= */ true);
+
+        assertNull(mTile.getState().sideViewCustomDrawable);
+    }
+
+    @Test
     public void testQueryCards_error_notUpdateSideViewDrawable() {
         String errorMessage = "getWalletCardsError";
         GetWalletCardsError error = new GetWalletCardsError(CARD_IMAGE, errorMessage);
@@ -503,9 +547,41 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    private void setUpInvalidWalletCard(boolean hasCard) {
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(
+                        hasCard
+                                ? Collections.singletonList(createInvalidWalletCard(mContext))
+                                : Collections.EMPTY_LIST, 0);
+
+        mTile.handleSetListening(true);
+
+        verify(mController).queryWalletCards(mCallbackCaptor.capture());
+
+        mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+    }
+
     private WalletCard createWalletCard(Context context) {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
         return new WalletCard.Builder(CARD_ID, CARD_IMAGE, CARD_DESCRIPTION, pendingIntent).build();
     }
+
+    private WalletCard createInvalidWalletCard(Context context) {
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        return new WalletCard.Builder(
+                CARD_ID, INVALID_CARD_IMAGE, CARD_DESCRIPTION, pendingIntent).build();
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
+    }
+
+
 }

@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
-import android.app.admin.flags.Flags;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
@@ -41,7 +40,6 @@ final class PolicyState<V> {
     private static final String TAG = "PolicyState";
     private static final String TAG_ADMIN_POLICY_ENTRY = "admin-policy-entry";
 
-    private static final String TAG_POLICY_DEFINITION_ENTRY = "policy-definition-entry";
     private static final String TAG_RESOLVED_VALUE_ENTRY = "resolved-value-entry";
     private static final String TAG_ENFORCING_ADMIN_ENTRY = "enforcing-admin-entry";
     private static final String TAG_POLICY_VALUE_ENTRY = "policy-value-entry";
@@ -225,12 +223,6 @@ final class PolicyState<V> {
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
-        if (!Flags.dontWritePolicyDefinition()) {
-            serializer.startTag(/* namespace= */ null, TAG_POLICY_DEFINITION_ENTRY);
-            mPolicyDefinition.saveToXml(serializer);
-            serializer.endTag(/* namespace= */ null, TAG_POLICY_DEFINITION_ENTRY);
-        }
-
         if (mCurrentResolvedPolicy != null) {
             serializer.startTag(/* namespace= */ null, TAG_RESOLVED_VALUE_ENTRY);
             mPolicyDefinition.savePolicyValueToXml(

@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
+import android.hardware.vibrator.IVibratorManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
@@ -40,6 +41,7 @@ import android.os.ExternalVibration;
 import android.os.ExternalVibrationScale;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.IExternalVibratorService;
 import android.os.IVibratorManagerService;
 import android.os.IVibratorStateListener;
@@ -57,6 +59,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.Flags;
+import android.os.vibrator.IVibrationSessionCallback;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
@@ -159,12 +162,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             new VibrationThreadCallbacks();
     private final ExternalVibrationCallbacks mExternalVibrationCallbacks =
             new ExternalVibrationCallbacks();
+    private final VendorVibrationSessionCallbacks mVendorVibrationSessionCallbacks =
+            new VendorVibrationSessionCallbacks();
     @GuardedBy("mLock")
     private final SparseArray<AlwaysOnVibration> mAlwaysOnEffects = new SparseArray<>();
     @GuardedBy("mLock")
-    private VibrationSession mCurrentVibration;
+    private VibrationSession mCurrentSession;
     @GuardedBy("mLock")
-    private VibrationSession mNextVibration;
+    private VibrationSession mNextSession;
     @GuardedBy("mLock")
     private boolean mServiceReady;
 
@@ -191,14 +196,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 // When the system is entering a non-interactive state, we want to cancel
                 // vibrations in case a misbehaving app has abandoned them.
                 synchronized (mLock) {
-                    maybeClearCurrentAndNextVibrationsLocked(
+                    maybeClearCurrentAndNextSessionsLocked(
                             VibratorManagerService.this::shouldCancelOnScreenOffLocked,
                             Status.CANCELLED_BY_SCREEN_OFF);
                 }
             } else if (android.multiuser.Flags.addUiForSoundsFromBackgroundUsers()
                     && intent.getAction().equals(BackgroundUserSoundNotifier.ACTION_MUTE_SOUND)) {
                 synchronized (mLock) {
-                    maybeClearCurrentAndNextVibrationsLocked(
+                    maybeClearCurrentAndNextSessionsLocked(
                             VibratorManagerService.this::shouldCancelOnFgUserRequest,
                             Status.CANCELLED_BY_FOREGROUND_USER);
                 }
@@ -215,14 +220,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         return;
                     }
                     synchronized (mLock) {
-                        maybeClearCurrentAndNextVibrationsLocked(
+                        maybeClearCurrentAndNextSessionsLocked(
                                 VibratorManagerService.this::shouldCancelAppOpModeChangedLocked,
                                 Status.CANCELLED_BY_APP_OPS);
                     }
                 }
             };
 
-    static native long nativeInit(OnSyncedVibrationCompleteListener listener);
+    static native long nativeInit(VibratorManagerNativeCallbacks listener);
 
     static native long nativeGetFinalizer();
 
@@ -235,6 +240,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     static native boolean nativeTriggerSynced(long nativeServicePtr, long vibrationId);
 
     static native void nativeCancelSynced(long nativeServicePtr);
+
+    static native boolean nativeStartSession(long nativeServicePtr, long sessionId,
+            int[] vibratorIds);
+
+    static native void nativeEndSession(long nativeServicePtr, long sessionId, boolean shouldAbort);
+
+    static native void nativeClearSessions(long nativeServicePtr);
 
     @VisibleForTesting
     VibratorManagerService(Context context, Injector injector) {
@@ -303,6 +315,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         // Reset the hardware to a default state, in case this is a runtime restart instead of a
         // fresh boot.
         mNativeWrapper.cancelSynced();
+        if (Flags.vendorVibrationEffects()) {
+            mNativeWrapper.clearSessions();
+        }
         for (int i = 0; i < mVibrators.size(); i++) {
             mVibrators.valueAt(i).reset();
         }
@@ -360,6 +375,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @Override // Binder call
     public int[] getVibratorIds() {
         return Arrays.copyOf(mVibratorIds, mVibratorIds.length);
+    }
+
+    @Override // Binder call
+    public int getCapabilities() {
+        return (int) mCapabilities;
     }
 
     @Override // Binder call
@@ -590,16 +610,22 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             logAndRecordVibrationAttempt(effect, callerInfo, Status.IGNORED_ERROR_TOKEN);
             return null;
         }
-        if (effect.hasVendorEffects()
-                && !hasPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)) {
-            Slog.e(TAG, "vibrate; no permission for vendor effects");
-            logAndRecordVibrationAttempt(effect, callerInfo, Status.IGNORED_MISSING_PERMISSION);
-            return null;
-        }
         enforceUpdateAppOpsStatsPermission(uid);
         if (!isEffectValid(effect)) {
             logAndRecordVibrationAttempt(effect, callerInfo, Status.IGNORED_UNSUPPORTED);
             return null;
+        }
+        if (effect.hasVendorEffects()) {
+            if (!Flags.vendorVibrationEffects()) {
+                Slog.e(TAG, "vibrate; vendor effects feature disabled");
+                logAndRecordVibrationAttempt(effect, callerInfo, Status.IGNORED_UNSUPPORTED);
+                return null;
+            }
+            if (!hasPermission(android.Manifest.permission.VIBRATE_VENDOR_EFFECTS)) {
+                Slog.e(TAG, "vibrate; no permission for vendor effects");
+                logAndRecordVibrationAttempt(effect, callerInfo, Status.IGNORED_MISSING_PERMISSION);
+                return null;
+            }
         }
         // Create Vibration.Stats as close to the received request as possible, for tracking.
         SingleVibrationSession session = new SingleVibrationSession(token, callerInfo, effect);
@@ -623,7 +649,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             // Check if ongoing vibration is more important than this vibration.
             if (ignoreStatus == null) {
-                Vibration.EndInfo vibrationEndInfo = shouldIgnoreVibrationForOngoingLocked(session);
+                Vibration.EndInfo vibrationEndInfo = shouldIgnoreForOngoingLocked(session);
                 if (vibrationEndInfo != null) {
                     ignoreStatus = vibrationEndInfo.status;
                     ignoredBy = vibrationEndInfo.endedBy;
@@ -632,10 +658,11 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             // If not ignored so far then try to start this vibration.
             if (ignoreStatus == null) {
+                // TODO(b/378492007): Investigate if we can move this around AppOpsManager calls
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    if (mCurrentVibration != null) {
-                        if (shouldPipelineVibrationLocked(mCurrentVibration, vib)) {
+                    if (mCurrentSession != null) {
+                        if (shouldPipelineVibrationLocked(mCurrentSession, vib)) {
                             // Don't cancel the current vibration if it's pipeline-able.
                             // Note that if there is a pending next vibration that can't be
                             // pipelined, it will have already cancelled the current one, so we
@@ -645,12 +672,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             }
                         } else {
                             vib.stats.reportInterruptedAnotherVibration(
-                                    mCurrentVibration.getCallerInfo());
-                            mCurrentVibration.requestEnd(Status.CANCELLED_SUPERSEDED, callerInfo,
+                                    mCurrentSession.getCallerInfo());
+                            mCurrentSession.requestEnd(Status.CANCELLED_SUPERSEDED, callerInfo,
                                     /* immediate= */ false);
                         }
                     }
-                    clearNextVibrationLocked(Status.CANCELLED_SUPERSEDED, callerInfo);
+                    clearNextSessionLocked(Status.CANCELLED_SUPERSEDED, callerInfo);
                     ignoreStatus = startVibrationLocked(session);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -659,7 +686,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             // Ignored or failed to start the vibration, end it and report metrics right away.
             if (ignoreStatus != null) {
-                endVibrationLocked(session, ignoreStatus, ignoredBy);
+                endSessionLocked(session, ignoreStatus, ignoredBy);
             }
             return vib;
         }
@@ -677,22 +704,190 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 if (DEBUG) {
                     Slog.d(TAG, "Canceling vibration");
                 }
+                // TODO(b/378492007): Investigate if we can move this around AppOpsManager calls
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     // TODO(b/370948466): investigate why token not checked on external vibrations.
                     IBinder cancelToken =
-                            (mNextVibration instanceof ExternalVibrationSession) ? null : token;
-                    if (shouldCancelVibration(mNextVibration, usageFilter, cancelToken)) {
-                        clearNextVibrationLocked(Status.CANCELLED_BY_USER);
+                            (mNextSession instanceof ExternalVibrationSession) ? null : token;
+                    if (shouldCancelSession(mNextSession, usageFilter, cancelToken)) {
+                        clearNextSessionLocked(Status.CANCELLED_BY_USER);
                     }
                     cancelToken =
-                            (mCurrentVibration instanceof ExternalVibrationSession) ? null : token;
-                    if (shouldCancelVibration(mCurrentVibration, usageFilter, cancelToken)) {
-                        mCurrentVibration.requestEnd(Status.CANCELLED_BY_USER);
+                            (mCurrentSession instanceof ExternalVibrationSession) ? null : token;
+                    if (shouldCancelSession(mCurrentSession, usageFilter, cancelToken)) {
+                        mCurrentSession.requestEnd(Status.CANCELLED_BY_USER);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
+            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    @android.annotation.EnforcePermission(allOf = {
+            android.Manifest.permission.VIBRATE,
+            android.Manifest.permission.VIBRATE_VENDOR_EFFECTS,
+            android.Manifest.permission.START_VIBRATION_SESSIONS,
+    })
+    @Override // Binder call
+    public ICancellationSignal startVendorVibrationSession(int uid, int deviceId, String opPkg,
+            int[] vibratorIds, VibrationAttributes attrs, String reason,
+            IVibrationSessionCallback callback) {
+        startVendorVibrationSession_enforcePermission();
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "startVibrationSession");
+        try {
+            VendorVibrationSession session = startVendorVibrationSessionInternal(
+                    uid, deviceId, opPkg, vibratorIds, attrs, reason, callback);
+            return session == null ? null : session.getCancellationSignal();
+        } finally {
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
+        }
+    }
+
+    VendorVibrationSession startVendorVibrationSessionInternal(int uid, int deviceId, String opPkg,
+            int[] vibratorIds, VibrationAttributes attrs, String reason,
+            IVibrationSessionCallback callback) {
+        if (!Flags.vendorVibrationEffects()) {
+            throw new UnsupportedOperationException("Vibration sessions not supported");
+        }
+        attrs = fixupVibrationAttributes(attrs, /* effect= */ null);
+        CallerInfo callerInfo = new CallerInfo(attrs, uid, deviceId, opPkg, reason);
+        if (callback == null) {
+            Slog.e(TAG, "session callback must not be null");
+            logAndRecordSessionAttempt(callerInfo, Status.IGNORED_ERROR_TOKEN);
+            return null;
+        }
+        if (vibratorIds == null) {
+            vibratorIds = new int[0];
+        }
+        enforceUpdateAppOpsStatsPermission(uid);
+
+        // Create session with adapter that only uses the session vibrators.
+        SparseArray<VibratorController> sessionVibrators = new SparseArray<>(vibratorIds.length);
+        for (int vibratorId : vibratorIds) {
+            VibratorController controller = mVibrators.get(vibratorId);
+            if (controller != null) {
+                sessionVibrators.put(vibratorId, controller);
+            }
+        }
+        DeviceAdapter deviceAdapter = new DeviceAdapter(mVibrationSettings, sessionVibrators);
+        VendorVibrationSession session = new VendorVibrationSession(callerInfo, mHandler,
+                mVendorVibrationSessionCallbacks, deviceAdapter, callback);
+
+        if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+            // Force update of user settings before checking if this vibration effect should
+            // be ignored or scaled.
+            mVibrationSettings.update();
+        }
+
+        synchronized (mLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "Starting session " + session.getSessionId());
+            }
+
+            Status ignoreStatus = null;
+            CallerInfo ignoredBy = null;
+
+            // Check if HAL has capability to start sessions.
+            if ((mCapabilities & IVibratorManager.CAP_START_SESSIONS) == 0) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Missing capability to start sessions, ignoring request");
+                }
+                ignoreStatus = Status.IGNORED_UNSUPPORTED;
+            }
+
+            // Check if vibrator IDs requested are available.
+            if (ignoreStatus == null) {
+                if (vibratorIds.length == 0
+                        || vibratorIds.length != deviceAdapter.getAvailableVibratorIds().length) {
+                    Slog.e(TAG, "Bad vibrator ids to start session, ignoring request."
+                            + " requested=" + Arrays.toString(vibratorIds)
+                            + " available=" + Arrays.toString(mVibratorIds));
+                    ignoreStatus = Status.IGNORED_UNSUPPORTED;
+                }
+            }
+
+            // Check if user settings or DnD is set to ignore this session.
+            if (ignoreStatus == null) {
+                ignoreStatus = shouldIgnoreVibrationLocked(callerInfo);
+            }
+
+            // Check if ongoing vibration is more important than this session.
+            if (ignoreStatus == null) {
+                Vibration.EndInfo vibrationEndInfo = shouldIgnoreForOngoingLocked(session);
+                if (vibrationEndInfo != null) {
+                    ignoreStatus = vibrationEndInfo.status;
+                    ignoredBy = vibrationEndInfo.endedBy;
+                }
+            }
+
+            if (ignoreStatus == null) {
+                // TODO(b/378492007): Investigate if we can move this around AppOpsManager calls
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    // If not ignored so far then stop ongoing sessions before starting this one.
+                    clearNextSessionLocked(Status.CANCELLED_SUPERSEDED, callerInfo);
+                    if (mCurrentSession != null) {
+                        mNextSession = session;
+                        mCurrentSession.requestEnd(Status.CANCELLED_SUPERSEDED, callerInfo,
+                                /* immediate= */ false);
+                    } else {
+                        ignoreStatus = startVendorSessionLocked(session);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+
+            // Ignored or failed to start the session, end it and report metrics right away.
+            if (ignoreStatus != null) {
+                endSessionLocked(session, ignoreStatus, ignoredBy);
+            }
+            return session;
+        }
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private Status startVendorSessionLocked(VendorVibrationSession session) {
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "startSessionLocked");
+        try {
+            long sessionId = session.getSessionId();
+            if (DEBUG) {
+                Slog.d(TAG, "Starting session " + sessionId + " in HAL");
+            }
+            if (session.isEnded()) {
+                // Session already ended, possibly cancelled by app cancellation signal.
+                return session.getStatus();
+            }
+            int mode = startAppOpModeLocked(session.getCallerInfo());
+            switch (mode) {
+                case AppOpsManager.MODE_ALLOWED:
+                    Trace.asyncTraceBegin(TRACE_TAG_VIBRATOR, "vibration", 0);
+                    // Make sure mCurrentVibration is set while triggering the HAL.
+                    mCurrentSession = session;
+                    if (!session.linkToDeath()) {
+                        mCurrentSession = null;
+                        return Status.IGNORED_ERROR_TOKEN;
+                    }
+                    if (!mNativeWrapper.startSession(sessionId, session.getVibratorIds())) {
+                        Slog.e(TAG, "Error starting session " + sessionId + " on vibrators "
+                                + Arrays.toString(session.getVibratorIds()));
+                        session.unlinkToDeath();
+                        mCurrentSession = null;
+                        return Status.IGNORED_UNSUPPORTED;
+                    }
+                    session.notifyStart();
+                    return null;
+                case AppOpsManager.MODE_ERRORED:
+                    Slog.w(TAG, "Start AppOpsManager operation errored for uid "
+                            + session.getCallerInfo().uid);
+                    return Status.IGNORED_ERROR_APP_OPS;
+                default:
+                    return Status.IGNORED_APP_OPS;
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_VIBRATOR);
@@ -747,8 +942,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             pw.println("CurrentVibration:");
             pw.increaseIndent();
-            if (mCurrentVibration != null) {
-                mCurrentVibration.getDebugInfo().dump(pw);
+            if (mCurrentSession != null) {
+                mCurrentSession.getDebugInfo().dump(pw);
             } else {
                 pw.println("null");
             }
@@ -757,8 +952,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
             pw.println("NextVibration:");
             pw.increaseIndent();
-            if (mNextVibration != null) {
-                mNextVibration.getDebugInfo().dump(pw);
+            if (mNextSession != null) {
+                mNextSession.getDebugInfo().dump(pw);
             } else {
                 pw.println("null");
             }
@@ -782,8 +977,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         synchronized (mLock) {
             mVibrationSettings.dump(proto);
             mVibrationScaler.dump(proto);
-            if (mCurrentVibration != null) {
-                mCurrentVibration.getDebugInfo().dump(proto,
+            if (mCurrentSession != null) {
+                mCurrentSession.getDebugInfo().dump(proto,
                         VibratorManagerServiceDumpProto.CURRENT_VIBRATION);
             }
             for (int i = 0; i < mVibrators.size(); i++) {
@@ -816,18 +1011,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
 
             // TODO(b/372241975): investigate why external vibrations were not handled here before
-            if (mCurrentVibration == null
-                    || (mCurrentVibration instanceof ExternalVibrationSession)) {
+            if (mCurrentSession == null
+                    || (mCurrentSession instanceof ExternalVibrationSession)) {
                 return;
             }
 
-            Status ignoreStatus = shouldIgnoreVibrationLocked(mCurrentVibration.getCallerInfo());
+            Status ignoreStatus = shouldIgnoreVibrationLocked(mCurrentSession.getCallerInfo());
             if (inputDevicesChanged || (ignoreStatus != null)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Canceling vibration because settings changed: "
                             + (inputDevicesChanged ? "input devices changed" : ignoreStatus));
                 }
-                mCurrentVibration.requestEnd(Status.CANCELLED_BY_SETTINGS_UPDATE);
+                mCurrentSession.requestEnd(Status.CANCELLED_BY_SETTINGS_UPDATE);
             }
         }
     }
@@ -866,15 +1061,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (mInputDeviceDelegate.isAvailable()) {
                 return startVibrationOnInputDevicesLocked(session.getVibration());
             }
-            if (mCurrentVibration == null) {
+            if (mCurrentSession == null) {
                 return startVibrationOnThreadLocked(session);
             }
             // If there's already a vibration queued (waiting for the previous one to finish
             // cancelling), end it cleanly and replace it with the new one.
             // Note that we don't consider pipelining here, because new pipelined ones should
             // replace pending non-executing pipelined ones anyway.
-            clearNextVibrationLocked(Status.IGNORED_SUPERSEDED, session.getCallerInfo());
-            mNextVibration = session;
+            clearNextSessionLocked(Status.IGNORED_SUPERSEDED, session.getCallerInfo());
+            mNextSession = session;
             return null;
         } finally {
             Trace.traceEnd(TRACE_TAG_VIBRATOR);
@@ -884,6 +1079,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     @GuardedBy("mLock")
     @Nullable
     private Status startVibrationOnThreadLocked(SingleVibrationSession session) {
+        if (DEBUG) {
+            Slog.d(TAG, "Starting vibration " + session.getVibration().id +  " on thread");
+        }
         VibrationStepConductor conductor = createVibrationStepConductor(session.getVibration());
         session.setVibrationConductor(conductor);
         int mode = startAppOpModeLocked(session.getCallerInfo());
@@ -891,16 +1089,16 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             case AppOpsManager.MODE_ALLOWED:
                 Trace.asyncTraceBegin(TRACE_TAG_VIBRATOR, "vibration", 0);
                 // Make sure mCurrentVibration is set while triggering the VibrationThread.
-                mCurrentVibration = session;
-                if (!mCurrentVibration.linkToDeath()) {
+                mCurrentSession = session;
+                if (!mCurrentSession.linkToDeath()) {
                     // Shouldn't happen. The method call already logs.
-                    mCurrentVibration = null;  // Aborted.
+                    mCurrentSession = null;  // Aborted.
                     return Status.IGNORED_ERROR_TOKEN;
                 }
                 if (!mVibrationThread.runVibrationOnVibrationThread(conductor)) {
                     // Shouldn't happen. The method call already logs.
                     session.setVibrationConductor(null); // Rejected by thread, clear it in session.
-                    mCurrentVibration = null;  // Aborted.
+                    mCurrentSession = null;  // Aborted.
                     return Status.IGNORED_ERROR_SCHEDULING;
                 }
                 return null;
@@ -914,28 +1112,50 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     }
 
     @GuardedBy("mLock")
-    private void maybeStartNextSingleVibrationLocked() {
-        if (mNextVibration instanceof SingleVibrationSession session) {
-            mNextVibration = null;
+    private void maybeStartNextSessionLocked() {
+        if (mNextSession instanceof SingleVibrationSession session) {
+            mNextSession = null;
             Status errorStatus = startVibrationOnThreadLocked(session);
             if (errorStatus != null) {
-                endVibrationLocked(session, errorStatus);
+                if (DEBUG) {
+                    Slog.d(TAG, "Error starting next vibration " + session.getVibration().id);
+                }
+                endSessionLocked(session, errorStatus);
             }
-        }
+        } else if (mNextSession instanceof VendorVibrationSession session) {
+            mNextSession = null;
+            Status errorStatus = startVendorSessionLocked(session);
+            if (errorStatus != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Error starting next session " + session.getSessionId());
+                }
+                endSessionLocked(session, errorStatus);
+            }
+        } // External vibrations cannot be started asynchronously.
     }
 
     @GuardedBy("mLock")
-    private void endVibrationLocked(VibrationSession session, Status status) {
-        endVibrationLocked(session, status, /* endedBy= */ null);
+    private void endSessionLocked(VibrationSession session, Status status) {
+        endSessionLocked(session, status, /* endedBy= */ null);
     }
 
     @GuardedBy("mLock")
-    private void endVibrationLocked(VibrationSession session, Status status, CallerInfo endedBy) {
+    private void endSessionLocked(VibrationSession session, Status status, CallerInfo endedBy) {
         session.requestEnd(status, endedBy, /* immediate= */ false);
         logAndRecordVibration(session.getDebugInfo());
     }
 
     private VibrationStepConductor createVibrationStepConductor(HalVibration vib) {
+        return createVibrationStepConductor(vib, mDeviceAdapter, /* isInSession= */ false);
+    }
+
+    private VibrationStepConductor createSessionVibrationStepConductor(HalVibration vib,
+            DeviceAdapter deviceAdapter) {
+        return createVibrationStepConductor(vib, deviceAdapter, /* isInSession= */ true);
+    }
+
+    private VibrationStepConductor createVibrationStepConductor(HalVibration vib,
+            DeviceAdapter deviceAdapter, boolean isInSession) {
         CompletableFuture<Void> requestVibrationParamsFuture = null;
 
         if (Flags.adaptiveHapticsEnabled()
@@ -947,8 +1167,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             mVibrationSettings.getRequestVibrationParamsTimeoutMs());
         }
 
-        return new VibrationStepConductor(vib, mVibrationSettings, mDeviceAdapter, mVibrationScaler,
-                mFrameworkStatsLogger, requestVibrationParamsFuture, mVibrationThreadCallbacks);
+        return new VibrationStepConductor(vib, isInSession, mVibrationSettings,
+                deviceAdapter, mVibrationScaler, mFrameworkStatsLogger,
+                requestVibrationParamsFuture, mVibrationThreadCallbacks);
     }
 
     private Status startVibrationOnInputDevicesLocked(HalVibration vib) {
@@ -968,17 +1189,29 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     private void logAndRecordVibrationAttempt(@Nullable CombinedVibration effect,
             CallerInfo callerInfo, Status status) {
+        logAndRecordVibration(createVibrationAttemptDebugInfo(effect, callerInfo, status));
+    }
+
+    private void logAndRecordSessionAttempt(CallerInfo callerInfo, Status status) {
         logAndRecordVibration(
-                new Vibration.DebugInfoImpl(status, callerInfo,
-                        VibrationStats.StatsInfo.findVibrationType(effect), new VibrationStats(),
-                        effect, /* originalEffect= */ null, VibrationScaler.SCALE_NONE,
-                        VibrationScaler.ADAPTIVE_SCALE_NONE));
+                new VendorVibrationSession.DebugInfoImpl(status, callerInfo,
+                        SystemClock.uptimeMillis(), System.currentTimeMillis(),
+                        /* startTime= */ 0, /* endUptime= */ 0, /* endTime= */ 0,
+                        /* endedByVendor= */ false, /* vibrations= */ null));
     }
 
     private void logAndRecordVibration(DebugInfo info) {
         info.logMetrics(mFrameworkStatsLogger);
         logVibrationStatus(info.getCallerInfo().uid, info.getCallerInfo().attrs, info.getStatus());
         mVibratorManagerRecords.record(info);
+    }
+
+    private DebugInfo createVibrationAttemptDebugInfo(@Nullable CombinedVibration effect,
+            CallerInfo callerInfo, Status status) {
+        return new Vibration.DebugInfoImpl(status, callerInfo,
+                VibrationStats.StatsInfo.findVibrationType(effect), new VibrationStats(),
+                effect, /* originalEffect= */ null, VibrationScaler.SCALE_NONE,
+                VibrationScaler.ADAPTIVE_SCALE_NONE);
     }
 
     private void logVibrationStatus(int uid, VibrationAttributes attrs, Status status) {
@@ -1026,25 +1259,40 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
+    private void onVibrationSessionComplete(long sessionId) {
+        synchronized (mLock) {
+            if (mCurrentSession == null || mCurrentSession.getSessionId() != sessionId) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Vibration session " + sessionId + " callback ignored");
+                }
+                return;
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration session " + sessionId + " complete, notifying session");
+            }
+            mCurrentSession.notifySessionCallback();
+        }
+    }
+
     private void onSyncedVibrationComplete(long vibrationId) {
         synchronized (mLock) {
-            if (mCurrentVibration != null) {
+            if (mCurrentSession != null) {
                 if (DEBUG) {
                     Slog.d(TAG, "Synced vibration " + vibrationId + " complete, notifying thread");
                 }
-                mCurrentVibration.notifySyncedVibratorsCallback(vibrationId);
+                mCurrentSession.notifySyncedVibratorsCallback(vibrationId);
             }
         }
     }
 
     private void onVibrationComplete(int vibratorId, long vibrationId) {
         synchronized (mLock) {
-            if (mCurrentVibration != null) {
+            if (mCurrentSession != null) {
                 if (DEBUG) {
                     Slog.d(TAG, "Vibration " + vibrationId + " on vibrator " + vibratorId
                             + " complete, notifying thread");
                 }
-                mCurrentVibration.notifyVibratorCallback(vibratorId, vibrationId);
+                mCurrentSession.notifyVibratorCallback(vibratorId, vibrationId);
             }
         }
     }
@@ -1056,10 +1304,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      */
     @GuardedBy("mLock")
     @Nullable
-    private Vibration.EndInfo shouldIgnoreVibrationForOngoingLocked(VibrationSession session) {
-        if (mNextVibration != null) {
-            Vibration.EndInfo vibrationEndInfo = shouldIgnoreVibrationForOngoing(session,
-                    mNextVibration);
+    private Vibration.EndInfo shouldIgnoreForOngoingLocked(VibrationSession session) {
+        if (mNextSession != null) {
+            Vibration.EndInfo vibrationEndInfo = shouldIgnoreForOngoing(session,
+                    mNextSession);
             if (vibrationEndInfo != null) {
                 // Next vibration has higher importance than the new one, so the new vibration
                 // should be ignored.
@@ -1067,13 +1315,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
-        if (mCurrentVibration != null) {
-            if (mCurrentVibration.wasEndRequested()) {
+        if (mCurrentSession != null) {
+            if (mCurrentSession.wasEndRequested()) {
                 // Current session has ended or is cancelling, should not block incoming vibrations.
                 return null;
             }
 
-            return shouldIgnoreVibrationForOngoing(session, mCurrentVibration);
+            return shouldIgnoreForOngoing(session, mCurrentSession);
         }
 
         return null;
@@ -1086,7 +1334,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * @return a Vibration.EndInfo if the vibration should be ignored, null otherwise.
      */
     @Nullable
-    private static Vibration.EndInfo shouldIgnoreVibrationForOngoing(
+    private static Vibration.EndInfo shouldIgnoreForOngoing(
             @NonNull VibrationSession newSession, @NonNull VibrationSession ongoingSession) {
 
         int newSessionImportance = getVibrationImportance(newSession);
@@ -1214,9 +1462,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      * @param tokenFilter The binder token to identify the vibration origin. Only vibrations
      *                    started with the same token can be cancelled with it.
      */
-    private boolean shouldCancelVibration(@Nullable VibrationSession session, int usageFilter,
+    private boolean shouldCancelSession(@Nullable VibrationSession session, int usageFilter,
             @Nullable IBinder tokenFilter) {
         if (session == null) {
+            return false;
+        }
+        if (session instanceof VendorVibrationSession) {
+            // Vendor sessions should not be cancelled by Vibrator.cancel API.
             return false;
         }
         if ((tokenFilter != null) && (tokenFilter != session.getCallerToken())) {
@@ -1572,25 +1824,35 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             Trace.traceBegin(TRACE_TAG_VIBRATOR, "onVibrationThreadReleased");
             try {
                 synchronized (mLock) {
-                    if (!(mCurrentVibration instanceof SingleVibrationSession session)) {
-                        if (Build.IS_DEBUGGABLE) {
-                            Slog.wtf(TAG, "VibrationSession invalid on vibration thread release."
-                                    + " currentSession=" + mCurrentVibration);
+                    if (mCurrentSession instanceof SingleVibrationSession session) {
+                        if (Build.IS_DEBUGGABLE && (session.getVibration().id != vibrationId)) {
+                            Slog.wtf(TAG, TextUtils.formatSimple(
+                                    "VibrationId mismatch on vibration thread release."
+                                            + " expected=%d, released=%d",
+                                    session.getVibration().id, vibrationId));
                         }
-                        // Only single vibration sessions are ended by thread being released. Abort.
-                        return;
+                        finishAppOpModeLocked(mCurrentSession.getCallerInfo());
+                        clearCurrentSessionLocked();
+                        Trace.asyncTraceEnd(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
+                        // Start next vibration if it's waiting for the thread.
+                        maybeStartNextSessionLocked();
+                    } else if (mCurrentSession instanceof VendorVibrationSession session) {
+                        VibrationStepConductor conductor = session.clearVibrationConductor();
+                        if (Build.IS_DEBUGGABLE) {
+                            if (conductor == null) {
+                                Slog.wtf(TAG, "Vendor session without ongoing vibration on"
+                                        + " thread release. currentSession=" + mCurrentSession);
+                            } else if (conductor.getVibration().id != vibrationId) {
+                                Slog.wtf(TAG, TextUtils.formatSimple(
+                                        "VibrationId mismatch on vibration thread release."
+                                                + " expected=%d, released=%d",
+                                        conductor.getVibration().id, vibrationId));
+                            }
+                        }
+                    } else if (Build.IS_DEBUGGABLE) {
+                        Slog.wtf(TAG, "VibrationSession invalid on vibration thread release."
+                                + " currentSession=" + mCurrentSession);
                     }
-                    if (Build.IS_DEBUGGABLE && (session.getVibration().id != vibrationId)) {
-                        Slog.wtf(TAG, TextUtils.formatSimple(
-                                "VibrationId mismatch on vibration thread release."
-                                        + " expected=%d, released=%d",
-                                session.getVibration().id, vibrationId));
-                    }
-                    finishAppOpModeLocked(mCurrentVibration.getCallerInfo());
-                    clearCurrentVibrationLocked();
-                    Trace.asyncTraceEnd(Trace.TRACE_TAG_VIBRATOR, "vibration", 0);
-                    // Start next vibration if it's a single vibration waiting for the thread.
-                    maybeStartNextSingleVibrationLocked();
                 }
             } finally {
                 Trace.traceEnd(TRACE_TAG_VIBRATOR);
@@ -1613,10 +1875,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             Trace.traceBegin(TRACE_TAG_VIBRATOR, "onExternalVibrationReleased");
             try {
                 synchronized (mLock) {
-                    if (!(mCurrentVibration instanceof ExternalVibrationSession session)) {
+                    if (!(mCurrentSession instanceof ExternalVibrationSession session)) {
                         if (Build.IS_DEBUGGABLE) {
                             Slog.wtf(TAG, "VibrationSession invalid on external vibration release."
-                                    + " currentSession=" + mCurrentVibration);
+                                    + " currentSession=" + mCurrentSession);
                         }
                         // Only external vibration sessions are ended by this callback. Abort.
                         return;
@@ -1627,10 +1889,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                                         + " expected=%d, released=%d", session.id, vibrationId));
                     }
                     setExternalControl(false, session.stats);
-                    clearCurrentVibrationLocked();
-                    // Start next vibration if it's a single vibration waiting for the external
-                    // control to be over.
-                    maybeStartNextSingleVibrationLocked();
+                    clearCurrentSessionLocked();
+                    // Start next vibration if it's waiting for the external control to be over.
+                    maybeStartNextSessionLocked();
                 }
             } finally {
                 Trace.traceEnd(TRACE_TAG_VIBRATOR);
@@ -1638,19 +1899,161 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
-    /** Listener for synced vibration completion callbacks from native. */
+    /**
+     * Implementation of {@link ExternalVibrationSession.VibratorManagerHooks} that controls
+     * external vibrations and reports them when finished.
+     */
+    private final class VendorVibrationSessionCallbacks
+            implements VendorVibrationSession.VibratorManagerHooks {
+
+        @Override
+        public void vibrate(long sessionId, CallerInfo callerInfo, CombinedVibration effect) {
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration session " + sessionId + " vibration requested");
+            }
+            Trace.traceBegin(TRACE_TAG_VIBRATOR, "sessionVibrate");
+            try {
+                synchronized (mLock) {
+                    if (!(mCurrentSession instanceof VendorVibrationSession session)) {
+                        if (Build.IS_DEBUGGABLE) {
+                            Slog.wtf(TAG, "VibrationSession invalid on session vibrate."
+                                    + " currentSession=" + mCurrentSession);
+                        }
+                        // Only vendor vibration sessions can handle this call. Abort.
+                        return;
+                    }
+                    if (session.getSessionId() != sessionId) {
+                        if (Build.IS_DEBUGGABLE) {
+                            Slog.wtf(TAG, TextUtils.formatSimple(
+                                    "SessionId mismatch on vendor vibration session vibrate."
+                                            + " expected=%d, released=%d",
+                                    session.getSessionId(), sessionId));
+                        }
+                        // Only the ongoing vendor vibration sessions can handle this call. Abort.
+                        return;
+                    }
+                    if (session.wasEndRequested()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "session vibrate; session is ending, vibration ignored");
+                        }
+                        session.notifyVibrationAttempt(createVibrationAttemptDebugInfo(effect,
+                                callerInfo, Status.IGNORED_ERROR_SCHEDULING));
+                        return;
+                    }
+                    if (!isEffectValid(effect)) {
+                        session.notifyVibrationAttempt(createVibrationAttemptDebugInfo(effect,
+                                callerInfo, Status.IGNORED_UNSUPPORTED));
+                        return;
+                    }
+                    if (effect.getDuration() == Long.MAX_VALUE) {
+                        // Repeating effects cannot be played by the service in a session.
+                        session.notifyVibrationAttempt(createVibrationAttemptDebugInfo(effect,
+                                callerInfo, Status.IGNORED_UNSUPPORTED));
+                        return;
+                    }
+                    // Create Vibration.Stats as close to the request as possible, for tracking.
+                    HalVibration vib = new HalVibration(callerInfo, effect);
+                    vib.fillFallbacks(mVibrationSettings::getFallbackEffect);
+
+                    if (callerInfo.attrs.isFlagSet(
+                            VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
+                        // Force update of user settings before checking if this vibration effect
+                        // should be ignored or scaled.
+                        mVibrationSettings.update();
+                    }
+
+                    if (DEBUG) {
+                        Slog.d(TAG, "Starting vibrate for vibration " + vib.id
+                                + " in session " + sessionId);
+                    }
+
+                    VibrationStepConductor conductor =
+                            createSessionVibrationStepConductor(vib, session.getDeviceAdapter());
+                    if (session.maybeSetVibrationConductor(conductor)) {
+                        if (!mVibrationThread.runVibrationOnVibrationThread(conductor)) {
+                            // Shouldn't happen. The method call already logs.
+                            vib.end(new Vibration.EndInfo(Status.IGNORED_ERROR_SCHEDULING));
+                            session.clearVibrationConductor(); // Rejected by thread, clear it.
+                        }
+                    } else {
+                        // Cannot set vibration in session, log failed attempt.
+                        session.notifyVibrationAttempt(createVibrationAttemptDebugInfo(effect,
+                                callerInfo, Status.IGNORED_ERROR_SCHEDULING));
+                    }
+                }
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIBRATOR);
+            }
+        }
+
+        @Override
+        public void endSession(long sessionId, boolean shouldAbort) {
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration session " + sessionId
+                        + (shouldAbort ? " aborting" : " ending"));
+            }
+            Trace.traceBegin(TRACE_TAG_VIBRATOR, "endSession");
+            try {
+                mNativeWrapper.endSession(sessionId, shouldAbort);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIBRATOR);
+            }
+        }
+
+        @Override
+        public void onSessionReleased(long sessionId) {
+            if (DEBUG) {
+                Slog.d(TAG, "Vibration session " + sessionId + " released");
+            }
+            Trace.traceBegin(TRACE_TAG_VIBRATOR, "onVendorSessionReleased");
+            try {
+                synchronized (mLock) {
+                    if (!(mCurrentSession instanceof VendorVibrationSession session)) {
+                        if (Build.IS_DEBUGGABLE) {
+                            Slog.wtf(TAG, "VibrationSession invalid on vibration session release."
+                                    + " currentSession=" + mCurrentSession);
+                        }
+                        // Only vendor vibration sessions are ended by this callback. Abort.
+                        return;
+                    }
+                    if (Build.IS_DEBUGGABLE && (session.getSessionId() != sessionId)) {
+                        Slog.wtf(TAG, TextUtils.formatSimple(
+                                "SessionId mismatch on vendor vibration session release."
+                                        + " expected=%d, released=%d",
+                                session.getSessionId(), sessionId));
+                    }
+                    // Make sure all controllers in session are reset after session ended.
+                    // This will update the vibrator state to isVibrating = false for listeners.
+                    for (int vibratorId : session.getVibratorIds()) {
+                        mVibrators.get(vibratorId).off();
+                    }
+                    finishAppOpModeLocked(mCurrentSession.getCallerInfo());
+                    clearCurrentSessionLocked();
+                    // Start next vibration if it's waiting for the HAL session to be over.
+                    maybeStartNextSessionLocked();
+                }
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIBRATOR);
+            }
+        }
+    }
+
+    /** Listener for vibrator manager completion callbacks from native. */
     @VisibleForTesting
-    interface OnSyncedVibrationCompleteListener {
+    interface VibratorManagerNativeCallbacks {
 
         /** Callback triggered when synced vibration is complete. */
-        void onComplete(long vibrationId);
+        void onSyncedVibrationComplete(long vibrationId);
+
+        /** Callback triggered when vibration session is complete. */
+        void onVibrationSessionComplete(long sessionId);
     }
 
     /**
      * Implementation of listeners to native vibrators with a weak reference to this service.
      */
     private static final class VibrationCompleteListener implements
-            VibratorController.OnVibrationCompleteListener, OnSyncedVibrationCompleteListener {
+            VibratorController.OnVibrationCompleteListener, VibratorManagerNativeCallbacks {
         private WeakReference<VibratorManagerService> mServiceRef;
 
         VibrationCompleteListener(VibratorManagerService service) {
@@ -1658,10 +2061,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         @Override
-        public void onComplete(long vibrationId) {
+        public void onSyncedVibrationComplete(long vibrationId) {
             VibratorManagerService service = mServiceRef.get();
             if (service != null) {
                 service.onSyncedVibrationComplete(vibrationId);
+            }
+        }
+
+        @Override
+        public void onVibrationSessionComplete(long sessionId) {
+            VibratorManagerService service = mServiceRef.get();
+            if (service != null) {
+                service.onVibrationSessionComplete(sessionId);
             }
         }
 
@@ -1698,7 +2109,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         private long mNativeServicePtr = 0;
 
         /** Returns native pointer to newly created controller and connects with HAL service. */
-        public void init(OnSyncedVibrationCompleteListener listener) {
+        public void init(VibratorManagerNativeCallbacks listener) {
             mNativeServicePtr = nativeInit(listener);
             long finalizerPtr = nativeGetFinalizer();
 
@@ -1733,6 +2144,21 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         /** Cancel prepared synced vibration. */
         public void cancelSynced() {
             nativeCancelSynced(mNativeServicePtr);
+        }
+
+        /** Start vibration session. */
+        public boolean startSession(long sessionId, @NonNull int[] vibratorIds) {
+            return nativeStartSession(mNativeServicePtr, sessionId, vibratorIds);
+        }
+
+        /** End vibration session. */
+        public void endSession(long sessionId, boolean shouldAbort) {
+            nativeEndSession(mNativeServicePtr, sessionId, shouldAbort);
+        }
+
+        /** Clear vibration sessions. */
+        public void clearSessions() {
+            nativeClearSessions(mNativeServicePtr);
         }
     }
 
@@ -1853,46 +2279,46 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     /** Clears mNextVibration if set, ending it cleanly */
     @GuardedBy("mLock")
-    private void clearNextVibrationLocked(Status status) {
-        clearNextVibrationLocked(status, /* endedBy= */ null);
+    private void clearNextSessionLocked(Status status) {
+        clearNextSessionLocked(status, /* endedBy= */ null);
     }
 
     /** Clears mNextVibration if set, ending it cleanly */
     @GuardedBy("mLock")
-    private void clearNextVibrationLocked(Status status, CallerInfo endedBy) {
-        if (mNextVibration != null) {
+    private void clearNextSessionLocked(Status status, CallerInfo endedBy) {
+        if (mNextSession != null) {
             if (DEBUG) {
-                Slog.d(TAG, "Dropping pending vibration from " + mNextVibration.getCallerInfo()
+                Slog.d(TAG, "Dropping pending vibration from " + mNextSession.getCallerInfo()
                         + " with status: " + status);
             }
             // Clearing next vibration before playing it, end it and report metrics right away.
-            endVibrationLocked(mNextVibration, status, endedBy);
-            mNextVibration = null;
+            endSessionLocked(mNextSession, status, endedBy);
+            mNextSession = null;
         }
     }
 
     /** Clears mCurrentVibration if set, reporting metrics */
     @GuardedBy("mLock")
-    private void clearCurrentVibrationLocked() {
-        if (mCurrentVibration != null) {
-            mCurrentVibration.unlinkToDeath();
-            logAndRecordVibration(mCurrentVibration.getDebugInfo());
-            mCurrentVibration = null;
+    private void clearCurrentSessionLocked() {
+        if (mCurrentSession != null) {
+            mCurrentSession.unlinkToDeath();
+            logAndRecordVibration(mCurrentSession.getDebugInfo());
+            mCurrentSession = null;
             mLock.notify(); // Notify if waiting for current vibration to end.
         }
     }
 
     @GuardedBy("mLock")
-    private void maybeClearCurrentAndNextVibrationsLocked(
+    private void maybeClearCurrentAndNextSessionsLocked(
             Predicate<VibrationSession> shouldEndSessionPredicate, Status endStatus) {
         // TODO(b/372241975): investigate why external vibrations were not handled here before
-        if (!(mNextVibration instanceof ExternalVibrationSession)
-                && shouldEndSessionPredicate.test(mNextVibration)) {
-            clearNextVibrationLocked(endStatus);
+        if (!(mNextSession instanceof ExternalVibrationSession)
+                && shouldEndSessionPredicate.test(mNextSession)) {
+            clearNextSessionLocked(endStatus);
         }
-        if (!(mCurrentVibration instanceof ExternalVibrationSession)
-                && shouldEndSessionPredicate.test(mCurrentVibration)) {
-            mCurrentVibration.requestEnd(endStatus);
+        if (!(mCurrentSession instanceof ExternalVibrationSession)
+                && shouldEndSessionPredicate.test(mCurrentSession)) {
+            mCurrentSession.requestEnd(endStatus);
         }
     }
 
@@ -1902,12 +2328,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
      *
      * @return true if the vibration completed, or false if waiting timed out.
      */
-    public boolean waitForCurrentVibrationEnd(long maxWaitMillis) {
+    public boolean waitForCurrentSessionEnd(long maxWaitMillis) {
         long now = SystemClock.elapsedRealtime();
         long deadline = now + maxWaitMillis;
         synchronized (mLock) {
             while (true) {
-                if (mCurrentVibration == null) {
+                if (mCurrentSession == null) {
                     return true;  // Done
                 }
                 if (now >= deadline) {  // Note that thread.wait(0) waits indefinitely.
@@ -1965,7 +2391,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
                 synchronized (mLock) {
                     if (!hasExternalControlCapability()) {
-                        endVibrationLocked(session, Status.IGNORED_UNSUPPORTED);
+                        endSessionLocked(session, Status.IGNORED_UNSUPPORTED);
                         return session.getScale();
                     }
 
@@ -1976,17 +2402,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
                                 + " tried to play externally controlled vibration"
                                 + " without VIBRATE permission, ignoring.");
-                        endVibrationLocked(session, Status.IGNORED_MISSING_PERMISSION);
+                        endSessionLocked(session, Status.IGNORED_MISSING_PERMISSION);
                         return session.getScale();
                     }
 
                     Status ignoreStatus = shouldIgnoreVibrationLocked(session.callerInfo);
                     if (ignoreStatus != null) {
-                        endVibrationLocked(session, ignoreStatus);
+                        endSessionLocked(session, ignoreStatus);
                         return session.getScale();
                     }
 
-                    if ((mCurrentVibration instanceof ExternalVibrationSession evs)
+                    if ((mCurrentSession instanceof ExternalVibrationSession evs)
                             && evs.isHoldingSameVibration(vib)) {
                         // We are already playing this external vibration, so we can return the same
                         // scale calculated in the previous call to this method.
@@ -1994,17 +2420,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     }
 
                     // Check if ongoing vibration is more important than this vibration.
-                    Vibration.EndInfo ignoreInfo = shouldIgnoreVibrationForOngoingLocked(session);
+                    Vibration.EndInfo ignoreInfo = shouldIgnoreForOngoingLocked(session);
                     if (ignoreInfo != null) {
-                        endVibrationLocked(session, ignoreInfo.status, ignoreInfo.endedBy);
+                        endSessionLocked(session, ignoreInfo.status, ignoreInfo.endedBy);
                         return session.getScale();
                     }
 
                     // First clear next request, so it won't start when the current one ends.
-                    clearNextVibrationLocked(Status.IGNORED_FOR_EXTERNAL, session.callerInfo);
-                    mNextVibration = session;
+                    clearNextSessionLocked(Status.IGNORED_FOR_EXTERNAL, session.callerInfo);
+                    mNextSession = session;
 
-                    if (mCurrentVibration != null) {
+                    if (mCurrentSession != null) {
                         // Cancel any vibration that may be playing and ready the vibrator, even if
                         // we have an externally controlled vibration playing already.
                         // Since the interface defines that only one externally controlled
@@ -2016,36 +2442,36 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         // as we would need to mute the old one still if it came from a different
                         // controller.
                         session.stats.reportInterruptedAnotherVibration(
-                                mCurrentVibration.getCallerInfo());
-                        mCurrentVibration.requestEnd(Status.CANCELLED_SUPERSEDED,
+                                mCurrentSession.getCallerInfo());
+                        mCurrentSession.requestEnd(Status.CANCELLED_SUPERSEDED,
                                 session.callerInfo, /* immediate= */ true);
                         waitForCompletion = true;
                     }
                 }
                 // Wait for lock and interact with HAL to set external control outside main lock.
                 if (waitForCompletion) {
-                    if (!waitForCurrentVibrationEnd(VIBRATION_CANCEL_WAIT_MILLIS)) {
+                    if (!waitForCurrentSessionEnd(VIBRATION_CANCEL_WAIT_MILLIS)) {
                         Slog.e(TAG, "Timed out waiting for vibration to cancel");
                         synchronized (mLock) {
-                            if (mNextVibration == session) {
-                                mNextVibration = null;
+                            if (mNextSession == session) {
+                                mNextSession = null;
                             }
-                            endVibrationLocked(session, Status.IGNORED_ERROR_CANCELLING);
+                            endSessionLocked(session, Status.IGNORED_ERROR_CANCELLING);
                             return session.getScale();
                         }
                     }
                 }
                 synchronized (mLock) {
-                    if (mNextVibration == session) {
+                    if (mNextSession == session) {
                         // This is still the next vibration to be played.
-                        mNextVibration = null;
+                        mNextSession = null;
                     } else {
                         // A new request took the place of this one, maybe with higher importance.
                         // Next vibration already cleared with the right status, just return here.
                         return session.getScale();
                     }
                     if (!session.linkToDeath()) {
-                        endVibrationLocked(session, Status.IGNORED_ERROR_TOKEN);
+                        endSessionLocked(session, Status.IGNORED_ERROR_TOKEN);
                         return session.getScale();
                     }
                     if (DEBUG) {
@@ -2062,7 +2488,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                         // should be ignored or scaled.
                         mVibrationSettings.update();
                     }
-                    mCurrentVibration = session;
+                    mCurrentSession = session;
                     session.scale(mVibrationScaler, attrs.getUsage());
 
                     // Vibrator will start receiving data from external channels after this point.
@@ -2080,12 +2506,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             Trace.traceBegin(TRACE_TAG_VIBRATOR, "onExternalVibrationStop");
             try {
                 synchronized (mLock) {
-                    if ((mCurrentVibration instanceof ExternalVibrationSession evs)
+                    if ((mCurrentSession instanceof ExternalVibrationSession evs)
                             && evs.isHoldingSameVibration(vib)) {
                         if (DEBUG) {
                             Slog.d(TAG, "Stopping external vibration: " + vib);
                         }
-                        mCurrentVibration.requestEnd(Status.FINISHED);
+                        mCurrentSession.requestEnd(Status.FINISHED);
                     }
                 }
             } finally {

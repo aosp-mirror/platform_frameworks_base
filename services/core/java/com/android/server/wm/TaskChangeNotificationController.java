@@ -62,6 +62,8 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG = 27;
     private static final int NOTIFY_LOCK_TASK_MODE_CHANGED_MSG = 28;
     private static final int NOTIFY_TASK_SNAPSHOT_INVALIDATED_LISTENERS_MSG = 29;
+    private static final int NOTIFY_RECENT_TASK_REMOVED_FOR_ADD_TASK_LISTENERS_MSG = 30;
+
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -167,6 +169,10 @@ class TaskChangeNotificationController {
         l.onRecentTaskListFrozenChanged(m.arg1 != 0);
     };
 
+    private final TaskStackConsumer mNotifyRecentTaskRemovedForAddTask = (l, m) -> {
+        l.onRecentTaskRemovedForAddTask(m.arg1);
+    };
+
     private final TaskStackConsumer mNotifyTaskFocusChanged = (l, m) -> {
         l.onTaskFocusChanged(m.arg1, m.arg2 != 0);
     };
@@ -260,6 +266,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG:
                     forAllRemoteListeners(mNotifyTaskListFrozen, msg);
+                    break;
+                case NOTIFY_RECENT_TASK_REMOVED_FOR_ADD_TASK_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyRecentTaskRemovedForAddTask, msg);
                     break;
                 case NOTIFY_TASK_FOCUS_CHANGED_MSG:
                     forAllRemoteListeners(mNotifyTaskFocusChanged, msg);
@@ -538,6 +547,15 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_LIST_FROZEN_UNFROZEN_MSG,
                 frozen ? 1 : 0, 0 /* unused */);
         forAllLocalListeners(mNotifyTaskListFrozen, msg);
+        msg.sendToTarget();
+    }
+
+    /** Called when a task is removed from the recent tasks list. */
+    void notifyRecentTaskRemovedForAddTask(int taskId) {
+        final Message msg = mHandler.obtainMessage(
+                NOTIFY_RECENT_TASK_REMOVED_FOR_ADD_TASK_LISTENERS_MSG, taskId,
+                0 /* unused */);
+        forAllLocalListeners(mNotifyRecentTaskRemovedForAddTask, msg);
         msg.sendToTarget();
     }
 

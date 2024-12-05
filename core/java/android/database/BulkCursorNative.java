@@ -215,7 +215,7 @@ final class BulkCursorProxy implements IBulkCursor {
             // If close() is being called from the finalizer thread, do not wait for a reply from
             // the remote side.
             final boolean fromFinalizer =
-                    android.database.sqlite.Flags.onewayFinalizerClose()
+                    android.database.sqlite.Flags.onewayFinalizerCloseFixed()
                     && "FinalizerDaemon".equals(Thread.currentThread().getName());
             mRemote.transact(CLOSE_TRANSACTION, data, reply,
                     fromFinalizer ? IBinder.FLAG_ONEWAY: 0);

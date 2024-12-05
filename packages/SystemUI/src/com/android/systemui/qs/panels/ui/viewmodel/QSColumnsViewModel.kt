@@ -16,17 +16,61 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.qs.panels.domain.interactor.QSColumnsInteractor
-import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
-interface QSColumnsViewModel {
-    val columns: StateFlow<Int>
-}
+/**
+ * View model for the number of columns that should be shown in a QS grid.
+ * * Create it with a [MediaLocation] to halve the number of columns when media should show in a row
+ *   with the tiles.
+ * * Create it with a `null` [MediaLocation] to ignore media visibility (useful for edit mode).
+ */
+class QSColumnsViewModel
+@AssistedInject
+constructor(
+    interactor: QSColumnsInteractor,
+    mediaInRowInLandscapeViewModelFactory: MediaInRowInLandscapeViewModel.Factory,
+    @Assisted @MediaLocation mediaLocation: Int?,
+) : ExclusiveActivatable() {
 
-@SysUISingleton
-class QSColumnsSizeViewModelImpl @Inject constructor(interactor: QSColumnsInteractor) :
-    QSColumnsViewModel {
-    override val columns: StateFlow<Int> = interactor.columns
+    private val hydrator = Hydrator("QSColumnsViewModelWithMedia")
+
+    val columns by derivedStateOf {
+        if (mediaInRowInLandscapeViewModel?.shouldMediaShowInRow == true) {
+            columnsWithoutMedia / 2
+        } else {
+            columnsWithoutMedia
+        }
+    }
+
+    private val mediaInRowInLandscapeViewModel =
+        mediaLocation?.let { mediaInRowInLandscapeViewModelFactory.create(it) }
+
+    private val columnsWithoutMedia by
+        hydrator.hydratedStateOf(traceName = "columnsWithoutMedia", source = interactor.columns)
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch { hydrator.activate() }
+            launch { mediaInRowInLandscapeViewModel?.activate() }
+            awaitCancellation()
+        }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(mediaLocation: Int?): QSColumnsViewModel
+
+        fun createWithoutMediaTracking() = create(null)
+    }
 }

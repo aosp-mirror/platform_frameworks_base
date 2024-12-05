@@ -51,7 +51,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
                 .apply { addOverride(R.drawable.ic_alarm, TestStubDrawable()) }
                 .resources,
             context.theme,
-            fakeClock
+            fakeClock,
         )
     }
 
@@ -69,7 +69,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val expectedState =
             createAlarmTileState(
                 QSTileState.ActivationState.INACTIVE,
-                context.getString(R.string.qs_alarm_tile_no_alarm)
+                context.getString(R.string.qs_alarm_tile_no_alarm),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -85,7 +85,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val localDateTime =
             LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(triggerTime),
-                TimeZone.getDefault().toZoneId()
+                TimeZone.getDefault().toZoneId(),
             )
         val expectedSecondaryLabel = AlarmTileMapper.formatter24Hour.format(localDateTime)
         val expectedState =
@@ -104,7 +104,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val localDateTime =
             LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(triggerTime),
-                TimeZone.getDefault().toZoneId()
+                TimeZone.getDefault().toZoneId(),
             )
         val expectedSecondaryLabel = AlarmTileMapper.formatter12Hour.format(localDateTime)
         val expectedState =
@@ -124,7 +124,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val localDateTime =
             LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(triggerTime),
-                TimeZone.getDefault().toZoneId()
+                TimeZone.getDefault().toZoneId(),
             )
         val expectedSecondaryLabel = AlarmTileMapper.formatterDateOnly.format(localDateTime)
         val expectedState =
@@ -144,7 +144,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val localDateTime =
             LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(triggerTime),
-                TimeZone.getDefault().toZoneId()
+                TimeZone.getDefault().toZoneId(),
             )
         val expectedSecondaryLabel = AlarmTileMapper.formatter12Hour.format(localDateTime)
         val expectedState =
@@ -164,7 +164,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
         val localDateTime =
             LocalDateTime.ofInstant(
                 Instant.ofEpochMilli(triggerTime),
-                TimeZone.getDefault().toZoneId()
+                TimeZone.getDefault().toZoneId(),
             )
         val expectedSecondaryLabel = AlarmTileMapper.formatterDateOnly.format(localDateTime)
         val expectedState =
@@ -174,11 +174,11 @@ class AlarmTileMapperTest : SysuiTestCase() {
 
     private fun createAlarmTileState(
         activationState: QSTileState.ActivationState,
-        secondaryLabel: String
+        secondaryLabel: String,
     ): QSTileState {
         val label = context.getString(R.string.status_bar_alarm)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(R.drawable.ic_alarm)!!, null) },
+            Icon.Loaded(context.getDrawable(R.drawable.ic_alarm)!!, null),
             R.drawable.ic_alarm,
             label,
             activationState,
@@ -188,7 +188,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.Chevron,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

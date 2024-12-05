@@ -622,18 +622,13 @@ bool SkiaCanvas::useGainmapShader(Bitmap& bitmap) {
     auto colorSpace = info.colorSpace();
     // If we don't have a colorspace, we can't apply a gainmap
     if (!colorSpace) return false;
-    skcms_TransferFunction tfn;
-    colorSpace->transferFn(&tfn);
 
-    auto transferType = skcms_TransferFunction_getType(&tfn);
-    switch (transferType) {
-        case skcms_TFType_HLGish:
-        case skcms_TFType_HLGinvish:
-        case skcms_TFType_PQish:
-            return true;
-        case skcms_TFType_Invalid:
-        case skcms_TFType_sRGBish:
-            return false;
+    const float targetRatio = uirenderer::getTargetHdrSdrRatio(colorSpace);
+
+    if (bitmap.gainmap()->info.fBaseImageType == SkGainmapInfo::BaseImageType::kHDR) {
+        return targetRatio < bitmap.gainmap()->info.fDisplayRatioHdr;
+    } else {
+        return targetRatio > bitmap.gainmap()->info.fDisplayRatioSdr;
     }
 }
 

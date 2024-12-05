@@ -58,3 +58,18 @@ flag {
   description: "Guards the new FLAG_SILENT Notification flag"
   bug: "336488844"
 }
+
+flag {
+   name: "notification_conversation_channel_management"
+   is_exported: true
+   namespace: "systemui"
+   description: "Allows the NAS to create and modify conversation notifications"
+   bug: "373599715"
+}
+
+flag {
+  name: "notification_regroup_on_classification"
+  namespace: "systemui"
+  description: "This flag controls regrouping after notification classification"
+  bug: "372775153"
+}

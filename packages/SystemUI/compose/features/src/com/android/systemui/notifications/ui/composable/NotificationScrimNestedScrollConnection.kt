@@ -16,11 +16,13 @@
 
 package com.android.systemui.notifications.ui.composable
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.util.fastCoerceAtLeast
 import androidx.compose.ui.util.fastCoerceAtMost
+import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController
 
@@ -43,6 +45,7 @@ fun NotificationScrimNestedScrollConnection(
     isCurrentGestureOverscroll: () -> Boolean,
     onStart: (Float) -> Unit = {},
     onStop: (Float) -> Unit = {},
+    flingBehavior: FlingBehavior,
 ): PriorityNestedScrollConnection {
     return PriorityNestedScrollConnection(
         orientation = Orientation.Vertical,
@@ -77,8 +80,9 @@ fun NotificationScrimNestedScrollConnection(
                     return amountConsumed
                 }
 
-                override suspend fun onStop(initialVelocity: Float): Float {
-                    onStop(initialVelocity)
+                override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
+                    val consumedByScroll = flingToScroll(initialVelocity, flingBehavior)
+                    onStop(initialVelocity - consumedByScroll)
                     if (scrimOffset() < minScrimOffset()) {
                         animateScrimOffset(minScrimOffset())
                     }

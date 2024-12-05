@@ -17,13 +17,12 @@
 package com.android.systemui.display.data.repository
 
 import android.view.Display
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Background
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Provides per display instances of [T]. */
 interface PerDisplayStore<T> {

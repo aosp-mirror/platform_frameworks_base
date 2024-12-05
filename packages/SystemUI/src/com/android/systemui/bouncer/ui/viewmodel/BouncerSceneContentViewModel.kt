@@ -23,6 +23,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.core.graphics.drawable.toBitmap
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -35,6 +36,7 @@ import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardMediaKeyInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
@@ -48,7 +50,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Models UI state for the content of the bouncer scene. */
 class BouncerSceneContentViewModel
@@ -67,6 +68,7 @@ constructor(
     private val bouncerHapticPlayer: BouncerHapticPlayer,
     private val keyguardMediaKeyInteractor: KeyguardMediaKeyInteractor,
     private val bouncerActionButtonInteractor: BouncerActionButtonInteractor,
+    private val keyguardDismissActionInteractor: KeyguardDismissActionInteractor,
 ) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
@@ -419,6 +421,13 @@ constructor(
         if (actionButtonModel is BouncerActionButtonModel.EmergencyButtonModel) {
             bouncerActionButtonInteractor.onEmergencyButtonLongClicked()
         }
+    }
+
+    /**
+     * Notifies that the bouncer UI has been destroyed (e.g. the composable left the composition).
+     */
+    fun onUiDestroyed() {
+        keyguardDismissActionInteractor.clearDismissAction()
     }
 
     data class DialogViewModel(

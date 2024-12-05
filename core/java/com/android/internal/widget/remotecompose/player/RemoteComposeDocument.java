@@ -112,6 +112,16 @@ public class RemoteComposeDocument {
     }
 
     /**
+     * Gets a array of Names of the named variables of a specific type defined in the doc.
+     *
+     * @param type the type of variable NamedVariable.COLOR_TYPE, STRING_TYPE, etc
+     * @return array of name or null
+     */
+    public String[] getNamedVariables(int type) {
+        return mDocument.getNamedVariables(type);
+    }
+
+    /**
      * Return a component associated with id
      *
      * @param id the component id
@@ -130,5 +140,10 @@ public class RemoteComposeDocument {
             return new String[0];
         }
         return mDocument.getStats();
+    }
+
+    public int hasSensorListeners(int[] ids) {
+
+        return 0;
     }
 }

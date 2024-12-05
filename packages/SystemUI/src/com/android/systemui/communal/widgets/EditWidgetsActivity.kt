@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
@@ -44,6 +45,7 @@ import com.android.systemui.communal.ui.compose.CommunalHub
 import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSection
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.util.WidgetPickerIntentUtils.getWidgetExtraFromIntent
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -52,13 +54,13 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** An Activity for editing the widgets that appear in hub mode. */
 class EditWidgetsActivity
 @Inject
 constructor(
     private val communalViewModel: CommunalEditModeViewModel,
+    private val keyguardInteractor: KeyguardInteractor,
     private var windowManagerService: IWindowManager? = null,
     private val uiEventLogger: UiEventLogger,
     private val widgetConfiguratorFactory: WidgetConfigurationController.Factory,
@@ -222,6 +224,9 @@ constructor(
                     // edit mode
                     communalViewModel.currentScene.first { it == CommunalScenes.Blank }
                 }
+
+                // Wait for dream to exit, if we were previously dreaming.
+                keyguardInteractor.isDreaming.first { !it }
 
                 communalViewModel.setEditModeState(EditModeState.SHOWING)
 

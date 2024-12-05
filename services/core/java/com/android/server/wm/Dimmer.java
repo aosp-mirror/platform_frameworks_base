@@ -17,8 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,7 +42,8 @@ class Dimmer {
      */
     private final WindowContainer<?> mHost;
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "Dimmer" : TAG_WM;
+    private static final String TAG = "WindowManagerDimmer";
+
     DimState mDimState;
     final DimmerAnimationHelper.AnimationAdapterFactory mAnimationAdapterFactory;
 
@@ -69,9 +68,10 @@ class Dimmer {
 
         DimState() {
             mHostContainer = mHost;
-            mAnimationHelper = new DimmerAnimationHelper(mAnimationAdapterFactory);
+            mAnimationHelper = new DimmerAnimationHelper(mHost, mAnimationAdapterFactory);
             try {
                 mDimSurface = makeDimLayer();
+                EventLogTags.writeWmDimCreated(mHost.getName(), mDimSurface.getLayerId());
             } catch (Surface.OutOfResourcesException e) {
                 Log.w(TAG, "OutOfResourcesException creating dim surface");
             }
@@ -102,6 +102,11 @@ class Dimmer {
          * Prepare the dim for the exit animation
          */
         void exit(@NonNull SurfaceControl.Transaction t) {
+            EventLogTags.writeWmDimExit(mDimState.mDimSurface.getLayerId(),
+                    mDimState.mLastDimmingWindow != null
+                            ? mDimState.mLastDimmingWindow.getName() : "-",
+                    mDimState.mHostContainer.isVisible() ? 1 : 0,
+                    mAnimateExit ? 0 : 1);
             if (!mAnimateExit) {
                 remove(t);
             } else {
@@ -111,8 +116,10 @@ class Dimmer {
         }
 
         void remove(@NonNull SurfaceControl.Transaction t) {
+            EventLogTags.writeWmDimCancelAnim(mDimSurface.getLayerId(), "ready to remove");
             mAnimationHelper.stopCurrentAnimation(mDimSurface);
             if (mDimSurface.isValid()) {
+                EventLogTags.writeWmDimRemoved(mDimSurface.getLayerId());
                 t.remove(mDimSurface);
                 ProtoLog.d(WM_DEBUG_DIMMER,
                         "Removing dim surface %s on transaction %s", this, t);
@@ -124,6 +131,13 @@ class Dimmer {
         @Override
         public String toString() {
             return "Dimmer#DimState with host=" + mHostContainer + ", surface=" + mDimSurface;
+        }
+
+
+        String reasonForRemoving() {
+            return mLastDimmingWindow != null ? mLastDimmingWindow
+                    + " is dimming but host " + mHostContainer + " is not visibleRequested"
+                    : " no one is dimming";
         }
 
         /**

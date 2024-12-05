@@ -18,22 +18,30 @@ package com.android.server;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManagerInternal;
 import android.os.ParcelFileDescriptor;
 import android.os.PermissionEnforcer;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.function.Supplier;
 
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class SerialService extends ISerialManager.Stub {
+    private static final String TAG = "SerialService";
+
     private final Context mContext;
 
     @GuardedBy("mSerialPorts")
@@ -50,7 +58,7 @@ public class SerialService extends ISerialManager.Stub {
             final String[] serialPorts = getSerialPorts(context);
             for (String serialPort : serialPorts) {
                 mSerialPorts.put(serialPort, () -> {
-                    return native_open(serialPort);
+                    return tryOpen(serialPort);
                 });
             }
         }
@@ -130,5 +138,14 @@ public class SerialService extends ISerialManager.Stub {
         }
     };
 
-    private native ParcelFileDescriptor native_open(String path);
+    private static @Nullable ParcelFileDescriptor tryOpen(String path) {
+        try {
+            FileDescriptor fd = Os.open(path, OsConstants.O_RDWR | OsConstants.O_NOCTTY, 0);
+            return new ParcelFileDescriptor(fd);
+        } catch (ErrnoException e) {
+            Slog.e(TAG, "Could not open: " + path, e);
+            // We return null to preserve API semantics from earlier implementation variants.
+            return null;
+        }
+    }
 }

@@ -20,7 +20,6 @@ import static com.android.server.vcn.VcnTestUtils.setupSystemService;
 import static com.android.server.vcn.routeselection.UnderlyingNetworkControllerTest.getLinkPropertiesWithName;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -126,8 +125,6 @@ public abstract class NetworkEvaluationTestBase {
                                 mock(VcnNetworkProvider.class),
                                 false /* isInTestMode */));
         doNothing().when(mVcnContext).ensureRunningOnLooperThread();
-
-        doReturn(true).when(mVcnContext).isFlagIpSecTransformStateEnabled();
 
         setupSystemService(
                 mContext,

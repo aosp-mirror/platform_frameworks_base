@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+#include <android/gui/LutProperties.h>
 #include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
 #include <android/surface_control_jni.h>
 #include <android_runtime/android_view_SurfaceControl.h>
 #include <configstore/Utils.h>
+#include <cutils/ashmem.h>
+#include <display_luts_private.h>
 #include <gui/HdrMetadata.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
@@ -53,6 +56,16 @@ static_assert(static_cast<int>(ADATASPACE_SCRGB) == static_cast<int>(HAL_DATASPA
 static_assert(static_cast<int>(ADATASPACE_DISPLAY_P3) ==
               static_cast<int>(HAL_DATASPACE_DISPLAY_P3));
 static_assert(static_cast<int>(ADATASPACE_BT2020_PQ) == static_cast<int>(HAL_DATASPACE_BT2020_PQ));
+static_assert(static_cast<int>(ADISPLAYLUTS_ONE_DIMENSION) ==
+              static_cast<int>(android::gui::LutProperties::Dimension::ONE_D));
+static_assert(static_cast<int>(ADISPLAYLUTS_THREE_DIMENSION) ==
+              static_cast<int>(android::gui::LutProperties::Dimension::THREE_D));
+static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_RGB) ==
+              static_cast<int>(android::gui::LutProperties::SamplingKey::RGB));
+static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_MAX_RGB) ==
+              static_cast<int>(android::gui::LutProperties::SamplingKey::MAX_RGB));
+static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_CIE_Y) ==
+              static_cast<int>(android::gui::LutProperties::SamplingKey::CIE_Y));
 
 Transaction* ASurfaceTransaction_to_Transaction(ASurfaceTransaction* aSurfaceTransaction) {
     return reinterpret_cast<Transaction*>(aSurfaceTransaction);
@@ -693,6 +706,58 @@ void ASurfaceTransaction_setDesiredHdrHeadroom(ASurfaceTransaction* aSurfaceTran
     transaction->setDesiredHdrHeadroom(surfaceControl, desiredRatio);
 }
 
+void ASurfaceTransaction_setLuts(ASurfaceTransaction* aSurfaceTransaction,
+                                 ASurfaceControl* aSurfaceControl,
+                                 const struct ADisplayLuts* luts) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    int fd = -1;
+    std::vector<int32_t> offsets;
+    std::vector<int32_t> dimensions;
+    std::vector<int32_t> sizes;
+    std::vector<int32_t> samplingKeys;
+
+    if (luts) {
+        std::vector<float> buffer(luts->totalBufferSize);
+        int32_t count = luts->offsets.size();
+        offsets = luts->offsets;
+
+        dimensions.reserve(count);
+        sizes.reserve(count);
+        samplingKeys.reserve(count);
+        for (int32_t i = 0; i < count; i++) {
+            dimensions.emplace_back(luts->entries[i]->properties.dimension);
+            sizes.emplace_back(luts->entries[i]->properties.size);
+            samplingKeys.emplace_back(luts->entries[i]->properties.samplingKey);
+            std::copy(luts->entries[i]->buffer.data.begin(), luts->entries[i]->buffer.data.end(),
+                      buffer.begin() + offsets[i]);
+        }
+
+        // mmap
+        fd = ashmem_create_region("lut_shared_mem", luts->totalBufferSize * sizeof(float));
+        if (fd < 0) {
+            LOG_ALWAYS_FATAL("setLuts, ashmem_create_region() failed");
+            return;
+        }
+        void* ptr = mmap(nullptr, luts->totalBufferSize * sizeof(float), PROT_READ | PROT_WRITE,
+                         MAP_SHARED, fd, 0);
+        if (ptr == MAP_FAILED) {
+            LOG_ALWAYS_FATAL("setLuts, Failed to map the shared memory");
+            return;
+        }
+
+        memcpy(ptr, buffer.data(), luts->totalBufferSize * sizeof(float));
+        munmap(ptr, luts->totalBufferSize * sizeof(float));
+    }
+
+    transaction->setLuts(surfaceControl, base::unique_fd(fd), offsets, dimensions, sizes,
+                         samplingKeys);
+}
+
 void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
                                   ASurfaceControl* aSurfaceControl,
                                   float r, float g, float b, float alpha,
@@ -728,28 +793,6 @@ void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSu
     CHECK_NOT_NULL(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
-}
-
-void ASurfaceTransaction_setFrameRateParams(
-        ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
-        float desiredMinRate, float desiredMaxRate, float fixedSourceRate,
-        ANativeWindow_ChangeFrameRateStrategy changeFrameRateStrategy) {
-    CHECK_NOT_NULL(aSurfaceTransaction);
-    CHECK_NOT_NULL(aSurfaceControl);
-    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
-    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-
-    if (desiredMaxRate < desiredMinRate) {
-        ALOGW("desiredMaxRate must be greater than or equal to desiredMinRate");
-        return;
-    }
-    // TODO(b/362798998): Fix plumbing to send modern params
-    int compatibility = fixedSourceRate == 0 ? ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_DEFAULT
-                                             : ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-    double frameRate = compatibility == ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
-            ? fixedSourceRate
-            : desiredMinRate;
     transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
 

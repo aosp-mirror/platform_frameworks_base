@@ -90,8 +90,8 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private int mHandleRegionHeight;
 
     /**
-     * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
-     * insets.
+     * This is not the visible bounds you see on screen, but the actual behind-the-scenes window
+     * bounds, which is larger.
      */
     private final Rect mDividerBounds = new Rect();
     private final Rect mTempRect = new Rect();

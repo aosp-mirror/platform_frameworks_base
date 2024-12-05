@@ -129,6 +129,8 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -339,7 +341,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onDisplayAdded(int displayId) {}
+    public void onDisplayAdded(int displayId) {
+        synchronized (mLock) {
+            mDisplayUiState.put(displayId, new UiState());
+        }
+    }
 
     @Override
     public void onDisplayRemoved(int displayId) {
@@ -1710,8 +1716,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             icons = new ArrayMap<>(mIcons);
         }
         synchronized (mLock) {
-            // TODO(b/118592525): Currently, status bar only works on the default display.
-            // Make it aware of multi-display if needed.
             final UiState state = mDisplayUiState.get(DEFAULT_DISPLAY);
             return new RegisterStatusBarResult(icons, gatherDisableActionsLocked(mCurrentUserId, 1),
                     state.mAppearance, state.mAppearanceRegions, state.mImeWindowVis,
@@ -1719,6 +1723,46 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                     gatherDisableActionsLocked(mCurrentUserId, 2),
                     state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibleTypes,
                     state.mPackageName, state.mTransientBarTypes, state.mLetterboxDetails);
+        }
+    }
+
+    @Override
+    public Map<String, RegisterStatusBarResult> registerStatusBarForAllDisplays(IStatusBar bar) {
+        enforceStatusBarService();
+        enforceValidCallingUser();
+
+        Slog.i(TAG, "registerStatusBarForAllDisplays bar=" + bar);
+        mBar = bar;
+        mDeathRecipient.linkToDeath();
+        notifyBarAttachChanged();
+
+        synchronized (mLock) {
+            Map<String, RegisterStatusBarResult> results = new HashMap<>();
+
+            for (int i = 0; i < mDisplayUiState.size(); i++) {
+                final int displayId = mDisplayUiState.keyAt(i);
+                final UiState state = mDisplayUiState.get(displayId);
+
+                final ArrayMap<String, StatusBarIcon> icons;
+                synchronized (mIcons) {
+                    icons = new ArrayMap<>(mIcons);
+                }
+
+                if (state != null) {
+                    results.put(String.valueOf(displayId),
+                            new RegisterStatusBarResult(icons,
+                                    gatherDisableActionsLocked(mCurrentUserId, 1),
+                                    state.mAppearance, state.mAppearanceRegions,
+                                    state.mImeWindowVis,
+                                    state.mImeBackDisposition, state.mShowImeSwitcher,
+                                    gatherDisableActionsLocked(mCurrentUserId, 2),
+                                    state.mNavbarColorManagedByIme, state.mBehavior,
+                                    state.mRequestedVisibleTypes,
+                                    state.mPackageName, state.mTransientBarTypes,
+                                    state.mLetterboxDetails));
+                }
+            }
+            return results;
         }
     }
 

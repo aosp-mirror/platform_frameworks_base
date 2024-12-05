@@ -121,14 +121,15 @@ private fun Modifier.panelPadding(): Modifier {
     val systemBars = WindowInsets.systemBarsIgnoringVisibility
     val displayCutout = WindowInsets.displayCutout
     val waterfall = WindowInsets.waterfall
-    val contentPadding = PaddingValues(all = OverlayShade.Dimensions.ScrimContentPadding)
+    val horizontalPadding =
+        PaddingValues(horizontal = dimensionResource(id = R.dimen.shade_panel_margin_horizontal))
 
     val combinedPadding =
         combinePaddings(
             systemBars.asPaddingValues(),
             displayCutout.asPaddingValues(),
             waterfall.asPaddingValues(),
-            contentPadding,
+            horizontalPadding,
         )
 
     return if (widthSizeClass == WindowWidthSizeClass.Compact) {
@@ -174,7 +175,6 @@ object OverlayShade {
     }
 
     object Dimensions {
-        val ScrimContentPadding = 16.dp
         val PanelCornerRadius = 46.dp
         val OverscrollLimit = 32.dp
     }

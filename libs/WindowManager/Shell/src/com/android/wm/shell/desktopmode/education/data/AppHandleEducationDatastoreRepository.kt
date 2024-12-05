@@ -42,101 +42,109 @@ import kotlinx.coroutines.flow.first
 class AppHandleEducationDatastoreRepository
 @VisibleForTesting
 constructor(private val dataStore: DataStore<WindowingEducationProto>) {
-  constructor(
-      context: Context
-  ) : this(
-      DataStoreFactory.create(
-          serializer = WindowingEducationProtoSerializer,
-          produceFile = { context.dataStoreFile(APP_HANDLE_EDUCATION_DATASTORE_FILEPATH) }))
+    constructor(
+        context: Context
+    ) : this(
+        DataStoreFactory.create(
+            serializer = WindowingEducationProtoSerializer,
+            produceFile = { context.dataStoreFile(APP_HANDLE_EDUCATION_DATASTORE_FILEPATH) },
+        )
+    )
 
-  /** Provides dataStore.data flow and handles exceptions thrown during collection */
-  val dataStoreFlow: Flow<WindowingEducationProto> =
-      dataStore.data.catch { exception ->
-        // dataStore.data throws an IOException when an error is encountered when reading data
-        if (exception is IOException) {
-          Log.e(
-              TAG,
-              "Error in reading app handle education related data from datastore, data is " +
-                  "stored in a file named $APP_HANDLE_EDUCATION_DATASTORE_FILEPATH",
-              exception)
-        } else {
-          throw exception
+    /** Provides dataStore.data flow and handles exceptions thrown during collection */
+    val dataStoreFlow: Flow<WindowingEducationProto> =
+        dataStore.data.catch { exception ->
+            // dataStore.data throws an IOException when an error is encountered when reading data
+            if (exception is IOException) {
+                Log.e(
+                    TAG,
+                    "Error in reading app handle education related data from datastore, data is " +
+                        "stored in a file named $APP_HANDLE_EDUCATION_DATASTORE_FILEPATH",
+                    exception,
+                )
+            } else {
+                throw exception
+            }
         }
-      }
 
-  /**
-   * Reads and returns the [WindowingEducationProto] Proto object from the DataStore. If the
-   * DataStore is empty or there's an error reading, it returns the default value of Proto.
-   */
-  suspend fun windowingEducationProto(): WindowingEducationProto = dataStoreFlow.first()
+    /**
+     * Reads and returns the [WindowingEducationProto] Proto object from the DataStore. If the
+     * DataStore is empty or there's an error reading, it returns the default value of Proto.
+     */
+    suspend fun windowingEducationProto(): WindowingEducationProto = dataStoreFlow.first()
 
-  /**
-   * Updates [WindowingEducationProto.educationViewedTimestampMillis_] field in datastore with
-   * current timestamp if [isViewed] is true, if not then clears the field.
-   */
-  suspend fun updateEducationViewedTimestampMillis(isViewed: Boolean) {
-    dataStore.updateData { preferences ->
-      if (isViewed) {
-        preferences
-            .toBuilder()
-            .setEducationViewedTimestampMillis(System.currentTimeMillis())
-            .build()
-      } else {
-        preferences.toBuilder().clearEducationViewedTimestampMillis().build()
-      }
+    /**
+     * Updates [WindowingEducationProto.appHandleHintViewedTimestampMillis_] field in datastore with
+     * current timestamp if [isViewed] is true, if not then clears the field.
+     */
+    suspend fun updateAppHandleHintViewedTimestampMillis(isViewed: Boolean) {
+        dataStore.updateData { preferences ->
+            if (isViewed) {
+                preferences
+                    .toBuilder()
+                    .setAppHandleHintViewedTimestampMillis(System.currentTimeMillis())
+                    .build()
+            } else {
+                preferences.toBuilder().clearAppHandleHintViewedTimestampMillis().build()
+            }
+        }
     }
-  }
 
-  /**
-   * Updates [WindowingEducationProto.featureUsedTimestampMillis_] field in datastore with current
-   * timestamp if [isViewed] is true, if not then clears the field.
-   */
-  suspend fun updateFeatureUsedTimestampMillis(isViewed: Boolean) {
-    dataStore.updateData { preferences ->
-      if (isViewed) {
-        preferences.toBuilder().setFeatureUsedTimestampMillis(System.currentTimeMillis()).build()
-      } else {
-        preferences.toBuilder().clearFeatureUsedTimestampMillis().build()
-      }
+    /**
+     * Updates [WindowingEducationProto.appHandleHintUsedTimestampMillis_] field in datastore with
+     * current timestamp if [isViewed] is true, if not then clears the field.
+     */
+    suspend fun updateAppHandleHintUsedTimestampMillis(isViewed: Boolean) {
+        dataStore.updateData { preferences ->
+            if (isViewed) {
+                preferences
+                    .toBuilder()
+                    .setAppHandleHintUsedTimestampMillis(System.currentTimeMillis())
+                    .build()
+            } else {
+                preferences.toBuilder().clearAppHandleHintUsedTimestampMillis().build()
+            }
+        }
     }
-  }
 
-  /**
-   * Updates [AppHandleEducation.appUsageStats] and
-   * [AppHandleEducation.appUsageStatsLastUpdateTimestampMillis] fields in datastore with
-   * [appUsageStats] and [appUsageStatsLastUpdateTimestamp].
-   */
-  suspend fun updateAppUsageStats(
-      appUsageStats: Map<String, Int>,
-      appUsageStatsLastUpdateTimestamp: Duration
-  ) {
-    val currentAppHandleProto = windowingEducationProto().appHandleEducation.toBuilder()
-    currentAppHandleProto
-        .putAllAppUsageStats(appUsageStats)
-        .setAppUsageStatsLastUpdateTimestampMillis(appUsageStatsLastUpdateTimestamp.toMillis())
-    dataStore.updateData { preferences: WindowingEducationProto ->
-      preferences.toBuilder().setAppHandleEducation(currentAppHandleProto).build()
+    /**
+     * Updates [AppHandleEducation.appUsageStats] and
+     * [AppHandleEducation.appUsageStatsLastUpdateTimestampMillis] fields in datastore with
+     * [appUsageStats] and [appUsageStatsLastUpdateTimestamp].
+     */
+    suspend fun updateAppUsageStats(
+        appUsageStats: Map<String, Int>,
+        appUsageStatsLastUpdateTimestamp: Duration,
+    ) {
+        val currentAppHandleProto = windowingEducationProto().appHandleEducation.toBuilder()
+        currentAppHandleProto
+            .putAllAppUsageStats(appUsageStats)
+            .setAppUsageStatsLastUpdateTimestampMillis(appUsageStatsLastUpdateTimestamp.toMillis())
+        dataStore.updateData { preferences: WindowingEducationProto ->
+            preferences.toBuilder().setAppHandleEducation(currentAppHandleProto).build()
+        }
     }
-  }
 
-  companion object {
-    private const val TAG = "AppHandleEducationDatastoreRepository"
-    private const val APP_HANDLE_EDUCATION_DATASTORE_FILEPATH = "app_handle_education.pb"
+    companion object {
+        private const val TAG = "AppHandleEducationDatastoreRepository"
+        private const val APP_HANDLE_EDUCATION_DATASTORE_FILEPATH = "app_handle_education.pb"
 
-    object WindowingEducationProtoSerializer : Serializer<WindowingEducationProto> {
+        object WindowingEducationProtoSerializer : Serializer<WindowingEducationProto> {
 
-      override val defaultValue: WindowingEducationProto =
-          WindowingEducationProto.getDefaultInstance()
+            override val defaultValue: WindowingEducationProto =
+                WindowingEducationProto.getDefaultInstance()
 
-      override suspend fun readFrom(input: InputStream): WindowingEducationProto =
-          try {
-            WindowingEducationProto.parseFrom(input)
-          } catch (exception: InvalidProtocolBufferException) {
-            throw CorruptionException("Cannot read proto.", exception)
-          }
+            override suspend fun readFrom(input: InputStream): WindowingEducationProto =
+                try {
+                    WindowingEducationProto.parseFrom(input)
+                } catch (exception: InvalidProtocolBufferException) {
+                    throw CorruptionException("Cannot read proto.", exception)
+                }
 
-      override suspend fun writeTo(windowingProto: WindowingEducationProto, output: OutputStream) =
-          windowingProto.writeTo(output)
+            override suspend fun writeTo(
+                windowingProto: WindowingEducationProto,
+                output: OutputStream,
+            ) = windowingProto.writeTo(output)
+        }
     }
-  }
 }

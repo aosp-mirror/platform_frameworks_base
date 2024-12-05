@@ -18,8 +18,8 @@ package com.android.systemui.inputdevice.tutorial
 
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEYBOARD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD
 import com.android.systemui.shared.system.SysUiStatsLog
 import javax.inject.Inject
 
@@ -37,9 +37,9 @@ class KeyboardTouchpadTutorialMetricsLogger @Inject constructor() {
 
         val tutorialType =
             when (tutorialTypeExtra) {
-                INTENT_TUTORIAL_TYPE_KEYBOARD ->
+                INTENT_TUTORIAL_SCOPE_KEYBOARD ->
                     SysUiStatsLog.PERIPHERAL_TUTORIAL_LAUNCHED__TUTORIAL_TYPE__KEYBOARD
-                INTENT_TUTORIAL_TYPE_TOUCHPAD ->
+                INTENT_TUTORIAL_SCOPE_TOUCHPAD ->
                     SysUiStatsLog.PERIPHERAL_TUTORIAL_LAUNCHED__TUTORIAL_TYPE__TOUCHPAD
                 else -> SysUiStatsLog.PERIPHERAL_TUTORIAL_LAUNCHED__TUTORIAL_TYPE__BOTH
             }

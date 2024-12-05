@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.PwleSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
@@ -57,7 +58,7 @@ final class ComposePwleV2VibratorStep extends AbstractComposedVibratorStep {
             // Load the next PwleSegments to create a single composePwleV2 call to the vibrator,
             // limited to the vibrator's maximum envelope effect size.
             int limit = controller.getVibratorInfo().getMaxEnvelopeEffectSize();
-            List<PwleSegment> pwles = unrollPwleSegments(effect, segmentIndex, limit);
+            List<PwlePoint> pwles = unrollPwleSegments(effect, segmentIndex, limit);
 
             if (pwles.isEmpty()) {
                 Slog.w(VibrationThread.TAG, "Ignoring wrong segment for a ComposeEnvelopeStep: "
@@ -70,7 +71,7 @@ final class ComposePwleV2VibratorStep extends AbstractComposedVibratorStep {
                 Slog.d(VibrationThread.TAG, "Compose " + pwles + " PWLEs on vibrator "
                         + controller.getVibratorInfo().getId());
             }
-            PwleSegment[] pwlesArray = pwles.toArray(new PwleSegment[pwles.size()]);
+            PwlePoint[] pwlesArray = pwles.toArray(new PwlePoint[pwles.size()]);
             long vibratorOnResult = controller.on(pwlesArray, getVibration().id);
             handleVibratorOnResult(vibratorOnResult);
             getVibration().stats.reportComposePwle(vibratorOnResult, pwlesArray);
@@ -82,9 +83,9 @@ final class ComposePwleV2VibratorStep extends AbstractComposedVibratorStep {
         }
     }
 
-    private List<PwleSegment> unrollPwleSegments(VibrationEffect.Composed effect, int startIndex,
+    private List<PwlePoint> unrollPwleSegments(VibrationEffect.Composed effect, int startIndex,
             int limit) {
-        List<PwleSegment> segments = new ArrayList<>(limit);
+        List<PwlePoint> pwlePoints = new ArrayList<>(limit);
         float bestBreakAmplitude = 1;
         int bestBreakPosition = limit; // Exclusive index.
 
@@ -93,7 +94,7 @@ final class ComposePwleV2VibratorStep extends AbstractComposedVibratorStep {
 
         // Loop once after reaching the limit to see if breaking it will really be necessary, then
         // apply the best break position found, otherwise return the full list as it fits the limit.
-        for (int i = startIndex; segments.size() <= limit; i++) {
+        for (int i = startIndex; pwlePoints.size() < limit; i++) {
             if (i == segmentCount) {
                 if (repeatIndex >= 0) {
                     i = repeatIndex;
@@ -104,12 +105,20 @@ final class ComposePwleV2VibratorStep extends AbstractComposedVibratorStep {
             }
             VibrationEffectSegment segment = effect.getSegments().get(i);
             if (segment instanceof PwleSegment pwleSegment) {
-                segments.add(pwleSegment);
+                if (pwlePoints.isEmpty()) {
+                    // The initial state is defined by the starting amplitude and frequency of the
+                    // first PwleSegment. The time parameter is set to zero to indicate this is
+                    // the initial condition without any ramp up time.
+                    pwlePoints.add(new PwlePoint(pwleSegment.getStartAmplitude(),
+                            pwleSegment.getStartFrequencyHz(), /*timeMillis=*/ 0));
+                }
+                pwlePoints.add(new PwlePoint(pwleSegment.getEndAmplitude(),
+                        pwleSegment.getEndFrequencyHz(), (int) pwleSegment.getDuration()));
 
-                if (isBetterBreakPosition(segments, bestBreakAmplitude, limit)) {
+                if (isBetterBreakPosition(pwlePoints, bestBreakAmplitude, limit)) {
                     // Mark this position as the best one so far to break a long waveform.
                     bestBreakAmplitude = pwleSegment.getEndAmplitude();
-                    bestBreakPosition = segments.size(); // Break after this pwle ends.
+                    bestBreakPosition = pwlePoints.size(); // Break after this pwle ends.
                 }
             } else {
                 // First non-pwle segment, stop collecting pwles.
@@ -117,21 +126,21 @@ final class ComposePwleV2VibratorStep extends AbstractComposedVibratorStep {
             }
         }
 
-        return segments.size() > limit
+        return pwlePoints.size() > limit
                 // Remove excessive segments, using the best breaking position recorded.
-                ? segments.subList(0, bestBreakPosition)
+                ? pwlePoints.subList(0, bestBreakPosition)
                 // Return all collected pwle segments.
-                : segments;
+                : pwlePoints;
     }
 
     /**
      * Returns true if the current segment list represents a better break position for a PWLE,
      * given the current amplitude being used for breaking it at a smaller size and the size limit.
      */
-    private boolean isBetterBreakPosition(List<PwleSegment> segments,
+    private boolean isBetterBreakPosition(List<PwlePoint> segments,
             float currentBestBreakAmplitude, int limit) {
-        PwleSegment lastSegment = segments.get(segments.size() - 1);
-        float breakAmplitudeCandidate = lastSegment.getEndAmplitude();
+        PwlePoint lastSegment = segments.get(segments.size() - 1);
+        float breakAmplitudeCandidate = lastSegment.getAmplitude();
         int breakPositionCandidate = segments.size();
 
         if (breakPositionCandidate > limit) {

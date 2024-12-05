@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -42,7 +45,8 @@ public class IntMap<T> {
         mSize = 0;
     }
 
-    public T put(int key, T value) {
+    @Nullable
+    public T put(int key, @NonNull T value) {
         if (key == NOT_PRESENT) throw new IllegalArgumentException("Key cannot be NOT_PRESENT");
         if (mSize > mKeys.length * LOAD_FACTOR) {
             resize();
@@ -50,6 +54,7 @@ public class IntMap<T> {
         return insert(key, value);
     }
 
+    @Nullable
     public T get(int key) {
         int index = findKey(key);
         if (index == -1) {
@@ -61,7 +66,8 @@ public class IntMap<T> {
         return mSize;
     }
 
-    private T insert(int key, T value) {
+    @Nullable
+    private T insert(int key, @NonNull T value) {
         int index = hash(key) % mKeys.length;
         while (mKeys[index] != NOT_PRESENT && mKeys[index] != key) {
             index = (index + 1) % mKeys.length;
@@ -111,6 +117,7 @@ public class IntMap<T> {
         }
     }
 
+    @Nullable
     public T remove(int key) {
         int index = hash(key) % mKeys.length;
         int initialIndex = index;

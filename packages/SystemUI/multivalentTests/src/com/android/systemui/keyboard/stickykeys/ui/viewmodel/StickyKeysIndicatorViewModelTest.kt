@@ -40,8 +40,8 @@ import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import com.android.systemui.util.settings.fakeSettings
-import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepositoryImpl
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -72,14 +72,13 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        val settingsRepository =
-            UserAwareSecureSettingsRepositoryImpl(secureSettings, userRepository, dispatcher)
+        val settingsRepository = kosmos.userAwareSecureSettingsRepository
         val stickyKeysRepository =
             StickyKeysRepositoryImpl(
                 inputManager,
                 dispatcher,
                 settingsRepository,
-                mock<StickyKeysLogger>()
+                mock<StickyKeysLogger>(),
             )
         setStickyKeySetting(enabled = false)
         viewModel =
@@ -114,7 +113,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
             verify(inputManager)
                 .registerStickyModifierStateListener(
                     any(),
-                    any(InputManager.StickyModifierStateListener::class.java)
+                    any(InputManager.StickyModifierStateListener::class.java),
                 )
         }
     }
@@ -187,11 +186,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
 
             assertThat(stickyKeys)
                 .isEqualTo(
-                    mapOf(
-                        ALT to Locked(false),
-                        META to Locked(false),
-                        SHIFT to Locked(false),
-                    )
+                    mapOf(ALT to Locked(false), META to Locked(false), SHIFT to Locked(false))
                 )
         }
     }
@@ -218,7 +213,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
                 mapOf(
                     META to false,
                     SHIFT to false, // shift is sticky but not locked
-                    CTRL to false
+                    CTRL to false,
                 )
             )
             val previousShiftIndex = stickyKeys?.toList()?.indexOf(SHIFT to Locked(false))
@@ -228,7 +223,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
                     SHIFT to false,
                     SHIFT to true, // shift is now locked
                     META to false,
-                    CTRL to false
+                    CTRL to false,
                 )
             )
             assertThat(stickyKeys?.toList()?.indexOf(SHIFT to Locked(true)))

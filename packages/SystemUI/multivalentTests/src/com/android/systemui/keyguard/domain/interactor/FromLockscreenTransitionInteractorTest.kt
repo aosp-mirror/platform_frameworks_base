@@ -27,15 +27,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
-import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat as assertThatRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.data.repository.FlingInfo
 import com.android.systemui.shade.data.repository.fakeShadeRepository
@@ -48,6 +46,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.spy
+import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat as assertThatRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -55,7 +55,9 @@ import org.mockito.Mockito.reset
 class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
+            this.fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository(
+                testScope = testScope,
+            ))
         }
 
     private val testScope = kosmos.testScope
@@ -66,7 +68,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
+        transitionRepository = kosmos.fakeKeyguardTransitionRepository
     }
 
     @Test
@@ -300,6 +302,76 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
                 .startedTransition(
                     from = KeyguardState.PRIMARY_BOUNCER,
                     to = KeyguardState.LOCKSCREEN,
+                )
+        }
+
+    /**
+     * External signals can cause us to transition from PRIMARY_BOUNCER -> * while a manual
+     * transition is in progress. This test was added after a bug that caused the manual transition
+     * ID to get stuck in this scenario, preventing subsequent transitions to PRIMARY_BOUNCER.
+     */
+    @Test
+    fun testExternalTransitionAwayFromBouncer_transitionIdNotStuck() =
+        testScope.runTest {
+            underTest.start()
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            keyguardRepository.setKeyguardDismissible(false)
+            shadeRepository.setLegacyShadeTracking(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            reset(transitionRepository)
+
+            // Disable automatic sending of transition steps so we can send steps through RUNNING
+            // to simulate a cancellation.
+            transitionRepository.sendTransitionStepsOnStartTransition = false
+            shadeRepository.setLegacyShadeExpansion(0.5f)
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                )
+
+            // Partially transition to PRIMARY_BOUNCER.
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                throughTransitionState = TransitionState.RUNNING,
+                testScope = testScope,
+            )
+
+            // Start a transition to GONE, which will cancel LS -> BOUNCER.
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.PRIMARY_BOUNCER,
+                to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+
+            // Go to AOD, then LOCKSCREEN.
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.AOD,
+                testScope = testScope,
+            )
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+            )
+
+            reset(transitionRepository)
+
+            // Start a swipe up to the bouncer, and verify that we started a transition to
+            // PRIMARY_BOUNCER, verifying the transition ID did not get stuck.
+            shadeRepository.setLegacyShadeExpansion(0.25f)
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
                 )
         }
 }

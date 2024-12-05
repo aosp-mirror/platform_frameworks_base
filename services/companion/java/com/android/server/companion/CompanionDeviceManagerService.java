@@ -55,6 +55,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.DeviceId;
 import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IOnAssociationsChangedListener;
@@ -108,8 +109,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService {
@@ -227,10 +226,7 @@ public class CompanionDeviceManagerService extends SystemService {
         if (associations.isEmpty()) return;
 
         mCompanionExemptionProcessor.updateAtm(userId, associations);
-
-        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
-            executor.execute(mCompanionExemptionProcessor::updateAutoRevokeExemptions);
-        }
+        mCompanionExemptionProcessor.updateAutoRevokeExemptions();
     }
 
     @Override
@@ -253,7 +249,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 mDisassociationProcessor.disassociate(association.getId());
             }
 
-            mCompanionAppBinder.onPackagesChanged(userId, packageName);
+            mCompanionAppBinder.onPackageChanged(userId);
         }
 
         // Clear observable UUIDs for the package.
@@ -270,7 +266,7 @@ public class CompanionDeviceManagerService extends SystemService {
         if (!associations.isEmpty()) {
             mCompanionExemptionProcessor.exemptPackage(userId, packageName, false);
 
-            mCompanionAppBinder.onPackagesChanged(userId, packageName);
+            mCompanionAppBinder.onPackageChanged(userId);
         }
     }
 
@@ -323,7 +319,6 @@ public class CompanionDeviceManagerService extends SystemService {
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "get associations");
-
             return mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
         }
 
@@ -699,14 +694,10 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void setAssociationTag(int associationId, String tag) {
-            mAssociationRequestsProcessor.setAssociationTag(associationId, tag);
+        public void setDeviceId(int associationId, DeviceId deviceId) {
+            mAssociationRequestsProcessor.setDeviceId(associationId, deviceId);
         }
 
-        @Override
-        public void clearAssociationTag(int associationId) {
-            setAssociationTag(associationId, null);
-        }
 
         @Override
         public byte[] getBackupPayload(int userId) {

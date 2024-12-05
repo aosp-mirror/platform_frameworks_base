@@ -16,6 +16,7 @@
 
 package com.android.server.display.feature;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -242,6 +243,25 @@ public class DisplayManagerFlags {
             Flags::autoBrightnessModeBedtimeWear
     );
 
+    private final FlagState mGetSupportedRefreshRatesFlagState = new FlagState(
+            Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES,
+            Flags::enableGetSupportedRefreshRates
+    );
+
+    private final FlagState mEnablePluginManagerFlagState = new FlagState(
+            Flags.FLAG_ENABLE_PLUGIN_MANAGER,
+            Flags::enablePluginManager
+    );
+    private final FlagState mDisplayListenerPerformanceImprovementsFlagState = new FlagState(
+            Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS,
+            Flags::displayListenerPerformanceImprovements
+    );
+
+    private final FlagState mSubscribeGranularDisplayEvents = new FlagState(
+            Flags.FLAG_SUBSCRIBE_GRANULAR_DISPLAY_EVENTS,
+            Flags::subscribeGranularDisplayEvents
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -452,8 +472,9 @@ public class DisplayManagerFlags {
     /**
      * @return Whether the useDozeBrightness parameter should be used
      */
-    public boolean isNormalBrightnessForDozeParameterEnabled() {
-        return mNormalBrightnessForDozeParameter.isEnabled();
+    public boolean isNormalBrightnessForDozeParameterEnabled(Context context) {
+        return mNormalBrightnessForDozeParameter.isEnabled() && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowNormalBrightnessForDozePolicy);
     }
 
      /**
@@ -518,6 +539,31 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return {@code true} if supported refresh rate api is enabled.
+     */
+    public boolean enableGetSupportedRefreshRates() {
+        return mGetSupportedRefreshRatesFlagState.isEnabled();
+    }
+
+    public boolean isPluginManagerEnabled() {
+        return mEnablePluginManagerFlagState.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the flag for display listener performance improvements is enabled
+     */
+    public boolean isDisplayListenerPerformanceImprovementsEnabled() {
+        return mDisplayListenerPerformanceImprovementsFlagState.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the flag for subscribing to granular display events is enabled
+     */
+    public boolean isSubscribeGranularDisplayEventsEnabled() {
+        return mSubscribeGranularDisplayEvents.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -568,6 +614,10 @@ public class DisplayManagerFlags {
         pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
         pw.println(" " + mHasArrSupport);
         pw.println(" " + mAutoBrightnessModeBedtimeWearFlagState);
+        pw.println(" " + mGetSupportedRefreshRatesFlagState);
+        pw.println(" " + mEnablePluginManagerFlagState);
+        pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
+        pw.println(" " + mSubscribeGranularDisplayEvents);
     }
 
     private static class FlagState {

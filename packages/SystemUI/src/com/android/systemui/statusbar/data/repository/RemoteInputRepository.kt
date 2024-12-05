@@ -16,16 +16,21 @@
 
 package com.android.systemui.statusbar.data.repository
 
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.RemoteInputController
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * Repository used for tracking the state of notification remote input (e.g. when the user presses
@@ -42,29 +47,49 @@ interface RemoteInputRepository {
     val remoteInputRowBottomBound: Flow<Float?>
 
     fun setRemoteInputRowBottomBound(bottom: Float?)
+
+    /** Close any active remote inputs */
+    fun closeRemoteInputs()
 }
 
 @SysUISingleton
 class RemoteInputRepositoryImpl
 @Inject
-constructor(private val notificationRemoteInputManager: NotificationRemoteInputManager) :
-    RemoteInputRepository {
-    override val isRemoteInputActive: Flow<Boolean> = conflatedCallbackFlow {
-        trySend(false) // initial value is false
+constructor(
+    @Application applicationScope: CoroutineScope,
+    private val notificationRemoteInputManager: NotificationRemoteInputManager,
+) : RemoteInputRepository {
+    private val _isRemoteInputActive = conflatedCallbackFlow {
         val callback =
             object : RemoteInputController.Callback {
                 override fun onRemoteInputActive(active: Boolean) {
                     trySend(active)
                 }
             }
+        trySend(notificationRemoteInputManager.isRemoteInputActive)
         notificationRemoteInputManager.addControllerCallback(callback)
         awaitClose { notificationRemoteInputManager.removeControllerCallback(callback) }
     }
+
+    override val isRemoteInputActive =
+        if (SceneContainerFlag.isEnabled) {
+            _isRemoteInputActive.stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                notificationRemoteInputManager.isRemoteInputActive,
+            )
+        } else {
+            _isRemoteInputActive
+        }
 
     override val remoteInputRowBottomBound = MutableStateFlow<Float?>(null)
 
     override fun setRemoteInputRowBottomBound(bottom: Float?) {
         remoteInputRowBottomBound.value = bottom
+    }
+
+    override fun closeRemoteInputs() {
+        notificationRemoteInputManager.closeRemoteInputs()
     }
 }
 

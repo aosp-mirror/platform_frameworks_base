@@ -16,9 +16,6 @@
 
 package com.android.systemui.util.settings;
 
-import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepository;
-import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepositoryImpl;
-
 import dagger.Binds;
 import dagger.Module;
 
@@ -39,9 +36,4 @@ public interface SettingsUtilModule {
     /** Bind GlobalSettingsImpl to GlobalSettings. */
     @Binds
     GlobalSettings bindsGlobalSettings(GlobalSettingsImpl impl);
-
-    /** Bind UserAwareSecureSettingsRepositoryImpl to UserAwareSecureSettingsRepository. */
-    @Binds
-    UserAwareSecureSettingsRepository bindsUserAwareSecureSettingsRepository(
-            UserAwareSecureSettingsRepositoryImpl impl);
 }

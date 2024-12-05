@@ -705,6 +705,10 @@ public class AidlConversion {
                 aidl.type = AudioDeviceType.OUT_BROADCAST;
                 aidl.connection = AudioDeviceDescription.CONNECTION_BT_LE;
                 break;
+            case AudioSystem.DEVICE_OUT_MULTICHANNEL_GROUP:
+                aidl.type = AudioDeviceType.OUT_MULTICHANNEL_GROUP;
+                aidl.connection = AudioDeviceDescription.CONNECTION_VIRTUAL;
+                break;
             case AudioSystem.DEVICE_IN_BUILTIN_MIC:
                 aidl.type = AudioDeviceType.IN_MICROPHONE;
                 break;

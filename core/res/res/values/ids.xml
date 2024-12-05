@@ -290,4 +290,7 @@
 
   <!-- View tag associating a view with its overridden id, to ensure valid recycling only. -->
   <item type="id" name="remote_views_override_id" />
+
+  <!-- View tag associating a view with its id for widget metrics. -->
+  <item type="id" name="remoteViewsMetricsId" />
 </resources>

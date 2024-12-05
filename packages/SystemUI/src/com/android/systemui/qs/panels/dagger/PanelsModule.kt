@@ -35,8 +35,6 @@ import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModelImpl
-import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsSizeViewModelImpl
-import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -57,8 +55,6 @@ interface PanelsModule {
     fun bindEditTilesResetInteractor(impl: SizedTilesResetInteractor): EditTilesResetInteractor
 
     @Binds fun bindIconTilesViewModel(impl: IconTilesViewModelImpl): IconTilesViewModel
-
-    @Binds fun bindQSColumnsViewModel(impl: QSColumnsSizeViewModelImpl): QSColumnsViewModel
 
     @Binds
     @PaginatedBaseLayoutType

@@ -163,18 +163,18 @@ public class QueuedWorkTest {
 
     @Test
     public void testHasPendingWork() {
-        Semaphore releaser = new Semaphore(0);
-        mQueuedWork.queue(
-                () -> {
-                    try {
-                        releaser.acquire();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, false);
+        final Semaphore releaser1 = new Semaphore(0);
+        final Semaphore releaser2 = new Semaphore(0);
+        mQueuedWork.queue(() -> releaser1.acquireUninterruptibly(), false);
+        mQueuedWork.queue(() -> releaser2.release(), false);
+        // Worker should be waiting for releaser1,
+        // and have pending work to release releaser2
         assertThat(mQueuedWork.hasPendingWork()).isTrue();
-        releaser.release();
-        mQueuedWork.waitToFinish();
+
+        // Allow worker to get to releasing releaser2
+        releaser1.release();
+        releaser2.acquireUninterruptibly();
+        // If we got here then there is no pending work.
         assertThat(mQueuedWork.hasPendingWork()).isFalse();
     }
 }

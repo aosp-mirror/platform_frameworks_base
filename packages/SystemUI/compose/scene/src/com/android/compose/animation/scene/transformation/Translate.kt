@@ -19,43 +19,41 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.Element
-import com.android.compose.animation.scene.ElementMatcher
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.OverscrollScope
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.content.state.TransitionState
 
-internal class Translate(
-    override val matcher: ElementMatcher,
-    private val x: Dp = 0.dp,
-    private val y: Dp = 0.dp,
-) : PropertyTransformation<Offset> {
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+internal class Translate private constructor(private val x: Dp, private val y: Dp) :
+    InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
-        value: Offset,
+        idleValue: Offset,
     ): Offset {
-        return with(layoutImpl.density) { Offset(value.x + x.toPx(), value.y + y.toPx()) }
+        return Offset(idleValue.x + x.toPx(), idleValue.y + y.toPx())
+    }
+
+    class Factory(private val x: Dp, private val y: Dp) : Transformation.Factory {
+        override fun create(): Transformation = Translate(x, y)
     }
 }
 
-internal class OverscrollTranslate(
-    override val matcher: ElementMatcher,
-    val x: OverscrollScope.() -> Float = { 0f },
-    val y: OverscrollScope.() -> Float = { 0f },
-) : PropertyTransformation<Offset> {
+internal class OverscrollTranslate
+private constructor(
+    private val x: OverscrollScope.() -> Float,
+    private val y: OverscrollScope.() -> Float,
+) : InterpolatedPropertyTransformation<Offset> {
+    override val property = PropertyTransformation.Property.Offset
+
     private val cachedOverscrollScope = CachedOverscrollScope()
 
-    override fun transform(
-        layoutImpl: SceneTransitionLayoutImpl,
+    override fun PropertyTransformationScope.transform(
         content: ContentKey,
-        element: Element,
-        stateInContent: Element.State,
+        element: ElementKey,
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
@@ -64,9 +62,16 @@ internal class OverscrollTranslate(
         // that this method was invoked after performing this check.
         val overscrollProperties = transition as TransitionState.HasOverscrollProperties
         val overscrollScope =
-            cachedOverscrollScope.getFromCacheOrCompute(layoutImpl.density, overscrollProperties)
+            cachedOverscrollScope.getFromCacheOrCompute(density = this, overscrollProperties)
 
         return Offset(x = value.x + overscrollScope.x(), y = value.y + overscrollScope.y())
+    }
+
+    class Factory(
+        private val x: OverscrollScope.() -> Float,
+        private val y: OverscrollScope.() -> Float,
+    ) : Transformation.Factory {
+        override fun create(): Transformation = OverscrollTranslate(x, y)
     }
 }
 
@@ -75,7 +80,7 @@ internal class OverscrollTranslate(
  * [TransitionState.HasOverscrollProperties]. This helps avoid recreating a scope every frame
  * whenever an overscroll transition is computed.
  */
-private class CachedOverscrollScope() {
+private class CachedOverscrollScope {
     private var previousScope: OverscrollScope? = null
     private var previousDensity: Density? = null
     private var previousOverscrollProperties: TransitionState.HasOverscrollProperties? = null

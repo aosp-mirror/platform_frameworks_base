@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 import android.os.Handler
 import android.os.looper
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 
 var Kosmos.mediaControllerInteractor: MediaControllerInteractor by
-    Kosmos.Fixture { MediaControllerInteractorImpl(Handler(looper)) }
+    Kosmos.Fixture { MediaControllerInteractorImpl(Handler(looper), testScope.testScheduler) }

@@ -17,8 +17,8 @@
 package android.security.net.config;
 
 import android.util.Pair;
+
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.util.Set;
 
 /**
@@ -32,7 +32,7 @@ class KeyStoreConfigSource implements ConfigSource {
         mConfig = new NetworkSecurityConfig.Builder()
                 .addCertificatesEntryRef(
                         // Use the KeyStore and do not override pins (of which there are none).
-                        new CertificatesEntryRef(new KeyStoreCertificateSource(ks), false))
+                        new CertificatesEntryRef(new KeyStoreCertificateSource(ks), false, false))
                 .build();
     }
 

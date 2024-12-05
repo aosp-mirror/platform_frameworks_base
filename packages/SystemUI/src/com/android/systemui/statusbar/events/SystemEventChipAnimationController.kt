@@ -32,13 +32,16 @@ import androidx.core.animation.AnimatorSet
 import androidx.core.animation.ValueAnimator
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Default
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.assisted.Assisted
@@ -56,6 +59,8 @@ interface SystemEventChipAnimationController : SystemStatusAnimationCallback {
     fun prepareChipAnimation(viewCreator: ViewCreator)
 
     fun init()
+
+    fun stop()
 
     /** Announces [contentDescriptions] for accessibility. */
     fun announceForAccessibility(contentDescriptions: String)
@@ -287,6 +292,26 @@ constructor(
         return animSet
     }
 
+    private val statusBarContentInsetsChangedListener =
+        object : StatusBarContentInsetsChangedListener {
+            override fun onStatusBarContentInsetsChanged() {
+                val newContentArea =
+                    contentInsetsProvider.getStatusBarContentAreaForCurrentRotation()
+                updateDimens(newContentArea)
+
+                // If we are currently animating, we have to re-solve for the chip bounds. If
+                // we're not animating then [prepareChipAnimation] will take care of it for us.
+                currentAnimatedView?.let {
+                    updateChipBounds(it, newContentArea)
+                    // Since updateCurrentAnimatedView can only be called during an animation,
+                    // we have to create a no-op animator here to apply the new chip bounds.
+                    val animator = ValueAnimator.ofInt(0, 1).setDuration(0)
+                    animator.addUpdateListener { updateCurrentAnimatedView() }
+                    animator.start()
+                }
+            }
+        }
+
     override fun init() {
         initialized = true
         themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
@@ -303,28 +328,11 @@ constructor(
 
         // Use contentInsetsProvider rather than configuration controller, since we only care
         // about status bar dimens
-        contentInsetsProvider.addCallback(
-            object : StatusBarContentInsetsChangedListener {
-                override fun onStatusBarContentInsetsChanged() {
-                    val newContentArea =
-                        contentInsetsProvider.getStatusBarContentAreaForCurrentRotation()
-                    updateDimens(newContentArea)
+        contentInsetsProvider.addCallback(statusBarContentInsetsChangedListener)
+    }
 
-                    // If we are currently animating, we have to re-solve for the chip bounds. If
-                    // we're
-                    // not animating then [prepareChipAnimation] will take care of it for us
-                    currentAnimatedView?.let {
-                        updateChipBounds(it, newContentArea)
-                        // Since updateCurrentAnimatedView can only be called during an animation,
-                        // we
-                        // have to create a dummy animator here to apply the new chip bounds
-                        val animator = ValueAnimator.ofInt(0, 1).setDuration(0)
-                        animator.addUpdateListener { updateCurrentAnimatedView() }
-                        animator.start()
-                    }
-                }
-            }
-        )
+    override fun stop() {
+        contentInsetsProvider.removeCallback(statusBarContentInsetsChangedListener)
     }
 
     override fun announceForAccessibility(contentDescriptions: String) {
@@ -418,7 +426,7 @@ constructor(
     }
 
     @AssistedFactory
-    interface Factory {
+    fun interface Factory {
         fun create(
             context: Context,
             statusBarWindowController: StatusBarWindowController,
@@ -446,20 +454,36 @@ private const val LEFT = 1
 private const val RIGHT = 2
 
 @Module
-object SystemEventChipAnimationControllerModule {
+interface SystemEventChipAnimationControllerModule {
 
-    @Provides
-    @SysUISingleton
-    fun controller(
-        factory: SystemEventChipAnimationControllerImpl.Factory,
-        context: Context,
-        statusBarWindowControllerStore: StatusBarWindowControllerStore,
-        contentInsetsProviderStore: StatusBarContentInsetsProviderStore,
-    ): SystemEventChipAnimationController {
-        return factory.create(
-            context,
-            statusBarWindowControllerStore.defaultDisplay,
-            contentInsetsProviderStore.defaultDisplay,
-        )
+    companion object {
+        @Provides
+        @Default
+        @SysUISingleton
+        fun defaultController(
+            factory: SystemEventChipAnimationControllerImpl.Factory,
+            context: Context,
+            statusBarWindowControllerStore: StatusBarWindowControllerStore,
+            contentInsetsProviderStore: StatusBarContentInsetsProviderStore,
+        ): SystemEventChipAnimationController {
+            return factory.create(
+                context,
+                statusBarWindowControllerStore.defaultDisplay,
+                contentInsetsProviderStore.defaultDisplay,
+            )
+        }
+
+        @Provides
+        @SysUISingleton
+        fun controller(
+            @Default defaultLazy: Lazy<SystemEventChipAnimationController>,
+            multiDisplayLazy: Lazy<MultiDisplaySystemEventChipAnimationController>,
+        ): SystemEventChipAnimationController {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                defaultLazy.get()
+            }
+        }
     }
 }

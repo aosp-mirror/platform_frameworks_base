@@ -44,7 +44,7 @@ final class SplitPwleSegmentsAdapter implements VibrationSegmentsAdapter {
             // The vibrator does not have PWLE v2 capability, so keep the segments unchanged.
             return repeatIndex;
         }
-        int maxPwleDuration = info.getMaxEnvelopeEffectDurationMillis();
+        int maxPwleDuration = (int) info.getMaxEnvelopeEffectDurationMillis();
         if (maxPwleDuration <= 0) {
             // No limit set to PWLE primitive duration.
             return repeatIndex;

@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static com.android.server.vibrator.VibrationSession.DebugInfo.formatTime;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioAttributes;
@@ -23,6 +25,7 @@ import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -31,9 +34,6 @@ import android.os.vibrator.VibrationEffectSegment;
 import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,11 +42,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The base class for all vibrations.
  */
 abstract class Vibration {
-    private static final DateTimeFormatter DEBUG_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "HH:mm:ss.SSS");
-    private static final DateTimeFormatter DEBUG_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(
-            "MM-dd HH:mm:ss.SSS");
-
     // Used to generate globally unique vibration ids.
     private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
 
@@ -217,6 +212,11 @@ abstract class Vibration {
         public void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
             statsLogger.logVibrationAdaptiveHapticScale(mCallerInfo.uid, mAdaptiveScale);
             statsLogger.writeVibrationReportedAsync(mStatsInfo);
+            if (Flags.vendorVibrationEffects()) {
+                // Log effect as it was originally requested.
+                statsLogger.logVibrationCountAndSizeIfVendorEffect(mCallerInfo.uid,
+                        mOriginalEffect != null ? mOriginalEffect : mPlayedEffect);
+            }
         }
 
         @Override
@@ -398,13 +398,6 @@ abstract class Vibration {
             proto.write(PrimitiveSegmentProto.SCALE, segment.getScale());
             proto.write(PrimitiveSegmentProto.DELAY, segment.getDelay());
             proto.end(token);
-        }
-
-        private String formatTime(long timeInMillis, boolean includeDate) {
-            return (includeDate ? DEBUG_DATE_TIME_FORMATTER : DEBUG_TIME_FORMATTER)
-                    // Ensure timezone is retrieved at formatting time
-                    .withZone(ZoneId.systemDefault())
-                    .format(Instant.ofEpochMilli(timeInMillis));
         }
     }
 }

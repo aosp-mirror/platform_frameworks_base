@@ -187,7 +187,7 @@ class InternetTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_internet_label)
         return QSTileState(
-            { icon },
+            icon,
             iconRes,
             label,
             activationState,

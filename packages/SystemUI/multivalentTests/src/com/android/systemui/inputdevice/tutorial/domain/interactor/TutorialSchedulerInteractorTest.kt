@@ -85,63 +85,62 @@ class TutorialSchedulerInteractorTest : SysuiTestCase() {
     @Test
     fun connectKeyboard_delayElapse_launchForKeyboard() =
         testScope.runTest {
-            launchAndAssert(TutorialType.KEYBOARD)
-
             keyboardRepository.setIsAnyKeyboardConnected(true)
             advanceTimeBy(LAUNCH_DELAY)
+
+            launchAndAssert(TutorialType.KEYBOARD)
         }
 
     @Test
     fun connectBothDevices_delayElapse_launchForBoth() =
         testScope.runTest {
-            launchAndAssert(TutorialType.BOTH)
-
             keyboardRepository.setIsAnyKeyboardConnected(true)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             advanceTimeBy(LAUNCH_DELAY)
+
+            launchAndAssert(TutorialType.BOTH)
         }
 
     @Test
     fun connectBothDevice_delayNotElapse_launchNothing() =
         testScope.runTest {
-            launchAndAssert(TutorialType.NONE)
-
             keyboardRepository.setIsAnyKeyboardConnected(true)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             advanceTimeBy(A_SHORT_PERIOD_OF_TIME)
+
+            launchAndAssert(TutorialType.NONE)
         }
 
     @Test
     fun nothingConnect_delayElapse_launchNothing() =
         testScope.runTest {
-            launchAndAssert(TutorialType.NONE)
-
             keyboardRepository.setIsAnyKeyboardConnected(false)
             touchpadRepository.setIsAnyTouchpadConnected(false)
             advanceTimeBy(LAUNCH_DELAY)
+
+            launchAndAssert(TutorialType.NONE)
         }
 
     @Test
     fun connectKeyboard_thenTouchpad_delayElapse_launchForBoth() =
         testScope.runTest {
-            launchAndAssert(TutorialType.BOTH)
-
             keyboardRepository.setIsAnyKeyboardConnected(true)
             advanceTimeBy(A_SHORT_PERIOD_OF_TIME)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             advanceTimeBy(REMAINING_TIME)
+
+            launchAndAssert(TutorialType.BOTH)
         }
 
     @Test
     fun connectKeyboard_thenTouchpad_removeKeyboard_delayElapse_launchNothing() =
         testScope.runTest {
-            launchAndAssert(TutorialType.NONE)
-
             keyboardRepository.setIsAnyKeyboardConnected(true)
             advanceTimeBy(A_SHORT_PERIOD_OF_TIME)
             touchpadRepository.setIsAnyTouchpadConnected(true)
             keyboardRepository.setIsAnyKeyboardConnected(false)
             advanceTimeBy(REMAINING_TIME)
+            launchAndAssert(TutorialType.NONE)
         }
 
     private suspend fun launchAndAssert(expectedTutorial: TutorialType) =

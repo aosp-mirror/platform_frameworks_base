@@ -28,7 +28,7 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE;
 import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
-import static com.android.server.hdmi.RequestActiveSourceAction.TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS;
+import static com.android.server.hdmi.RequestActiveSourceAction.TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS;
 import static com.android.server.hdmi.RoutingControlAction.TIMEOUT_ROUTING_INFORMATION_MS;
 import static com.android.server.hdmi.RequestSadAction.RETRY_COUNTER_MAX;
 
@@ -118,6 +118,7 @@ public class HdmiCecLocalDeviceTvTest {
     private boolean mDisableCecOnStandbyByLowEnergyMode;
     private boolean mWasCecDisabledOnStandbyByLowEnergyMode;
     private boolean mUseHdmiCecPowerStatusController;
+    private boolean mUserEnabledCecInOfflineMode;
 
     private class DeviceEventListener {
         private HdmiDeviceInfo mDevice;
@@ -250,6 +251,11 @@ public class HdmiCecLocalDeviceTvTest {
                     protected void setWasCecDisabledOnStandbyByLowEnergyMode(boolean value) {
                         mWasCecDisabledOnStandbyByLowEnergyMode = value;
                     }
+
+                    @Override
+                    protected boolean userEnabledCecInOfflineMode() {
+                        return mUserEnabledCecInOfflineMode;
+                    }
                 };
 
         mHdmiControlService.setIoLooper(mMyLooper);
@@ -298,6 +304,7 @@ public class HdmiCecLocalDeviceTvTest {
         mWasCecDisabledOnStandbyByLowEnergyMode = false;
         mDisableCecOnStandbyByLowEnergyMode = false;
         mUseHdmiCecPowerStatusController = false;
+        mUserEnabledCecInOfflineMode = false;
         mNativeWrapper.clearResultMessages();
     }
 
@@ -1877,7 +1884,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1910,7 +1917,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1946,7 +1953,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -1989,7 +1996,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTestLooper.dispatchAll();
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
@@ -2026,7 +2033,7 @@ public class HdmiCecLocalDeviceTvTest {
         mHdmiControlService.sendCecCommand(setStreamPathFromTv);
 
         // Skip the LauncherX API timeout.
-        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
+        mTestLooper.moveTimeForward(TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(requestActiveSource);
@@ -2398,6 +2405,32 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mVendorCommandListeners.size()).isEqualTo(2);
         assertTrue(mVendorCommandListeners.contains(vendorCommandListenerInvocationWakeup));
         assertTrue(mVendorCommandListeners.contains(vendorCommandListenerInvocationSettingChange));
+    }
+
+    @Test
+    public void lowEnergyMode_userEnabledCecInOfflineMode_onStandby_cecStaysEnabled() {
+        mDisableCecOnStandbyByLowEnergyMode = true;
+        mUseHdmiCecPowerStatusController = true;
+        mUserEnabledCecInOfflineMode = true;
+        mPowerManager.setIsLowPowerStandbyEnabled(true);
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlService.onStandby(STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        assertFalse(mWasCecDisabledOnStandbyByLowEnergyMode);
+        mHdmiControlService.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().getIntValue(
+                        HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED),
+                HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        assertFalse(mWasCecDisabledOnStandbyByLowEnergyMode);
     }
 
     protected static class MockTvDevice extends HdmiCecLocalDeviceTv {

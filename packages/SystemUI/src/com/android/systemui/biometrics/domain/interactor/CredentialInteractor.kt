@@ -72,7 +72,7 @@ constructor(
         // Request LockSettingsService to return the Gatekeeper Password in the
         // VerifyCredentialResponse so that we can request a Gatekeeper HAT with the
         // Gatekeeper Password and operationId.
-        var effectiveUserId = request.userInfo.userIdForPasswordEntry
+        var effectiveUserId = request.userInfo.deviceCredentialOwnerId
         val response =
             if (Flags.privateSpaceBp() && effectiveUserId != request.userInfo.userId) {
                 effectiveUserId = request.userInfo.userId

@@ -203,7 +203,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 mock(),
-                configurationForwarder,
+                { configurationForwarder },
                 brightnessMirrorShowingInteractor,
             )
 

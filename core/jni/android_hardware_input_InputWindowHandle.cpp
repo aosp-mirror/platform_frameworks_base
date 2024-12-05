@@ -83,68 +83,53 @@ static struct {
     jmethodID ctor;
 } gRegionClassInfo;
 
-static Mutex gHandleMutex;
+// --- Global functions ---
 
+sp<gui::WindowInfoHandle> android_view_InputWindowHandle_getHandle(JNIEnv* env, jobject obj) {
+    sp<gui::WindowInfoHandle> handle = [&]() {
+        jlong cachedHandle = env->GetLongField(obj, gInputWindowHandleClassInfo.ptr);
+        if (cachedHandle) {
+            return sp<gui::WindowInfoHandle>::fromExisting(
+                    reinterpret_cast<gui::WindowInfoHandle*>(cachedHandle));
+        }
 
-// --- NativeInputWindowHandle ---
+        auto newHandle = sp<gui::WindowInfoHandle>::make();
+        newHandle->incStrong((void*)android_view_InputWindowHandle_getHandle);
+        env->SetLongField(obj, gInputWindowHandleClassInfo.ptr,
+                          reinterpret_cast<jlong>(newHandle.get()));
+        return newHandle;
+    }();
 
-NativeInputWindowHandle::NativeInputWindowHandle(jweak objWeak) :
-        mObjWeak(objWeak) {
-}
+    gui::WindowInfo* windowInfo = handle->editInfo();
 
-NativeInputWindowHandle::~NativeInputWindowHandle() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    env->DeleteWeakGlobalRef(mObjWeak);
-
-    // Clear the weak reference to the layer handle and flush any binder ref count operations so we
-    // do not hold on to any binder references.
-    // TODO(b/139697085) remove this after it can be flushed automatically
-    mInfo.touchableRegionCropHandle.clear();
-    IPCThreadState::self()->flushCommands();
-}
-
-jobject NativeInputWindowHandle::getInputWindowHandleObjLocalRef(JNIEnv* env) {
-    return env->NewLocalRef(mObjWeak);
-}
-
-bool NativeInputWindowHandle::updateInfo() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jobject obj = env->NewLocalRef(mObjWeak);
-    if (!obj) {
-        releaseChannel();
-        return false;
-    }
-
-    mInfo.touchableRegion.clear();
+    windowInfo->touchableRegion.clear();
 
     jobject tokenObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.token);
     if (tokenObj) {
-        mInfo.token = ibinderForJavaObject(env, tokenObj);
+        windowInfo->token = ibinderForJavaObject(env, tokenObj);
         env->DeleteLocalRef(tokenObj);
     } else {
-        mInfo.token.clear();
+        windowInfo->token.clear();
     }
 
-    mInfo.name = getStringField(env, obj, gInputWindowHandleClassInfo.name, "<null>");
+    windowInfo->name = getStringField(env, obj, gInputWindowHandleClassInfo.name, "<null>");
 
-    mInfo.dispatchingTimeout = std::chrono::milliseconds(
+    windowInfo->dispatchingTimeout = std::chrono::milliseconds(
             env->GetLongField(obj, gInputWindowHandleClassInfo.dispatchingTimeoutMillis));
 
     ScopedLocalRef<jobject> frameObj(env,
                                      env->GetObjectField(obj, gInputWindowHandleClassInfo.frame));
-    mInfo.frame = JNICommon::rectFromObj(env, frameObj.get());
+    windowInfo->frame = JNICommon::rectFromObj(env, frameObj.get());
 
-    mInfo.surfaceInset = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.surfaceInset);
-    mInfo.globalScaleFactor = env->GetFloatField(obj,
-            gInputWindowHandleClassInfo.scaleFactor);
+    windowInfo->surfaceInset = env->GetIntField(obj, gInputWindowHandleClassInfo.surfaceInset);
+    windowInfo->globalScaleFactor =
+            env->GetFloatField(obj, gInputWindowHandleClassInfo.scaleFactor);
 
-    jobject regionObj = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.touchableRegion);
+    jobject regionObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.touchableRegion);
     if (regionObj) {
         for (graphics::RegionIterator it(env, regionObj); !it.isDone(); it.next()) {
             ARect rect = it.getRect();
-            mInfo.addTouchableRegion(Rect(rect.left, rect.top, rect.right, rect.bottom));
+            windowInfo->addTouchableRegion(Rect(rect.left, rect.top, rect.right, rect.bottom));
         }
         env->DeleteLocalRef(regionObj);
     }
@@ -153,49 +138,55 @@ bool NativeInputWindowHandle::updateInfo() {
             env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsFlags));
     const auto type = static_cast<WindowInfo::Type>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.layoutParamsType));
-    mInfo.layoutParamsFlags = flags;
-    mInfo.layoutParamsType = type;
+    windowInfo->layoutParamsFlags = flags;
+    windowInfo->layoutParamsType = type;
 
-    mInfo.inputConfig = static_cast<gui::WindowInfo::InputConfig>(
+    windowInfo->inputConfig = static_cast<gui::WindowInfo::InputConfig>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.inputConfig));
 
-    mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
+    windowInfo->touchOcclusionMode = static_cast<TouchOcclusionMode>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
-    mInfo.ownerPid = gui::Pid{env->GetIntField(obj, gInputWindowHandleClassInfo.ownerPid)};
-    mInfo.ownerUid = gui::Uid{
+    windowInfo->ownerPid = gui::Pid{env->GetIntField(obj, gInputWindowHandleClassInfo.ownerPid)};
+    windowInfo->ownerUid = gui::Uid{
             static_cast<uid_t>(env->GetIntField(obj, gInputWindowHandleClassInfo.ownerUid))};
-    mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
-    mInfo.displayId =
+    windowInfo->packageName =
+            getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
+    windowInfo->displayId =
             ui::LogicalDisplayId{env->GetIntField(obj, gInputWindowHandleClassInfo.displayId)};
 
-    jobject inputApplicationHandleObj = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.inputApplicationHandle);
+    jobject inputApplicationHandleObj =
+            env->GetObjectField(obj, gInputWindowHandleClassInfo.inputApplicationHandle);
     if (inputApplicationHandleObj) {
         std::shared_ptr<InputApplicationHandle> inputApplicationHandle =
                 android_view_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
         if (inputApplicationHandle != nullptr) {
             inputApplicationHandle->updateInfo();
-            mInfo.applicationInfo = *(inputApplicationHandle->getInfo());
+            windowInfo->applicationInfo = *(inputApplicationHandle->getInfo());
         }
         env->DeleteLocalRef(inputApplicationHandleObj);
     }
 
-    mInfo.replaceTouchableRegionWithCrop = env->GetBooleanField(obj,
-            gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop);
+    windowInfo->replaceTouchableRegionWithCrop =
+            env->GetBooleanField(obj, gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop);
 
-    jobject weakSurfaceCtrl = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.touchableRegionSurfaceControl.ctrl);
+    jobject weakSurfaceCtrl =
+            env->GetObjectField(obj,
+                                gInputWindowHandleClassInfo.touchableRegionSurfaceControl.ctrl);
     bool touchableRegionCropHandleSet = false;
     if (weakSurfaceCtrl) {
         // Promote java weak reference.
-        jobject strongSurfaceCtrl = env->CallObjectMethod(weakSurfaceCtrl,
-                gInputWindowHandleClassInfo.touchableRegionSurfaceControl.get);
+        jobject strongSurfaceCtrl =
+                env->CallObjectMethod(weakSurfaceCtrl,
+                                      gInputWindowHandleClassInfo.touchableRegionSurfaceControl
+                                              .get);
         if (strongSurfaceCtrl) {
-            jlong mNativeObject = env->GetLongField(strongSurfaceCtrl,
-                    gInputWindowHandleClassInfo.touchableRegionSurfaceControl.mNativeObject);
+            jlong mNativeObject =
+                    env->GetLongField(strongSurfaceCtrl,
+                                      gInputWindowHandleClassInfo.touchableRegionSurfaceControl
+                                              .mNativeObject);
             if (mNativeObject) {
                 auto ctrl = reinterpret_cast<SurfaceControl *>(mNativeObject);
-                mInfo.touchableRegionCropHandle = ctrl->getHandle();
+                windowInfo->touchableRegionCropHandle = ctrl->getHandle();
                 touchableRegionCropHandleSet = true;
             }
             env->DeleteLocalRef(strongSurfaceCtrl);
@@ -203,15 +194,15 @@ bool NativeInputWindowHandle::updateInfo() {
         env->DeleteLocalRef(weakSurfaceCtrl);
     }
     if (!touchableRegionCropHandleSet) {
-        mInfo.touchableRegionCropHandle.clear();
+        windowInfo->touchableRegionCropHandle.clear();
     }
 
     jobject windowTokenObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.windowToken);
     if (windowTokenObj) {
-        mInfo.windowToken = ibinderForJavaObject(env, windowTokenObj);
+        windowInfo->windowToken = ibinderForJavaObject(env, windowTokenObj);
         env->DeleteLocalRef(windowTokenObj);
     } else {
-        mInfo.windowToken.clear();
+        windowInfo->windowToken.clear();
     }
 
     ScopedLocalRef<jobject>
@@ -220,41 +211,16 @@ bool NativeInputWindowHandle::updateInfo() {
                                                        gInputWindowHandleClassInfo
                                                                .focusTransferTarget));
     if (focusTransferTargetObj.get()) {
-        mInfo.focusTransferTarget = ibinderForJavaObject(env, focusTransferTargetObj.get());
+        windowInfo->focusTransferTarget = ibinderForJavaObject(env, focusTransferTargetObj.get());
     } else {
-        mInfo.focusTransferTarget.clear();
+        windowInfo->focusTransferTarget.clear();
     }
 
-    env->DeleteLocalRef(obj);
-    return true;
-}
-
-
-// --- Global functions ---
-
-sp<NativeInputWindowHandle> android_view_InputWindowHandle_getHandle(
-        JNIEnv* env, jobject inputWindowHandleObj) {
-    if (!inputWindowHandleObj) {
-        return NULL;
-    }
-
-    AutoMutex _l(gHandleMutex);
-
-    jlong ptr = env->GetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr);
-    NativeInputWindowHandle* handle;
-    if (ptr) {
-        handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
-    } else {
-        jweak objWeak = env->NewWeakGlobalRef(inputWindowHandleObj);
-        handle = new NativeInputWindowHandle(objWeak);
-        handle->incStrong((void*)android_view_InputWindowHandle_getHandle);
-        env->SetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
-                reinterpret_cast<jlong>(handle));
-    }
     return handle;
 }
 
-jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowInfo windowInfo) {
+jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env,
+                                                      const gui::WindowInfo& windowInfo) {
     ScopedLocalRef<jobject>
             applicationHandle(env,
                               android_view_InputApplicationHandle_fromInputApplicationInfo(
@@ -337,17 +303,14 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
 // --- JNI ---
 
 static void android_view_InputWindowHandle_nativeDispose(JNIEnv* env, jobject obj) {
-    AutoMutex _l(gHandleMutex);
-
     jlong ptr = env->GetLongField(obj, gInputWindowHandleClassInfo.ptr);
-    if (ptr) {
-        env->SetLongField(obj, gInputWindowHandleClassInfo.ptr, 0);
-
-        NativeInputWindowHandle* handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
-        handle->decStrong((void*)android_view_InputWindowHandle_getHandle);
+    if (!ptr) {
+        return;
     }
+    env->SetLongField(obj, gInputWindowHandleClassInfo.ptr, 0);
+    auto handle = reinterpret_cast<gui::WindowInfoHandle*>(ptr);
+    handle->decStrong((void*)android_view_InputWindowHandle_getHandle);
 }
-
 
 static const JNINativeMethod gInputWindowHandleMethods[] = {
     /* name, signature, funcPtr */

@@ -55,6 +55,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -248,7 +249,11 @@ public class WearableSensingManager {
      * @param executor Executor on which to run the consumer callback
      * @param statusConsumer A consumer that handles the status codes for providing the connection
      *     and errors in the encrypted channel.
+     * @deprecated Use {@link #provideConnection(WearableConnection, Executor)} instead to provide a
+     *     remote wearable device connection to the WearableSensingService
      */
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void provideConnection(
             @NonNull ParcelFileDescriptor wearableConnection,
@@ -348,9 +353,7 @@ public class WearableSensingManager {
                             wearableConnection.getMetadata(),
                             createWearableSensingCallback(executor),
                             statusCallback);
-            if (connectionId != CONNECTION_ID_INVALID) {
-                mWearableConnectionIdMap.put(wearableConnection, connectionId);
-            }
+            mWearableConnectionIdMap.put(wearableConnection, connectionId);
             // For invalid connection IDs, the status callback will remove the connection from
             // mWearableConnectionIdMap
         } catch (RemoteException e) {
@@ -367,36 +370,37 @@ public class WearableSensingManager {
      * <p>After this method returns, there will be no new invocation to callback methods in the
      * removed {@link WearableConnection}. Ongoing invocations will continue to run.
      *
-     * <p>This method does nothing if the provided {@code wearableConnection} does not match any
-     * open connection.
+     * <p>This method throws a {@link NoSuchElementException} if the provided {@code
+     * wearableConnection} does not match any open connection.
      *
      * <p>This method should not be called before the corresponding {@link
      * #provideConnection(WearableConnection, Executor)} invocation returns. Otherwise, the
-     * connection may not be removed.
+     * connection may not be removed, and an {@link IllegalStateException} may be thrown.
      *
      * @param wearableConnection The WearableConnection instance previously provided to {@link
      *     #provideConnection(WearableConnection, Executor)}.
-     * @return true if a concurrent connection quota has been freed due to this method invocation.
-     *     Returns false otherwise.
+     * @throws NoSuchElementException if the connection was never provided or was already removed.
+     * @throws IllegalStateException if the {@link #provideConnection(WearableConnection, Executor)}
+     *     invocation for the given connection has not returned.
      */
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
-    public boolean removeConnection(@NonNull WearableConnection wearableConnection) {
-        int connectionId =
-                mWearableConnectionIdMap.getOrDefault(wearableConnection, CONNECTION_ID_INVALID);
-        if (connectionId == CONNECTION_ID_INVALID) {
-            return false;
+    public void removeConnection(@NonNull WearableConnection wearableConnection) {
+        Integer connectionId = mWearableConnectionIdMap.remove(wearableConnection);
+        if (connectionId == null || connectionId == CONNECTION_ID_INVALID) {
+            throw new NoSuchElementException(
+                    "The provided connection was never provided or was already removed.");
         }
         if (connectionId == CONNECTION_ID_PLACEHOLDER) {
-            Slog.w(
-                    TAG,
+            throw new IllegalStateException(
                     "Attempt to remove connection before provideConnection returns. The connection"
                             + " will not be removed.");
-            return false;
         }
-        mWearableConnectionIdMap.remove(wearableConnection);
         try {
-            return mService.removeConnection(connectionId);
+            if (!mService.removeConnection(connectionId)) {
+                throw new NoSuchElementException(
+                        "The provided connection was never provided or was already removed.");
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -9,4 +9,4 @@ wyattriley@google.com
 yuhany@google.com
 
 # ContextHub team
-per-file *ContextHub*,*NanoApp* = file:platform/system/chre:/OWNERS
+per-file Android.bp,*Hub*,*NanoApp* = file:platform/system/chre:/OWNERS

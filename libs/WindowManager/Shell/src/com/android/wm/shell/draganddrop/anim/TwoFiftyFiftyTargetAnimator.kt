@@ -22,6 +22,10 @@ import android.graphics.Rect
 import com.android.wm.shell.R
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.draganddrop.SplitDragPolicy.Target
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_0
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_1
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_2
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_3
 
 /**
  * Represents Drop Zone targets and animations for when the system is currently in a 2 app 50/50
@@ -98,7 +102,7 @@ class TwoFiftyFiftyTargetAnimator : DropTargetAnimSupplier {
                     farStartBounds.right + halfDividerWidth,
                     farStartBounds.bottom
                 ),
-                farStartBounds, 0
+                farStartBounds, SPLIT_INDEX_0
             )
         )
         targets.add(
@@ -110,7 +114,7 @@ class TwoFiftyFiftyTargetAnimator : DropTargetAnimSupplier {
                     startBounds.right + halfDividerWidth,
                     startBounds.bottom
                 ),
-                startBounds, 1
+                startBounds, SPLIT_INDEX_1
             )
         )
         targets.add(
@@ -120,7 +124,7 @@ class TwoFiftyFiftyTargetAnimator : DropTargetAnimSupplier {
                     endBounds.left - halfDividerWidth,
                     endBounds.top, endBounds.right, endBounds.bottom
                 ),
-                endBounds, 2
+                endBounds, SPLIT_INDEX_2
             )
         )
         targets.add(
@@ -130,7 +134,7 @@ class TwoFiftyFiftyTargetAnimator : DropTargetAnimSupplier {
                     farEndBounds.left - halfDividerWidth,
                     farEndBounds.top, farEndBounds.right, farEndBounds.bottom
                 ),
-                farEndBounds, 3
+                farEndBounds, SPLIT_INDEX_3
             )
         )
 

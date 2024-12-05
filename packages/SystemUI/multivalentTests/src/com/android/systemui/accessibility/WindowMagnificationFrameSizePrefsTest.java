@@ -25,15 +25,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.util.Size;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.FakeSharedPreferences;
 
@@ -59,18 +56,6 @@ public class WindowMagnificationFrameSizePrefsTest extends SysuiTestCase {
         mWindowMagnificationFrameSizePrefs = new WindowMagnificationFrameSizePrefs(mContext);
     }
 
-    @DisableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
-    @Test
-    public void saveSizeForCurrentDensity_getExpectedSize() {
-        Size testSize = new Size(500, 500);
-        mWindowMagnificationFrameSizePrefs
-                .saveIndexAndSizeForCurrentDensity(MagnificationSize.CUSTOM, testSize);
-
-        assertThat(mWindowMagnificationFrameSizePrefs.getSizeForCurrentDensity())
-                .isEqualTo(testSize);
-    }
-
-    @EnableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
     @Test
     public void saveSizeForCurrentDensity_validPreference_getExpectedSize() {
         int testIndex = MagnificationSize.MEDIUM;
@@ -81,7 +66,6 @@ public class WindowMagnificationFrameSizePrefsTest extends SysuiTestCase {
                 .isEqualTo(testSize);
     }
 
-    @EnableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
     @Test
     public void saveSizeForCurrentDensity_validPreference_getExpectedIndex() {
         int testIndex = MagnificationSize.MEDIUM;
@@ -92,7 +76,6 @@ public class WindowMagnificationFrameSizePrefsTest extends SysuiTestCase {
                 .isEqualTo(testIndex);
     }
 
-    @EnableFlags(Flags.FLAG_SAVE_AND_RESTORE_MAGNIFICATION_SETTINGS_BUTTONS)
     @Test
     public void saveSizeForCurrentDensity_invalidPreference_getDefaultIndex() {
         mSharedPreferences

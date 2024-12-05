@@ -18,6 +18,8 @@ package com.android.settingslib.bluetooth;
 
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import static com.android.settingslib.Utils.isAudioModeOngoingCall;
+
 import static java.util.stream.Collectors.toList;
 
 import android.annotation.CallbackExecutor;
@@ -54,7 +56,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
-import com.android.settingslib.flags.Flags;
 
 import com.google.common.collect.ImmutableList;
 
@@ -303,6 +304,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + ", sourceId = "
                                         + sourceId);
                     }
+                    updateFallbackActiveDeviceIfNeeded();
                 }
 
                 @Override
@@ -389,9 +391,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                                         + sourceId
                                         + ", state = "
                                         + state);
-                    }
-                    if (BluetoothUtils.isConnected(state)) {
-                        updateFallbackActiveDeviceIfNeeded();
                     }
                 }
             };
@@ -1130,18 +1129,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded for work profile.");
             return;
         }
-        if (mServiceBroadcast == null) {
-            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to broadcast profile is null");
-            return;
-        }
-        List<BluetoothLeBroadcastMetadata> sources = mServiceBroadcast.getAllBroadcastMetadata();
-        if (sources.stream()
-                .noneMatch(source -> mServiceBroadcast.isPlaying(source.getBroadcastId()))) {
-            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no broadcast ongoing");
-            return;
-        }
-        if (mServiceBroadcastAssistant == null) {
-            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to assistant profile is null");
+        if (isAudioModeOngoingCall(mContext)) {
+            Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to ongoing call");
             return;
         }
         Map<Integer, List<BluetoothDevice>> deviceGroupsInBroadcast = getDeviceGroupsInBroadcast();
@@ -1152,7 +1141,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         int targetGroupId = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         int fallbackActiveGroupId = BluetoothUtils.getPrimaryGroupIdForBroadcast(
                 mContext.getContentResolver());
-        if (Flags.audioSharingHysteresisModeFix()) {
+        if (BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)) {
             int userPreferredPrimaryGroupId = getUserPreferredPrimaryGroupId();
             if (userPreferredPrimaryGroupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
                     && deviceGroupsInBroadcast.containsKey(userPreferredPrimaryGroupId)) {
@@ -1193,7 +1182,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
 
     @NonNull
     private Map<Integer, List<BluetoothDevice>> getDeviceGroupsInBroadcast() {
-        boolean hysteresisModeFixEnabled = Flags.audioSharingHysteresisModeFix();
+        boolean hysteresisModeFixEnabled =
+                BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext);
         List<BluetoothDevice> connectedDevices = mServiceBroadcastAssistant.getConnectedDevices();
         return connectedDevices.stream()
                 .filter(
@@ -1227,12 +1217,13 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 }
             }
         }
+        Log.d(TAG, "updateFallbackActiveDeviceIfNeeded, earliest group id = " + targetGroupId);
         return targetGroupId;
     }
 
     @Nullable
     private CachedBluetoothDevice getMainDevice(@Nullable List<BluetoothDevice> devices) {
-        if (devices == null || devices.size() == 1) return null;
+        if (devices == null || devices.isEmpty()) return null;
         List<CachedBluetoothDevice> cachedDevices =
                 devices.stream()
                         .map(device -> mDeviceManager.findDevice(device))

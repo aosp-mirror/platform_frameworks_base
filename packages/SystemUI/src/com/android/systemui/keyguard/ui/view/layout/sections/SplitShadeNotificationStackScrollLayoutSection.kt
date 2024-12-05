@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
@@ -35,7 +36,7 @@ import javax.inject.Inject
 class SplitShadeNotificationStackScrollLayoutSection
 @Inject
 constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     notificationPanelView: NotificationPanelView,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,

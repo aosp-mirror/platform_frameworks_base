@@ -35,12 +35,11 @@ import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInte
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
@@ -50,7 +49,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
-import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -65,8 +63,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
     private val executor = FakeExecutor(FakeSystemClock())
-    private val testDispatcher = StandardTestDispatcher()
-    private val activeNotificationsRepository = ActiveNotificationListRepository()
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
 
@@ -95,7 +91,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
             FakeKeyguardRepository(),
             headsUpManager,
             PowerInteractorFactory.create().powerInteractor,
-            ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher),
+            kosmos.activeNotificationsInteractor,
             kosmos::sceneInteractor,
         )
     }

@@ -23,7 +23,6 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.TwoStatePreference
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
-import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceTitleProvider
@@ -56,13 +55,13 @@ interface PreferenceScreenBinding : PreferenceBinding {
     }
 }
 
-/** Binding of preference group associated with [PreferenceCategory]. */
-interface PreferenceGroupBinding : PreferenceBinding {
+/** Binding of preference category associated with [PreferenceCategory]. */
+interface PreferenceCategoryBinding : PreferenceBinding {
 
     override fun createWidget(context: Context) = PreferenceCategory(context)
 
     companion object {
-        @JvmStatic val INSTANCE = object : PreferenceGroupBinding {}
+        @JvmStatic val INSTANCE = object : PreferenceCategoryBinding {}
     }
 }
 
@@ -71,10 +70,10 @@ interface TwoStatePreferenceBinding : PreferenceBinding {
 
     override fun bind(preference: Preference, metadata: PreferenceMetadata) {
         super.bind(preference, metadata)
-        (metadata as? PersistentPreference<*>)
-            ?.storage(preference.context)
-            ?.getValue(metadata.key, Boolean::class.javaObjectType)
-            ?.let { (preference as TwoStatePreference).isChecked = it }
+        (preference as TwoStatePreference).apply {
+            // "false" is kind of placeholder, metadata datastore should provide the default value
+            isChecked = preferenceDataStore!!.getBoolean(key, false)
+        }
     }
 }
 

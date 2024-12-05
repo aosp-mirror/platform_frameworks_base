@@ -17,6 +17,7 @@
 package android.window;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TransitionType;
 
 import android.annotation.IntDef;
@@ -189,6 +190,8 @@ public final class TransitionFilter implements Parcelable {
         public Boolean mCustomAnimation = null;
         public IBinder mTaskFragmentToken = null;
 
+        public int mWindowingMode = WINDOWING_MODE_UNDEFINED;
+
         public Requirement() {
         }
 
@@ -206,6 +209,7 @@ public final class TransitionFilter implements Parcelable {
             final int customAnimRaw = in.readInt();
             mCustomAnimation = customAnimRaw == 0 ? null : Boolean.valueOf(customAnimRaw == 2);
             mTaskFragmentToken = in.readStrongBinder();
+            mWindowingMode = in.readInt();
         }
 
         /** Go through changes and find if at-least one change matches this filter */
@@ -270,6 +274,12 @@ public final class TransitionFilter implements Parcelable {
                         continue;
                     }
                 }
+                if (mWindowingMode != WINDOWING_MODE_UNDEFINED) {
+                    if (change.getTaskInfo() == null
+                            || change.getTaskInfo().getWindowingMode() != mWindowingMode) {
+                        continue;
+                    }
+                }
                 return true;
             }
             return false;
@@ -322,6 +332,7 @@ public final class TransitionFilter implements Parcelable {
             int customAnimRaw = mCustomAnimation == null ? 0 : (mCustomAnimation ? 2 : 1);
             dest.writeInt(customAnimRaw);
             dest.writeStrongBinder(mTaskFragmentToken);
+            dest.writeInt(mWindowingMode);
         }
 
         @NonNull
@@ -369,6 +380,8 @@ public final class TransitionFilter implements Parcelable {
             if (mTaskFragmentToken != null) {
                 out.append(" taskFragmentToken=").append(mTaskFragmentToken);
             }
+            out.append(" windowingMode="
+                    + WindowConfiguration.windowingModeToString(mWindowingMode));
             out.append("}");
             return out.toString();
         }

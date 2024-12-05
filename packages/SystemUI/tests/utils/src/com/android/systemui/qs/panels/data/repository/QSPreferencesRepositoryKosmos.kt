@@ -16,8 +16,10 @@
 
 package com.android.systemui.qs.panels.data.repository
 
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.log.core.FakeLogBuffer
 import com.android.systemui.settings.userFileManager
 import com.android.systemui.user.data.repository.userRepository
 
@@ -27,6 +29,8 @@ val Kosmos.qsPreferencesRepository by
             userFileManager,
             userRepository,
             defaultLargeTilesRepository,
-            testDispatcher
+            testDispatcher,
+            FakeLogBuffer.Factory.create(),
+            broadcastDispatcher,
         )
     }

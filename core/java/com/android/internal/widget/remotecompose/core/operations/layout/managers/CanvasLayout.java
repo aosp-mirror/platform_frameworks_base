@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -30,7 +33,7 @@ import java.util.List;
 
 public class CanvasLayout extends BoxLayout {
     public CanvasLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -40,10 +43,11 @@ public class CanvasLayout extends BoxLayout {
         super(parent, componentId, animationId, x, y, width, height, 0, 0);
     }
 
-    public CanvasLayout(Component parent, int componentId, int animationId) {
+    public CanvasLayout(@Nullable Component parent, int componentId, int animationId) {
         this(parent, componentId, animationId, 0, 0, 0, 0);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "CANVAS ["
@@ -62,32 +66,55 @@ public class CanvasLayout extends BoxLayout {
                 + mVisibility;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "CANVAS";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "CanvasLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_CANVAS;
     }
 
-    public static void apply(WireBuffer buffer, int componentId, int animationId) {
+    public static void apply(@NonNull WireBuffer buffer, int componentId, int animationId) {
         buffer.start(Operations.LAYOUT_CANVAS);
         buffer.writeInt(componentId);
         buffer.writeInt(animationId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         operations.add(new CanvasLayout(null, componentId, animationId));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Canvas implementation. Encapsulate draw operations.\n\n")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
@@ -98,7 +125,7 @@ public class CanvasLayout extends BoxLayout {
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
+    public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         float selfWidth = selfMeasure.getW() - mPaddingLeft - mPaddingRight;
         float selfHeight = selfMeasure.getH() - mPaddingTop - mPaddingBottom;
@@ -112,7 +139,7 @@ public class CanvasLayout extends BoxLayout {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId, mAnimationId);
     }
 }

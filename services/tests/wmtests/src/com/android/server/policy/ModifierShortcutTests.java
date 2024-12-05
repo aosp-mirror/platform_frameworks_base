@@ -288,22 +288,10 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * Sends a KEYCODE_SCREENSHOT and validates screenshot is taken if flag is enabled
      */
     @Test
-    @EnableFlags(com.android.hardware.input.Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testTakeScreenshot_flagEnabled() {
         sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
         mPhoneWindowManager.assertTakeScreenshotCalled();
-    }
-
-    /**
-     * Sends a KEYCODE_SCREENSHOT and validates screenshot is not taken if flag is disabled
-     */
-    @Test
-    @DisableFlags({com.android.hardware.input.Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE,
-            com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER})
-    public void testTakeScreenshot_flagDisabled() {
-        sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
-        mPhoneWindowManager.assertTakeScreenshotNotCalled();
     }
 
     /**

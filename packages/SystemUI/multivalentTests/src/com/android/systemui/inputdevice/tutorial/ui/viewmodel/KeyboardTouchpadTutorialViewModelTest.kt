@@ -27,9 +27,11 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.domain.interactor.KeyboardTouchpadConnectionInteractor
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEY
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEY
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEYBOARD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.ACTION_KEY
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.HOME_GESTURE
@@ -66,8 +68,8 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     private val sysUiState = kosmos.sysUiState
     private val touchpadRepo = PrettyFakeTouchpadRepository()
     private val keyboardRepo = kosmos.keyboardRepository
-    private var startingPeripheral = INTENT_TUTORIAL_TYPE_TOUCHPAD
-    private val viewModel by lazy { createViewModel(startingPeripheral) }
+    private var tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD
+    private val viewModel by lazy { createViewModel(tutorialScope) }
 
     // createUnsafe so its methods don't have to be called on Main thread
     private val lifecycle = LifecycleRegistry.createUnsafe(mock(LifecycleOwner::class.java))
@@ -75,7 +77,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     @get:Rule val mainDispatcherRule = MainDispatcherRule(kosmos.testDispatcher)
 
     private fun createViewModel(
-        startingPeripheral: String = INTENT_TUTORIAL_TYPE_TOUCHPAD,
+        scope: String = INTENT_TUTORIAL_SCOPE_TOUCHPAD,
         hasTouchpadTutorialScreens: Boolean = true,
     ): KeyboardTouchpadTutorialViewModel {
         val viewModel =
@@ -84,7 +86,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
                 KeyboardTouchpadConnectionInteractor(keyboardRepo, touchpadRepo),
                 hasTouchpadTutorialScreens,
                 mock<InputDeviceTutorialLogger>(),
-                SavedStateHandle(mapOf(INTENT_TUTORIAL_TYPE_KEY to startingPeripheral))
+                SavedStateHandle(mapOf(INTENT_TUTORIAL_SCOPE_KEY to scope)),
             )
         lifecycle.addObserver(viewModel)
         return viewModel
@@ -169,7 +171,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     @Test
     fun screensOrder_whenGoingBackAndOnlyKeyboardConnected() =
         testScope.runTest {
-            startingPeripheral = INTENT_TUTORIAL_TYPE_KEYBOARD
+            tutorialScope = INTENT_TUTORIAL_SCOPE_KEYBOARD
             val screens by collectValues(viewModel.screen)
             val closeActivity by collectLastValue(viewModel.closeActivity)
             peripheralsState(keyboardConnected = true, touchpadConnected = false)
@@ -185,13 +187,12 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     @Test
     fun screensOrder_whenTouchpadConnected() =
         testScope.runTest {
-            startingPeripheral = INTENT_TUTORIAL_TYPE_TOUCHPAD
+            tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD
             val screens by collectValues(viewModel.screen)
             val closeActivity by collectLastValue(viewModel.closeActivity)
 
             peripheralsState(keyboardConnected = false, touchpadConnected = true)
 
-            goToNextScreen()
             goToNextScreen()
             goToNextScreen()
 
@@ -200,15 +201,41 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun screensOrder_whenKeyboardConnected() =
+    fun screensOrder_withBackGestureScope() =
         testScope.runTest {
-            startingPeripheral = INTENT_TUTORIAL_TYPE_KEYBOARD
+            tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK
             val screens by collectValues(viewModel.screen)
             val closeActivity by collectLastValue(viewModel.closeActivity)
-
-            peripheralsState(keyboardConnected = true)
+            peripheralsState(touchpadConnected = true)
 
             goToNextScreen()
+
+            assertThat(screens).containsExactly(BACK_GESTURE).inOrder()
+            assertThat(closeActivity).isTrue()
+        }
+
+    @Test
+    fun screensOrder_withHomeGestureScope() =
+        testScope.runTest {
+            tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME
+            val screens by collectValues(viewModel.screen)
+            val closeActivity by collectLastValue(viewModel.closeActivity)
+            peripheralsState(touchpadConnected = true)
+
+            goToNextScreen()
+
+            assertThat(screens).containsExactly(HOME_GESTURE).inOrder()
+            assertThat(closeActivity).isTrue()
+        }
+
+    @Test
+    fun screensOrder_withKeyboardScope() =
+        testScope.runTest {
+            tutorialScope = INTENT_TUTORIAL_SCOPE_KEYBOARD
+            val screens by collectValues(viewModel.screen)
+            val closeActivity by collectLastValue(viewModel.closeActivity)
+            peripheralsState(keyboardConnected = true)
+
             goToNextScreen()
 
             assertThat(screens).containsExactly(ACTION_KEY).inOrder()
@@ -218,7 +245,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     @Test
     fun touchpadGesturesDisabled_onlyDuringTouchpadTutorial() =
         testScope.runTest {
-            startingPeripheral = INTENT_TUTORIAL_TYPE_TOUCHPAD
+            tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD
             collectValues(viewModel.screen) // just to initialize viewModel
             peripheralsState(keyboardConnected = true, touchpadConnected = true)
 
@@ -234,8 +261,8 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val viewModel =
                 createViewModel(
-                    startingPeripheral = INTENT_TUTORIAL_TYPE_TOUCHPAD,
-                    hasTouchpadTutorialScreens = false
+                    scope = INTENT_TUTORIAL_SCOPE_TOUCHPAD,
+                    hasTouchpadTutorialScreens = false,
                 )
             val screens by collectValues(viewModel.screen)
             val closeActivity by collectLastValue(viewModel.closeActivity)
@@ -248,7 +275,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     @Test
     fun touchpadGesturesDisabled_whenTutorialGoesToForeground() =
         testScope.runTest {
-            startingPeripheral = INTENT_TUTORIAL_TYPE_TOUCHPAD
+            tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD
             collectValues(viewModel.screen) // just to initialize viewModel
             peripheralsState(touchpadConnected = true)
 
@@ -260,7 +287,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     @Test
     fun touchpadGesturesNotDisabled_whenTutorialGoesToBackground() =
         testScope.runTest {
-            startingPeripheral = INTENT_TUTORIAL_TYPE_TOUCHPAD
+            tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD
             collectValues(viewModel.screen)
             peripheralsState(touchpadConnected = true)
 
@@ -288,7 +315,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
 
     private fun TestScope.peripheralsState(
         keyboardConnected: Boolean = false,
-        touchpadConnected: Boolean = false
+        touchpadConnected: Boolean = false,
     ) {
         keyboardRepo.setIsAnyKeyboardConnected(keyboardConnected)
         touchpadRepo.setIsAnyTouchpadConnected(touchpadConnected)

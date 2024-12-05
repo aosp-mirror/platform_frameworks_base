@@ -17,7 +17,6 @@ package com.android.systemui.statusbar.phone.fragment;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS;
-import static com.android.systemui.Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 
@@ -61,6 +60,7 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips;
+import com.android.systemui.statusbar.core.StatusBarRootModernization;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewBinder;
@@ -155,9 +156,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 any(StatusBarWindowStateListener.class));
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testDisableNone() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testDisableNone() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
@@ -166,9 +167,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testDisableSystemInfo_systemAnimationIdle_doesHide() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testDisableSystemInfo_systemAnimationIdle_doesHide() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
@@ -184,9 +185,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testSystemStatusAnimation_startedDisabled_finishedWithAnimator_showsSystemInfo() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testSystemStatusAnimation_startedDisabled_finishedWithAnimator_showsSystemInfo() {
         // GIVEN the status bar hides the system info via disable flags, while there is no event
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
@@ -214,9 +215,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(1, getEndSideContentView().getAlpha(), 0.01);
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testSystemStatusAnimation_systemInfoDisabled_staysInvisible() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testSystemStatusAnimation_systemInfoDisabled_staysInvisible() {
         // GIVEN the status bar hides the system info via disable flags, while there is no event
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_SYSTEM_INFO, 0, false);
@@ -231,9 +232,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testSystemStatusAnimation_notDisabled_animatesAlphaZero() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testSystemStatusAnimation_notDisabled_animatesAlphaZero() {
         // GIVEN the status bar is not disabled
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         assertEquals(1, getEndSideContentView().getAlpha(), 0.01);
@@ -247,9 +248,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(0, getEndSideContentView().getAlpha(), 0.01);
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testSystemStatusAnimation_notDisabled_animatesBackToAlphaOne() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testSystemStatusAnimation_notDisabled_animatesBackToAlphaOne() {
         // GIVEN the status bar is not disabled
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         assertEquals(1, getEndSideContentView().getAlpha(), 0.01);
@@ -271,9 +272,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(1, getEndSideContentView().getAlpha(), 0.01);
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testDisableNotifications() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testDisableNotifications() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
@@ -290,7 +291,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
     public void testDisableNotifications_doesNothingWhenFlagEnabled() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -307,9 +308,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testDisableClock() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testDisableClock() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_CLOCK, 0, false);
@@ -326,7 +327,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
-    @EnableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME)
     public void testDisableClock_doesNothingWhenFlagEnabled() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
@@ -343,10 +344,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_shadeOpenAndShouldHide_everythingHidden() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_shadeOpenAndShouldHide_everythingHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN the shade is open and configured to hide the status bar icons
@@ -361,10 +362,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_shadeOpenButNotShouldHide_everythingShown() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_shadeOpenButNotShouldHide_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN the shade is open but *not* configured to hide the status bar icons
@@ -379,11 +380,11 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
-    /** Regression test for b/279790651. */
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_shadeOpenAndShouldHide_thenShadeNotOpenAndDozingUpdate_everythingShown() {
+  /** Regression test for b/279790651. */
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_shadeOpenAndShouldHide_thenShadeNotOpenAndDozingUpdate_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN the shade is open and configured to hide the status bar icons
@@ -409,9 +410,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_notTransitioningToOccluded_everythingShown() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_notTransitioningToOccluded_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().setValue(false);
@@ -424,10 +425,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_isTransitioningToOccluded_everythingHidden() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_isTransitioningToOccluded_everythingHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().setValue(true);
@@ -440,10 +441,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_wasTransitioningToOccluded_transitionFinished_everythingShown() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_wasTransitioningToOccluded_transitionFinished_everythingShown() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN the transition is occurring
@@ -472,9 +473,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getUserChipView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void disable_noOngoingCall_chipHidden() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void disable_noOngoingCall_chipHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         when(mOngoingCallController.hasOngoingCall()).thenReturn(false);
@@ -484,9 +489,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void disable_hasOngoingCall_chipDisplayedAndNotificationIconsHidden() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void disable_hasOngoingCall_chipDisplayedAndNotificationIconsHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
@@ -497,9 +506,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void disable_hasOngoingCallButNotificationIconsDisabled_chipHidden() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void disable_hasOngoingCallButNotificationIconsDisabled_chipHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
@@ -510,9 +523,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void disable_hasOngoingCallButAlsoHun_chipHidden() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void disable_hasOngoingCallButAlsoHun_chipHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
@@ -523,9 +540,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void disable_ongoingCallEnded_chipHidden() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void disable_ongoingCallEnded_chipHidden() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // Ongoing call started
@@ -547,9 +568,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void disable_hasOngoingCall_hidesNotifsWithoutAnimation() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void disable_hasOngoingCall_hidesNotifsWithoutAnimation() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         // Enable animations for testing so that we can verify we still aren't animating
         fragment.enableAnimationsForTesting();
@@ -564,9 +589,13 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @DisableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void screenSharingChipsDisabled_ignoresNewCallback() {
+  @Test
+  @DisableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void screenSharingChipsDisabled_ignoresNewCallback() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN there *is* an ongoing call via old callback
@@ -597,10 +626,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getSecondaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void noOngoingActivity_chipHidden() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void noOngoingActivity_chipHidden() {
         resumeAndGetFragment();
 
         // TODO(b/332662551): We *should* be able to just set a value on
@@ -615,10 +644,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void hasPrimaryOngoingActivity_primaryChipDisplayedAndNotificationIconsHidden() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void hasPrimaryOngoingActivity_primaryChipDisplayedAndNotificationIconsHidden() {
         resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -630,12 +659,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({
-            FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
-            StatusBarNotifChips.FLAG_NAME,
-            FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void hasPrimaryOngoingActivity_viewsUnchangedWhenSimpleFragmentFlagOn() {
+  @Test
+  @EnableFlags({
+    FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS,
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void hasPrimaryOngoingActivity_viewsUnchangedWhenRootModernizationFlagOn() {
         resumeAndGetFragment();
 
         assertEquals(View.VISIBLE, getPrimaryOngoingActivityChipView().getVisibility());
@@ -658,10 +689,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags({StatusBarNotifChips.FLAG_NAME, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void hasSecondaryOngoingActivity_butNotifsFlagOff_secondaryChipHidden() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void hasSecondaryOngoingActivity_butNotifsFlagOff_secondaryChipHidden() {
         resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -672,10 +707,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getSecondaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void hasSecondaryOngoingActivity_flagOn_secondaryChipShownAndNotificationIconsHidden() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void hasSecondaryOngoingActivity_flagOn_secondaryChipShownAndNotificationIconsHidden() {
         resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -687,10 +722,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags({StatusBarNotifChips.FLAG_NAME, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void hasOngoingActivityButNotificationIconsDisabled_chipHidden_notifsFlagOff() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void hasOngoingActivityButNotificationIconsDisabled_chipHidden_notifsFlagOff() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -704,10 +743,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void hasOngoingActivitiesButNotificationIconsDisabled_chipsHidden_notifsFlagOn() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void hasOngoingActivitiesButNotificationIconsDisabled_chipsHidden_notifsFlagOn() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -722,10 +761,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getSecondaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags({StatusBarNotifChips.FLAG_NAME, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void hasOngoingActivityButAlsoHun_chipHidden_notifsFlagOff() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void hasOngoingActivityButAlsoHun_chipHidden_notifsFlagOff() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -739,10 +782,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void hasOngoingActivitiesButAlsoHun_chipsHidden_notifsFlagOn() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void hasOngoingActivitiesButAlsoHun_chipsHidden_notifsFlagOn() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onOngoingActivityStatusChanged(
@@ -757,10 +800,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getSecondaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags({StatusBarNotifChips.FLAG_NAME, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void primaryOngoingActivityEnded_chipHidden_notifsFlagOff() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void primaryOngoingActivityEnded_chipHidden_notifsFlagOff() {
         resumeAndGetFragment();
 
         // Ongoing activity started
@@ -780,10 +827,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void primaryOngoingActivityEnded_chipHidden_notifsFlagOn() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void primaryOngoingActivityEnded_chipHidden_notifsFlagOn() {
         resumeAndGetFragment();
 
         // Ongoing activity started
@@ -803,10 +850,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void secondaryOngoingActivityEnded_chipHidden() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void secondaryOngoingActivityEnded_chipHidden() {
         resumeAndGetFragment();
 
         // Secondary ongoing activity started
@@ -826,10 +873,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getSecondaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags({StatusBarNotifChips.FLAG_NAME, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void hasOngoingActivity_hidesNotifsWithoutAnimation_notifsFlagOff() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void hasOngoingActivity_hidesNotifsWithoutAnimation_notifsFlagOff() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         // Enable animations for testing so that we can verify we still aren't animating
         fragment.enableAnimationsForTesting();
@@ -845,10 +896,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void hasOngoingActivity_hidesNotifsWithoutAnimation_notifsFlagOn() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void hasOngoingActivity_hidesNotifsWithoutAnimation_notifsFlagOn() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         // Enable animations for testing so that we can verify we still aren't animating
         fragment.enableAnimationsForTesting();
@@ -864,10 +915,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getNotificationAreaView().getVisibility());
     }
 
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    @DisableFlags({StatusBarNotifChips.FLAG_NAME, FLAG_STATUS_BAR_SIMPLE_FRAGMENT})
-    public void screenSharingChipsEnabled_ignoresOngoingCallController_notifsFlagOff() {
+  @Test
+  @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
+  @DisableFlags({
+    StatusBarNotifChips.FLAG_NAME,
+    StatusBarRootModernization.FLAG_NAME,
+    StatusBarChipsModernization.FLAG_NAME
+  })
+  public void screenSharingChipsEnabled_ignoresOngoingCallController_notifsFlagOff() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN there *is* an ongoing call via old callback
@@ -897,10 +952,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getPrimaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void screenSharingChipsEnabled_ignoresOngoingCallController_notifsFlagOn() {
+  @Test
+  @EnableFlags({FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS, StatusBarNotifChips.FLAG_NAME})
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void screenSharingChipsEnabled_ignoresOngoingCallController_notifsFlagOn() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN there *is* an ongoing call via old callback
@@ -931,10 +986,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getSecondaryOngoingActivityChipView().getVisibility());
     }
 
-    @Test
-    @EnableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void isHomeStatusBarAllowedByScene_false_everythingHidden() {
+  @Test
+  @EnableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void isHomeStatusBarAllowedByScene_false_everythingHidden() {
         resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(false);
@@ -945,10 +1000,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @EnableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void isHomeStatusBarAllowedByScene_true_everythingShown() {
+  @Test
+  @EnableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void isHomeStatusBarAllowedByScene_true_everythingShown() {
         resumeAndGetFragment();
 
         mCollapsedStatusBarViewBinder.getListener().onIsHomeStatusBarAllowedBySceneChanged(true);
@@ -959,10 +1014,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @EnableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_isHomeStatusBarAllowedBySceneFalse_disableValuesIgnored() {
+  @Test
+  @EnableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_isHomeStatusBarAllowedBySceneFalse_disableValuesIgnored() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN the scene doesn't allow the status bar
@@ -977,10 +1032,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @EnableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_isHomeStatusBarAllowedBySceneTrue_disableValuesUsed() {
+  @Test
+  @EnableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_isHomeStatusBarAllowedBySceneTrue_disableValuesUsed() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN the scene does allow the status bar
@@ -995,10 +1050,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void isHomeStatusBarAllowedByScene_sceneContainerDisabled_valueNotUsed() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void isHomeStatusBarAllowedByScene_sceneContainerDisabled_valueNotUsed() {
         resumeAndGetFragment();
 
         // Even if the scene says to hide the home status bar
@@ -1010,9 +1065,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_isDozing_clockAndSystemInfoVisible() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_isDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(true);
 
@@ -1022,9 +1077,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_NotDozing_clockAndSystemInfoVisible() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_NotDozing_clockAndSystemInfoVisible() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mStatusBarStateController.isDozing()).thenReturn(false);
 
@@ -1034,9 +1089,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_headsUpShouldBeVisibleTrue_clockDisabled() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_headsUpShouldBeVisibleTrue_clockDisabled() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
 
@@ -1045,9 +1100,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.GONE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void disable_headsUpShouldBeVisibleFalse_clockNotDisabled() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void disable_headsUpShouldBeVisibleFalse_clockNotDisabled() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
         when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(false);
 
@@ -1098,10 +1153,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertFalse(contains);
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testStatusBarIcons_hiddenThroughoutCameraLaunch() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testStatusBarIcons_hiddenThroughoutCameraLaunch() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         mockSecureCameraLaunch(fragment, true /* launched */);
@@ -1121,10 +1176,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testStatusBarIcons_hiddenThroughoutLockscreenToDreamTransition() {
+  @Test
+  @DisableSceneContainer
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testStatusBarIcons_hiddenThroughoutLockscreenToDreamTransition() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN a transition to dream has started
@@ -1158,9 +1213,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
-    public void testStatusBarIcons_lockscreenToDreamTransitionButNotDreaming_iconsVisible() {
+  @Test
+  @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
+  public void testStatusBarIcons_lockscreenToDreamTransitionButNotDreaming_iconsVisible() {
         final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         // WHEN a transition to dream has started but we're *not* dreaming
@@ -1184,9 +1239,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mKeyguardStateController = mock(KeyguardStateController.class);
         mOperatorNameViewController = mock(OperatorNameViewController.class);
         mOperatorNameViewControllerFactory = mock(OperatorNameViewController.Factory.class);
-        when(mOperatorNameViewControllerFactory.create(any()))
+        when(mOperatorNameViewControllerFactory.create(any(), any()))
                 .thenReturn(mOperatorNameViewController);
-        when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
+        when(mIconManagerFactory.create(any(), any(), any())).thenReturn(mIconManager);
         mSecureSettings = mock(SecureSettings.class);
 
         mShadeExpansionStateManager = new ShadeExpansionStateManager();

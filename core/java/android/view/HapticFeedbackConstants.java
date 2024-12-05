@@ -176,7 +176,7 @@ public class HapticFeedbackConstants {
 
     /**
      * The user is executing a swipe/drag-style gesture, such as pull-to-refresh, where the
-     * gesture action is “eligible” at a certain threshold of movement, and can be cancelled by
+     * gesture action is "eligible" at a certain threshold of movement, and can be cancelled by
      * moving back past the threshold. This constant indicates that the user's motion has just
      * passed the threshold for the action to be activated on release.
      *
@@ -186,7 +186,7 @@ public class HapticFeedbackConstants {
 
     /**
      * The user is executing a swipe/drag-style gesture, such as pull-to-refresh, where the
-     * gesture action is “eligible” at a certain threshold of movement, and can be cancelled by
+     * gesture action is "eligible" at a certain threshold of movement, and can be cancelled by
      * moving back past the threshold. This constant indicates that the user's motion has just
      * re-crossed back "under" the threshold for the action to be activated, meaning the gesture is
      * currently in a cancelled state.

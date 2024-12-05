@@ -19,6 +19,7 @@
 #include <HardwareBitmapUploader.h>
 #include <androidfw/Asset.h>
 #include <sys/stat.h>
+#include <utils/StatsUtils.h>
 
 #include <memory>
 
@@ -111,9 +112,7 @@ public:
             return false;
         }
 
-        // Round out the subset so that we decode a slightly larger region, in
-        // case the subset has fractional components.
-        SkIRect roundedSubset = desiredSubset.roundOut();
+        sampleSize = std::max(sampleSize, 1);
 
         // Map the desired subset to the space of the decoded gainmap. The
         // subset is repositioned relative to the resulting bitmap, and then
@@ -122,10 +121,51 @@ public:
         // for existing gainmap formats.
         SkRect logicalSubset = desiredSubset.makeOffset(-std::floorf(desiredSubset.left()),
                                                         -std::floorf(desiredSubset.top()));
-        logicalSubset.fLeft /= sampleSize;
-        logicalSubset.fTop /= sampleSize;
-        logicalSubset.fRight /= sampleSize;
-        logicalSubset.fBottom /= sampleSize;
+        logicalSubset = scale(logicalSubset, 1.0f / sampleSize);
+
+        // Round out the subset so that we decode a slightly larger region, in
+        // case the subset has fractional components. When we round, we need to
+        // round the downsampled subset to avoid possibly rounding down by accident.
+        // Consider this concrete example if we round the desired subset directly:
+        //
+        // * We are decoding a 18x18 corner of an image
+        //
+        // * Gainmap is 1/4 resolution, which is logically a 4.5x4.5 gainmap
+        // that we would want
+        //
+        // * The app wants to downsample by a factor of 2x
+        //
+        // * The desired gainmap dimensions are computed to be 3x3 to fit the
+        // downsampled gainmap, since we need to fill a 2.25x2.25 region that's
+        // later upscaled to 3x3
+        //
+        // * But, if we round out the desired gainmap region _first_, then we
+        // request to decode a 5x5 region, downsampled by 2, which actually
+        // decodes a 2x2 region since skia rounds down internally. But then we transfer
+        // the result to a 3x3 bitmap using a clipping allocator, which leaves an inset.
+        // Not only did we get a smaller region than we expected (so, our desired subset is
+        // not valid), but because the API allows for decoding regions using a recycled
+        // bitmap, we can't really safely fill in the inset since then we might
+        // extend the gainmap beyond intended the image bounds. Oops.
+        //
+        // * If we instead round out as if we downsampled, then we downsample
+        // the desired region to 2.25x2.25, round out to 3x3, then upsample back
+        // into the source gainmap space to get 6x6. Then we decode a 6x6 region
+        // downsampled into a 3x3 region, and everything's now correct.
+        //
+        // Note that we don't always run into this problem, because
+        // decoders actually round *up* for subsampling when decoding a subset
+        // that matches the dimensions of the image. E.g., if the original image
+        // size in the above example was a 20x20 image, so that the gainmap was
+        // 5x5, then we still manage to downsample into a 3x3 bitmap even with
+        // the "wrong" math. but that's what we wanted!
+        //
+        // Note also that if we overshoot the gainmap bounds with the requested
+        // subset it isn't a problem either, since now the decoded bitmap is too
+        // large, rather than too small, so now we can use the desired subset to
+        // avoid sampling "invalid" colors.
+        SkRect scaledSubset = scale(desiredSubset, 1.0f / sampleSize);
+        SkIRect roundedSubset = scale(scaledSubset.roundOut(), static_cast<float>(sampleSize));
 
         RecyclingClippingPixelAllocator allocator(nativeBitmap.get(), false, logicalSubset);
         if (!mGainmapBRD->decodeRegion(&bm, &allocator, roundedSubset, sampleSize, decodeColorType,
@@ -153,7 +193,7 @@ public:
         const float scaleX = ((float)mGainmapBRD->width()) / mMainImageBRD->width();
         const float scaleY = ((float)mGainmapBRD->height()) / mMainImageBRD->height();
 
-        if (uirenderer::Properties::resampleGainmapRegions) {
+        if (uirenderer::Properties::resampleGainmapRegions()) {
             const auto srcRect = SkRect::MakeLTRB(
                     mainImageRegion.left() * scaleX, mainImageRegion.top() * scaleY,
                     mainImageRegion.right() * scaleX, mainImageRegion.bottom() * scaleY);
@@ -184,6 +224,22 @@ private:
             : mMainImageBRD(std::move(mainImageBRD))
             , mGainmapBRD(std::move(gainmapBRD))
             , mGainmapInfo(info) {}
+
+    SkRect scale(SkRect rect, float scale) const {
+        rect.fLeft *= scale;
+        rect.fTop *= scale;
+        rect.fRight *= scale;
+        rect.fBottom *= scale;
+        return rect;
+    }
+
+    SkIRect scale(SkIRect rect, float scale) const {
+        rect.fLeft *= scale;
+        rect.fTop *= scale;
+        rect.fRight *= scale;
+        rect.fBottom *= scale;
+        return rect;
+    }
 
     std::unique_ptr<skia::BitmapRegionDecoder> mMainImageBRD;
     std::unique_ptr<skia::BitmapRegionDecoder> mGainmapBRD;
@@ -376,6 +432,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
             recycledBitmap->setGainmap(std::move(gainmap));
         }
         bitmap::reinitBitmap(env, javaBitmap, recycledBitmap->info(), !requireUnpremul);
+        uirenderer::logBitmapDecode(*recycledBitmap);
         return javaBitmap;
     }
 
@@ -392,12 +449,14 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
                 hardwareBitmap->setGainmap(std::move(gm));
             }
         }
+        uirenderer::logBitmapDecode(*hardwareBitmap);
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags);
     }
     Bitmap* heapBitmap = heapAlloc.getStorageObjAndReset();
     if (hasGainmap && heapBitmap != nullptr) {
         heapBitmap->setGainmap(std::move(gainmap));
     }
+    uirenderer::logBitmapDecode(*heapBitmap);
     return android::bitmap::createBitmap(env, heapBitmap, bitmapCreateFlags);
 }
 

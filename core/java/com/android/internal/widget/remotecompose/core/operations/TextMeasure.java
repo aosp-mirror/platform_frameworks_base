@@ -19,6 +19,8 @@ import static com.android.internal.widget.remotecompose.core.PaintContext.TEXT_M
 import static com.android.internal.widget.remotecompose.core.PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -55,19 +57,24 @@ public class TextMeasure extends PaintOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mTextId, mType);
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "FloatConstant[" + mId + "] = " + mTextId + " " + mType;
     }
 
-    public static String name() {
+    public static @NonNull String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -80,37 +87,49 @@ public class TextMeasure extends PaintOperation {
      * @param textId the id
      * @param type the value of the float
      */
-    public static void apply(WireBuffer buffer, int id, int textId, int type) {
+    public static void apply(@NonNull WireBuffer buffer, int id, int textId, int type) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(textId);
         buffer.writeInt(type);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int textId = buffer.readInt();
         int type = buffer.readInt();
         operations.add(new TextMeasure(id, textId, type));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
-                .description("A float and its associated id")
+                .description("Measure text")
                 .field(INT, "id", "id of float result of the measure")
                 .field(INT, "textId", "id of text")
                 .field(INT, "type", "type: measure 0=width,1=height");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 
-    float[] mBounds = new float[4];
+    @NonNull float[] mBounds = new float[4];
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         int val = mType & 255;
         int flags = mType >> 8;
         context.getTextBounds(mTextId, 0, -1, flags, mBounds);

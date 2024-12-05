@@ -14,7 +14,7 @@ per-file *Keyboard* = set noparent
 per-file *Keyboard* = file:../keyguard/OWNERS
 per-file *Keyguard* = set noparent
 per-file *Keyguard* = file:../keyguard/OWNERS
-per-file *Notification* = set noparent
+# Not setting noparent here, since *Notification* also matches some status bar notification chips files (statusbar/chips/notification) which should be owned by the status bar team.
 per-file *Notification* = file:notification/OWNERS
 # Not setting noparent here, since *Mode* matches many other classes (e.g., *ViewModel*)
 per-file *Mode* = file:notification/OWNERS

@@ -60,6 +60,7 @@ import static com.android.server.am.ProcessList.PERCEPTIBLE_RECENT_FOREGROUND_AP
 import static com.android.server.am.ProcessList.PERSISTENT_PROC_ADJ;
 import static com.android.server.am.ProcessList.PERSISTENT_SERVICE_ADJ;
 import static com.android.server.am.ProcessList.PREVIOUS_APP_ADJ;
+import static com.android.server.am.ProcessList.PREVIOUS_APP_MAX_ADJ;
 import static com.android.server.am.ProcessList.SCHED_GROUP_BACKGROUND;
 import static com.android.server.am.ProcessList.SCHED_GROUP_DEFAULT;
 import static com.android.server.am.ProcessList.SCHED_GROUP_FOREGROUND_WINDOW;
@@ -104,10 +105,12 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.server.LocalServices;
@@ -129,6 +132,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Test class for {@link OomAdjuster}.
@@ -173,6 +177,7 @@ public class MockingOomAdjusterTests {
     private ActiveUids mActiveUids;
     private PackageManagerInternal mPackageManagerInternal;
     private ActivityManagerService mService;
+    private TestCachedAppOptimizer mTestCachedAppOptimizer;
     private OomAdjusterInjector mInjector = new OomAdjusterInjector();
 
     private int mUiTierSize;
@@ -240,9 +245,11 @@ public class MockingOomAdjusterTests {
         doNothing().when(pr).enqueueProcessChangeItemLocked(anyInt(), anyInt(), anyInt(),
                 anyBoolean());
         mActiveUids = new ActiveUids(mService, false);
+        mTestCachedAppOptimizer = new TestCachedAppOptimizer(mService);
         mProcessStateController = new ProcessStateController.Builder(mService,
                 mService.mProcessList, mActiveUids)
                 .useModernOomAdjuster(mService.mConstants.ENABLE_NEW_OOMADJ)
+                .setCachedAppOptimizer(mTestCachedAppOptimizer)
                 .setOomAdjusterInjector(mInjector)
                 .build();
         mService.mProcessStateController = mProcessStateController;
@@ -899,8 +906,25 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    public void testUpdateOomAdj_DoPending_PreviousApp() {
+        testUpdateOomAdj_PreviousApp(apps -> {
+            for (ProcessRecord app : apps) {
+                mProcessStateController.enqueueUpdateTarget(app);
+            }
+            mProcessStateController.runPendingUpdate(OOM_ADJ_REASON_NONE);
+        });
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoAll_PreviousApp() {
-        final int numberOfApps = 15;
+        testUpdateOomAdj_PreviousApp(apps -> {
+            mProcessStateController.runFullUpdate(OOM_ADJ_REASON_NONE);
+        });
+    }
+
+    private void testUpdateOomAdj_PreviousApp(Consumer<ProcessRecord[]> updater) {
+        final int numberOfApps = 105;
         final ProcessRecord[] apps = new ProcessRecord[numberOfApps];
         for (int i = 0; i < numberOfApps; i++) {
             apps[i] = spy(makeDefaultProcessRecord(MOCKAPP_PID + i, MOCKAPP_UID + i,
@@ -911,10 +935,11 @@ public class MockingOomAdjusterTests {
         }
         setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
         setProcessesToLru(apps);
-        mProcessStateController.runFullUpdate(OOM_ADJ_REASON_NONE);
-
+        updater.accept(apps);
         for (int i = 0; i < numberOfApps; i++) {
-            assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
+            final int mruIndex = numberOfApps - i - 1;
+            final int expectedAdj = Math.min(PREVIOUS_APP_ADJ + mruIndex, PREVIOUS_APP_MAX_ADJ);
+            assertProcStates(apps[i], PROCESS_STATE_LAST_ACTIVITY, expectedAdj,
                     SCHED_GROUP_BACKGROUND, "previous");
         }
 
@@ -1399,6 +1424,31 @@ public class MockingOomAdjusterTests {
         updateOomAdj(client, app);
 
         assertEquals(PERCEPTIBLE_LOW_APP_ADJ, app.mState.getSetAdj());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_Service_NotPerceptible_AboveClient() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        ProcessRecord service = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        bindService(app, client, null, null, Context.BIND_NOT_PERCEPTIBLE, mock(IBinder.class));
+        bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
+        mProcessStateController.setRunningRemoteAnimation(client, true);
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
+        setWakefulness(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        updateOomAdj(client, app, service);
+
+        final int expectedAdj;
+        if (Flags.addModifyRawOomAdjServiceLevel()) {
+            expectedAdj = SERVICE_ADJ;
+        } else {
+            expectedAdj = CACHED_APP_MIN_ADJ;
+        }
+        assertEquals(expectedAdj, app.mState.getSetAdj());
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2882,7 +2932,7 @@ public class MockingOomAdjusterTests {
         // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
         // verify that its OOM adjustment level is unaffected.
         bindService(service, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         assertTrue(app.mServices.hasAboveClient());
 
         updateOomAdj(app);
@@ -2904,7 +2954,7 @@ public class MockingOomAdjusterTests {
         // Simulate binding to a service in the same process using BIND_ABOVE_CLIENT and
         // verify that its OOM adjustment level is unaffected.
         bindService(app, app, null, null, Context.BIND_ABOVE_CLIENT, mock(IBinder.class));
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         assertFalse(app.mServices.hasAboveClient());
 
         updateOomAdj(app);
@@ -2959,7 +3009,7 @@ public class MockingOomAdjusterTests {
 
         // Since sr.app is null, this service cannot be in the same process as the
         // client so we expect the BIND_ABOVE_CLIENT adjustment to take effect.
-        app.mServices.updateHasAboveClientLocked();
+        mProcessStateController.updateHasAboveClientLocked(app.mServices);
         updateOomAdj(app);
         assertTrue(app.mServices.hasAboveClient());
         assertNotEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
@@ -3090,13 +3140,13 @@ public class MockingOomAdjusterTests {
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, true);
 
         assertEquals(true, app.getUidRecord().isSetAllowListed());
-        assertEquals(true, app.mOptRecord.shouldNotFreeze());
-        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
+        assertFreezeState(app, false);
+        assertFreezeState(app2, false);
 
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
-        assertEquals(false, app.mOptRecord.shouldNotFreeze());
-        assertEquals(false, app2.mOptRecord.shouldNotFreeze());
+        assertFreezeState(app, true);
+        assertFreezeState(app2, true);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3118,25 +3168,25 @@ public class MockingOomAdjusterTests {
 
         assertEquals(true, app.getUidRecord().isSetAllowListed());
         assertEquals(true, app2.getUidRecord().isSetAllowListed());
-        assertEquals(true, app.mOptRecord.shouldNotFreeze());
-        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
-        assertEquals(true, app3.mOptRecord.shouldNotFreeze());
+        assertFreezeState(app, false);
+        assertFreezeState(app2, false);
+        assertFreezeState(app3, false);
 
         // Remove app1 from allowlist.
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
         assertEquals(true, app2.getUidRecord().isSetAllowListed());
-        assertEquals(false, app.mOptRecord.shouldNotFreeze());
-        assertEquals(true, app2.mOptRecord.shouldNotFreeze());
-        assertEquals(true, app3.mOptRecord.shouldNotFreeze());
+        assertFreezeState(app, true);
+        assertFreezeState(app2, false);
+        assertFreezeState(app3, false);
 
         // Now remove app2 from allowlist.
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP2_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
         assertEquals(false, app2.getUidRecord().isSetAllowListed());
-        assertEquals(false, app.mOptRecord.shouldNotFreeze());
-        assertEquals(false, app2.mOptRecord.shouldNotFreeze());
-        assertEquals(false, app3.mOptRecord.shouldNotFreeze());
+        assertFreezeState(app, true);
+        assertFreezeState(app2, true);
+        assertFreezeState(app3, true);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3184,7 +3234,8 @@ public class MockingOomAdjusterTests {
         setProcessesToLru(app1, app2);
         mProcessStateController.runFullUpdate(OOM_ADJ_REASON_NONE);
 
-        assertProcStates(app1, PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
+        assertProcStates(app1, PROCESS_STATE_LAST_ACTIVITY,
+                PREVIOUS_APP_ADJ + (Flags.oomadjusterPrevLaddering() ? 1 : 0),
                 SCHED_GROUP_BACKGROUND, "recent-provider");
         assertProcStates(app2, PROCESS_STATE_LAST_ACTIVITY, PREVIOUS_APP_ADJ,
                 SCHED_GROUP_BACKGROUND, "recent-provider");
@@ -3208,6 +3259,24 @@ public class MockingOomAdjusterTests {
         mProcessStateController.runFollowUpUpdate();
         assertProcStates(app2, PROCESS_STATE_CACHED_EMPTY, expectedAdj, SCHED_GROUP_BACKGROUND,
                 "cch-empty");
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_FIX_APPLY_OOMADJ_ORDER)
+    public void testUpdateOomAdj_ApplyOomAdjInCorrectOrder() {
+        final int numberOfApps = 5;
+        final ProcessRecord[] apps = new ProcessRecord[numberOfApps];
+        for (int i = 0; i < numberOfApps; i++) {
+            apps[i] = spy(makeDefaultProcessRecord(MOCKAPP_PID + i, MOCKAPP_UID + i,
+                    MOCKAPP_PROCESSNAME + i, MOCKAPP_PACKAGENAME + i, true));
+        }
+        updateOomAdj(apps);
+        for (int i = 1; i < numberOfApps; i++) {
+            final int pre = mInjector.mSetOomAdjAppliedAt.get(apps[i - 1].mPid);
+            final int cur = mInjector.mSetOomAdjAppliedAt.get(apps[i].mPid);
+            assertTrue("setOomAdj is called in wrong order", pre < cur);
+        }
     }
 
     private ProcessRecord makeDefaultProcessRecord(int pid, int uid, String processName,
@@ -3281,7 +3350,7 @@ public class MockingOomAdjusterTests {
         if (Flags.pushGlobalStateToOomadjuster()) {
             mProcessStateController.setBackupTarget(app, app.userId);
         } else {
-            BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0);
+            BackupRecord backupTarget = new BackupRecord(null, 0, 0, 0, true);
             backupTarget.app = app;
             doReturn(backupTarget).when(mService.mBackupTargets).get(anyInt());
         }
@@ -3347,6 +3416,14 @@ public class MockingOomAdjusterTests {
         assertProcStates(app, expectedProcState, expectedAdj, expectedSchedGroup, expectedAdjType);
         final ProcessStateRecord state = app.mState;
         assertEquals(expectedCached, state.isCached());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void assertFreezeState(ProcessRecord app, boolean expectedFreezeState) {
+        boolean actualFreezeState = mTestCachedAppOptimizer.mLastSetFreezeState.get(app.getPid(),
+                false);
+        assertEquals("Unexcepted freeze state for " + app.processName, expectedFreezeState,
+                actualFreezeState);
     }
 
     private class ProcessRecordBuilder {
@@ -3492,17 +3569,56 @@ public class MockingOomAdjusterTests {
             return app;
         }
     }
+    private static final class TestProcessDependencies
+            implements CachedAppOptimizer.ProcessDependencies {
+        @Override
+        public long[] getRss(int pid) {
+            return new long[]{/*totalRSS*/ 0, /*fileRSS*/ 0, /*anonRSS*/ 0, /*swap*/ 0};
+        }
+
+        @Override
+        public void performCompaction(CachedAppOptimizer.CompactProfile action, int pid) {}
+    }
+
+    private static class TestCachedAppOptimizer extends CachedAppOptimizer {
+        private SparseBooleanArray mLastSetFreezeState = new SparseBooleanArray();
+
+        TestCachedAppOptimizer(ActivityManagerService ams) {
+            super(ams, null, new TestProcessDependencies());
+        }
+
+        @Override
+        public boolean useFreezer() {
+            return true;
+        }
+
+        @Override
+        public void freezeAppAsyncLSP(ProcessRecord app) {
+            mLastSetFreezeState.put(app.getPid(), true);
+        }
+
+        @Override
+        public void unfreezeAppLSP(ProcessRecord app, @UnfreezeReason int reason) {
+            mLastSetFreezeState.put(app.getPid(), false);
+        }
+    }
 
     static class OomAdjusterInjector extends OomAdjuster.Injector {
         // Jump ahead in time by this offset amount.
         long mTimeOffsetMillis = 0;
         private SparseIntArray mLastSetOomAdj = new SparseIntArray();
 
+        // A sequence number that increases every time setOomAdj is called
+        int mLastAppliedAt = 0;
+        // Holds the last sequence number setOomAdj is called for a pid
+        private SparseIntArray mSetOomAdjAppliedAt = new SparseIntArray();
+
         void reset() {
             mTimeOffsetMillis = 0;
             mLastSetOomAdj.clear();
+            mLastAppliedAt = 0;
+            mSetOomAdjAppliedAt.clear();
         }
-
 
         void jumpUptimeAheadTo(long uptimeMillis) {
             final long jumpMs = uptimeMillis - getUptimeMillis();
@@ -3526,6 +3642,7 @@ public class MockingOomAdjusterTests {
                 final int pid = proc.getPid();
                 if (pid <= 0) continue;
                 mLastSetOomAdj.put(pid, proc.mState.getCurAdj());
+                mSetOomAdjAppliedAt.put(pid, mLastAppliedAt++);
             }
         }
 
@@ -3533,6 +3650,7 @@ public class MockingOomAdjusterTests {
         void setOomAdj(int pid, int uid, int adj) {
             if (pid <= 0) return;
             mLastSetOomAdj.put(pid, adj);
+            mSetOomAdjAppliedAt.put(pid, mLastAppliedAt++);
         }
 
         @Override

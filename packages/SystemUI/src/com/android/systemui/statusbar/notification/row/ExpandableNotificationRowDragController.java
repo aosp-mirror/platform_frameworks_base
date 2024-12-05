@@ -50,9 +50,10 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 
 import javax.inject.Inject;
 
@@ -69,7 +70,8 @@ public class ExpandableNotificationRowDragController {
     private NotificationPanelLogger mNotificationPanelLogger;
 
     @Inject
-    public ExpandableNotificationRowDragController(Context context,
+    public ExpandableNotificationRowDragController(
+            @ShadeDisplayAware Context context,
             HeadsUpManager headsUpManager,
             ShadeController shadeController,
             NotificationPanelLogger notificationPanelLogger) {

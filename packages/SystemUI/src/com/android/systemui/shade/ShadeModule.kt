@@ -49,10 +49,7 @@ import dagger.Provides
 import javax.inject.Provider
 
 /** Module for classes related to the notification shade. */
-@Module(
-    includes =
-        [StartShadeModule::class, ShadeViewProviderModule::class]
-)
+@Module(includes = [StartShadeModule::class, ShadeViewProviderModule::class])
 abstract class ShadeModule {
     companion object {
         @Provides

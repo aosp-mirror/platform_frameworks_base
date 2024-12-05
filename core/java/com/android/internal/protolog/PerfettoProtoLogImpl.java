@@ -51,7 +51,6 @@ import android.os.ServiceManager;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.tracing.perfetto.DataSourceParams;
 import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
@@ -86,7 +85,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Stream;
 
 /**
  * A service for the ProtoLog logging system.
@@ -98,10 +96,12 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
 
     @NonNull
     protected final ProtoLogDataSource mDataSource;
+    @Nullable
+    protected final IProtoLogConfigurationService mConfigurationService;
     @NonNull
     protected final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     @NonNull
-    private final Runnable mCacheUpdater;
+    private final ProtoLogCacheUpdater mCacheUpdater;
 
     @NonNull
     private final int[] mDefaultLogLevelCounts = new int[LogLevel.values().length];
@@ -117,10 +117,10 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
     private boolean mLogcatReady = false;
 
     protected PerfettoProtoLogImpl(
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogDataSource dataSource,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
-        this(cacheUpdater, groups,
-                ProtoLogDataSource::new,
+        this(dataSource, cacheUpdater, groups,
                 android.tracing.Flags.clientSideProtoLogging() ?
                     IProtoLogConfigurationService.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(PROTOLOG_CONFIGURATION_SERVICE)
@@ -129,47 +129,60 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
     }
 
     protected PerfettoProtoLogImpl(
-            @NonNull Runnable cacheUpdater,
+            @NonNull ProtoLogDataSource dataSource,
+            @NonNull ProtoLogCacheUpdater cacheUpdater,
             @NonNull IProtoLogGroup[] groups,
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
             @Nullable IProtoLogConfigurationService configurationService) {
-        mDataSource = dataSourceBuilder.build(
-                this::onTracingInstanceStart,
-                this::onTracingFlush,
-                this::onTracingInstanceStop);
-        Producer.init(InitArguments.DEFAULTS);
-        DataSourceParams params =
-                new DataSourceParams.Builder()
-                        .setBufferExhaustedPolicy(
-                                DataSourceParams
-                                        .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
-                        .build();
-        // NOTE: Registering that datasource is an async operation, so there may be no data traced
-        // for some messages logged right after the construction of this class.
-        mDataSource.register(params);
-
-        this.mCacheUpdater = cacheUpdater;
+        mDataSource = dataSource;
+        mCacheUpdater = cacheUpdater;
+        mConfigurationService = configurationService;
 
         registerGroupsLocally(groups);
+    }
+
+    /**
+     * To be called to enable the ProtoLogImpl to start tracing to ProtoLog and register with all
+     * the expected ProtoLog components.
+     */
+    public void enable() {
+        Producer.init(InitArguments.DEFAULTS);
 
         if (android.tracing.Flags.clientSideProtoLogging()) {
-            Objects.requireNonNull(configurationService,
-                    "A null ProtoLog Configuration Service was provided!");
-
-            try {
-                var args = createConfigurationServiceRegisterClientArgs();
-
-                final var groupArgs = Stream.of(groups)
-                        .map(group -> new RegisterClientArgs
-                                .GroupConfig(group.name(), group.isLogToLogcat()))
-                        .toArray(RegisterClientArgs.GroupConfig[]::new);
-                args.setGroups(groupArgs);
-
-                configurationService.registerClient(this, args);
-            } catch (RemoteException e) {
-                throw new RuntimeException("Failed to register ProtoLog client");
-            }
+            connectToConfigurationService();
         }
+
+        mDataSource.registerOnStartCallback(this::onTracingInstanceStart);
+        mDataSource.registerOnFlushCallback(this::onTracingFlush);
+        mDataSource.registerOnStopCallback(this::onTracingInstanceStop);
+    }
+
+    private void connectToConfigurationService() {
+        Objects.requireNonNull(mConfigurationService,
+                "A null ProtoLog Configuration Service was provided!");
+
+        try {
+            var args = createConfigurationServiceRegisterClientArgs();
+
+            final var groupArgs = mLogGroups.values().stream()
+                    .map(group -> new RegisterClientArgs
+                            .GroupConfig(group.name(), group.isLogToLogcat()))
+                    .toArray(RegisterClientArgs.GroupConfig[]::new);
+            args.setGroups(groupArgs);
+
+            mConfigurationService.registerClient(this, args);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Failed to register ProtoLog client");
+        }
+    }
+
+    /**
+     * Should be called when we no longer want to use the ProtoLog logger to unlink ourselves from
+     * the datasource and the configuration service to ensure we no longer receive the callback.
+     */
+    public void disable() {
+        mDataSource.unregisterOnStartCallback(this::onTracingInstanceStart);
+        mDataSource.unregisterOnFlushCallback(this::onTracingFlush);
+        mDataSource.unregisterOnStopCallback(this::onTracingInstanceStop);
     }
 
     @NonNull
@@ -676,19 +689,34 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
         return internMap.get(string);
     }
 
+    protected boolean validateGroups(ILogger logger, String[] groups) {
+        for (int i = 0; i < groups.length; i++) {
+            String group = groups[i];
+            IProtoLogGroup g = mLogGroups.get(group);
+            if (g == null) {
+                logger.log("No IProtoLogGroup named " + group);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private int setTextLogging(boolean value, ILogger logger, String... groups) {
+        if (!validateGroups(logger, groups)) {
+            return -1;
+        }
+
         for (int i = 0; i < groups.length; i++) {
             String group = groups[i];
             IProtoLogGroup g = mLogGroups.get(group);
             if (g != null) {
                 g.setLogToLogcat(value);
             } else {
-                logger.log("No IProtoLogGroup named " + group);
-                return -1;
+                throw new RuntimeException("No IProtoLogGroup named " + group);
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         return 0;
     }
 
@@ -731,7 +759,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
 
         this.mTracingInstances.incrementAndGet();
 
@@ -771,7 +799,7 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         Log.d(LOG_TAG, "Finished onTracingInstanceStop");
     }
 

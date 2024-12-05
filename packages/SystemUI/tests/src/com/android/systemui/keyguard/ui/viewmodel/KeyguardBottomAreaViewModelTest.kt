@@ -213,7 +213,7 @@ class KeyguardBottomAreaViewModelTest(flags: FlagsParameterization) : SysuiTestC
             )
         val keyguardTouchHandlingInteractor =
             KeyguardTouchHandlingInteractor(
-                appContext = mContext,
+                context = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = repository,

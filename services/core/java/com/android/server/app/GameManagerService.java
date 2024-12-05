@@ -100,6 +100,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
+import com.android.server.utils.LazyJniRegistrar;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.CompatScaleProvider;
 
@@ -157,6 +158,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private static final String USER_ID_MSG_KEY = "userId";
     private static final String GAME_MODE_INTERVENTION_LIST_FILE_NAME =
             "game_mode_intervention.list";
+
+    static {
+        LazyJniRegistrar.registerGameManagerService();
+    }
 
     private final Context mContext;
     private final Object mLock = new Object();

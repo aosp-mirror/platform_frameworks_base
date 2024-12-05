@@ -23,6 +23,11 @@ import kotlinx.coroutines.flow.flowOf
 class FakeRemoteInputRepository : RemoteInputRepository {
     override val isRemoteInputActive = MutableStateFlow(false)
     override val remoteInputRowBottomBound: Flow<Float?> = flowOf(null)
+    var areRemoteInputsClosed: Boolean = false
 
     override fun setRemoteInputRowBottomBound(bottom: Float?) {}
+
+    override fun closeRemoteInputs() {
+        areRemoteInputsClosed = true
+    }
 }
