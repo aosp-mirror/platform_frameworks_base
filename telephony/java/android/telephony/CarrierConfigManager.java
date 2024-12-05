@@ -10525,6 +10525,8 @@ public class CarrierConfigManager {
      *     <!-- Handover from 4G to IWLAN is not allowed if the device has capability in either IMS
      *     or EIMS-->
      *     <item value="source=EUTRAN, target=IWLAN, type=disallowed, capabilities=IMS|EIMS"/>
+     *     <!-- Handover from IWLAN to 5G is not allowed if the device is incall. -->
+     *     <item value="source=IWLAN, target=NGRAN, incall=true, type=disallowed"/>
      *     <!-- Handover is always allowed in any condition. -->
      *     <item value="source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN|UNKNOWN,
      *         target=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, type=allowed"/>
