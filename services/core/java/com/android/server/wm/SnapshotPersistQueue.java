@@ -50,7 +50,7 @@ import java.util.ArrayDeque;
 class SnapshotPersistQueue {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final long DELAY_MS = 100;
-    private static final int MAX_STORE_QUEUE_DEPTH = 2;
+    static final int MAX_STORE_QUEUE_DEPTH = 2;
     private static final int COMPRESS_QUALITY = 95;
 
     @GuardedBy("mLock")
@@ -154,7 +154,12 @@ class SnapshotPersistQueue {
         }
     }
 
-    @VisibleForTesting
+    int peekWriteQueueSize() {
+        synchronized (mLock) {
+            return mStoreQueueItems.size();
+        }
+    }
+
     int peekQueueSize() {
         synchronized (mLock) {
             return mWriteQueue.size();
