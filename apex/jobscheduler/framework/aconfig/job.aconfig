@@ -17,14 +17,6 @@ flag {
 }
 
 flag {
-    name: "backup_jobs_exemption"
-    is_exported: true
-    namespace: "backstage_power"
-    description: "Introduce a new RUN_BACKUP_JOBS permission and exemption logic allowing for longer running jobs for apps whose primary purpose is to backup or sync content."
-    bug: "318731461"
-}
-
-flag {
    name: "handle_abandoned_jobs"
    namespace: "backstage_power"
    description: "Detect, report and take action on jobs that maybe abandoned by the app without calling jobFinished."
