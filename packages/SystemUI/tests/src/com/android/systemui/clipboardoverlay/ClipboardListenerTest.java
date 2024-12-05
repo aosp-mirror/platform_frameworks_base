@@ -32,6 +32,7 @@ import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
@@ -45,6 +46,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.FakeUserTracker;
+import com.android.systemui.user.utils.FakeUserScopedService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +59,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Provider;
 
@@ -68,6 +72,10 @@ public class ClipboardListenerTest extends SysuiTestCase {
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
+    private ClipboardManager mClipboardManagerSecondaryUser;
+    @Mock
+    private KeyguardManager mKeyguardManagerSecondaryUser;
+    @Mock
     private ClipboardOverlayController mOverlayController;
     @Mock
     private ClipboardToast mClipboardToast;
@@ -75,9 +83,6 @@ public class ClipboardListenerTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private ClipboardOverlaySuppressionController mClipboardOverlaySuppressionController;
-
-    private ClipData mSampleClipData;
-    private String mSampleSource = "Example source";
 
     @Captor
     private ArgumentCaptor<Runnable> mRunnableCaptor;
@@ -89,6 +94,20 @@ public class ClipboardListenerTest extends SysuiTestCase {
     @Spy
     private Provider<ClipboardOverlayController> mOverlayControllerProvider;
 
+    private final FakeUserScopedService<ClipboardManager> mUserScopedClipboardManager =
+            new FakeUserScopedService<>(mClipboardManager);
+    private final FakeUserScopedService<KeyguardManager> mUserScopedKeyguardManager =
+            new FakeUserScopedService<>(mKeyguardManager);
+    private final FakeUserTracker mUserTracker = new FakeUserTracker();
+
+    private final List<UserInfo> mUserInfos = List.of(
+            new UserInfo(0, "system", 0), new UserInfo(50, "secondary", 0));
+    private final ClipData mSampleClipData = new ClipData("Test", new String[]{"text/plain"},
+            new ClipData.Item("Test Item"));
+    private final ClipData mSecondaryClipData = new ClipData(
+            "Test secondary", new String[]{"text/plain"}, new ClipData.Item("Secondary Item"));
+    private final String mSampleSource = "Example source";
+
     private ClipboardListener mClipboardListener;
 
 
@@ -97,28 +116,36 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mOverlayControllerProvider = () -> mOverlayController;
 
         MockitoAnnotations.initMocks(this);
-        when(mClipboardManager.hasPrimaryClip()).thenReturn(true);
+
         Settings.Secure.putInt(
                 mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 1);
 
-        mSampleClipData = new ClipData("Test", new String[]{"text/plain"},
-                new ClipData.Item("Test Item"));
-        when(mClipboardManager.getPrimaryClip()).thenReturn(mSampleClipData);
-        when(mClipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
+        mUserTracker.set(mUserInfos, 0);
+        UserHandle user0 = mUserInfos.get(0).getUserHandle();
+        UserHandle user1 = mUserInfos.get(1).getUserHandle();
+        mUserScopedKeyguardManager.addImplementation(user0, mKeyguardManager);
+        mUserScopedKeyguardManager.addImplementation(user1, mKeyguardManagerSecondaryUser);
+        setupClipboardManager(mClipboardManager, user0, mSampleClipData);
+        setupClipboardManager(mClipboardManagerSecondaryUser, user1, mSecondaryClipData);
 
         mClipboardListener = new ClipboardListener(
                 getContext(),
                 mOverlayControllerProvider,
                 mClipboardToast,
-                user -> {
-                    if (UserHandle.CURRENT.equals(user)) {
-                        return mClipboardManager;
-                    }
-                    return null;
-                },
-                mKeyguardManager,
+                mUserTracker,
+                mUserScopedClipboardManager,
+                mUserScopedKeyguardManager,
                 mUiEventLogger,
+                getContext().getMainExecutor(),
                 mClipboardOverlaySuppressionController);
+    }
+
+    private void setupClipboardManager(
+            ClipboardManager clipboardManager, UserHandle user, ClipData clipData) {
+        when(clipboardManager.hasPrimaryClip()).thenReturn(true);
+        when(clipboardManager.getPrimaryClip()).thenReturn(clipData);
+        when(clipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
+        mUserScopedClipboardManager.addImplementation(user, clipboardManager);
     }
 
 
@@ -157,6 +184,76 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mClipboardListener.onPrimaryClipChanged();
 
         verify(mOverlayControllerProvider, times(2)).get();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_CLIPBOARD_OVERLAY_MULTIUSER)
+    public void test_noSwitchUserWithFlagOff() {
+        mClipboardListener.start();
+
+        mClipboardListener.onPrimaryClipChanged();
+        mUserTracker.set(mUserInfos, 1);
+        mUserTracker.onUserChanged(mUserInfos.get(1).id);
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mKeyguardManager, times(2)).isDeviceLocked();
+        verify(mClipboardManager, times(2)).hasPrimaryClip();
+        verify(mOverlayController, times(2)).setClipData(mSampleClipData, mSampleSource);
+        verifyNoMoreInteractions(mClipboardManagerSecondaryUser);
+        verifyNoMoreInteractions(mKeyguardManagerSecondaryUser);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_CLIPBOARD_OVERLAY_MULTIUSER)
+    public void test_switchUserSwitchesClipboard() {
+        mClipboardListener.start();
+
+        mClipboardListener.onPrimaryClipChanged();
+        verify(mClipboardManager).hasPrimaryClip();
+        verify(mOverlayController).setClipData(mSampleClipData, mSampleSource);
+
+        mUserTracker.set(mUserInfos, 1);
+        mUserTracker.onUserChanged(mUserInfos.get(1).id);
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mClipboardManagerSecondaryUser).hasPrimaryClip();
+        verify(mOverlayController).setClipData(mSecondaryClipData, mSampleSource);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_CLIPBOARD_OVERLAY_MULTIUSER)
+    @EnableFlags(Flags.FLAG_CLIPBOARD_NONINTERACTIVE_ON_LOCKSCREEN)
+    public void test_deviceLockedForSecondaryUser_withoutMultiuser_showsOverlay() {
+        when(mKeyguardManager.isDeviceLocked()).thenReturn(false);
+        when(mKeyguardManagerSecondaryUser.isDeviceLocked()).thenReturn(true);
+
+        mClipboardListener.start();
+        mUserTracker.set(mUserInfos, 1);
+        mUserTracker.onUserChanged(mUserInfos.get(1).id);
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED, 0, mSampleSource);
+        verify(mOverlayController).setClipData(mSampleClipData, mSampleSource);
+        verifyNoMoreInteractions(mClipboardToast);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_CLIPBOARD_OVERLAY_MULTIUSER,
+            Flags.FLAG_CLIPBOARD_NONINTERACTIVE_ON_LOCKSCREEN})
+    public void test_deviceLockedForSecondaryUser_showsToast() {
+        when(mKeyguardManager.isDeviceLocked()).thenReturn(false);
+        when(mKeyguardManagerSecondaryUser.isDeviceLocked()).thenReturn(true);
+
+        mClipboardListener.start();
+        mUserTracker.set(mUserInfos, 1);
+        mUserTracker.onUserChanged(mUserInfos.get(1).id);
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
+        verify(mClipboardToast, times(1)).showCopiedToast();
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 
     @Test

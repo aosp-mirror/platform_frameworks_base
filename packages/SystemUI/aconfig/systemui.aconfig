@@ -679,6 +679,16 @@ flag {
 }
 
 flag {
+    name: "clipboard_overlay_multiuser"
+    namespace: "systemui"
+    description: "Fix clipboard overlay for secondary users"
+    bug: "217922018"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "clipboard_shared_transitions"
     namespace: "systemui"
     description: "Show shared transitions from clipboard"
