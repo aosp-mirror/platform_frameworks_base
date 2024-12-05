@@ -105,6 +105,13 @@ combined_apis {
         default: [
             "framework-platformcrashrecovery",
         ],
+    }) + select(release_flag("RELEASE_ONDEVICE_INTELLIGENCE_MODULE"), {
+        true: [
+            "framework-ondeviceintelligence",
+        ],
+        default: [
+            "framework-ondeviceintelligence-platform",
+        ],
     }) + select(release_flag("RELEASE_RANGING_STACK"), {
         true: [
             "framework-ranging",
@@ -119,7 +126,12 @@ combined_apis {
         "service-permission",
         "service-rkp",
         "service-sdksandbox",
-    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+    ] + select(release_flag("RELEASE_ONDEVICE_INTELLIGENCE_MODULE"), {
+        true: [
+            "service-ondeviceintelligence",
+        ],
+        default: [],
+    }) + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
         "true": [
             "service-crashrecovery",
         ],
@@ -478,6 +490,7 @@ java_defaults {
         "//frameworks/base/location",
         "//frameworks/base/packages/CrashRecovery/framework",
         "//frameworks/base/nfc",
+        "//packages/modules/NeuralNetworks:__subpackages__",
     ],
     plugins: ["error_prone_android_framework"],
     errorprone: {
