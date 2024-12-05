@@ -841,6 +841,7 @@ public final class ContextHubManager {
      * @param endpointId The identifier of the hub endpoint.
      * @param callback The callback to be invoked.
      * @param executor The executor to invoke the callback on.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -881,6 +882,7 @@ public final class ContextHubManager {
      * @param callback The callback to be invoked.
      * @param executor The executor to invoke the callback on.
      * @throws IllegalArgumentException if the serviceDescriptor is empty.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -911,6 +913,7 @@ public final class ContextHubManager {
      *
      * @param callback The callback previously registered.
      * @throws IllegalArgumentException If the callback was not previously registered.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -1311,6 +1314,8 @@ public final class ContextHubManager {
      *     endpoint discovery results (e.g. from {@link ContextHubManager#findEndpoints(long)}).
      * @param serviceDescriptor A string that describes the service associated with this session.
      *     The information will be sent to the destination as part of open request.
+     * @throws IllegalStateException if hubEndpoint was not successfully registered, or if there is
+     *     insufficient capacity for creating a session.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
