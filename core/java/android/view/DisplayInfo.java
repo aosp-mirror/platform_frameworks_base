@@ -210,6 +210,11 @@ public final class DisplayInfo implements Parcelable {
     public FrameRateCategoryRate frameRateCategoryRate;
 
     /**
+     * All the refresh rates supported in the active mode.
+     */
+    public float[] supportedRefreshRates = new float[0];
+
+    /**
      * The default display mode.
      */
     public int defaultModeId;
@@ -356,6 +361,12 @@ public final class DisplayInfo implements Parcelable {
     public float brightnessDefault;
 
     /**
+     * The current dim brightness of the display. Value between 0.0 and 1.0,
+     * derived from the configuration of the display device of this logical display.
+     */
+    public float brightnessDim;
+
+    /**
      * The {@link RoundedCorners} if present, otherwise {@code null}.
      */
     @Nullable
@@ -447,9 +458,9 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
-                && renderFrameRate == other.renderFrameRate
                 && hasArrSupport == other.hasArrSupport
                 && Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)
+                && Arrays.equals(supportedRefreshRates, other.supportedRefreshRates)
                 && defaultModeId == other.defaultModeId
                 && userPreferredModeId == other.userPreferredModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
@@ -474,6 +485,7 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
+                && brightnessDim == other.brightnessDim
                 && Objects.equals(roundedCorners, other.roundedCorners)
                 && installOrientation == other.installOrientation
                 && Objects.equals(displayShape, other.displayShape)
@@ -513,6 +525,8 @@ public final class DisplayInfo implements Parcelable {
         renderFrameRate = other.renderFrameRate;
         hasArrSupport = other.hasArrSupport;
         frameRateCategoryRate = other.frameRateCategoryRate;
+        supportedRefreshRates = Arrays.copyOf(
+                other.supportedRefreshRates, other.supportedRefreshRates.length);
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
@@ -539,6 +553,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        brightnessDim = other.brightnessDim;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
         displayShape = other.displayShape;
@@ -572,6 +587,11 @@ public final class DisplayInfo implements Parcelable {
         hasArrSupport = source.readBoolean();
         frameRateCategoryRate = source.readParcelable(null,
                 android.view.FrameRateCategoryRate.class);
+        int numOfSupportedRefreshRates = source.readInt();
+        supportedRefreshRates = new float[numOfSupportedRefreshRates];
+        for (int i = 0; i < numOfSupportedRefreshRates; i++) {
+            supportedRefreshRates[i] = source.readFloat();
+        }
         defaultModeId = source.readInt();
         userPreferredModeId = source.readInt();
         int nModes = source.readInt();
@@ -608,6 +628,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         brightnessDefault = source.readFloat();
+        brightnessDim = source.readFloat();
         roundedCorners = source.readTypedObject(RoundedCorners.CREATOR);
         int numUserDisabledFormats = source.readInt();
         userDisabledHdrTypes = new int[numUserDisabledFormats];
@@ -647,6 +668,10 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(renderFrameRate);
         dest.writeBoolean(hasArrSupport);
         dest.writeParcelable(frameRateCategoryRate, flags);
+        dest.writeInt(supportedRefreshRates.length);
+        for (float supportedRefreshRate : supportedRefreshRates) {
+            dest.writeFloat(supportedRefreshRate);
+        }
         dest.writeInt(defaultModeId);
         dest.writeInt(userPreferredModeId);
         dest.writeInt(supportedModes.length);
@@ -680,6 +705,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeFloat(brightnessDefault);
+        dest.writeFloat(brightnessDim);
         dest.writeTypedObject(roundedCorners, flags);
         dest.writeInt(userDisabledHdrTypes.length);
         for (int i = 0; i < userDisabledHdrTypes.length; i++) {
@@ -704,6 +730,9 @@ public final class DisplayInfo implements Parcelable {
     public float getRefreshRate() {
         if (refreshRateOverride > 0) {
             return refreshRateOverride;
+        }
+        if (renderFrameRate > 0) {
+            return renderFrameRate;
         }
         if (supportedModes.length == 0) {
             return 0;
@@ -748,9 +777,19 @@ public final class DisplayInfo implements Parcelable {
     }
 
     /**
-     * Returns the list of supported refresh rates in the default mode.
+     * Returns the list of supported refresh rates in the active mode.
      */
     public float[] getDefaultRefreshRates() {
+        if (supportedRefreshRates.length == 0) {
+            return getDefaultRefreshRatesLegacy();
+        }
+        return Arrays.copyOf(supportedRefreshRates, supportedRefreshRates.length);
+    }
+
+    /**
+     * Returns the list of supported refresh rates in the default mode.
+     */
+    public float[] getDefaultRefreshRatesLegacy() {
         Display.Mode[] modes = appsSupportedModes;
         ArraySet<Float> rates = new ArraySet<>();
         Display.Mode defaultMode = getDefaultMode();
@@ -896,6 +935,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(hasArrSupport);
         sb.append(", frameRateCategoryRate ");
         sb.append(frameRateCategoryRate);
+        sb.append(", supportedRefreshRates ");
+        sb.append(Arrays.toString(supportedRefreshRates));
         sb.append(", defaultMode ");
         sb.append(defaultModeId);
         sb.append(", userPreferredModeId ");
@@ -963,6 +1004,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessMaximum);
         sb.append(", brightnessDefault ");
         sb.append(brightnessDefault);
+        sb.append(", brightnessDim ");
+        sb.append(brightnessDim);
         sb.append(", installOrientation ");
         sb.append(Surface.rotationToString(installOrientation));
         sb.append(", layoutLimitedRefreshRate ");

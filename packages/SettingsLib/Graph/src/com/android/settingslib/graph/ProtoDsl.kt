@@ -24,7 +24,9 @@ import com.android.settingslib.graph.proto.PreferenceOrGroupProto
 import com.android.settingslib.graph.proto.PreferenceProto
 import com.android.settingslib.graph.proto.PreferenceProto.ActionTarget
 import com.android.settingslib.graph.proto.PreferenceScreenProto
+import com.android.settingslib.graph.proto.PreferenceValueDescriptorProto
 import com.android.settingslib.graph.proto.PreferenceValueProto
+import com.android.settingslib.graph.proto.RangeValueProto
 import com.android.settingslib.graph.proto.TextProto
 
 /** Returns root or null. */
@@ -88,6 +90,16 @@ inline fun actionTargetProto(init: ActionTarget.Builder.() -> Unit) =
 @JvmSynthetic
 inline fun preferenceValueProto(init: PreferenceValueProto.Builder.() -> Unit) =
     PreferenceValueProto.newBuilder().also(init).build()
+
+/** Kotlin DSL-style builder for [PreferenceValueDescriptorProto]. */
+@JvmSynthetic
+inline fun preferenceValueDescriptorProto(init: PreferenceValueDescriptorProto.Builder.() -> Unit) =
+    PreferenceValueDescriptorProto.newBuilder().also(init).build()
+
+/** Kotlin DSL-style builder for [RangeValueProto]. */
+@JvmSynthetic
+inline fun rangeValueProto(init: RangeValueProto.Builder.() -> Unit) =
+    RangeValueProto.newBuilder().also(init).build()
 
 /** Kotlin DSL-style builder for [TextProto]. */
 @JvmSynthetic

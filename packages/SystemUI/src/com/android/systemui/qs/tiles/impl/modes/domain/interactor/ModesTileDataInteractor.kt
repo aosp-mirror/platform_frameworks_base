@@ -28,6 +28,7 @@ import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
 import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
@@ -42,7 +43,7 @@ import kotlinx.coroutines.flow.map
 class ModesTileDataInteractor
 @Inject
 constructor(
-    val context: Context,
+    @ShadeDisplayAware val context: Context,
     val zenModeInteractor: ZenModeInteractor,
     @Background val bgDispatcher: CoroutineDispatcher,
 ) : QSTileDataInteractor<ModesTileModel> {

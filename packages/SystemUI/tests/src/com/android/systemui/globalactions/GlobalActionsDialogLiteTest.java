@@ -31,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
-import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -80,6 +79,7 @@ import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.user.domain.interactor.UserLogoutInteractor;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.settings.FakeGlobalSettings;
@@ -106,7 +106,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
     @Mock private GlobalActions.GlobalActionsManager mWindowManagerFuncs;
     @Mock private AudioManager mAudioManager;
-    @Mock private DevicePolicyManager mDevicePolicyManager;
     @Mock private LockPatternUtils mLockPatternUtils;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private TelephonyListenerManager mTelephonyListenerManager;
@@ -140,6 +139,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
+    @Mock private UserLogoutInteractor mLogoutInteractor;
     @Mock private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
 
@@ -166,7 +166,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         mGlobalActionsDialogLite = new GlobalActionsDialogLite(mContext,
                 mWindowManagerFuncs,
                 mAudioManager,
-                mDevicePolicyManager,
                 mLockPatternUtils,
                 mBroadcastDispatcher,
                 mTelephonyListenerManager,
@@ -198,6 +197,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mDialogTransitionAnimator,
                 mSelectedUserInteractor,
+                mLogoutInteractor,
                 mInteractor);
         mGlobalActionsDialogLite.setZeroDialogPressDelayForTesting();
 

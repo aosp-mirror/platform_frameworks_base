@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.core
 
+import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.window.StatusBarWindowController
 
 class FakeStatusBarInitializerFactory() : StatusBarInitializer.Factory {
 
     override fun create(
-        statusBarWindowController: StatusBarWindowController
+        statusBarWindowController: StatusBarWindowController,
+        statusBarModePerDisplayRepository: StatusBarModePerDisplayRepository,
     ): StatusBarInitializer = FakeStatusBarInitializer()
 }

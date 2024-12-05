@@ -360,7 +360,7 @@ public class TransitionUtil {
             windowConfiguration = new WindowConfiguration();
         }
 
-        Rect localBounds = new Rect();
+        Rect bounds = windowConfiguration.getBounds();
         RemoteAnimationTarget target = new RemoteAnimationTarget(
                 taskId,
                 newModeToLegacyMode(mode),
@@ -373,12 +373,12 @@ public class TransitionUtil {
                 new Rect(0, 0, 0, 0),
                 order,
                 null,
-                localBounds,
-                new Rect(),
+                bounds,
+                bounds,
                 windowConfiguration,
                 isNotInRecents,
                 null,
-                new Rect(),
+                bounds,
                 taskInfo,
                 false,
                 INVALID_WINDOW_TYPE

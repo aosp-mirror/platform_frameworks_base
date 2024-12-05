@@ -70,6 +70,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -352,6 +353,7 @@ public class IntentForwarderActivity extends Activity  {
         findViewById(R.id.use_same_profile_browser).setOnClickListener(v -> finish());
 
         findViewById(R.id.button_open).setOnClickListener(v -> {
+            TargetInfo.refreshIntentCreatorToken(launchIntent);
             startActivityAsCaller(
                     launchIntent,
                     ActivityOptions.makeCustomAnimation(
@@ -476,6 +478,7 @@ public class IntentForwarderActivity extends Activity  {
 
     private void startActivityAsCaller(Intent newIntent, int userId) {
         try {
+            TargetInfo.refreshIntentCreatorToken(newIntent);
             startActivityAsCaller(
                     newIntent,
                     /* options= */ null,
@@ -502,6 +505,7 @@ public class IntentForwarderActivity extends Activity  {
             return;
         }
         sanitizeIntent(innerIntent);
+        TargetInfo.refreshIntentCreatorToken(intentReceived);
         startActivityAsCaller(intentReceived, null, false, getUserId());
         finish();
     }
@@ -525,6 +529,7 @@ public class IntentForwarderActivity extends Activity  {
         if (singleTabOnly) {
             intentReceived.putExtra(EXTRA_RESTRICT_TO_SINGLE_USER, true);
         }
+        TargetInfo.refreshIntentCreatorToken(intentReceived);
         startActivityAsCaller(intentReceived, null, false, userId);
         finish();
     }

@@ -20,7 +20,6 @@ import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
 import android.app.smartspace.SmartspaceTarget
-import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.view.View
@@ -31,6 +30,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_DREAM
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DREAM_SMARTSPACE_DATA_PLUGIN
@@ -44,13 +44,12 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
-/**
- * Controller for managing the smartspace view on the dream
- */
+/** Controller for managing the smartspace view on the dream */
 @SysUISingleton
-class DreamSmartspaceController @Inject constructor(
-    private val context: Context,
-    private val smartspaceManager: SmartspaceManager?,
+class DreamSmartspaceController
+@Inject
+constructor(
+    private val userTracker: UserTracker,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
     private val smartspaceViewComponentFactory: SmartspaceViewComponent.Factory,
@@ -65,6 +64,7 @@ class DreamSmartspaceController @Inject constructor(
         private const val TAG = "DreamSmartspaceCtrlr"
     }
 
+    private var userSmartspaceManager: SmartspaceManager? = null
     private var session: SmartspaceSession? = null
     private val weatherPlugin: BcSmartspaceDataPlugin? = optionalWeatherPlugin.orElse(null)
     private val plugin: BcSmartspaceDataPlugin? = optionalPlugin.orElse(null)
@@ -78,66 +78,68 @@ class DreamSmartspaceController @Inject constructor(
     // Smartspace can be used on multiple displays, such as when the user casts their screen
     private var smartspaceViews = mutableSetOf<SmartspaceView>()
 
-    var preconditionListener = object : SmartspacePrecondition.Listener {
-        override fun onCriteriaChanged() {
-            reloadSmartspace()
+    var preconditionListener =
+        object : SmartspacePrecondition.Listener {
+            override fun onCriteriaChanged() {
+                reloadSmartspace()
+            }
         }
-    }
 
     init {
         precondition.addListener(preconditionListener)
     }
 
-    var filterListener = object : SmartspaceTargetFilter.Listener {
-        override fun onCriteriaChanged() {
-            reloadSmartspace()
+    var filterListener =
+        object : SmartspaceTargetFilter.Listener {
+            override fun onCriteriaChanged() {
+                reloadSmartspace()
+            }
         }
-    }
 
     init {
         targetFilter?.addListener(filterListener)
     }
 
-    var stateChangeListener = object : View.OnAttachStateChangeListener {
-        override fun onViewAttachedToWindow(v: View) {
-            val view = v as SmartspaceView
-            // Until there is dream color matching
-            view.setPrimaryTextColor(Color.WHITE)
-            smartspaceViews.add(view)
-            connectSession()
-            view.setDozeAmount(0f)
-        }
+    var stateChangeListener =
+        object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                val view = v as SmartspaceView
+                // Until there is dream color matching
+                view.setPrimaryTextColor(Color.WHITE)
+                smartspaceViews.add(view)
+                connectSession()
+                view.setDozeAmount(0f)
+            }
 
-        override fun onViewDetachedFromWindow(v: View) {
-            smartspaceViews.remove(v as SmartspaceView)
+            override fun onViewDetachedFromWindow(v: View) {
+                smartspaceViews.remove(v as SmartspaceView)
 
-            if (smartspaceViews.isEmpty()) {
-                disconnect()
+                if (smartspaceViews.isEmpty()) {
+                    disconnect()
+                }
             }
         }
-    }
 
-    private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
-        execution.assertIsMainThread()
+    private val sessionListener =
+        SmartspaceSession.OnTargetsAvailableListener { targets ->
+            execution.assertIsMainThread()
 
-        // The weather data plugin takes unfiltered targets and performs the filtering internally.
-        weatherPlugin?.onTargetsAvailable(targets)
+            // The weather data plugin takes unfiltered targets and performs the filtering
+            // internally.
+            weatherPlugin?.onTargetsAvailable(targets)
 
-        onTargetsAvailableUnfiltered(targets)
-        val filteredTargets = targets.filter { targetFilter?.filterSmartspaceTarget(it) ?: true }
-        plugin?.onTargetsAvailable(filteredTargets)
-    }
+            onTargetsAvailableUnfiltered(targets)
+            val filteredTargets =
+                targets.filter { targetFilter?.filterSmartspaceTarget(it) ?: true }
+            plugin?.onTargetsAvailable(filteredTargets)
+        }
 
-    /**
-     * Constructs the weather view with custom layout and connects it to the weather plugin.
-     */
+    /** Constructs the weather view with custom layout and connects it to the weather plugin. */
     fun buildAndConnectWeatherView(parent: ViewGroup, customView: View?): View? {
         return buildAndConnectViewWithPlugin(parent, weatherPlugin, customView)
     }
 
-    /**
-     * Constructs the smartspace view and connects it to the smartspace service.
-     */
+    /** Constructs the smartspace view and connects it to the smartspace service. */
     fun buildAndConnectView(parent: ViewGroup): View? {
         return buildAndConnectViewWithPlugin(parent, plugin, null)
     }
@@ -145,7 +147,7 @@ class DreamSmartspaceController @Inject constructor(
     private fun buildAndConnectViewWithPlugin(
         parent: ViewGroup,
         smartspaceDataPlugin: BcSmartspaceDataPlugin?,
-        customView: View?
+        customView: View?,
     ): View? {
         execution.assertIsMainThread()
 
@@ -163,12 +165,13 @@ class DreamSmartspaceController @Inject constructor(
     private fun buildView(
         parent: ViewGroup,
         smartspaceDataPlugin: BcSmartspaceDataPlugin?,
-        customView: View?
+        customView: View?,
     ): View? {
         return if (smartspaceDataPlugin != null) {
-            val view = smartspaceViewComponentFactory.create(parent, smartspaceDataPlugin,
-                stateChangeListener, customView)
-                .getView()
+            val view =
+                smartspaceViewComponentFactory
+                    .create(parent, smartspaceDataPlugin, stateChangeListener, customView)
+                    .getView()
             if (view !is View) {
                 return null
             }
@@ -179,12 +182,17 @@ class DreamSmartspaceController @Inject constructor(
     }
 
     private fun hasActiveSessionListeners(): Boolean {
-        return smartspaceViews.isNotEmpty() || listeners.isNotEmpty() ||
+        return smartspaceViews.isNotEmpty() ||
+            listeners.isNotEmpty() ||
             unfilteredListeners.isNotEmpty()
     }
 
     private fun connectSession() {
-        if (smartspaceManager == null) {
+        if (userSmartspaceManager == null) {
+            userSmartspaceManager =
+                userTracker.userContext.getSystemService(SmartspaceManager::class.java)
+        }
+        if (userSmartspaceManager == null) {
             return
         }
         if (plugin == null && weatherPlugin == null) {
@@ -198,25 +206,21 @@ class DreamSmartspaceController @Inject constructor(
             return
         }
 
-        val newSession = smartspaceManager.createSmartspaceSession(
-            SmartspaceConfig.Builder(context, UI_SURFACE_DREAM).build()
-        )
+        val newSession =
+            userSmartspaceManager?.createSmartspaceSession(
+                SmartspaceConfig.Builder(userTracker.userContext, UI_SURFACE_DREAM).build()
+            )
         Log.d(TAG, "Starting smartspace session for dream")
-        newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
+        newSession?.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
         weatherPlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
-        plugin?.registerSmartspaceEventNotifier {
-                e ->
-            session?.notifySmartspaceEvent(e)
-        }
+        plugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
 
         reloadSmartspace()
     }
 
-    /**
-     * Disconnects the smartspace view from the smartspace service and cleans up any resources.
-     */
+    /** Disconnects the smartspace view from the smartspace service and cleans up any resources. */
     private fun disconnect() {
         if (hasActiveSessionListeners()) return
 
@@ -259,7 +263,7 @@ class DreamSmartspaceController @Inject constructor(
 
     private fun addAndRegisterListener(
         listener: SmartspaceTargetListener,
-        smartspaceDataPlugin: BcSmartspaceDataPlugin?
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?,
     ) {
         execution.assertIsMainThread()
         smartspaceDataPlugin?.registerListener(listener)
@@ -270,7 +274,7 @@ class DreamSmartspaceController @Inject constructor(
 
     private fun removeAndUnregisterListener(
         listener: SmartspaceTargetListener,
-        smartspaceDataPlugin: BcSmartspaceDataPlugin?
+        smartspaceDataPlugin: BcSmartspaceDataPlugin?,
     ) {
         execution.assertIsMainThread()
         smartspaceDataPlugin?.unregisterListener(listener)

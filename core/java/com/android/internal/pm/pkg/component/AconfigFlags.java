@@ -25,7 +25,6 @@ import android.aconfig.nano.Aconfig.parsed_flags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Flags;
-import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Process;
 import android.util.ArrayMap;
@@ -214,13 +213,30 @@ public class AconfigFlags {
      * @param parser XML parser object currently parsing an element
      * @return true if the element is disabled because of its feature flag
      */
+    public boolean skipCurrentElement(@Nullable ParsingPackage pkg, @NonNull XmlPullParser parser) {
+        return skipCurrentElement(pkg, parser, /* allowNoNamespace= */ false);
+    }
+
+    /**
+     * Check if the element in {@code parser} should be skipped because of the feature flag.
+     * @param pkg The package being parsed
+     * @param parser XML parser object currently parsing an element
+     * @param allowNoNamespace Whether to allow namespace null
+     * @return true if the element is disabled because of its feature flag
+     */
     public boolean skipCurrentElement(
-            @NonNull ParsingPackage pkg,
-            @NonNull XmlResourceParser parser) {
+        @Nullable ParsingPackage pkg,
+        @NonNull XmlPullParser parser,
+        boolean allowNoNamespace
+    ) {
         if (!Flags.manifestFlagging()) {
             return false;
         }
         String featureFlag = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "featureFlag");
+        // If allow no namespace, make another attempt to parse feature flag with null namespace.
+        if (featureFlag == null && allowNoNamespace) {
+            featureFlag = parser.getAttributeValue(null, "featureFlag");
+        }
         if (featureFlag == null) {
             return false;
         }
@@ -230,20 +246,23 @@ public class AconfigFlags {
             negated = true;
             featureFlag = featureFlag.substring(1).strip();
         }
-        final Boolean flagValue = getFlagValue(featureFlag);
-        boolean shouldSkip = false;
+        Boolean flagValue = getFlagValue(featureFlag);
+        boolean isUndefined = false;
         if (flagValue == null) {
-            Slog.w(LOG_TAG, "Skipping element " + parser.getName()
-                    + " due to unknown feature flag " + featureFlag);
-            shouldSkip = true;
-        } else if (flagValue == negated) {
+            isUndefined = true;
+            flagValue = false;
+        }
+        boolean shouldSkip = false;
+        if (flagValue == negated) {
             // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
-            Slog.i(LOG_TAG, "Skipping element " + parser.getName()
-                    + " behind feature flag " + featureFlag + " = " + flagValue);
             shouldSkip = true;
         }
-        if (android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
-            pkg.addFeatureFlag(featureFlag, flagValue);
+        if (pkg != null && android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
+            if (isUndefined) {
+                pkg.addFeatureFlag(featureFlag, null);
+            } else {
+                pkg.addFeatureFlag(featureFlag, flagValue);
+            }
         }
         return shouldSkip;
     }

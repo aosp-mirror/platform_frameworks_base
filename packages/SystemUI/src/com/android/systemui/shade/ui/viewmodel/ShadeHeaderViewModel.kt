@@ -23,6 +23,7 @@ import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
 import android.provider.Settings
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.ActivityStarter
@@ -48,7 +49,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Models UI state for the shade header. */
 class ShadeHeaderViewModel
@@ -86,10 +86,6 @@ constructor(
 
     /** Whether or not the privacy chip is enabled in the device privacy config. */
     val isPrivacyChipEnabled: StateFlow<Boolean> = privacyChipInteractor.isChipEnabled
-
-    private val _isDisabled = MutableStateFlow(false)
-    /** Whether or not the Shade Header should be disabled based on disableFlags. */
-    val isDisabled: StateFlow<Boolean> = _isDisabled.asStateFlow()
 
     private val longerPattern = context.getString(R.string.abbrev_wday_month_day_no_year_alarm)
     private val shorterPattern = context.getString(R.string.abbrev_month_day_no_year)
@@ -131,8 +127,6 @@ constructor(
                     .map { list -> list.map { it.subscriptionId } }
                     .collect { _mobileSubIds.value = it }
             }
-
-            launch { shadeInteractor.isQsEnabled.map { !it }.collect { _isDisabled.value = it } }
 
             awaitCancellation()
         }

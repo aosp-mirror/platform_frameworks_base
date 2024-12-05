@@ -16,8 +16,12 @@
 
 package android.media;
 
+import static android.media.audio.Flags.FLAG_IAMF_DEFINITIONS_API;
+import static android.media.codec.Flags.FLAG_APV_SUPPORT;
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
+import static android.media.codec.Flags.FLAG_NUM_INPUT_SLOTS;
 import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
+import static android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES;
 
 import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
@@ -157,6 +161,8 @@ import java.util.stream.Collectors;
 public final class MediaFormat {
     public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
     public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    @FlaggedApi(FLAG_APV_SUPPORT)
+    public static final String MIMETYPE_VIDEO_APV = "video/apv";
     public static final String MIMETYPE_VIDEO_AV1 = "video/av01";
     public static final String MIMETYPE_VIDEO_AVC = "video/avc";
     public static final String MIMETYPE_VIDEO_HEVC = "video/hevc";
@@ -258,6 +264,11 @@ public final class MediaFormat {
      * MIME type for the IEC61937 audio stream encapsulation. This type isn't defined by IANA.
      */
     public static final String MIMETYPE_AUDIO_IEC61937 = "audio/x-iec61937";
+    /**
+     * MIME type for IAMF audio stream
+     */
+    @FlaggedApi(FLAG_IAMF_DEFINITIONS_API)
+    public static final String MIMETYPE_AUDIO_IAMF = "audio/iamf";
 
     /**
      * MIME type for HEIF still image data encoded in HEVC.
@@ -1744,6 +1755,7 @@ public final class MediaFormat {
             (1 << MediaCodecInfo.SECURITY_MODEL_MEMORY_SAFE);
     /**
      * Flag for {@link MediaCodecInfo#SECURITY_MODEL_TRUSTED_CONTENT_ONLY}.
+     * @hide
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final int FLAG_SECURITY_MODEL_TRUSTED_CONTENT_ONLY =
@@ -1755,8 +1767,7 @@ public final class MediaFormat {
      * The associated value is a flag of the following values:
      * {@link FLAG_SECURITY_MODEL_SANDBOXED},
      * {@link FLAG_SECURITY_MODEL_MEMORY_SAFE},
-     * {@link FLAG_SECURITY_MODEL_TRUSTED_CONTENT_ONLY}. The default value is
-     * {@link FLAG_SECURITY_MODEL_SANDBOXED}.
+     * The default value is {@link FLAG_SECURITY_MODEL_SANDBOXED}.
      * <p>
      * When passed to {@link MediaCodecList#findDecoderForFormat} or
      * {@link MediaCodecList#findEncoderForFormat}, MediaCodecList filters
@@ -1772,6 +1783,38 @@ public final class MediaFormat {
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final String KEY_SECURITY_MODEL = "security-model";
+
+    /**
+     * A key describing the number of slots used in the codec. When present in input format,
+     * the associated value indicates the number of input slots. The entry is set by the codec
+     * if configured with (@link MediaCodec#CONFIGURE_FLAG_BLOCK_MODEL), and will be ignored if set
+     * by the application.
+     * <p>
+     * The associated value is an integer.
+     */
+    @FlaggedApi(FLAG_NUM_INPUT_SLOTS)
+    public static final String KEY_NUM_SLOTS = "num-slots";
+
+    /**
+     * A key describing the picture profile ID to be applied to {@link MediaCodec}.
+     * <p>
+     * The associated value is a string.
+     * <p>
+     * @see {@link android.media.quality.PictureProfile}
+     * @see {@link android.media.quality.PictureProfile#getProfileId}
+     */
+    @FlaggedApi(FLAG_APPLY_PICTURE_PROFILES)
+    public static final String KEY_PICTURE_PROFILE_ID = "picture-profile-id";
+
+    /**
+     * A key describing the picture profile instance to be applied to {@link MediaCodec}.
+     * <p>
+     * The associated value is an instance of {@link android.media.quality.PictureProfile}.
+     * <p>
+     * @see {@link android.media.quality.PictureProfile}
+     */
+    @FlaggedApi(FLAG_APPLY_PICTURE_PROFILES)
+    public static final String KEY_PICTURE_PROFILE_INSTANCE = "picture-profile-instance";
 
     /**
      * QpOffsetRect constitutes the metadata required for encoding a region of interest in an

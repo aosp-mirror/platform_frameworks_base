@@ -21,6 +21,7 @@ import static android.app.AppOpsManager.OP_FINE_LOCATION;
 
 import static org.junit.Assert.assertEquals;
 
+import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.os.Handler;
 
@@ -63,6 +64,7 @@ public class AppOpsLegacyRestrictionsTest {
 
     @Before
     public void setUp() {
+        PropertyInvalidatedCache.disableForTestMode();
         mSession = ExtendedMockito.mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)

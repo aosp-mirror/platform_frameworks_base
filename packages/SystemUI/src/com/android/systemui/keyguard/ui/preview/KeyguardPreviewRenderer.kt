@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Resources
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.os.Bundle
@@ -47,6 +48,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isInvisible
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
@@ -57,12 +59,14 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.communal.ui.binder.CommunalTutorialIndicatorViewBinder
 import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewModel
 import com.android.systemui.coroutines.newTracingContext
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -80,9 +84,11 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.DefaultClockController
@@ -105,7 +111,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOf
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.json.JSONException
@@ -183,7 +188,8 @@ constructor(
     private val shortcutsBindings = mutableSetOf<KeyguardQuickAffordanceViewBinder.Binding>()
 
     private val coroutineScope: CoroutineScope
-    private var themeStyle: Style? = null
+
+    @Style.Type private var themeStyle: Int? = null
 
     init {
         coroutineScope =
@@ -308,6 +314,10 @@ constructor(
         )
     }
 
+    fun onClockSizeSelected(clockSize: ClockSizeSetting) {
+        smartspaceViewModel.setOverrideClockSize(clockSize)
+    }
+
     fun destroy() {
         isDestroyed = true
         lockscreenSmartspaceController.disconnect()
@@ -352,8 +362,11 @@ constructor(
 
         val topPadding: Int =
             smartspaceViewModel.getLargeClockSmartspaceTopPadding(
-                previewInSplitShade(),
-                previewContext,
+                ClockPreviewConfig(
+                    previewContext,
+                    getPreviewShadeLayoutWide(display!!),
+                    SceneContainerFlag.isEnabled,
+                )
             )
         val startPadding: Int = smartspaceViewModel.getSmartspaceStartPadding(previewContext)
         val endPadding: Int = smartspaceViewModel.getSmartspaceEndPadding(previewContext)
@@ -436,11 +449,15 @@ constructor(
             setUpClock(previewContext, rootView)
             if (MigrateClocksToBlueprint.isEnabled) {
                 KeyguardPreviewClockViewBinder.bind(
-                    previewContext,
                     keyguardRootView,
                     clockViewModel,
                     clockRegistry,
                     ::updateClockAppearance,
+                    ClockPreviewConfig(
+                        previewContext,
+                        getPreviewShadeLayoutWide(display!!),
+                        SceneContainerFlag.isEnabled,
+                    ),
                 )
             } else {
                 KeyguardPreviewClockViewBinder.bind(
@@ -455,10 +472,14 @@ constructor(
 
         smartSpaceView?.let {
             KeyguardPreviewSmartspaceViewBinder.bind(
-                previewContext,
                 it,
-                previewInSplitShade(),
                 smartspaceViewModel,
+                clockPreviewConfig =
+                    ClockPreviewConfig(
+                        previewContext,
+                        getPreviewShadeLayoutWide(display!!),
+                        SceneContainerFlag.isEnabled,
+                    ),
             )
         }
         setupCommunalTutorialIndicator(keyguardRootView)
@@ -552,20 +573,14 @@ constructor(
             val layoutParams =
                 FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.WRAP_CONTENT,
-                    resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.small_clock_height
-                    ),
+                    resources.getDimensionPixelSize(customR.dimen.small_clock_height),
                 )
             layoutParams.topMargin =
                 SystemBarUtils.getStatusBarHeight(previewContext) +
-                    resources.getDimensionPixelSize(
-                        com.android.systemui.customization.R.dimen.small_clock_padding_top
-                    )
+                    resources.getDimensionPixelSize(customR.dimen.small_clock_padding_top)
             smallClockHostView.layoutParams = layoutParams
             smallClockHostView.setPaddingRelative(
-                /* start = */ resources.getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.clock_padding_start
-                ),
+                /* start = */ resources.getDimensionPixelSize(customR.dimen.clock_padding_start),
                 /* top = */ 0,
                 /* end = */ 0,
                 /* bottom = */ 0,
@@ -637,7 +652,7 @@ constructor(
         onClockChanged()
     }
 
-    private suspend fun updateClockAppearance(clock: ClockController) {
+    private suspend fun updateClockAppearance(clock: ClockController, resources: Resources) {
         if (!MigrateClocksToBlueprint.isEnabled) {
             clockController.clock = clock
         }
@@ -646,6 +661,7 @@ constructor(
             // Seed color null means users do not override any color on the clock. The default
             // color will need to use wallpaper's extracted color and consider if the
             // wallpaper's color is dark or light.
+            @Style.Type
             val style = themeStyle ?: fetchThemeStyleFromSetting().also { themeStyle = it }
             val wallpaperColorScheme = ColorScheme(colors, false, style)
             val lightClockColor = wallpaperColorScheme.accent1.s100
@@ -664,9 +680,15 @@ constructor(
         }
         // In clock preview, we should have a seed color for clock
         // before setting clock to clockEventController to avoid updateColor with seedColor == null
+        // So in update colors, it should already have the correct theme in clockFaceController
         if (MigrateClocksToBlueprint.isEnabled) {
             clockController.clock = clock
         }
+        // When set clock to clockController,it will reset fontsize based on context.resources
+        // We need to override it with overlaid resources
+        clock.largeClock.events.onFontSettingChanged(
+            resources.getDimensionPixelSize(customR.dimen.large_clock_text_size).toFloat()
+        )
     }
 
     private fun onClockChanged() {
@@ -676,7 +698,7 @@ constructor(
         coroutineScope.launch {
             val clock = clockRegistry.createCurrentClock()
             clockController.clock = clock
-            updateClockAppearance(clock)
+            updateClockAppearance(clock, context.resources)
             updateLargeClock(clock)
             updateSmallClock(clock)
         }
@@ -693,7 +715,8 @@ constructor(
         }
     }
 
-    private suspend fun fetchThemeStyleFromSetting(): Style {
+    @Style.Type
+    private suspend fun fetchThemeStyleFromSetting(): Int {
         val overlayPackageJson =
             withContext(backgroundDispatcher) {
                 secureSettings.getString(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)
@@ -742,12 +765,14 @@ constructor(
         smallClockHostView.addView(clock.smallClock.view)
     }
 
-    /*
-     * When multi_crop_preview_ui_flag is on, we can preview portrait in split shadow direction
-     * or vice versa. So we need to decide preview direction by width and height
-     */
-    private fun previewInSplitShade(): Boolean {
-        return width > height
+    private fun getPreviewShadeLayoutWide(display: Display): Boolean {
+        return if (display.displayId == 0) {
+            shadeInteractor.isShadeLayoutWide.value
+        } else {
+            // For the unfolded preview in a folded screen; it's landscape by default
+            // For the folded preview in an unfolded screen; it's portrait by default
+            display.name == "Inner Display"
+        }
     }
 
     companion object {

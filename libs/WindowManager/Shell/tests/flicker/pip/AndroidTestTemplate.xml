@@ -25,7 +25,7 @@
         <!-- keeps the screen on during tests -->
         <option name="screen-always-on" value="on"/>
         <!-- Turns off Wi-fi -->
-        <option name="wifi" value="off"/>
+        <option name="wifi" value="on"/>
         <!-- Turns off Bluetooth -->
         <option name="bluetooth" value="off"/>
         <!-- prevents the phone from restarting -->
@@ -48,6 +48,8 @@
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="test-user-token" value="%TEST_USER%"/>
         <option name="run-command" value="rm -rf /data/user/%TEST_USER%/files/*"/>
+        <!-- Disable AOD -->
+        <option name="run-command" value="settings put secure doze_always_on 0"/>
         <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1"/>
         <option name="run-command" value="settings put system show_touches 1"/>
         <option name="run-command" value="settings put system pointer_location 1"/>
@@ -107,4 +109,11 @@
         <option name="collect-on-run-ended-only" value="true"/>
         <option name="clean-up" value="true"/>
     </metrics_collector>
+    <!-- Enable mocking GPS location by the test app -->
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command"
+            value="appops set com.android.shell android:mock_location allow"/>
+        <option name="teardown-command"
+            value="appops set com.android.shell android:mock_location deny"/>
+    </target_preparer>
 </configuration>

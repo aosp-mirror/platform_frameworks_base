@@ -257,6 +257,7 @@ interface IDevicePolicyManager {
     void setUserRestriction(in ComponentName who, in String callerPackage, in String key, boolean enable, boolean parent);
     void setUserRestrictionForUser(in String systemEntity, in String key, boolean enable, int targetUser);
     void setUserRestrictionGlobally(in String callerPackage, in String key);
+    void setUserRestrictionGloballyFromSystem(in String systemEntity, in String key, boolean enable);
     Bundle getUserRestrictions(in ComponentName who, in String callerPackage, boolean parent);
     Bundle getUserRestrictionsGlobally(in String callerPackage);
 
@@ -278,8 +279,9 @@ interface IDevicePolicyManager {
     boolean isNotificationListenerServicePermitted(in String packageName, int userId);
 
     Intent createAdminSupportIntent(in String restriction);
-    Bundle getEnforcingAdminAndUserDetails(int userId,String restriction);
-    List<EnforcingAdmin> getEnforcingAdminsForRestriction(int userId,String restriction);
+    Bundle getEnforcingAdminAndUserDetails(int userId, String restriction);
+    EnforcingAdmin getEnforcingAdmin(int userId, String identifier);
+    List<EnforcingAdmin> getEnforcingAdminsForRestriction(int userId, String restriction);
     boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden, boolean parent);
     boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean parent);
 
@@ -375,8 +377,14 @@ interface IDevicePolicyManager {
     void setAutoTimeEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeEnabled(in ComponentName who, String callerPackageName);
 
+    void setAutoTimePolicy(String callerPackageName, int policy);
+    int getAutoTimePolicy(String callerPackageName);
+
     void setAutoTimeZoneEnabled(in ComponentName who, String callerPackageName, boolean enabled);
     boolean getAutoTimeZoneEnabled(in ComponentName who, String callerPackageName);
+
+    void setAutoTimeZonePolicy(String callerPackageName, int policy);
+    int getAutoTimeZonePolicy(String callerPackageName);
 
     void setForceEphemeralUsers(in ComponentName who, boolean forceEpehemeralUsers);
     boolean getForceEphemeralUsers(in ComponentName who);
@@ -563,9 +571,13 @@ interface IDevicePolicyManager {
     void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);
 
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
+    UserHandle createManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
+    void finalizeCreateManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in UserHandle managedProfileUser);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
 
     void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
+
+    boolean removeManagedProfile(int userId);
 
     void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
     int getDeviceOwnerType(in ComponentName admin);
@@ -606,6 +618,7 @@ interface IDevicePolicyManager {
     int[] getApplicationExemptions(String packageName);
 
     void setMtePolicy(int flag, String callerPackageName);
+    void setMtePolicyBySystem(in String systemEntity, int policy);
     int getMtePolicy(String callerPackageName);
 
     void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);
@@ -631,4 +644,7 @@ interface IDevicePolicyManager {
     int getPolicySizeForAdmin(String callerPackageName, in EnforcingAdmin admin);
 
     int getHeadlessDeviceOwnerMode(String callerPackageName);
+
+    void setAppFunctionsPolicy(String callerPackageName, int policy);
+    int getAppFunctionsPolicy(String callerPackageName, int userId);
 }

@@ -81,8 +81,8 @@ class AppHandleEducationDatastoreRepositoryTest {
       runTest(StandardTestDispatcher()) {
         val windowingEducationProto =
             createWindowingEducationProto(
-                educationViewedTimestampMillis = 123L,
-                featureUsedTimestampMillis = 124L,
+                appHandleHintViewedTimestampMillis = 123L,
+                appHandleHintUsedTimestampMillis = 124L,
                 appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 2),
                 appUsageStatsLastUpdateTimestampMillis = 125L)
         testDatastore.updateData { windowingEducationProto }
@@ -110,20 +110,20 @@ class AppHandleEducationDatastoreRepositoryTest {
       }
 
   @Test
-  fun updateEducationViewedTimestampMillis_updatesDatastoreProto() =
+  fun updateAppHandleHintViewedTimestampMillis_updatesDatastoreProto() =
       runTest(StandardTestDispatcher()) {
-        datastoreRepository.updateEducationViewedTimestampMillis(true)
+        datastoreRepository.updateAppHandleHintViewedTimestampMillis(true)
 
-        val result = testDatastore.data.first().hasEducationViewedTimestampMillis()
+        val result = testDatastore.data.first().hasAppHandleHintViewedTimestampMillis()
         assertThat(result).isEqualTo(true)
       }
 
   @Test
-  fun updateFeatureUsedTimestampMillis_updatesDatastoreProto() =
+  fun updateAppHandleHintUsedTimestampMillis_updatesDatastoreProto() =
       runTest(StandardTestDispatcher()) {
-        datastoreRepository.updateFeatureUsedTimestampMillis(true)
+        datastoreRepository.updateAppHandleHintUsedTimestampMillis(true)
 
-        val result = testDatastore.data.first().hasFeatureUsedTimestampMillis()
+        val result = testDatastore.data.first().hasAppHandleHintUsedTimestampMillis()
         assertThat(result).isEqualTo(true)
       }
 

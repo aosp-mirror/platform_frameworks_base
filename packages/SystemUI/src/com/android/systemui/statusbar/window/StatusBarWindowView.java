@@ -35,11 +35,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.compose.ComposeInitializer;
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
+import com.android.systemui.statusbar.core.StatusBarRootModernization;
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 
 /**
- * Status bar view.
+ * Status bar view
  * We now extend WindowRootView so that we can host Compose views
  */
 public class StatusBarWindowView extends FrameLayout {
@@ -64,7 +64,7 @@ public class StatusBarWindowView extends FrameLayout {
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        if (StatusBarSimpleFragment.isEnabled()) {
+        if (StatusBarRootModernization.isEnabled()) {
             ComposeInitializer.INSTANCE.onAttachedToWindow(this);
         }
     }
@@ -73,7 +73,7 @@ public class StatusBarWindowView extends FrameLayout {
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        if (StatusBarSimpleFragment.isEnabled()) {
+        if (StatusBarRootModernization.isEnabled()) {
             ComposeInitializer.INSTANCE.onDetachedFromWindow(this);
         }
     }

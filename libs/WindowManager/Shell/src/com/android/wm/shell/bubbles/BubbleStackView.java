@@ -1704,6 +1704,7 @@ public class BubbleStackView extends FrameLayout
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        stopMonitoringSwipeUpGesture();
     }
 
     @Override
@@ -2313,7 +2314,8 @@ public class BubbleStackView extends FrameLayout
     /**
      * Stop monitoring for swipe up gesture
      */
-    void stopMonitoringSwipeUpGesture() {
+    @VisibleForTesting
+    public void stopMonitoringSwipeUpGesture() {
         stopMonitoringSwipeUpGestureInternal();
     }
 

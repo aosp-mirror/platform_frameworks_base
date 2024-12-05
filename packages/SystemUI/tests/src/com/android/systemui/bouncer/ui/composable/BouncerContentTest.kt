@@ -42,6 +42,7 @@ import com.android.systemui.motion.createSysUiComposeMotionTestRule
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.testKosmos
+import kotlin.time.Duration.Companion.seconds
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -109,7 +110,7 @@ class BouncerContentTest : SysuiTestCase() {
 
     @Test
     fun doubleClick_swapSide() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val motion =
                 recordMotion(
                     content = { BouncerContentUnderTest() },

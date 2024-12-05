@@ -45,6 +45,7 @@ import android.view.inspector.InspectableProperty;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 
+import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -291,11 +292,26 @@ public class TextClock extends TextView {
     }
 
     private void createTime(String timeZone) {
-        if (timeZone != null) {
-            mTime = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+        TimeZone tz = null;
+        if (timeZone == null) {
+            tz = TimeZone.getDefault();
+            // Note that mTimeZone should always be null if timeZone is.
         } else {
-            mTime = Calendar.getInstance();
+            tz = TimeZone.getTimeZone(timeZone);
+            try {
+                // Try converting this TZ to a zoneId to make sure it's valid. This
+                // performs a different set of checks than TimeZone.getTimeZone so
+                // we can avoid exceptions later when we do need this conversion.
+                tz.toZoneId();
+            } catch (DateTimeException ex) {
+                // If we're here, the user supplied timezone is invalid, so reset
+                // mTimeZone to something sane.
+                tz = TimeZone.getDefault();
+                mTimeZone = tz.getID();
+            }
         }
+
+        mTime = Calendar.getInstance(tz);
     }
 
     /**

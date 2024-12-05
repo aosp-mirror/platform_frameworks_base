@@ -1761,7 +1761,7 @@ public abstract class ColorSpace {
 
         if (Flags.displayBt2020Colorspace()) {
             sNamedColorSpaceMap.put(Named.DISPLAY_BT2020.ordinal(), new ColorSpace.Rgb(
-                    "BT 2020",
+                    "Display BT. 2020",
                     BT2020_PRIMARIES,
                     ILLUMINANT_D65,
                     null,

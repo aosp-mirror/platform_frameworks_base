@@ -61,7 +61,7 @@ public class DisplayStateController {
         // We might override this below based on other factors.
         // Initialise brightness as invalid.
         int state;
-        int reason = Display.STATE_REASON_DEFAULT_POLICY;
+        int reason = displayPowerRequest.policyReason;
         switch (displayPowerRequest.policy) {
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF:
                 state = Display.STATE_OFF;

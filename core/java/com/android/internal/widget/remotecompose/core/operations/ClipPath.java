@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -57,16 +59,23 @@ public class ClipPath extends PaintOperation {
     public static final int UNDEFINED = PATH_CLIP_UNDEFINED;
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ClipPath " + mId + ";";
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int pack = buffer.readInt();
         int id = pack & 0xFFFFF;
         int regionOp = pack >> 24;
@@ -74,27 +83,43 @@ public class ClipPath extends PaintOperation {
         operations.add(op);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, int id) {
+    public static void apply(@NonNull WireBuffer buffer, int id) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Canvas Operations", OP_CODE, CLASS_NAME)
                 .description("Intersect the current clip with the path")
                 .field(DocumentedOperation.INT, "id", "id of the path");
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.clipPath(mId, mRegionOp);
     }
 }

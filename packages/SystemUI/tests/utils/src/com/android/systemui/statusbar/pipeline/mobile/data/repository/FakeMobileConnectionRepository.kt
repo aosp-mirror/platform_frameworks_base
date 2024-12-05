@@ -41,6 +41,7 @@ class FakeMobileConnectionRepository(
     override val isGsm = MutableStateFlow(false)
     override val cdmaLevel = MutableStateFlow(0)
     override val primaryLevel = MutableStateFlow(0)
+    override val satelliteLevel = MutableStateFlow(0)
     override val dataConnectionState = MutableStateFlow(DataConnectionState.Disconnected)
     override val dataActivityDirection =
         MutableStateFlow(DataActivityModel(hasActivityIn = false, hasActivityOut = false))

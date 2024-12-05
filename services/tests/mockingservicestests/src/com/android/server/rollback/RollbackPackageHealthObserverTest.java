@@ -109,14 +109,11 @@ public class RollbackPackageHealthObserverTest {
     private static final String PROP_DISABLE_HIGH_IMPACT_ROLLBACK_FLAG =
             "persist.device_config.configuration.disable_high_impact_rollback";
 
-    private SystemConfig mSysConfig;
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     @Before
     public void setup() {
-        mSysConfig = new SystemConfigTestClass();
-
         mSession = ExtendedMockito.mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
@@ -184,7 +181,7 @@ public class RollbackPackageHealthObserverTest {
     @Test
     public void testHealthCheckLevels() {
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         VersionedPackage testFailedPackage = new VersionedPackage(APP_A, VERSION_CODE);
         VersionedPackage secondFailedPackage = new VersionedPackage(APP_B, VERSION_CODE);
 
@@ -228,14 +225,14 @@ public class RollbackPackageHealthObserverTest {
     @Test
     public void testIsPersistent() {
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         assertTrue(observer.isPersistent());
     }
 
     @Test
     public void testMayObservePackage_withoutAnyRollback() {
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of());
         assertFalse(observer.mayObservePackage(APP_A));
@@ -245,7 +242,7 @@ public class RollbackPackageHealthObserverTest {
     public void testMayObservePackage_forPersistentApp()
             throws PackageManager.NameNotFoundException {
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ApplicationInfo info = new ApplicationInfo();
         info.flags = ApplicationInfo.FLAG_PERSISTENT | ApplicationInfo.FLAG_SYSTEM;
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -260,7 +257,7 @@ public class RollbackPackageHealthObserverTest {
     public void testMayObservePackage_forNonPersistentApp()
             throws PackageManager.NameNotFoundException {
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(mRollbackInfo));
         when(mRollbackInfo.getPackages()).thenReturn(List.of(mPackageRollbackInfo));
@@ -286,7 +283,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_LOW);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         VersionedPackage secondFailedPackage = new VersionedPackage(APP_B, VERSION_CODE);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -317,7 +314,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         VersionedPackage secondFailedPackage = new VersionedPackage(APP_B, VERSION_CODE);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -348,7 +345,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         VersionedPackage secondFailedPackage = new VersionedPackage(APP_B, VERSION_CODE);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -386,7 +383,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 222,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -419,7 +416,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_LOW);
         VersionedPackage secondFailedPackage = new VersionedPackage(APP_B, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         // Make the rollbacks available
@@ -427,7 +424,7 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(secondFailedPackage,
+        observer.onExecuteHealthCheckMitigation(secondFailedPackage,
                 PackageWatchdog.FAILURE_REASON_NATIVE_CRASH, 1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
@@ -461,7 +458,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 222,
                 PackageManager.ROLLBACK_USER_IMPACT_LOW);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -471,7 +468,8 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(appBFrom, PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
+        observer.onExecuteHealthCheckMitigation(appBFrom, PackageWatchdog.FAILURE_REASON_APP_CRASH,
+                1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager).commitRollback(argument.capture(), any(), any());
@@ -506,7 +504,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_LOW);
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -516,7 +514,8 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(failedPackage, PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
+        observer.onExecuteHealthCheckMitigation(failedPackage,
+                PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(2)).commitRollback(
@@ -552,7 +551,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -562,7 +561,8 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(failedPackage, PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
+        observer.onExecuteHealthCheckMitigation(failedPackage,
+                PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(1)).commitRollback(
@@ -590,7 +590,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -599,7 +599,8 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(failedPackage, PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
+        observer.onExecuteHealthCheckMitigation(failedPackage,
+                PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, never()).commitRollback(argument.capture(), any(), any());
@@ -621,7 +622,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_LOW);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         // Make the rollbacks available
@@ -646,7 +647,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         // Make the rollbacks available
@@ -672,7 +673,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         // Make the rollbacks available
@@ -701,7 +702,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         // Make the rollbacks available
@@ -737,7 +738,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 222,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
         // Make the rollbacks available
@@ -776,7 +777,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 222,
                 PackageManager.ROLLBACK_USER_IMPACT_LOW);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -786,7 +787,7 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.executeBootLoopMitigation(1);
+        observer.onExecuteBootLoopMitigation(1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(2)).commitRollback(
@@ -821,7 +822,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 222,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -831,7 +832,7 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.executeBootLoopMitigation(1);
+        observer.onExecuteBootLoopMitigation(1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(1)).commitRollback(
@@ -857,7 +858,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -866,7 +867,7 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.executeBootLoopMitigation(1);
+        observer.onExecuteBootLoopMitigation(1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(1)).commitRollback(
@@ -902,7 +903,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL);
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -912,7 +913,8 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(failedPackage, PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
+        observer.onExecuteHealthCheckMitigation(failedPackage,
+                PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(1)).commitRollback(
@@ -938,7 +940,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_ONLY_MANUAL);
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -947,7 +949,8 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.execute(failedPackage, PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
+        observer.onExecuteHealthCheckMitigation(failedPackage,
+                PackageWatchdog.FAILURE_REASON_APP_CRASH, 1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, never()).commitRollback(argument.capture(), any(), any());
@@ -980,7 +983,7 @@ public class RollbackPackageHealthObserverTest {
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         VersionedPackage failedPackage = new VersionedPackage(APP_C, VERSION_CODE);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -990,7 +993,7 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.executeBootLoopMitigation(1);
+        observer.onExecuteBootLoopMitigation(1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, times(1)).commitRollback(
@@ -1026,7 +1029,7 @@ public class RollbackPackageHealthObserverTest {
                 false, null, 111,
                 PackageManager.ROLLBACK_USER_IMPACT_HIGH);
         RollbackPackageHealthObserver observer =
-                spy(new RollbackPackageHealthObserver(mMockContext, mApexManager));
+                spy(new RollbackPackageHealthObserver(mMockContext));
         ArgumentCaptor<Integer> argument = ArgumentCaptor.forClass(Integer.class);
 
         when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
@@ -1036,7 +1039,7 @@ public class RollbackPackageHealthObserverTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getModuleInfo(any(), eq(0))).thenReturn(null);
 
-        observer.executeBootLoopMitigation(1);
+        observer.onExecuteBootLoopMitigation(1);
         waitForIdleHandler(observer.getHandler(), Duration.ofSeconds(10));
 
         verify(mRollbackManager, never()).commitRollback(

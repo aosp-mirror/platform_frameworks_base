@@ -32,8 +32,9 @@ import com.android.settingslib.widget.SelectorWithWidgetPreference;
 /**
  * Selector with widget preference that can be disabled by a device admin using a user restriction.
  */
-public class RestrictedSelectorWithWidgetPreference extends SelectorWithWidgetPreference {
-    private RestrictedPreferenceHelper mHelper;
+public class RestrictedSelectorWithWidgetPreference extends SelectorWithWidgetPreference implements
+        RestrictedPreferenceHelperProvider {
+    private final RestrictedPreferenceHelper mHelper;
 
     /**
      * Perform inflation from XML and apply a class-specific base style.
@@ -82,8 +83,11 @@ public class RestrictedSelectorWithWidgetPreference extends SelectorWithWidgetPr
      */
     public RestrictedSelectorWithWidgetPreference(@NonNull Context context) {
         this(context, null);
-        mHelper =
-                new RestrictedPreferenceHelper(context, /* preference= */ this, /* attrs= */ null);
+    }
+
+    @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
     }
 
     @Override

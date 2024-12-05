@@ -26,6 +26,7 @@ import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
+import com.android.systemui.volume.dialog.ringer.data.repository.VolumeDialogRingerFeedbackRepository
 import com.android.systemui.volume.dialog.ringer.shared.model.VolumeDialogRingerModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
 import javax.inject.Inject
@@ -45,6 +46,7 @@ constructor(
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val controller: VolumeDialogController,
     private val audioSystemRepository: AudioSystemRepository,
+    private val ringerFeedbackRepository: VolumeDialogRingerFeedbackRepository,
 ) {
 
     val ringerModel: Flow<VolumeDialogRingerModel> =
@@ -83,5 +85,13 @@ constructor(
 
     fun scheduleTouchFeedback() {
         controller.scheduleTouchFeedback()
+    }
+
+    suspend fun getToastCount(): Int {
+        return ringerFeedbackRepository.getToastCount()
+    }
+
+    suspend fun updateToastCount(toastCount: Int) {
+        ringerFeedbackRepository.updateToastCount(toastCount)
     }
 }

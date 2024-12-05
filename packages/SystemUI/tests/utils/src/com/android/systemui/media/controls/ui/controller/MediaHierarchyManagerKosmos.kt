@@ -16,8 +16,15 @@
 
 package com.android.systemui.media.controls.ui.controller
 
+import android.content.testableContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.animation.UniqueObjectHostView
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 
-var Kosmos.mediaHierarchyManager by Fixture { mock<MediaHierarchyManager>() }
+var Kosmos.mediaHierarchyManager by Fixture {
+    mock<MediaHierarchyManager> {
+        on { register(any()) }.thenAnswer { UniqueObjectHostView(this@Fixture.testableContext) }
+    }
+}

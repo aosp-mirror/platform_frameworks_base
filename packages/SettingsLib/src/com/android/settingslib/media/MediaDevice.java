@@ -33,6 +33,9 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
+import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
+import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION_MANAGED;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED;
@@ -150,6 +153,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
                 break;
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
+            case TYPE_LINE_DIGITAL:
+            case TYPE_LINE_ANALOG:
+            case TYPE_AUX_LINE:
                 mType = MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE;
                 break;
             case TYPE_USB_DEVICE:
@@ -381,6 +387,16 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     public int getDeviceType() {
         return mType;
+    }
+
+    /**
+     * Get the {@link MediaRoute2Info.Type} of the device.
+     */
+    public int getRouteType() {
+        if (mRouteInfo == null) {
+            return TYPE_UNKNOWN;
+        }
+        return mRouteInfo.getType();
     }
 
     /**

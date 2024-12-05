@@ -19,7 +19,7 @@
     <item>
         <shape android:shape="rectangle">
             <solid android:color="@color/btn_material_filled_tonal_background_color"/>
-            <corners android:radius="?android:attr/buttonCornerRadius"/>
+            <corners android:radius="@dimen/config_wearMaterial3_buttonCornerRadius"/>
             <size
                 android:width="@dimen/btn_material_width"
                 android:height="@dimen/btn_material_height" />

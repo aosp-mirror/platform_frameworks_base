@@ -23,6 +23,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -163,7 +164,8 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                         t.show(wallpapers[i].leash);
                         t.setAlpha(wallpapers[i].leash, 1.f);
                     }
-                    if (ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue()) {
+                    if (ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue()
+                            || ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS_BUGFIX.isTrue()) {
                         resetLauncherAlphaOnDesktopExit(info, launcherTask, leashMap, t);
                     }
                 } else {
@@ -268,7 +270,8 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
             // skip changes that we didn't wrap
             if (!leashMap.containsKey(change.getLeash())) continue;
             // Only make the update if we are closing Desktop tasks.
-            if (change.getTaskInfo().isFreeform() && isClosingMode(change.getMode())) {
+            if (change.getTaskInfo() != null && change.getTaskInfo().isFreeform()
+                    && isClosingMode(change.getMode())) {
                 startTransaction.setAlpha(leashMap.get(launcherChange.getLeash()), 0f);
                 return;
             }

@@ -34,66 +34,60 @@ private const val FONT_ITALIC_MIN = 0f
 private const val FONT_ITALIC_ANIMATION_STEP = 0.1f
 private const val FONT_ITALIC_DEFAULT_VALUE = 0f
 
-// Benchmarked via Perfetto, difference between 10 and 50 entries is about 0.3ms in
-// frame draw time on a Pixel 6.
-@VisibleForTesting const val DEFAULT_FONT_CACHE_MAX_ENTRIES = 10
+/** Caches for font interpolation */
+interface FontCache {
+    val animationFrameCount: Int
 
-/** Provide interpolation of two fonts by adjusting font variation settings. */
-class FontInterpolator(
-    numberOfAnimationSteps: Int? = null,
-) {
-    /**
-     * Cache key for the interpolated font.
-     *
-     * This class is mutable for recycling.
-     */
-    private data class InterpKey(var l: Font?, var r: Font?, var progress: Float) {
-        fun set(l: Font, r: Font, progress: Float) {
-            this.l = l
-            this.r = r
-            this.progress = progress
-        }
-    }
+    fun get(key: InterpKey): Font?
 
-    /**
-     * Cache key for the font that has variable font.
-     *
-     * This class is mutable for recycling.
-     */
-    private data class VarFontKey(
-        var sourceId: Int,
-        var index: Int,
-        val sortedAxes: MutableList<FontVariationAxis>
-    ) {
-        constructor(
-            font: Font,
-            axes: List<FontVariationAxis>
-        ) : this(
-            font.sourceIdentifier,
-            font.ttcIndex,
-            axes.toMutableList().apply { sortBy { it.tag } }
-        )
+    fun get(key: VarFontKey): Font?
 
-        fun set(font: Font, axes: List<FontVariationAxis>) {
-            sourceId = font.sourceIdentifier
-            index = font.ttcIndex
-            sortedAxes.clear()
-            sortedAxes.addAll(axes)
-            sortedAxes.sortBy { it.tag }
-        }
-    }
+    fun put(key: InterpKey, font: Font)
 
+    fun put(key: VarFontKey, font: Font)
+}
+
+/** Cache key for the interpolated font. */
+data class InterpKey(val start: Font?, val end: Font?, val frame: Int)
+
+/** Cache key for the font that has variable font. */
+data class VarFontKey(val sourceId: Int, val index: Int, val sortedAxes: List<FontVariationAxis>) {
+    constructor(
+        font: Font,
+        axes: List<FontVariationAxis>,
+    ) : this(font.sourceIdentifier, font.ttcIndex, axes.sortedBy { it.tag })
+}
+
+class FontCacheImpl(override val animationFrameCount: Int = DEFAULT_FONT_CACHE_MAX_ENTRIES / 2) :
+    FontCache {
     // Font interpolator has two level caches: one for input and one for font with different
     // variation settings. No synchronization is needed since FontInterpolator is not designed to be
     // thread-safe and can be used only on UI thread.
-    val cacheMaxEntries = numberOfAnimationSteps?.let { it * 2 } ?: DEFAULT_FONT_CACHE_MAX_ENTRIES
+    val cacheMaxEntries = animationFrameCount * 2
     private val interpCache = LruCache<InterpKey, Font>(cacheMaxEntries)
     private val verFontCache = LruCache<VarFontKey, Font>(cacheMaxEntries)
 
-    // Mutable keys for recycling.
-    private val tmpInterpKey = InterpKey(null, null, 0f)
-    private val tmpVarFontKey = VarFontKey(0, 0, mutableListOf())
+    override fun get(key: InterpKey): Font? = interpCache[key]
 
+    override fun get(key: VarFontKey): Font? = verFontCache[key]
+
+    override fun put(key: InterpKey, font: Font) {
+        interpCache.put(key, font)
+    }
+
+    override fun put(key: VarFontKey, font: Font) {
+        verFontCache.put(key, font)
+    }
+
+    companion object {
+        // Benchmarked via Perfetto, difference between 10 and 50 entries is about 0.3ms in frame
+        // draw time on a Pixel 6.
+        @VisibleForTesting const val DEFAULT_FONT_CACHE_MAX_ENTRIES = 10
+    }
+}
+
+/** Provide interpolation of two fonts by adjusting font variation settings. */
+class FontInterpolator(val fontCache: FontCache = FontCacheImpl()) {
     /** Linear interpolate the font variation settings. */
     fun lerp(start: Font, end: Font, progress: Float): Font {
         if (progress == 0f) {
@@ -111,13 +105,12 @@ class FontInterpolator(
 
         // Check we already know the result. This is commonly happens since we draws the different
         // text chunks with the same font.
-        tmpInterpKey.set(start, end, progress)
-        val cachedFont = interpCache[tmpInterpKey]
-        if (cachedFont != null) {
+        val iKey = InterpKey(start, end, (progress * fontCache.animationFrameCount).toInt())
+        fontCache.get(iKey)?.let {
             if (DEBUG) {
-                Log.d(LOG_TAG, "[$progress] Interp. cache hit for $tmpInterpKey")
+                Log.d(LOG_TAG, "[$progress] Interp. cache hit for $iKey")
             }
-            return cachedFont
+            return it
         }
 
         // General axes interpolation takes O(N log N), this is came from sorting the axes. Usually
@@ -131,14 +124,14 @@ class FontInterpolator(
                         MathUtils.lerp(
                             startValue ?: FONT_WEIGHT_DEFAULT_VALUE,
                             endValue ?: FONT_WEIGHT_DEFAULT_VALUE,
-                            progress
+                            progress,
                         )
                     TAG_ITAL ->
                         adjustItalic(
                             MathUtils.lerp(
                                 startValue ?: FONT_ITALIC_DEFAULT_VALUE,
                                 endValue ?: FONT_ITALIC_DEFAULT_VALUE,
-                                progress
+                                progress,
                             )
                         )
                     else -> {
@@ -152,32 +145,31 @@ class FontInterpolator(
 
         // Check if we already make font for this axes. This is typically happens if the animation
         // happens backward.
-        tmpVarFontKey.set(start, newAxes)
-        val axesCachedFont = verFontCache[tmpVarFontKey]
-        if (axesCachedFont != null) {
-            interpCache.put(InterpKey(start, end, progress), axesCachedFont)
+        val vKey = VarFontKey(start, newAxes)
+        fontCache.get(vKey)?.let {
+            fontCache.put(iKey, it)
             if (DEBUG) {
-                Log.d(LOG_TAG, "[$progress] Axis cache hit for $tmpVarFontKey")
+                Log.d(LOG_TAG, "[$progress] Axis cache hit for $vKey")
             }
-            return axesCachedFont
+            return it
         }
 
         // This is the first time to make the font for the axes. Build and store it to the cache.
         // Font.Builder#build won't throw IOException since creating fonts from existing fonts will
         // not do any IO work.
         val newFont = Font.Builder(start).setFontVariationSettings(newAxes.toTypedArray()).build()
-        interpCache.put(InterpKey(start, end, progress), newFont)
-        verFontCache.put(VarFontKey(start, newAxes), newFont)
+        fontCache.put(iKey, newFont)
+        fontCache.put(vKey, newFont)
 
         // Cache misses are likely to create memory leaks, so this is logged at error level.
-        Log.e(LOG_TAG, "[$progress] Cache MISS for $tmpInterpKey / $tmpVarFontKey")
+        Log.e(LOG_TAG, "[$progress] Cache MISS for $iKey / $vKey")
         return newFont
     }
 
     private fun lerp(
         start: Array<FontVariationAxis>,
         end: Array<FontVariationAxis>,
-        filter: (tag: String, left: Float?, right: Float?) -> Float
+        filter: (tag: String, left: Float?, right: Float?) -> Float,
     ): List<FontVariationAxis> {
         // Safe to modify result of Font#getAxes since it returns cloned object.
         start.sortBy { axis -> axis.tag }

@@ -44,13 +44,13 @@
             android:layout_height="wrap_content">
 
             <com.android.systemui.statusbar.notification.row.FooterViewButton
-                android:id="@+id/settings_button"
+                android:id="@+id/history_button"
                 style="@style/TextAppearance.NotificationFooterButtonRedesign"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:background="@drawable/notif_footer_btn_background"
-                android:contentDescription="@string/notification_settings_button_description"
-                android:drawableStart="@drawable/notif_footer_btn_settings"
+                android:contentDescription="@string/notification_history_button_description"
+                android:drawableStart="@drawable/notif_footer_btn_history"
                 android:focusable="true"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -64,17 +64,17 @@
                 android:contentDescription="@string/accessibility_clear_all"
                 android:focusable="true"
                 android:text="@string/clear_all_notifications_text"
-                app:layout_constraintEnd_toStartOf="@id/history_button"
-                app:layout_constraintStart_toEndOf="@id/settings_button" />
+                app:layout_constraintEnd_toStartOf="@id/settings_button"
+                app:layout_constraintStart_toEndOf="@id/history_button" />
 
             <com.android.systemui.statusbar.notification.row.FooterViewButton
-                android:id="@+id/history_button"
+                android:id="@+id/settings_button"
                 style="@style/TextAppearance.NotificationFooterButtonRedesign"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:background="@drawable/notif_footer_btn_background"
-                android:contentDescription="@string/notification_history_button_description"
-                android:drawableStart="@drawable/notif_footer_btn_history"
+                android:contentDescription="@string/notification_settings_button_description"
+                android:drawableStart="@drawable/notif_footer_btn_settings"
                 android:focusable="true"
                 app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>

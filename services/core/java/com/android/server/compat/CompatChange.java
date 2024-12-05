@@ -50,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Note, this class is not thread safe so callers must ensure thread safety.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CompatChange extends CompatibilityChangeInfo {
 
     /**

@@ -33,7 +33,9 @@ import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.os.vibrator.Flags;
+import android.os.vibrator.VendorVibrationSession;
 import android.os.vibrator.VibrationConfig;
+import android.os.vibrator.VibratorEnvelopeEffectInfo;
 import android.os.vibrator.VibratorFrequencyProfile;
 import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.Log;
@@ -135,6 +137,9 @@ public abstract class Vibrator {
     // This is lazily loaded only for the few clients that need this (e. Settings app).
     @Nullable
     private volatile VibrationConfig mVibrationConfig;
+
+    private VibratorFrequencyProfile mVibratorFrequencyProfile;
+    private VibratorEnvelopeEffectInfo mVibratorEnvelopeEffectInfo;
 
     /**
      * @hide to prevent subclassing from outside of the framework
@@ -247,6 +252,34 @@ public abstract class Vibrator {
     }
 
     /**
+     * Check whether the vibrator has support for vendor-specific effects.
+     *
+     * <p>Vendor vibration effects can be created via {@link VibrationEffect#createVendorEffect}.
+     *
+     * @return True if the hardware can play vendor-specific vibration effects, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public boolean areVendorEffectsSupported() {
+        return getInfo().hasCapability(IVibrator.CAP_PERFORM_VENDOR_EFFECTS);
+    }
+
+    /**
+     * Check whether the vibrator has support for vendor-specific vibration sessions.
+     *
+     * <p>Vendor vibration sessions can be started via {@link #startVendorSession}.
+     *
+     * @return True if the hardware can play vendor-specific vibration sessions, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    public boolean areVendorSessionsSupported() {
+        return false;
+    }
+
+    /**
      * Check whether the vibrator can be controlled by an external service with the
      * {@link IExternalVibratorService}.
      *
@@ -322,7 +355,11 @@ public abstract class Vibrator {
             return null;
         }
 
-        return new VibratorFrequencyProfile(frequencyProfile);
+        if (mVibratorFrequencyProfile == null) {
+            mVibratorFrequencyProfile = new VibratorFrequencyProfile(frequencyProfile);
+        }
+
+        return mVibratorFrequencyProfile;
     }
 
     /**
@@ -354,70 +391,28 @@ public abstract class Vibrator {
     }
 
     /**
-     * Retrieves the maximum duration supported for an envelope effect, in milliseconds.
+     * Retrieves the vibrator's capabilities and limitations for envelope effects.
      *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantees a
-     * maximum duration equivalent to the product of {@link #getMaxEnvelopeEffectSize()} and
-     * {@link #getMaxEnvelopeEffectControlPointDurationMillis()}. If the device does not support
-     * envelope effects, this method will return 0.
+     * <p>These parameters can be used with {@link VibrationEffect.WaveformEnvelopeBuilder}
+     * to create custom envelope effects.
      *
-     * @return The maximum duration (in milliseconds) allowed for an envelope effect, or 0 if
-     * envelope effects are not supported.
+     * @return The vibrator's envelope effect information, or null if not supported. If this
+     * vibrator is a composite of multiple physical devices then this will return a profile
+     * supported in all devices, or null if the intersection is empty or not available.
+     *
+     * @see VibrationEffect.WaveformEnvelopeBuilder
      */
     @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMaxEnvelopeEffectDurationMillis() {
-        return getInfo().getMaxEnvelopeEffectDurationMillis();
-    }
+    @NonNull
+    public VibratorEnvelopeEffectInfo getEnvelopeEffectInfo() {
+        if (mVibratorEnvelopeEffectInfo == null) {
+            mVibratorEnvelopeEffectInfo = new VibratorEnvelopeEffectInfo(
+                    getInfo().getMaxEnvelopeEffectSize(),
+                    getInfo().getMinEnvelopeEffectControlPointDurationMillis(),
+                    getInfo().getMaxEnvelopeEffectControlPointDurationMillis());
+        }
 
-    /**
-     * Retrieves the maximum number of control points supported for an envelope effect.
-     *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantee support
-     * for a minimum of 16 control points. If the device does not support envelope effects,
-     * this method will return 0.
-     *
-     * @return the maximum number of control points allowed for an envelope effect, or 0 if
-     * envelope effects are not supported.
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMaxEnvelopeEffectSize() {
-        return getInfo().getMaxEnvelopeEffectSize();
-    }
-
-    /**
-     * Retrieves the minimum duration supported between two control points within an envelope
-     * effect, in milliseconds.
-     *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantee
-     * support for durations down to at least 20 milliseconds. If the device does
-     * not support envelope effects, this method will return 0.
-     *
-     * @return the minimum allowed duration between two control points in an envelope effect,
-     * or 0 if envelope effects are not supported.
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMinEnvelopeEffectControlPointDurationMillis() {
-        return getInfo().getMinEnvelopeEffectControlPointDurationMillis();
-    }
-
-    /**
-     * Retrieves the maximum duration supported between two control points within an envelope
-     * effect, in milliseconds.
-     *
-     * <p>If the device supports envelope effects (check {@link #areEnvelopeEffectsSupported}),
-     * this value will be positive. Devices with envelope effects capabilities guarantee support
-     * for durations up to at least 1 second. If the device does not support envelope effects,
-     * this method will return 0.
-     *
-     * @return the maximum allowed duration between two control points in an envelope effect,
-     * or 0 if envelope effects are not supported.
-     */
-    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
-    public int getMaxEnvelopeEffectControlPointDurationMillis() {
-        return getInfo().getMaxEnvelopeEffectControlPointDurationMillis();
+        return mVibratorEnvelopeEffectInfo;
     }
 
     /**
@@ -921,5 +916,45 @@ public abstract class Vibrator {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.ACCESS_VIBRATOR_STATE)
     public void removeVibratorStateListener(@NonNull OnVibratorStateChangedListener listener) {
+    }
+
+    /**
+     * Starts a vibration session in this vibrator.
+     *
+     * <p>The session will start asynchronously once the vibrator control can be acquired. Once it's
+     * started the {@link VendorVibrationSession} will be provided to the callback. This session
+     * should be used to play vibrations until the session is ended or canceled.
+     *
+     * <p>The vendor app will have exclusive control over the vibrator during this session. This
+     * control can be revoked by the vibrator service, which will be notified to the same session
+     * callback with the {@link VendorVibrationSession#STATUS_CANCELED}.
+     *
+     * <p>The {@link VibrationAttributes} will be used to decide the priority of the vendor
+     * vibrations that will be performed in this session. All vibrations within this session will
+     * apply the same attributes.
+     *
+     * @param attrs    The {@link VibrationAttributes} corresponding to the vibrations that will be
+     *                 performed in the session. This will be used to decide the priority of this
+     *                 session against other system vibrations.
+     * @param reason   The description for this session, used for debugging purposes.
+     * @param cancellationSignal A signal to cancel the session before it starts.
+     * @param executor The executor for the session callbacks.
+     * @param callback The {@link VendorVibrationSession.Callback} for the started session.
+     *
+     * @see VendorVibrationSession
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.VIBRATE,
+            android.Manifest.permission.VIBRATE_VENDOR_EFFECTS,
+            android.Manifest.permission.START_VIBRATION_SESSIONS,
+    })
+    public void startVendorSession(@NonNull VibrationAttributes attrs, @Nullable String reason,
+            @Nullable CancellationSignal cancellationSignal, @NonNull Executor executor,
+            @NonNull VendorVibrationSession.Callback callback) {
+        Log.w(TAG, "startVendorSession is not supported");
+        executor.execute(() -> callback.onFinished(VendorVibrationSession.STATUS_UNSUPPORTED));
     }
 }

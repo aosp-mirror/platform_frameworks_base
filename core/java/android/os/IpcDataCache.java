@@ -23,6 +23,7 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
+import android.app.PropertyInvalidatedCache.Args;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -341,7 +342,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     public IpcDataCache(int maxEntries, @NonNull @IpcDataCacheModule String module,
             @NonNull String api, @NonNull String cacheName,
             @NonNull QueryHandler<Query, Result> computer) {
-        super(maxEntries, module, api, cacheName, computer);
+        super(new Args(module).maxEntries(maxEntries).api(api), cacheName, computer);
     }
 
     /**
@@ -399,10 +400,11 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
     }
 
     /**
-     * This is a convenience class that encapsulates configuration information for a
-     * cache.  It may be supplied to the cache constructors in lieu of the other
-     * parameters.  The class captures maximum entry count, the module, the key, and the
-     * api.
+     * This is a convenience class that encapsulates configuration information for a cache.  It
+     * may be supplied to the cache constructors in lieu of the other parameters.  The class
+     * captures maximum entry count, the module, the key, and the api.  The key is used to
+     * invalidate the cache and may be shared by different caches.  The api is a user-visible (in
+     * debug) name for the cache.
      *
      * There are three specific use cases supported by this class.
      *
@@ -429,11 +431,8 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
      * @hide
      */
     public static class Config {
-        private final int mMaxEntries;
-        @IpcDataCacheModule
-        private final String mModule;
-        private final String mApi;
-        private final String mName;
+        final Args mArgs;
+        final String mName;
 
         /**
          * The list of cache names that were created extending this Config.  If
@@ -451,12 +450,20 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
          */
         private boolean mDisabled = false;
 
+        /**
+         * Fully construct a config.
+         */
+        private Config(@NonNull Args args, @NonNull String name) {
+            mArgs = args;
+            mName = name;
+        }
+
+        /**
+         *
+         */
         public Config(int maxEntries, @NonNull @IpcDataCacheModule String module,
                 @NonNull String api, @NonNull String name) {
-            mMaxEntries = maxEntries;
-            mModule = module;
-            mApi = api;
-            mName = name;
+            this(new Args(module).api(api).maxEntries(maxEntries), name);
         }
 
         /**
@@ -472,7 +479,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
          * the parameter list.
          */
         public Config(@NonNull Config root, @NonNull String api, @NonNull String name) {
-            this(root.maxEntries(), root.module(), api, name);
+            this(root.mArgs.api(api), name);
         }
 
         /**
@@ -480,7 +487,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
          * the parameter list.
          */
         public Config(@NonNull Config root, @NonNull String api) {
-            this(root.maxEntries(), root.module(), api, api);
+            this(root.mArgs.api(api), api);
         }
 
         /**
@@ -489,26 +496,23 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
          * current process.
          */
         public Config child(@NonNull String name) {
-            final Config result = new Config(this, api(), name);
+            final Config result = new Config(mArgs, name);
             registerChild(name);
             return result;
         }
 
-        public final int maxEntries() {
-            return mMaxEntries;
+        /**
+         * Set the cacheNull behavior.
+         */
+        public Config cacheNulls(boolean enable) {
+            return new Config(mArgs.cacheNulls(enable), mName);
         }
 
-        @IpcDataCacheModule
-        public final @NonNull String module() {
-            return mModule;
-        }
-
-        public final @NonNull String api() {
-            return mApi;
-        }
-
-        public final @NonNull String name() {
-            return mName;
+        /**
+         * Set the isolateUidss behavior.
+         */
+        public Config isolateUids(boolean enable) {
+            return new Config(mArgs.isolateUids(enable), mName);
         }
 
         /**
@@ -531,7 +535,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
          * Invalidate all caches that share this Config's module and api.
          */
         public void invalidateCache() {
-            IpcDataCache.invalidateCache(mModule, mApi);
+            IpcDataCache.invalidateCache(mArgs);
         }
 
         /**
@@ -563,7 +567,7 @@ public class IpcDataCache<Query, Result> extends PropertyInvalidatedCache<Query,
      * @hide
      */
     public IpcDataCache(@NonNull Config config, @NonNull QueryHandler<Query, Result> computer) {
-        super(config.maxEntries(), config.module(), config.api(), config.name(), computer);
+        super(config.mArgs, config.mName, computer);
     }
 
     /**

@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.composable
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +30,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,13 +63,25 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @Composable
 fun AlternateBouncer(
     alternateBouncerDependencies: AlternateBouncerDependencies,
+    onHideAnimationFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
     val isVisible by
-        alternateBouncerDependencies.viewModel.isVisible.collectAsStateWithLifecycle(
-            initialValue = false
-        )
+        alternateBouncerDependencies.viewModel.isVisible.collectAsStateWithLifecycle(true)
+    val visibleState = remember { MutableTransitionState(isVisible) }
+
+    // Feeds the isVisible value to the MutableTransitionState used by AnimatedVisibility below.
+    LaunchedEffect(isVisible) { visibleState.targetState = isVisible }
+
+    // Watches the MutableTransitionState and calls onHideAnimationFinished when the fade out
+    // animation is finished. This way the window view is removed from the view hierarchy only after
+    // the fade out animation is complete.
+    LaunchedEffect(visibleState.currentState, visibleState.isIdle) {
+        if (!visibleState.currentState && visibleState.isIdle) {
+            onHideAnimationFinished()
+        }
+    }
 
     val udfpsIconLocation by
         alternateBouncerDependencies.udfpsIconViewModel.iconLocation.collectAsStateWithLifecycle(
@@ -74,7 +89,7 @@ fun AlternateBouncer(
         )
 
     AnimatedVisibility(
-        visible = isVisible,
+        visibleState = visibleState,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = modifier,

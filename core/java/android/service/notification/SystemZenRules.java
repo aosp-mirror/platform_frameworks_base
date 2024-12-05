@@ -122,17 +122,16 @@ public final class SystemZenRules {
     @Nullable
     public static String getTriggerDescriptionForScheduleTime(Context context,
             @NonNull ScheduleInfo schedule) {
-        final StringBuilder sb = new StringBuilder();
         String daysSummary = getDaysOfWeekShort(context, schedule);
         if (daysSummary == null) {
             // no use outputting times without dates
             return null;
         }
-        sb.append(daysSummary);
-        sb.append(context.getString(R.string.zen_mode_trigger_summary_divider_text));
-        sb.append(getTimeSummary(context, schedule));
-
-        return sb.toString();
+        return context.getString(
+                R.string.zen_mode_trigger_summary_combined,
+                daysSummary,
+                getTimeSummary(context, schedule)
+        );
     }
 
     /**

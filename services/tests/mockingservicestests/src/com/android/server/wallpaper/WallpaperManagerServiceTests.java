@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
@@ -535,7 +536,8 @@ public class WallpaperManagerServiceTests {
         doReturn(wallpaper).when(mService).getWallpaperSafeLocked(wallpaper.userId, FLAG_SYSTEM);
         doNothing().when(mService).switchWallpaper(any(), any());
         doReturn(true).when(mService)
-                .bindWallpaperComponentLocked(any(), anyBoolean(), anyBoolean(), any(), any());
+                .bindWallpaperComponentLocked(isA(ComponentName.class), anyBoolean(), anyBoolean(),
+                        any(), any());
         doNothing().when(mService).saveSettingsLocked(wallpaper.userId);
         spyOn(mService.mWallpaperCropper);
         doNothing().when(mService.mWallpaperCropper).generateCrop(wallpaper);

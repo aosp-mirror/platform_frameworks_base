@@ -30,6 +30,7 @@ per-file com_android_server_vibrator_* = file:/services/core/java/com/android/se
 per-file com_android_server_am_CachedAppOptimizer.cpp = file:/PERFORMANCE_OWNERS
 per-file com_android_server_am_Freezer.cpp = file:/PERFORMANCE_OWNERS
 per-file com_android_server_companion_virtual_InputController.cpp = file:/services/companion/java/com/android/server/companion/virtual/OWNERS
+per-file com_android_server_utils_LazyJniRegistrar.cpp = file:/PERFORMANCE_OWNERS
 
 # Memory
 per-file com_android_server_am_OomConnection.cpp = file:/MEMORY_OWNERS

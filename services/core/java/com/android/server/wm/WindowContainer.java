@@ -1117,7 +1117,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent != dc) {
-            mTransitionController.collect(this);
+            if (asWindowState() == null) {
+                mTransitionController.collect(this);
+            }
             // Cancel any change transition queued-up for this container on the old display when
             // this container is moved from the old display.
             mDisplayContent.mClosingChangingContainers.remove(this);
@@ -1674,30 +1676,36 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param orientation the specified orientation. Needs to be one of {@link ScreenOrientation}.
      * @param requestingContainer the container which orientation request has changed. Mostly used
      *                            to ensure it gets correct configuration.
+     * @return the resolved override orientation of this window container.
      */
-    void setOrientation(@ScreenOrientation int orientation,
+    @ScreenOrientation
+    int setOrientation(@ScreenOrientation int orientation,
             @Nullable WindowContainer requestingContainer) {
         if (getOverrideOrientation() == orientation) {
-            return;
+            return orientation;
         }
-
         setOverrideOrientation(orientation);
         final WindowContainer parent = getParent();
-        if (parent != null) {
-            if (getConfiguration().orientation != getRequestedConfigurationOrientation()
-                    // Update configuration directly only if the change won't be dispatched from
-                    // ancestor. This prevents from computing intermediate configuration when the
-                    // parent also needs to be updated from the ancestor. E.g. the app requests
-                    // portrait but the task is still in landscape. While updating from display,
-                    // the task can be updated to portrait first so the configuration can be
-                    // computed in a consistent environment.
-                    && (inMultiWindowMode()
-                        || !handlesOrientationChangeFromDescendant(orientation))) {
-                // Resolve the requested orientation.
-                onConfigurationChanged(parent.getConfiguration());
-            }
-            onDescendantOrientationChanged(requestingContainer);
+        if (parent == null) {
+            return orientation;
         }
+        // The derived class can return a result that is different from the given orientation.
+        final int resolvedOrientation = getOverrideOrientation();
+        if (getConfiguration().orientation != getRequestedConfigurationOrientation(
+                false /* forDisplay */, resolvedOrientation)
+                // Update configuration directly only if the change won't be dispatched from
+                // ancestor. This prevents from computing intermediate configuration when the
+                // parent also needs to be updated from the ancestor. E.g. the app requests
+                // portrait but the task is still in landscape. While updating from display,
+                // the task can be updated to portrait first so the configuration can be
+                // computed in a consistent environment.
+                && (inMultiWindowMode()
+                        || !handlesOrientationChangeFromDescendant(orientation))) {
+            // Resolve the requested orientation.
+            onConfigurationChanged(parent.getConfiguration());
+        }
+        onDescendantOrientationChanged(requestingContainer);
+        return resolvedOrientation;
     }
 
     @ScreenOrientation
@@ -2119,7 +2127,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * For all tasks at or below this container call the callback.
+     * Calls the given {@param callback} for all tasks in depth-first top-down z-order at or below
+     * this container.
      *
      * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
      *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
@@ -3212,8 +3221,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final boolean isChanging = AppTransition.isChangeTransitOld(transit) && enter
                 && isChangingAppTransition();
 
-        // Delaying animation start isn't compatible with remote animations at all.
-        if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
+        if (controller != null) {
             // Here we load App XML in order to read com.android.R.styleable#Animation_showBackdrop.
             boolean showBackdrop = false;
             // Optionally set backdrop color if App explicitly provides it through
@@ -3636,20 +3644,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return getAnimatingContainer(PARENTS, ANIMATION_TYPE_ALL);
     }
 
-    /**
-     * @see SurfaceAnimator#startDelayingAnimationStart
-     */
-    void startDelayingAnimationStart() {
-        mSurfaceAnimator.startDelayingAnimationStart();
-    }
-
-    /**
-     * @see SurfaceAnimator#endDelayingAnimationStart
-     */
-    void endDelayingAnimationStart() {
-        mSurfaceAnimator.endDelayingAnimationStart();
-    }
-
     @Override
     public int getSurfaceWidth() {
         return mSurfaceControl.getWidth();
@@ -3739,7 +3733,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 && !mTransitionController.useShellTransitionsRotation()) {
             if (deltaRotation != Surface.ROTATION_0) {
                 updateSurfaceRotation(t, deltaRotation, null /* positionLeash */);
-                getPendingTransaction().setFixedTransformHint(mSurfaceControl,
+                mDisplayContent.setFixedTransformHint(getPendingTransaction(), mSurfaceControl,
                         getWindowConfiguration().getDisplayRotation());
             } else if (deltaRotation != mLastDeltaRotation) {
                 t.setMatrix(mSurfaceControl, 1, 0, 0, 1);

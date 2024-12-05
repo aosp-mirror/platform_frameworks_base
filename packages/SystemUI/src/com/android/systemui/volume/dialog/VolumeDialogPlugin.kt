@@ -16,19 +16,31 @@
 
 package com.android.systemui.volume.dialog
 
+import android.content.Context
+import android.media.AudioManager
+import com.android.app.tracing.coroutines.coroutineScopeTraced
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.VolumeDialog
+import com.android.systemui.volume.SafetyWarningDialog
 import com.android.systemui.volume.dialog.dagger.VolumeDialogPluginComponent
+import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogPluginViewModel
 import javax.inject.Inject
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.suspendCancellableCoroutine
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class VolumeDialogPlugin
 @Inject
 constructor(
     @Application private val applicationCoroutineScope: CoroutineScope,
+    private val context: Context,
+    private val audioManager: AudioManager,
     private val volumeDialogPluginComponentFactory: VolumeDialogPluginComponent.Factory,
 ) : VolumeDialog {
 
@@ -38,17 +50,42 @@ constructor(
     override fun init(windowType: Int, callback: VolumeDialog.Callback?) {
         job =
             applicationCoroutineScope.launch {
-                coroutineScope {
+                coroutineScopeTraced("[Volume]plugin") {
                     pluginComponent =
                         volumeDialogPluginComponentFactory.create(this).also {
-                            it.viewModel().launchVolumeDialog()
+                            bindPlugin(it.viewModel())
                         }
                 }
             }
+    }
+
+    private fun CoroutineScope.bindPlugin(viewModel: VolumeDialogPluginViewModel) {
+        viewModel.launchVolumeDialog()
+
+        viewModel.isShowingSafetyWarning
+            .mapLatest { isShowingSafetyWarning ->
+                if (isShowingSafetyWarning) {
+                    showSafetyWarningVisibility { viewModel.onSafetyWarningDismissed() }
+                }
+            }
+            .launchIn(this)
     }
 
     override fun destroy() {
         job?.cancel()
         pluginComponent = null
     }
+
+    private suspend fun showSafetyWarningVisibility(onDismissed: () -> Unit) =
+        suspendCancellableCoroutine { continuation ->
+            val dialog =
+                object : SafetyWarningDialog(context, audioManager) {
+                    override fun cleanUp() {
+                        onDismissed()
+                        continuation.resume(Unit)
+                    }
+                }
+            dialog.show()
+            continuation.invokeOnCancellation { dialog.dismiss() }
+        }
 }

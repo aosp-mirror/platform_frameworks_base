@@ -16,13 +16,21 @@
 
 package android.os;
 
+import static android.app.Flags.FLAG_PIC_CACHE_NULLS;
+import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import android.app.PropertyInvalidatedCache;
+import android.app.PropertyInvalidatedCache.Args;
 import android.multiuser.Flags;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.os.IpcDataCache;
 
 import androidx.test.filters.SmallTest;
 
@@ -42,6 +50,10 @@ import org.junit.Test;
  */
 @SmallTest
 public class IpcDataCacheTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // Configuration for creating caches
     private static final String MODULE = IpcDataCache.MODULE_TEST;
@@ -287,7 +299,12 @@ public class IpcDataCacheTest {
         @Override
         public String apply(Integer qv) {
             mRecomputeCount += 1;
-            return "foo" + qv.toString();
+            // Special case for testing caches of nulls.  Integers in the range 30-40 return null.
+            if (qv >= 30 && qv < 40) {
+                return null;
+            } else {
+                return "foo" + qv.toString();
+            }
         }
 
         int getRecomputeCount() {
@@ -406,31 +423,16 @@ public class IpcDataCacheTest {
     }
 
     @Test
-    public void testConfig() {
+    public void testConfigDisable() {
+        // Create a set of caches based on a set of chained configs.
         IpcDataCache.Config a = new IpcDataCache.Config(8, MODULE, "apiA");
         TestCache ac = new TestCache(a);
-        assertEquals(8, a.maxEntries());
-        assertEquals(MODULE, a.module());
-        assertEquals("apiA", a.api());
-        assertEquals("apiA", a.name());
         IpcDataCache.Config b = new IpcDataCache.Config(a, "apiB");
         TestCache bc = new TestCache(b);
-        assertEquals(8, b.maxEntries());
-        assertEquals(MODULE, b.module());
-        assertEquals("apiB", b.api());
-        assertEquals("apiB", b.name());
         IpcDataCache.Config c = new IpcDataCache.Config(a, "apiC", "nameC");
         TestCache cc = new TestCache(c);
-        assertEquals(8, c.maxEntries());
-        assertEquals(MODULE, c.module());
-        assertEquals("apiC", c.api());
-        assertEquals("nameC", c.name());
         IpcDataCache.Config d = a.child("nameD");
         TestCache dc = new TestCache(d);
-        assertEquals(8, d.maxEntries());
-        assertEquals(MODULE, d.module());
-        assertEquals("apiA", d.api());
-        assertEquals("nameD", d.name());
 
         a.disableForCurrentProcess();
         assertEquals(ac.isDisabled(), true);
@@ -448,6 +450,7 @@ public class IpcDataCacheTest {
         TestCache ec = new TestCache(e);
         assertEquals(ec.isDisabled(), true);
     }
+
 
     // Verify that invalidating the cache from an app process would fail due to lack of permissions.
     @Test
@@ -506,5 +509,48 @@ public class IpcDataCacheTest {
 
         // Re-enable test mode (so that the cleanup for the test does not throw).
         IpcDataCache.setTestMode(true);
+    }
+
+    @RequiresFlagsEnabled(FLAG_PIC_CACHE_NULLS)
+    @Test
+    public void testCachingNulls() {
+        IpcDataCache.Config c =
+                new IpcDataCache.Config(4, IpcDataCache.MODULE_TEST, "testCachingNulls");
+        TestCache cache;
+        cache = new TestCache(c.cacheNulls(true));
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+
+        cache = new TestCache(c.cacheNulls(false));
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
+
+        // Verify that the default is not to cache nulls.
+        cache = new TestCache(c);
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
     }
 }

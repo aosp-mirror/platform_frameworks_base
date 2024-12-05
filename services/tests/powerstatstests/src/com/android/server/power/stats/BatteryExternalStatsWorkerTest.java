@@ -39,7 +39,6 @@ import android.hardware.power.stats.StateResidencyResult;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.connectivity.WifiActivityEnergyInfo;
-import android.platform.test.ravenwood.RavenwoodConfig;
 import android.power.PowerStatsInternal;
 import android.util.IntArray;
 import android.util.SparseArray;
@@ -66,9 +65,6 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("GuardedBy")
 @android.platform.test.annotations.DisabledOnRavenwood
 public class BatteryExternalStatsWorkerTest {
-    @RavenwoodConfig.Config
-    public final RavenwoodConfig mRavenwood = new RavenwoodConfig.Builder().build();
-
     private BatteryExternalStatsWorker mBatteryExternalStatsWorker;
     private TestPowerStatsInternal mPowerStatsInternal;
     private Handler mHandler;

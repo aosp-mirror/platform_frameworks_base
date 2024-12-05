@@ -31,4 +31,6 @@ data class ShortcutCategoryUi(
         iconSource: IconSource,
         shortcutCategory: ShortcutCategory,
     ) : this(label, iconSource, shortcutCategory.type, shortcutCategory.subCategories)
+
+    val containsCustomShortcuts: Boolean = subCategories.any { it.containsCustomShortcuts }
 }

@@ -224,13 +224,12 @@ class PowerStatsExporter {
         BatteryConsumer.Key key = getKeyForPartialTotal(batteryUsageStatsBuilder, deviceScope,
                 powerComponentId, screenState, powerState);
         if (key != null) {
-            deviceScope.addConsumedPower(key, totalPower[0],
-                    BatteryConsumer.POWER_MODEL_UNDEFINED);
+            deviceScope.addConsumedPower(key, totalPower[0]);
             deviceScope.addUsageDurationMillis(key, durationMs[0]);
         }
         key = deviceScope.getKey(powerComponentId, BatteryConsumer.PROCESS_STATE_UNSPECIFIED);
         if (key != null) {
-            deviceScope.addConsumedPower(key, totalPower[0], BatteryConsumer.POWER_MODEL_UNDEFINED);
+            deviceScope.addConsumedPower(key, totalPower[0]);
             deviceScope.addUsageDurationMillis(key, durationMs[0]);
         }
     }
@@ -373,7 +372,7 @@ class PowerStatsExporter {
                 BatteryConsumer.Key key = builder.getKey(powerComponentId, procState,
                         resultScreenState, resultPowerState);
                 if (key != null) {
-                    builder.addConsumedPower(key, power, BatteryConsumer.POWER_MODEL_UNDEFINED);
+                    builder.addConsumedPower(key, power);
                     builder.addUsageDurationMillis(key, duration);
                 }
             }
@@ -384,8 +383,7 @@ class PowerStatsExporter {
                         BatteryConsumer.PROCESS_STATE_UNSPECIFIED);
                 if (key != null) {
                     builder.addConsumedPower(key,
-                            powerByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED],
-                            BatteryConsumer.POWER_MODEL_UNDEFINED);
+                            powerByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED]);
                     builder.addUsageDurationMillis(key,
                             durationByProcState[BatteryConsumer.PROCESS_STATE_UNSPECIFIED]);
                 }
@@ -399,11 +397,9 @@ class PowerStatsExporter {
         BatteryConsumer.Key key = getKeyForPartialTotal(batteryUsageStatsBuilder, allAppsScope,
                 powerComponentId, screenState, powerState);
         if (key != null) {
-            allAppsScope.addConsumedPower(key, powerAllApps,
-                    BatteryConsumer.POWER_MODEL_UNDEFINED);
+            allAppsScope.addConsumedPower(key, powerAllApps);
         }
-        allAppsScope.addConsumedPower(powerComponentId, powerAllApps,
-                BatteryConsumer.POWER_MODEL_UNDEFINED);
+        allAppsScope.addConsumedPower(powerComponentId, powerAllApps);
     }
 
     @Nullable

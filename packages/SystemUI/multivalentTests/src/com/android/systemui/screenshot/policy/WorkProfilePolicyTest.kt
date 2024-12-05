@@ -135,7 +135,7 @@ class WorkProfilePolicyTest {
                 PolicyResult.Matched(
                     policy = WorkProfilePolicy.NAME,
                     reason = WORK_TASK_IS_TOP,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = IsolatedTask(taskId = 1002, taskBounds = FULL_SCREEN),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
@@ -162,7 +162,7 @@ class WorkProfilePolicyTest {
                 PolicyResult.Matched(
                     policy = WorkProfilePolicy.NAME,
                     reason = WORK_TASK_IS_TOP,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = IsolatedTask(taskId = 1002, taskBounds = FULL_SCREEN.splitTop(20)),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
@@ -200,7 +200,7 @@ class WorkProfilePolicyTest {
                 PolicyResult.Matched(
                     policy = WorkProfilePolicy.NAME,
                     reason = WORK_TASK_IS_TOP,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = IsolatedTask(taskId = 1003, taskBounds = FULL_SCREEN),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),
@@ -226,7 +226,7 @@ class WorkProfilePolicyTest {
                 PolicyResult.Matched(
                     policy = WorkProfilePolicy.NAME,
                     reason = WORK_TASK_IS_TOP,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = IsolatedTask(taskId = 1003, taskBounds = FREE_FORM),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(WORK),

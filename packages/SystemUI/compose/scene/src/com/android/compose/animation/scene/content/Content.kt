@@ -16,13 +16,14 @@
 
 package com.android.compose.animation.scene.content
 
-import androidx.compose.foundation.gestures.Orientation
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.approachLayout
@@ -41,7 +42,9 @@ import com.android.compose.animation.scene.MovableElement
 import com.android.compose.animation.scene.MovableElementContentScope
 import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
+import com.android.compose.animation.scene.SceneTransitionLayoutForTesting
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.SceneTransitionLayoutScope
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.SharedValueType
 import com.android.compose.animation.scene.UserAction
@@ -72,6 +75,7 @@ internal sealed class Content(
     var targetSize by mutableStateOf(IntSize.Zero)
     var userActions by mutableStateOf(actions)
 
+    @SuppressLint("NotConstructor")
     @Composable
     fun Content(modifier: Modifier = Modifier) {
         Box(
@@ -151,8 +155,7 @@ internal class ContentScopeImpl(
         isExternalOverscrollGesture: () -> Boolean,
     ): Modifier {
         return nestedScrollToScene(
-            layoutImpl = layoutImpl,
-            orientation = Orientation.Horizontal,
+            draggableHandler = layoutImpl.horizontalDraggableHandler,
             topOrLeftBehavior = leftBehavior,
             bottomOrRightBehavior = rightBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
@@ -165,8 +168,7 @@ internal class ContentScopeImpl(
         isExternalOverscrollGesture: () -> Boolean,
     ): Modifier {
         return nestedScrollToScene(
-            layoutImpl = layoutImpl,
-            orientation = Orientation.Vertical,
+            draggableHandler = layoutImpl.verticalDraggableHandler,
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
             isExternalOverscrollGesture = isExternalOverscrollGesture,
@@ -175,5 +177,25 @@ internal class ContentScopeImpl(
 
     override fun Modifier.noResizeDuringTransitions(): Modifier {
         return noResizeDuringTransitions(layoutState = layoutImpl.state)
+    }
+
+    @Composable
+    override fun NestedSceneTransitionLayout(
+        state: SceneTransitionLayoutState,
+        modifier: Modifier,
+        builder: SceneTransitionLayoutScope.() -> Unit,
+    ) {
+        SceneTransitionLayoutForTesting(
+            state,
+            modifier,
+            onLayoutImpl = null,
+            builder = builder,
+            sharedElementMap = layoutImpl.elements,
+            ancestorContentKeys =
+                remember(layoutImpl.ancestorContentKeys, contentKey) {
+                    layoutImpl.ancestorContentKeys + contentKey
+                },
+            lookaheadScope = layoutImpl.lookaheadScope,
+        )
     }
 }

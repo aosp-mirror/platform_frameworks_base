@@ -55,7 +55,6 @@ class DefaultClockController(
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
     private val settings: ClockSettings?,
-    private val hasStepClockAnimation: Boolean = false,
     private val migratedClocks: Boolean = false,
     messageBuffers: ClockMessageBuffers? = null,
 ) : ClockController {
@@ -107,10 +106,8 @@ class DefaultClockController(
         largeClock.animations = LargeClockAnimations(largeClock.view, dozeFraction, foldFraction)
         smallClock.animations = DefaultClockAnimations(smallClock.view, dozeFraction, foldFraction)
 
-        val theme = ThemeConfig(isDarkTheme, settings?.seedColor)
-        largeClock.events.onThemeChanged(theme)
-        smallClock.events.onThemeChanged(theme)
-
+        largeClock.events.onThemeChanged(largeClock.theme.copy(isDarkTheme = isDarkTheme))
+        smallClock.events.onThemeChanged(smallClock.theme.copy(isDarkTheme = isDarkTheme))
         events.onTimeZoneChanged(TimeZone.getDefault())
 
         smallClock.events.onTimeTick()
@@ -197,12 +194,11 @@ class DefaultClockController(
                 views[0].id =
                     resources.getIdentifier("lockscreen_clock_view_large", "id", ctx.packageName)
             }
-        override val config =
-            ClockFaceConfig(hasCustomPositionUpdatedAnimation = hasStepClockAnimation)
+        override val config = ClockFaceConfig(hasCustomPositionUpdatedAnimation = true)
 
         init {
             view.migratedClocks = migratedClocks
-            view.hasCustomPositionUpdatedAnimation = hasStepClockAnimation
+            view.hasCustomPositionUpdatedAnimation = true
             animations = LargeClockAnimations(view, 0f, 0f)
         }
 

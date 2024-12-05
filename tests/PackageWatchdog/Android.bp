@@ -35,7 +35,13 @@ android_test {
         "services.core",
         "services.net",
         "truth",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": [
+            "service-crashrecovery-pre-jarjar",
+            "framework-crashrecovery.impl",
+        ],
+        default: [],
+    }),
     libs: ["android.test.runner.stubs.system"],
     jni_libs: [
         // mockito-target-extended dependencies

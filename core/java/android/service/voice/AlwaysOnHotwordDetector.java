@@ -1164,7 +1164,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     public boolean startRecognition(@RecognitionFlags int recognitionFlags) {
         if (DBG) Slog.d(TAG, "startRecognition(" + recognitionFlags + ")");
         synchronized (mLock) {
-            return startRecognitionLocked(recognitionFlags, null /* data */) == STATUS_OK;
+            return startRecognitionLocked(recognitionFlags, /* data= */new byte[0]) == STATUS_OK;
         }
     }
 
@@ -1496,8 +1496,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     }
 
     @GuardedBy("mLock")
-    private int startRecognitionLocked(int recognitionFlags,
-            @Nullable byte[] data) {
+    @SuppressWarnings("FlaggedApi") // RecognitionConfig.Builder is available internally.
+    private int startRecognitionLocked(int recognitionFlags, @NonNull byte[] data) {
         if (DBG) {
             Slog.d(TAG, "startRecognition("
                     + recognitionFlags
@@ -1541,7 +1541,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 mInternalCallback,
                 new RecognitionConfig.Builder()
                     .setCaptureRequested(captureTriggerAudio)
-                    .setAllowMultipleTriggers(allowMultipleTriggers)
+                    .setMultipleTriggersAllowed(allowMultipleTriggers)
                     .setKeyphrases(recognitionExtra)
                     .setData(data)
                     .setAudioCapabilities(audioCapabilities)

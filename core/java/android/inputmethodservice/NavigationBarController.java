@@ -41,6 +41,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
@@ -178,6 +179,9 @@ final class NavigationBarController {
 
         private boolean mDrawLegacyNavigationBarBackground;
 
+        /** Whether a custom IME Switcher button should be visible. */
+        private boolean mCustomImeSwitcherVisible;
+
         private final Rect mTempRect = new Rect();
         private final int[] mTempPos = new int[2];
 
@@ -265,6 +269,7 @@ final class NavigationBarController {
                     // IME navigation bar.
                     boolean visible = insets.isVisible(captionBar());
                     mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
+                    checkCustomImeSwitcherVisibility();
                 }
                 return view.onApplyWindowInsets(insets);
             });
@@ -491,6 +496,8 @@ final class NavigationBarController {
                     mShouldShowImeSwitcherWhenImeIsShown;
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
 
+            checkCustomImeSwitcherVisibility();
+
             mService.mWindow.getWindow().getDecorView().getWindowInsetsController()
                     .setImeCaptionBarInsetsHeight(getImeCaptionBarHeight(imeDrawsImeNavBar));
 
@@ -616,12 +623,33 @@ final class NavigationBarController {
                     && mNavigationBarFrame.getVisibility() == View.VISIBLE;
         }
 
+        /**
+         * Checks if a custom IME Switcher button should be visible, and notifies the IME when this
+         * state changes. This can only be {@code true} if three conditions are met:
+         *
+         * <li>The IME should draw the IME navigation bar.</li>
+         * <li>The IME Switcher button should be visible when the IME is visible.</li>
+         * <li>The IME navigation bar should be visible, but was requested hidden by the IME.</li>
+         */
+        private void checkCustomImeSwitcherVisibility() {
+            if (!Flags.imeSwitcherRevampApi()) {
+                return;
+            }
+            final boolean visible = mImeDrawsImeNavBar && mShouldShowImeSwitcherWhenImeIsShown
+                    && mNavigationBarFrame != null && !isShown();
+            if (visible != mCustomImeSwitcherVisible) {
+                mCustomImeSwitcherVisible = visible;
+                mService.onCustomImeSwitcherButtonRequestedVisible(mCustomImeSwitcherVisible);
+            }
+        }
+
         @Override
         public String toDebugString() {
             return "{mImeDrawsImeNavBar=" + mImeDrawsImeNavBar
                     + " mNavigationBarFrame=" + mNavigationBarFrame
                     + " mShouldShowImeSwitcherWhenImeIsShown="
                     + mShouldShowImeSwitcherWhenImeIsShown
+                    + " mCustomImeSwitcherVisible="  + mCustomImeSwitcherVisible
                     + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + " mDarkIntensity=" + mDarkIntensity
                     + " mDrawLegacyNavigationBarBackground=" + mDrawLegacyNavigationBarBackground

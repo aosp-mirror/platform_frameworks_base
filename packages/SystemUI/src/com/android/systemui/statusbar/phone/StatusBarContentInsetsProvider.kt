@@ -174,6 +174,14 @@ constructor(
     private val dumpableName = TAG + nameSuffix
     private val commandName = StatusBarInsetsCommand.NAME + nameSuffix
 
+    init {
+        if (!StatusBarConnectedDisplays.isEnabled) {
+            // Call start(), since it is not called when the flag is disabled, to keep the old
+            // behavior as it was.
+            start()
+        }
+    }
+
     override fun start() {
         configurationController.addCallback(this)
         dumpManager.registerDumpable(dumpableName, this)

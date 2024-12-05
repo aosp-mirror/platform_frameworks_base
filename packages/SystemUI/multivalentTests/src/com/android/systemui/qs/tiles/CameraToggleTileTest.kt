@@ -23,7 +23,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -31,8 +30,11 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLoggerFake
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.google.common.truth.Truth.assertThat
@@ -41,8 +43,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -54,24 +56,15 @@ class CameraToggleTileTest : SysuiTestCase() {
         const val CAMERA_TOGGLE_DISABLED: Boolean = true
     }
 
-    @Mock
-    private lateinit var host: QSHost
-    @Mock
-    private lateinit var metricsLogger: MetricsLogger
-    @Mock
-    private lateinit var statusBarStateController: StatusBarStateController
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var qsLogger: QSLogger
-    @Mock
-    private lateinit var privacyController: IndividualSensorPrivacyController
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
-    @Mock
-    private lateinit var uiEventLogger: QsEventLoggerFake
-    @Mock
-    private lateinit var safetyCenterManager: SafetyCenterManager
+    @Mock private lateinit var host: QSHost
+    @Mock private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var privacyController: IndividualSensorPrivacyController
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var uiEventLogger: QsEventLoggerFake
+    @Mock private lateinit var safetyCenterManager: SafetyCenterManager
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: CameraToggleTile
@@ -82,7 +75,8 @@ class CameraToggleTileTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         whenever(host.context).thenReturn(mContext)
 
-        tile = CameraToggleTile(
+        tile =
+            CameraToggleTile(
                 host,
                 uiEventLogger,
                 testableLooper.looper,
@@ -94,7 +88,8 @@ class CameraToggleTileTest : SysuiTestCase() {
                 qsLogger,
                 privacyController,
                 keyguardStateController,
-                safetyCenterManager)
+                safetyCenterManager,
+            )
     }
 
     @After
@@ -109,8 +104,7 @@ class CameraToggleTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, CAMERA_TOGGLE_ENABLED)
 
-        assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_camera_access_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_camera_access_icon_on))
     }
 
     @Test
@@ -119,14 +113,14 @@ class CameraToggleTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, CAMERA_TOGGLE_DISABLED)
 
-        assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_camera_access_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_camera_access_icon_off))
     }
 
     @Test
     fun testLongClickIntent_safetyCenterEnabled() {
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(true)
-        val cameraTile = CameraToggleTile(
+        val cameraTile =
+            CameraToggleTile(
                 host,
                 uiEventLogger,
                 testableLooper.looper,
@@ -138,7 +132,8 @@ class CameraToggleTileTest : SysuiTestCase() {
                 qsLogger,
                 privacyController,
                 keyguardStateController,
-                safetyCenterManager)
+                safetyCenterManager,
+            )
         assertThat(cameraTile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_CONTROLS)
         cameraTile.destroy()
         testableLooper.processAllMessages()
@@ -147,7 +142,8 @@ class CameraToggleTileTest : SysuiTestCase() {
     @Test
     fun testLongClickIntent_safetyCenterDisabled() {
         whenever(safetyCenterManager.isSafetyCenterEnabled).thenReturn(false)
-        val cameraTile = CameraToggleTile(
+        val cameraTile =
+            CameraToggleTile(
                 host,
                 uiEventLogger,
                 testableLooper.looper,
@@ -159,9 +155,18 @@ class CameraToggleTileTest : SysuiTestCase() {
                 qsLogger,
                 privacyController,
                 keyguardStateController,
-                safetyCenterManager)
+                safetyCenterManager,
+            )
         assertThat(tile.longClickIntent?.action).isEqualTo(Settings.ACTION_PRIVACY_SETTINGS)
         cameraTile.destroy()
         testableLooper.processAllMessages()
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }

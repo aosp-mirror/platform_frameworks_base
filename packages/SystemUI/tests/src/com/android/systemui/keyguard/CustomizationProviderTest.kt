@@ -273,6 +273,12 @@ class CustomizationProviderTest : SysuiTestCase() {
                     "${Contract.AUTHORITY}." +
                     Contract.FlagsTable.TABLE_NAME
             )
+        assertThat(underTest.getType(Contract.RuntimeValuesTable.URI))
+            .isEqualTo(
+                "vnd.android.cursor.dir/vnd." +
+                    "${Contract.AUTHORITY}." +
+                    Contract.RuntimeValuesTable.TABLE_NAME
+            )
     }
 
     @Test

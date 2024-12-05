@@ -125,18 +125,18 @@
     <string name="select_text" msgid="5139083974039906583">"Seleccionar"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Captura de pantalla"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Abrir no navegador"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Abrir na aplicación"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Ventá nova"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Xestionar as ventás"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Cambiar a proporción"</string>
     <string name="close_text" msgid="4986518933445178928">"Pechar"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Pechar o menú"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Abrir o menú"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maximizar pantalla"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Encaixar pantalla"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Cambiar tamaño"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Non se pode mover aquí a aplicación"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_button_text (559492223133829481) -->
-    <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_restore_button_text (4900114367354709257) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Envolvente"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Restaurar"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maximizar"</string>
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Restaurar"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Axustar á esquerda"</string>
@@ -146,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"Na aplicación"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"No navegador"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"Aceptar"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Abre rapidamente aplicacións no navegador aquí"</string>
 </resources>

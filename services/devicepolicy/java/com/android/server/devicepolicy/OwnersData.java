@@ -93,6 +93,11 @@ class OwnersData {
     private static final String ATTR_SUSPENDED_PACKAGES_MIGRATED = "suspendedPackagesMigrated";
     private static final String ATTR_RESET_PASSWORD_WITH_TOKEN_MIGRATED =
             "resetPasswordWithTokenMigrated";
+    private static final String ATTR_MEMORY_TAGGING_MIGRATED =
+            "memoryTaggingMigrated";
+    private static final String ATTR_SET_KEYGUARD_DISABLED_FEATURES_MIGRATED =
+            "setKeyguardDisabledFeaturesMigrated";
+
     private static final String ATTR_MIGRATED_POST_UPGRADE = "migratedPostUpgrade";
 
     // Internal state for the device owner package.
@@ -125,6 +130,8 @@ class OwnersData {
     boolean mRequiredPasswordComplexityMigrated = false;
     boolean mSuspendedPackagesMigrated = false;
     boolean mResetPasswordWithTokenMigrated = false;
+    boolean mMemoryTaggingMigrated = false;
+    boolean mSetKeyguardDisabledFeaturesMigrated = false;
 
     boolean mPoliciesMigratedPostUpdate = false;
 
@@ -416,6 +423,8 @@ class OwnersData {
             if (Flags.unmanagedModeMigration()) {
                 out.attributeBoolean(null, ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED,
                         mRequiredPasswordComplexityMigrated);
+            }
+            if (Flags.suspendPackagesCoexistence()) {
                 out.attributeBoolean(null, ATTR_SUSPENDED_PACKAGES_MIGRATED,
                         mSuspendedPackagesMigrated);
 
@@ -423,6 +432,14 @@ class OwnersData {
             if (Flags.resetPasswordWithTokenCoexistence()) {
                 out.attributeBoolean(null, ATTR_RESET_PASSWORD_WITH_TOKEN_MIGRATED,
                         mResetPasswordWithTokenMigrated);
+            }
+            if (Flags.setMtePolicyCoexistence()) {
+                out.attributeBoolean(null, ATTR_MEMORY_TAGGING_MIGRATED,
+                        mMemoryTaggingMigrated);
+            }
+            if (Flags.setKeyguardDisabledFeaturesCoexistence()) {
+                out.attributeBoolean(null, ATTR_SET_KEYGUARD_DISABLED_FEATURES_MIGRATED,
+                        mSetKeyguardDisabledFeaturesMigrated);
             }
             out.endTag(null, TAG_POLICY_ENGINE_MIGRATION);
 
@@ -491,13 +508,19 @@ class OwnersData {
                     mRequiredPasswordComplexityMigrated = Flags.unmanagedModeMigration()
                             && parser.getAttributeBoolean(null,
                                     ATTR_REQUIRED_PASSWORD_COMPLEXITY_MIGRATED, false);
-                    mSuspendedPackagesMigrated = Flags.unmanagedModeMigration()
+                    mSuspendedPackagesMigrated = Flags.suspendPackagesCoexistence()
                             && parser.getAttributeBoolean(null,
                                     ATTR_SUSPENDED_PACKAGES_MIGRATED, false);
                     mResetPasswordWithTokenMigrated = Flags.resetPasswordWithTokenCoexistence()
                             && parser.getAttributeBoolean(null,
                             ATTR_RESET_PASSWORD_WITH_TOKEN_MIGRATED, false);
-
+                    mMemoryTaggingMigrated = Flags.setMtePolicyCoexistence()
+                            && parser.getAttributeBoolean(null,
+                            ATTR_MEMORY_TAGGING_MIGRATED, false);
+                    mSetKeyguardDisabledFeaturesMigrated =
+                            Flags.setKeyguardDisabledFeaturesCoexistence()
+                                    && parser.getAttributeBoolean(null,
+                                    ATTR_SET_KEYGUARD_DISABLED_FEATURES_MIGRATED, false);
                     break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);

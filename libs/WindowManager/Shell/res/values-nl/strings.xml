@@ -84,7 +84,7 @@
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Recente bubbels en gesloten bubbels zie je hier"</string>
     <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chatten met bubbels"</string>
     <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Nieuwe gesprekken verschijnen als iconen in een benedenhoek van je scherm. Tik om ze uit te vouwen of sleep om ze te sluiten."</string>
-    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Bubbels beheren wanneer je wilt"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Bubbels beheren"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Tik hier om te beheren welke apps en gesprekken als bubbel kunnen worden getoond"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubbel"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Beheren"</string>
@@ -125,18 +125,18 @@
     <string name="select_text" msgid="5139083974039906583">"Selecteren"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Openen in browser"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Openen in app"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nieuw venster"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Vensters beheren"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Beeldverhouding wijzigen"</string>
     <string name="close_text" msgid="4986518933445178928">"Sluiten"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Menu sluiten"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Menu openen"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Scherm maximaliseren"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Scherm halveren"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Formaat aanpassen"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Kan de app niet hierheen verplaatsen"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_button_text (559492223133829481) -->
-    <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_restore_button_text (4900114367354709257) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Immersief"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Herstellen"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maximaliseren"</string>
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Herstellen"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Links uitlijnen"</string>
@@ -146,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"In de app"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"In je browser"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"OK"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Open hier snel apps in je browser"</string>
 </resources>

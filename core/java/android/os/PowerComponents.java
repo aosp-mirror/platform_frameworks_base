@@ -15,7 +15,6 @@
  */
 package android.os;
 
-import static android.os.BatteryConsumer.BatteryConsumerDataLayout.POWER_MODEL_NOT_INCLUDED;
 import static android.os.BatteryConsumer.POWER_COMPONENT_ANY;
 import static android.os.BatteryConsumer.POWER_COMPONENT_BASE;
 import static android.os.BatteryConsumer.POWER_STATE_ANY;
@@ -154,15 +153,6 @@ class PowerComponents {
 
     public String getCustomPowerComponentName(int componentId) {
         return mData.layout.getPowerComponentName(componentId);
-    }
-
-    @BatteryConsumer.PowerModel
-    int getPowerModel(BatteryConsumer.Key key) {
-        if (key.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
-            throw new IllegalStateException(
-                    "Power model IDs were not requested in the BatteryUsageStatsQuery");
-        }
-        return mData.getInt(key.mPowerModelColumnIndex);
     }
 
     /**
@@ -378,10 +368,6 @@ class PowerComponents {
             if (durationMs != 0) {
                 serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_DURATION, durationMs);
             }
-            if (mData.layout.powerModelsIncluded) {
-                serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_MODEL,
-                        getPowerModel(key));
-            }
             serializer.endTag(null, BatteryUsageStats.XML_TAG_COMPONENT);
         }
         serializer.endTag(null, BatteryUsageStats.XML_TAG_POWER_COMPONENTS);
@@ -411,7 +397,6 @@ class PowerComponents {
                         int powerState = POWER_STATE_UNSPECIFIED;
                         double powerMah = 0;
                         long durationMs = 0;
-                        int model = BatteryConsumer.POWER_MODEL_UNDEFINED;
                         for (int i = 0; i < parser.getAttributeCount(); i++) {
                             switch (parser.getAttributeName(i)) {
                                 case BatteryUsageStats.XML_ATTR_ID:
@@ -432,15 +417,12 @@ class PowerComponents {
                                 case BatteryUsageStats.XML_ATTR_DURATION:
                                     durationMs = parser.getAttributeLong(i);
                                     break;
-                                case BatteryUsageStats.XML_ATTR_MODEL:
-                                    model = parser.getAttributeInt(i);
-                                    break;
                             }
                         }
                         final BatteryConsumer.Key key = builder.mData.layout.getKey(componentId,
                                 processState, screenState, powerState);
-                        builder.setConsumedPower(key, powerMah, model);
-                        builder.setUsageDurationMillis(key, durationMs);
+                        builder.addConsumedPower(key, powerMah);
+                        builder.addUsageDurationMillis(key, durationMs);
                         break;
                     }
                 }
@@ -453,42 +435,35 @@ class PowerComponents {
      * Builder for PowerComponents.
      */
     static final class Builder {
-        private static final byte POWER_MODEL_UNINITIALIZED = -1;
-
         private final BatteryConsumer.BatteryConsumerData mData;
         private final double mMinConsumedPowerThreshold;
 
         Builder(BatteryConsumer.BatteryConsumerData data, double minConsumedPowerThreshold) {
             mData = data;
             mMinConsumedPowerThreshold = minConsumedPowerThreshold;
-            for (BatteryConsumer.Key key : mData.layout.keys) {
-                if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
-                    mData.putInt(key.mPowerModelColumnIndex, POWER_MODEL_UNINITIALIZED);
-                }
-            }
         }
 
+        /**
+         * @deprecated use {@link #addConsumedPower(BatteryConsumer.Key, double)}
+         */
+        @Deprecated
         @NonNull
-        public Builder setConsumedPower(BatteryConsumer.Key key, double componentPower,
-                int powerModel) {
+        public Builder setConsumedPower(BatteryConsumer.Key key, double componentPower) {
             mData.putDouble(key.mPowerColumnIndex, componentPower);
-            if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
-                mData.putInt(key.mPowerModelColumnIndex, powerModel);
-            }
             return this;
         }
 
         @NonNull
-        public Builder addConsumedPower(BatteryConsumer.Key key, double componentPower,
-                int powerModel) {
+        public Builder addConsumedPower(BatteryConsumer.Key key, double componentPower) {
             mData.putDouble(key.mPowerColumnIndex,
                     mData.getDouble(key.mPowerColumnIndex) + componentPower);
-            if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
-                mData.putInt(key.mPowerModelColumnIndex, powerModel);
-            }
             return this;
         }
 
+        /**
+         * @deprecated use {@link #addUsageDurationMillis(BatteryConsumer.Key, long)}
+         */
+        @Deprecated
         @NonNull
         public Builder setUsageDurationMillis(BatteryConsumer.Key key,
                 long componentUsageDurationMillis) {
@@ -539,28 +514,6 @@ class PowerComponents {
                             mData.getLong(key.mDurationColumnIndex)
                                     + otherData.getLong(otherKey.mDurationColumnIndex));
                 }
-                if (key.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
-                    continue;
-                }
-
-                boolean undefined = false;
-                if (otherKey.mPowerModelColumnIndex == POWER_MODEL_NOT_INCLUDED) {
-                    undefined = true;
-                } else {
-                    final int powerModel = mData.getInt(key.mPowerModelColumnIndex);
-                    int otherPowerModel = otherData.getInt(otherKey.mPowerModelColumnIndex);
-                    if (powerModel == POWER_MODEL_UNINITIALIZED) {
-                        mData.putInt(key.mPowerModelColumnIndex, otherPowerModel);
-                    } else if (powerModel != otherPowerModel
-                            && otherPowerModel != POWER_MODEL_UNINITIALIZED) {
-                        undefined = true;
-                    }
-                }
-
-                if (undefined) {
-                    mData.putInt(key.mPowerModelColumnIndex,
-                            BatteryConsumer.POWER_MODEL_UNDEFINED);
-                }
             }
         }
 
@@ -586,13 +539,6 @@ class PowerComponents {
         @NonNull
         public PowerComponents build() {
             for (BatteryConsumer.Key key : mData.layout.keys) {
-                if (key.mPowerModelColumnIndex != POWER_MODEL_NOT_INCLUDED) {
-                    if (mData.getInt(key.mPowerModelColumnIndex) == POWER_MODEL_UNINITIALIZED) {
-                        mData.putInt(key.mPowerModelColumnIndex,
-                                BatteryConsumer.POWER_MODEL_UNDEFINED);
-                    }
-                }
-
                 if (mMinConsumedPowerThreshold != 0) {
                     if (mData.getDouble(key.mPowerColumnIndex) < mMinConsumedPowerThreshold) {
                         mData.putDouble(key.mPowerColumnIndex, 0);

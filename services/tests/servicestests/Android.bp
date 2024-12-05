@@ -96,7 +96,10 @@ android_test {
         "CtsVirtualDeviceCommonLib",
         "com_android_server_accessibility_flags_lib",
         "locksettings_flags_lib",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": ["service-crashrecovery-pre-jarjar"],
+        default: [],
+    }),
 
     libs: [
         "android.hardware.power-V1-java",
@@ -157,21 +160,49 @@ android_test {
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
 
-android_ravenwood_test {
-    name: "FrameworksServicesTestsRavenwood",
+java_defaults {
+    name: "FrameworksServicesTestsRavenwood-defaults",
     libs: [
         "android.test.mock.stubs.system",
     ],
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.test.rules",
-        "services.core",
         "flag-junit",
+    ],
+    auto_gen_config: true,
+}
+
+// Unit tests for UriGrantManager, running on ravenwood.
+// Note UriGrantManager does not support Ravenwood (yet). We're just running the original
+// unit tests as is on Ravenwood. So here, we use the original "services.core", because
+// "services.core.ravenwood" doesn't have the target code.
+// (Compare to FrameworksServicesTestsRavenwood_Compat, which does support Ravenwood.)
+android_ravenwood_test {
+    name: "FrameworksServicesTestsRavenwood_Uri",
+    defaults: ["FrameworksServicesTestsRavenwood-defaults"],
+    team: "trendy_team_ravenwood",
+    static_libs: [
+        "services.core",
     ],
     srcs: [
         "src/com/android/server/uri/**/*.java",
     ],
-    auto_gen_config: true,
+}
+
+// Unit tests for compat-framework.
+// Compat-framework does support Ravenwood, and it uses the ravenwood anottations,
+// so we link "services.core.ravenwood".
+android_ravenwood_test {
+    name: "FrameworksServicesTestsRavenwood_Compat",
+    defaults: ["FrameworksServicesTestsRavenwood-defaults"],
+    team: "trendy_team_ravenwood",
+    static_libs: [
+        "services.core.ravenwood",
+    ],
+    srcs: [
+        "src/com/android/server/compat/**/*.java",
+    ],
 }
 
 java_library {
@@ -863,16 +894,6 @@ test_module_config {
         "device-tests",
     ],
     include_filters: ["com.android.server.om"],
-}
-
-test_module_config {
-    name: "FrameworksServicesTests_server_accessibility",
-    base: "FrameworksServicesTests",
-    test_suites: [
-        "automotive-tests",
-        "device-tests",
-    ],
-    include_filters: ["com.android.server.accessibility"],
 }
 
 test_module_config {

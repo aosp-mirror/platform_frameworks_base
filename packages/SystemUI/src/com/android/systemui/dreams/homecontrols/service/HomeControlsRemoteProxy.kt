@@ -16,20 +16,16 @@
 
 package com.android.systemui.dreams.homecontrols.service
 
-import android.content.ComponentName
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dreams.homecontrols.shared.IHomeControlsRemoteProxy
-import com.android.systemui.dreams.homecontrols.shared.IOnControlsSettingsChangeListener
+import com.android.systemui.dreams.homecontrols.shared.controlsSettings
 import com.android.systemui.dreams.homecontrols.shared.model.HomeControlsComponentInfo
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.kotlin.FlowDumperImpl
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -45,30 +41,8 @@ constructor(
     @Assisted private val proxy: IHomeControlsRemoteProxy,
 ) : FlowDumperImpl(dumpManager) {
 
-    private companion object {
-        const val TAG = "HomeControlsRemoteProxy"
-    }
-
     val componentInfo: Flow<HomeControlsComponentInfo> =
-        conflatedCallbackFlow {
-                val listener =
-                    object : IOnControlsSettingsChangeListener.Stub() {
-                        override fun onControlsSettingsChanged(
-                            panelComponent: ComponentName?,
-                            allowTrivialControlsOnLockscreen: Boolean,
-                        ) {
-                            trySendWithFailureLogging(
-                                HomeControlsComponentInfo(
-                                    panelComponent,
-                                    allowTrivialControlsOnLockscreen,
-                                ),
-                                TAG,
-                            )
-                        }
-                    }
-                proxy.registerListenerForCurrentUser(listener)
-                awaitClose { proxy.unregisterListenerForCurrentUser(listener) }
-            }
+        proxy.controlsSettings
             .distinctUntilChanged()
             .stateIn(bgScope, SharingStarted.WhileSubscribed(), null)
             .dumpValue("componentInfo")

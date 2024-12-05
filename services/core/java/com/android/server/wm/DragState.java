@@ -528,7 +528,7 @@ class DragState {
             }
             // Only allow the extras to be dispatched to a global-intercepting drag target
             ClipData data = null;
-            if (interceptsGlobalDrag) {
+            if (interceptsGlobalDrag && mData != null) {
                 data = mData.copyForTransferWithActivityInfo();
                 PersistableBundle extras = data.getDescription().getExtras() != null
                         ? data.getDescription().getExtras()

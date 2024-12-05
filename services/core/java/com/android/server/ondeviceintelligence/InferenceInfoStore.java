@@ -20,8 +20,8 @@ import android.app.ondeviceintelligence.InferenceInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
-import android.util.Slog;
 import android.util.Base64;
+import android.util.Slog;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -36,12 +36,12 @@ public class InferenceInfoStore {
     public InferenceInfoStore(long maxAgeMs) {
         this.maxAgeMs = maxAgeMs;
         this.inferenceInfos = new TreeSet<>(
-                Comparator.comparingLong(InferenceInfo::getStartTimeMs));
+                Comparator.comparingLong(InferenceInfo::getStartTimeMillis));
     }
 
     public List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) {
         return inferenceInfos.stream().filter(
-                info -> info.getStartTimeMs() > startTimeEpochMillis).toList();
+                info -> info.getStartTimeMillis() > startTimeEpochMillis).toList();
     }
 
     public void addInferenceInfoFromBundle(PersistableBundle pb) {
@@ -85,7 +85,7 @@ public class InferenceInfoStore {
 
     private synchronized void add(com.android.server.ondeviceintelligence.nano.InferenceInfo info) {
         while (!inferenceInfos.isEmpty()
-                && System.currentTimeMillis() - inferenceInfos.first().getStartTimeMs()
+                && System.currentTimeMillis() - inferenceInfos.first().getStartTimeMillis()
                 > maxAgeMs) {
             inferenceInfos.pollFirst();
         }
@@ -94,8 +94,8 @@ public class InferenceInfoStore {
 
     private static InferenceInfo toInferenceInfo(
             com.android.server.ondeviceintelligence.nano.InferenceInfo info) {
-        return new InferenceInfo.Builder().setUid(info.uid).setStartTimeMs(
-                info.startTimeMs).setEndTimeMs(info.endTimeMs).setSuspendedTimeMs(
+        return new InferenceInfo.Builder(info.uid).setStartTimeMillis(
+                info.startTimeMs).setEndTimeMillis(info.endTimeMs).setSuspendedTimeMillis(
                 info.suspendedTimeMs).build();
     }
 }

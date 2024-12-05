@@ -25,6 +25,9 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class holds the Parcelable data of a {@link TaskFragmentContainer}.
  */
@@ -61,6 +64,12 @@ class ParcelableTaskFragmentContainerData implements Parcelable {
     @NonNull
     final Rect mLastRequestedBounds;
 
+    /**
+     * Individual associated activity tokens in different containers that should be finished on
+     * exit.
+     */
+    final List<IBinder> mActivitiesToFinishOnExit = new ArrayList<>();
+
     ParcelableTaskFragmentContainerData(@NonNull IBinder token, @Nullable String overlayTag,
             @Nullable IBinder associatedActivityToken) {
         mToken = token;
@@ -74,6 +83,7 @@ class ParcelableTaskFragmentContainerData implements Parcelable {
         mOverlayTag = in.readString();
         mAssociatedActivityToken = in.readStrongBinder();
         mLastRequestedBounds = in.readTypedObject(Rect.CREATOR);
+        in.readBinderList(mActivitiesToFinishOnExit);
     }
 
     public static final Creator<ParcelableTaskFragmentContainerData> CREATOR = new Creator<>() {
@@ -99,7 +109,7 @@ class ParcelableTaskFragmentContainerData implements Parcelable {
         dest.writeString(mOverlayTag);
         dest.writeStrongBinder(mAssociatedActivityToken);
         dest.writeTypedObject(mLastRequestedBounds, flags);
+        dest.writeBinderList(mActivitiesToFinishOnExit);
     }
-
 }
 

@@ -16,10 +16,16 @@
 
 package android.view;
 
+import static android.view.flags.Flags.scrollCaptureTargetZOrderFix;
+
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UiThread;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.util.IndentingPrintWriter;
@@ -113,7 +119,9 @@ public final class ScrollCaptureSearchResults {
 
     private void signalComplete() {
         mComplete = true;
-        mTargets.sort(PRIORITY_ORDER);
+        if (!scrollCaptureTargetZOrderFix()) {
+            mTargets.sort(PRIORITY_ORDER);
+        }
         if (mOnCompleteListener != null) {
             mOnCompleteListener.run();
             mOnCompleteListener = null;
@@ -125,14 +133,73 @@ public final class ScrollCaptureSearchResults {
         return new ArrayList<>(mTargets);
     }
 
+    private Rect getScrollBoundsInWindow(@Nullable ScrollCaptureTarget target) {
+        if (target == null || target.getScrollBounds() == null) {
+            return new Rect();
+        }
+        Rect windowRect = new Rect(target.getScrollBounds());
+        Point windowPosition = target.getPositionInWindow();
+        windowRect.offset(windowPosition.x, windowPosition.y);
+        return windowRect;
+    }
+
     /**
      * Get the top ranked result out of all completed requests.
      *
      * @return the top ranked result
      */
+    @Nullable
     public ScrollCaptureTarget getTopResult() {
-        ScrollCaptureTarget target = mTargets.isEmpty() ? null : mTargets.get(0);
-        return target != null && target.getScrollBounds() != null ? target : null;
+        if (!scrollCaptureTargetZOrderFix()) {
+            ScrollCaptureTarget target = mTargets.isEmpty() ? null : mTargets.get(0);
+            return target != null && target.getScrollBounds() != null ? target : null;
+        }
+        List<ScrollCaptureTarget> filtered = new ArrayList<>();
+
+        mTargets.removeIf(a -> nullOrEmpty(a.getScrollBounds()));
+
+        // Remove scroll targets obscured or covered by other scrolling views.
+        nextTarget:
+        for (int i = 0; i <  mTargets.size(); i++) {
+            ScrollCaptureTarget current = mTargets.get(i);
+
+            View currentView = current.getContainingView();
+
+            // Nested scroll containers:
+            // Check if the next view is a child of the current. If so, skip the current.
+            if (i + 1 < mTargets.size()) {
+                ScrollCaptureTarget next = mTargets.get(i + 1);
+                View nextView = next.getContainingView();
+                // Honor explicit include hint on parent as escape hatch (unless both have it)
+                if (isDescendant(currentView, nextView)
+                        && (!hasIncludeHint(currentView) || hasIncludeHint(nextView))) {
+                    continue;
+                }
+            }
+
+            // Check if any views will be drawn partially or fully over this one.
+            for (int j = i + 1; j < mTargets.size(); j++) {
+                ScrollCaptureTarget above = mTargets.get(j);
+                if (Rect.intersects(getScrollBoundsInWindow(current),
+                        getScrollBoundsInWindow(above))) {
+                    continue nextTarget;
+                }
+            }
+
+            filtered.add(current);
+        }
+
+        // natural order, false->true
+        Comparator<ScrollCaptureTarget> byIncludeHintPresence = comparing(
+                ScrollCaptureSearchResults::hasIncludeHint);
+
+        // natural order, smallest->largest area
+        Comparator<ScrollCaptureTarget> byArea = comparing(
+                target -> area(requireNonNullElse(target.getScrollBounds(), new Rect())));
+
+        // The top result is the last one (with include hint if present, then by largest area)
+        filtered.sort(byIncludeHintPresence.thenComparing(byArea));
+        return filtered.isEmpty() ? null : filtered.getLast();
     }
 
     private class SearchRequest implements Consumer<Rect> {
@@ -224,6 +291,10 @@ public final class ScrollCaptureSearchResults {
 
     private static boolean nullOrEmpty(Rect r) {
         return r == null || r.isEmpty();
+    }
+
+    private static boolean hasIncludeHint(ScrollCaptureTarget target) {
+        return hasIncludeHint(target.getContainingView());
     }
 
     private static boolean hasIncludeHint(View view) {

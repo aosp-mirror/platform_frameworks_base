@@ -307,6 +307,36 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     /**
+     * Record task snapshots before shutdown.
+     */
+    void prepareShutdown() {
+        if (!com.android.window.flags.Flags.recordTaskSnapshotsBeforeShutdown()) {
+            return;
+        }
+        // Make write items run in a batch.
+        mPersister.mSnapshotPersistQueue.setPaused(true);
+        mPersister.mSnapshotPersistQueue.prepareShutdown();
+        for (int i = 0; i < mService.mRoot.getChildCount(); i++) {
+            mService.mRoot.getChildAt(i).forAllLeafTasks(task -> {
+                if (task.isVisible() && !task.isActivityTypeHome()) {
+                    final TaskSnapshot snapshot = captureSnapshot(task);
+                    if (snapshot != null) {
+                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                    }
+                }
+            }, true /* traverseTopToBottom */);
+        }
+        mPersister.mSnapshotPersistQueue.setPaused(false);
+    }
+
+    void waitFlush(long timeout) {
+        if (!com.android.window.flags.Flags.recordTaskSnapshotsBeforeShutdown()) {
+            return;
+        }
+        mPersister.mSnapshotPersistQueue.waitFlush(timeout);
+    }
+
+    /**
      * Called when screen is being turned off.
      */
     void screenTurningOff(int displayId, ScreenOffListener listener) {

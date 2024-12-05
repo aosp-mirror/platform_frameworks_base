@@ -205,7 +205,8 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    FRAME_RATE_COMPATIBILITY_GTE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -214,6 +215,11 @@ public class Surface implements Parcelable {
      * system selects a frame rate other than what the app requested, the app will be able
      * to run at the system frame rate without requiring pull down. This value should be
      * used when displaying game content, UIs, and anything that isn't video.
+     *
+     * In Android version {@link Build.VERSION_CODES#BAKLAVA} and above, use
+     * {@link FRAME_RATE_COMPATIBILITY_DEFAULT} for game content.
+     * For other cases, see {@link FRAME_RATE_COMPATIBILITY_FIXED_SOURCE} and
+     * {@link FRAME_RATE_COMPATIBILITY_GTE}.
      */
     public static final int FRAME_RATE_COMPATIBILITY_DEFAULT = 0;
 
@@ -226,6 +232,17 @@ public class Surface implements Parcelable {
      * the app's requested frame rate. This value should be used for video content.
      */
     public static final int FRAME_RATE_COMPATIBILITY_FIXED_SOURCE = 1;
+
+    /**
+     * The surface requests a frame rate that is greater than or equal to the specified frame rate.
+     * This value should be used for UIs, animations, scrolling and fling, and anything that is not
+     * a game or video.
+     *
+     * For video, use {@link FRAME_RATE_COMPATIBILITY_FIXED_SOURCE} instead. For game content, use
+     * {@link FRAME_RATE_COMPATIBILITY_DEFAULT}.
+     */
+    @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_GTE_ENUM)
+    public static final int FRAME_RATE_COMPATIBILITY_GTE = 2;
 
     /**
      * This surface belongs to an app on the High Refresh Rate Deny list, and needs the display
@@ -249,13 +266,6 @@ public class Surface implements Parcelable {
      * @hide
      */
     public static final int FRAME_RATE_COMPATIBILITY_MIN = 102;
-
-    // From window.h. Keep these in sync.
-    /**
-     * The surface requests a frame rate that is greater than or equal to {@code frameRate}.
-     * @hide
-     */
-    public static final int FRAME_RATE_COMPATIBILITY_GTE = 103;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

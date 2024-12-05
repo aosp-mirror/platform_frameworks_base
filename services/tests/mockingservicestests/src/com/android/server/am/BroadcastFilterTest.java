@@ -20,10 +20,13 @@ import static android.content.IntentFilter.SYSTEM_LOW_PRIORITY;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
+import android.content.pm.ApplicationInfo;
 import android.os.Process;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -53,14 +56,14 @@ public class BroadcastFilterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        doReturn(true).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), any(ApplicationInfo.class));
     }
 
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority() {
-        doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
-
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
             final Pair<Integer, Integer>[] priorities = new Pair[] {
@@ -95,8 +98,8 @@ public class BroadcastFilterTest {
     @Test
     @EnableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority_withChangeIdDisabled() {
-        doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+        doReturn(false).when(mPlatformCompat).isChangeEnabledInternalNoLogging(
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), any(ApplicationInfo.class));
 
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
@@ -132,9 +135,6 @@ public class BroadcastFilterTest {
     @Test
     @DisableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority_withFlagDisabled() {
-        doReturn(true).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
-
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
             final Pair<Integer, Integer>[] priorities = new Pair[] {
@@ -170,7 +170,7 @@ public class BroadcastFilterTest {
     @DisableFlags(Flags.FLAG_RESTRICT_PRIORITY_VALUES)
     public void testCalculateAdjustedPriority_withFlagDisabled_withChangeIdDisabled() {
         doReturn(false).when(mPlatformCompat).isChangeEnabledByUidInternalNoLogging(
-                eq(BroadcastFilter.CHANGE_RESTRICT_PRIORITY_VALUES), anyInt());
+                eq(BroadcastFilter.RESTRICT_PRIORITY_VALUES), anyInt());
 
         {
             // Pairs of {initial-priority, expected-adjusted-priority}
@@ -215,6 +215,7 @@ public class BroadcastFilterTest {
         final String errorMsg = String.format("owner=%d; actualPriority=%d; expectedPriority=%d",
                 owningUid, priority, expectedAdjustedPriority);
         assertWithMessage(errorMsg).that(BroadcastFilter.calculateAdjustedPriority(
-                owningUid, priority, mPlatformCompat)).isEqualTo(expectedAdjustedPriority);
+                owningUid, priority, mock(ApplicationInfo.class), mPlatformCompat))
+                        .isEqualTo(expectedAdjustedPriority);
     }
 }

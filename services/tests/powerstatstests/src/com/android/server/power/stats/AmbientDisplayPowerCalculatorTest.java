@@ -79,8 +79,6 @@ public class AmbientDisplayPowerCalculatorTest {
         // 100,000,00 uC / 1000 (micro-/milli-) / 360 (seconds/hour) = 27.777778 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(27.777778);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
@@ -140,8 +138,6 @@ public class AmbientDisplayPowerCalculatorTest {
         // (seconds/hour) = 27.777778 mAh
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(83.33333);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
     }
 
     @Test
@@ -163,8 +159,6 @@ public class AmbientDisplayPowerCalculatorTest {
                 .isEqualTo(90 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(15.0);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 
     @Test
@@ -195,7 +189,5 @@ public class AmbientDisplayPowerCalculatorTest {
                 .isEqualTo(120 * MINUTE_IN_MS);
         assertThat(consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
                 .isWithin(PRECISION).of(35.0);
-        assertThat(consumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY))
-                .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
     }
 }

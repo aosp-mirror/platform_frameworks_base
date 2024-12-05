@@ -45,10 +45,14 @@ cc_library_shared {
 
     header_libs: [
         "jni_headers",
+        "native_headers",
         "libhwui_internal_headers",
     ],
+    export_header_lib_headers: ["native_headers"],
 
-    static_libs: ["libarect"],
+    static_libs: [
+        "libarect",
+    ],
 
     host_supported: true,
     target: {
@@ -59,6 +63,11 @@ cc_library_shared {
             ],
             shared_libs: [
                 "libandroid",
+            ],
+            static_libs: [
+                "libstatslog_hwui",
+                "libstatspull_lazy",
+                "libstatssocket_lazy",
             ],
             version_script: "libjnigraphics.map.txt",
         },

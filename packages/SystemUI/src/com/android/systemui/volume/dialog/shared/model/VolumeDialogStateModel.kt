@@ -21,6 +21,8 @@ import android.content.ComponentName
 /** Models a state of the Volume Dialog. */
 data class VolumeDialogStateModel(
     val shouldShowA11ySlider: Boolean = false,
+    val isShowingSafetyWarning: VolumeDialogSafetyWarningModel =
+        VolumeDialogSafetyWarningModel.Invisible,
     val streamModels: Map<Int, VolumeDialogStreamModel> = mapOf(),
     val ringerModeInternal: Int = 0,
     val ringerModeExternal: Int = 0,

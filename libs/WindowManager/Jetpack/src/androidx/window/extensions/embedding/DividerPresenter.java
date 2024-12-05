@@ -39,6 +39,7 @@ import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSI
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -1394,10 +1395,14 @@ class DividerPresenter implements View.OnTouchListener {
         }
 
         private void showVeils(@NonNull SurfaceControl.Transaction t) {
-            final Color primaryVeilColor = getContainerBackgroundColor(
-                    mProperties.mPrimaryContainer, DEFAULT_PRIMARY_VEIL_COLOR);
-            final Color secondaryVeilColor = getContainerBackgroundColor(
-                    mProperties.mSecondaryContainer, DEFAULT_SECONDARY_VEIL_COLOR);
+            final Color primaryVeilColor = getVeilColor(
+                    mProperties.mDividerAttributes.getPrimaryVeilColor(),
+                    mProperties.mPrimaryContainer,
+                    DEFAULT_PRIMARY_VEIL_COLOR);
+            final Color secondaryVeilColor = getVeilColor(
+                    mProperties.mDividerAttributes.getSecondaryVeilColor(),
+                    mProperties.mSecondaryContainer,
+                    DEFAULT_SECONDARY_VEIL_COLOR);
             t.setColor(mPrimaryVeil, colorToFloatArray(primaryVeilColor))
                     .setColor(mSecondaryVeil, colorToFloatArray(secondaryVeilColor))
                     .setLayer(mDividerSurface, DIVIDER_LAYER)
@@ -1442,6 +1447,21 @@ class DividerPresenter implements View.OnTouchListener {
                 t.setPosition(mSecondaryVeil, secondaryBounds.left, secondaryBounds.top);
                 t.setVisibility(mSecondaryVeil, !secondaryBounds.isEmpty());
             }
+        }
+
+        /**
+         * Returns the veil color.
+         *
+         * If the configured color is not transparent, we use the configured color, otherwise we use
+         * the window background color of the top activity. If the background color of the top
+         * activity is unavailable, the default color is used.
+         */
+        @NonNull
+        private static Color getVeilColor(@ColorInt int configuredColor,
+                @NonNull TaskFragmentContainer container, @NonNull Color defaultColor) {
+            return configuredColor != Color.TRANSPARENT
+                    ? Color.valueOf(configuredColor)
+                    : getContainerBackgroundColor(container, defaultColor);
         }
 
         private static float[] colorToFloatArray(@NonNull Color color) {

@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.paint;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 public class PaintChangeAdapter implements PaintChanges {
 
     @Override
@@ -64,8 +67,8 @@ public class PaintChangeAdapter implements PaintChanges {
 
     @Override
     public void setLinearGradient(
-            int[] colorsArray,
-            float[] stopsArray,
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
             float startX,
             float startY,
             float endX,
@@ -74,8 +77,8 @@ public class PaintChangeAdapter implements PaintChanges {
 
     @Override
     public void setRadialGradient(
-            int[] colorsArray,
-            float[] stopsArray,
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
             float centerX,
             float centerY,
             float radius,
@@ -83,7 +86,10 @@ public class PaintChangeAdapter implements PaintChanges {
 
     @Override
     public void setSweepGradient(
-            int[] colorsArray, float[] stopsArray, float centerX, float centerY) {}
+            @NonNull int[] colorsArray,
+            @Nullable float[] stopsArray,
+            float centerX,
+            float centerY) {}
 
     @Override
     public void setColorFilter(int color, int mode) {}

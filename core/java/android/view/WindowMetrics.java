@@ -107,8 +107,8 @@ public final class WindowMetrics {
      * and display cutout areas depending on the calling context and target SDK level. Please refer
      * to {@link Display#getSize(Point)} for details.
      * <p>
-     * The value reported by {@link Display#getSize(Point)} excluding system decoration areas can be
-     * obtained by using:
+     * The following code snippet shows how to get the bounds excluding navigation bars and display
+     * cutout:
      * <pre class="prettyprint">
      * final WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
      * // Gets all excluding insets

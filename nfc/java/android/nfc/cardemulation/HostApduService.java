@@ -107,7 +107,7 @@ import java.util.List;
  *     &lt;intent-filter&gt;
  *         &lt;action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE"/&gt;
  *     &lt;/intent-filter&gt;
- *     &lt;meta-data android:name="android.nfc.cardemulation.host_apdu_ervice" android:resource="@xml/apduservice"/&gt;
+ *     &lt;meta-data android:name="android.nfc.cardemulation.host_apdu_service" android:resource="@xml/apduservice"/&gt;
  * &lt;/service&gt;</pre>
  *
  * This meta-data tag points to an apduservice.xml file.
@@ -239,15 +239,6 @@ public abstract class HostApduService extends Service {
      */
     public static final int MSG_POLLING_LOOP = 4;
 
-    /**
-     * @hide
-     */
-    public static final int MSG_OBSERVE_MODE_CHANGE = 5;
-
-    /**
-     * @hide
-     */
-    public static final int MSG_PREFERRED_SERVICE_CHANGED = 6;
 
     /**
      * @hide
@@ -341,16 +332,6 @@ public abstract class HostApduService extends Service {
                                 msg.getData().getParcelableArrayList(
                                     KEY_POLLING_LOOP_FRAMES_BUNDLE, PollingFrame.class);
                         processPollingFrames(pollingFrames);
-                    }
-                    break;
-                case MSG_OBSERVE_MODE_CHANGE:
-                    if (android.nfc.Flags.nfcEventListener()) {
-                        onObserveModeStateChanged(msg.arg1 == 1);
-                    }
-                    break;
-                case MSG_PREFERRED_SERVICE_CHANGED:
-                    if (android.nfc.Flags.nfcEventListener()) {
-                        onPreferredServiceChanged(msg.arg1 == 1);
                     }
                     break;
                 default:
@@ -462,25 +443,4 @@ public abstract class HostApduService extends Service {
      */
     public abstract void onDeactivated(int reason);
 
-
-    /**
-     * This method is called when this service is the preferred Nfc service and
-     * Observe mode has been enabled or disabled.
-     *
-     * @param isEnabled true if observe mode has been enabled, false if it has been disabled
-     */
-    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public void onObserveModeStateChanged(boolean isEnabled) {
-
-    }
-
-    /**
-     * This method is called when this service gains or loses preferred Nfc service status.
-     *
-     * @param isPreferred true is this service has become the preferred Nfc service,
-     * false if it is no longer the preferred service
-     */
-    @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public void onPreferredServiceChanged(boolean isPreferred) {
-    }
 }

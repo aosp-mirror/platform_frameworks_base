@@ -28,6 +28,7 @@ import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository.Compa
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -48,7 +49,7 @@ class QSHostAdapter
 @Inject
 constructor(
     private val interactor: CurrentTilesInteractor,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val tileServiceRequestControllerBuilder: TileServiceRequestController.Builder,
     @Application private val scope: CoroutineScope,
     dumpManager: DumpManager,

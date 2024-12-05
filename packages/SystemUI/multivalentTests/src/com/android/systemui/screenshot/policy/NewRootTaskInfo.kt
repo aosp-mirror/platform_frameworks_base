@@ -84,6 +84,7 @@ fun newRootTaskInfo(
     activityType: ActivityType = Standard,
     windowingMode: WindowingMode = FullScreen,
     bounds: Rect = Rect(),
+    maxBounds: Rect = bounds,
     topActivity: ComponentName? = null,
     topActivityType: ActivityType = Standard,
     numActivities: Int? = null,
@@ -94,6 +95,7 @@ fun newRootTaskInfo(
             setWindowingMode(windowingMode.toInt())
             setActivityType(activityType.toInt())
             setBounds(bounds)
+            setMaxBounds(maxBounds)
         }
         this.bounds = bounds
         this.displayId = displayId

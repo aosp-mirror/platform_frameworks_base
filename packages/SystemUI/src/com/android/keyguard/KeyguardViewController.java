@@ -174,8 +174,19 @@ public interface KeyguardViewController {
 
     /**
      * Stop showing the alternate bouncer, if showing.
+     *
+     * <p>Should be like calling {@link #hideAlternateBouncer(boolean, boolean)} with a {@code true}
+     * {@code clearDismissAction} parameter.
      */
     void hideAlternateBouncer(boolean updateScrim);
+
+    /**
+     * Stop showing the alternate bouncer, if showing.
+     *
+     * @param updateScrim Whether to update the scrim
+     * @param clearDismissAction Whether the pending dismiss action should be cleared
+     */
+    void hideAlternateBouncer(boolean updateScrim, boolean clearDismissAction);
 
     // TODO: Deprecate registerStatusBar in KeyguardViewController interface. It is currently
     //  only used for testing purposes in StatusBarKeyguardViewManager, and it prevents us from

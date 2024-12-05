@@ -70,6 +70,7 @@ public final class ProfcollectForwardingService extends SystemService {
     private int mUsageSetting;
     private boolean mUploadEnabled;
 
+    private static boolean sVerityEnforced;
     private boolean mAdbActive;
 
     private IProfCollectd mIProfcollect;
@@ -117,6 +118,13 @@ public final class ProfcollectForwardingService extends SystemService {
             mUsageSetting = -1;
         }
 
+        // Check verity, disable profile upload if not enforced.
+        final String verityMode = SystemProperties.get("ro.boot.veritymode");
+        sVerityEnforced = verityMode.equals("enforcing");
+        if (!sVerityEnforced) {
+            Log.d(LOG_TAG, "verity is not enforced: " + verityMode);
+        }
+
         mUploadEnabled =
             context.getResources().getBoolean(R.bool.config_profcollectReportUploaderEnabled);
 
@@ -144,6 +152,10 @@ public final class ProfcollectForwardingService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             UsbManager usbManager = getContext().getSystemService(UsbManager.class);
+            if (usbManager == null) {
+                mAdbActive = false;
+                return;
+            }
             mAdbActive = ((usbManager.getCurrentFunctions() & UsbManager.FUNCTION_ADB) == 1);
             Log.d(LOG_TAG, "ADB is " + mAdbActive + " on system startup");
         }
@@ -367,6 +379,10 @@ public final class ProfcollectForwardingService extends SystemService {
             }
             if (!pfs.mUploadEnabled) {
                 Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
+            if (!sVerityEnforced) {
+                Log.i(LOG_TAG, "Verity is not enforced.");
                 return;
             }
             Intent intent = new Intent()

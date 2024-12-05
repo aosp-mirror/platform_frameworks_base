@@ -18,8 +18,8 @@ package com.android.systemui.qs.pipeline.data.repository
 
 import android.content.res.Resources
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /**
@@ -35,7 +35,7 @@ interface MinimumTilesRepository {
  * creation, as it's not expected to change.
  */
 @SysUISingleton
-class MinimumTilesResourceRepository @Inject constructor(@Main resources: Resources) :
+class MinimumTilesResourceRepository @Inject constructor(@ShadeDisplayAware resources: Resources) :
     MinimumTilesRepository {
     override val minNumberOfTiles: Int =
         resources.getInteger(R.integer.quick_settings_min_num_tiles)

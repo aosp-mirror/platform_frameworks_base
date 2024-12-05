@@ -63,6 +63,7 @@ class DragAndDropTest : SysuiTestCase() {
             listState = listState,
             otherTiles = listOf(),
             columns = 4,
+            largeTilesSpan = 4,
             modifier = Modifier.fillMaxSize(),
             onRemoveTile = {},
             onSetTiles = onSetTiles,
@@ -75,7 +76,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedTile_shouldDisappear() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -101,7 +102,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedTile_shouldChangePosition() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -128,7 +129,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedTileOut_shouldBeRemoved() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }
@@ -153,7 +154,7 @@ class DragAndDropTest : SysuiTestCase() {
     @Test
     fun draggedNewTileIn_shouldBeAdded() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) {
                 tiles = it.map { tileSpec -> createEditTile(tileSpec.spec) }

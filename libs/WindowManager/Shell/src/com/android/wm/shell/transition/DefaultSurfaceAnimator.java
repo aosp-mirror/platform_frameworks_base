@@ -41,9 +41,9 @@ public class DefaultSurfaceAnimator {
             @NonNull Animation anim, @NonNull SurfaceControl leash,
             @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @Nullable Point position, float cornerRadius,
-            @Nullable Rect clipRect, boolean isActivity) {
+            @Nullable Rect clipRect) {
         final DefaultAnimationAdapter adapter = new DefaultAnimationAdapter(anim, leash,
-                position, clipRect, cornerRadius, isActivity);
+                position, clipRect, cornerRadius);
         buildSurfaceAnimation(animations, anim, finishCallback, pool, mainExecutor, adapter);
     }
 
@@ -136,19 +136,18 @@ public class DefaultSurfaceAnimator {
         @NonNull final Animation mAnim;
         @Nullable final Point mPosition;
         @Nullable final Rect mClipRect;
+        @Nullable private final Rect mAnimClipRect;
         final float mCornerRadius;
-        final boolean mIsActivity;
 
         DefaultAnimationAdapter(@NonNull Animation anim, @NonNull SurfaceControl leash,
-                @Nullable Point position, @Nullable Rect clipRect, float cornerRadius,
-                boolean isActivity) {
+                @Nullable Point position, @Nullable Rect clipRect, float cornerRadius) {
             super(leash);
             mAnim = anim;
             mPosition = (position != null && (position.x != 0 || position.y != 0))
                     ? position : null;
             mClipRect = (clipRect != null && !clipRect.isEmpty()) ? clipRect : null;
+            mAnimClipRect = mClipRect != null ? new Rect() : null;
             mCornerRadius = cornerRadius;
-            mIsActivity = isActivity;
         }
 
         @Override
@@ -158,10 +157,6 @@ public class DefaultSurfaceAnimator {
             final SurfaceControl leash = mLeash;
             transformation.clear();
             mAnim.getTransformation(currentPlayTime, transformation);
-            if (com.android.graphics.libgui.flags.Flags.edgeExtensionShader()
-                    && mIsActivity && mAnim.getExtensionEdges() != 0) {
-                t.setEdgeExtensionEffect(leash, mAnim.getExtensionEdges());
-            }
             if (mPosition != null) {
                 transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
             }
@@ -169,18 +164,26 @@ public class DefaultSurfaceAnimator {
             t.setAlpha(leash, transformation.getAlpha());
 
             if (mClipRect != null) {
-                Rect clipRect = mClipRect;
+                boolean needCrop = false;
+                mAnimClipRect.set(mClipRect);
+                if (transformation.hasClipRect()
+                        && com.android.window.flags.Flags.respectAnimationClip()) {
+                    mAnimClipRect.intersectUnchecked(transformation.getClipRect());
+                    needCrop = true;
+                }
                 final Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
                 if (!extensionInsets.equals(Insets.NONE)) {
                     // Clip out any overflowing edge extension.
-                    clipRect = new Rect(mClipRect);
-                    clipRect.inset(extensionInsets);
-                    t.setCrop(leash, clipRect);
+                    mAnimClipRect.inset(extensionInsets);
+                    needCrop = true;
                 }
                 if (mCornerRadius > 0 && mAnim.hasRoundedCorners()) {
                     // Rounded corner can only be applied if a crop is set.
-                    t.setCrop(leash, clipRect);
                     t.setCornerRadius(leash, mCornerRadius);
+                    needCrop = true;
+                }
+                if (needCrop) {
+                    t.setCrop(leash, mAnimClipRect);
                 }
             }
         }

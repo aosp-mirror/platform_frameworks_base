@@ -17,7 +17,6 @@
 package com.android.settingslib.bluetooth.devicesettings;
 
 import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -47,7 +46,7 @@ public class DeviceSettingPendingIntentAction extends DeviceSettingAction implem
     /** Read a {@link DeviceSettingPendingIntentAction} instance from {@link Parcel} */
     @NonNull
     public static DeviceSettingPendingIntentAction readFromParcel(@NonNull Parcel in) {
-        PendingIntent pendingIntent = in.readParcelable(Intent.class.getClassLoader());
+        PendingIntent pendingIntent = in.readParcelable(PendingIntent.class.getClassLoader());
         Bundle extras = in.readBundle(Bundle.class.getClassLoader());
         return new DeviceSettingPendingIntentAction(pendingIntent, extras);
     }

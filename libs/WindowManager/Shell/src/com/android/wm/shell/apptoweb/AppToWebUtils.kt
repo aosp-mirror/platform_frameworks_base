@@ -20,7 +20,9 @@ package com.android.wm.shell.apptoweb
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER
 import android.content.pm.PackageManager
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -31,7 +33,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup
 private const val TAG = "AppToWebUtils"
 
 private val GenericBrowserIntent = Intent()
-    .setAction(Intent.ACTION_VIEW)
+    .setAction(ACTION_VIEW)
     .addCategory(Intent.CATEGORY_BROWSABLE)
     .setData(Uri.parse("http:"))
 
@@ -61,6 +63,20 @@ fun getBrowserIntent(uri: Uri, packageManager: PackageManager): Intent? {
         .setData(uri)
         .addFlags(FLAG_ACTIVITY_NEW_TASK)
     // If there is no browser application available to handle intent, return null
+    val component = intent.resolveActivity(packageManager) ?: return null
+    intent.setComponent(component)
+    return intent
+}
+
+/**
+ * Returns intent if there is a non-browser application available to handle the uri. Otherwise,
+ * returns null.
+ */
+fun getAppIntent(uri: Uri, packageManager: PackageManager): Intent? {
+    val intent = Intent(ACTION_VIEW, uri).apply {
+        flags = FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_REQUIRE_NON_BROWSER
+    }
+    // If there is no application available to handle intent, return null
     val component = intent.resolveActivity(packageManager) ?: return null
     intent.setComponent(component)
     return intent

@@ -15,10 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import com.android.internal.widget.remotecompose.core.Operation;
+import android.annotation.NonNull;
+
+import com.android.internal.widget.remotecompose.core.OperationInterface;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 /** Represents a modifier */
-public interface ModifierOperation extends Operation {
-    void serializeToString(int indent, StringSerializer serializer);
+public interface ModifierOperation extends OperationInterface {
+    void serializeToString(int indent, @NonNull StringSerializer serializer);
 }

@@ -18,14 +18,19 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,7 +46,17 @@ class PriorityNestedScrollConnectionTest {
     private var consumeScroll = true
     private var lastStop: Float? = null
     private var isCancelled: Boolean = false
-    private var consumeStop = true
+    private var onStopConsumeFlingToScroll = false
+    private var onStopConsumeAll = true
+
+    private val customFlingBehavior =
+        object : FlingBehavior {
+            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                scrollBy(initialVelocity)
+                // returns the remaining velocity: 1/3 remained + 2/3 consumed
+                return initialVelocity / 3f
+            }
+        }
 
     private val scrollConnection =
         PriorityNestedScrollConnection(
@@ -57,9 +72,16 @@ class PriorityNestedScrollConnectionTest {
                         return if (consumeScroll) deltaScroll else 0f
                     }
 
-                    override suspend fun onStop(initialVelocity: Float): Float {
+                    override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
                         lastStop = initialVelocity
-                        return if (consumeStop) initialVelocity else 0f
+                        var velocityConsumed = 0f
+                        if (onStopConsumeFlingToScroll) {
+                            velocityConsumed = flingToScroll(initialVelocity, customFlingBehavior)
+                        }
+                        if (onStopConsumeAll) {
+                            velocityConsumed = initialVelocity
+                        }
+                        return velocityConsumed
                     }
 
                     override fun onCancel() {
@@ -178,6 +200,24 @@ class PriorityNestedScrollConnectionTest {
     }
 
     @Test
+    fun onStopScrollUsingFlingToScroll() = runMonotonicClockTest {
+        startPriorityModePostScroll()
+        onStopConsumeFlingToScroll = true
+        onStopConsumeAll = false
+        lastScroll = Float.NaN
+
+        val consumed = scrollConnection.onPreFling(available = Velocity(2f, 2f))
+
+        val initialVelocity = 2f
+        assertThat(lastStop).isEqualTo(initialVelocity)
+        // flingToScroll should try to scroll the content, customFlingBehavior uses the velocity.
+        assertThat(lastScroll).isEqualTo(2f)
+        val remainingVelocity = initialVelocity / 3f
+        // customFlingBehavior returns 2/3 of the vertical velocity.
+        assertThat(consumed).isEqualTo(Velocity(0f, initialVelocity - remainingVelocity))
+    }
+
+    @Test
     fun ifCannotStopOnPreFling_shouldStopOnPostFling() = runTest {
         startPriorityModePostScroll()
         canStopOnPreFling = false
@@ -226,5 +266,17 @@ class PriorityNestedScrollConnectionTest {
 
         scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
         assertThat(isStarted).isEqualTo(true)
+    }
+
+    @Test
+    fun handleMultipleOnPreFlingCalls() = runTest {
+        startPriorityModePostScroll()
+
+        coroutineScope {
+            launch { scrollConnection.onPreFling(available = Velocity.Zero) }
+            launch { scrollConnection.onPreFling(available = Velocity.Zero) }
+        }
+
+        assertThat(lastStop).isEqualTo(0f)
     }
 }

@@ -16,24 +16,23 @@
 
 package com.android.systemui.shared.clocks.view
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Point
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.core.Logger
-import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
+import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.LogUtil
 import java.util.Locale
 
 // TODO(b/364680879): Merge w/ only subclass FlexClockView
-abstract class DigitalClockFaceView(ctx: Context, messageBuffer: MessageBuffer) : FrameLayout(ctx) {
-    protected val logger = Logger(messageBuffer, this::class.simpleName!!)
+abstract class DigitalClockFaceView(clockCtx: ClockContext) : FrameLayout(clockCtx.context) {
+    protected val logger = Logger(clockCtx.messageBuffer, this::class.simpleName!!)
         get() = field ?: LogUtil.FALLBACK_INIT_LOGGER
 
     abstract var digitalClockTextViewMap: MutableMap<Int, SimpleDigitalClockTextView>

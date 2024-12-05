@@ -24,8 +24,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A helper class that creates a {@link JSONObject} from a {@link JsonReader}.
@@ -46,15 +44,9 @@ public final class JsonParser {
         while (reader.hasNext()) {
             String fieldName = reader.nextName();
 
-            if (output.has(fieldName)) {
-                errorMsg = "Duplicate field name.";
-                reader.skipValue();
-                continue;
-            }
-
             JsonToken token = reader.peek();
             if (token.equals(JsonToken.BEGIN_ARRAY)) {
-                output.put(fieldName, new JSONArray(parseArray(reader)));
+                output.put(fieldName, parseArray(reader));
             } else if (token.equals(JsonToken.STRING)) {
                 output.put(fieldName, reader.nextString());
             } else if (token.equals(JsonToken.BEGIN_OBJECT)) {
@@ -63,9 +55,11 @@ public final class JsonParser {
                 } catch (JSONException e) {
                     errorMsg = e.getMessage();
                 }
+            } else if (token.equals(JsonToken.BOOLEAN)) {
+                output.put(fieldName, reader.nextBoolean());
             } else {
                 reader.skipValue();
-                errorMsg = "Unsupported value type.";
+                errorMsg = "Unsupported value type: " + token;
             }
         }
         reader.endObject();
@@ -78,16 +72,35 @@ public final class JsonParser {
     }
 
     /**
-     * Parses one string array from the {@link JsonReader}.
+     * Parses one JSON array from the {@link JsonReader}.
      */
-    public static List<String> parseArray(JsonReader reader) throws IOException {
-        ArrayList<String> output = new ArrayList<>();
+    public static JSONArray parseArray(JsonReader reader) throws IOException, JSONException {
+        JSONArray output = new JSONArray();
+        String errorMsg = null;
 
         reader.beginArray();
         while (reader.hasNext()) {
-            output.add(reader.nextString());
+            JsonToken token = reader.peek();
+            if (token.equals(JsonToken.BEGIN_ARRAY)) {
+                output.put(parseArray(reader));
+            } else if (token.equals(JsonToken.STRING)) {
+                output.put(reader.nextString());
+            } else if (token.equals(JsonToken.BEGIN_OBJECT)) {
+                try {
+                    output.put(parse(reader));
+                } catch (JSONException e) {
+                    errorMsg = e.getMessage();
+                }
+            } else {
+                reader.skipValue();
+                errorMsg = "Unsupported value type: " + token;
+            }
         }
         reader.endArray();
+
+        if (errorMsg != null) {
+            throw new JSONException(errorMsg);
+        }
 
         return output;
     }

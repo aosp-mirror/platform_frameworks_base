@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.RingerModeTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -51,7 +52,7 @@ import kotlinx.coroutines.withContext
 class MuteQuickAffordanceConfig
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val userTracker: UserTracker,
     private val userFileManager: UserFileManager,
     private val ringerModeTracker: RingerModeTracker,

@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO;
 import static android.media.AudioDeviceInfo.TYPE_BUILTIN_MIC;
 import static android.media.AudioDeviceInfo.TYPE_USB_ACCESSORY;
@@ -103,7 +104,8 @@ public class InputMediaDevice extends MediaDevice {
                             TYPE_USB_DEVICE,
                             TYPE_USB_HEADSET,
                             TYPE_USB_ACCESSORY,
-                            TYPE_BLUETOOTH_SCO ->
+                            TYPE_BLUETOOTH_SCO,
+                            TYPE_BLE_HEADSET ->
                     true;
             default -> false;
         };
@@ -124,7 +126,7 @@ public class InputMediaDevice extends MediaDevice {
                     mProductName != null
                             ? mProductName
                             : mContext.getString(R.string.media_transfer_usb_device_mic_name);
-            case TYPE_BLUETOOTH_SCO ->
+            case TYPE_BLUETOOTH_SCO, TYPE_BLE_HEADSET ->
                     mProductName != null
                             ? mProductName
                             : mContext.getString(R.string.media_transfer_bt_device_mic_name);

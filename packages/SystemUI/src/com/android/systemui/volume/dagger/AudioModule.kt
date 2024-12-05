@@ -53,7 +53,9 @@ interface AudioModule {
         fun provideAudioManagerIntentsReceiver(
             @Application context: Context,
             @Application coroutineScope: CoroutineScope,
-        ): AudioManagerEventsReceiver = AudioManagerEventsReceiverImpl(context, coroutineScope)
+            @Background coroutineContext: CoroutineContext,
+        ): AudioManagerEventsReceiver =
+            AudioManagerEventsReceiverImpl(context, coroutineScope, coroutineContext)
 
         @Provides
         @SysUISingleton
@@ -82,15 +84,18 @@ interface AudioModule {
             localBluetoothManager: LocalBluetoothManager?,
             @Application coroutineScope: CoroutineScope,
             @Background coroutineContext: CoroutineContext,
-            volumeLogger: VolumeLogger
+            volumeLogger: VolumeLogger,
         ): AudioSharingRepository =
-            if (Flags.enableLeAudioSharing() && localBluetoothManager != null) {
+            if (
+                (Flags.enableLeAudioSharing() || Flags.audioSharingDeveloperOption()) &&
+                    localBluetoothManager != null
+            ) {
                 AudioSharingRepositoryImpl(
                     contentResolver,
                     localBluetoothManager,
                     coroutineScope,
                     coroutineContext,
-                    volumeLogger
+                    volumeLogger,
                 )
             } else {
                 AudioSharingRepositoryEmptyImpl()
@@ -111,8 +116,7 @@ interface AudioModule {
 
         @Provides
         @SysUISingleton
-        fun provideAudioSystemRepository(
-            @Application context: Context,
-        ): AudioSystemRepository = AudioSystemRepositoryImpl(context)
+        fun provideAudioSystemRepository(@Application context: Context): AudioSystemRepository =
+            AudioSystemRepositoryImpl(context)
     }
 }

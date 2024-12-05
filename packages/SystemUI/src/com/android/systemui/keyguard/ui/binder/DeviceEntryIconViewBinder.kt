@@ -182,13 +182,11 @@ object DeviceEntryIconViewBinder {
             fgIconView.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     // Start with an empty state
+                    Log.d(TAG, "Initializing device entry fgIconView")
                     fgIconView.setImageState(StateSet.NOTHING, /* merge */ false)
                     launch("$TAG#fpIconView.viewModel") {
                         fgViewModel.viewModel.collect { viewModel ->
-                            fgIconView.setImageState(
-                                view.getIconState(viewModel.type, viewModel.useAodVariant),
-                                /* merge */ false,
-                            )
+                            Log.d(TAG, "Updating device entry icon image state $viewModel")
                             if (viewModel.type.contentDescriptionResId != -1) {
                                 fgIconView.contentDescription =
                                     fgIconView.resources.getString(
@@ -203,6 +201,14 @@ object DeviceEntryIconViewBinder {
                                 viewModel.padding,
                                 viewModel.padding,
                             )
+                            // Set image state at the end after updating other view state. This
+                            // method forces the ImageView to recompute the bounds of the drawable.
+                            fgIconView.setImageState(
+                                view.getIconState(viewModel.type, viewModel.useAodVariant),
+                                /* merge */ false,
+                            )
+                            // Invalidate, just in case the padding changes just after icon changes
+                            fgIconView.invalidate()
                         }
                     }
                 }

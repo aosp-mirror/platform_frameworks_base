@@ -69,6 +69,7 @@ final class VibrationStepConductor {
     // Used within steps.
     public final VibrationSettings vibrationSettings;
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
+    public final boolean isInSession;
 
     private final DeviceAdapter mDeviceAdapter;
     private final VibrationScaler mVibrationScaler;
@@ -105,12 +106,13 @@ final class VibrationStepConductor {
     private int mRemainingStartSequentialEffectSteps;
     private int mSuccessfulVibratorOnSteps;
 
-    VibrationStepConductor(HalVibration vib, VibrationSettings vibrationSettings,
-            DeviceAdapter deviceAdapter, VibrationScaler vibrationScaler,
-            VibratorFrameworkStatsLogger statsLogger,
+    VibrationStepConductor(HalVibration vib, boolean isInSession,
+            VibrationSettings vibrationSettings, DeviceAdapter deviceAdapter,
+            VibrationScaler vibrationScaler, VibratorFrameworkStatsLogger statsLogger,
             CompletableFuture<Void> requestVibrationParamsFuture,
             VibrationThread.VibratorManagerHooks vibratorManagerHooks) {
         this.mVibration = vib;
+        this.isInSession = isInSession;
         this.vibrationSettings = vibrationSettings;
         this.mDeviceAdapter = deviceAdapter;
         mVibrationScaler = vibrationScaler;
@@ -285,6 +287,9 @@ final class VibrationStepConductor {
         Step nextStep = mNextSteps.peek();
         if (nextStep == null) {
             return true;  // Finished
+        }
+        if (isInSession) {
+            return true;  // Don't wait to play session vibration steps
         }
         long waitMillis = nextStep.calculateWaitTime();
         if (waitMillis <= 0) {

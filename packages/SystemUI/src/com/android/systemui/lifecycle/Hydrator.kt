@@ -21,11 +21,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.StateFactoryMarker
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.coroutines.traceCoroutine
+import com.android.systemui.log.table.TableLogBuffer
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Keeps snapshot/Compose [State]s up-to-date.
@@ -47,6 +47,12 @@ class Hydrator(
      * concatenation or templating.
      */
     private val traceName: String,
+    /**
+     * An optional [TableLogBuffer] to log emissions to the states. [traceName] will be used as the
+     * prefix for the columns logged by this [Hydrator], allowing to aggregate multiple hydrators in
+     * the same table.
+     */
+    private val tableLogBuffer: TableLogBuffer? = null,
 ) : ExclusiveActivatable() {
 
     private val children = mutableListOf<NamedActivatable>()
@@ -62,15 +68,8 @@ class Hydrator(
      *   automatically set on the returned [State].
      */
     @StateFactoryMarker
-    fun <T> hydratedStateOf(
-        traceName: String,
-        source: StateFlow<T>,
-    ): State<T> {
-        return hydratedStateOf(
-            traceName = traceName,
-            initialValue = source.value,
-            source = source,
-        )
+    fun <T> hydratedStateOf(traceName: String, source: StateFlow<T>): State<T> {
+        return hydratedStateOf(traceName = traceName, initialValue = source.value, source = source)
     }
 
     /**
@@ -81,26 +80,44 @@ class Hydrator(
      *   performance findings with actual code. One recommendation: prefer whole string literals
      *   instead of some complex concatenation or templating scheme. Use `null` to disable
      *   performance tracing for this state.
+     *
+     *   If a [TableLogBuffer] was provided, every emission to the flow will be logged using the
+     *   [traceName] as the column name. For this to work correctly, all the states in the same
+     *   hydrator should have different [traceName]. Use `null` to disable logging for this state.
+     *
      * @param initialValue The first value to place on the [State]
      * @param source The upstream [Flow] to collect from; values emitted to it will be automatically
      *   set on the returned [State].
      */
     @StateFactoryMarker
-    fun <T> hydratedStateOf(
-        traceName: String?,
-        initialValue: T,
-        source: Flow<T>,
-    ): State<T> {
+    fun <T> hydratedStateOf(traceName: String?, initialValue: T, source: Flow<T>): State<T> {
         check(!isActive) { "Cannot call hydratedStateOf after Hydrator is already active." }
 
         val mutableState = mutableStateOf(initialValue)
+        traceName?.let { name ->
+            tableLogBuffer?.logChange(
+                prefix = this.traceName,
+                columnName = name,
+                value = initialValue?.toString(),
+                isInitial = true,
+            )
+        }
         children.add(
             NamedActivatable(
                 traceName = traceName,
                 activatable =
                     object : ExclusiveActivatable() {
                         override suspend fun onActivated(): Nothing {
-                            source.collect { mutableState.value = it }
+                            source.collect {
+                                traceName?.let { name ->
+                                    tableLogBuffer?.logChange(
+                                        prefix = this@Hydrator.traceName,
+                                        columnName = name,
+                                        value = it?.toString(),
+                                    )
+                                }
+                                mutableState.value = it
+                            }
                             awaitCancellation()
                         }
                     },
@@ -122,8 +139,5 @@ class Hydrator(
         }
     }
 
-    private data class NamedActivatable(
-        val traceName: String?,
-        val activatable: Activatable,
-    )
+    private data class NamedActivatable(val traceName: String?, val activatable: Activatable)
 }

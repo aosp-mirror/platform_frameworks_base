@@ -1,1 +1,12 @@
 # Ravenwood "policy" file for services.core.
+
+# Auto-generated from XSD
+class com.android.server.compat.config.Change keepclass
+class com.android.server.compat.config.Config keepclass
+class com.android.server.compat.config.XmlParser keepclass
+class com.android.server.compat.overrides.ChangeOverrides keepclass
+class com.android.server.compat.overrides.OverrideValue keepclass
+class com.android.server.compat.overrides.Overrides keepclass
+class com.android.server.compat.overrides.RawOverrideValue keepclass
+class com.android.server.compat.overrides.XmlParser keepclass
+class com.android.server.compat.overrides.XmlWriter keepclass
