@@ -1272,7 +1272,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     void migrateToNewSurfaceControl(Transaction t) {
         t.remove(mSurfaceControl);
-
+        // Reset the recording displays which were mirroring this display.
+        for (int i = mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
+            final ContentRecorder recorder = mRootWindowContainer.getChildAt(i).mContentRecorder;
+            if (recorder != null) {
+                recorder.resetRecordingDisplay(mDisplayId);
+            }
+        }
         mLastSurfacePosition.set(0, 0);
         mLastDeltaRotation = Surface.ROTATION_0;
 
