@@ -886,7 +886,10 @@ class DesktopTasksController(
             destinationBounds.height(),
             displayController,
         )
-        toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
+        toggleResizeDesktopTaskTransitionHandler.startTransition(
+            wct,
+            interaction.animationStartBounds,
+        )
     }
 
     private fun dragToMaximizeDesktopTask(
@@ -917,6 +920,7 @@ class DesktopTasksController(
                 direction = ToggleTaskSizeInteraction.Direction.MAXIMIZE,
                 source = ToggleTaskSizeInteraction.Source.HEADER_DRAG_TO_TOP,
                 inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent),
+                animationStartBounds = currentDragBounds,
             ),
         )
     }
