@@ -87,6 +87,7 @@ filegroup {
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
+        ":vcn-utils-platform-sources",
         ":net-utils-framework-common-srcs",
 
         // AIDL from frameworks/base/native/
@@ -314,6 +315,7 @@ java_defaults {
             ":framework-telephony-sources",
             ":framework-wifi-annotations",
             ":framework-wifi-non-updatable-sources",
+            ":vcn-utils-platform-sources",
             ":PacProcessor-aidl-sources",
             ":ProxyHandler-aidl-sources",
             ":net-utils-framework-common-srcs",
@@ -582,7 +584,7 @@ filegroup {
     srcs: [
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
-        "core/java/android/net/vcn/util/PersistableBundleUtils.java",
+        "packages/Vcn/framework-b/src/android/net/vcn/util/PersistableBundleUtils.java",
         "telephony/java/android/telephony/Annotation.java",
     ],
 }
