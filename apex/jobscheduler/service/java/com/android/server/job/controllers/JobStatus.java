@@ -1459,7 +1459,12 @@ public final class JobStatus {
     @NonNull
     public String getWakelockTag() {
         if (mWakelockTag == null) {
-            mWakelockTag = "*job*/" + this.batteryName;
+            mWakelockTag = "*job*";
+            if (android.app.job.Flags.addTypeInfoToWakelockTag()) {
+                mWakelockTag += (isRequestedExpeditedJob()
+                    ? "e" : (getJob().isUserInitiated() ? "u" : "r"));
+            }
+            mWakelockTag += "/" + this.batteryName;
         }
         return mWakelockTag;
     }

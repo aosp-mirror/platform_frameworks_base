@@ -55,3 +55,14 @@ flag {
     description: "Introduce a new getPendingJobReasonsHistory() API which returns a limited historical view of getPendingJobReasons()."
     bug: "372031023"
 }
+
+
+flag {
+    name: "add_type_info_to_wakelock_tag"
+    namespace: "backstage_power"
+    description: "Append the job type info to wakelock tag"
+    bug: "381880530"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
