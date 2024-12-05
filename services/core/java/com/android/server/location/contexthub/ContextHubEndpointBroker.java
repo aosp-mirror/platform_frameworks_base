@@ -78,18 +78,23 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     @GuardedBy("mOpenSessionLock")
     private final Set<Integer> mActiveRemoteSessionIds = new HashSet<>();
 
+    /** The package name of the app that created the endpoint */
+    private final String mPackageName;
+
     /* package */ ContextHubEndpointBroker(
             Context context,
             IContextHubWrapper contextHubProxy,
             ContextHubEndpointManager endpointManager,
             EndpointInfo halEndpointInfo,
-            IContextHubEndpointCallback callback) {
+            IContextHubEndpointCallback callback,
+            String packageName) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mEndpointManager = endpointManager;
         mEndpointInfo = new HubEndpointInfo(halEndpointInfo);
         mHalEndpointInfo = halEndpointInfo;
         mContextHubEndpointCallback = callback;
+        mPackageName = packageName;
     }
 
     @Override

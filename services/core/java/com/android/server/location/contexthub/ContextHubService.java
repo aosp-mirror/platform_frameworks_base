@@ -794,14 +794,16 @@ public class ContextHubService extends IContextHubService.Stub {
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public IContextHubEndpoint registerEndpoint(
-            HubEndpointInfo pendingHubEndpointInfo, IContextHubEndpointCallback callback)
+            HubEndpointInfo pendingHubEndpointInfo,
+            IContextHubEndpointCallback callback,
+            String packageName)
             throws RemoteException {
         super.registerEndpoint_enforcePermission();
         if (mEndpointManager == null) {
             Log.e(TAG, "Endpoint manager failed to initialize");
             throw new UnsupportedOperationException("Endpoint registration is not supported");
         }
-        return mEndpointManager.registerEndpoint(pendingHubEndpointInfo, callback);
+        return mEndpointManager.registerEndpoint(pendingHubEndpointInfo, callback, packageName);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)

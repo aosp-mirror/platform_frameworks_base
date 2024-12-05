@@ -132,11 +132,14 @@ import java.util.concurrent.ConcurrentHashMap;
      *
      * @param pendingEndpointInfo the object describing the endpoint being registered
      * @param callback the callback interface of the endpoint to register
+     * @param packageName the name of the package of the calling client
      * @return the endpoint interface
      * @throws IllegalStateException if max number of endpoints have already registered
      */
     /* package */ IContextHubEndpoint registerEndpoint(
-            HubEndpointInfo pendingEndpointInfo, IContextHubEndpointCallback callback)
+            HubEndpointInfo pendingEndpointInfo,
+            IContextHubEndpointCallback callback,
+            String packageName)
             throws RemoteException {
         if (!mSessionIdsValid) {
             throw new IllegalStateException("ContextHubEndpointManager failed to initialize");
@@ -158,7 +161,8 @@ import java.util.concurrent.ConcurrentHashMap;
                         mContextHubProxy,
                         this /* endpointManager */,
                         halEndpointInfo,
-                        callback);
+                        callback,
+                        packageName);
         mEndpointMap.put(endpointId, broker);
 
         try {
