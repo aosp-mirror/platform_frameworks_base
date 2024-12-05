@@ -50,7 +50,7 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
     private static final String PRODUCTION_BUILD = "user";
     private static final String PROPERTY_BUILD_TYPE = "ro.build.type";
     private static final String PROPERTY_INTRUSION_DETECTION_SERVICE_NAME =
-            "intrusiondetection_service_name";
+            "debug.intrusiondetection_package_name";
     private static final long FUTURE_TIMEOUT_MILLIS = 60 * 1000; // 1 min
     private static final String TAG = "IntrusionDetectionEventTransportConnection";
     private final Context mContext;
@@ -147,9 +147,9 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
     }
 
     private String getSystemPropertyValue(String propertyName) {
-        String comamandString = "getprop " + propertyName;
+        String commandString = "getprop " + propertyName;
         try {
-            Process process = Runtime.getRuntime().exec(comamandString);
+            Process process = Runtime.getRuntime().exec(commandString);
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
             String propertyValue = reader.readLine();
@@ -175,6 +175,10 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
             mIntrusionDetectionEventTransportConfig =
                     getSystemPropertyValue(PROPERTY_INTRUSION_DETECTION_SERVICE_NAME);
         }
+        Slog.d(
+                TAG,
+                "mIntrusionDetectionEventTransportConfig: "
+                        + mIntrusionDetectionEventTransportConfig);
 
         if (TextUtils.isEmpty(mIntrusionDetectionEventTransportConfig)) {
             Slog.e(TAG, "Unable to find a valid config for the transport service");
