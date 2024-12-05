@@ -550,7 +550,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 groupedTasks.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
-                if (Flags.enableRefactorTaskThumbnail() && isWallpaperTask(taskInfo)) {
+                if (
+                        Flags.enableUseTopVisibleActivityForExcludeFromRecentTask()
+                                && isWallpaperTask(taskInfo)) {
                     // Don't add the wallpaper task as an entry in grouped tasks
                     continue;
                 }

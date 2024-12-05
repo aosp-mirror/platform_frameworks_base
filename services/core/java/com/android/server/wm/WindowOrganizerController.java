@@ -1335,11 +1335,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK: {
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
-                Task pipTask = container.asTask();
-                if (pipTask == null) {
+                TaskFragment pipTaskFragment = container.asTaskFragment();
+                if (pipTaskFragment == null) {
                     break;
                 }
-                ActivityRecord pipActivity = pipTask.getActivity(
+                ActivityRecord pipActivity = pipTaskFragment.getActivity(
                         (activity) -> activity.pictureInPictureArgs != null);
 
                 if (pipActivity.isState(RESUMED)) {

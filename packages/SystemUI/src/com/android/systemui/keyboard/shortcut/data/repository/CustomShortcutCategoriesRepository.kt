@@ -16,10 +16,8 @@
 
 package com.android.systemui.keyboard.shortcut.data.repository
 
-import android.content.Context
 import android.hardware.input.InputGestureData
 import android.hardware.input.InputGestureData.Builder
-import android.hardware.input.InputGestureData.KeyTrigger
 import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.InputManager
 import android.hardware.input.KeyGestureEvent.KeyGestureType
@@ -30,11 +28,8 @@ import com.android.systemui.Flags.shortcutHelperKeyGlyph
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult
-import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutGroup
-import com.android.systemui.keyboard.shortcut.data.model.InternalKeyboardShortcutInfo
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
@@ -57,8 +52,7 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     @Background private val bgCoroutineContext: CoroutineContext,
     private val shortcutCategoriesUtils: ShortcutCategoriesUtils,
-    private val context: Context,
-    private val inputGestureMaps: InputGestureMaps,
+    private val inputGestureDataAdapter: InputGestureDataAdapter,
     private val customInputGesturesRepository: CustomInputGesturesRepository,
     private val inputManager: InputManager
 ) : ShortcutCategoriesRepository {
@@ -116,7 +110,7 @@ constructor(
                 if (inputDevice == null) {
                     emptyList()
                 } else {
-                    val sources = toInternalGroupSources(inputGestures)
+                    val sources = inputGestureDataAdapter.toInternalGroupSources(inputGestures)
                     val supportedKeyCodes =
                         shortcutCategoriesUtils.fetchSupportedKeyCodes(
                             inputDevice.id,
@@ -216,7 +210,8 @@ constructor(
             return null
         }
 
-        return inputGestureMaps.shortcutLabelToKeyGestureTypeMap[shortcutBeingCustomized.label]
+        return inputGestureDataAdapter
+            .getKeyGestureTypeFromShortcutLabel(shortcutBeingCustomized.label)
     }
 
     @KeyGestureType
@@ -232,7 +227,8 @@ constructor(
             return null
         }
 
-        return inputGestureMaps.shortcutLabelToKeyGestureTypeMap[shortcutBeingCustomized.label]
+        return inputGestureDataAdapter
+            .getKeyGestureTypeFromShortcutLabel(shortcutBeingCustomized.label)
     }
 
     private fun Builder.addTriggerFromSelectedKeyCombination(): Builder {
@@ -260,70 +256,6 @@ constructor(
     fun getShortcutBeingCustomized(): ShortcutCustomizationRequestInfo? {
         return _shortcutBeingCustomized.value
     }
-
-    private fun toInternalGroupSources(
-        inputGestures: List<InputGestureData>
-    ): List<InternalGroupsSource> {
-        val ungroupedInternalGroupSources =
-            inputGestures.mapNotNull { gestureData ->
-                val keyTrigger = gestureData.trigger as KeyTrigger
-                val keyGestureType = gestureData.action.keyGestureType()
-                fetchGroupLabelByGestureType(keyGestureType)?.let { groupLabel ->
-                    toInternalKeyboardShortcutInfo(keyGestureType, keyTrigger)?.let {
-                        internalKeyboardShortcutInfo ->
-                        val group =
-                            InternalKeyboardShortcutGroup(
-                                label = groupLabel,
-                                items = listOf(internalKeyboardShortcutInfo),
-                            )
-
-                        fetchShortcutCategoryTypeByGestureType(keyGestureType)?.let {
-                            InternalGroupsSource(groups = listOf(group), type = it)
-                        }
-                    }
-                }
-            }
-
-        return ungroupedInternalGroupSources
-    }
-
-    private fun toInternalKeyboardShortcutInfo(
-        keyGestureType: Int,
-        keyTrigger: KeyTrigger,
-    ): InternalKeyboardShortcutInfo? {
-        fetchShortcutInfoLabelByGestureType(keyGestureType)?.let {
-            return InternalKeyboardShortcutInfo(
-                label = it,
-                keycode = keyTrigger.keycode,
-                modifiers = keyTrigger.modifierState,
-                isCustomShortcut = true,
-            )
-        }
-        return null
-    }
-
-    private fun fetchGroupLabelByGestureType(@KeyGestureType keyGestureType: Int): String? {
-        inputGestureMaps.gestureToInternalKeyboardShortcutGroupLabelResIdMap[keyGestureType]?.let {
-            return context.getString(it)
-        } ?: return null
-    }
-
-    private fun fetchShortcutInfoLabelByGestureType(@KeyGestureType keyGestureType: Int): String? {
-        inputGestureMaps.gestureToInternalKeyboardShortcutInfoLabelResIdMap[keyGestureType]?.let {
-            return context.getString(it)
-        } ?: return null
-    }
-
-    private fun fetchShortcutCategoryTypeByGestureType(
-        @KeyGestureType keyGestureType: Int
-    ): ShortcutCategoryType? {
-        return inputGestureMaps.gestureToShortcutCategoryTypeMap[keyGestureType]
-    }
-
-    private data class InternalGroupsSource(
-        val groups: List<InternalKeyboardShortcutGroup>,
-        val type: ShortcutCategoryType,
-    )
 
     private companion object {
         private const val TAG = "CustomShortcutCategoriesRepository"

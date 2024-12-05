@@ -16,6 +16,7 @@ package com.android.extensions.appfunctions {
     field public static final int ERROR_CATEGORY_UNKNOWN = 0; // 0x0
     field public static final int ERROR_DENIED = 1000; // 0x3e8
     field public static final int ERROR_DISABLED = 1002; // 0x3ea
+    field public static final int ERROR_ENTERPRISE_POLICY_DISALLOWED = 2002; // 0x7d2
     field public static final int ERROR_FUNCTION_NOT_FOUND = 1003; // 0x3eb
     field public static final int ERROR_INVALID_ARGUMENT = 1001; // 0x3e9
     field public static final int ERROR_SYSTEM_ERROR = 2000; // 0x7d0

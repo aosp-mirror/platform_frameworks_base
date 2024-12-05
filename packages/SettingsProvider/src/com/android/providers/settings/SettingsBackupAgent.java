@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.FullBackupDataOutput;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -82,6 +83,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.HashMap;
 import java.util.zip.CRC32;
 
 /**
@@ -194,6 +196,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY =
             "pin_enhanced_privacy";
 
+    // Error messages for logging metrics.
+    private static final String ERROR_COULD_NOT_READ_FROM_CURSOR =
+        "could_not_read_from_cursor";
+    private static final String ERROR_FAILED_TO_WRITE_ENTITY =
+        "failed_to_write_entity";
+
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
     private static final String STAGE_FILE = "flattened-data";
@@ -224,6 +232,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // The font_scale default value for this device.
     private float mDefaultFontScale;
 
+    @Nullable private BackupRestoreEventLogger mBackupRestoreEventLogger;
+    @VisibleForTesting boolean areAgentMetricsEnabled = false;
+    @VisibleForTesting protected Map<String, Integer> numberOfSettingsPerKey;
+
     @Override
     public void onCreate() {
         if (DEBUG_BACKUP) Log.d(TAG, "onCreate() invoked");
@@ -232,6 +244,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 .getStringArray(R.array.entryvalues_font_size);
         mSettingsHelper = new SettingsHelper(this);
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        if (com.android.server.backup.Flags.enableMetricsSettingsBackupAgents()) {
+            mBackupRestoreEventLogger = this.getBackupRestoreEventLogger();
+            numberOfSettingsPerKey = new HashMap<>();
+            areAgentMetricsEnabled = true;
+        }
         super.onCreate();
     }
 
@@ -654,23 +671,41 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         if (oldChecksum == newChecksum) {
             return oldChecksum;
         }
+        writeDataForKey(key, data, output);
+        return newChecksum;
+    }
+
+    @VisibleForTesting
+    void writeDataForKey(String key, byte[] data, BackupDataOutput output) {
+        boolean shouldLogMetrics =
+            areAgentMetricsEnabled && numberOfSettingsPerKey.containsKey(key);
         try {
             if (DEBUG_BACKUP) {
                 Log.v(TAG, "Writing entity " + key + " of size " + data.length);
             }
             output.writeEntityHeader(key, data.length);
             output.writeEntityData(data, data.length);
+            if (shouldLogMetrics) {
+                mBackupRestoreEventLogger
+                    .logItemsBackedUp(key, numberOfSettingsPerKey.get(key));
+            }
         } catch (IOException ioe) {
             // Bail
+            if (shouldLogMetrics) {
+                mBackupRestoreEventLogger
+                    .logItemsBackupFailed(
+                        key,
+                        numberOfSettingsPerKey.get(key),
+                        ERROR_FAILED_TO_WRITE_ENTITY);
+            }
         }
-        return newChecksum;
     }
 
     private byte[] getSystemSettings() {
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, SystemSettings.SETTINGS_TO_BACKUP);
+            return extractRelevantValues(cursor, SystemSettings.SETTINGS_TO_BACKUP, KEY_SYSTEM);
         } finally {
             cursor.close();
         }
@@ -680,7 +715,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Cursor cursor = getContentResolver().query(Settings.Secure.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, SecureSettings.SETTINGS_TO_BACKUP);
+            return extractRelevantValues(cursor, SecureSettings.SETTINGS_TO_BACKUP, KEY_SECURE);
         } finally {
             cursor.close();
         }
@@ -690,7 +725,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Cursor cursor = getContentResolver().query(Settings.Global.CONTENT_URI, PROJECTION, null,
                 null, null);
         try {
-            return extractRelevantValues(cursor, getGlobalSettingsToBackup());
+            return extractRelevantValues(cursor, getGlobalSettingsToBackup(), KEY_GLOBAL);
         } finally {
             cursor.close();
         }
@@ -1118,11 +1153,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      *
      * @param cursor A cursor with settings data.
      * @param settings The settings to extract.
+     * @param settingsKey The key of the settings to extract (eg system).
      * @return The byte array of extracted values.
      */
-    private byte[] extractRelevantValues(Cursor cursor, String[] settings) {
+    private byte[] extractRelevantValues(
+        Cursor cursor, String[] settings, String settingsKey) {
         if (!cursor.moveToFirst()) {
             Log.e(TAG, "Couldn't read from the cursor");
+            if (areAgentMetricsEnabled) {
+                mBackupRestoreEventLogger
+                    .logItemsBackupFailed(
+                        settingsKey,
+                        settings.length,
+                        ERROR_COULD_NOT_READ_FROM_CURSOR);
+            }
             return new byte[0];
         }
 
@@ -1179,6 +1223,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG) {
                 Log.d(TAG, "Backed up setting: " + key + "=" + value);
             }
+        }
+
+        if (areAgentMetricsEnabled) {
+            numberOfSettingsPerKey.put(settingsKey, backedUpSettingIndex);
         }
 
         // Aggregate the result.
@@ -1364,7 +1412,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                      getContentResolver()
                              .query(Settings.Secure.CONTENT_URI, PROJECTION, null, null, null)) {
             return extractRelevantValues(
-                    cursor, DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
+                    cursor,
+                    DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP,
+                    KEY_DEVICE_SPECIFIC_CONFIG);
         }
     }
 

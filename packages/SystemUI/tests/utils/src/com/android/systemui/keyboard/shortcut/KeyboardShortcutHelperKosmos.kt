@@ -25,6 +25,7 @@ import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.keyboard.shortcut.data.repository.CustomInputGesturesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.CustomShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.DefaultShortcutCategoriesRepository
+import com.android.systemui.keyboard.shortcut.data.repository.InputGestureDataAdapter
 import com.android.systemui.keyboard.shortcut.data.repository.InputGestureMaps
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategoriesUtils
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
@@ -112,6 +113,8 @@ val Kosmos.defaultShortcutCategoriesRepository by
 
 val Kosmos.inputGestureMaps by Kosmos.Fixture { InputGestureMaps(applicationContext) }
 
+val Kosmos.inputGestureDataAdapter by Kosmos.Fixture { InputGestureDataAdapter(userTracker, inputGestureMaps, applicationContext)}
+
 val Kosmos.customInputGesturesRepository by
     Kosmos.Fixture { CustomInputGesturesRepository(userTracker, testDispatcher) }
 
@@ -122,8 +125,7 @@ val Kosmos.customShortcutCategoriesRepository by
             applicationCoroutineScope,
             testDispatcher,
             shortcutCategoriesUtils,
-            applicationContext,
-            inputGestureMaps,
+            inputGestureDataAdapter,
             customInputGesturesRepository,
             fakeInputManager.inputManager,
         )
