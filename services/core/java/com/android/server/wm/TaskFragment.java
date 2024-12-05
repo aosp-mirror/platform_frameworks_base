@@ -3523,10 +3523,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 throw new IllegalStateException("allowMultipleAdjacentTaskFragments must be"
                         + " enabled to set more than two TaskFragments adjacent to each other.");
             }
-            if (taskFragments.size() < 2) {
+            final int size = taskFragments.size();
+            if (size < 2) {
                 throw new IllegalArgumentException("Adjacent TaskFragments must contain at least"
-                        + " two TaskFragments, but only " + taskFragments.size()
-                        + " were provided.");
+                        + " two TaskFragments, but only " + size + " were provided.");
+            }
+            if (size > 2) {
+                for (int i = 0; i < size; i++) {
+                    if (taskFragments.valueAt(i).asTask() == null) {
+                        throw new IllegalArgumentException(
+                                "Not yet support 3+ adjacent for non-Task TFs");
+                    }
+                }
             }
             mAdjacentSet = taskFragments;
         }
@@ -3602,6 +3610,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 }
             }
             return false;
+        }
+
+        int size() {
+            return mAdjacentSet.size();
         }
 
         @Override
