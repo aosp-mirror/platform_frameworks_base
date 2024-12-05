@@ -182,6 +182,7 @@ public class XmlConfigSource implements ConfigSource {
         boolean overridePins =
                 parser.getAttributeBooleanValue(null, "overridePins", defaultOverridePins);
         int sourceId = parser.getAttributeResourceValue(null, "src", -1);
+        boolean disableCT = false;
         String sourceString = parser.getAttributeValue(null, "src");
         CertificateSource source = null;
         if (sourceString == null) {
@@ -190,10 +191,12 @@ public class XmlConfigSource implements ConfigSource {
         if (sourceId != -1) {
             // TODO: Cache ResourceCertificateSources by sourceId
             source = new ResourceCertificateSource(sourceId, mContext);
+            disableCT = true;
         } else if ("system".equals(sourceString)) {
             source = SystemCertificateSource.getInstance();
         } else if ("user".equals(sourceString)) {
             source = UserCertificateSource.getInstance();
+            disableCT = true;
         } else if ("wfa".equals(sourceString)) {
             source = WfaCertificateSource.getInstance();
         } else {
@@ -201,7 +204,7 @@ public class XmlConfigSource implements ConfigSource {
                     + "Should be one of system|user|@resourceVal");
         }
         XmlUtils.skipCurrentTag(parser);
-        return new CertificatesEntryRef(source, overridePins);
+        return new CertificatesEntryRef(source, overridePins, disableCT);
     }
 
     private Collection<CertificatesEntryRef> parseTrustAnchors(XmlResourceParser parser,

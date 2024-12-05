@@ -32,6 +32,33 @@ filegroup {
     visibility: ["//frameworks/base/services/core"],
 }
 
+// Do not static include this lib in VCN because these files exist in
+// both service-connectivity.jar and framework.jar
+// TODO: b/374174952 After VCN moves to Connectivity/ and the modularization is done
+// this lib can be removed and "service-connectivity-b-pre-jarjar" can include
+// "service-connectivity-pre-jarjar"
+java_library {
+    name: "connectivity-utils-service-vcn-internal",
+    sdk_version: "module_current",
+    min_sdk_version: "30",
+    srcs: [
+        ":framework-connectivity-shared-srcs",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    visibility: [
+        "//visibility:private",
+    ],
+    apex_available: [
+        // TODO: b/374174952 Remove it when VCN modularization is released
+        "//apex_available:platform",
+
+        "com.android.tethering",
+    ],
+}
+
 java_library {
     name: "service-connectivity-b-pre-jarjar",
     sdk_version: "system_server_current",
@@ -42,8 +69,33 @@ java_library {
         "src/**/*.java",
     ],
 
-    // TODO: b/375213246 Expose this library to Tethering module
+    libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "connectivity-utils-service-vcn-internal",
+        "framework-annotations-lib",
+        "framework-connectivity-pre-jarjar",
+        "framework-connectivity-t-pre-jarjar",
+        "framework-connectivity-b-pre-jarjar",
+        "framework-wifi.stubs.module_lib",
+        "keepanno-annotations",
+        "modules-utils-statemachine",
+        "unsupportedappusage",
+    ],
+
+    // TODO: b/374174952 Dynamically include these libs when VCN
+    // modularization is released
+    static_libs: [
+        "net-utils-service-vcn",
+        "modules-utils-handlerexecutor",
+    ],
+
     visibility: [
         "//frameworks/base/services",
+    ],
+    apex_available: [
+        // TODO: b/374174952 Remove it when VCN modularization is released
+        "//apex_available:platform",
+
+        "com.android.tethering",
     ],
 }
