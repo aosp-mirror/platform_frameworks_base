@@ -201,6 +201,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         "could_not_read_from_cursor";
     private static final String ERROR_FAILED_TO_WRITE_ENTITY =
         "failed_to_write_entity";
+    private static final String ERROR_COULD_NOT_READ_ENTITY =
+        "could_not_read_entity";
+    private static final String ERROR_SKIPPED_BY_SYSTEM = "skipped_by_system";
+    private static final String ERROR_SKIPPED_BY_BLOCKLIST =
+        "skipped_by_dynamic_blocklist";
+    private static final String ERROR_SKIPPED_PRESERVED = "skipped_preserved";
+    private static final String ERROR_SKIPPED_DUE_TO_LARGE_SCREEN =
+        "skipped_due_to_large_screen";
+    private static final String ERROR_DID_NOT_PASS_VALIDATION = "did_not_pass_validation";
+
 
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
@@ -373,7 +383,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal,
                             movedToSecure, /* movedToSystem= */ null,
                             R.array.restore_blocked_system_settings, dynamicBlockList,
-                            preservedSystemSettings);
+                            preservedSystemSettings, KEY_SYSTEM);
                     mSettingsHelper.applyAudioSettings();
                     break;
 
@@ -381,13 +391,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal,
                             /* movedToSecure= */ null, movedToSystem,
                             R.array.restore_blocked_secure_settings, dynamicBlockList,
-                            preservedSecureSettings);
+                            preservedSecureSettings, KEY_SECURE);
                     break;
 
                 case KEY_GLOBAL :
                     restoreSettings(data, Settings.Global.CONTENT_URI, /* movedToGlobal= */ null,
                             movedToSecure, movedToSystem, R.array.restore_blocked_global_settings,
-                            dynamicBlockList, preservedGlobalSettings);
+                            dynamicBlockList, preservedGlobalSettings, KEY_GLOBAL);
                     break;
 
                 case KEY_WIFI_SUPPLICANT :
@@ -506,7 +516,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI, movedToGlobal,
                     movedToSecure, /* movedToSystem= */ null,
                     R.array.restore_blocked_system_settings, Collections.emptySet(),
-                    Collections.emptySet());
+                    Collections.emptySet(), KEY_SYSTEM);
 
             // secure settings
             nBytes = in.readInt();
@@ -516,7 +526,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI, movedToGlobal,
                     /* movedToSecure= */ null, movedToSystem,
                     R.array.restore_blocked_secure_settings, Collections.emptySet(),
-                    Collections.emptySet());
+                    Collections.emptySet(), KEY_SECURE);
 
             // Global only if sufficiently new
             if (version >= FULL_BACKUP_ADDED_GLOBAL) {
@@ -527,7 +537,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI,
                         /* movedToGlobal= */ null, movedToSecure, movedToSystem,
                         R.array.restore_blocked_global_settings, Collections.emptySet(),
-                        Collections.emptySet());
+                        Collections.emptySet(), KEY_GLOBAL);
             }
 
             // locale
@@ -808,7 +818,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         return baos.toByteArray();
     }
 
-    private void restoreSettings(
+    @VisibleForTesting
+    void restoreSettings(
             BackupDataInput data,
             Uri contentUri,
             Set<String> movedToGlobal,
@@ -816,12 +827,17 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Set<String> movedToSystem,
             int blockedSettingsArrayId,
             Set<String> dynamicBlockList,
-            Set<String> settingsToPreserve) {
+            Set<String> settingsToPreserve,
+            String settingsKey) {
         byte[] settings = new byte[data.getDataSize()];
         try {
             data.readEntityData(settings, 0, settings.length);
         } catch (IOException ioe) {
             Log.e(TAG, "Couldn't read entity data");
+            if (areAgentMetricsEnabled) {
+                mBackupRestoreEventLogger.logItemsRestoreFailed(
+                    settingsKey, /* count= */ 1, ERROR_COULD_NOT_READ_ENTITY);
+            }
             return;
         }
         restoreSettings(
@@ -833,7 +849,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 movedToSystem,
                 blockedSettingsArrayId,
                 dynamicBlockList,
-                settingsToPreserve);
+                settingsToPreserve,
+                settingsKey);
     }
 
     private void restoreSettings(
@@ -845,7 +862,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Set<String> movedToSystem,
             int blockedSettingsArrayId,
             Set<String> dynamicBlockList,
-            Set<String> settingsToPreserve) {
+            Set<String> settingsToPreserve,
+            String settingsKey) {
         restoreSettings(
                 settings,
                 0,
@@ -856,7 +874,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 movedToSystem,
                 blockedSettingsArrayId,
                 dynamicBlockList,
-                settingsToPreserve);
+                settingsToPreserve,
+                settingsKey);
     }
 
     @VisibleForTesting
@@ -870,12 +889,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Set<String> movedToSystem,
             int blockedSettingsArrayId,
             Set<String> dynamicBlockList,
-            Set<String> settingsToPreserve) {
+            Set<String> settingsToPreserve,
+            String settingsKey) {
         if (DEBUG) {
             Log.i(TAG, "restoreSettings: " + contentUri);
         }
 
-        SettingsBackupWhitelist whitelist = getBackupWhitelist(contentUri);
+        SettingsBackupAllowlist allowlist = getBackupAllowlist(contentUri);
 
         // Restore only the white list data.
         final ArrayMap<String, String> cachedEntries = new ArrayMap<>();
@@ -885,7 +905,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         Set<String> blockedSettings = getBlockedSettings(blockedSettingsArrayId);
 
-        for (String key : whitelist.mSettingsWhitelist) {
+        int restoredSettingsCount = 0;
+        for (String key : allowlist.mSettingsAllowlist) {
             boolean isBlockedBySystem = blockedSettings != null && blockedSettings.contains(key);
             if (isBlockedBySystem || isBlockedByDynamicList(dynamicBlockList, contentUri,  key)) {
                 Log.i(
@@ -895,6 +916,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                                 + " removed from restore by "
                                 + (isBlockedBySystem ? "system" : "dynamic")
                                 + " block list");
+                if (areAgentMetricsEnabled) {
+                    mBackupRestoreEventLogger.logItemsRestoreFailed(
+                        settingsKey,
+                        /* count= */ 1,
+                        isBlockedBySystem ? ERROR_SKIPPED_BY_SYSTEM : ERROR_SKIPPED_BY_BLOCKLIST);
+                }
                 continue;
             }
 
@@ -905,12 +932,20 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (isSettingPreserved && !Settings.Secure.NAVIGATION_MODE.equals(key)) {
                 Log.i(TAG, "Skipping restore for setting " + key + " as it is marked as "
                         + "preserved");
+                if (areAgentMetricsEnabled) {
+                    mBackupRestoreEventLogger.logItemsRestoreFailed(
+                            settingsKey, /* count= */ 1, ERROR_SKIPPED_PRESERVED);
+                }
                 continue;
             }
 
             if (LargeScreenSettings.doNotRestoreIfLargeScreenSetting(key, getBaseContext())) {
                 Log.i(TAG, "Skipping restore for setting " + key + " as the target device "
                         + "is a large screen (i.e tablet or foldable in unfolded state)");
+                if (areAgentMetricsEnabled) {
+                    mBackupRestoreEventLogger.logItemsRestoreFailed(
+                            settingsKey, /* count= */ 1, ERROR_SKIPPED_DUE_TO_LARGE_SCREEN);
+                }
                 continue;
             }
 
@@ -947,19 +982,34 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             }
 
             // only restore the settings that have valid values
-            if (!isValidSettingValue(key, value, whitelist.mSettingsValidators)) {
+            if (!isValidSettingValue(key, value, allowlist.mSettingsValidators)) {
                 Log.w(TAG, "Attempted restore of " + key + " setting, but its value didn't pass"
                         + " validation, value: " + value);
+                if (areAgentMetricsEnabled) {
+                    mBackupRestoreEventLogger.logItemsRestoreFailed(
+                            settingsKey, /* count= */ 1, ERROR_DID_NOT_PASS_VALIDATION);
+                }
                 continue;
             }
 
             final Uri destination;
+            // If the destination changes, we need to update the key used as datatype for metrics.
+            String finalSettingsKey = settingsKey;
             if (movedToGlobal != null && movedToGlobal.contains(key)) {
                 destination = Settings.Global.CONTENT_URI;
+                if (areAgentMetricsEnabled) {
+                    finalSettingsKey = KEY_GLOBAL;
+                }
             } else if (movedToSecure != null && movedToSecure.contains(key)) {
                 destination = Settings.Secure.CONTENT_URI;
+                if (areAgentMetricsEnabled) {
+                    finalSettingsKey = KEY_SECURE;
+                }
             } else if (movedToSystem != null && movedToSystem.contains(key)) {
                 destination = Settings.System.CONTENT_URI;
+                if (areAgentMetricsEnabled) {
+                    finalSettingsKey = KEY_SYSTEM;
+                }
             } else {
                 destination = contentUri;
             }
@@ -977,6 +1027,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (isSettingPreserved) {
                     Log.i(TAG, "Skipping restore for setting navigation_mode "
                         + "as it is marked as preserved");
+                    if (areAgentMetricsEnabled) {
+                        mBackupRestoreEventLogger.logItemsRestoreFailed(
+                                finalSettingsKey, /* count= */ 1, ERROR_SKIPPED_PRESERVED);
+                    }
                     continue;
                 }
             }
@@ -996,12 +1050,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 Log.d(TAG, "Restored font scale from: " + toRestore + " to " + value);
             }
 
-
+            // TODO(b/379861078): Log metrics inside this method.
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);
 
             Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
+            if (areAgentMetricsEnabled) {
+                mBackupRestoreEventLogger.logItemsRestored(finalSettingsKey, /* count= */ 1);
+            }
         }
+
     }
 
 
@@ -1031,29 +1089,29 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     @VisibleForTesting
-    SettingsBackupWhitelist getBackupWhitelist(Uri contentUri) {
+    SettingsBackupAllowlist getBackupAllowlist(Uri contentUri) {
         // Figure out the white list and redirects to the global table.  We restore anything
         // in either the backup allowlist or the legacy-restore allowlist for this table.
-        String[] whitelist;
+        String[] allowlist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            whitelist = ArrayUtils.concat(String.class, SecureSettings.SETTINGS_TO_BACKUP,
+            allowlist = ArrayUtils.concat(String.class, SecureSettings.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS,
                     DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
             validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
-            whitelist = ArrayUtils.concat(String.class, SystemSettings.SETTINGS_TO_BACKUP,
+            allowlist = ArrayUtils.concat(String.class, SystemSettings.SETTINGS_TO_BACKUP,
                     Settings.System.LEGACY_RESTORE_SETTINGS);
             validators = SystemSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
-            whitelist = ArrayUtils.concat(String.class, getGlobalSettingsToBackup(),
+            allowlist = ArrayUtils.concat(String.class, getGlobalSettingsToBackup(),
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
             validators = GlobalSettingsValidators.VALIDATORS;
         } else {
             throw new IllegalArgumentException("Unknown URI: " + contentUri);
         }
 
-        return new SettingsBackupWhitelist(whitelist, validators);
+        return new SettingsBackupAllowlist(allowlist, validators);
     }
 
     private String[] getGlobalSettingsToBackup() {
@@ -1449,7 +1507,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 null,
                 blockedSettingsArrayId,
                 dynamicBlocklist,
-                preservedSettings);
+                preservedSettings,
+                KEY_DEVICE_SPECIFIC_CONFIG);
 
         updateWindowManagerIfNeeded(originalDensity);
 
@@ -1647,14 +1706,14 @@ public class SettingsBackupAgent extends BackupAgentHelper {
      * Store the allowlist of settings to be backed up and validators for them.
      */
     @VisibleForTesting
-    static class SettingsBackupWhitelist {
-        final String[] mSettingsWhitelist;
+    static class SettingsBackupAllowlist {
+        final String[] mSettingsAllowlist;
         final Map<String, Validator> mSettingsValidators;
 
 
-        SettingsBackupWhitelist(String[] settingsWhitelist,
+        SettingsBackupAllowlist(String[] settingsAllowlist,
                 Map<String, Validator> settingsValidators) {
-            mSettingsWhitelist = settingsWhitelist;
+            mSettingsAllowlist = settingsAllowlist;
             mSettingsValidators = settingsValidators;
         }
     }
