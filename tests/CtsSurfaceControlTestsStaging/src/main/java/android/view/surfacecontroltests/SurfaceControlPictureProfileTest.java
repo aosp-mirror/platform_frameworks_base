@@ -203,12 +203,10 @@ public class SurfaceControlPictureProfileTest {
             transaction
                     .setBuffer(mSurfaceControls[i], buffer)
                     .setPictureProfileHandle(mSurfaceControls[i], handle)
-                    .setContentPriority(mSurfaceControls[i], 0);
+                    .setContentPriority(mSurfaceControls[i], 1);
         }
-        // Make the first layer low priority (high value)
-        transaction.setContentPriority(mSurfaceControls[0], 2);
-        // Make the last layer higher priority (lower value)
-        transaction.setContentPriority(mSurfaceControls[maxPictureProfiles], 1);
+        transaction.setContentPriority(mSurfaceControls[0], -1);
+        transaction.setContentPriority(mSurfaceControls[maxPictureProfiles], 0);
         transaction.apply();
 
         pictures = pollMs(picturesQueue, 200);
@@ -219,8 +217,8 @@ public class SurfaceControlPictureProfileTest {
         assertThat(stream(pictures).map(picture -> picture.getPictureProfileHandle().getId()))
                 .containsExactlyElementsIn(toIterableRange(2, maxPictureProfiles + 1));
 
-        // Change priority and ensure that the first layer gets access
-        new SurfaceControl.Transaction().setContentPriority(mSurfaceControls[0], 0).apply();
+        // Elevate priority for the first layer and verify it gets to use a profile
+        new SurfaceControl.Transaction().setContentPriority(mSurfaceControls[0], 2).apply();
         pictures = pollMs(picturesQueue, 200);
         assertThat(pictures).isNotNull();
         // Expect all but the last layer to be listed as an active picture

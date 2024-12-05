@@ -4671,8 +4671,7 @@ public final class SurfaceControl implements Parcelable {
          * Sets the importance the layer's contents has to the app's user experience.
          * <p>
          * When a two layers within the same app are competing for a limited rendering resource,
-         * the priority will determine which layer gets access to the resource. The lower the
-         * priority, the more likely the layer will get access to the resource.
+         * the layer with the highest priority will gets access to the resource.
          * <p>
          * Resources managed by this priority:
          * <ul>
