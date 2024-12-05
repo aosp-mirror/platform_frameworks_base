@@ -159,7 +159,8 @@ public class SplitScreenConstants {
      * {@link PersistentSnapPosition} + {@link #NOT_IN_SPLIT}.
      */
     @IntDef(value = {
-            NOT_IN_SPLIT,
+            NOT_IN_SPLIT, // user is not in split screen
+            SNAP_TO_NONE, // in "free snap mode," where apps are fully resizable
             SNAP_TO_2_33_66,
             SNAP_TO_2_50_50,
             SNAP_TO_2_66_33,
@@ -170,6 +171,23 @@ public class SplitScreenConstants {
             SNAP_TO_3_10_45_45,
     })
     public @interface SplitScreenState {}
+
+    /** Converts a {@link SplitScreenState} to a human-readable string. */
+    public static String stateToString(@SplitScreenState int state) {
+        return switch (state) {
+            case NOT_IN_SPLIT -> "NOT_IN_SPLIT";
+            case SNAP_TO_NONE -> "SNAP_TO_NONE";
+            case SNAP_TO_2_33_66 -> "SNAP_TO_2_33_66";
+            case SNAP_TO_2_50_50 -> "SNAP_TO_2_50_50";
+            case SNAP_TO_2_66_33 -> "SNAP_TO_2_66_33";
+            case SNAP_TO_2_90_10 -> "SNAP_TO_2_90_10";
+            case SNAP_TO_2_10_90 -> "SNAP_TO_2_10_90";
+            case SNAP_TO_3_33_33_33 -> "SNAP_TO_3_33_33_33";
+            case SNAP_TO_3_45_45_10 -> "SNAP_TO_3_45_45_10";
+            case SNAP_TO_3_10_45_45 -> "SNAP_TO_3_10_45_45";
+            default -> "UNKNOWN";
+        };
+    }
 
     /**
      * Checks if the snapPosition in question is a {@link PersistentSnapPosition}.
