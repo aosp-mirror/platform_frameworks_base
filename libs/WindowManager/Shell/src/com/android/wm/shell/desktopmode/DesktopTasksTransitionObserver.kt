@@ -75,6 +75,12 @@ class DesktopTasksTransitionObserver(
         finishTransaction: SurfaceControl.Transaction,
     ) {
         // TODO: b/332682201 Update repository state
+        if (
+            DesktopModeFlags.INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC
+                .isTrue() && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
+        ) {
+            updateTopTransparentFullscreenTaskId(info)
+        }
         updateWallpaperToken(info)
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             handleBackNavigation(transition, info)
@@ -260,6 +266,24 @@ class DesktopTasksTransitionObserver(
                         TRANSIT_CLOSE -> desktopRepository.wallpaperActivityToken = null
                         else -> {}
                     }
+                }
+            }
+        }
+    }
+
+    private fun updateTopTransparentFullscreenTaskId(info: TransitionInfo) {
+        info.changes.forEach { change ->
+            change.taskInfo?.let { task ->
+                val desktopRepository = desktopUserRepositories.getProfile(task.userId)
+                val displayId = task.displayId
+                // Clear `topTransparentFullscreenTask` information from repository if task
+                // is closed or sent to back.
+                if (
+                    TransitionUtil.isClosingMode(change.mode) &&
+                        task.taskId ==
+                            desktopRepository.getTopTransparentFullscreenTaskId(displayId)
+                ) {
+                    desktopRepository.clearTopTransparentFullscreenTaskId(displayId)
                 }
             }
         }

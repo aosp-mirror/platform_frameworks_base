@@ -54,7 +54,9 @@ class DesktopRepository(
      * @property closingTasks task ids for tasks that are going to close, but are currently visible.
      * @property freeformTasksInZOrder list of current freeform task ids ordered from top to bottom
      * @property fullImmersiveTaskId the task id of the desktop task that is in full-immersive mode.
-     *   (top is at index 0).
+     * @property topTransparentFullscreenTaskId the task id of any current top transparent
+     *   fullscreen task launched on top of Desktop Mode. Cleared when the transparent task is
+     *   closed or sent to back. (top is at index 0).
      */
     private data class DesktopTaskData(
         val activeTasks: ArraySet<Int> = ArraySet(),
@@ -64,6 +66,7 @@ class DesktopRepository(
         val closingTasks: ArraySet<Int> = ArraySet(),
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
         var fullImmersiveTaskId: Int? = null,
+        var topTransparentFullscreenTaskId: Int? = null,
     ) {
         fun deepCopy(): DesktopTaskData =
             DesktopTaskData(
@@ -73,6 +76,7 @@ class DesktopRepository(
                 closingTasks = ArraySet(closingTasks),
                 freeformTasksInZOrder = ArrayList(freeformTasksInZOrder),
                 fullImmersiveTaskId = fullImmersiveTaskId,
+                topTransparentFullscreenTaskId = topTransparentFullscreenTaskId,
             )
 
         fun clear() {
@@ -82,6 +86,7 @@ class DesktopRepository(
             closingTasks.clear()
             freeformTasksInZOrder.clear()
             fullImmersiveTaskId = null
+            topTransparentFullscreenTaskId = null
         }
     }
 
@@ -322,13 +327,27 @@ class DesktopRepository(
     fun getTaskInFullImmersiveState(displayId: Int): Int? =
         desktopTaskDataByDisplayId.getOrCreate(displayId).fullImmersiveTaskId
 
+    /** Sets the top transparent fullscreen task id for a given display. */
+    fun setTopTransparentFullscreenTaskId(displayId: Int, taskId: Int) {
+        desktopTaskDataByDisplayId.getOrCreate(displayId).topTransparentFullscreenTaskId = taskId
+    }
+
+    /** Returns the top transparent fullscreen task id for a given display, or null. */
+    fun getTopTransparentFullscreenTaskId(displayId: Int): Int? =
+        desktopTaskDataByDisplayId.getOrCreate(displayId).topTransparentFullscreenTaskId
+
+    /** Clears the top transparent fullscreen task id info for a given display. */
+    fun clearTopTransparentFullscreenTaskId(displayId: Int) {
+        desktopTaskDataByDisplayId.getOrCreate(displayId).topTransparentFullscreenTaskId = null
+    }
+
     private fun notifyVisibleTaskListeners(displayId: Int, visibleTasksCount: Int) {
         visibleTasksListeners.forEach { (listener, executor) ->
             executor.execute { listener.onTasksVisibilityChanged(displayId, visibleTasksCount) }
         }
     }
 
-    /** Gets number of visible tasks on given [displayId] */
+    /** Gets number of visible freeform tasks on given [displayId] */
     fun getVisibleTaskCount(displayId: Int): Int =
         desktopTaskDataByDisplayId[displayId]?.visibleTasks?.size
             ?: 0.also { logD("getVisibleTaskCount=$it") }
@@ -526,6 +545,10 @@ class DesktopRepository(
             )
             pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
             pw.println("${innerPrefix}fullImmersiveTaskId=${data.fullImmersiveTaskId}")
+            pw.println(
+                "${innerPrefix}topTransparentFullscreenTaskId=" +
+                    "${data.topTransparentFullscreenTaskId}"
+            )
             pw.println("${innerPrefix}wallpaperActivityToken=$wallpaperActivityToken")
         }
     }

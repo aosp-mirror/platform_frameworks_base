@@ -27,10 +27,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Tests for {@link AppCompatUtils}.
+ * Tests for [@link AppCompatUtils].
  *
- * Build/Install/Run:
- *  atest WMShellUnitTests:AppCompatUtilsTest
+ * Build/Install/Run: atest WMShellUnitTests:AppCompatUtilsTest
  */
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
