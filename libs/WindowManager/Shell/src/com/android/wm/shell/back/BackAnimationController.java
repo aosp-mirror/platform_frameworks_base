@@ -214,6 +214,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         }
                         ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Navigation window gone.");
                         setTriggerBack(false);
+                        // Trigger close transition if necessary.
+                        if (Flags.migratePredictiveBackTransition()) {
+                            mBackTransitionHandler.onAnimationFinished();
+                        }
                         resetTouchTracker();
                         // Don't wait for animation start
                         mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
