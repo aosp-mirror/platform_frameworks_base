@@ -368,8 +368,8 @@ constructor(
                     SceneContainerFlag.isEnabled,
                 )
             )
-        val startPadding: Int = smartspaceViewModel.getSmartspaceStartPadding(previewContext)
-        val endPadding: Int = smartspaceViewModel.getSmartspaceEndPadding(previewContext)
+        val startPadding: Int = smartspaceViewModel.getDateWeatherStartPadding(previewContext)
+        val endPadding: Int = smartspaceViewModel.getDateWeatherEndPadding(previewContext)
 
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
