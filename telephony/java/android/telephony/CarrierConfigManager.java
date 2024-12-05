@@ -9756,9 +9756,8 @@ public class CarrierConfigManager {
      * }</pre>
      * <p>
      * This config is empty by default.
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String KEY_REGIONAL_SATELLITE_EARFCN_BUNDLE =
             "regional_satellite_earfcn_bundle";
 
@@ -9885,15 +9884,14 @@ public class CarrierConfigManager {
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
     /**
-     * This value is used to set the max datagram size, if the value is not available then the
-     * default one will be used.
-     * If key is {@code true}, retrieve the max datagram value and use this value always,
-     * {@code false} the default value from the modem will be used.
+     * This value is used to set the max datagram size in bytes.
+     * If the value is not available then the default value will be used.
      *
-     * @hide
+     * The default value is 255 bytes.
      */
-    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE =
-            "satellite_sos_max_datagram_size";
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE_BYTES_INT =
+            "satellite_sos_max_datagram_size_bytes_int";
 
     /** @hide */
     @IntDef({
@@ -10062,9 +10060,9 @@ public class CarrierConfigManager {
 
     /**
      * The display name that will be used for satellite functionality within the UI.
-     * The default string value for this is "Satellite".
-     * @hide
+     * The default string value is empty string.
      */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String KEY_SATELLITE_DISPLAY_NAME_STRING = "satellite_display_name_string";
 
     /**
@@ -10183,10 +10181,8 @@ public class CarrierConfigManager {
      * A string array containing the list of messaging apps that support satellite.
      *
      * The default value contains only "com.google.android.apps.messaging"
-     *
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String KEY_SATELLITE_SUPPORTED_MSG_APPS_STRING_ARRAY =
             "satellite_supported_msg_apps_string_array";
 
@@ -11458,7 +11454,7 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_BT_TO_CELL_DELAY_MS_INT, -1);
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_EXTEND_BT_TO_CELL_DELAY_ON_WIFI_MS_INT, -1);
-        sDefaults.putInt(KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE, 255);
+        sDefaults.putInt(KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE_BYTES_INT, 255);
     }
 
     /**
