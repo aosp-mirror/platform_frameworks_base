@@ -1301,17 +1301,23 @@ public final class Display {
     }
 
     /**
-     * Represents the {@link FrameRateCategory} for the Normal frame rate
+     * Normal category determines the framework's recommended normal frame rate.
+     * Opt for this normal rate unless a higher frame rate significantly enhances
+     * the user experience.
      *
-     * @see FrameRateCategory
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_HIGH
      */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
 
     /**
-     * Represents the {@link FrameRateCategory} for the High frame rate
+     * High category determines the framework's recommended high frame rate.
+     * Opt for this high rate when a higher frame rate significantly enhances
+     * the user experience.
      *
-     * @see FrameRateCategory
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_NORMAL
      */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_HIGH = 1;
@@ -1332,22 +1338,17 @@ public final class Display {
      *
      * <p> For example, an animation that does not require fast render rates can use
      * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
-     * The suggested frame rate then can be used in the
-     * {@link Surface.FrameRateParams.Builder#setDesiredRateRange} for desiredMinRate.
      *
      * <pre>{@code
      *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
-     *  Surface.FrameRateParams params = new Surface.FrameRateParams.Builder().
-     *                                      setDesiredRateRange(desiredMinRate, Float.MAX).build();
-     *  surface.setFrameRate(params);
+     *  surface.setFrameRate(desiredMinRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
      * }</pre>
      * </p>
      *
      * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
      *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
      *
-     * @see Surface#setFrameRate(Surface.FrameRateParams)
-     * @see SurfaceControl.Transaction#setFrameRate(SurfaceControl, Surface.FrameRateParams)
+     * @see Surface#setFrameRate(float, int)
      * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
      * or {@link #FRAME_RATE_CATEGORY_HIGH}
      */
