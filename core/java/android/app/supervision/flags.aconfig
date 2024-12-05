@@ -24,3 +24,11 @@ flag {
   description: "Flag that enables supervision when the supervision app is the profile owner"
   bug: "377261590"
 }
+
+flag {
+  name: "deprecate_dpm_supervision_apis"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag that deprecates supervision methods in DPM"
+  bug: "382034839"
+}

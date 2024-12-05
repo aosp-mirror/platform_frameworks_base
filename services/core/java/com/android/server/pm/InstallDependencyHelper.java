@@ -129,14 +129,14 @@ public class InstallDependencyHelper {
         }
     }
 
-    void notifySessionComplete(int sessionId, boolean success) {
+    void notifySessionComplete(int sessionId) {
         if (DEBUG) {
-            Slog.d(TAG, "Session complete for " + sessionId + " result: " + success);
+            Slog.d(TAG, "Session complete for " + sessionId);
         }
         synchronized (mTrackers) {
             List<DependencyInstallTracker> completedTrackers = new ArrayList<>();
             for (DependencyInstallTracker tracker: mTrackers) {
-                if (!tracker.onSessionComplete(sessionId, success)) {
+                if (!tracker.onSessionComplete(sessionId)) {
                     completedTrackers.add(tracker);
                 }
             }
@@ -354,7 +354,7 @@ public class InstallDependencyHelper {
                     // Don't wait for sessions that finished already
                     if (sessionInfo == null) {
                         Binder.withCleanCallingIdentity(() -> {
-                            notifySessionComplete(sessionId, /*success=*/ true);
+                            notifySessionComplete(sessionId);
                         });
                     }
                 }
@@ -459,17 +459,11 @@ public class InstallDependencyHelper {
          *
          * Returns true if we still need to continue tracking.
          */
-        public boolean onSessionComplete(int sessionId, boolean success) {
+        public boolean onSessionComplete(int sessionId) {
             synchronized (this) {
                 if (!mPendingSessionIds.contains(sessionId)) {
                     // This had no impact on tracker, so continue tracking
                     return true;
-                }
-
-                if (!success) {
-                    // If one of the dependency fails, the orig session would fail too.
-                    onError(mCallback, "Failed to install all dependencies");
-                    return false; // No point in tracking anymore
                 }
 
                 mPendingSessionIds.remove(sessionId);

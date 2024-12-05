@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.core
 
+import android.internal.statusbar.FakeStatusBarService.Companion.SECONDARY_DISPLAY_ID
 import android.internal.statusbar.fakeStatusBarService
 import android.platform.test.annotations.EnableFlags
 import android.view.WindowInsets
@@ -53,7 +54,7 @@ class CommandQueueInitializerTest : SysuiTestCase() {
     }
 
     @Test
-    fun start_barResultHasTransientStatusBar_transientStateIsTrue() {
+    fun start_defaultDisplay_barResultHasTransientStatusBar_transientStateIsTrue() {
         fakeStatusBarService.transientBarTypes = WindowInsets.Type.statusBars()
 
         initializer.start()
@@ -62,12 +63,38 @@ class CommandQueueInitializerTest : SysuiTestCase() {
     }
 
     @Test
-    fun start_barResultDoesNotHaveTransientStatusBar_transientStateIsFalse() {
+    fun start_defaultDisplay_barResultDoesNotHaveTransientStatusBar_transientStateIsFalse() {
         fakeStatusBarService.transientBarTypes = WindowInsets.Type.navigationBars()
 
         initializer.start()
 
         assertThat(statusBarModeRepository.defaultDisplay.isTransientShown.value).isFalse()
+    }
+
+    @Test
+    fun start_secondaryDisplay_barResultHasTransientStatusBar_transientStateIsTrue() {
+        fakeStatusBarService.transientBarTypesSecondaryDisplay = WindowInsets.Type.statusBars()
+        fakeStatusBarService.transientBarTypes = WindowInsets.Type.navigationBars()
+
+        initializer.start()
+
+        assertThat(statusBarModeRepository.forDisplay(SECONDARY_DISPLAY_ID).isTransientShown.value)
+            .isTrue()
+        // Default display should be unaffected
+        assertThat(statusBarModeRepository.defaultDisplay.isTransientShown.value).isFalse()
+    }
+
+    @Test
+    fun start_secondaryDisplay_barResultDoesNotHaveTransientStatusBar_transientStateIsFalse() {
+        fakeStatusBarService.transientBarTypesSecondaryDisplay = WindowInsets.Type.navigationBars()
+        fakeStatusBarService.transientBarTypes = WindowInsets.Type.statusBars()
+
+        initializer.start()
+
+        assertThat(statusBarModeRepository.forDisplay(SECONDARY_DISPLAY_ID).isTransientShown.value)
+            .isFalse()
+        // Default display should be unaffected
+        assertThat(statusBarModeRepository.defaultDisplay.isTransientShown.value).isTrue()
     }
 
     @Test
@@ -84,6 +111,17 @@ class CommandQueueInitializerTest : SysuiTestCase() {
                 fakeStatusBarService.requestedVisibleTypes,
                 fakeStatusBarService.packageName,
                 fakeStatusBarService.letterboxDetails,
+            )
+        verify(commandQueueCallbacks)
+            .onSystemBarAttributesChanged(
+                SECONDARY_DISPLAY_ID,
+                fakeStatusBarService.appearanceSecondaryDisplay,
+                fakeStatusBarService.appearanceRegionsSecondaryDisplay,
+                fakeStatusBarService.navbarColorManagedByImeSecondaryDisplay,
+                fakeStatusBarService.behaviorSecondaryDisplay,
+                fakeStatusBarService.requestedVisibleTypesSecondaryDisplay,
+                fakeStatusBarService.packageNameSecondaryDisplay,
+                fakeStatusBarService.letterboxDetailsSecondaryDisplay,
             )
     }
 
@@ -105,6 +143,14 @@ class CommandQueueInitializerTest : SysuiTestCase() {
                 fakeStatusBarService.imeBackDisposition,
                 fakeStatusBarService.showImeSwitcher,
             )
+
+        verify(commandQueueCallbacks)
+            .setImeWindowStatus(
+                SECONDARY_DISPLAY_ID,
+                fakeStatusBarService.imeWindowVisSecondaryDisplay,
+                fakeStatusBarService.imeBackDispositionSecondaryDisplay,
+                fakeStatusBarService.showImeSwitcherSecondaryDisplay,
+            )
     }
 
     @Test
@@ -117,6 +163,11 @@ class CommandQueueInitializerTest : SysuiTestCase() {
             .isEqualTo(fakeStatusBarService.disabledFlags1)
         assertThat(commandQueue.disableFlags2ForDisplay(context.displayId))
             .isEqualTo(fakeStatusBarService.disabledFlags2)
+
+        assertThat(commandQueue.disableFlags1ForDisplay(SECONDARY_DISPLAY_ID))
+            .isEqualTo(fakeStatusBarService.disabledFlags1SecondaryDisplay)
+        assertThat(commandQueue.disableFlags2ForDisplay(SECONDARY_DISPLAY_ID))
+            .isEqualTo(fakeStatusBarService.disabledFlags2SecondaryDisplay)
     }
 
     @Test
@@ -125,5 +176,7 @@ class CommandQueueInitializerTest : SysuiTestCase() {
 
         assertThat(commandQueue.disableFlags1ForDisplay(context.displayId)).isNull()
         assertThat(commandQueue.disableFlags2ForDisplay(context.displayId)).isNull()
+        assertThat(commandQueue.disableFlags1ForDisplay(SECONDARY_DISPLAY_ID)).isNull()
+        assertThat(commandQueue.disableFlags2ForDisplay(SECONDARY_DISPLAY_ID)).isNull()
     }
 }

@@ -2347,13 +2347,24 @@ class MediaRouter2ServiceImpl {
             if (!Flags.enableRouteVisibilityControlApi()) {
                 return true;
             }
-            for (String permission : route.getRequiredPermissions()) {
-                if (mContext.checkPermission(permission, mPid, mUid)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    return false;
+            List<Set<String>> permissionSets = route.getRequiredPermissions();
+            if (permissionSets.isEmpty()) {
+                return true;
+            }
+            for (Set<String> permissionSet : permissionSets) {
+                boolean hasAllInSet = true;
+                for (String permission : permissionSet) {
+                    if (mContext.checkPermission(permission, mPid, mUid)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        hasAllInSet = false;
+                        break;
+                    }
+                }
+                if (hasAllInSet) {
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
     }
 

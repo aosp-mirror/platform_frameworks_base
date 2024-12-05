@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Describes the properties of a route.
@@ -640,7 +641,7 @@ public final class MediaRoute2Info implements Parcelable {
     private final String mProviderId;
     private final boolean mIsVisibilityRestricted;
     private final Set<String> mAllowedPackages;
-    private final Set<String> mRequiredPermissions;
+    private final List<Set<String>> mRequiredPermissions;
     @SuitabilityStatus private final int mSuitabilityStatus;
 
     MediaRoute2Info(@NonNull Builder builder) {
@@ -665,7 +666,7 @@ public final class MediaRoute2Info implements Parcelable {
         mIsVisibilityRestricted = builder.mIsVisibilityRestricted;
         mAllowedPackages = builder.mAllowedPackages;
         mSuitabilityStatus = builder.mSuitabilityStatus;
-        mRequiredPermissions = Set.copyOf(builder.mRequiredPermissions);
+        mRequiredPermissions = List.copyOf(builder.mRequiredPermissions);
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
@@ -690,7 +691,12 @@ public final class MediaRoute2Info implements Parcelable {
         mProviderId = in.readString();
         mIsVisibilityRestricted = in.readBoolean();
         mAllowedPackages = Set.of(in.createString8Array());
-        mRequiredPermissions = Set.of(in.createString8Array());
+        ArrayList<Set<String>> requiredPermissions = new ArrayList<>();
+        int numRequiredPermissionSets = in.readInt();
+        for (int i = 0; i < numRequiredPermissionSets; i++) {
+            requiredPermissions.add(Set.of(in.createString8Array()));
+        }
+        mRequiredPermissions = List.copyOf(requiredPermissions); // Use copyOf to make it immutable.
         mSuitabilityStatus = in.readInt();
     }
 
@@ -934,11 +940,12 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * @return the set of permissions which must be held to see this route
+     * @return a list of permission sets - all the permissions in at least one of these sets must be
+     * held to see this route.
      */
     @NonNull
     @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
-    public Set<String> getRequiredPermissions() {
+    public List<Set<String>> getRequiredPermissions() {
         return mRequiredPermissions;
     }
 
@@ -1119,7 +1126,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(", allowedPackages=")
                 .append(String.join(",", mAllowedPackages))
                 .append(", mRequiredPermissions=")
-                .append(String.join(",", mRequiredPermissions))
+                .append(mRequiredPermissions.stream().map(set -> String.join(",", set)).collect(
+                                Collectors.joining("),(", "(", ")")))
                 .append(", suitabilityStatus=")
                 .append(mSuitabilityStatus)
                 .append(" }")
@@ -1153,7 +1161,10 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mProviderId);
         dest.writeBoolean(mIsVisibilityRestricted);
         dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
-        dest.writeString8Array(mRequiredPermissions.toArray(new String[0]));
+        dest.writeInt(mRequiredPermissions.size());
+        for (Set<String> permissionSet : mRequiredPermissions) {
+            dest.writeString8Array(permissionSet.toArray(new String[0]));
+        }
         dest.writeInt(mSuitabilityStatus);
     }
 
@@ -1302,7 +1313,7 @@ public final class MediaRoute2Info implements Parcelable {
         private String mProviderId;
         private boolean mIsVisibilityRestricted;
         private Set<String> mAllowedPackages;
-        private Set<String> mRequiredPermissions;
+        private List<Set<String>> mRequiredPermissions;
         @SuitabilityStatus private int mSuitabilityStatus;
 
         /**
@@ -1328,7 +1339,7 @@ public final class MediaRoute2Info implements Parcelable {
             mDeduplicationIds = Set.of();
             mAllowedPackages = Set.of();
             mSuitabilityStatus = SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
-            mRequiredPermissions = Set.of();
+            mRequiredPermissions = List.of();
         }
 
         /**
@@ -1610,7 +1621,7 @@ public final class MediaRoute2Info implements Parcelable {
         public Builder setVisibilityPublic() {
             mIsVisibilityRestricted = false;
             mAllowedPackages = Set.of();
-            mRequiredPermissions = Set.of();
+            mRequiredPermissions = List.of();
             return this;
         }
 
@@ -1637,13 +1648,31 @@ public final class MediaRoute2Info implements Parcelable {
         /**
          * Limits the visibility of this route to holders of a set of permissions.
          *
+         * <p>Calls to this method override any previous calls of
+         * {@link #setRequiredPermissions(Set)} or {@link #setRequiredPermissions(List)}.
+         *
          * @param requiredPermissions the list of all permissions which must be held in order to
          *                            see this route.
          */
         @NonNull
         @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
         public Builder setRequiredPermissions(@NonNull Set<String> requiredPermissions) {
-            mRequiredPermissions = Set.copyOf(requiredPermissions);
+            return setRequiredPermissions(List.of(requiredPermissions));
+        }
+
+        /**
+         * Limits the visibility of this route to holders of one of a set of permissions.
+         *
+         * <p>Calls to this method override any previous calls of
+         * {@link #setRequiredPermissions(Set)} or {@link #setRequiredPermissions(List)}.
+         *
+         * @param requiresOneOf a list of Sets of permissions. Holding all permissions in at least
+         *                      one of the Sets is required for the route to be visible.
+         */
+        @NonNull
+        @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
+        public Builder setRequiredPermissions(@NonNull List<Set<String>> requiresOneOf) {
+            mRequiredPermissions = List.copyOf(requiresOneOf);
             return this;
         }
 

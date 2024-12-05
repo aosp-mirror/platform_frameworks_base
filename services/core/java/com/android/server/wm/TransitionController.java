@@ -791,19 +791,30 @@ class TransitionController {
             ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
             ActivityManager.RunningTaskInfo startTaskInfo = null;
-            ActivityManager.RunningTaskInfo pipTaskInfo = null;
+            TransitionRequestInfo.PipChange pipChange = null;
             if (startTask != null) {
                 startTaskInfo = startTask.getTaskInfo();
             }
 
             // set the pip task in the request if provided
             if (transition.getPipActivity() != null) {
-                pipTaskInfo = transition.getPipActivity().getTask().getTaskInfo();
+                ActivityManager.RunningTaskInfo pipTaskInfo =
+                        transition.getPipActivity().getTask().getTaskInfo();
+                ActivityRecord pipActivity = transition.getPipActivity();
+                if (pipActivity.getTaskFragment() != null
+                        && pipActivity.getTaskFragment() != pipActivity.getTask()) {
+                    // If the PiP activity is in a TF different from its task, this could be
+                    // AE-to-PiP case, so PipChange will have the TF token cached separately.
+                    pipChange = new TransitionRequestInfo.PipChange(pipActivity.getTaskFragment()
+                            .mRemoteToken.toWindowContainerToken(), pipTaskInfo);
+                } else {
+                    pipChange = new TransitionRequestInfo.PipChange(pipTaskInfo);
+                }
                 transition.setPipActivity(null);
             }
 
             final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
-                    startTaskInfo, pipTaskInfo, remoteTransition, displayChange,
+                    startTaskInfo, pipChange, remoteTransition, displayChange,
                     transition.getFlags(), transition.getSyncId());
 
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();

@@ -1151,7 +1151,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun moveRunningTaskToDesktop_topActivityTranslucentWithoutDisplay_taskIsMovedToDesktop() {
     val task =
       setUpFullscreenTask().apply {
-        isTopActivityTransparent = true
+        isActivityStackTransparent = true
         isTopActivityNoDisplay = true
         numActivities = 1
       }
@@ -1167,7 +1167,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   fun moveRunningTaskToDesktop_topActivityTranslucentWithDisplay_doesNothing() {
     val task =
       setUpFullscreenTask().apply {
-        isTopActivityTransparent = true
+        isActivityStackTransparent = true
         isTopActivityNoDisplay = false
         numActivities = 1
       }
@@ -2260,7 +2260,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     val task =
       setUpFullscreenTask().apply {
-        isTopActivityTransparent = true
+        isActivityStackTransparent = true
         isTopActivityNoDisplay = true
         numActivities = 1
       }
@@ -2278,7 +2278,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     val task =
       setUpFreeformTask().apply {
-        isTopActivityTransparent = true
+        isActivityStackTransparent = true
         isTopActivityNoDisplay = false
         numActivities = 1
       }

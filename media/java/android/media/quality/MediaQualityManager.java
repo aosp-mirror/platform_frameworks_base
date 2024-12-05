@@ -295,9 +295,21 @@ public final class MediaQualityManager {
      * Gets picture profile handle by profile ID.
      * @hide
      */
-    public PictureProfileHandle getPictureProfileHandle(String id) {
+    public List<PictureProfileHandle> getPictureProfileHandle(String[] id) {
         try {
             return mService.getPictureProfileHandle(id, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets sound profile handle by profile ID.
+     * @hide
+     */
+    public List<SoundProfileHandle> getSoundProfileHandle(String[] id) {
+        try {
+            return mService.getSoundProfileHandle(id, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

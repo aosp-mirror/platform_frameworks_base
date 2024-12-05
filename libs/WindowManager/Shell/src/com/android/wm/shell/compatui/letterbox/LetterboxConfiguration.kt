@@ -36,6 +36,21 @@ class LetterboxConfiguration @Inject constructor(
     // Color resource id for the solid color letterbox background type.
     private var letterboxBackgroundColorResourceIdOverride: Int? = null
 
+    // Default value for corners radius for activities presented in the letterbox mode.
+    // Values < 0 will be ignored.
+    private val letterboxActivityDefaultCornersRadius: Int
+
+    // Current corners radius for activities presented in the letterbox mode.
+    // Values can be modified at runtime and values < 0 will be ignored.
+    private var letterboxActivityCornersRadius = 0
+
+    init {
+        letterboxActivityDefaultCornersRadius = context.resources.getInteger(
+            R.integer.config_letterboxActivityCornersRadius
+        )
+        letterboxActivityCornersRadius = letterboxActivityDefaultCornersRadius
+    }
+
     /**
      * Sets color of letterbox background which is used when using the solid background mode.
      */
@@ -64,7 +79,7 @@ class LetterboxConfiguration @Inject constructor(
         }
         // Query color dynamically because material colors extracted from wallpaper are updated
         // when wallpaper is changed.
-        return Color.valueOf(context.getResources().getColor(colorId!!, /* theme */null))
+        return Color.valueOf(context.getResources().getColor(colorId!!, null))
     }
 
     /**
@@ -79,4 +94,33 @@ class LetterboxConfiguration @Inject constructor(
      * The background color for the Letterbox.
      */
     fun getBackgroundColorRgbArray(): FloatArray = getLetterboxBackgroundColor().components
+
+    /**
+     * Overrides corners radius for activities presented in the letterbox mode. Values < 0,
+     * will be ignored and corners of the activity won't be rounded.
+     */
+    fun setLetterboxActivityCornersRadius(cornersRadius: Int) {
+        letterboxActivityCornersRadius = cornersRadius
+    }
+
+    /**
+     * Resets corners radius for activities presented in the letterbox mode.
+     */
+    fun resetLetterboxActivityCornersRadius() {
+        letterboxActivityCornersRadius = letterboxActivityDefaultCornersRadius
+    }
+
+    /**
+     * Whether corners of letterboxed activities are rounded.
+     */
+    fun isLetterboxActivityCornersRounded(): Boolean {
+        return getLetterboxActivityCornersRadius() > 0
+    }
+
+    /**
+     * Gets corners radius for activities presented in the letterbox mode.
+     */
+    fun getLetterboxActivityCornersRadius(): Int {
+        return maxOf(letterboxActivityCornersRadius, 0)
+    }
 }

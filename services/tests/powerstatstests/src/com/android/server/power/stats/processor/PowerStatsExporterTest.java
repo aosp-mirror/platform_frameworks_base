@@ -408,7 +408,7 @@ public class PowerStatsExporterTest {
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 new String[]{"cu570m"},
                 /* includeProcessStateData */ true, true, true, /* powerThreshold */ 0);
-        exportAggregatedPowerStats(builder, 3700, 6700);
+        exportAggregatedPowerStats(builder, 3700, 7500);
 
         BatteryUsageStats actual = builder.build();
         String message = "Actual BatteryUsageStats: " + actual;

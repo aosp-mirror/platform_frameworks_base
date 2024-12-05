@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.pm.UserInfo
 import android.os.Handler
 import android.os.PersistableBundle
@@ -59,6 +60,7 @@ class SupervisionServiceTest {
     @get:Rule val mocks: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var mockDpmInternal: DevicePolicyManagerInternal
+    @Mock private lateinit var mockPackageManager: PackageManager
     @Mock private lateinit var mockUserManagerInternal: UserManagerInternal
 
     private lateinit var context: Context
@@ -68,7 +70,7 @@ class SupervisionServiceTest {
     @Before
     fun setUp() {
         context = InstrumentationRegistry.getInstrumentation().context
-        context = SupervisionContextWrapper(context)
+        context = SupervisionContextWrapper(context, mockPackageManager)
 
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal::class.java)
         LocalServices.addService(DevicePolicyManagerInternal::class.java, mockDpmInternal)
@@ -137,6 +139,31 @@ class SupervisionServiceTest {
     }
 
     @Test
+    fun isActiveSupervisionApp_supervisionUid_supervisionEnabled_returnsTrue() {
+        whenever(mockPackageManager.getPackagesForUid(APP_UID))
+            .thenReturn(arrayOf(systemSupervisionPackage))
+        service.setSupervisionEnabledForUser(USER_ID, true)
+
+        assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isTrue()
+    }
+
+    @Test
+    fun isActiveSupervisionApp_supervisionUid_supervisionNotEnabled_returnsFalse() {
+        whenever(mockPackageManager.getPackagesForUid(APP_UID))
+            .thenReturn(arrayOf(systemSupervisionPackage))
+        service.setSupervisionEnabledForUser(USER_ID, false)
+
+        assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isFalse()
+    }
+
+    @Test
+    fun isActiveSupervisionApp_notSupervisionUid_returnsFalse() {
+        whenever(mockPackageManager.getPackagesForUid(APP_UID)).thenReturn(arrayOf())
+
+        assertThat(service.mInternal.isActiveSupervisionApp(APP_UID)).isFalse()
+    }
+
+    @Test
     fun setSupervisionEnabledForUser() {
         assertThat(service.isSupervisionEnabledForUser(USER_ID)).isFalse()
 
@@ -191,6 +218,7 @@ class SupervisionServiceTest {
 
     private companion object {
         const val USER_ID = 100
+        val APP_UID = USER_ID * UserHandle.PER_USER_RANGE
     }
 }
 
@@ -198,8 +226,11 @@ class SupervisionServiceTest {
  * A context wrapper that allows broadcast intents to immediately invoke the receivers without
  * performing checks on the sending user.
  */
-private class SupervisionContextWrapper(val context: Context) : ContextWrapper(context) {
+private class SupervisionContextWrapper(val context: Context, val pkgManager: PackageManager) :
+    ContextWrapper(context) {
     val interceptors = mutableListOf<Pair<BroadcastReceiver, IntentFilter>>()
+
+    override fun getPackageManager() = pkgManager
 
     override fun registerReceiverForAllUsers(
         receiver: BroadcastReceiver?,

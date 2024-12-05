@@ -333,7 +333,8 @@ public class ContextHubService extends IContextHubService.Stub {
             HubInfoRegistry registry;
             try {
                 registry = new HubInfoRegistry(mContextHubWrapper);
-                mEndpointManager = new ContextHubEndpointManager(mContext, mContextHubWrapper);
+                mEndpointManager =
+                        new ContextHubEndpointManager(mContext, mContextHubWrapper, registry);
                 Log.i(TAG, "Enabling generic offload API");
             } catch (UnsupportedOperationException e) {
                 mEndpointManager = null;
@@ -533,7 +534,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
         try {
             mContextHubWrapper.registerEndpointCallback(
-                    new ContextHubHalEndpointCallback(mHubInfoRegistry));
+                    new ContextHubHalEndpointCallback(mHubInfoRegistry, mEndpointManager));
         } catch (RemoteException | UnsupportedOperationException e) {
             Log.e(TAG, "Exception while registering IEndpointCallback", e);
         }

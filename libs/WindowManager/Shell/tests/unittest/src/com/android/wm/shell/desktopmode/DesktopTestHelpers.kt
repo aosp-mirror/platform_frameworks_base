@@ -73,10 +73,10 @@ object DesktopTestHelpers {
             .setLastActiveTime(100)
             .build()
 
-    /** Create a new System Modal task, i.e. a task with a single transparent activity. */
+    /** Create a new System Modal task, i.e. a task with only transparent activities. */
     fun createSystemModalTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo =
         createFullscreenTaskBuilder(displayId)
-            .setTopActivityTransparent(true)
+            .setActivityStackTransparent(true)
             .setNumActivities(1)
             .build()
 }
