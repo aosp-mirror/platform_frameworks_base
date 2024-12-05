@@ -6828,6 +6828,13 @@
     <permission android:name="android.permission.MANAGE_SUBSCRIPTION_PLANS"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows for reading subscription plan fields for status and end date.
+         @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    -->
+    <permission android:name="android.permission.READ_SUBSCRIPTION_PLANS"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="com.android.internal.telephony.flags.subscription_plan_allow_status_and_end_date" />
+
     <!-- C2DM permission.
          @hide Used internally.
      -->
