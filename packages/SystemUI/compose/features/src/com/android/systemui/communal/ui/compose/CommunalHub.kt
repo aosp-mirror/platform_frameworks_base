@@ -187,6 +187,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
+import com.android.systemui.communal.util.ResizeUtils.resizeOngoingItems
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.lifecycle.rememberViewModel
@@ -834,8 +835,16 @@ private fun BoxScope.CommunalHubLazyGrid(
         gridState = gridState,
         contentPadding = contentPadding,
     ) { sizeInfo ->
+        /** Override spans based on the responsive grid size */
+        val finalizedList =
+            if (sizeInfo != null) {
+                resizeOngoingItems(list, sizeInfo.gridSize.height)
+            } else {
+                list
+            }
+
         itemsIndexed(
-            items = list,
+            items = finalizedList,
             key = { _, item -> item.key },
             contentType = { _, item -> item.key },
             span = { _, item -> GridItemSpan(item.getSpanOrMax(sizeInfo?.gridSize?.height)) },
