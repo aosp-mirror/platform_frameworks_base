@@ -468,6 +468,14 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
+    public void testKeyGestureLaunchVoiceAssistant() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT));
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
     public void testKeyGestureGoHome() {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_HOME));
