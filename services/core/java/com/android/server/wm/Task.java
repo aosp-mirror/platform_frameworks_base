@@ -3425,6 +3425,7 @@ class Task extends TaskFragment {
         info.isTopActivityNoDisplay = top != null && top.isNoDisplay();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
+        info.isActivityStackTransparent = !topTask.forAllActivities(r -> (r.occludesParent()));
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         final WindowState windowState = top != null
                 ? top.findMainWindow(/* includeStartingApp= */ false) : null;

@@ -29,6 +29,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
+import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -39,7 +40,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlin.math.max
 
 /** Encapsulates business logic for interacting with the UDFPS overlay. */
 @SysUISingleton
@@ -55,10 +55,7 @@ constructor(
     private fun calculateIconSize(): Int {
         val pixelPitch = context.resources.getFloat(R.dimen.pixel_pitch)
         if (pixelPitch <= 0) {
-            Log.e(
-                "UdfpsOverlayInteractor",
-                "invalid pixelPitch: $pixelPitch. Pixel pitch must be updated per device.",
-            )
+            Log.e(TAG, "invalid pixelPitch: $pixelPitch. Pixel pitch must be updated per device.")
         }
         return (context.resources.getFloat(R.dimen.udfps_icon_size) / pixelPitch).toInt()
     }
@@ -84,13 +81,15 @@ constructor(
     }
 
     /** Sets whether Udfps overlay should handle touches */
-    fun setHandleTouches(shouldHandle: Boolean = true) {
-        if (authController.isUdfpsSupported && shouldHandle != _shouldHandleTouches.value) {
+    fun setHandleTouches(shouldHandle: Boolean) {
+        if (authController.isUdfpsSupported) {
             fingerprintManager?.setIgnoreDisplayTouches(
                 requestId.value,
                 authController.udfpsProps!!.get(0).sensorId,
                 !shouldHandle,
             )
+        } else {
+            Log.d(TAG, "setIgnoreDisplayTouches not set, UDFPS not supported")
         }
         _shouldHandleTouches.value = shouldHandle
     }
@@ -123,12 +122,14 @@ constructor(
 
     // Padding between the fingerprint icon and its bounding box in pixels.
     val iconPadding: Flow<Int> =
-        udfpsOverlayParams.map { params ->
-            val sensorWidth = params.nativeSensorBounds.right - params.nativeSensorBounds.left
-            val nativePadding = (sensorWidth - iconSize) / 2
-            // padding can be negative when udfpsOverlayParams has not been initialized yet.
-            max(0, (nativePadding * params.scaleFactor).toInt())
-        }.distinctUntilChanged()
+        udfpsOverlayParams
+            .map { params ->
+                val sensorWidth = params.nativeSensorBounds.right - params.nativeSensorBounds.left
+                val nativePadding = (sensorWidth - iconSize) / 2
+                // padding can be negative when udfpsOverlayParams has not been initialized yet.
+                max(0, (nativePadding * params.scaleFactor).toInt())
+            }
+            .distinctUntilChanged()
 
     companion object {
         private const val TAG = "UdfpsOverlayInteractor"

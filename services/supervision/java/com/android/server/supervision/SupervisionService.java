@@ -29,11 +29,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.UserHandle;
 import android.util.SparseArray;
 
 import com.android.internal.R;
@@ -63,11 +65,13 @@ public class SupervisionService extends ISupervisionManager.Stub {
     private final SparseArray<SupervisionUserData> mUserData = new SparseArray<>();
 
     private final DevicePolicyManagerInternal mDpmInternal;
+    private final PackageManager mPackageManager;
     private final UserManagerInternal mUserManagerInternal;
 
     public SupervisionService(Context context) {
         mContext = context.createAttributionContext(LOG_TAG);
         mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
+        mPackageManager = context.getPackageManager();
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
     }
@@ -148,12 +152,13 @@ public class SupervisionService extends ISupervisionManager.Stub {
     /** Returns whether the supervision app has profile owner status. */
     private boolean isProfileOwner(@UserIdInt int userId) {
         ComponentName profileOwner = mDpmInternal.getProfileOwnerAsUser(userId);
-        if (profileOwner == null) {
-            return false;
-        }
+        return profileOwner != null && isSupervisionAppPackage(profileOwner.getPackageName());
+    }
 
-        String configPackage = mContext.getResources().getString(R.string.config_systemSupervision);
-        return profileOwner.getPackageName().equals(configPackage);
+    /** Returns whether the given package name belongs to the supervision role holder. */
+    private boolean isSupervisionAppPackage(String packageName) {
+        return packageName.equals(
+                mContext.getResources().getString(R.string.config_systemSupervision));
     }
 
     public static class Lifecycle extends SystemService {
@@ -210,6 +215,21 @@ public class SupervisionService extends ISupervisionManager.Stub {
     final SupervisionManagerInternal mInternal = new SupervisionManagerInternalImpl();
 
     private final class SupervisionManagerInternalImpl extends SupervisionManagerInternal {
+        @Override
+        public boolean isActiveSupervisionApp(int uid) {
+            String[] packages = mPackageManager.getPackagesForUid(uid);
+            if (packages == null) {
+                return false;
+            }
+            for (var packageName : packages) {
+                if (SupervisionService.this.isSupervisionAppPackage(packageName)) {
+                    int userId = UserHandle.getUserId(uid);
+                    return SupervisionService.this.isSupervisionEnabledForUser(userId);
+                }
+            }
+            return false;
+        }
+
         @Override
         public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
             return SupervisionService.this.isSupervisionEnabledForUser(userId);

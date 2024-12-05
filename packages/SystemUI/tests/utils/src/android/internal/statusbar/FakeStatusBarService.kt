@@ -30,6 +30,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.os.UserHandle
 import android.util.ArrayMap
+import android.view.Display
 import android.view.KeyEvent
 import com.android.internal.logging.InstanceId
 import com.android.internal.statusbar.IAddTileResultCallback
@@ -95,6 +96,90 @@ class FakeStatusBarService : IStatusBarService.Stub() {
             )
         )
 
+    var statusBarIconsSecondaryDisplay =
+        ArrayMap<String, StatusBarIcon>().also {
+            it["slot1"] = mock<StatusBarIcon>()
+            it["slot2"] = mock<StatusBarIcon>()
+        }
+    var disabledFlags1SecondaryDisplay = 12345678
+    var appearanceSecondaryDisplay = 1234
+    var appearanceRegionsSecondaryDisplay =
+        arrayOf(
+            AppearanceRegion(
+                /* appearance = */ 123,
+                /* bounds = */ Rect(/* left= */ 4, /* top= */ 3, /* right= */ 2, /* bottom= */ 1),
+            ),
+            AppearanceRegion(
+                /* appearance = */ 345,
+                /* bounds = */ Rect(/* left= */ 1, /* top= */ 2, /* right= */ 3, /* bottom= */ 4),
+            ),
+        )
+    var imeWindowVisSecondaryDisplay = 9876
+    var imeBackDispositionSecondaryDisplay = 654
+    var showImeSwitcherSecondaryDisplay = true
+    var disabledFlags2SecondaryDisplay = 87654321
+    var navbarColorManagedByImeSecondaryDisplay = true
+    var behaviorSecondaryDisplay = 234
+    var requestedVisibleTypesSecondaryDisplay = 345
+    var packageNameSecondaryDisplay = "fake.bar.ser.vice"
+    var transientBarTypesSecondaryDisplay = 0
+    var letterboxDetailsSecondaryDisplay =
+        arrayOf(
+            LetterboxDetails(
+                /* letterboxInnerBounds = */ Rect(
+                    /* left= */ 5,
+                    /* top= */ 6,
+                    /* right= */ 7,
+                    /* bottom= */ 8,
+                ),
+                /* letterboxFullBounds = */ Rect(
+                    /* left= */ 1,
+                    /* top= */ 2,
+                    /* right= */ 3,
+                    /* bottom= */ 4,
+                ),
+                /* appAppearance = */ 123,
+            )
+        )
+
+    private val defaultRegisterStatusBarResult
+        get() =
+            RegisterStatusBarResult(
+                statusBarIcons,
+                disabledFlags1,
+                appearance,
+                appearanceRegions,
+                imeWindowVis,
+                imeBackDisposition,
+                showImeSwitcher,
+                disabledFlags2,
+                navbarColorManagedByIme,
+                behavior,
+                requestedVisibleTypes,
+                packageName,
+                transientBarTypes,
+                letterboxDetails,
+            )
+
+    private val registerStatusBarResultSecondaryDisplay
+        get() =
+            RegisterStatusBarResult(
+                statusBarIconsSecondaryDisplay,
+                disabledFlags1SecondaryDisplay,
+                appearanceSecondaryDisplay,
+                appearanceRegionsSecondaryDisplay,
+                imeWindowVisSecondaryDisplay,
+                imeBackDispositionSecondaryDisplay,
+                showImeSwitcherSecondaryDisplay,
+                disabledFlags2SecondaryDisplay,
+                navbarColorManagedByImeSecondaryDisplay,
+                behaviorSecondaryDisplay,
+                requestedVisibleTypesSecondaryDisplay,
+                packageNameSecondaryDisplay,
+                transientBarTypesSecondaryDisplay,
+                letterboxDetailsSecondaryDisplay,
+            )
+
     override fun expandNotificationsPanel() {}
 
     override fun collapsePanels() {}
@@ -140,21 +225,16 @@ class FakeStatusBarService : IStatusBarService.Stub() {
 
     override fun registerStatusBar(callbacks: IStatusBar): RegisterStatusBarResult {
         registeredStatusBar = callbacks
-        return RegisterStatusBarResult(
-            statusBarIcons,
-            disabledFlags1,
-            appearance,
-            appearanceRegions,
-            imeWindowVis,
-            imeBackDisposition,
-            showImeSwitcher,
-            disabledFlags2,
-            navbarColorManagedByIme,
-            behavior,
-            requestedVisibleTypes,
-            packageName,
-            transientBarTypes,
-            letterboxDetails,
+        return defaultRegisterStatusBarResult
+    }
+
+    override fun registerStatusBarForAllDisplays(
+        callbacks: IStatusBar
+    ): Map<String, RegisterStatusBarResult> {
+        registeredStatusBar = callbacks
+        return mapOf(
+            DEFAULT_DISPLAY_ID.toString() to defaultRegisterStatusBarResult,
+            SECONDARY_DISPLAY_ID.toString() to registerStatusBarResultSecondaryDisplay,
         )
     }
 
@@ -352,4 +432,9 @@ class FakeStatusBarService : IStatusBarService.Stub() {
     override fun unregisterNearbyMediaDevicesProvider(provider: INearbyMediaDevicesProvider) {}
 
     override fun showRearDisplayDialog(currentBaseState: Int) {}
+
+    companion object {
+        const val DEFAULT_DISPLAY_ID = Display.DEFAULT_DISPLAY
+        const val SECONDARY_DISPLAY_ID = 2
+    }
 }

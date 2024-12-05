@@ -113,6 +113,8 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
 import kotlin.Unit;
@@ -184,6 +186,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private SurfaceControlViewHost mMockSurfaceControlViewHost;
     @Mock
     private AttachedSurfaceControl mMockRootSurfaceControl;
+    @Mock
+    private WindowDecorViewHostSupplier<WindowDecorViewHost> mMockWindowDecorViewHostSupplier;
+    @Mock
+    private WindowDecorViewHost mMockWindowDecorViewHost;
     @Mock
     private WindowDecoration.SurfaceControlViewHostFactory mMockSurfaceControlViewHostFactory;
     @Mock
@@ -274,6 +280,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any())).thenReturn(mMockAppHeaderViewHolder);
         when(mMockDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
         when(mMockDesktopUserRepositories.getProfile(anyInt())).thenReturn(mDesktopRepository);
+        when(mMockWindowDecorViewHostSupplier.acquire(any(), eq(defaultDisplay)))
+                .thenReturn(mMockWindowDecorViewHost);
+        when(mMockWindowDecorViewHost.getSurfaceControl()).thenReturn(mock(SurfaceControl.class));
     }
 
     @After
@@ -1722,7 +1731,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
-                maximizeMenuFactory, mMockHandleMenuFactory,
+                mMockWindowDecorViewHostSupplier, maximizeMenuFactory, mMockHandleMenuFactory,
                 mMockMultiInstanceHelper, mMockCaptionHandleRepository, mDesktopModeEventLogger);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);

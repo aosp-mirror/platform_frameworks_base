@@ -83,6 +83,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -112,6 +113,7 @@ public class CrashRecoveryTest {
 
     private final TestClock mTestClock = new TestClock();
     private TestLooper mTestLooper;
+    private Executor mTestExecutor;
     private Context mSpyContext;
     // Keep track of all created watchdogs to apply device config changes
     private List<PackageWatchdog> mAllocatedWatchdogs;
@@ -141,6 +143,7 @@ public class CrashRecoveryTest {
                 Manifest.permission.WRITE_DEVICE_CONFIG,
                 Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
+        mTestExecutor = mTestLooper.getNewExecutor();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getPackageInfo(anyString(), anyInt())).then(inv -> {
@@ -231,31 +234,37 @@ public class CrashRecoveryTest {
             watchdog.noteBoot();
         }
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(2);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(3);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(3);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(4);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(4);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(5);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(5);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(6);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(6);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(7);
     }
@@ -272,6 +281,7 @@ public class CrashRecoveryTest {
             watchdog.noteBoot();
         }
 
+        mTestLooper.dispatchAll();
         verify(rollbackObserver).onExecuteBootLoopMitigation(1);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
 
@@ -281,6 +291,7 @@ public class CrashRecoveryTest {
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rollbackObserver).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(3);
 
@@ -289,6 +300,7 @@ public class CrashRecoveryTest {
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(3);
     }
 
@@ -305,18 +317,21 @@ public class CrashRecoveryTest {
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
         }
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(1);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(2);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(3);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(3);
         verify(rollbackObserver).onExecuteBootLoopMitigation(1);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
@@ -326,24 +341,28 @@ public class CrashRecoveryTest {
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(3);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(4);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(4);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(5);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(5);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(6);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(6);
         verify(rollbackObserver).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(3);
@@ -352,6 +371,7 @@ public class CrashRecoveryTest {
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(6);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(7);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(3);
@@ -362,6 +382,7 @@ public class CrashRecoveryTest {
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
         }
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
     }
@@ -379,12 +400,14 @@ public class CrashRecoveryTest {
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
         }
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(1);
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver).onExecuteBootLoopMitigation(1);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(2);
@@ -394,6 +417,7 @@ public class CrashRecoveryTest {
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver).onExecuteBootLoopMitigation(2);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(3);
@@ -402,6 +426,7 @@ public class CrashRecoveryTest {
 
         watchdog.noteBoot();
 
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(2);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(3);
         verify(rollbackObserver, never()).onExecuteBootLoopMitigation(3);
@@ -412,6 +437,7 @@ public class CrashRecoveryTest {
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
             watchdog.noteBoot();
         }
+        mTestLooper.dispatchAll();
         verify(rescuePartyObserver).onExecuteBootLoopMitigation(1);
         verify(rescuePartyObserver, never()).onExecuteBootLoopMitigation(2);
     }
@@ -739,14 +765,14 @@ public class CrashRecoveryTest {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
-        watchdog.registerHealthObserver(rollbackObserver);
+        watchdog.registerHealthObserver(rollbackObserver, mTestExecutor);
         return rollbackObserver;
     }
     RescuePartyObserver setUpRescuePartyObserver(PackageWatchdog watchdog) {
         setCrashRecoveryPropRescueBootCount(0);
         RescuePartyObserver rescuePartyObserver = spy(RescuePartyObserver.getInstance(mSpyContext));
         assertFalse(RescueParty.isRebootPropertySet());
-        watchdog.registerHealthObserver(rescuePartyObserver);
+        watchdog.registerHealthObserver(rescuePartyObserver, mTestExecutor);
         return rescuePartyObserver;
     }
 

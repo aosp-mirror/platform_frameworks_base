@@ -30,6 +30,7 @@ import android.media.quality.ParamCapability;
 import android.media.quality.PictureProfile;
 import android.media.quality.PictureProfileHandle;
 import android.media.quality.SoundProfile;
+import android.media.quality.SoundProfileHandle;
 import android.os.PersistableBundle;
 import android.util.Log;
 
@@ -45,8 +46,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * This service manage picture profile and sound profile for TV setting. Also communicates with the
@@ -173,8 +174,13 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public PictureProfileHandle getPictureProfileHandle(String id, int userId) {
-            return null;
+        public List<PictureProfileHandle> getPictureProfileHandle(String[] id, int userId) {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public List<SoundProfileHandle> getSoundProfileHandle(String[] id, int userId) {
+            return new ArrayList<>();
         }
 
         @Override
@@ -352,7 +358,8 @@ public class MediaQualityService extends SystemService {
                     getName(cursor),
                     getInputId(cursor),
                     getPackageName(cursor),
-                    jsonToBundle(getSettingsString(cursor))
+                    jsonToBundle(getSettingsString(cursor)),
+                    PictureProfileHandle.NONE
             );
         }
 
@@ -363,7 +370,8 @@ public class MediaQualityService extends SystemService {
                     getName(cursor),
                     getInputId(cursor),
                     getPackageName(cursor),
-                    jsonToBundle(getSettingsString(cursor))
+                    jsonToBundle(getSettingsString(cursor)),
+                    SoundProfileHandle.NONE
             );
         }
 

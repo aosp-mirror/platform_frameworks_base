@@ -256,6 +256,16 @@ constructor(
             val isTransitioningBetweenDesiredScenes =
                 sceneInteractor.transitionState.value.isTransitioning(fromScene, toScene)
 
+            // When in STL A -> B settles in A we can't do the same in KTF as KTF requires us to
+            // start B -> A to get back to A. [LockscreenSceneTransitionInteractor] will emit these
+            // steps but because STL is Idle(A) at this point (and never even started a B -> A in
+            // the first place) [isTransitioningBetweenDesiredScenes] will not be satisfied. We need
+            // this condition to not filter out the STARTED and FINISHED step of the "artificially"
+            // reversed B -> A transition.
+            val belongsToInstantReversedTransition =
+                sceneInteractor.transitionState.value.isIdle(toScene) &&
+                    sceneTransitionPair.value.previousValue.isTransitioning(toScene, fromScene)
+
             // We can't compare the terminal step with the current sceneTransition because
             // a) STL has no guarantee that it will settle in Idle() when finished/canceled
             // b) Comparing to Idle(toScene) would make any other FINISHED step settling in
@@ -267,7 +277,8 @@ constructor(
 
             return@filter isTransitioningBetweenLockscreenStates ||
                 isTransitioningBetweenDesiredScenes ||
-                terminalStepBelongsToPreviousTransition
+                terminalStepBelongsToPreviousTransition ||
+                belongsToInstantReversedTransition
         }
     }
 

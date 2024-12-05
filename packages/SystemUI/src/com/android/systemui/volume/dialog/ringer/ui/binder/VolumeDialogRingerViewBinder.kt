@@ -196,15 +196,17 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         uiModel.availableButtons.fastForEachIndexed { index, ringerButton ->
             ringerButton?.let {
                 val view = getChildAt(count - index - 1)
+                val isOpen = uiModel.drawerState is RingerDrawerState.Open
                 if (index == uiModel.currentButtonIndex) {
                     view.bindDrawerButton(
-                        uiModel.selectedButton,
+                        if (isOpen) it else uiModel.selectedButton,
                         viewModel,
+                        isOpen,
                         isSelected = true,
                         isAnimated = isAnimated,
                     )
                 } else {
-                    view.bindDrawerButton(it, viewModel, isAnimated)
+                    view.bindDrawerButton(it, viewModel, isOpen, isAnimated = isAnimated)
                 }
             }
         }
@@ -214,12 +216,22 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
     private fun View.bindDrawerButton(
         buttonViewModel: RingerButtonViewModel,
         viewModel: VolumeDialogRingerDrawerViewModel,
+        isOpen: Boolean,
         isSelected: Boolean = false,
         isAnimated: Boolean = false,
     ) {
+        val ringerContentDesc = context.getString(buttonViewModel.contentDescriptionResId)
         with(requireViewById<ImageButton>(R.id.volume_drawer_button)) {
             setImageResource(buttonViewModel.imageResId)
-            contentDescription = context.getString(buttonViewModel.contentDescriptionResId)
+            contentDescription =
+                if (isSelected && !isOpen) {
+                    context.getString(
+                        R.string.volume_ringer_drawer_closed_content_description,
+                        ringerContentDesc,
+                    )
+                } else {
+                    ringerContentDesc
+                }
             if (isSelected && !isAnimated) {
                 setBackgroundResource(R.drawable.volume_drawer_selection_bg)
                 setColorFilter(

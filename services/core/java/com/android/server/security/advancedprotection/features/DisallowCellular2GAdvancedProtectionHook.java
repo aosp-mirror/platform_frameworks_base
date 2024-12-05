@@ -24,8 +24,13 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserManager;
 import android.security.advancedprotection.AdvancedProtectionFeature;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** @hide */
 public final class DisallowCellular2GAdvancedProtectionHook extends AdvancedProtectionHook {
@@ -35,11 +40,13 @@ public final class DisallowCellular2GAdvancedProtectionHook extends AdvancedProt
             new AdvancedProtectionFeature(FEATURE_ID_DISALLOW_CELLULAR_2G);
     private final DevicePolicyManager mDevicePolicyManager;
     private final TelephonyManager mTelephonyManager;
+    private final SubscriptionManager mSubscriptionManager;
 
     public DisallowCellular2GAdvancedProtectionHook(@NonNull Context context, boolean enabled) {
         super(context, enabled);
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
+        mSubscriptionManager = context.getSystemService(SubscriptionManager.class);
 
         setPolicy(enabled);
     }
@@ -50,14 +57,44 @@ public final class DisallowCellular2GAdvancedProtectionHook extends AdvancedProt
         return mFeature;
     }
 
+    private static boolean isEmbeddedSubscriptionVisible(SubscriptionInfo subInfo) {
+        if (subInfo.isEmbedded()
+                && (subInfo.getProfileClass() == SubscriptionManager.PROFILE_CLASS_PROVISIONING
+                        || (com.android.internal.telephony.flags.Flags.oemEnabledSatelliteFlag()
+                                && subInfo.isOnlyNonTerrestrialNetwork()))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private List<TelephonyManager> getActiveTelephonyManagers() {
+        List<TelephonyManager> telephonyManagers = new ArrayList<>();
+
+        for (SubscriptionInfo subInfo : mSubscriptionManager.getActiveSubscriptionInfoList()) {
+            if (isEmbeddedSubscriptionVisible(subInfo)) {
+                telephonyManagers.add(
+                        mTelephonyManager.createForSubscriptionId(subInfo.getSubscriptionId()));
+            }
+        }
+
+        return telephonyManagers;
+    }
+
     @Override
     public boolean isAvailable() {
-        return mTelephonyManager.isDataCapable();
+        for (TelephonyManager telephonyManager : getActiveTelephonyManagers()) {
+            if (telephonyManager.isDataCapable()
+                    && telephonyManager.isRadioInterfaceCapabilitySupported(
+                            mTelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void setPolicy(boolean enabled) {
-        Slog.i(TAG, "setPolicy called with " + enabled);
-
         if (enabled) {
             Slog.d(TAG, "Setting DISALLOW_CELLULAR_2G_GLOBALLY restriction");
             mDevicePolicyManager.addUserRestrictionGlobally(
@@ -75,12 +112,14 @@ public final class DisallowCellular2GAdvancedProtectionHook extends AdvancedProt
 
         // Leave 2G disabled even if APM is disabled.
         if (!enabled) {
-            long oldAllowedTypes =
-                    mTelephonyManager.getAllowedNetworkTypesForReason(
-                            TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G);
-            long newAllowedTypes = oldAllowedTypes & ~TelephonyManager.NETWORK_CLASS_BITMASK_2G;
-            mTelephonyManager.setAllowedNetworkTypesForReason(
-                    TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G, newAllowedTypes);
+            for (TelephonyManager telephonyManager : getActiveTelephonyManagers()) {
+                long oldAllowedTypes =
+                        telephonyManager.getAllowedNetworkTypesForReason(
+                                TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G);
+                long newAllowedTypes = oldAllowedTypes & ~TelephonyManager.NETWORK_CLASS_BITMASK_2G;
+                telephonyManager.setAllowedNetworkTypesForReason(
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G, newAllowedTypes);
+            }
         }
     }
 }

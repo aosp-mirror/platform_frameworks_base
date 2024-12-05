@@ -94,11 +94,7 @@ class ModesTileTest : SysuiTestCase() {
     private val zenModeRepository = kosmos.zenModeRepository
     private val tileDataInteractor =
         ModesTileDataInteractor(context, kosmos.zenModeInteractor, testDispatcher)
-    private val mapper =
-        ModesTileMapper(
-            context.resources,
-            context.theme,
-        )
+    private val mapper = ModesTileMapper(context.resources, context.theme)
 
     private lateinit var userActionInteractor: ModesTileUserActionInteractor
     private lateinit var secureSettings: SecureSettings
@@ -127,10 +123,7 @@ class ModesTileTest : SysuiTestCase() {
             )
 
         userActionInteractor =
-            ModesTileUserActionInteractor(
-                inputHandler,
-                dialogDelegate,
-            )
+            ModesTileUserActionInteractor(inputHandler, dialogDelegate, kosmos.zenModeInteractor)
 
         underTest =
             ModesTile(
@@ -185,7 +178,7 @@ class ModesTileTest : SysuiTestCase() {
                 ModesTileModel(
                     isActivated = true,
                     activeModes = listOf("One", "Two"),
-                    icon = TestStubDrawable().asIcon()
+                    icon = TestStubDrawable().asIcon(),
                 )
 
             underTest.handleUpdateState(tileState, model)

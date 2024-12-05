@@ -20,6 +20,7 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.os.Binder
 import android.os.RemoteException
+import android.view.Display
 import android.view.WindowInsets
 import com.android.internal.statusbar.IStatusBarService
 import com.android.internal.statusbar.RegisterStatusBarResult
@@ -47,20 +48,32 @@ constructor(
 
     override fun start() {
         StatusBarConnectedDisplays.assertInNewMode()
-        val result: RegisterStatusBarResult =
+        val resultPerDisplay: Map<String, RegisterStatusBarResult> =
             try {
-                barService.registerStatusBar(commandQueue)
+                barService.registerStatusBarForAllDisplays(commandQueue)
             } catch (ex: RemoteException) {
                 ex.rethrowFromSystemServer()
                 return
             }
 
-        createNavigationBar(result)
-
-        if ((result.mTransientBarTypes and WindowInsets.Type.statusBars()) != 0) {
-            statusBarModeRepository.defaultDisplay.showTransient()
+        resultPerDisplay[Display.DEFAULT_DISPLAY.toString()]?.let {
+            createNavigationBar(it)
+            // Set up the initial icon state
+            val numIcons: Int = it.mIcons.size
+            for (i in 0 until numIcons) {
+                commandQueue.setIcon(it.mIcons.keyAt(i), it.mIcons.valueAt(i))
+            }
         }
-        val displayId = context.display.displayId
+
+        for ((displayId, result) in resultPerDisplay.entries) {
+            initializeStatusBarForDisplay(displayId.toInt(), result)
+        }
+    }
+
+    private fun initializeStatusBarForDisplay(displayId: Int, result: RegisterStatusBarResult) {
+        if ((result.mTransientBarTypes and WindowInsets.Type.statusBars()) != 0) {
+            statusBarModeRepository.forDisplay(displayId).showTransient()
+        }
         val commandQueueCallbacks = commandQueueCallbacksLazy.get()
         commandQueueCallbacks.onSystemBarAttributesChanged(
             displayId,
@@ -80,12 +93,6 @@ constructor(
             result.mImeBackDisposition,
             result.mShowImeSwitcher,
         )
-
-        // Set up the initial icon state
-        val numIcons: Int = result.mIcons.size
-        for (i in 0 until numIcons) {
-            commandQueue.setIcon(result.mIcons.keyAt(i), result.mIcons.valueAt(i))
-        }
 
         // set the initial view visibility
         val disabledFlags1 = result.mDisabledFlags1

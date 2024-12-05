@@ -68,6 +68,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -294,7 +295,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleUpdateState_updateLabelAndIcon_noIconFromApi() {
         when(mQuickAccessWalletClient.getTileIcon()).thenReturn(null);
         QSTile.State state = new QSTile.State();
-        QSTile.Icon icon = QSTileImpl.ResourceIcon.get(R.drawable.ic_wallet_lockscreen);
+        QSTile.Icon icon = createExpectedIcon(R.drawable.ic_wallet_lockscreen);
 
         mTile.handleUpdateState(state, null);
 
@@ -572,6 +573,14 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 PendingIntent.getActivity(context, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
         return new WalletCard.Builder(
                 CARD_ID, INVALID_CARD_IMAGE, CARD_DESCRIPTION, pendingIntent).build();
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 
 

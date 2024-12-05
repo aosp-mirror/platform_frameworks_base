@@ -196,7 +196,7 @@ public class PipTransition extends PipTransitionController implements
             @NonNull TransitionRequestInfo request) {
         if (isAutoEnterInButtonNavigation(request) || isEnterPictureInPictureModeRequest(request)) {
             mEnterTransition = transition;
-            return getEnterPipTransaction(transition, request);
+            return getEnterPipTransaction(transition, request.getPipChange());
         }
         return null;
     }
@@ -205,7 +205,8 @@ public class PipTransition extends PipTransitionController implements
     public void augmentRequest(@NonNull IBinder transition, @NonNull TransitionRequestInfo request,
             @NonNull WindowContainerTransaction outWct) {
         if (isAutoEnterInButtonNavigation(request) || isEnterPictureInPictureModeRequest(request)) {
-            outWct.merge(getEnterPipTransaction(transition, request), true /* transfer */);
+            outWct.merge(getEnterPipTransaction(transition, request.getPipChange()),
+                    true /* transfer */);
             mEnterTransition = transition;
         }
     }
@@ -775,9 +776,9 @@ public class PipTransition extends PipTransitionController implements
     }
 
     private WindowContainerTransaction getEnterPipTransaction(@NonNull IBinder transition,
-            @NonNull TransitionRequestInfo request) {
+            @NonNull TransitionRequestInfo.PipChange pipChange) {
         // cache the original task token to check for multi-activity case later
-        final ActivityManager.RunningTaskInfo pipTask = request.getPipTask();
+        final ActivityManager.RunningTaskInfo pipTask = pipChange.getTaskInfo();
         PictureInPictureParams pipParams = pipTask.pictureInPictureParams;
         mPipTaskListener.setPictureInPictureParams(pipParams);
         mPipBoundsState.setBoundsStateForEntry(pipTask.topActivity, pipTask.topActivityInfo,
@@ -787,14 +788,18 @@ public class PipTransition extends PipTransitionController implements
         final Rect entryBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         mPipBoundsState.setBounds(entryBounds);
 
+        // Operate on the TF token in case we are dealing with AE case; this should avoid marking
+        // activities in other TFs as config-at-end.
+        WindowContainerToken token = pipChange.getTaskFragmentToken();
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.movePipActivityToPinnedRootTask(pipTask.token, entryBounds);
-        wct.deferConfigToTransitionEnd(pipTask.token);
+        wct.movePipActivityToPinnedRootTask(token, entryBounds);
+        wct.deferConfigToTransitionEnd(token);
         return wct;
     }
 
     private boolean isAutoEnterInButtonNavigation(@NonNull TransitionRequestInfo requestInfo) {
-        final ActivityManager.RunningTaskInfo pipTask = requestInfo.getPipTask();
+        final ActivityManager.RunningTaskInfo pipTask = requestInfo.getPipChange() != null
+                ? requestInfo.getPipChange().getTaskInfo() : null;
         if (pipTask == null) {
             return false;
         }

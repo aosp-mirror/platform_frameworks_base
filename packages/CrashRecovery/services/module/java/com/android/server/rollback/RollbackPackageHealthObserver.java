@@ -111,7 +111,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         mTwoPhaseRollbackEnabledFile = new File(dataDir, "two-phase-rollback-enabled");
-        PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
+        PackageWatchdog.getInstance(mContext).registerHealthObserver(this,
+                context.getMainExecutor());
 
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
             // Load the value from the file if system server has crashed and restarted
@@ -271,16 +272,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
     private void assertInWorkerThread() {
         Preconditions.checkState(mHandler.getLooper().isCurrentThread());
-    }
-
-    /**
-     * Start observing health of {@code packages} for {@code durationMs}.
-     * This may cause {@code packages} to be rolled back if they crash too freqeuntly.
-     */
-    @AnyThread
-    @NonNull
-    public void startObservingHealth(@NonNull List<String> packages, @NonNull long durationMs) {
-        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
     @AnyThread

@@ -44,7 +44,7 @@ public class HubEndpointSession implements AutoCloseable {
     @NonNull private final HubEndpoint mHubEndpoint;
     @NonNull private final HubEndpointInfo mInitiator;
     @NonNull private final HubEndpointInfo mDestination;
-    @Nullable private final HubServiceInfo mServiceInfo;
+    @Nullable private final String mServiceDescriptor;
 
     private final AtomicBoolean mIsClosed = new AtomicBoolean(true);
 
@@ -54,12 +54,12 @@ public class HubEndpointSession implements AutoCloseable {
             @NonNull HubEndpoint hubEndpoint,
             @NonNull HubEndpointInfo destination,
             @NonNull HubEndpointInfo initiator,
-            @Nullable HubServiceInfo serviceInfo) {
+            @Nullable String serviceDescriptor) {
         mId = id;
         mHubEndpoint = hubEndpoint;
         mDestination = destination;
         mInitiator = initiator;
-        mServiceInfo = serviceInfo;
+        mServiceDescriptor = serviceDescriptor;
     }
 
     /**
@@ -131,8 +131,8 @@ public class HubEndpointSession implements AutoCloseable {
     }
 
     /**
-     * Get the {@link HubServiceInfo} associated with this session. Null value indicates that there
-     * is no service associated to this session.
+     * Get the service descriptor associated with this session. Null value indicates that there is
+     * no service associated to this session.
      *
      * <p>For hub initiated sessions, the object was previously used in as an argument for open
      * request in {@link IHubEndpointLifecycleCallback#onSessionOpenRequest}.
@@ -141,8 +141,8 @@ public class HubEndpointSession implements AutoCloseable {
      * android.hardware.location.ContextHubManager#openSession}
      */
     @Nullable
-    public HubServiceInfo getServiceInfo() {
-        return mServiceInfo;
+    public String getServiceDescriptor() {
+        return mServiceDescriptor;
     }
 
     @Override

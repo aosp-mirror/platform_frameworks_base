@@ -49,7 +49,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -226,8 +225,15 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .filter { !it }
-                .sample(deviceEntryInteractor.isUnlocked, ::Pair)
+                .filterRelevantKeyguardStateAnd { !it }
+                .sample(
+                    if (SceneContainerFlag.isEnabled) {
+                        deviceEntryInteractor.isUnlocked
+                    } else {
+                        keyguardInteractor.isKeyguardDismissible
+                    },
+                    ::Pair,
+                )
                 .collect { (_, dismissable) ->
                     // TODO(b/349837588): Add check for -> OCCLUDED.
                     if (dismissable) {
