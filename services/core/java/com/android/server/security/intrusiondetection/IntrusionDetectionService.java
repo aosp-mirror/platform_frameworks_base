@@ -232,12 +232,10 @@ public class IntrusionDetectionService extends SystemService {
             return;
         }
 
-        // TODO: temporarily disable the following for the CTS IntrusionDetectionManagerTest.
-        //  Enable it when the transport component is ready.
-        // if (!mIntrusionDetectionEventTransportConnection.initialize()) {
-        //     callback.onFailure(ERROR_TRANSPORT_UNAVAILABLE);
-        //   return;
-        // }
+        if (!mIntrusionDetectionEventTransportConnection.initialize()) {
+            callback.onFailure(ERROR_TRANSPORT_UNAVAILABLE);
+            return;
+        }
 
         mDataAggregator.enable();
         mState = STATE_ENABLED;
@@ -252,9 +250,7 @@ public class IntrusionDetectionService extends SystemService {
             return;
         }
 
-        // TODO: temporarily disable the following for the CTS IntrusionDetectionManagerTest.
-        //  Enable it when the transport component is ready.
-        // mIntrusionDetectionEventTransportConnection.release();
+        mIntrusionDetectionEventTransportConnection.release();
         mDataAggregator.disable();
         mState = STATE_DISABLED;
         notifyStateMonitors();
