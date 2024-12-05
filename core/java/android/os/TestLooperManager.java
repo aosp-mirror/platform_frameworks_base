@@ -123,6 +123,18 @@ public class TestLooperManager {
     }
 
     /**
+     * Checks whether the Looper is currently blocked on a sync barrier.
+     *
+     * A Looper is blocked on a sync barrier if there is a Message in the Looper's
+     * queue that is ready for execution but is behind a sync barrier
+     */
+    @FlaggedApi(Flags.FLAG_MESSAGE_QUEUE_TESTABILITY)
+    public boolean isBlockedOnSyncBarrier() {
+        checkReleased();
+        return mQueue.isBlockedOnSyncBarrier();
+    }
+
+    /**
      * Releases the looper to continue standard looping and processing of messages, no further
      * interactions with TestLooperManager will be allowed after release() has been called.
      */
