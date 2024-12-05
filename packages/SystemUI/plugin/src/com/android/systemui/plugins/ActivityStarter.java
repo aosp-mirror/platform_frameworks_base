@@ -140,6 +140,11 @@ public interface ActivityStarter {
     void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityTransitionAnimator.Controller animationController,
             @Nullable String customMessage);
+    /** Posts a start activity intent that dismisses keyguard. */
+    void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
+            @Nullable String customMessage,
+            @Nullable UserHandle userHandle);
     void postStartActivityDismissingKeyguard(PendingIntent intent);
 
     /**

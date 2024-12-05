@@ -312,6 +312,25 @@ constructor(
         }
     }
 
+    override fun postStartActivityDismissingKeyguard(
+        intent: Intent,
+        delay: Int,
+        animationController: ActivityTransitionAnimator.Controller?,
+        customMessage: String?,
+        userHandle: UserHandle?,
+    ) {
+        postOnUiThread(delay) {
+            activityStarterInternal.startActivityDismissingKeyguard(
+                intent = intent,
+                onlyProvisioned = true,
+                dismissShade = true,
+                animationController = animationController,
+                customMessage = customMessage,
+                userHandle = userHandle,
+            )
+        }
+    }
+
     override fun dismissKeyguardThenExecute(
         action: OnDismissAction,
         cancel: Runnable?,

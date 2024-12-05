@@ -25,6 +25,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 
 import java.io.Closeable;
 import java.util.concurrent.Executor;
@@ -230,6 +231,15 @@ public interface QuickAccessWalletClient extends Closeable {
      */
     @Nullable
     Drawable getTileIcon();
+
+    /**
+     * Returns the user that should receive the wallet intents
+     *
+     * @return UserHandle
+     * @hide
+     */
+    @Nullable
+    UserHandle getUser();
 
     /**
      * Returns the service label specified by {@code android:label} in the service manifest entry.
