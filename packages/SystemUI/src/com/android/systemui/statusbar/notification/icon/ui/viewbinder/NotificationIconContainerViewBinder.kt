@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import android.graphics.Color
-import android.graphics.Rect
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -53,7 +52,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 
 /** Binds a view-model to a [NotificationIconContainer]. */
@@ -71,10 +69,7 @@ object NotificationIconContainerViewBinder {
         launch {
             val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
             val iconColors: StateFlow<NotificationIconColors> =
-                viewModel
-                    .iconColors(displayId)
-                    .mapNotNull { it.iconColors(view.viewBounds) }
-                    .stateIn(this)
+                viewModel.iconColors(displayId).stateIn(this)
             viewModel.icons.bindIcons(
                 logTag = "statusbar",
                 view = view,
@@ -372,18 +367,6 @@ object NotificationIconContainerViewBinder {
 fun NotifCollection.iconViewStoreBy(block: (IconPack) -> StatusBarIconView?) =
     IconViewStore { key ->
         getEntry(key)?.icons?.let(block)
-    }
-
-private val View.viewBounds: Rect
-    get() {
-        val tmpArray = intArrayOf(0, 0)
-        getLocationOnScreen(tmpArray)
-        return Rect(
-            /* left = */ tmpArray[0],
-            /* top = */ tmpArray[1],
-            /* right = */ left + width,
-            /* bottom = */ top + height,
-        )
     }
 
 private suspend inline fun <T> Flow<T>.collectTracingEach(
