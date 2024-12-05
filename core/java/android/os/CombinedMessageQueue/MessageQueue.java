@@ -1353,6 +1353,69 @@ public final class MessageQueue {
         }
     }
 
+    /**
+     * @return true if we are blocked on a sync barrier
+     */
+    boolean isBlockedOnSyncBarrier() {
+        throwIfNotTest();
+        if (mUseConcurrent) {
+            Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
+            MessageNode queueNode = iterateNext(queueIter);
+
+            if (queueNode.isBarrier()) {
+                long now = SystemClock.uptimeMillis();
+
+                /* Look for a deliverable async node. If one exists we are not blocked. */
+                Iterator<MessageNode> asyncQueueIter = mAsyncPriorityQueue.iterator();
+                MessageNode asyncNode = iterateNext(asyncQueueIter);
+                if (asyncNode != null && now >= asyncNode.getWhen()) {
+                    return false;
+                }
+                /*
+                 * Look for a deliverable sync node. In this case, if one exists we are blocked
+                 * since the barrier prevents delivery of the Message.
+                 */
+                while (queueNode.isBarrier()) {
+                    queueNode = iterateNext(queueIter);
+                }
+                if (queueNode != null && now >= queueNode.getWhen()) {
+                    return true;
+                }
+
+                return false;
+            }
+        } else {
+            Message msg = mMessages;
+            if (msg != null && msg.target == null) {
+                Message iter = msg;
+                /* Look for a deliverable async node */
+                do {
+                    iter = iter.next;
+                } while (iter != null && !iter.isAsynchronous());
+
+                long now = SystemClock.uptimeMillis();
+                if (iter != null && now >= iter.when) {
+                    return false;
+                }
+                /*
+                 * Look for a deliverable sync node. In this case, if one exists we are blocked
+                 * since the barrier prevents delivery of the Message.
+                 */
+                iter = msg;
+                do {
+                    iter = iter.next;
+                } while (iter != null && (iter.target == null || iter.isAsynchronous()));
+
+                if (iter != null && now >= iter.when) {
+                    return true;
+                }
+                return false;
+            }
+        }
+        /* No barrier was found. */
+        return false;
+    }
+
     private static final class MatchHandlerWhatAndObject extends MessageCompare {
         @Override
         public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,

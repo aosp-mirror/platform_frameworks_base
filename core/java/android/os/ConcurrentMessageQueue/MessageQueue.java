@@ -1107,6 +1107,38 @@ public final class MessageQueue {
         return nextMessage(false);
     }
 
+    /**
+     * @return true if we are blocked on a sync barrier
+     */
+    boolean isBlockedOnSyncBarrier() {
+        throwIfNotTest();
+        Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
+        MessageNode queueNode = iterateNext(queueIter);
+
+        if (queueNode.isBarrier()) {
+            long now = SystemClock.uptimeMillis();
+
+            /* Look for a deliverable async node. If one exists we are not blocked. */
+            Iterator<MessageNode> asyncQueueIter = mAsyncPriorityQueue.iterator();
+            MessageNode asyncNode = iterateNext(asyncQueueIter);
+            if (asyncNode != null && now >= asyncNode.getWhen()) {
+                return false;
+            }
+            /*
+             * Look for a deliverable sync node. In this case, if one exists we are blocked
+             * since the barrier prevents delivery of the Message.
+             */
+            while (queueNode.isBarrier()) {
+                queueNode = iterateNext(queueIter);
+            }
+            if (queueNode != null && now >= queueNode.getWhen()) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
     private StateNode getStateNode(StackNode node) {
         if (node.isMessageNode()) {
             return ((MessageNode) node).mBottomOfStack;
