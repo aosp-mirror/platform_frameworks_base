@@ -19393,7 +19393,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return createOrGetIntentCreatorToken(intent, key);
 
         } else {
-            throw new IllegalArgumentException("intent does not contain a creator token.");
+            return null;
         }
     }
 
