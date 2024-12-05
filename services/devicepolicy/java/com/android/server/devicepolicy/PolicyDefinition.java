@@ -672,10 +672,6 @@ final class PolicyDefinition<V> {
         }
     }
 
-    void saveToXml(TypedXmlSerializer serializer) throws IOException {
-        mPolicyKey.saveToXml(serializer);
-    }
-
     @Nullable
     static <V> PolicyDefinition<V> readFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {

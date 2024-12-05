@@ -132,9 +132,6 @@ public class ClickArea extends Operation
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        if (context.getMode() != RemoteContext.ContextMode.DATA) {
-            return;
-        }
         context.addClickArea(
                 mId, mContentDescription, mOutLeft, mOutTop, mOutRight, mOutBottom, mMetadata);
     }

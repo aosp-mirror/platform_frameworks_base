@@ -43,6 +43,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+/**
+ * Tests for {@link SystemModalsTransitionHandler}
+ * Usage: atest WMShellUnitTests:SystemModalsTransitionHandlerTest
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class SystemModalsTransitionHandlerTest : ShellTestCase() {

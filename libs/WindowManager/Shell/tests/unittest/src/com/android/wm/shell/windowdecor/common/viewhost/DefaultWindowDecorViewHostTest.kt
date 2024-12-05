@@ -18,7 +18,6 @@ package com.android.wm.shell.windowdecor.common.viewhost
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.SurfaceControl
-import android.view.SurfaceControlViewHost
 import android.view.View
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
@@ -28,7 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -57,54 +55,8 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
             onDrawTransaction = null,
         )
 
-        assertThat(windowDecorViewHost.viewHost).isNotNull()
-        assertThat(windowDecorViewHost.viewHost!!.view).isEqualTo(view)
-    }
-
-    @Test
-    fun updateView_alreadyLaidOut_relayouts() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
-        val view = View(context)
-        windowDecorViewHost.updateView(
-            view = view,
-            attrs = WindowManager.LayoutParams(100, 100),
-            configuration = context.resources.configuration,
-            onDrawTransaction = null,
-        )
-
-        val otherParams = WindowManager.LayoutParams(200, 200)
-        windowDecorViewHost.updateView(
-            view = view,
-            attrs = otherParams,
-            configuration = context.resources.configuration,
-            onDrawTransaction = null,
-        )
-
-        assertThat(windowDecorViewHost.viewHost!!.view).isEqualTo(view)
-        assertThat(windowDecorViewHost.viewHost!!.view!!.layoutParams.width)
-            .isEqualTo(otherParams.width)
-    }
-
-    @Test
-    fun updateView_replacingView_throws() = runTest {
-        val windowDecorViewHost = createDefaultViewHost()
-        val view = View(context)
-        windowDecorViewHost.updateView(
-            view = view,
-            attrs = WindowManager.LayoutParams(100, 100),
-            configuration = context.resources.configuration,
-            onDrawTransaction = null,
-        )
-
-        val otherView = View(context)
-        assertThrows(Exception::class.java) {
-            windowDecorViewHost.updateView(
-                view = otherView,
-                attrs = WindowManager.LayoutParams(100, 100),
-                configuration = context.resources.configuration,
-                onDrawTransaction = null,
-            )
-        }
+        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(windowDecorViewHost.view()).isEqualTo(view)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -123,7 +75,7 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
         )
 
         // No view host yet, since the coroutine hasn't run.
-        assertThat(windowDecorViewHost.viewHost).isNull()
+        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isFalse()
 
         windowDecorViewHost.updateView(
             view = syncView,
@@ -135,14 +87,13 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
         // Would run coroutine if it hadn't been cancelled.
         advanceUntilIdle()
 
-        assertThat(windowDecorViewHost.viewHost).isNotNull()
-        assertThat(windowDecorViewHost.viewHost!!.view).isNotNull()
+        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(windowDecorViewHost.view()).isNotNull()
         // View host view/attrs should match the ones from the sync call, plus, since the
         // sync/async were made with different views, if the job hadn't been cancelled there
         // would've been an exception thrown as replacing views isn't allowed.
-        assertThat(windowDecorViewHost.viewHost!!.view).isEqualTo(syncView)
-        assertThat(windowDecorViewHost.viewHost!!.view!!.layoutParams.width)
-            .isEqualTo(syncAttrs.width)
+        assertThat(windowDecorViewHost.view()).isEqualTo(syncView)
+        assertThat(windowDecorViewHost.view()!!.layoutParams.width).isEqualTo(syncAttrs.width)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -158,11 +109,11 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
             configuration = context.resources.configuration,
         )
 
-        assertThat(windowDecorViewHost.viewHost).isNull()
+        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isFalse()
 
         advanceUntilIdle()
 
-        assertThat(windowDecorViewHost.viewHost).isNotNull()
+        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -185,9 +136,8 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
 
         advanceUntilIdle()
 
-        assertThat(windowDecorViewHost.viewHost).isNotNull()
-        assertThat(windowDecorViewHost.viewHost!!.view).isNotNull()
-        assertThat(windowDecorViewHost.viewHost!!.view).isEqualTo(otherView)
+        assertThat(windowDecorViewHost.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(windowDecorViewHost.view()).isEqualTo(otherView)
     }
 
     @Test
@@ -205,8 +155,7 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
         val t = mock(SurfaceControl.Transaction::class.java)
         windowDecorViewHost.release(t)
 
-        verify(windowDecorViewHost.viewHost!!).release()
-        verify(t).remove(windowDecorViewHost.surfaceControl)
+        verify(windowDecorViewHost.viewHostAdapter).release(t)
     }
 
     private fun CoroutineScope.createDefaultViewHost() =
@@ -214,8 +163,8 @@ class DefaultWindowDecorViewHostTest : ShellTestCase() {
             context = context,
             mainScope = this,
             display = context.display,
-            surfaceControlViewHostFactory = { c, d, wwm, s ->
-                spy(SurfaceControlViewHost(c, d, wwm, s))
-            },
+            viewHostAdapter = spy(SurfaceControlViewHostAdapter(context, context.display)),
         )
+
+    private fun DefaultWindowDecorViewHost.view(): View? = viewHostAdapter.viewHost?.view
 }

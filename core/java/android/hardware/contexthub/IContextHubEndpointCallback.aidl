@@ -29,9 +29,9 @@ oneway interface IContextHubEndpointCallback {
      *
      * @param sessionId An integer identifying the session, assigned by the initiator
      * @param initiator HubEndpointInfo representing the requester
-     * @param serviceInfo Nullable HubServiceInfo representing the service associated with this session
+     * @param serviceDescriptor Nullable string representing the service associated with this session
      */
-    void onSessionOpenRequest(int sessionId, in HubEndpointInfo initiator, in @nullable HubServiceInfo serviceInfo);
+    void onSessionOpenRequest(int sessionId, in HubEndpointInfo initiator, in @nullable String serviceDescriptor);
 
     /**
      * Request from system service to close a specific session

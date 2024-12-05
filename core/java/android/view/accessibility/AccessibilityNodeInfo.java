@@ -6540,6 +6540,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Class with information if a node is a range.
      */
     public static final class RangeInfo {
+        /** @hide */
+        @IntDef(prefix = { "RANGE_TYPE_" }, value = {
+                RANGE_TYPE_INT,
+                RANGE_TYPE_FLOAT,
+                RANGE_TYPE_PERCENT,
+                RANGE_TYPE_INDETERMINATE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface RangeType {}
 
         /** Range type: integer. */
         public static final int RANGE_TYPE_INT = 0;
@@ -6588,7 +6597,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param current The current value.
          */
         @Deprecated
-        public static RangeInfo obtain(int type, float min, float max, float current) {
+        public static RangeInfo obtain(@RangeType int type, float min, float max, float current) {
             return new RangeInfo(type, min, max, current);
         }
 
@@ -6602,7 +6611,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *            maximum.
          * @param current The current value.
          */
-        public RangeInfo(int type, float min, float max, float current) {
+        public RangeInfo(@RangeType int type, float min, float max, float current) {
             mType = type;
             mMin = min;
             mMax = max;
@@ -6618,6 +6627,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @see #RANGE_TYPE_FLOAT
          * @see #RANGE_TYPE_PERCENT
          */
+        @RangeType
         public int getType() {
             return mType;
         }

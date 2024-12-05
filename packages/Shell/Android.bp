@@ -12,7 +12,10 @@ shell_srcs = [
     "src/**/*.java",
     ":dumpstate_aidl",
 ]
-shell_static_libs = ["androidx.legacy_legacy-support-v4"]
+shell_static_libs = [
+    "androidx.legacy_legacy-support-v4",
+    "wear_aconfig_declarations_flags_java_lib",
+]
 
 android_app {
     name: "Shell",
@@ -28,6 +31,7 @@ android_app {
     flags_packages: [
         "android.security.flags-aconfig",
         "android.permission.flags-aconfig",
+        "wear_aconfig_declarations",
     ],
     platform_apis: true,
     certificate: "platform",

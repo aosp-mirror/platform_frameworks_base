@@ -32,6 +32,7 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.util.IndentingPrintWriter;
 import android.util.Spline;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
@@ -58,6 +59,7 @@ public class BrightnessClamperController {
     private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
     private final Handler mHandler;
     private final LightSensorController mLightSensorController;
+    private int mDisplayState = Display.STATE_OFF;
 
     private final ClamperChangeListener mClamperChangeListenerExternal;
     private final Executor mExecutor;
@@ -149,16 +151,13 @@ public class BrightnessClamperController {
     public DisplayBrightnessState clamp(DisplayBrightnessState displayBrightnessState,
             DisplayManagerInternal.DisplayPowerRequest request,
             float brightnessValue, boolean slowChange, int displayState) {
+        mDisplayState = displayState;
         DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(
                 displayBrightnessState);
         builder.setIsSlowChange(slowChange);
         builder.setBrightness(brightnessValue);
 
-        if (displayState != STATE_ON) {
-            mLightSensorController.stop();
-        } else {
-            adjustLightSensorSubscription();
-        }
+        adjustLightSensorSubscription();
 
         for (int i = 0; i < mModifiers.size(); i++) {
             mModifiers.get(i).apply(request, builder);
@@ -230,7 +229,8 @@ public class BrightnessClamperController {
     }
 
     private void adjustLightSensorSubscription() {
-        if (mModifiers.stream().anyMatch(BrightnessStateModifier::shouldListenToLightSensor)) {
+        if (mDisplayState == STATE_ON && mModifiers.stream()
+                .anyMatch(BrightnessStateModifier::shouldListenToLightSensor)) {
             mLightSensorController.restart();
         } else {
             mLightSensorController.stop();

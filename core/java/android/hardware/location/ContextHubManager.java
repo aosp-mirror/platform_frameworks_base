@@ -1309,16 +1309,16 @@ public final class ContextHubManager {
      *     ContextHubManager#registerEndpoint(HubEndpoint)}.
      * @param destination {@link HubEndpointInfo} object that represents an endpoint from previous
      *     endpoint discovery results (e.g. from {@link ContextHubManager#findEndpoints(long)}).
-     * @param serviceInfo {@link HubServiceInfo} object that describes the service associated with
-     *     this session. The information will be sent to the destination as part of open request.
+     * @param serviceDescriptor A string that describes the service associated with this session.
+     *     The information will be sent to the destination as part of open request.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void openSession(
             @NonNull HubEndpoint hubEndpoint,
             @NonNull HubEndpointInfo destination,
-            @NonNull HubServiceInfo serviceInfo) {
-        hubEndpoint.openSession(destination, serviceInfo);
+            @NonNull String serviceDescriptor) {
+        hubEndpoint.openSession(destination, serviceDescriptor);
     }
 
     /**

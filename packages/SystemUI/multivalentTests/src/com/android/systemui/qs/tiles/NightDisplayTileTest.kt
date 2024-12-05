@@ -23,7 +23,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dagger.NightDisplayListenerModule
@@ -32,8 +31,11 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.LocationController
 import com.google.common.truth.Truth
 import org.junit.After
@@ -42,8 +44,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -72,8 +74,6 @@ class NightDisplayTileTest : SysuiTestCase() {
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mTile: NightDisplayTile
 
-
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -97,7 +97,7 @@ class NightDisplayTileTest : SysuiTestCase() {
                 mQsLogger,
                 mLocationController,
                 mColorDisplayManager,
-                mNightDisplayListenerBuilder
+                mNightDisplayListenerBuilder,
             )
     }
 
@@ -115,7 +115,7 @@ class NightDisplayTileTest : SysuiTestCase() {
         mTile.handleUpdateState(state, /* arg= */ null)
 
         Truth.assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_nightlight_icon_off))
+            .isEqualTo(createExpectedIcon(R.drawable.qs_nightlight_icon_off))
     }
 
     @Test
@@ -125,7 +125,14 @@ class NightDisplayTileTest : SysuiTestCase() {
 
         mTile.handleUpdateState(state, /* arg= */ null)
 
-        Truth.assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_nightlight_icon_on))
+        Truth.assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_nightlight_icon_on))
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }

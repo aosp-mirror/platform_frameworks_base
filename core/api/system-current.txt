@@ -5266,7 +5266,7 @@ package android.hardware.contexthub {
 
   @FlaggedApi("android.chre.flags.offload_api") public class HubEndpointSession implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void close();
-    method @Nullable public android.hardware.contexthub.HubServiceInfo getServiceInfo();
+    method @Nullable public String getServiceDescriptor();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> sendMessage(@NonNull android.hardware.contexthub.HubMessage);
   }
 
@@ -5319,7 +5319,7 @@ package android.hardware.contexthub {
 
   @FlaggedApi("android.chre.flags.offload_api") public interface IHubEndpointLifecycleCallback {
     method public void onSessionClosed(@NonNull android.hardware.contexthub.HubEndpointSession, int);
-    method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo, @Nullable android.hardware.contexthub.HubServiceInfo);
+    method @NonNull public android.hardware.contexthub.HubEndpointSessionResult onSessionOpenRequest(@NonNull android.hardware.contexthub.HubEndpointInfo, @Nullable String);
     method public void onSessionOpened(@NonNull android.hardware.contexthub.HubEndpointSession);
   }
 
@@ -6325,7 +6325,7 @@ package android.hardware.location {
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public int loadNanoApp(int, @NonNull android.hardware.location.NanoApp);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.lang.Void> loadNanoApp(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.NanoAppBinary);
     method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void openSession(@NonNull android.hardware.contexthub.HubEndpoint, @NonNull android.hardware.contexthub.HubEndpointInfo);
-    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void openSession(@NonNull android.hardware.contexthub.HubEndpoint, @NonNull android.hardware.contexthub.HubEndpointInfo, @NonNull android.hardware.contexthub.HubServiceInfo);
+    method @FlaggedApi("android.chre.flags.offload_api") @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public void openSession(@NonNull android.hardware.contexthub.HubEndpoint, @NonNull android.hardware.contexthub.HubEndpointInfo, @NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB) public android.hardware.location.ContextHubTransaction<java.util.List<android.hardware.location.NanoAppState>> queryNanoApps(@NonNull android.hardware.location.ContextHubInfo);
     method @Deprecated public int registerCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
     method @Deprecated public int registerCallback(android.hardware.location.ContextHubManager.Callback, android.os.Handler);
@@ -12616,6 +12616,7 @@ package android.provider {
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
     field public static final String ACTION_SHOW_RESTRICTED_SETTING_DIALOG = "android.settings.SHOW_RESTRICTED_SETTING_DIALOG";
+    field @FlaggedApi("com.android.internal.telephony.flags.action_sim_preference_settings") public static final String ACTION_SIM_PREFERENCE_SETTINGS = "android.settings.SIM_PREFERENCE_SETTINGS";
     field public static final String ACTION_TETHER_PROVISIONING_UI = "android.settings.TETHER_PROVISIONING_UI";
     field public static final String ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS";
     field public static final String ACTION_TETHER_UNSUPPORTED_CARRIER_UI = "android.settings.TETHER_UNSUPPORTED_CARRIER_UI";

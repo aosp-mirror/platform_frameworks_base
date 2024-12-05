@@ -64,6 +64,7 @@ public class Theme extends Operation implements RemoteComposeOperation {
     @Override
     public void apply(@NonNull RemoteContext context) {
         context.setTheme(mTheme);
+        markDirty();
     }
 
     @NonNull

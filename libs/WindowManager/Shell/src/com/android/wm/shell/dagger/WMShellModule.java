@@ -152,6 +152,7 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
 import com.android.wm.shell.windowdecor.common.viewhost.DefaultWindowDecorViewHostSupplier;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationPromoController;
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController;
@@ -301,6 +302,7 @@ public abstract class WMShellModule {
             Transitions transitions,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             FocusTransitionObserver focusTransitionObserver,
+            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             Optional<DesktopModeWindowDecorViewModel> desktopModeWindowDecorViewModel) {
         if (desktopModeWindowDecorViewModel.isPresent()) {
             return desktopModeWindowDecorViewModel.get();
@@ -318,7 +320,8 @@ public abstract class WMShellModule {
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
                 transitions,
-                focusTransitionObserver);
+                focusTransitionObserver,
+                windowDecorViewHostSupplier);
     }
 
     @WMSingleton
@@ -343,7 +346,7 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
+    static WindowDecorViewHostSupplier<WindowDecorViewHost> provideWindowDecorViewHostSupplier(
             @ShellMainThread @NonNull CoroutineScope mainScope) {
         return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
@@ -908,6 +911,7 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
@@ -927,8 +931,8 @@ public abstract class WMShellModule {
                 displayInsetsController, syncQueue, transitions, desktopTasksController,
                 desktopImmersiveController.get(),
                 rootTaskDisplayAreaOrganizer, interactionJankMonitor, genericLinksParser,
-                assistContentRequester, multiInstanceHelper, desktopTasksLimiter,
-                appHandleEducationController, appToWebEducationController,
+                assistContentRequester, windowDecorViewHostSupplier, multiInstanceHelper,
+                desktopTasksLimiter, appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
                 focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger));
     }
