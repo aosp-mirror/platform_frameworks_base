@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.mockito.kotlin.verify
 
 var Kosmos.testDispatcher by Fixture { StandardTestDispatcher() }
 
@@ -82,6 +83,32 @@ fun <T> TestScope.currentValue(stateFlow: StateFlow<T>): T {
 }
 
 /** Retrieve the current value of this [StateFlow] safely. See `currentValue(TestScope)`. */
+fun <T> Kosmos.currentValue(fn: () -> T) = testScope.currentValue(fn)
+
+/**
+ * Retrieve the result of [fn] after running all pending tasks. Do not use to retrieve the value of
+ * a flow directly; for that, use either `currentValue(StateFlow)` or [collectLastValue]
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+fun <T> TestScope.currentValue(fn: () -> T): T {
+    runCurrent()
+    return fn()
+}
+
+/** Retrieve the result of [fn] after running all pending tasks. See `TestScope.currentValue(fn)` */
 fun <T> Kosmos.currentValue(stateFlow: StateFlow<T>): T {
     return testScope.currentValue(stateFlow)
 }
+
+/** Safely verify that a mock has been called after the test scope has caught up */
+@OptIn(ExperimentalCoroutinesApi::class)
+fun <T> TestScope.verifyCurrent(mock: T): T {
+    runCurrent()
+    return verify(mock)
+}
+
+/**
+ * Safely verify that a mock has been called after the test scope has caught up. See
+ * `TestScope.verifyCurrent`
+ */
+fun <T> Kosmos.verifyCurrent(mock: T) = testScope.verifyCurrent(mock)
