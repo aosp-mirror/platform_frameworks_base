@@ -2166,7 +2166,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             overrideNetworkType = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE;
         }
         boolean isRoaming = telephonyDisplayInfo.isRoaming();
-        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming);
+        boolean isNtn = telephonyDisplayInfo.isNtn();
+        boolean isSatelliteConstrainedData =
+                telephonyDisplayInfo.isSatelliteConstrainedData();
+        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming,
+                isNtn, isSatelliteConstrainedData);
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {

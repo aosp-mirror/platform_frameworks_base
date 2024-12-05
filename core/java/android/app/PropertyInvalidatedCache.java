@@ -80,6 +80,17 @@ import java.util.concurrent.atomic.AtomicLong;
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
+     * A method to report if the PermissionManager notifications can be separated from cache
+     * invalidation.  The feature relies on a series of flags; the dependency is captured in this
+     * method.
+     * @hide
+     */
+    public static boolean separatePermissionNotificationsEnabled() {
+        return isSharedMemoryAvailable()
+                && Flags.picSeparatePermissionNotifications();
+    }
+
+    /**
      * This is a configuration class that customizes a cache instance.
      * @hide
      */
@@ -1921,6 +1932,10 @@ public class PropertyInvalidatedCache<Query, Result> {
         }
 
         public AutoCorker(@NonNull String propertyName, int autoCorkDelayMs) {
+            if (separatePermissionNotificationsEnabled()) {
+                throw new IllegalStateException("AutoCorking is unavailable");
+            }
+
             mPropertyName = propertyName;
             mAutoCorkDelayMs = autoCorkDelayMs;
             // We can't initialize mHandler here: when we're created, the main loop might not

@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -362,7 +363,7 @@ public class PackageWatchdog {
      * it will resume observing any packages requested from a previous boot.
      * @hide
      */
-    public void registerHealthObserver(PackageHealthObserver observer) {
+    public void registerHealthObserver(PackageHealthObserver observer, Executor ignoredExecutor) {
         synchronized (mLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -396,7 +397,7 @@ public class PackageWatchdog {
      * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      * @hide
      */
-    public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
+    public void startExplicitHealthCheck(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
         if (packageNames.isEmpty()) {
             Slog.wtf(TAG, "No packages to observe, " + observer.getUniqueIdentifier());
@@ -445,7 +446,7 @@ public class PackageWatchdog {
             }
 
             // Register observer in case not already registered
-            registerHealthObserver(observer);
+            registerHealthObserver(observer, null);
 
             // Sync after we add the new packages to the observers. We may have received packges
             // requiring an earlier schedule than we are currently scheduled for.
@@ -861,7 +862,7 @@ public class PackageWatchdog {
          * otherwise
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
-         * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
+         * it has not explicitly asked to watch the package with {@link #startExplicitHealthCheck}.
          */
         default boolean mayObservePackage(@NonNull String packageName) {
             return false;

@@ -36,10 +36,8 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * @deprecated This class is undergoing a major change. Reach out to g/ravenwood if you need
- * any featues in it.
+ * Reach out to g/ravenwood if you need any features in it.
  */
-@Deprecated
 public final class RavenwoodRule implements TestRule {
     private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 

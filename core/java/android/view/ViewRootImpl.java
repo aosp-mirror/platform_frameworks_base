@@ -2254,7 +2254,7 @@ public final class ViewRootImpl implements ViewParent,
 
         onClientWindowFramesChanged(frames);
 
-        CompatibilityInfo.applyOverrideScaleIfNeeded(mergedConfiguration);
+        CompatibilityInfo.applyOverrideIfNeeded(mergedConfiguration);
         final Rect frame = frames.frame;
         final Rect displayFrame = frames.displayFrame;
         final Rect attachedFrame = frames.attachedFrame;
@@ -9458,7 +9458,7 @@ public final class ViewRootImpl implements ViewParent,
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.attachedFrame);
             }
             mInvCompatScale = 1f / mTmpFrames.compatScale;
-            CompatibilityInfo.applyOverrideScaleIfNeeded(mPendingMergedConfiguration);
+            CompatibilityInfo.applyOverrideIfNeeded(mPendingMergedConfiguration);
             handleInsetsControlChanged(mTempInsets, mTempControls);
 
             mPendingAlwaysConsumeSystemBars =

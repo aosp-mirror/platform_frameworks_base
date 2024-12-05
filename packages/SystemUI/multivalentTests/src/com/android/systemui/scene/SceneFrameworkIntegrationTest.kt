@@ -47,6 +47,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.ui.viewmodel.lockscreenUserActionsViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.currentValue
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
@@ -77,6 +78,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -399,9 +401,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      * Note that this doesn't assert what the current scene is in the UI.
      */
     private fun Kosmos.assertCurrentScene(expected: SceneKey) {
-        testScope.runCurrent()
         assertWithMessage("Current scene mismatch!")
-            .that(sceneContainerViewModel.currentScene.value)
+            .that(currentValue(sceneContainerViewModel.currentScene))
             .isEqualTo(expected)
     }
 

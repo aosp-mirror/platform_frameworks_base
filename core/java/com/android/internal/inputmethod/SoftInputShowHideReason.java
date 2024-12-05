@@ -91,6 +91,7 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
         SoftInputShowHideReason.SHOW_INPUT_TARGET_CHANGED,
         SoftInputShowHideReason.HIDE_INPUT_TARGET_CHANGED,
+        SoftInputShowHideReason.REASON_HIDE_WINDOW_LOST_FOCUS,
 })
 public @interface SoftInputShowHideReason {
     /** Default, undefined reason. */
@@ -418,4 +419,7 @@ public @interface SoftInputShowHideReason {
      * {@link android.view.InsetsController#controlWindowInsetsAnimation}.
      */
     int CONTROL_WINDOW_INSETS_ANIMATION = ImeProtoEnums.REASON_CONTROL_WINDOW_INSETS_ANIMATION;
+
+    /** Hide soft input when the window lost focus. */
+    int REASON_HIDE_WINDOW_LOST_FOCUS = ImeProtoEnums.REASON_HIDE_WINDOW_LOST_FOCUS;
 }

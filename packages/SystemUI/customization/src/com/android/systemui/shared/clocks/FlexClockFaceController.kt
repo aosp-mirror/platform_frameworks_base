@@ -131,6 +131,7 @@ class FlexClockFaceController(
         }
 
         override fun onThemeChanged(theme: ThemeConfig) {
+            this@FlexClockFaceController.theme = theme
             layerController.faceEvents.onThemeChanged(theme)
         }
 

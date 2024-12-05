@@ -37,35 +37,46 @@ import org.junit.runner.RunWith
 @SmallTest
 class AppCompatUtilsTest : ShellTestCase() {
     @Test
-    fun testIsTopActivityExemptFromDesktopWindowing_topActivityTransparent() {
+    fun testIsTopActivityExemptFromDesktopWindowing_onlyTransparentActivitiesInStack() {
         assertTrue(isTopActivityExemptFromDesktopWindowing(mContext,
             createFreeformTask(/* displayId */ 0)
                     .apply {
-                        isTopActivityTransparent = true
-                        numActivities = 1
+                        isActivityStackTransparent = true
                         isTopActivityNoDisplay = false
+                        numActivities = 1
                     }))
     }
 
     @Test
-    fun testIsTopActivityExemptFromDesktopWindowing_topActivityTransparent_multipleActivities() {
+    fun testIsTopActivityExemptFromDesktopWindowing_noActivitiesInStack() {
         assertFalse(isTopActivityExemptFromDesktopWindowing(mContext,
             createFreeformTask(/* displayId */ 0)
                 .apply {
-                    isTopActivityTransparent = true
-                    numActivities = 2
+                    isActivityStackTransparent = true
                     isTopActivityNoDisplay = false
+                    numActivities = 0
                 }))
     }
 
     @Test
-    fun testIsTopActivityExemptFromDesktopWindowing_topActivityTransparent_notDisplayed() {
+    fun testIsTopActivityExemptFromDesktopWindowing_nonTransparentActivitiesInStack() {
         assertFalse(isTopActivityExemptFromDesktopWindowing(mContext,
             createFreeformTask(/* displayId */ 0)
                 .apply {
-                    isTopActivityTransparent = true
+                    isActivityStackTransparent = false
+                    isTopActivityNoDisplay = false
                     numActivities = 1
+                }))
+    }
+
+    @Test
+    fun testIsTopActivityExemptFromDesktopWindowing_transparentActivityStack_notDisplayed() {
+        assertFalse(isTopActivityExemptFromDesktopWindowing(mContext,
+            createFreeformTask(/* displayId */ 0)
+                .apply {
+                    isActivityStackTransparent = true
                     isTopActivityNoDisplay = true
+                    numActivities = 1
                 }))
     }
 

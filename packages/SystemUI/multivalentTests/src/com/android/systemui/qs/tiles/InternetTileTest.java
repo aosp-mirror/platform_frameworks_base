@@ -35,9 +35,11 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager;
@@ -172,7 +174,7 @@ public class InternetTileTest extends SysuiTestCase {
         mTile.mSignalCallback.setIsAirplaneMode(state);
         mTestableLooper.processAllMessages();
         assertThat(mTile.getState().icon).isEqualTo(
-                QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_no_internet_unavailable));
+                createExpectedIcon(R.drawable.ic_qs_no_internet_unavailable));
     }
 
     @Test
@@ -193,5 +195,13 @@ public class InternetTileTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(mWifiStateWorker, times(1)).setWifiEnabled(eq(true));
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 }

@@ -109,6 +109,11 @@ constructor(
         userActionInteractor.handleClick(expandable)
     }
 
+    override fun handleSecondaryClick(expandable: Expandable?) = runBlocking {
+        val model = dataInteractor.getCurrentTileModel()
+        userActionInteractor.handleToggleClick(model)
+    }
+
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
     @VisibleForTesting
@@ -125,6 +130,7 @@ constructor(
             secondaryLabel = tileState.secondaryLabel
             contentDescription = tileState.contentDescription
             expandedAccessibilityClassName = tileState.expandedAccessibilityClassName
+            handlesSecondaryClick = true
         }
     }
 

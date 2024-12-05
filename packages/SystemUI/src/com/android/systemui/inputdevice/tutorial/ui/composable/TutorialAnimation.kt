@@ -36,6 +36,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.Ref
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.util.lerp
 import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.compose.LottieAnimation
@@ -47,6 +50,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
+import com.android.systemui.res.R
 
 @Composable
 fun TutorialAnimation(
@@ -104,11 +108,15 @@ private fun EducationAnimation(
             isPlaying = isPlaying,
             restartOnPlay = false,
         )
+    val animationDescription = stringResource(R.string.tutorial_animation_content_description)
     LottieAnimation(
         composition = composition,
         progress = { progress },
         dynamicProperties = animationProperties,
-        modifier = Modifier.fillMaxSize().clickable { isPlaying = !isPlaying },
+        modifier =
+            Modifier.fillMaxSize()
+                .clickable { isPlaying = !isPlaying }
+                .semantics { contentDescription = animationDescription },
     )
 }
 

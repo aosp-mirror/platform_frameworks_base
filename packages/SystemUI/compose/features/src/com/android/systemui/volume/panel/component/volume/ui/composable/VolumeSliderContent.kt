@@ -53,7 +53,7 @@ private enum class VolumeSliderContentComponent {
     DisabledMessage,
 }
 
-/** Shows label of the [VolumeSlider]. Also shows [disabledMessage] when not [isEnabled]. */
+/** Shows label of the [LegacyVolumeSlider]. Also shows [disabledMessage] when not [isEnabled]. */
 @Composable
 fun VolumeSliderContent(
     label: String,
@@ -89,7 +89,7 @@ fun VolumeSliderContent(
                 }
             }
         },
-        measurePolicy = VolumeSliderContentMeasurePolicy(isEnabled)
+        measurePolicy = VolumeSliderContentMeasurePolicy(isEnabled),
     )
 }
 
@@ -102,7 +102,7 @@ private class VolumeSliderContentMeasurePolicy(private val isEnabled: Boolean) :
 
     override fun MeasureScope.measure(
         measurables: List<Measurable>,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         val labelPlaceable =
             measurables
