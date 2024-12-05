@@ -9020,16 +9020,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
         clearPointerDownOutsideFocusRunnable();
 
+        final InputTarget focusedInputTarget = mFocusedInputTarget;
         if (shouldDelayTouchOutside(t)) {
-            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mPointerDownOutsideFocusRunnable =
+                    () -> handlePointerDownOutsideFocus(t, focusedInputTarget);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
         } else if (!fromHandler) {
             // Still post the runnable to handler thread in case there is already a runnable
             // in execution, but still waiting to hold the wm lock.
-            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mPointerDownOutsideFocusRunnable =
+                    () -> handlePointerDownOutsideFocus(t, focusedInputTarget);
             mH.post(mPointerDownOutsideFocusRunnable);
         } else {
-            handlePointerDownOutsideFocus(t);
+            handlePointerDownOutsideFocus(t, focusedInputTarget);
         }
     }
 
@@ -9061,8 +9064,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return shouldDelayTouchForEmbeddedActivity || shouldDelayTouchForFreeform;
     }
 
-    private void handlePointerDownOutsideFocus(InputTarget t) {
+    private void handlePointerDownOutsideFocus(InputTarget t, InputTarget focusedInputTarget) {
         synchronized (mGlobalLock) {
+            if (mFocusedInputTarget != focusedInputTarget) {
+                // Skip if the mFocusedInputTarget is already changed. This is possible if the
+                // pointer-down-outside-focus event is delayed to be handled.
+                ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
+                        "Skip onPointerDownOutsideFocusLocked due to input target changed %s", t);
+                return;
+            }
             if (mPointerDownOutsideFocusRunnable != null
                     && mH.hasCallbacks(mPointerDownOutsideFocusRunnable)) {
                 // Skip if there's another pending pointer-down-outside-focus event.
