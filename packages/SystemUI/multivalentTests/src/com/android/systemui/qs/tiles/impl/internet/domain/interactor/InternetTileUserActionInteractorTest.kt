@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -135,5 +136,14 @@ class InternetTileUserActionInteractorTest : SysuiTestCase() {
             underTest.handleInput(QSTileInputTestKtx.toggleClick(InternetTileModel.Inactive()))
 
             verify(wifiStateWorker, times(1)).isWifiEnabled = eq(true)
+        }
+
+    @Test
+    fun detailsViewModel() =
+        kosmos.testScope.runTest {
+            assertThat(underTest.detailsViewModel.getTitle())
+                .isEqualTo("Internet")
+            assertThat(underTest.detailsViewModel.getSubTitle())
+                .isEqualTo("Tab a network to connect")
         }
 }

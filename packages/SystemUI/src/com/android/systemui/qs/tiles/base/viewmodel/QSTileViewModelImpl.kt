@@ -20,6 +20,7 @@ import android.os.UserHandle
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Dumpable
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor
@@ -114,6 +115,9 @@ class QSTileViewModelImpl<DATA_TYPE>(
             .flatMapLatest { tileDataInteractor().availability(it) }
             .flowOn(backgroundDispatcher)
             .stateIn(tileScope, SharingStarted.WhileSubscribed(), true)
+
+    override val detailsViewModel: TileDetailsViewModel?
+        get() = userActionInteractor().detailsViewModel
 
     override fun forceUpdate() {
         tileScope.launch(context = backgroundDispatcher) { forceUpdates.emit(Unit) }

@@ -18,15 +18,23 @@ package com.android.systemui.qs.tiles.impl.internet.domain.interactor
 
 import android.content.Intent
 import android.provider.Settings
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
+import com.android.systemui.qs.tiles.dialog.InternetDetailsViewModel
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.statusbar.connectivity.AccessPointController
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
@@ -61,11 +69,18 @@ constructor(
                     wifiStateWorker.isWifiEnabled = !wifiStateWorker.isWifiEnabled
                 }
                 is QSTileUserAction.LongClick -> {
-                    qsTileIntentUserActionHandler.handle(
-                        action.expandable,
-                        Intent(Settings.ACTION_WIFI_SETTINGS)
-                    )
+                    handleLongClick(action.expandable)
                 }
             }
         }
+
+    override val detailsViewModel: TileDetailsViewModel =
+        InternetDetailsViewModel { handleLongClick(null) }
+
+    private fun handleLongClick(expandable:Expandable?){
+        qsTileIntentUserActionHandler.handle(
+            expandable,
+            Intent(Settings.ACTION_WIFI_SETTINGS)
+        )
+    }
 }
