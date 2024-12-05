@@ -856,6 +856,11 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.flags-aconfig-java",
     aconfig_declarations: "android.app.flags-aconfig",
+    min_sdk_version: "34",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+    ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
