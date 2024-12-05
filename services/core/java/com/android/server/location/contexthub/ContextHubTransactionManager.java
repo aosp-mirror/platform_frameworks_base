@@ -84,9 +84,9 @@ import java.util.concurrent.atomic.AtomicInteger;
     protected final Map<Integer, ContextHubServiceTransaction> mReliableMessageTransactionMap =
             new HashMap<>();
 
-    /** A set of host endpoint IDs that have an active pending transaction. */
+    /** A set of IDs of transaction owners that have an active pending transaction. */
     @GuardedBy("mReliableMessageLock")
-    protected final Set<Short> mReliableMessageHostEndpointIdActiveSet = new HashSet<>();
+    protected final Set<Long> mReliableMessageOwnerIdActiveSet = new HashSet<>();
 
     protected final AtomicInteger mNextAvailableId = new AtomicInteger();
 
@@ -355,27 +355,32 @@ import java.util.concurrent.atomic.AtomicInteger;
     /**
      * Creates a transaction to send a reliable message.
      *
-     * @param hostEndpointId      The ID of the host endpoint sending the message.
-     * @param contextHubId        The ID of the hub to send the message to.
-     * @param message             The message to send.
+     * @param ownerId The ID of the transaction owner.
+     * @param contextHubId The ID of the hub to send the message to.
+     * @param message The message to send.
      * @param transactionCallback The callback of the transactions.
-     * @param packageName         The host package associated with this transaction.
+     * @param packageName The host package associated with this transaction.
      * @return The generated transaction.
      */
     /* package */ ContextHubServiceTransaction createMessageTransaction(
-            short hostEndpointId, int contextHubId, NanoAppMessage message,
-            IContextHubTransactionCallback transactionCallback, String packageName) {
-        return new ContextHubServiceTransaction(mNextAvailableId.getAndIncrement(),
-                ContextHubTransaction.TYPE_RELIABLE_MESSAGE, packageName,
-                mNextAvailableMessageSequenceNumber.getAndIncrement(), hostEndpointId) {
+            short ownerId,
+            int contextHubId,
+            NanoAppMessage message,
+            IContextHubTransactionCallback transactionCallback,
+            String packageName) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(),
+                ContextHubTransaction.TYPE_RELIABLE_MESSAGE,
+                packageName,
+                mNextAvailableMessageSequenceNumber.getAndIncrement(),
+                ownerId) {
             @Override
             /* package */ int onTransact() {
                 try {
                     message.setIsReliable(/* isReliable= */ true);
                     message.setMessageSequenceNumber(getMessageSequenceNumber());
 
-                    return mContextHubProxy.sendMessageToContextHub(hostEndpointId, contextHubId,
-                            message);
+                    return mContextHubProxy.sendMessageToContextHub(ownerId, contextHubId, message);
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while trying to send a reliable message", e);
                     return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
@@ -766,10 +771,10 @@ import java.util.concurrent.atomic.AtomicInteger;
                         mReliableMessageTransactionMap.entrySet().iterator();
                 while (iter.hasNext()) {
                     ContextHubServiceTransaction transaction = iter.next().getValue();
-                    short hostEndpointId = transaction.getHostEndpointId();
+                    long ownerId = transaction.getOwnerId();
                     int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
                     if (numCompletedStartCalls == 0
-                            && mReliableMessageHostEndpointIdActiveSet.contains(hostEndpointId)) {
+                            && mReliableMessageOwnerIdActiveSet.contains(ownerId)) {
                         continue;
                     }
 
@@ -871,7 +876,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         } else {
             iter.remove();
         }
-        mReliableMessageHostEndpointIdActiveSet.remove(transaction.getHostEndpointId());
+        mReliableMessageOwnerIdActiveSet.remove(transaction.getOwnerId());
     }
 
     /**
@@ -906,7 +911,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             transaction.setTimeoutTime(now + RELIABLE_MESSAGE_TIMEOUT.toNanos());
         }
         transaction.setNumCompletedStartCalls(numCompletedStartCalls + 1);
-        mReliableMessageHostEndpointIdActiveSet.add(transaction.getHostEndpointId());
+        mReliableMessageOwnerIdActiveSet.add(transaction.getOwnerId());
     }
 
     private int toStatsTransactionResult(@ContextHubTransaction.Result int result) {
