@@ -68,6 +68,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class BatteryStatsHistoryTest {
     private static final String TAG = "BatteryStatsHistoryTest";
+    private static final int MAX_HISTORY_BUFFER_SIZE = 1024;
     private final Parcel mHistoryBuffer = Parcel.obtain();
     private File mSystemDir;
     private File mHistoryDir;
@@ -98,8 +99,9 @@ public class BatteryStatsHistoryTest {
 
         mClock.realtime = 123;
 
-        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
+        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32768,
+                MAX_HISTORY_BUFFER_SIZE, mStepDetailsCalculator, mClock, mMonotonicClock, mTracer,
+                mEventLogger);
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
@@ -196,12 +198,15 @@ public class BatteryStatsHistoryTest {
     }
 
     @Test
-    public void testStartNextFile() {
+    public void testStartNextFile() throws Exception {
+        mHistory.forceRecordAllHistory();
+
         mClock.realtime = 123;
 
         List<String> fileList = new ArrayList<>();
         fileList.add("123.bh");
         createActiveFile(mHistory);
+        fillActiveFile(mHistory);
 
         // create file 1 to 31.
         for (int i = 1; i < 32; i++) {
@@ -210,6 +215,8 @@ public class BatteryStatsHistoryTest {
 
             mHistory.startNextFile(mClock.realtime);
             createActiveFile(mHistory);
+            fillActiveFile(mHistory);
+
             verifyFileNames(mHistory, fileList);
             verifyActiveFile(mHistory, mClock.realtime + ".bh");
         }
@@ -224,6 +231,8 @@ public class BatteryStatsHistoryTest {
         verifyFileDeleted("123.bh");
         verifyFileNames(mHistory, fileList);
         verifyActiveFile(mHistory, "32000.bh");
+
+        fillActiveFile(mHistory);
 
         // create file 33
         mClock.realtime = 1000 * 33;
@@ -398,6 +407,14 @@ public class BatteryStatsHistoryTest {
             file.createNewFile();
         } catch (IOException e) {
             Log.e(TAG, "Error creating history file " + file.getPath(), e);
+        }
+    }
+
+    private void fillActiveFile(BatteryStatsHistory history) {
+        // Create roughly 1K of history
+        int initialSize = history.getHistoryUsedSize();
+        while (history.getHistoryUsedSize() < initialSize + 1000) {
+            history.recordCurrentTimeChange(mClock.realtime, mClock.uptime, 0xFFFFFFFFL);
         }
     }
 

@@ -5358,6 +5358,7 @@
   <java-symbol type="integer" name="config_powerStatsAggregationPeriod" />
   <java-symbol type="integer" name="config_aggregatedPowerStatsSpanDuration" />
   <java-symbol type="integer" name="config_accumulatedBatteryUsageStatsSpanSize" />
+  <java-symbol type="integer" name="config_batteryHistoryStorageSize" />
 
   <!--Dynamic Tokens-->
   <java-symbol name="materialColorBackground" type="color"/>

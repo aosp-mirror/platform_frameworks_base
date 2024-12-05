@@ -427,11 +427,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugHighBatteryLevel);
         final boolean resetOnUnplugAfterSignificantCharge = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_batteryStatsResetOnUnplugAfterSignificantCharge);
+        final int batteryHistoryStorageSize = context.getResources().getInteger(
+                com.android.internal.R.integer.config_batteryHistoryStorageSize);
         BatteryStatsImpl.BatteryStatsConfig.Builder batteryStatsConfigBuilder =
                 new BatteryStatsImpl.BatteryStatsConfig.Builder()
                         .setResetOnUnplugHighBatteryLevel(resetOnUnplugHighBatteryLevel)
                         .setResetOnUnplugAfterSignificantCharge(
-                                resetOnUnplugAfterSignificantCharge);
+                                resetOnUnplugAfterSignificantCharge)
+                        .setMaxHistorySizeBytes(batteryHistoryStorageSize);
         setPowerStatsThrottlePeriods(batteryStatsConfigBuilder, context.getResources().getString(
                 com.android.internal.R.string.config_powerStatsThrottlePeriods));
         mBatteryStatsConfig = batteryStatsConfigBuilder.build();
