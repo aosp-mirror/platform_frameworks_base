@@ -328,7 +328,7 @@ APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintMa
 
 bool APerformanceHintManager::canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) {
     mHintBudget =
-            std::max(kMaxLoadHintsPerInterval,
+            std::min(kMaxLoadHintsPerInterval,
                      mHintBudget +
                              static_cast<double>(now - mLastBudgetReplenish) * kReplenishRate);
     mLastBudgetReplenish = now;
