@@ -912,6 +912,8 @@
     <dimen name="conversation_icon_size_badged">20dp</dimen>
     <!-- size of the conversation avatar in an expanded group -->
     <dimen name="conversation_avatar_size_group_expanded">@dimen/messaging_avatar_size</dimen>
+    <!-- size of the face pile icons (2025 redesign version) -->
+    <dimen name="notification_2025_face_pile_avatar_size">24dp</dimen>
     <!-- size of the face pile icons -->
     <dimen name="conversation_face_pile_avatar_size">32dp</dimen>
     <!-- size of the face pile icons when the group is expanded -->

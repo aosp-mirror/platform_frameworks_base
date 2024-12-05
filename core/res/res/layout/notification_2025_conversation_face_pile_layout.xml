@@ -18,14 +18,14 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/conversation_face_pile"
-    android:layout_width="@dimen/conversation_avatar_size"
-    android:layout_height="@dimen/conversation_avatar_size"
+    android:layout_width="@dimen/notification_2025_icon_circle_size"
+    android:layout_height="@dimen/notification_2025_icon_circle_size"
     android:forceHasOverlappingRendering="false"
     >
     <ImageView
         android:id="@+id/conversation_face_pile_top"
-        android:layout_width="@dimen/messaging_avatar_size"
-        android:layout_height="@dimen/messaging_avatar_size"
+        android:layout_width="@dimen/notification_2025_face_pile_avatar_size"
+        android:layout_height="@dimen/notification_2025_face_pile_avatar_size"
         android:scaleType="centerCrop"
         android:layout_gravity="end|top"
         android:background="@drawable/notification_icon_circle"
@@ -43,8 +43,8 @@
             />
         <ImageView
             android:id="@+id/conversation_face_pile_bottom"
-            android:layout_width="@dimen/messaging_avatar_size"
-            android:layout_height="@dimen/messaging_avatar_size"
+            android:layout_width="@dimen/notification_2025_face_pile_avatar_size"
+            android:layout_height="@dimen/notification_2025_face_pile_avatar_size"
             android:scaleType="centerCrop"
             android:layout_gravity="center"
             android:background="@drawable/notification_icon_circle"
