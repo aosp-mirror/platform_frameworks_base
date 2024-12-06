@@ -28,15 +28,18 @@ import kotlinx.coroutines.flow.conflate
  * Returns a [TFlow] that emits the value sampled from the [Transactional] produced by each emission
  * of the original [TFlow], within the same transaction of the original emission.
  */
+@ExperimentalFrpApi
 fun <A> TFlow<Transactional<A>>.sampleTransactionals(): TFlow<A> = map { it.sample() }
 
 /** @see FrpTransactionScope.sample */
+@ExperimentalFrpApi
 fun <A, B, C> TFlow<A>.sample(
     state: TState<B>,
     transform: suspend FrpTransactionScope.(A, B) -> C,
 ): TFlow<C> = map { transform(it, state.sample()) }
 
 /** @see FrpTransactionScope.sample */
+@ExperimentalFrpApi
 fun <A, B, C> TFlow<A>.sample(
     transactional: Transactional<B>,
     transform: suspend FrpTransactionScope.(A, B) -> C,
@@ -51,6 +54,7 @@ fun <A, B, C> TFlow<A>.sample(
  *
  * @see sample
  */
+@ExperimentalFrpApi
 fun <A, B, C> TFlow<A>.samplePromptly(
     state: TState<B>,
     transform: suspend FrpTransactionScope.(A, B) -> C,
@@ -74,6 +78,7 @@ fun <A, B, C> TFlow<A>.samplePromptly(
  * Returns a cold [Flow] that, when collected, emits from this [TFlow]. [network] is needed to
  * transactionally connect to / disconnect from the [TFlow] when collection starts/stops.
  */
+@ExperimentalFrpApi
 fun <A> TFlow<A>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { observe { trySend(it) } } }.conflate()
 
@@ -81,6 +86,7 @@ fun <A> TFlow<A>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
  * Returns a cold [Flow] that, when collected, emits from this [TState]. [network] is needed to
  * transactionally connect to / disconnect from the [TState] when collection starts/stops.
  */
+@ExperimentalFrpApi
 fun <A> TState<A>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { observe { trySend(it) } } }.conflate()
 
@@ -90,6 +96,7 @@ fun <A> TState<A>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
  *
  * When collection is cancelled, so is the [FrpSpec]. This means all ongoing work is cleaned up.
  */
+@ExperimentalFrpApi
 @JvmName("flowSpecToColdConflatedFlow")
 fun <A> FrpSpec<TFlow<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { applySpec().observe { trySend(it) } } }.conflate()
@@ -100,6 +107,7 @@ fun <A> FrpSpec<TFlow<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
  *
  * When collection is cancelled, so is the [FrpSpec]. This means all ongoing work is cleaned up.
  */
+@ExperimentalFrpApi
 @JvmName("stateSpecToColdConflatedFlow")
 fun <A> FrpSpec<TState<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { applySpec().observe { trySend(it) } } }.conflate()
@@ -108,6 +116,7 @@ fun <A> FrpSpec<TState<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
  * Returns a cold [Flow] that, when collected, applies this [Transactional] in a new transaction in
  * this [network], and then emits from the returned [TFlow].
  */
+@ExperimentalFrpApi
 @JvmName("transactionalFlowToColdConflatedFlow")
 fun <A> Transactional<TFlow<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { sample().observe { trySend(it) } } }.conflate()
@@ -116,6 +125,7 @@ fun <A> Transactional<TFlow<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A
  * Returns a cold [Flow] that, when collected, applies this [Transactional] in a new transaction in
  * this [network], and then emits from the returned [TState].
  */
+@ExperimentalFrpApi
 @JvmName("transactionalStateToColdConflatedFlow")
 fun <A> Transactional<TState<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { sample().observe { trySend(it) } } }.conflate()
@@ -126,6 +136,7 @@ fun <A> Transactional<TState<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<
  *
  * When collection is cancelled, so is the [FrpStateful]. This means all ongoing work is cleaned up.
  */
+@ExperimentalFrpApi
 @JvmName("statefulFlowToColdConflatedFlow")
 fun <A> FrpStateful<TFlow<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { applyStateful().observe { trySend(it) } } }.conflate()
@@ -136,11 +147,13 @@ fun <A> FrpStateful<TFlow<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> 
  *
  * When collection is cancelled, so is the [FrpStateful]. This means all ongoing work is cleaned up.
  */
+@ExperimentalFrpApi
 @JvmName("statefulStateToColdConflatedFlow")
 fun <A> FrpStateful<TState<A>>.toColdConflatedFlow(network: FrpNetwork): Flow<A> =
     channelFlow { network.activateSpec { applyStateful().observe { trySend(it) } } }.conflate()
 
 /** Return a [TFlow] that emits from the original [TFlow] only when [state] is `true`. */
+@ExperimentalFrpApi
 fun <A> TFlow<A>.filter(state: TState<Boolean>): TFlow<A> = filter { state.sample() }
 
 private fun Iterable<Boolean>.allTrue() = all { it }
@@ -148,13 +161,15 @@ private fun Iterable<Boolean>.allTrue() = all { it }
 private fun Iterable<Boolean>.anyTrue() = any { it }
 
 /** Returns a [TState] that is `true` only when all of [states] are `true`. */
+@ExperimentalFrpApi
 fun allOf(vararg states: TState<Boolean>): TState<Boolean> = combine(*states) { it.allTrue() }
 
 /** Returns a [TState] that is `true` when any of [states] are `true`. */
+@ExperimentalFrpApi
 fun anyOf(vararg states: TState<Boolean>): TState<Boolean> = combine(*states) { it.anyTrue() }
 
 /** Returns a [TState] containing the inverse of the Boolean held by the original [TState]. */
-fun not(state: TState<Boolean>): TState<Boolean> = state.mapCheapUnsafe { !it }
+@ExperimentalFrpApi fun not(state: TState<Boolean>): TState<Boolean> = state.mapCheapUnsafe { !it }
 
 /**
  * Represents a modal FRP sub-network.
@@ -168,6 +183,7 @@ fun not(state: TState<Boolean>): TState<Boolean> = state.mapCheapUnsafe { !it }
  *
  * @see FrpStatefulMode
  */
+@ExperimentalFrpApi
 fun interface FrpBuildMode<out A> {
     /**
      * Invoked when this mode is enabled. Returns a value and a [TFlow] that signals a switch to a
@@ -183,6 +199,7 @@ fun interface FrpBuildMode<out A> {
  *
  * @see FrpBuildMode
  */
+@ExperimentalFrpApi
 val <A> FrpBuildMode<A>.compiledFrpSpec: FrpSpec<TState<A>>
     get() = frpSpec {
         var modeChangeEvents by TFlowLoop<FrpBuildMode<A>>()
@@ -206,6 +223,7 @@ val <A> FrpBuildMode<A>.compiledFrpSpec: FrpSpec<TState<A>>
  *
  * @see FrpBuildMode
  */
+@ExperimentalFrpApi
 fun interface FrpStatefulMode<out A> {
     /**
      * Invoked when this mode is enabled. Returns a value and a [TFlow] that signals a switch to a
@@ -221,6 +239,7 @@ fun interface FrpStatefulMode<out A> {
  *
  * @see FrpBuildMode
  */
+@ExperimentalFrpApi
 val <A> FrpStatefulMode<A>.compiledStateful: FrpStateful<TState<A>>
     get() = statefully {
         var modeChangeEvents by TFlowLoop<FrpStatefulMode<A>>()
@@ -237,6 +256,7 @@ val <A> FrpStatefulMode<A>.compiledStateful: FrpStateful<TState<A>>
  * Runs [spec] in this [FrpBuildScope], and then re-runs it whenever [rebuildSignal] emits. Returns
  * a [TState] that holds the result of the currently-active [FrpSpec].
  */
+@ExperimentalFrpApi
 fun <A> FrpBuildScope.rebuildOn(rebuildSignal: TFlow<*>, spec: FrpSpec<A>): TState<A> =
     rebuildSignal.map { spec }.holdLatestSpec(spec)
 
@@ -248,5 +268,6 @@ fun <A> FrpBuildScope.rebuildOn(rebuildSignal: TFlow<*>, spec: FrpSpec<A>): TSta
  *     stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
  * ```
  */
+@ExperimentalFrpApi
 val <A> TState<A>.transitions: TFlow<WithPrev<A, A>>
     get() = stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
