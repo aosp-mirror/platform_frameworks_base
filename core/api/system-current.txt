@@ -14630,7 +14630,7 @@ package android.telecom {
     field public static final int CALLTYPE_INCOMING = 1; // 0x1
     field public static final int CALLTYPE_OUTGOING = 2; // 0x2
     field public static final int CALLTYPE_UNKNOWN = 0; // 0x0
-    field public static final int CDMA_PHONE = 1; // 0x1
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_PHONE = 1; // 0x1
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics> CREATOR;
     field public static final int GSM_PHONE = 2; // 0x2
     field public static final int IMS_PHONE = 4; // 0x4
@@ -15011,7 +15011,7 @@ package android.telephony {
     field public static final String KEY_GBA_UA_SECURITY_ORGANIZATION_INT = "gba_ua_security_organization_int";
     field public static final String KEY_GBA_UA_SECURITY_PROTOCOL_INT = "gba_ua_security_protocol_int";
     field public static final String KEY_GBA_UA_TLS_CIPHER_SUITE_INT = "gba_ua_tls_cipher_suite_int";
-    field public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL = "support_cdma_1x_voice_calls_bool";
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL = "support_cdma_1x_voice_calls_bool";
   }
 
   public static final class CarrierConfigManager.Wifi {
@@ -15098,8 +15098,8 @@ package android.telephony {
     ctor public CellBroadcastService();
     method @NonNull @WorkerThread public abstract CharSequence getCellBroadcastAreaInfo(int);
     method @CallSuper public android.os.IBinder onBind(@Nullable android.content.Intent);
-    method public abstract void onCdmaCellBroadcastSms(int, @NonNull byte[], int);
-    method public abstract void onCdmaScpMessage(int, @NonNull java.util.List<android.telephony.cdma.CdmaSmsCbProgramData>, @NonNull String, @NonNull java.util.function.Consumer<android.os.Bundle>);
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public void onCdmaCellBroadcastSms(int, @NonNull byte[], int);
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public void onCdmaScpMessage(int, @NonNull java.util.List<android.telephony.cdma.CdmaSmsCbProgramData>, @NonNull String, @NonNull java.util.function.Consumer<android.os.Bundle>);
     method public abstract void onGsmCellBroadcastSms(int, @NonNull byte[]);
     field public static final String CELL_BROADCAST_SERVICE_INTERFACE = "android.telephony.CellBroadcastService";
   }
@@ -15109,9 +15109,9 @@ package android.telephony {
     method @NonNull public abstract android.telephony.CellIdentity sanitizeLocationInfo();
   }
 
-  public final class CellIdentityCdma extends android.telephony.CellIdentity {
-    method @NonNull public android.telephony.cdma.CdmaCellLocation asCellLocation();
-    method @NonNull public android.telephony.CellIdentityCdma sanitizeLocationInfo();
+  @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public final class CellIdentityCdma extends android.telephony.CellIdentity {
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @NonNull public android.telephony.cdma.CdmaCellLocation asCellLocation();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @NonNull public android.telephony.CellIdentityCdma sanitizeLocationInfo();
   }
 
   public final class CellIdentityGsm extends android.telephony.CellIdentity {
@@ -15527,16 +15527,16 @@ package android.telephony {
     field public static final int BUSY = 17; // 0x11
     field public static final int CALL_BARRED = 240; // 0xf0
     field public static final int CALL_REJECTED = 21; // 0x15
-    field public static final int CDMA_ACCESS_BLOCKED = 1009; // 0x3f1
-    field public static final int CDMA_ACCESS_FAILURE = 1006; // 0x3ee
-    field public static final int CDMA_DROP = 1001; // 0x3e9
-    field public static final int CDMA_INTERCEPT = 1002; // 0x3ea
-    field public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE = 1000; // 0x3e8
-    field public static final int CDMA_NOT_EMERGENCY = 1008; // 0x3f0
-    field public static final int CDMA_PREEMPTED = 1007; // 0x3ef
-    field public static final int CDMA_REORDER = 1003; // 0x3eb
-    field public static final int CDMA_RETRY_ORDER = 1005; // 0x3ed
-    field public static final int CDMA_SO_REJECT = 1004; // 0x3ec
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_ACCESS_BLOCKED = 1009; // 0x3f1
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_ACCESS_FAILURE = 1006; // 0x3ee
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_DROP = 1001; // 0x3e9
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_INTERCEPT = 1002; // 0x3ea
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE = 1000; // 0x3e8
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_NOT_EMERGENCY = 1008; // 0x3f0
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_PREEMPTED = 1007; // 0x3ef
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_REORDER = 1003; // 0x3eb
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_RETRY_ORDER = 1005; // 0x3ed
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_SO_REJECT = 1004; // 0x3ec
     field public static final int CHANNEL_NOT_AVAIL = 44; // 0x2c
     field public static final int CHANNEL_UNACCEPTABLE = 6; // 0x6
     field public static final int CONDITIONAL_IE_ERROR = 100; // 0x64
@@ -16070,14 +16070,14 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CarrierRestrictionRules getCarrierRestrictionRules();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getCarrierServicePackageName();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getCarrierServicePackageNameForLogicalSlot(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaEnhancedRoamingIndicatorDisplayNumber();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn(int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin(int);
-    method public String getCdmaPrlVersion();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaRoamingMode();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaSubscriptionMode();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaEnhancedRoamingIndicatorDisplayNumber();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn(int);
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin(int);
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public String getCdmaPrlVersion();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaRoamingMode();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaSubscriptionMode();
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_CELL_BROADCASTS) public java.util.List<android.telephony.CellBroadcastIdRange> getCellBroadcastIdRanges();
     method public int getCurrentPhoneType();
     method public int getCurrentPhoneType(int);
@@ -16167,7 +16167,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void resetCarrierKeysForImsiEncryption();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void resetIms(int);
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void resetOtaEmergencyNumberDbFilePath();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean resetRadioConfig();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean resetRadioConfig();
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void resetSettings();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int sendThermalMitigationRequest(@NonNull android.telephony.ThermalMitigationRequest);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
@@ -16176,8 +16176,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCdmaRoamingMode(int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCdmaSubscriptionMode(int);
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCdmaRoamingMode(int);
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCdmaSubscriptionMode(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_CELL_BROADCASTS) public void setCellBroadcastIdRanges(@NonNull java.util.List<android.telephony.CellBroadcastIdRange>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
@@ -16241,9 +16241,9 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
-    field public static final int CDMA_SUBSCRIPTION_NV = 1; // 0x1
-    field public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // 0x0
-    field public static final int CDMA_SUBSCRIPTION_UNKNOWN = -1; // 0xffffffff
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_SUBSCRIPTION_NV = 1; // 0x1
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // 0x0
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CDMA_SUBSCRIPTION_UNKNOWN = -1; // 0xffffffff
     field public static final int CELL_BROADCAST_RESULT_FAIL_ACTIVATION = 3; // 0x3
     field public static final int CELL_BROADCAST_RESULT_FAIL_CONFIG = 2; // 0x2
     field public static final int CELL_BROADCAST_RESULT_SUCCESS = 0; // 0x0
@@ -16460,21 +16460,21 @@ package android.telephony {
 
 package android.telephony.cdma {
 
-  public final class CdmaSmsCbProgramData implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getCategory();
-    method public int getOperation();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY = 4099; // 0x1003
-    field public static final int CATEGORY_CMAS_EXTREME_THREAT = 4097; // 0x1001
-    field public static final int CATEGORY_CMAS_LAST_RESERVED_VALUE = 4351; // 0x10ff
-    field public static final int CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT = 4096; // 0x1000
-    field public static final int CATEGORY_CMAS_SEVERE_THREAT = 4098; // 0x1002
-    field public static final int CATEGORY_CMAS_TEST_MESSAGE = 4100; // 0x1004
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.cdma.CdmaSmsCbProgramData> CREATOR;
-    field public static final int OPERATION_ADD_CATEGORY = 1; // 0x1
-    field public static final int OPERATION_CLEAR_CATEGORIES = 2; // 0x2
-    field public static final int OPERATION_DELETE_CATEGORY = 0; // 0x0
+  @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public final class CdmaSmsCbProgramData implements android.os.Parcelable {
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public int describeContents();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public int getCategory();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public int getOperation();
+    method @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public void writeToParcel(android.os.Parcel, int);
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY = 4099; // 0x1003
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CATEGORY_CMAS_EXTREME_THREAT = 4097; // 0x1001
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CATEGORY_CMAS_LAST_RESERVED_VALUE = 4351; // 0x10ff
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT = 4096; // 0x1000
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CATEGORY_CMAS_SEVERE_THREAT = 4098; // 0x1002
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CATEGORY_CMAS_TEST_MESSAGE = 4100; // 0x1004
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") @NonNull public static final android.os.Parcelable.Creator<android.telephony.cdma.CdmaSmsCbProgramData> CREATOR;
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int OPERATION_ADD_CATEGORY = 1; // 0x1
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int OPERATION_CLEAR_CATEGORIES = 2; // 0x2
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int OPERATION_DELETE_CATEGORY = 0; // 0x0
   }
 
 }
@@ -17802,7 +17802,7 @@ package android.telephony.ims {
     field public static final int CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1; // 0x1
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 7; // 0x7
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 6; // 0x6
-    field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 4; // 0x4
+    field @Deprecated @FlaggedApi("com.android.internal.telephony.flags.deprecate_cdma") public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 4; // 0x4
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS = 5; // 0x5
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_INTERNET_PDN = 12; // 0xc
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN = 9; // 0x9
