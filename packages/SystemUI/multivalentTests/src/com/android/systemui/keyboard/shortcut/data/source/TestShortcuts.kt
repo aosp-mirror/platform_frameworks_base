@@ -40,7 +40,6 @@ import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.AppCategories
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
@@ -553,17 +552,7 @@ object TestShortcuts {
             simpleShortcutCategory(
                 MultiTasking,
                 "Split screen",
-                "Switch to app on left or above while using split screen",
-            ),
-            simpleShortcutCategory(
-                MultiTasking,
-                "Split screen",
                 "Use split screen with app on the right",
-            ),
-            simpleShortcutCategory(
-                MultiTasking,
-                "Split screen",
-                "Switch to app on right or below while using split screen",
             ),
             simpleShortcutCategory(System, "System controls", "Show shortcuts"),
             simpleShortcutCategory(System, "System controls", "View recent apps"),
@@ -595,13 +584,7 @@ object TestShortcuts {
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT
             ),
             simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
-            ),
-            simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT
             ),
             simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER
