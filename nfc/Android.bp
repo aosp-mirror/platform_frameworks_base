@@ -37,6 +37,7 @@ filegroup {
 java_sdk_library {
     name: "framework-nfc",
     libs: [
+        "androidx.annotation_annotation",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
         "framework-permission-s.stubs.module_lib",
         "framework-permission.stubs.module_lib",
