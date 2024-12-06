@@ -1634,7 +1634,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         }
         final DesktopModeWindowDecoration windowDecoration =
                 mDesktopModeWindowDecorFactory.create(
-                        mContext,
+                        Flags.enableBugFixesForSecondaryDisplay()
+                                ? mDisplayController.getDisplayContext(taskInfo.displayId)
+                                : mContext,
                         mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mSplitScreenController,

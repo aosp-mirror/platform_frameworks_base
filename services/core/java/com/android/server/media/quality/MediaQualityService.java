@@ -32,6 +32,7 @@ import android.media.quality.PictureProfileHandle;
 import android.media.quality.SoundProfile;
 import android.media.quality.SoundProfileHandle;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.server.SystemService;
@@ -81,7 +82,7 @@ public class MediaQualityService extends SystemService {
     private final class BinderService extends IMediaQualityManager.Stub {
 
         @Override
-        public PictureProfile createPictureProfile(PictureProfile pp, int userId) {
+        public PictureProfile createPictureProfile(PictureProfile pp, UserHandle user) {
             SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
@@ -100,12 +101,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public void updatePictureProfile(String id, PictureProfile pp, int userId) {
+        public void updatePictureProfile(String id, PictureProfile pp, UserHandle user) {
             // TODO: implement
         }
 
         @Override
-        public void removePictureProfile(String id, int userId) {
+        public void removePictureProfile(String id, UserHandle user) {
             Long intId = mPictureProfileTempIdMap.inverse().get(id);
             if (intId != null) {
                 SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
@@ -118,7 +119,8 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public PictureProfile getPictureProfile(int type, String name, int userId) {
+        public PictureProfile getPictureProfile(int type, String name, boolean includeParams,
+                UserHandle user) {
             String selection = BaseParameters.PARAMETER_TYPE + " = ? AND "
                     + BaseParameters.PARAMETER_NAME + " = ?";
             String[] selectionArguments = {Integer.toString(type), name};
@@ -144,7 +146,8 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfile> getPictureProfilesByPackage(String packageName, int userId) {
+        public List<PictureProfile> getPictureProfilesByPackage(
+                String packageName, boolean includeParams, UserHandle user) {
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
             return getPictureProfilesBasedOnConditions(getAllMediaProfileColumns(), selection,
@@ -152,18 +155,19 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfile> getAvailablePictureProfiles(int userId) {
+        public List<PictureProfile> getAvailablePictureProfiles(
+                boolean includeParams, UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public boolean setDefaultPictureProfile(String profileId, int userId) {
+        public boolean setDefaultPictureProfile(String profileId, UserHandle user) {
             // TODO: pass the profile ID to MediaQuality HAL when ready.
             return false;
         }
 
         @Override
-        public List<String> getPictureProfilePackageNames(int userId) {
+        public List<String> getPictureProfilePackageNames(UserHandle user) {
             String [] column = {BaseParameters.PARAMETER_PACKAGE};
             List<PictureProfile> pictureProfiles = getPictureProfilesBasedOnConditions(column,
                     null, null);
@@ -174,17 +178,17 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfileHandle> getPictureProfileHandle(String[] id, int userId) {
+        public List<PictureProfileHandle> getPictureProfileHandle(String[] id, UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public List<SoundProfileHandle> getSoundProfileHandle(String[] id, int userId) {
+        public List<SoundProfileHandle> getSoundProfileHandle(String[] id, UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public SoundProfile createSoundProfile(SoundProfile sp, int userId) {
+        public SoundProfile createSoundProfile(SoundProfile sp, UserHandle user) {
             SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
@@ -203,12 +207,12 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public void updateSoundProfile(String id, SoundProfile pp, int userId) {
+        public void updateSoundProfile(String id, SoundProfile pp, UserHandle user) {
             // TODO: implement
         }
 
         @Override
-        public void removeSoundProfile(String id, int userId) {
+        public void removeSoundProfile(String id, UserHandle user) {
             Long intId = mSoundProfileTempIdMap.inverse().get(id);
             if (intId != null) {
                 SQLiteDatabase db = mMediaQualityDbHelper.getWritableDatabase();
@@ -221,9 +225,10 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public SoundProfile getSoundProfile(int type, String id, int userId) {
+        public SoundProfile getSoundProfile(int type, String id, boolean includeParams,
+                UserHandle user) {
             String selection = BaseParameters.PARAMETER_TYPE + " = ? AND "
-                    + BaseParameters.PARAMETER_NAME + " = ?";
+                    + BaseParameters.PARAMETER_ID + " = ?";
             String[] selectionArguments = {String.valueOf(type), id};
 
             try (
@@ -247,7 +252,8 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<SoundProfile> getSoundProfilesByPackage(String packageName, int userId) {
+        public List<SoundProfile> getSoundProfilesByPackage(
+                String packageName, boolean includeParams, UserHandle user) {
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
             return getSoundProfilesBasedOnConditions(getAllMediaProfileColumns(), selection,
@@ -255,18 +261,19 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<SoundProfile> getAvailableSoundProfiles(int userId) {
+        public List<SoundProfile> getAvailableSoundProfiles(
+                boolean includeParams, UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public boolean setDefaultSoundProfile(String profileId, int userId) {
+        public boolean setDefaultSoundProfile(String profileId, UserHandle user) {
             // TODO: pass the profile ID to MediaQuality HAL when ready.
             return false;
         }
 
         @Override
-        public List<String> getSoundProfilePackageNames(int userId) {
+        public List<String> getSoundProfilePackageNames(UserHandle user) {
             String [] column = {BaseParameters.PARAMETER_NAME};
             List<SoundProfile> soundProfiles = getSoundProfilesBasedOnConditions(column,
                     null, null);
@@ -456,70 +463,71 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public void setAmbientBacklightSettings(AmbientBacklightSettings settings, int userId) {
+        public void setAmbientBacklightSettings(
+                AmbientBacklightSettings settings, UserHandle user) {
         }
 
         @Override
-        public void setAmbientBacklightEnabled(boolean enabled, int userId) {
+        public void setAmbientBacklightEnabled(boolean enabled, UserHandle user) {
         }
 
         @Override
-        public List<ParamCapability> getParamCapabilities(List<String> names, int userId) {
+        public List<ParamCapability> getParamCapabilities(List<String> names, UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public List<String> getPictureProfileAllowList(int userId) {
+        public List<String> getPictureProfileAllowList(UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public void setPictureProfileAllowList(List<String> packages, int userId) {
+        public void setPictureProfileAllowList(List<String> packages, UserHandle user) {
         }
 
         @Override
-        public List<String> getSoundProfileAllowList(int userId) {
+        public List<String> getSoundProfileAllowList(UserHandle user) {
             return new ArrayList<>();
         }
 
         @Override
-        public void setSoundProfileAllowList(List<String> packages, int userId) {
+        public void setSoundProfileAllowList(List<String> packages, UserHandle user) {
         }
 
         @Override
-        public boolean isSupported(int userId) {
+        public boolean isSupported(UserHandle user) {
             return false;
         }
 
         @Override
-        public void setAutoPictureQualityEnabled(boolean enabled, int userId) {
+        public void setAutoPictureQualityEnabled(boolean enabled, UserHandle user) {
         }
 
         @Override
-        public boolean isAutoPictureQualityEnabled(int userId) {
+        public boolean isAutoPictureQualityEnabled(UserHandle user) {
             return false;
         }
 
         @Override
-        public void setSuperResolutionEnabled(boolean enabled, int userId) {
+        public void setSuperResolutionEnabled(boolean enabled, UserHandle user) {
         }
 
         @Override
-        public boolean isSuperResolutionEnabled(int userId) {
+        public boolean isSuperResolutionEnabled(UserHandle user) {
             return false;
         }
 
         @Override
-        public void setAutoSoundQualityEnabled(boolean enabled, int userId) {
+        public void setAutoSoundQualityEnabled(boolean enabled, UserHandle user) {
         }
 
         @Override
-        public boolean isAutoSoundQualityEnabled(int userId) {
+        public boolean isAutoSoundQualityEnabled(UserHandle user) {
             return false;
         }
 
         @Override
-        public boolean isAmbientBacklightEnabled(int userId) {
+        public boolean isAmbientBacklightEnabled(UserHandle user) {
             return false;
         }
     }

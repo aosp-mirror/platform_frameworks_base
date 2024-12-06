@@ -210,6 +210,35 @@ crashrecovery_java_defaults {
     },
 }
 
+soong_config_module_type {
+    name: "ondeviceintelligence_module_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_ondevice_intelligence_module",
+        "release_ondevice_intelligence_platform",
+    ],
+    properties: [
+        "libs",
+        "srcs",
+        "static_libs",
+    ],
+}
+
+// Conditionally add ondeviceintelligence stubs library
+ondeviceintelligence_module_java_defaults {
+    name: "ondeviceintelligence_conditionally",
+    soong_config_variables: {
+        release_ondevice_intelligence_module: {
+            libs: ["service-ondeviceintelligence.stubs.system_server"],
+        },
+        release_ondevice_intelligence_platform: {
+            srcs: [":service-ondeviceintelligence-sources"],
+            static_libs: ["modules-utils-backgroundthread"],
+        },
+    },
+}
+
 // merge all required services into one jar
 // ============================================================
 soong_config_module_type {
@@ -236,6 +265,7 @@ system_java_library {
         "services_java_defaults",
         "art_profile_java_defaults",
         "services_crashrecovery_stubs_conditionally",
+        "ondeviceintelligence_conditionally",
     ],
     installable: true,
 

@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -177,7 +176,8 @@ constructor(
                             newScene = CommunalScenes.Communal,
                             loggingReason = "FromDreamingTransitionInteractor",
                             transitionKey =
-                                if (communalHubOnMobile()) CommunalTransitionKeys.SimpleFade
+                                if (communalSettingsInteractor.isV2FlagEnabled())
+                                    CommunalTransitionKeys.SimpleFade
                                 else null,
                         )
                     } else {

@@ -49,10 +49,14 @@ import static android.app.NotificationChannel.PROMOTIONS_ID;
 import static android.app.NotificationChannel.RECS_ID;
 import static android.app.NotificationChannel.SOCIAL_MEDIA_ID;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
+import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
 import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
+import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_ID;
+import static android.app.NotificationManager.EXTRA_AUTOMATIC_ZEN_RULE_STATUS;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -369,6 +373,7 @@ import java.io.FileOutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -11273,18 +11278,70 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)), eq(UserHandle.of(102)));
     }
 
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void onAutomaticRuleStatusChanged_sendsBroadcastToRuleOwner() throws Exception {
+        mService.mZenModeHelper.getCallbacks().forEach(c -> c.onAutomaticRuleStatusChanged(
+                mUserId, "rule.owner.pkg", "rule_id", AUTOMATIC_RULE_STATUS_ACTIVATED));
+
+        Intent expected = new Intent(ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED)
+                .setPackage("rule.owner.pkg")
+                .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, "rule_id")
+                .putExtra(EXTRA_AUTOMATIC_ZEN_RULE_STATUS, AUTOMATIC_RULE_STATUS_ACTIVATED)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+
+        verify(mContext).sendBroadcastAsUser(eqIntent(expected), eq(UserHandle.of(mUserId)));
+    }
+
     private static Intent eqIntent(Intent wanted) {
         return ArgumentMatchers.argThat(
                 new ArgumentMatcher<Intent>() {
                     @Override
                     public boolean matches(Intent argument) {
                         return wanted.filterEquals(argument)
-                                && wanted.getFlags() == argument.getFlags();
+                                && wanted.getFlags() == argument.getFlags()
+                                && equalBundles(wanted.getExtras(), argument.getExtras());
                     }
 
                     @Override
                     public String toString() {
                         return wanted.toString();
+                    }
+
+                    private boolean equalBundles(Bundle one, Bundle two) {
+                        if (one == null && two == null) {
+                            return true;
+                        }
+                        if ((one == null) != (two == null)) {
+                            return false;
+                        }
+                        if (one.size() != two.size()) {
+                            return false;
+                        }
+
+                        HashSet<String> setOne = new HashSet<>(one.keySet());
+                        setOne.addAll(two.keySet());
+
+                        for (String key : setOne) {
+                            if (!one.containsKey(key) || !two.containsKey(key)) {
+                                return false;
+                            }
+
+                            Object valueOne = one.get(key);
+                            Object valueTwo = two.get(key);
+                            if (valueOne instanceof Bundle
+                                    && valueTwo instanceof Bundle
+                                    && !equalBundles((Bundle) valueOne, (Bundle) valueTwo)) {
+                                return false;
+                            } else if (valueOne == null) {
+                                if (valueTwo != null) {
+                                    return false;
+                                }
+                            } else if (!valueOne.equals(valueTwo)) {
+                                return false;
+                            }
+                        }
+                        return true;
                     }
                 });
     }
@@ -17314,6 +17371,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
 
@@ -17327,6 +17385,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
         StatusBarNotification sbn1 = new StatusBarNotification(mPkg, mPkg, 7, null, mUid, 0,
@@ -17339,6 +17398,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
         StatusBarNotification sbn2 = new StatusBarNotification(PKG_O, PKG_O, 7, null, UID_O, 0,
@@ -17388,6 +17448,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
 
@@ -17420,6 +17481,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
@@ -17434,6 +17496,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
@@ -17483,6 +17546,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
                 .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
                 .build();
@@ -17515,6 +17579,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
                 n, UserHandle.getUserHandleForUid(mUid), null, 0);
@@ -17543,6 +17608,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
@@ -17570,6 +17636,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
 
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,

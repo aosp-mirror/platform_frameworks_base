@@ -50,6 +50,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_PIP
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.widget.Toast
 import android.window.DesktopModeFlags
@@ -220,6 +221,7 @@ class DesktopTasksController(
     // Launch cookie used to identify a drag and drop transition to fullscreen after it has begun.
     // Used to prevent handleRequest from moving the new fullscreen task to freeform.
     private var dragAndDropFullscreenCookie: Binder? = null
+    private var pendingPipTransitionAndTask: Pair<IBinder, Int>? = null
 
     init {
         desktopMode = DesktopModeImpl()
@@ -557,6 +559,26 @@ class DesktopTasksController(
     }
 
     fun minimizeTask(taskInfo: RunningTaskInfo) {
+        val wct = WindowContainerTransaction()
+
+        val isMinimizingToPip = taskInfo.pictureInPictureParams?.isAutoEnterEnabled() ?: false
+        // If task is going to PiP, start a PiP transition instead of a minimize transition
+        if (isMinimizingToPip) {
+            val requestInfo = TransitionRequestInfo(
+                TRANSIT_PIP, /* triggerTask= */ null, taskInfo, /* remoteTransition= */ null,
+                /* displayChange= */ null, /* flags= */ 0
+            )
+            val requestRes = transitions.dispatchRequest(Binder(), requestInfo, /* skip= */ null)
+            wct.merge(requestRes.second, true)
+            pendingPipTransitionAndTask =
+                freeformTaskTransitionStarter.startPipTransition(wct) to taskInfo.taskId
+            return
+        }
+
+        minimizeTaskInner(taskInfo)
+    }
+
+    private fun minimizeTaskInner(taskInfo: RunningTaskInfo) {
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
@@ -1202,9 +1224,12 @@ class DesktopTasksController(
         moveHomeTask(wct, toTop = true)
 
         // Currently, we only handle the desktop on the default display really.
-        if (displayId == DEFAULT_DISPLAY && ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()) {
+        if (
+            (displayId == DEFAULT_DISPLAY || Flags.enableBugFixesForSecondaryDisplay()) &&
+                ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()
+        ) {
             // Add translucent wallpaper activity to show the wallpaper underneath
-            addWallpaperActivity(wct)
+            addWallpaperActivity(displayId, wct)
         }
 
         val expandedTasksOrderedFrontToBack = taskRepository.getExpandedTasksOrdered(displayId)
@@ -1253,7 +1278,7 @@ class DesktopTasksController(
             ?.let { homeTask -> wct.reorder(homeTask.getToken(), /* onTop= */ toTop) }
     }
 
-    private fun addWallpaperActivity(wct: WindowContainerTransaction) {
+    private fun addWallpaperActivity(displayId: Int, wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
         val userHandle = UserHandle.of(userId)
         val userContext = context.createContextAsUser(userHandle, /* flags= */ 0)
@@ -1264,6 +1289,9 @@ class DesktopTasksController(
                 launchWindowingMode = WINDOWING_MODE_FULLSCREEN
                 pendingIntentBackgroundActivityStartMode =
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                if (Flags.enableBugFixesForSecondaryDisplay()) {
+                    launchDisplayId = displayId
+                }
             }
         val pendingIntent =
             PendingIntent.getActivityAsUser(
@@ -1327,6 +1355,21 @@ class DesktopTasksController(
     ): Boolean {
         // This handler should never be the sole handler, so should not animate anything.
         return false
+    }
+
+    override fun onTransitionConsumed(
+        transition: IBinder,
+        aborted: Boolean,
+        finishT: Transaction?
+    ) {
+        pendingPipTransitionAndTask?.let { (pipTransition, taskId) ->
+            if (transition == pipTransition) {
+                if (aborted) {
+                    shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { minimizeTaskInner(it) }
+                }
+                pendingPipTransitionAndTask = null
+            }
+        }
     }
 
     override fun handleRequest(
@@ -2048,7 +2091,11 @@ class DesktopTasksController(
                     syncQueue,
                     taskInfo,
                     displayController,
-                    context,
+                    if (Flags.enableBugFixesForSecondaryDisplay()) {
+                        displayController.getDisplayContext(taskInfo.displayId)
+                    } else {
+                        context
+                    },
                     taskSurface,
                     rootTaskDisplayAreaOrganizer,
                     dragStartState,

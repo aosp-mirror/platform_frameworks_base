@@ -20,116 +20,100 @@ import static android.Manifest.permission.DYNAMIC_INSTRUMENTATION;
 import static android.content.Context.DYNAMIC_INSTRUMENTATION_SERVICE;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.PermissionManuallyEnforced;
+import android.annotation.RequiresPermission;
+import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.os.RemoteException;
 import android.os.instrumentation.ExecutableMethodFileOffsets;
 import android.os.instrumentation.IDynamicInstrumentationManager;
+import android.os.instrumentation.IOffsetCallback;
 import android.os.instrumentation.MethodDescriptor;
+import android.os.instrumentation.MethodDescriptorParser;
 import android.os.instrumentation.TargetProcess;
 
-import com.android.internal.annotations.VisibleForTesting;
+
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import dalvik.system.VMDebug;
 
 import java.lang.reflect.Method;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+
 
 /**
  * System private implementation of the {@link IDynamicInstrumentationManager interface}.
  */
 public class DynamicInstrumentationManagerService extends SystemService {
+
+    private ActivityManagerInternal mAmInternal;
+
     public DynamicInstrumentationManagerService(@NonNull Context context) {
         super(context);
     }
 
     @Override
     public void onStart() {
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         publishBinderService(DYNAMIC_INSTRUMENTATION_SERVICE, new BinderService());
     }
 
     private final class BinderService extends IDynamicInstrumentationManager.Stub {
         @Override
         @PermissionManuallyEnforced
-        public @Nullable ExecutableMethodFileOffsets getExecutableMethodFileOffsets(
-                @NonNull TargetProcess targetProcess, @NonNull MethodDescriptor methodDescriptor) {
+        @RequiresPermission(value = android.Manifest.permission.DYNAMIC_INSTRUMENTATION)
+        public void getExecutableMethodFileOffsets(
+                @NonNull TargetProcess targetProcess, @NonNull MethodDescriptor methodDescriptor,
+                @NonNull IOffsetCallback callback) {
             if (!com.android.art.flags.Flags.executableMethodFileOffsets()) {
                 throw new UnsupportedOperationException();
             }
             getContext().enforceCallingOrSelfPermission(
                     DYNAMIC_INSTRUMENTATION, "Caller must have DYNAMIC_INSTRUMENTATION permission");
+            Objects.requireNonNull(targetProcess.processName);
 
-            if (targetProcess.processName == null
-                    || !targetProcess.processName.equals("system_server")) {
-                throw new UnsupportedOperationException(
-                        "system_server is the only supported target process");
+            if (!targetProcess.processName.equals("system_server")) {
+                try {
+                    mAmInternal.getExecutableMethodFileOffsets(targetProcess.processName,
+                            targetProcess.pid, targetProcess.uid, methodDescriptor,
+                            new IOffsetCallback.Stub() {
+                                @Override
+                                public void onResult(ExecutableMethodFileOffsets result) {
+                                    try {
+                                        callback.onResult(result);
+                                    } catch (RemoteException e) {
+                                        /* ignore */
+                                    }
+                                }
+                            });
+                    return;
+                } catch (NoSuchElementException e) {
+                    throw new IllegalArgumentException(
+                            "The specified app process cannot be found." , e);
+                }
             }
 
-            Method method = parseMethodDescriptor(
+            Method method = MethodDescriptorParser.parseMethodDescriptor(
                     getClass().getClassLoader(), methodDescriptor);
             VMDebug.ExecutableMethodFileOffsets location =
                     VMDebug.getExecutableMethodFileOffsets(method);
 
-            if (location == null) {
-                return null;
-            }
-
-            ExecutableMethodFileOffsets ret = new ExecutableMethodFileOffsets();
-            ret.containerPath = location.getContainerPath();
-            ret.containerOffset = location.getContainerOffset();
-            ret.methodOffset = location.getMethodOffset();
-            return ret;
-        }
-    }
-
-    @VisibleForTesting
-    static Method parseMethodDescriptor(ClassLoader classLoader,
-            @NonNull MethodDescriptor descriptor) {
-        try {
-            Class<?> javaClass = classLoader.loadClass(descriptor.fullyQualifiedClassName);
-            Class<?>[] parameters = new Class[descriptor.fullyQualifiedParameters.length];
-            for (int i = 0; i < descriptor.fullyQualifiedParameters.length; i++) {
-                String typeName = descriptor.fullyQualifiedParameters[i];
-                boolean isArrayType = typeName.endsWith("[]");
-                if (isArrayType) {
-                    typeName = typeName.substring(0, typeName.length() - 2);
+            try {
+                if (location == null) {
+                    callback.onResult(null);
+                    return;
                 }
-                switch (typeName) {
-                    case "boolean":
-                        parameters[i] = isArrayType ? boolean.class.arrayType() : boolean.class;
-                        break;
-                    case "byte":
-                        parameters[i] = isArrayType ? byte.class.arrayType() : byte.class;
-                        break;
-                    case "char":
-                        parameters[i] = isArrayType ? char.class.arrayType() : char.class;
-                        break;
-                    case "short":
-                        parameters[i] = isArrayType ? short.class.arrayType() : short.class;
-                        break;
-                    case "int":
-                        parameters[i] = isArrayType ? int.class.arrayType() : int.class;
-                        break;
-                    case "long":
-                        parameters[i] = isArrayType ? long.class.arrayType() : long.class;
-                        break;
-                    case "float":
-                        parameters[i] = isArrayType ? float.class.arrayType() : float.class;
-                        break;
-                    case "double":
-                        parameters[i] = isArrayType ? double.class.arrayType() : double.class;
-                        break;
-                    default:
-                        parameters[i] = isArrayType ? classLoader.loadClass(typeName).arrayType()
-                                : classLoader.loadClass(typeName);
-                }
-            }
 
-            return javaClass.getDeclaredMethod(descriptor.methodName, parameters);
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
-            throw new IllegalArgumentException(
-                    "The specified method cannot be found. Is this descriptor valid? "
-                            + descriptor, e);
+                ExecutableMethodFileOffsets ret = new ExecutableMethodFileOffsets();
+                ret.containerPath = location.getContainerPath();
+                ret.containerOffset = location.getContainerOffset();
+                ret.methodOffset = location.getMethodOffset();
+                callback.onResult(ret);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Failed to invoke result callback", e);
+            }
         }
     }
 }

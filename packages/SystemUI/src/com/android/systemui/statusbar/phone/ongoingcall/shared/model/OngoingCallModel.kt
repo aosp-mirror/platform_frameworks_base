@@ -46,5 +46,6 @@ sealed interface OngoingCallModel {
         val startTimeMs: Long,
         val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
+        val notificationKey: String,
     ) : OngoingCallModel
 }

@@ -21,6 +21,9 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.ALL_APPS
+import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.contextualeducation.GestureType.HOME
+import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.ContextualEducationMetricsLogger
@@ -37,6 +40,7 @@ import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Clock
+import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -48,6 +52,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.merge
@@ -71,6 +76,8 @@ constructor(
         const val TAG = "KeyboardTouchpadEduInteractor"
         const val MAX_SIGNAL_COUNT: Int = 2
         const val MAX_EDUCATION_SHOW_COUNT: Int = 2
+        const val MAX_TOAST_PER_USAGE_SESSION: Int = 2
+
         val usageSessionDuration =
             getDurationForConfig("persist.contextual_edu.usage_session_sec", 3.days)
         val minIntervalBetweenEdu =
@@ -109,6 +116,16 @@ constructor(
         overviewProxyService.addCallback(listener)
         awaitClose { overviewProxyService.removeCallback(listener) }
     }
+
+    private val gestureModelMap: Flow<Map<GestureType, GestureEduModel>> =
+        combine(
+            contextualEducationInteractor.backGestureModelFlow,
+            contextualEducationInteractor.homeGestureModelFlow,
+            contextualEducationInteractor.overviewGestureModelFlow,
+            contextualEducationInteractor.allAppsGestureModelFlow,
+        ) { back, home, overview, allApps ->
+            mapOf(BACK to back, HOME to home, OVERVIEW to overview, ALL_APPS to allApps)
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
@@ -211,7 +228,11 @@ constructor(
 
     private suspend fun incrementSignalCount(gestureType: GestureType) {
         val targetDevice = getTargetDevice(gestureType)
-        if (isTargetDeviceConnected(targetDevice) && hasInitialDelayElapsed(targetDevice)) {
+        if (
+            isTargetDeviceConnected(targetDevice) &&
+                hasInitialDelayElapsed(targetDevice) &&
+                isMinIntervalForToastEduElapsed(gestureType)
+        ) {
             contextualEducationInteractor.incrementSignalCount(gestureType)
         }
     }
@@ -220,6 +241,28 @@ constructor(
         return when (deviceType) {
             KEYBOARD -> userInputDeviceRepository.isAnyKeyboardConnectedForUser.first().isConnected
             TOUCHPAD -> userInputDeviceRepository.isAnyTouchpadConnectedForUser.first().isConnected
+        }
+    }
+
+    private suspend fun isMinIntervalForToastEduElapsed(gestureType: GestureType): Boolean {
+        val gestureModelMap = gestureModelMap.first()
+        // Only perform checking if the next edu is toast (i.e. no education is shown yet)
+        if (gestureModelMap[gestureType]?.educationShownCount != 0) {
+            return true
+        }
+
+        val wasLastEduToast = { gesture: GestureEduModel -> gesture.educationShownCount == 1 }
+        val toastEduTimesInCurrentSession: List<Instant> =
+            gestureModelMap.values
+                .filter { wasLastEduToast(it) }
+                .mapNotNull { it.lastEducationTime }
+                .filter { it >= clock.instant().minusSeconds(usageSessionDuration.inWholeSeconds) }
+
+        return if (toastEduTimesInCurrentSession.size >= MAX_TOAST_PER_USAGE_SESSION) {
+            val lastToastTime: Instant? = toastEduTimesInCurrentSession.maxOrNull()
+            clock.instant().isAfter(lastToastTime?.plusSeconds(usageSessionDuration.inWholeSeconds))
+        } else {
+            true
         }
     }
 

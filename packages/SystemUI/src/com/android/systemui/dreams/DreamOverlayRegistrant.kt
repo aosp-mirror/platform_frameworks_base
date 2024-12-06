@@ -25,7 +25,7 @@ import android.os.PatternMatcher
 import android.os.RemoteException
 import android.service.dreams.IDreamManager
 import android.util.Log
-import com.android.systemui.Flags
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.qualifiers.SystemUser
 import com.android.systemui.dreams.dagger.DreamModule
 import com.android.systemui.log.LogBuffer
@@ -48,6 +48,7 @@ constructor(
     @SystemUser monitor: Monitor,
     private val packageManager: PackageManager,
     private val dreamManager: IDreamManager,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     @DreamLog private val logBuffer: LogBuffer,
 ) : ConditionalCoreStartable(monitor) {
     private var currentRegisteredState = false
@@ -90,7 +91,7 @@ constructor(
             }
 
             if (
-                Flags.communalHubOnMobile() &&
+                communalSettingsInteractor.isV2FlagEnabled() &&
                     packageManager.getComponentEnabledSetting(overlayServiceComponent) ==
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED
             ) {
@@ -111,7 +112,7 @@ constructor(
         }
 
         // Enable for hub on mobile
-        if (Flags.communalHubOnMobile()) {
+        if (communalSettingsInteractor.isV2FlagEnabled()) {
             // Not available on TV or auto
             if (
                 packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE) ||

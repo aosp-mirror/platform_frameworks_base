@@ -261,7 +261,7 @@ private fun RowScope.ForegroundServicesButton(
 
 /** A button with an icon. */
 @Composable
-private fun IconButton(model: FooterActionsButtonViewModel, modifier: Modifier = Modifier) {
+fun IconButton(model: FooterActionsButtonViewModel, modifier: Modifier = Modifier) {
     Expandable(
         color = colorAttr(model.backgroundColor),
         shape = CircleShape,

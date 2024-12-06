@@ -115,6 +115,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
@@ -126,7 +127,6 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import kotlinx.coroutines.delay
-import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 
 @Composable
 fun ShortcutHelper(
@@ -189,7 +189,7 @@ private fun ActiveShortcutHelper(
             onKeyboardSettingsClicked,
             shortcutsUiState.isShortcutCustomizerFlagEnabled,
             onCustomizationRequested,
-            shortcutsUiState.shouldShowResetButton
+            shortcutsUiState.shouldShowResetButton,
         )
     }
 }
@@ -380,7 +380,7 @@ private fun ShortcutHelperTwoPane(
     onKeyboardSettingsClicked: () -> Unit,
     isShortcutCustomizerFlagEnabled: Boolean,
     onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
-    shouldShowResetButton: Boolean
+    shouldShowResetButton: Boolean,
 ) {
     val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
     var isCustomizing by remember { mutableStateOf(false) }
@@ -801,7 +801,10 @@ private fun ShortcutKeyContainer(shortcutKeyContent: @Composable BoxScope.() -> 
 private fun BoxScope.ShortcutTextKey(key: ShortcutKey.Text) {
     Text(
         text = key.value,
-        modifier = Modifier.align(Alignment.Center).padding(horizontal = 12.dp),
+        modifier =
+            Modifier.align(Alignment.Center).padding(horizontal = 12.dp).semantics {
+                hideFromAccessibility()
+            },
         style = MaterialTheme.typography.titleSmall,
     )
 }
@@ -825,7 +828,7 @@ private fun FlowRowScope.ShortcutOrSeparator(spacing: Dp) {
     Spacer(Modifier.width(spacing))
     Text(
         text = stringResource(R.string.shortcut_helper_key_combinations_or_separator),
-        modifier = Modifier.align(Alignment.CenterVertically),
+        modifier = Modifier.align(Alignment.CenterVertically).semantics { hideFromAccessibility() },
         style = MaterialTheme.typography.titleSmall,
     )
     Spacer(Modifier.width(spacing))

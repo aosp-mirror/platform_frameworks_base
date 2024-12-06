@@ -162,6 +162,21 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Return the maximum size of the window decoration surface control view host pool, or zero if
+     * there should be no pooling.
+     */
+    public static int getWindowDecorScvhPoolSize(@NonNull Context context) {
+        if (!Flags.enableDesktopWindowingScvhCacheBugFix()) return 0;
+        final int maxTaskLimit = getMaxTaskLimit(context);
+        if (maxTaskLimit > 0) {
+            return maxTaskLimit;
+        }
+        // TODO: b/368032552 - task limit equal to 0 means unlimited. Figure out what the pool
+        //  size should be in that case.
+        return 0;
+    }
+
+    /**
      * Return {@code true} if the current device supports desktop mode.
      */
     @VisibleForTesting

@@ -260,6 +260,7 @@ constructor(
                 startTimeMs = currentInfo.callStartTime,
                 notificationIconView = icon,
                 intent = currentInfo.intent,
+                notificationKey = currentInfo.key,
             )
         } else {
             return OngoingCallModel.NoCall

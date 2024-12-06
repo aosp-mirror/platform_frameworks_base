@@ -467,8 +467,21 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_notOngoing() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
 
     @Test
@@ -480,6 +493,7 @@ public class NotificationTest {
                 .setContentTitle("TITLE")
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -491,6 +505,7 @@ public class NotificationTest {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -503,6 +518,7 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle())
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -515,6 +531,7 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
+                .setOngoing(true)
                 .setGroup("someGroup")
                 .setGroupSummary(true)
                 .build();

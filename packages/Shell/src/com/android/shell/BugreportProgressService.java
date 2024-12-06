@@ -1365,7 +1365,11 @@ public class BugreportProgressService extends Service {
      */
     private Intent buildWearWarningIntent() {
         Intent intent = new Intent();
-        intent.setClassName(mContext, getPackageName() + ".WearBugreportWarningActivity");
+        String systemUIPackage = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemUi);
+        String wearBugreportWarningActivity = getResources()
+                .getString(R.string.system_ui_wear_bugreport_warning_activity);
+        intent.setClassName(systemUIPackage, wearBugreportWarningActivity);
         if (mContext.getPackageManager().resolveActivity(intent, /* flags */ 0) == null) {
             Log.e(TAG, "Cannot find wear bugreport warning activity");
             return buildWarningIntent(mContext, /* sendIntent */ null);

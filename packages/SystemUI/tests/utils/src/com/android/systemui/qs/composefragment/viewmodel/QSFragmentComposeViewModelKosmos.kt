@@ -33,6 +33,7 @@ import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteracto
 import com.android.systemui.qs.panels.ui.viewmodel.inFirstPageViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.mediaInRowInLandscapeViewModelFactory
 import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModelFactory
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
 import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
@@ -56,6 +57,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     disableFlagsInteractor,
                     keyguardTransitionInteractor,
                     largeScreenShadeInterpolator,
+                    shadeInteractor,
                     configurationInteractor,
                     largeScreenHeaderHelper,
                     tileSquishinessInteractor,

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import com.android.compose.animation.scene.effect.ContentOverscrollEffect
 
 /**
  * [SceneTransitionLayout] is a container that automatically animates its content whenever its state
@@ -282,6 +283,53 @@ typealias SceneScope = ContentScope
 @Stable
 @ElementDsl
 interface ContentScope : BaseContentScope {
+    /**
+     * The overscroll effect applied to the content in the vertical direction. This can be used to
+     * customize how the content behaves when the scene is over scrolled.
+     *
+     * For example, you can use it with the `Modifier.overscroll()` modifier:
+     * ```kotlin
+     * @Composable
+     * fun ContentScope.MyScene() {
+     *     Box(
+     *         modifier = Modifier
+     *             // Apply the effect
+     *             .overscroll(verticalOverscrollEffect)
+     *     ) {
+     *         // ... your content ...
+     *     }
+     * }
+     * ```
+     *
+     * Or you can read the `overscrollDistance` value directly, if you need some custom overscroll
+     * behavior:
+     * ```kotlin
+     * @Composable
+     * fun ContentScope.MyScene() {
+     *     Box(
+     *         modifier = Modifier
+     *             .graphicsLayer {
+     *                 // Translate half of the overscroll
+     *                 translationY = verticalOverscrollEffect.overscrollDistance * 0.5f
+     *             }
+     *     ) {
+     *         // ... your content ...
+     *     }
+     * }
+     * ```
+     *
+     * @see horizontalOverscrollEffect
+     */
+    val verticalOverscrollEffect: ContentOverscrollEffect
+
+    /**
+     * The overscroll effect applied to the content in the horizontal direction. This can be used to
+     * customize how the content behaves when the scene is over scrolled.
+     *
+     * @see verticalOverscrollEffect
+     */
+    val horizontalOverscrollEffect: ContentOverscrollEffect
+
     /**
      * Animate some value at the content level.
      *
