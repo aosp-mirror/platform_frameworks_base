@@ -30,6 +30,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil;
+import android.view.accessibility.Flags;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -41,7 +42,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import java.util.concurrent.ExecutionException;
 
@@ -54,17 +54,17 @@ import java.util.concurrent.ExecutionException;
 public class SettingsHelperRestoreTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final BroadcastInterceptingContext mInterceptingContext =
+            new BroadcastInterceptingContext(
+                    InstrumentationRegistry.getInstrumentation().getContext());
     private static final float FLOAT_TOLERANCE = 0.01f;
-
-    private Context mContext;
     private ContentResolver mContentResolver;
     private SettingsHelper mSettingsHelper;
 
     @Before
     public void setUp() {
-        mContext = InstrumentationRegistry.getInstrumentation().getContext();
-        mContentResolver = mContext.getContentResolver();
-        mSettingsHelper = new SettingsHelper(mContext);
+        mContentResolver = mInterceptingContext.getContentResolver();
+        mSettingsHelper = new SettingsHelper(mInterceptingContext);
     }
 
     @After
@@ -74,23 +74,22 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, 0);
         Settings.Secure.putString(mContentResolver, Settings.Secure.ACCESSIBILITY_QS_TARGETS, null);
         Settings.Secure.putString(mContentResolver,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, null);
+        Settings.Secure.putString(mContentResolver,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null);
     }
 
     @Test
     public void restoreHighTextContrastEnabled_currentlyEnabled_enableInRestoredFromVanilla_dontSendNotification_hctKeepsEnabled()
             throws ExecutionException, InterruptedException {
-        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
-                mContext);
         BroadcastInterceptingContext.FutureIntent futureIntent =
-                interceptingContext.nextBroadcastIntent(
+                mInterceptingContext.nextBroadcastIntent(
                         SettingsHelper.HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION);
-        mContentResolver = interceptingContext.getContentResolver();
         String settingName = Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED;
         Settings.Secure.putInt(mContentResolver, settingName, 1);
 
         mSettingsHelper.restoreValue(
-                interceptingContext,
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -106,17 +105,14 @@ public class SettingsHelperRestoreTest {
     @Test
     public void restoreHighTextContrastEnabled_currentlyDisabled_enableInRestoredFromVanilla_sendNotification_hctKeepsDisabled()
             throws ExecutionException, InterruptedException {
-        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
-                mContext);
         BroadcastInterceptingContext.FutureIntent futureIntent =
-                interceptingContext.nextBroadcastIntent(
+                mInterceptingContext.nextBroadcastIntent(
                         SettingsHelper.HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION);
-        mContentResolver = interceptingContext.getContentResolver();
         String settingName = Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED;
         Settings.Secure.putInt(mContentResolver, settingName, 0);
 
         mSettingsHelper.restoreValue(
-                interceptingContext,
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -133,17 +129,14 @@ public class SettingsHelperRestoreTest {
     @Test
     public void restoreHighTextContrastEnabled_currentlyDisabled_enableInRestoredFromAfterVanilla_dontSendNotification_hctShouldEnabled()
             throws ExecutionException, InterruptedException {
-        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
-                mContext);
         BroadcastInterceptingContext.FutureIntent futureIntent =
-                interceptingContext.nextBroadcastIntent(
+                mInterceptingContext.nextBroadcastIntent(
                         SettingsHelper.HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION);
-        mContentResolver = interceptingContext.getContentResolver();
         String settingName = Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED;
         Settings.Secure.putInt(mContentResolver, settingName, 0);
 
         mSettingsHelper.restoreValue(
-                interceptingContext,
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -169,7 +162,7 @@ public class SettingsHelperRestoreTest {
         Settings.Secure.putFloat(mContentResolver, settingName, configuredSettingValue);
 
         mSettingsHelper.restoreValue(
-                mContext,
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -192,7 +185,7 @@ public class SettingsHelperRestoreTest {
         float restoreSettingValue = defaultSettingValue + 0.5f;
 
         mSettingsHelper.restoreValue(
-                Mockito.mock(Context.class),
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -214,7 +207,7 @@ public class SettingsHelperRestoreTest {
      */
     private float setDefaultAccessibilityDisplayMagnificationScale() {
         float defaultSettingValue =
-                mContext.getResources()
+                mInterceptingContext.getResources()
                         .getFraction(
                                 R.fraction.def_accessibility_display_magnification_scale, 1, 1);
         Settings.Secure.putFloat(
@@ -235,7 +228,7 @@ public class SettingsHelperRestoreTest {
         Settings.Secure.putInt(mContentResolver, settingName, configuredSettingValue);
 
         mSettingsHelper.restoreValue(
-                Mockito.mock(Context.class),
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -257,7 +250,7 @@ public class SettingsHelperRestoreTest {
 
         int restoreSettingValue = 1;
         mSettingsHelper.restoreValue(
-                Mockito.mock(Context.class),
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -271,17 +264,15 @@ public class SettingsHelperRestoreTest {
     @Test
     public void restoreAccessibilityQsTargets_broadcastSent()
             throws ExecutionException, InterruptedException {
-        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
-                mContext);
         final String settingName = Settings.Secure.ACCESSIBILITY_QS_TARGETS;
         final String restoreSettingValue = "com.android.server.accessibility/ColorInversion"
                 + SettingsStringUtil.DELIMITER
                 + "com.android.server.accessibility/ColorCorrectionTile";
         BroadcastInterceptingContext.FutureIntent futureIntent =
-                interceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
+                mInterceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
 
         mSettingsHelper.restoreValue(
-                interceptingContext,
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -300,15 +291,13 @@ public class SettingsHelperRestoreTest {
     @Test
     public void restoreAccessibilityShortcutTargetService_broadcastSent()
             throws ExecutionException, InterruptedException {
-        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
-                mContext);
         final String settingName = Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
         final String restoredValue = "com.android.a11y/Service";
         BroadcastInterceptingContext.FutureIntent futureIntent =
-                interceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
+                mInterceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
 
         mSettingsHelper.restoreValue(
-                interceptingContext,
+                mInterceptingContext,
                 mContentResolver,
                 new ContentValues(2),
                 Settings.Secure.getUriFor(settingName),
@@ -319,6 +308,34 @@ public class SettingsHelperRestoreTest {
         Intent intentReceived = futureIntent.get();
         assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
                 .isEqualTo(restoredValue);
+        assertThat(intentReceived.getIntExtra(
+                Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, /* defaultValue= */ 0))
+                .isEqualTo(Build.VERSION.SDK_INT);
+    }
+
+    @EnableFlags(Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    @Test
+    public void restoreAccessibilityShortcutTargets_broadcastSent()
+            throws ExecutionException, InterruptedException {
+        final String settingName = Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS;
+        final String restoreSettingValue = "com.android.server.accessibility/ColorInversion"
+                + SettingsStringUtil.DELIMITER
+                + "com.android.server.accessibility/ColorCorrectionTile";
+        BroadcastInterceptingContext.FutureIntent futureIntent =
+                mInterceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
+
+        mSettingsHelper.restoreValue(
+                mInterceptingContext,
+                mContentResolver,
+                new ContentValues(2),
+                Settings.Secure.getUriFor(settingName),
+                settingName,
+                restoreSettingValue,
+                Build.VERSION.SDK_INT);
+
+        Intent intentReceived = futureIntent.get();
+        assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
+                .isEqualTo(restoreSettingValue);
         assertThat(intentReceived.getIntExtra(
                 Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, /* defaultValue= */ 0))
                 .isEqualTo(Build.VERSION.SDK_INT);

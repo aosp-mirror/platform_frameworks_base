@@ -101,21 +101,26 @@ public class SettingsHelper {
      */
     private static final ArraySet<String> sBroadcastOnRestore;
     private static final ArraySet<String> sBroadcastOnRestoreSystemUI;
+    private static final ArraySet<String> sBroadcastOnRestoreAccessibility;
     static {
-        sBroadcastOnRestore = new ArraySet<String>(12);
+        sBroadcastOnRestore = new ArraySet<>(7);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
-        sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         sBroadcastOnRestore.add(Settings.Global.BLUETOOTH_ON);
         sBroadcastOnRestore.add(Settings.Secure.UI_NIGHT_MODE);
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_START_TIME);
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
-        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
         sBroadcastOnRestore.add(Settings.Secure.SCREEN_RESOLUTION_MODE);
-        sBroadcastOnRestoreSystemUI = new ArraySet<String>(2);
+
+        sBroadcastOnRestoreAccessibility = new ArraySet<>(5);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        sBroadcastOnRestoreAccessibility.add(
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
+        sBroadcastOnRestoreAccessibility.add(Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
+
+        sBroadcastOnRestoreSystemUI = new ArraySet<>(2);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_TILES);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_AUTO_ADDED_TILES);
     }
@@ -188,6 +193,7 @@ public class SettingsHelper {
         String oldValue = null;
         boolean sendBroadcast = false;
         boolean sendBroadcastSystemUI = false;
+        boolean sendBroadcastAccessibility = false;
         final SettingsLookup table;
 
         if (destination.equals(Settings.Secure.CONTENT_URI)) {
@@ -200,6 +206,7 @@ public class SettingsHelper {
 
         sendBroadcast = sBroadcastOnRestore.contains(name);
         sendBroadcastSystemUI = sBroadcastOnRestoreSystemUI.contains(name);
+        sendBroadcastAccessibility = sBroadcastOnRestoreAccessibility.contains(name);
 
         if (sendBroadcast) {
             // TODO: http://b/22388012
@@ -209,6 +216,10 @@ public class SettingsHelper {
             // It would probably be correct to do it for the ones sent to the system, but consumers
             // may be depending on the current behavior.
             oldValue = table.lookup(cr, name, context.getUserId());
+        } else if (sendBroadcastAccessibility) {
+            int userId = android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()
+                    ? context.getUserId() : UserHandle.USER_SYSTEM;
+            oldValue = table.lookup(cr, name, userId);
         }
 
         try {
@@ -251,11 +262,7 @@ public class SettingsHelper {
             } else if (Settings.System.ACCELEROMETER_ROTATION.equals(name)
                     && shouldSkipAutoRotateRestore()) {
                 return;
-            } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(name)) {
-                // Don't write it to setting. Let the broadcast receiver in
-                // AccessibilityManagerService handle restore/merging logic.
-                return;
-            } else if (Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(name)) {
+            } else if (shouldSkipAndLetBroadcastHandlesRestoreLogic(name)) {
                 // Don't write it to setting. Let the broadcast receiver in
                 // AccessibilityManagerService handle restore/merging logic.
                 return;
@@ -287,12 +294,13 @@ public class SettingsHelper {
             // If we fail to apply the setting, by definition nothing happened
             sendBroadcast = false;
             sendBroadcastSystemUI = false;
+            sendBroadcastAccessibility = false;
             Log.e(TAG, "Failed to restore setting name: " + name + " + value: " + value, e);
         } finally {
             // If this was an element of interest, send the "we just restored it"
             // broadcast with the historical value now that the new value has
             // been committed and observers kicked off.
-            if (sendBroadcast || sendBroadcastSystemUI) {
+            if (sendBroadcast || sendBroadcastSystemUI || sendBroadcastAccessibility) {
                 Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
                         .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                         .putExtra(Intent.EXTRA_SETTING_NAME, name)
@@ -308,6 +316,13 @@ public class SettingsHelper {
                     intent.setPackage(
                             context.getString(com.android.internal.R.string.config_systemUi));
                     context.sendBroadcastAsUser(intent, context.getUser(), null);
+                }
+                if (sendBroadcastAccessibility) {
+                    UserHandle userHandle =
+                            android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()
+                                    ? context.getUser() : UserHandle.SYSTEM;
+                    intent.setPackage("android");
+                    context.sendBroadcastAsUser(intent, userHandle, null);
                 }
             }
         }
@@ -472,6 +487,19 @@ public class SettingsHelper {
             default:
                 return false;
         }
+    }
+
+    private boolean shouldSkipAndLetBroadcastHandlesRestoreLogic(String settingName) {
+        boolean restoreHandledByBroadcast = Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(
+                settingName)
+                || Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(settingName);
+        if (android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()) {
+            restoreHandledByBroadcast |=
+                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(settingName)
+                            || Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(settingName);
+        }
+
+        return restoreHandledByBroadcast;
     }
 
     private void setAutoRestore(boolean enabled) {
