@@ -20,6 +20,7 @@ import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
 import static android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO;
 import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.content.res.Flags.FLAG_SELF_TARGETING_ANDROID_RESOURCE_FRRO;
 import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 import static android.util.proto.ProtoInputStream.NO_MORE_FIELDS;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
@@ -127,8 +128,8 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
-import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
 import com.android.internal.widget.remotecompose.player.RemoteComposePlayer;
 
@@ -8709,6 +8710,7 @@ public class RemoteViews implements Parcelable, Filter {
          *
          * @hide
          */
+        @FlaggedApi(FLAG_SELF_TARGETING_ANDROID_RESOURCE_FRRO)
         @Nullable
         public static ColorResources createWithOverlay(Context context,
                 SparseIntArray colorMapping) {
