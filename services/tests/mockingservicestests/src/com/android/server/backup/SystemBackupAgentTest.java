@@ -93,7 +93,8 @@ public class SystemBackupAgentTest {
                         "app_locales",
                         "app_gender",
                         "companion",
-                        "system_gender");
+                        "system_gender",
+                        "display");
     }
 
     @Test
@@ -118,7 +119,8 @@ public class SystemBackupAgentTest {
                         "app_locales",
                         "app_gender",
                         "companion",
-                        "system_gender");
+                        "system_gender",
+                        "display");
     }
 
     @Test
@@ -136,7 +138,8 @@ public class SystemBackupAgentTest {
                         "app_locales",
                         "companion",
                         "app_gender",
-                        "system_gender");
+                        "system_gender",
+                        "display");
     }
 
     @Test
@@ -158,7 +161,8 @@ public class SystemBackupAgentTest {
                         "shortcut_manager",
                         "companion",
                         "app_gender",
-                        "system_gender");
+                        "system_gender",
+                        "display");
     }
 
     @Test
