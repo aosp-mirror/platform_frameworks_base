@@ -63,6 +63,26 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
             )
             .indented()
 
+    private val applicationStub: TestFile =
+        kotlin(
+                """
+                package com.android.systemui.dagger.qualifiers
+
+                @Retention(AnnotationRetention.RUNTIME) annotation class Application
+                """
+            )
+            .indented()
+
+    private val globalConfigStub: TestFile =
+        kotlin(
+                """
+                package com.android.systemui.common.ui
+
+                @Retention(AnnotationRetention.RUNTIME) annotation class GlobalConfig
+                """
+            )
+            .indented()
+
     private val configStateStub: TestFile =
         kotlin(
                 """
@@ -98,6 +118,8 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
             injectStub,
             qsContext,
             shadeDisplayAwareStub,
+            applicationStub,
+            globalConfigStub,
             configStateStub,
             configControllerStub,
             configInteractorStub,
@@ -259,6 +281,60 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
+    fun injectedConstructor_inRelevantPackage_withApplicationAnnotatedContext() {
+        lint()
+            .files(
+                TestFiles.kotlin(
+                    """
+                        package com.android.systemui.shade.example
+
+                        import javax.inject.Inject
+                        import android.content.Context
+                        import com.android.systemui.dagger.qualifiers.Application
+
+                        class ExampleClass
+                            @Inject
+                            constructor(@Application private val context: Context)
+                    """
+                        .trimIndent()
+                ),
+                *androidStubs,
+                *otherStubs,
+            )
+            .issues(ShadeDisplayAwareDetector.ISSUE)
+            .testModes(TestMode.DEFAULT)
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun injectedConstructor_inRelevantPackage_withGlobalConfigAnnotatedConfigurationClass() {
+        lint()
+            .files(
+                TestFiles.kotlin(
+                    """
+                        package com.android.systemui.shade.example
+
+                        import javax.inject.Inject
+                        import com.android.systemui.common.ui.ConfigurationState
+                        import com.android.systemui.common.ui.GlobalConfig
+
+                        class ExampleClass
+                            @Inject
+                            constructor(@GlobalConfig private val configState: ConfigurationState)
+                    """
+                        .trimIndent()
+                ),
+                *androidStubs,
+                *otherStubs,
+            )
+            .issues(ShadeDisplayAwareDetector.ISSUE)
+            .testModes(TestMode.DEFAULT)
+            .run()
+            .expectClean()
+    }
+
+    @Test
     fun injectedConstructor_notInRelevantPackage_withRelevantParameter_withoutAnnotation() {
         lint()
             .files(
@@ -363,13 +439,13 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
     }
 
     private fun errorMsgString(lineNumber: Int, className: String) =
-        """
-        src/com/android/systemui/shade/example/ExampleClass.kt:$lineNumber: Error: UI elements of the shade window
-        should use ShadeDisplayAware-annotated $className, as the shade might move between windows, and only
-        @ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so
-        might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).
-        If the usage of $className is not related to display specific configuration or UI, then there is
-        technically no need to use the annotation, and you can annotate the class with
-        @SuppressLint("ShadeDisplayAwareContextChecker")/@Suppress("ShadeDisplayAwareContextChecker")
-    """
+        "src/com/android/systemui/shade/example/ExampleClass.kt:$lineNumber: Error: UI elements of " +
+            "the shade window should use ShadeDisplayAware-annotated $className, as the shade " +
+            "might move between windows, and only @ShadeDisplayAware resources are updated with " +
+            "the new configuration correctly. Failures to do so might result in wrong dimensions " +
+            "for shade window classes (e.g. using the wrong density or theme). If the usage of " +
+            "$className is not related to display specific configuration or UI, then there is " +
+            "technically no need to use the annotation, and you can annotate the class with " +
+            "@SuppressLint(\"ShadeDisplayAwareContextChecker\")" +
+            "/@Suppress(\"ShadeDisplayAwareContextChecker\")"
 }

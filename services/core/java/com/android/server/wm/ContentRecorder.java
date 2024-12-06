@@ -243,6 +243,19 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    /** Called when the surface of display is changed to a different instance. */
+    void resetRecordingDisplay(int displayId) {
+        if (!isCurrentlyRecording()
+                || mContentRecordingSession.getDisplayToRecord() != displayId) {
+            return;
+        }
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Content Recording: Display %d changed surface so stop recording", displayId);
+        mDisplayContent.mWmService.mTransactionFactory.get().remove(mRecordedSurface).apply();
+        mRecordedSurface = null;
+        // Do not un-set the token, in case new surface is ready and recording should begin again.
+    }
+
     /**
      * Pauses recording on this display content. Note the session does not need to be updated,
      * since recording can be resumed still.

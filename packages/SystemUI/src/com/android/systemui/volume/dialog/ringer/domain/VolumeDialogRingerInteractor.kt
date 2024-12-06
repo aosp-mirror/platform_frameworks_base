@@ -20,7 +20,6 @@ import android.media.AudioManager
 import android.media.AudioManager.RINGER_MODE_NORMAL
 import android.media.AudioManager.RINGER_MODE_SILENT
 import android.media.AudioManager.RINGER_MODE_VIBRATE
-import android.provider.Settings
 import com.android.settingslib.volume.data.repository.AudioSystemRepository
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.plugins.VolumeDialogController
@@ -66,11 +65,6 @@ constructor(
                             }
                         },
                 currentRingerMode = RingerMode(state.ringerModeInternal),
-                isEnabled =
-                    !(state.zenMode == Settings.Global.ZEN_MODE_ALARMS ||
-                        state.zenMode == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS ||
-                        (state.zenMode == Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS &&
-                            state.disallowRinger)),
                 isMuted = it.level == 0 || it.muted,
                 level = it.level,
                 levelMax = it.levelMax,

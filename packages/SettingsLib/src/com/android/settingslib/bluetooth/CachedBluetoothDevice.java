@@ -17,6 +17,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.flags.Flags.enableSetPreferredTransportForLeAudioDevice;
+import static com.android.settingslib.flags.Flags.ignoreA2dpDisconnectionForAndroidAuto;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.StringRes;
@@ -82,6 +83,8 @@ import java.util.stream.Stream;
  */
 public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
     private static final String TAG = "CachedBluetoothDevice";
+    private static final ParcelUuid ANDROID_AUTO_UUID =
+            ParcelUuid.fromString("4de17a00-52cb-11e6-bdf4-0800200c9a66");
 
     // See mConnectAttempted
     private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
@@ -260,18 +263,26 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                         if (mHandler.hasMessages(profile.getProfileId())) {
                             mHandler.removeMessages(profile.getProfileId());
                             if (profile.getConnectionPolicy(mDevice) >
-                                BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
-                                /*
-                                 * If we received state DISCONNECTED and previous state was
-                                 * CONNECTING and connection policy is FORBIDDEN or UNKNOWN
-                                 * then it's not really a failure to connect.
-                                 *
-                                 * Connection profile is considered as failed when connection
-                                 * policy indicates that profile should be connected
-                                 * but it got disconnected.
-                                 */
-                                Log.w(TAG, "onProfileStateChanged(): Failed to connect profile");
-                                setProfileConnectedStatus(profile.getProfileId(), true);
+                                    BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
+                                if (ignoreA2dpDisconnectionForAndroidAuto()
+                                        && profile instanceof A2dpProfile && isAndroidAuto()) {
+                                    Log.w(TAG,
+                                            "onProfileStateChanged(): Skip setting A2DP "
+                                                    + "connection fail for Android Auto");
+                                } else {
+                                    /*
+                                     * If we received state DISCONNECTED and previous state was
+                                     * CONNECTING and connection policy is FORBIDDEN or UNKNOWN
+                                     * then it's not really a failure to connect.
+                                     *
+                                     * Connection profile is considered as failed when connection
+                                     * policy indicates that profile should be connected
+                                     * but it got disconnected.
+                                     */
+                                    Log.w(TAG,
+                                            "onProfileStateChanged(): Failed to connect profile");
+                                    setProfileConnectedStatus(profile.getProfileId(), true);
+                                }
                             }
                         }
                         break;
@@ -2030,5 +2041,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     @VisibleForTesting
     void setLocalBluetoothManager(LocalBluetoothManager bluetoothManager) {
         mBluetoothManager = bluetoothManager;
+    }
+
+    private boolean isAndroidAuto() {
+        try {
+            ParcelUuid[] uuids = mDevice.getUuids();
+            if (ArrayUtils.contains(uuids, ANDROID_AUTO_UUID)) {
+                return true;
+            }
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Fail to check isAndroidAuto for " + this);
+        }
+        return false;
     }
 }

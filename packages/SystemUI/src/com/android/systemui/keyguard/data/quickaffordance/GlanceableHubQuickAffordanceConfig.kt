@@ -20,12 +20,12 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
-import com.android.systemui.Flags.glanceableHubShortcutButton
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.communal.data.repository.CommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
@@ -46,6 +46,7 @@ constructor(
     @Application private val context: Context,
     private val communalSceneRepository: CommunalSceneRepository,
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val sceneInteractor: SceneInteractor,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -61,8 +62,7 @@ constructor(
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState>
         get() = flow {
             emit(
-                // TODO(b/378113263): Gate on getV2FlagEnabled() when ready.
-                if (!glanceableHubShortcutButton()) {
+                if (!communalSettingsInteractor.isV2FlagEnabled()) {
                     Log.i(TAG, "Button hidden on lockscreen: flag not enabled.")
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden
                 } else if (!communalInteractor.isCommunalEnabled.value) {
@@ -81,8 +81,7 @@ constructor(
         }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
-        // TODO(b/378113263): Gate on getV2FlagEnabled() when ready.
-        return if (!glanceableHubShortcutButton()) {
+        return if (!communalSettingsInteractor.isV2FlagEnabled()) {
             Log.i(TAG, "Button unavailable in picker: flag not enabled.")
             KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
         } else if (!communalInteractor.isCommunalEnabled.value) {

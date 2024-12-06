@@ -45,9 +45,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -246,13 +248,13 @@ public class DreamTileTest extends SysuiTestCase {
         dockIntent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_DESK);
         receiver.onReceive(mContext, dockIntent);
         mTestableLooper.processAllMessages();
-        assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver),
+        assertEquals(createExpectedIcon(R.drawable.ic_qs_screen_saver),
                 dockedTile.getState().icon);
 
         dockIntent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
         receiver.onReceive(mContext, dockIntent);
         mTestableLooper.processAllMessages();
-        assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked),
+        assertEquals(createExpectedIcon(R.drawable.ic_qs_screen_saver_undocked),
                 dockedTile.getState().icon);
 
         destroyTile(dockedTile);
@@ -266,6 +268,14 @@ public class DreamTileTest extends SysuiTestCase {
     private void destroyTile(QSTileImpl<?> tile) {
         tile.destroy();
         mTestableLooper.processAllMessages();
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 
     private DreamTile constructTileForTest(boolean dreamSupported,

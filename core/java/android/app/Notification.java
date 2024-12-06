@@ -3221,7 +3221,6 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean containsCustomViews() {
         return contentView != null
                 || bigContentView != null
@@ -3235,7 +3234,6 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean hasTitle() {
         return extras != null
                 && (!TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE))
@@ -3245,7 +3243,7 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public boolean hasPromotableStyle() {
         final Class<? extends Style> notificationStyle = getNotificationStyle();
 
@@ -3257,11 +3255,16 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide
+     * Returns whether the notification has all the characteristics that make it eligible for
+     * {@link #FLAG_PROMOTED_ONGOING}. This method does not factor in other criteria such user
+     * preferences for the app or channel. If this returns true, it does not guarantee that the
+     * notification will be assigned FLAG_PROMOTED_ONGOING by the system, but if this returns false,
+     * it will not.
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public boolean hasPromotableCharacteristics() {
         return isColorizedRequested()
+                && isOngoingEvent()
                 && hasTitle()
                 && !isGroupSummary()
                 && !containsCustomViews()
@@ -4153,6 +4156,13 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public String getShortCriticalText() {
         return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOngoingEvent() {
+        return (flags & FLAG_ONGOING_EVENT) != 0;
     }
 
     /**

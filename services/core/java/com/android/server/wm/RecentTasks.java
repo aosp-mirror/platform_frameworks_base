@@ -40,7 +40,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
-import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
+import static com.android.launcher3.Flags.enableUseTopVisibleActivityForExcludeFromRecentTask;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
@@ -1529,7 +1529,7 @@ class RecentTasks {
                 // The Recents is only supported on default display now, we should only keep the
                 // most recent task of home display.
                 boolean isMostRecentTask;
-                if (enableRefactorTaskThumbnail()) {
+                if (enableUseTopVisibleActivityForExcludeFromRecentTask()) {
                     isMostRecentTask = task.getTopVisibleActivity() != null;
                 } else {
                     isMostRecentTask = taskIndex == 0;

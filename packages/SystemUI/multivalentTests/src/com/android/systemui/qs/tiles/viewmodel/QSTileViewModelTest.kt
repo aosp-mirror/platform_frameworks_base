@@ -173,6 +173,21 @@ class QSTileViewModelTest : SysuiTestCase() {
                 .isEqualTo(FakeQSTileDataInteractor.AvailabilityRequest(USER))
         }
 
+    @Test
+    fun tileDetails() =
+        testScope.runTest {
+            assertThat(tileUserActionInteractor.detailsViewModel).isNotNull()
+            assertThat(tileUserActionInteractor.detailsViewModel?.getTitle())
+                .isEqualTo("FakeQSTileUserActionInteractor")
+            assertThat(underTest.detailsViewModel).isNotNull()
+            assertThat(underTest.detailsViewModel?.getTitle())
+                .isEqualTo("FakeQSTileUserActionInteractor")
+
+            tileUserActionInteractor.detailsViewModel = null
+            assertThat(tileUserActionInteractor.detailsViewModel).isNull()
+            assertThat(underTest.detailsViewModel).isNull()
+        }
+
     private fun createViewModel(
         scope: TestScope,
         config: QSTileConfig = tileConfig,

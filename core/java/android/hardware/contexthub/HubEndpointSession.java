@@ -69,6 +69,8 @@ public class HubEndpointSession implements AutoCloseable {
      * @return For messages that does not require a response, the transaction will immediately
      *     complete. For messages that requires a response, the transaction will complete after
      *     receiving the response for the message.
+     * @throws SecurityException if the application doesn't have the right permissions to send this
+     *     message.
      */
     @NonNull
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)

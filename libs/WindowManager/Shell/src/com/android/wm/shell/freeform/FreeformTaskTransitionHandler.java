@@ -18,6 +18,7 @@ package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.TRANSIT_PIP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -99,6 +100,12 @@ public class FreeformTaskTransitionHandler
         return token;
     }
 
+    @Override
+    public IBinder startPipTransition(WindowContainerTransaction wct) {
+        final IBinder token = mTransitions.startTransition(TRANSIT_PIP, wct, null);
+        mPendingTransitionTokens.add(token);
+        return token;
+    }
 
     @Override
     public IBinder startRemoveTransition(WindowContainerTransaction wct) {

@@ -17,118 +17,131 @@
 package com.android.server.security.intrusiondetection;
 
 import android.app.admin.ConnectEvent;
-import android.app.admin.DevicePolicyManager;
 import android.app.admin.DnsEvent;
-import android.app.admin.NetworkEvent;
-import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
+import android.net.IIpConnectivityMetrics;
+import android.net.INetdEventCallback;
+import android.net.metrics.IpConnectivityLog;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.security.intrusiondetection.IntrusionDetectionEvent;
 import android.util.Slog;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.android.server.LocalServices;
+import com.android.server.net.BaseNetdEventCallback;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NetworkLogSource implements DataSource {
 
     private static final String TAG = "IntrusionDetectionEvent NetworkLogSource";
+    private final AtomicBoolean mIsNetworkLoggingEnabled = new AtomicBoolean(false);
+    private final PackageManagerInternal mPm;
 
-    private DevicePolicyManager mDpm;
-    private ComponentName mAdmin;
     private DataAggregator mDataAggregator;
 
-    public NetworkLogSource(Context context, DataAggregator dataAggregator) {
+    private IIpConnectivityMetrics mIpConnectivityMetrics;
+    private long mId;
+
+    public NetworkLogSource(Context context, DataAggregator dataAggregator)
+            throws SecurityException {
         mDataAggregator = dataAggregator;
-        mDpm = context.getSystemService(DevicePolicyManager.class);
-        mAdmin = new ComponentName(context, IntrusionDetectionAdminReceiver.class);
+        mPm = LocalServices.getService(PackageManagerInternal.class);
+        mId = 0;
+        initIpConnectivityMetrics();
     }
 
-    @Override
-    public boolean initialize() {
-        try {
-            if (!mDpm.isAdminActive(mAdmin)) {
-                Slog.e(TAG, "Admin " + mAdmin.flattenToString() + "is not active admin");
-                return false;
-            }
-        } catch (SecurityException e) {
-            Slog.e(TAG, "Security exception in initialize: ", e);
-            return false;
-        }
-        return true;
+    private void initIpConnectivityMetrics() {
+        mIpConnectivityMetrics =
+                (IIpConnectivityMetrics)
+                        IIpConnectivityMetrics.Stub.asInterface(
+                                ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
     }
 
     @Override
     public void enable() {
-        enableNetworkLog();
+        if (mIsNetworkLoggingEnabled.get()) {
+            Slog.w(TAG, "Network logging is already enabled");
+            return;
+        }
+        try {
+            if (mIpConnectivityMetrics.addNetdEventCallback(
+                    INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY, mNetdEventCallback)) {
+                mIsNetworkLoggingEnabled.set(true);
+            } else {
+                Slog.e(TAG, "Failed to enable network logging; invalid callback");
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to enable network logging; ", e);
+        }
     }
 
     @Override
     public void disable() {
-        disableNetworkLog();
-    }
-
-    private void enableNetworkLog() {
-        if (!isNetworkLogEnabled()) {
-            mDpm.setNetworkLoggingEnabled(mAdmin, true);
+        if (!mIsNetworkLoggingEnabled.get()) {
+            Slog.w(TAG, "Network logging is already disabled");
+            return;
         }
-    }
-
-    private void disableNetworkLog() {
-        if (isNetworkLogEnabled()) {
-            mDpm.setNetworkLoggingEnabled(mAdmin, false);
-        }
-    }
-
-    private boolean isNetworkLogEnabled() {
-        return mDpm.isNetworkLoggingEnabled(mAdmin);
-    }
-
-    /**
-     * Retrieve network logs when onNetworkLogsAvailable callback is received.
-     *
-     * @param batchToken The token representing the current batch of network logs.
-     */
-    public void onNetworkLogsAvailable(long batchToken) {
-        List<NetworkEvent> events;
         try {
-            events = mDpm.retrieveNetworkLogs(mAdmin, batchToken);
-        } catch (SecurityException e) {
-            Slog.e(
-                    TAG,
-                    "Admin "
-                            + mAdmin.flattenToString()
-                            + "does not have permission to retrieve network logs",
-                    e);
-            return;
-        }
-        if (events == null) {
-            if (!isNetworkLogEnabled()) {
-                Slog.w(TAG, "Network logging is disabled");
+            if (!mIpConnectivityMetrics.removeNetdEventCallback(
+                    INetdEventCallback.CALLBACK_CALLER_NETWORK_WATCHLIST)) {
+
+                mIsNetworkLoggingEnabled.set(false);
             } else {
-                Slog.e(TAG, "Invalid batch token: " + batchToken);
+                Slog.e(TAG, "Failed to enable network logging; invalid callback");
             }
-            return;
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to disable network logging; ", e);
         }
-
-        List<IntrusionDetectionEvent> intrusionDetectionEvents =
-                events.stream()
-                        .filter(event -> event != null)
-                        .map(event -> toIntrusionDetectionEvent(event))
-                        .collect(Collectors.toList());
-        mDataAggregator.addBatchData(intrusionDetectionEvents);
     }
 
-    private IntrusionDetectionEvent toIntrusionDetectionEvent(NetworkEvent event) {
-        if (event instanceof DnsEvent) {
-            DnsEvent dnsEvent = (DnsEvent) event;
-            return new IntrusionDetectionEvent(dnsEvent);
-        } else if (event instanceof ConnectEvent) {
-            ConnectEvent connectEvent = (ConnectEvent) event;
-            return new IntrusionDetectionEvent(connectEvent);
+    private void incrementEventID() {
+        if (mId == Long.MAX_VALUE) {
+            Slog.i(TAG, "Reached maximum id value; wrapping around.");
+            mId = 0;
+        } else {
+            mId++;
         }
-        throw new IllegalArgumentException(
-                "Invalid event type with ID: "
-                        + event.getId()
-                        + "from package: "
-                        + event.getPackageName());
     }
+
+    private final INetdEventCallback mNetdEventCallback =
+            new BaseNetdEventCallback() {
+                @Override
+                public void onDnsEvent(
+                        int netId,
+                        int eventType,
+                        int returnCode,
+                        String hostname,
+                        String[] ipAddresses,
+                        int ipAddressesCount,
+                        long timestamp,
+                        int uid) {
+                    if (!mIsNetworkLoggingEnabled.get()) {
+                        return;
+                    }
+                    DnsEvent dnsEvent =
+                            new DnsEvent(
+                                    hostname,
+                                    ipAddresses,
+                                    ipAddressesCount,
+                                    mPm.getNameForUid(uid),
+                                    timestamp);
+                    dnsEvent.setId(mId);
+                    incrementEventID();
+                    mDataAggregator.addSingleData(new IntrusionDetectionEvent(dnsEvent));
+                }
+
+                @Override
+                public void onConnectEvent(String ipAddr, int port, long timestamp, int uid) {
+                    if (!mIsNetworkLoggingEnabled.get()) {
+                        return;
+                    }
+                    ConnectEvent connectEvent =
+                            new ConnectEvent(ipAddr, port, mPm.getNameForUid(uid), timestamp);
+                    connectEvent.setId(mId);
+                    incrementEventID();
+                    mDataAggregator.addSingleData(new IntrusionDetectionEvent(connectEvent));
+                }
+            };
 }

@@ -2846,6 +2846,14 @@ public class AccountManagerService
                                 : AccountsDb.DEBUG_ACTION_SET_PASSWORD;
                         logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts,
                                 callingUid);
+
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                                account.type,
+                                callingUid,
+                                TextUtils.isEmpty(password)
+                                ? FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__PASSWORD_REMOVED
+                                : FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__PASSWORD_CHANGED);
                     }
                 } finally {
                     accounts.accountsDb.endTransaction();
@@ -2912,7 +2920,7 @@ public class AccountManagerService
             if (!accountExistsCache(accounts, account)) {
                 return;
             }
-            setUserdataInternal(accounts, account, key, value);
+            setUserdataInternal(accounts, account, key, value, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2932,7 +2940,7 @@ public class AccountManagerService
     }
 
     private void setUserdataInternal(UserAccounts accounts, Account account, String key,
-            String value) {
+            String value, int callingUid) {
         synchronized (accounts.dbLock) {
             accounts.accountsDb.beginTransaction();
             try {
@@ -2958,6 +2966,11 @@ public class AccountManagerService
                 AccountManager.invalidateLocalAccountUserDataCaches();
             }
         }
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                account.type,
+                callingUid,
+                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__USER_DATA_CHANGED);
     }
 
     private void onResult(IAccountManagerResponse response, Bundle result) {

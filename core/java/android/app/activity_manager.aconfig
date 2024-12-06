@@ -156,3 +156,10 @@ flag {
      bug: "362537357"
      is_exported: true
 }
+
+flag {
+    name: "jank_perceptible_narrow"
+    namespace: "system_performance"
+    description: "Narrow the scope of Jank Perceptible"
+    bug: "304837972"
+}

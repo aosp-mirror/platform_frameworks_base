@@ -1342,6 +1342,8 @@
     <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add the \"Widgets\" shortcut, make sure \"Show widgets on lock screen\" is enabled in settings.</string>
     <!-- Label for a button used to open Settings in order to enable showing widgets on the lock screen. [CHAR LIMIT=NONE] -->
     <string name="glanceable_hub_lockscreen_affordance_action_button_label">Settings</string>
+    <!-- Content description for a "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_glanceable_hub_to_dream_button">Show screensaver button</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1508,6 +1510,9 @@
 
     <!-- Content description for accessibility: Tapping this button will dismiss all gentle notifications [CHAR LIMIT=NONE] -->
     <string name="accessibility_notification_section_header_gentle_clear_all">Clear all silent notifications</string>
+
+    <!-- Content description for accessibility: Tapping this button will open notifications settings [CHAR LIMIT=NONE] -->
+    <string name="accessibility_notification_section_header_open_settings">Open notifications settings</string>
 
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
     <string name="dnd_suppressing_shade_text">Notifications paused by Do Not Disturb</string>

@@ -112,9 +112,10 @@ import android.util.SparseArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
@@ -277,6 +278,11 @@ public class ZenModeHelper {
 
     public void removeCallback(Callback callback) {
         mCallbacks.remove(callback);
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public List<Callback> getCallbacks() {
+        return mCallbacks;
     }
 
     public void initZenMode() {

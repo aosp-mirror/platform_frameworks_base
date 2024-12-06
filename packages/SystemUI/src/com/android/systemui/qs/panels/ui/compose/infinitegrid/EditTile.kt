@@ -28,6 +28,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -138,7 +139,6 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.model.groupAndSort
 import com.android.systemui.res.R
-import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -148,8 +148,9 @@ object TileType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditModeTopBar(onStopEditing: () -> Unit, onReset: (() -> Unit)?) {
+
     TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         title = { Text(text = stringResource(id = R.string.qs_edit)) },
         navigationIcon = {
             IconButton(onClick = onStopEditing) {
@@ -209,7 +210,15 @@ fun DefaultEditTileGrid(
             Column(
                 verticalArrangement =
                     spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
-                modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(innerPadding),
+                modifier =
+                    modifier
+                        .fillMaxSize()
+                        // Apply top padding before the scroll so the scrollable doesn't show under
+                        // the
+                        // top bar
+                        .padding(top = innerPadding.calculateTopPadding())
+                        .clipScrollableContainer(Orientation.Vertical)
+                        .verticalScroll(scrollState),
             ) {
                 AnimatedContent(
                     targetState = listState.dragInProgress,
