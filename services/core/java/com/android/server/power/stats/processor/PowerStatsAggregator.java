@@ -23,7 +23,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
-import com.android.internal.os.MonotonicClock;
 
 import java.util.function.Consumer;
 
@@ -169,9 +168,6 @@ public class PowerStatsAggregator {
                         mStats.addPowerStats(item.powerStats, item.time);
                     }
                 }
-            }
-            if (endTimeMs != MonotonicClock.UNDEFINED) {
-                lastTime = endTimeMs;
             }
             if (lastTime > baseTime) {
                 mStats.setDuration(lastTime - baseTime);
