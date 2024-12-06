@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.net.MacAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.OneTimeUseBuilder;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -155,7 +154,7 @@ public final class DeviceId implements Parcelable {
     /**
      * A builder for {@link DeviceId}
      */
-    public static final class Builder extends OneTimeUseBuilder<DeviceId> {
+    public static final class Builder {
         private String mCustomId;
         private MacAddress mMacAddress;
 
@@ -171,7 +170,6 @@ public final class DeviceId implements Parcelable {
          */
         @NonNull
         public Builder setCustomId(@Nullable String customId) {
-            checkNotUsed();
             if (customId != null
                     && customId.length() > CUSTOM_ID_LENGTH_LIMIT) {
                 throw new IllegalArgumentException("Length of the custom id must be at most "
@@ -191,15 +189,12 @@ public final class DeviceId implements Parcelable {
          */
         @NonNull
         public Builder setMacAddress(@Nullable MacAddress macAddress) {
-            checkNotUsed();
             mMacAddress = macAddress;
             return this;
         }
 
         @NonNull
-        @Override
         public DeviceId build() {
-            markUsed();
             if (mCustomId == null && mMacAddress == null) {
                 throw new IllegalArgumentException("At least one device id property must be"
                         + "non-null to build a DeviceId.");
