@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.job
@@ -117,12 +118,13 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
     override fun <A> Events<A>.observe(
         coroutineContext: CoroutineContext,
         block: EffectScope.(A) -> Unit,
-    ): Job {
+    ): DisposableHandle {
         val subRef = AtomicReference<Maybe<Output<A>>>(null)
         val childScope = coroutineScope.childScope()
-        // When our scope is cancelled, deactivate this observer.
-        childScope.coroutineContext.job.invokeOnCompletion {
+        lateinit var cancelHandle: DisposableHandle
+        val handle = DisposableHandle {
             subRef.getAndSet(None)?.let { output ->
+                cancelHandle.dispose()
                 if (output is Just) {
                     @Suppress("DeferredResultUnused")
                     network.transaction("observeEffect cancelled") {
@@ -131,25 +133,29 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                 }
             }
         }
+        // When our scope is cancelled, deactivate this observer.
+        cancelHandle = childScope.coroutineContext.job.invokeOnCompletion { handle.dispose() }
         val localNetwork = LocalNetwork(network, childScope, endSignal)
-        // Defer so that we don't suspend the caller
+        val outputNode =
+            Output<A>(
+                context = coroutineContext,
+                onDeath = { subRef.set(None) },
+                onEmit = { output ->
+                    if (subRef.get() is Just) {
+                        // Not cancelled, safe to emit
+                        val scope =
+                            object : EffectScope, TransactionScope by this {
+                                override val effectCoroutineScope: CoroutineScope = childScope
+                                override val kairosNetwork: KairosNetwork = localNetwork
+                            }
+                        scope.block(output)
+                    }
+                },
+            )
+        // Defer, in case any EventsLoops / StateLoops still need to be set
         deferAction {
-            val outputNode =
-                Output<A>(
-                    context = coroutineContext,
-                    onDeath = { subRef.getAndSet(None)?.let { childScope.cancel() } },
-                    onEmit = { output ->
-                        if (subRef.get() is Just) {
-                            // Not cancelled, safe to emit
-                            val scope =
-                                object : EffectScope, TransactionScope by this@BuildScopeImpl {
-                                    override val effectCoroutineScope: CoroutineScope = childScope
-                                    override val kairosNetwork: KairosNetwork = localNetwork
-                                }
-                            block(scope, output)
-                        }
-                    },
-                )
+            // Check for immediate cancellation
+            if (subRef.get() != null) return@deferAction
             this@observe.takeUntil(endSignal)
                 .init
                 .connect(evalScope = stateScope.evalScope)
@@ -164,7 +170,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                     }
                 } ?: run { childScope.cancel() }
         }
-        return childScope.coroutineContext.job
+        return handle
     }
 
     override fun <A, B> Events<A>.mapBuild(transform: BuildScope.(A) -> B): Events<B> {
